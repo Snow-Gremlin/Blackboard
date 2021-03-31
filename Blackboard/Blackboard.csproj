@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9F240AEF-0F9C-4B97-8959-E6DBF2D649AC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Blackboard</RootNamespace>
+    <AssemblyName>Blackboard</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Core\Caps\NegFloat.cs" />
+    <Compile Include="Core\Caps\NegInt.cs" />
+    <Compile Include="Core\Caps\SubFloat.cs" />
+    <Compile Include="Core\Caps\SubInt.cs" />
+    <Compile Include="Core\Caps\MulFloat.cs" />
+    <Compile Include="Core\Caps\Implies.cs" />
+    <Compile Include="Core\Caps\Div.cs" />
+    <Compile Include="Core\Caps\Xor.cs" />
+    <Compile Include="Core\Caps\SumFloat.cs" />
+    <Compile Include="Core\Caps\MulInt.cs" />
+    <Compile Include="Core\Caps\SumInt.cs" />
+    <Compile Include="Core\Caps\Select.cs" />
+    <Compile Include="Core\Ternary.cs" />
+    <Compile Include="Core\Nary.cs" />
+    <Compile Include="Core\Interfaces\INamed.cs" />
+    <Compile Include="Core\Caps\InputValue.cs" />
+    <Compile Include="Core\Caps\Not.cs" />
+    <Compile Include="Core\Caps\Or.cs" />
+    <Compile Include="Core\Caps\And.cs" />
+    <Compile Include="Core\Evaluator.cs" />
+    <Compile Include="Core\Extensions.cs" />
+    <Compile Include="Core\Interfaces\IInput.cs" />
+    <Compile Include="Core\Interfaces\INode.cs" />
+    <Compile Include="Core\Node.cs" />
+    <Compile Include="Core\Binary.cs" />
+    <Compile Include="Core\Unary.cs" />
+    <Compile Include="Core\Interfaces\IValue.cs" />
+    <Compile Include="Core\ValueNode.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

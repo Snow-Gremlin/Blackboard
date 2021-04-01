@@ -39,6 +39,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Caps\InputTrigger.cs" />
     <Compile Include="Core\Caps\NegFloat.cs" />
     <Compile Include="Core\Caps\NegInt.cs" />
     <Compile Include="Core\Caps\SubFloat.cs" />
@@ -51,8 +52,11 @@
     <Compile Include="Core\Caps\MulInt.cs" />
     <Compile Include="Core\Caps\SumInt.cs" />
     <Compile Include="Core\Caps\Select.cs" />
-    <Compile Include="Core\Ternary.cs" />
-    <Compile Include="Core\Nary.cs" />
+    <Compile Include="Core\Interfaces\ITriggerInput.cs" />
+    <Compile Include="Core\Interfaces\ITrigger.cs" />
+    <Compile Include="Core\Interfaces\IValueInput.cs" />
+    <Compile Include="Core\Bases\Ternary.cs" />
+    <Compile Include="Core\Bases\Nary.cs" />
     <Compile Include="Core\Interfaces\INamed.cs" />
     <Compile Include="Core\Caps\InputValue.cs" />
     <Compile Include="Core\Caps\Not.cs" />
@@ -62,11 +66,12 @@
     <Compile Include="Core\Extensions.cs" />
     <Compile Include="Core\Interfaces\IInput.cs" />
     <Compile Include="Core\Interfaces\INode.cs" />
-    <Compile Include="Core\Node.cs" />
-    <Compile Include="Core\Binary.cs" />
-    <Compile Include="Core\Unary.cs" />
+    <Compile Include="Core\Bases\Node.cs" />
+    <Compile Include="Core\Bases\Binary.cs" />
+    <Compile Include="Core\Bases\Unary.cs" />
     <Compile Include="Core\Interfaces\IValue.cs" />
-    <Compile Include="Core\ValueNode.cs" />
+    <Compile Include="Core\Bases\TriggerNode.cs" />
+    <Compile Include="Core\Bases\ValueNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Blackboard.Core.Interfaces;
 
-namespace Blackboard.Core {
+namespace Blackboard.Core.Bases {
 
     public abstract class Unary<T1, TResult>: ValueNode<TResult> {
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Blackboard.Core.Interfaces;
+using Blackboard.Core.Bases;
 using System.Linq;
 
 namespace Blackboard.Core.Caps {

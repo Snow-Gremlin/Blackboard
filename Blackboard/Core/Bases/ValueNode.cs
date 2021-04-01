@@ -2,7 +2,7 @@
 using Blackboard.Core.Interfaces;
 using System.Linq;
 
-namespace Blackboard.Core {
+namespace Blackboard.Core.Bases {
     public abstract class ValueNode<T>: Node, IValue<T> {
 
         protected ValueNode(T value = default) {

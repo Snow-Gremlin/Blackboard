@@ -2,7 +2,7 @@
 using System.Linq;
 using Blackboard.Core.Interfaces;
 
-namespace Blackboard.Core {
+namespace Blackboard.Core.Bases {
 
     public abstract class Node: INode {
 

@@ -2,7 +2,7 @@
 using Blackboard.Core.Interfaces;
 using System.Linq;
 
-namespace Blackboard.Core {
+namespace Blackboard.Core.Bases {
     public abstract class TriggerNode: Node, ITrigger {
 
         protected TriggerNode() {

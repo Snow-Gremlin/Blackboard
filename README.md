@@ -1,2 +1,3 @@
-# BlackboardCSharp
-A tool for quickly making highly interactive systems
+# Blackboard
+
+A C# tool for quickly making highly interactive systems

@@ -6,13 +6,7 @@ namespace Blackboard.Core.Caps {
 
     public class MulInt: Nary<int, int> {
 
-        public MulInt(params IValue<int>[] sources) :
-            this(sources as IEnumerable<IValue<int>>) { }
-
-        public MulInt(IEnumerable<IValue<int>> sources = null, int value = default) :
-            base(sources, value) { }
-
-        protected override int OnEval(int[] values) {
+        protected override int OnEval(IEnumerable<int> values) {
             int result = 1;
             foreach (int value in values) result *= value;
             return result;

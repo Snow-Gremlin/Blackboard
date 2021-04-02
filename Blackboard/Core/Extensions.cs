@@ -69,6 +69,15 @@ namespace Blackboard.Core {
             }
         }
 
+        /// <summary>The triggers from the given input nodes.</summary>
+        /// <param name="nodes">The set of nodes to get all the triggers from.</param>
+        /// <returns>The triggers from the given non-null nodes.</returns>
+        static public IEnumerable<bool> Triggers(this IEnumerable<ITrigger> nodes) {
+            foreach (ITrigger node in nodes) {
+                yield return !(node is null) && node.Triggered;
+            }
+        }
+
         /// <summary>Determines if any of values exists in both lists.</summary>
         /// <typeparam name="T">The types of values to find.</typeparam>
         /// <param name="a">The first input set of values to check within.</param>

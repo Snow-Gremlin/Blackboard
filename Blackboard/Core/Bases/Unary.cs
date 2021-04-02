@@ -15,7 +15,7 @@ namespace Blackboard.Core.Bases {
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        protected Unary(IValue<T1> source = null, TResult value = default) : base(value) {
+        public Unary(IValue<T1> source = null, TResult value = default) : base(value) {
             this.Parent = source;
             this.UpdateValue();
         }
@@ -56,7 +56,6 @@ namespace Blackboard.Core.Bases {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() =>
-            "("+NodeString(this.source)+")";
+        public override string ToString() => "("+NodeString(this.source)+")";
     }
 }

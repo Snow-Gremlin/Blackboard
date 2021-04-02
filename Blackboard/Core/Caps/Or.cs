@@ -8,13 +8,7 @@ namespace Blackboard.Core.Caps {
     /// <see cref="https://mathworld.wolfram.com/OR.html"/>
     public class Or: Nary<bool, bool> {
 
-        public Or(params IValue<bool>[] sources) :
-            this(sources as IEnumerable<IValue<bool>>) { }
-
-        public Or(IEnumerable<IValue<bool>> sources = null, bool value = default) :
-            base(sources, value) { }
-
-        protected override bool OnEval(bool[] values) {
+        protected override bool OnEval(IEnumerable<bool> values) {
             foreach (bool value in values) {
                 if (value) return true;
             }

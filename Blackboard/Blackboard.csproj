@@ -39,6 +39,21 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Bases\Binary.cs" />
+    <Compile Include="Core\Bases\Multitrigger.cs" />
+    <Compile Include="Core\Bases\Nary.cs" />
+    <Compile Include="Core\Bases\Ternary.cs" />
+    <Compile Include="Core\Bases\Unary.cs" />
+    <Compile Include="Core\Caps\AbsFloat.cs" />
+    <Compile Include="Core\Caps\AbsInt.cs" />
+    <Compile Include="Core\Caps\BitwiseAnd.cs" />
+    <Compile Include="Core\Caps\BitwiseOr.cs" />
+    <Compile Include="Core\Caps\RightShift.cs" />
+    <Compile Include="Core\Caps\Truncate.cs" />
+    <Compile Include="Core\Caps\BitwiseNot.cs" />
+    <Compile Include="Core\Caps\OnlyOne.cs" />
+    <Compile Include="Core\Caps\All.cs" />
+    <Compile Include="Core\Caps\Any.cs" />
     <Compile Include="Core\Caps\InputTrigger.cs" />
     <Compile Include="Core\Caps\NegFloat.cs" />
     <Compile Include="Core\Caps\NegInt.cs" />
@@ -47,6 +62,8 @@
     <Compile Include="Core\Caps\MulFloat.cs" />
     <Compile Include="Core\Caps\Implies.cs" />
     <Compile Include="Core\Caps\Div.cs" />
+    <Compile Include="Core\Caps\BitwiseXor.cs" />
+    <Compile Include="Core\Caps\LeftShift.cs" />
     <Compile Include="Core\Caps\Xor.cs" />
     <Compile Include="Core\Caps\SumFloat.cs" />
     <Compile Include="Core\Caps\MulInt.cs" />
@@ -55,8 +72,6 @@
     <Compile Include="Core\Interfaces\ITriggerInput.cs" />
     <Compile Include="Core\Interfaces\ITrigger.cs" />
     <Compile Include="Core\Interfaces\IValueInput.cs" />
-    <Compile Include="Core\Bases\Ternary.cs" />
-    <Compile Include="Core\Bases\Nary.cs" />
     <Compile Include="Core\Interfaces\INamed.cs" />
     <Compile Include="Core\Caps\InputValue.cs" />
     <Compile Include="Core\Caps\Not.cs" />
@@ -67,8 +82,6 @@
     <Compile Include="Core\Interfaces\IInput.cs" />
     <Compile Include="Core\Interfaces\INode.cs" />
     <Compile Include="Core\Bases\Node.cs" />
-    <Compile Include="Core\Bases\Binary.cs" />
-    <Compile Include="Core\Bases\Unary.cs" />
     <Compile Include="Core\Interfaces\IValue.cs" />
     <Compile Include="Core\Bases\TriggerNode.cs" />
     <Compile Include="Core\Bases\ValueNode.cs" />

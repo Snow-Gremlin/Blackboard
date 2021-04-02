@@ -8,7 +8,7 @@ namespace Blackboard.Core.Bases {
     public abstract class TriggerNode: Node, ITrigger {
 
         /// <summary>Creates a new trigger node.</summary>
-        protected TriggerNode() {
+        public TriggerNode() {
             this.Triggered = false;
         }
 

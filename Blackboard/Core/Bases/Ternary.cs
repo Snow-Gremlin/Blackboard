@@ -25,7 +25,7 @@ namespace Blackboard.Core.Bases {
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="source3">This is the third parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        protected Ternary(IValue<T1> source1 = null, IValue<T2> source2 = null,
+        public Ternary(IValue<T1> source1 = null, IValue<T2> source2 = null,
             IValue<T3> source3 = null, TResult value = default) : base(value) {
             this.Parent1 = source1;
             this.Parent2 = source2;

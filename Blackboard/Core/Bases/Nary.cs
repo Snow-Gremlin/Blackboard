@@ -13,10 +13,15 @@ namespace Blackboard.Core.Bases {
         private List<IValue<TIn>> sources;
 
         /// <summary>Creates a N-ary value node.</summary>
+        /// <param name="parents">The initial set of parents to use.</param>
+        public Nary(params IValue<TIn>[] sources) :
+            this(sources as IEnumerable<IValue<TIn>>) { }
+
+        /// <summary>Creates a N-ary value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        protected Nary(IEnumerable<IValue<TIn>> parents = null, TResult value = default) : base(value) {
+        public Nary(IEnumerable<IValue<TIn>> parents = null, TResult value = default) : base(value) {
             this.sources = new List<IValue<TIn>>();
             this.AddParents(parents);
             this.UpdateValue();
@@ -65,19 +70,18 @@ namespace Blackboard.Core.Bases {
         public override IEnumerable<INode> Parents => this.sources;
 
         /// <summary>This handles updating this node's value given the parents' values during evaluation.</summary>
-        /// <remarks>This will not be called if any of the parents are null.</remarks>
+        /// <remarks>Any null parents are ignored.</remarks>
         /// <param name="values">The value from the all the non-null parents.</param>
         /// <returns>The new value for this node.</returns>
-        protected abstract TResult OnEval(TIn[] values);
+        protected abstract TResult OnEval(IEnumerable<TIn> values);
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>
         protected override bool UpdateValue() =>
-            this.SetNodeValue(this.OnEval(this.sources.NotNull().Values().ToArray()));
+            this.SetNodeValue(this.OnEval(this.sources.NotNull().Values()));
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() =>
-            "("+NodeString(this.sources)+")";
+        public override string ToString() => "("+NodeString(this.sources)+")";
     }
 }

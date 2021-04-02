@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Blackboard.Core.Caps {
 
-    public class InputTrigger: TriggerNode, ITriggerInput, INamed {
+    public class InputTrigger: TriggerNode, ITriggerInput {
 
         public InputTrigger(string name = "Input") {
             this.Name = name;
@@ -13,7 +13,9 @@ namespace Blackboard.Core.Caps {
 
         public string Name { get; }
 
-        protected override bool Trigger() => true;
+        public void Trigger() => this.Triggered = true;
+
+        protected override bool UpdateTrigger() => this.Triggered;
 
         public override IEnumerable<INode> Parents => Enumerable.Empty<INode>();
 

@@ -2,6 +2,7 @@
 
 namespace Blackboard.Core.Interfaces {
 
+    /// <summary>The interface for all nodes in the blackboard.</summary>
     public interface INode {
 
         /// <summary>The depth in the graph from the furthest input of this node.</summary>

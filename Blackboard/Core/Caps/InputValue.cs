@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Blackboard.Core.Caps {
 
-    public class InputValue<T>: ValueNode<T>, IValueInput<T>, INamed {
+    public class InputValue<T>: ValueNode<T>, IValueInput<T> {
 
         public InputValue(string name = "Input", T value = default): base(value) {
             this.Name = name;

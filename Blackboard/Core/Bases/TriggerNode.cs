@@ -20,12 +20,12 @@ namespace Blackboard.Core.Bases {
 
         /// <summary>This is called when the trigger is evaluated.</summary>
         /// <returns>True if this trigger got triggered, false if not.</returns>
-        abstract protected bool Trigger();
+        abstract protected bool UpdateTrigger();
 
         /// <summary>This evaluates this trigger node.</summary>
         /// <returns>This will always return all the children if triggered, or none if not triggered.</returns>
         sealed public override IEnumerable<INode> Eval() {
-            this.Triggered = this.Trigger();
+            this.Triggered = this.UpdateTrigger();
             return this.Triggered ? this.Children : Enumerable.Empty<INode>();
         }
     }

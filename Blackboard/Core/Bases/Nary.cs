@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Blackboard.Core.Interfaces;
+using System.Collections.Generic;
 using System.Linq;
-using Blackboard.Core.Interfaces;
 
 namespace Blackboard.Core.Bases {
 

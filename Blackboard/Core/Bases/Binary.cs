@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Blackboard.Core.Interfaces;
+﻿using Blackboard.Core.Interfaces;
+using System.Collections.Generic;
 
 namespace Blackboard.Core.Bases {
 

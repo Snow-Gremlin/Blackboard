@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Blackboard.Core.Caps;
 using Blackboard.Core;
+using Blackboard.Core.Bases;
 using Blackboard.Core.Interfaces;
 using System.IO;
 using System.Linq;
@@ -23,8 +24,7 @@ namespace BlackboardTests.CoreTests {
             Assert.AreEqual(exp, node.Value);
 
         static private void checkLog(StringWriter buf, params string[] lines) =>
-            Assert.AreEqual(string.Join(System.Environment.NewLine, lines),
-                buf.ToString().Trim());
+            Assert.AreEqual(string.Join(System.Environment.NewLine, lines), buf.ToString().Trim());
 
         [TestMethod]
         public void TestAddNodes() {

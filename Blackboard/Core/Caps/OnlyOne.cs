@@ -17,6 +17,8 @@ namespace Blackboard.Core.Caps {
             return foundTriggered;
         }
 
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
         public override string ToString() => "OnlyOne"+base.ToString();
     }
 }

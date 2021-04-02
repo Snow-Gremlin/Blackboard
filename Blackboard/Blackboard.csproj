@@ -48,7 +48,12 @@
     <Compile Include="Core\Caps\AbsInt.cs" />
     <Compile Include="Core\Caps\BitwiseAnd.cs" />
     <Compile Include="Core\Caps\BitwiseOr.cs" />
+    <Compile Include="Core\Caps\Literal.cs" />
+    <Compile Include="Core\Caps\MinInt.cs" />
+    <Compile Include="Core\Caps\MaxInt.cs" />
+    <Compile Include="Core\Caps\MinFloat.cs" />
     <Compile Include="Core\Caps\RightShift.cs" />
+    <Compile Include="Core\Caps\MaxFloat.cs" />
     <Compile Include="Core\Caps\Truncate.cs" />
     <Compile Include="Core\Caps\BitwiseNot.cs" />
     <Compile Include="Core\Caps\OnlyOne.cs" />

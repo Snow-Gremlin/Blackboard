@@ -7,6 +7,8 @@ namespace Blackboard.Core.Caps {
 
         protected override int OnEval(int value1, int value2) => value1-value2;
 
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
         public override string ToString() => "SubInt"+base.ToString();
     }
 }

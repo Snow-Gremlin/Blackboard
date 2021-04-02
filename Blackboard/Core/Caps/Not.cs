@@ -9,6 +9,8 @@ namespace Blackboard.Core.Caps {
 
         protected override bool OnEval(bool value) => !value;
 
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
         public override string ToString() => "Not"+base.ToString();
     }
 }

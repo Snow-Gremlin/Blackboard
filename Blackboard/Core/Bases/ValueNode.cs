@@ -10,7 +10,7 @@ namespace Blackboard.Core.Bases {
 
         /// <summary>Creates a new value node.</summary>
         /// <param name="value">The initial value of the node.</param>
-        protected ValueNode(T value = default) {
+        public ValueNode(T value = default) {
             this.Value = value;
         }
 

@@ -8,6 +8,8 @@ namespace Blackboard.Core.Caps {
 
         protected override int OnEval(double value) => (int)value;
 
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
         public override string ToString() => "Truncate"+base.ToString();
     }
 }

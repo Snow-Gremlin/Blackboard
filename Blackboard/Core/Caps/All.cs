@@ -4,8 +4,12 @@ using Blackboard.Core.Bases;
 
 namespace Blackboard.Core.Caps {
 
+    /// <summary>This is a trigger which will be triggered when all of its non-null parents are triggered.</summary>
     public class All: Multitrigger {
 
+        /// <summary>Checks if all of the parents are triggered during evaluation.</summary>
+        /// <param name="triggered">The triggered values from the parents.</param>
+        /// <returns>True if all the parents are triggered, false otherwise.</returns>
         protected override bool OnEval(IEnumerable<bool> triggered) {
             foreach (bool trig in triggered) {
                 if (!trig) return false;
@@ -13,6 +17,8 @@ namespace Blackboard.Core.Caps {
             return true;
         }
 
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
         public override string ToString() => "All"+base.ToString();
     }
 }

@@ -1,0 +1,87 @@
+﻿using Blackboard.Core.Bases;
+using Blackboard.Core.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+namespace Blackboard.Core.Caps {
+
+    public class Namespace: Node, INamespace {
+
+        static private Regex nameRegex = null;
+        static private Regex NameValidator {
+            get {
+                if (nameRegex is null)
+                    nameRegex = new Regex(@"^[_a-zA-Z][_a-zA-Z0-9]*$", RegexOptions.Compiled);
+                return nameRegex;
+            }
+        }
+
+        static public bool ValidName(string name) =>
+            NameValidator.IsMatch(name);
+
+        static internal void SetName(INamed named, string name) {
+            if (named.Name != name) {
+                if (!ValidName(name))
+                    throw Exception.InvalidName(name);
+                if (named?.Scope?.Exists(name) ?? false)
+                    throw Exception.RenameDuplicateInScope(name, named.Scope);
+                named.Name = name;
+            }
+        }
+
+        private string name;
+        private INamespace scope;
+
+        public Namespace(INamespace scope = null) {
+            this.Scope = scope;
+        }
+
+        /// <summary>Gets or sets the name for the node.</summary>
+        public string Name {
+            get => this.name;
+            set => SetName(this, value);
+        }
+
+        /// <summary>Gets or sets the containing scope for this name or null.</summary>
+        public INamespace Scope {
+            get => this.scope;
+            set {
+                if (value?.Exists(this.name) ?? false)
+                    throw Exception.RenameDuplicateInScope(this.name, value);
+                this.scope?.RemoveChildren(this);
+                this.scope = value;
+                this.scope?.AddChildren(this);
+            }
+        }
+
+        /// <summary>The set of parent nodes to this node in the graph.</summary>
+        public override IEnumerable<INode> Parents {
+            get {
+                if (!(this.scope is null)) yield return this.scope;
+            }
+        }
+
+        /// <summary>This determines if the namespace has a child with the given name.</summary>
+        /// <param name="name">The name of the child to check for.</param>
+        /// <returns>True if the child exists, false otherwise.</returns>
+        public bool Exists(string name) => !(this.Find(name) is null);
+
+        /// <summary>Finds the child with the given name.</summary>
+        /// <param name="name">The name of the child to check for.</param>
+        /// <returns>The child with the given name, otherwise null is returned.</returns>
+        public INamed Find(string name) {
+            foreach (INode node in this.Children) {
+                if (node is INamed) {
+                    INamed named = node as INamed;
+                    if (named.Name == name) return named;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>Evaluates this node and updates it.</summary>
+        /// <returns>The namespace shouldn't be evaluated so this will always return nothing.</returns>
+        public override IEnumerable<INode> Eval() => Enumerable.Empty<INode>();
+    }
+}

@@ -54,6 +54,7 @@
     <Compile Include="Core\Caps\MinFloat.cs" />
     <Compile Include="Core\Caps\RightShift.cs" />
     <Compile Include="Core\Caps\MaxFloat.cs" />
+    <Compile Include="Core\Group.cs" />
     <Compile Include="Core\Caps\Truncate.cs" />
     <Compile Include="Core\Caps\BitwiseNot.cs" />
     <Compile Include="Core\Caps\OnlyOne.cs" />
@@ -74,10 +75,11 @@
     <Compile Include="Core\Caps\MulInt.cs" />
     <Compile Include="Core\Caps\SumInt.cs" />
     <Compile Include="Core\Caps\Select.cs" />
+    <Compile Include="Core\Interfaces\INamed.cs" />
     <Compile Include="Core\Interfaces\ITriggerInput.cs" />
     <Compile Include="Core\Interfaces\ITrigger.cs" />
     <Compile Include="Core\Interfaces\IValueInput.cs" />
-    <Compile Include="Core\Interfaces\INamed.cs" />
+    <Compile Include="Core\Interfaces\INamedNode.cs" />
     <Compile Include="Core\Caps\InputValue.cs" />
     <Compile Include="Core\Caps\Not.cs" />
     <Compile Include="Core\Caps\Or.cs" />

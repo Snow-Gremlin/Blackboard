@@ -7,6 +7,10 @@ namespace Blackboard.Core.Caps {
     /// <see cref="https://mathworld.wolfram.com/XOR.html"/>
     public class BitwiseXor: Binary<int, int, int> {
 
+        /// <summary>This will XOR of the two given values.</summary>
+        /// <param name="value1">The first of the two values in the XOR.</param>
+        /// <param name="value2">The second of the two values in the XOR.</param>
+        /// <returns>The XOR of the two given values.</returns>
         protected override int OnEval(int value1, int value2) => value1 ^ value2;
 
         /// <summary>Gets the string for this node.</summary>

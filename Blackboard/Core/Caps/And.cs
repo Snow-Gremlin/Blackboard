@@ -8,6 +8,9 @@ namespace Blackboard.Core.Caps {
     /// <see cref="https://mathworld.wolfram.com/AND.html"/>
     public class And: Nary<bool, bool> {
 
+        /// <summary>Gets the AND of all the parent's booleans.</summary>
+        /// <param name="values">The to AND together.</param>
+        /// <returns>The AND of all the given values.</returns>
         protected override bool OnEval(IEnumerable<bool> values) {
             foreach (bool value in values) {
                 if (!value) return false;

@@ -8,6 +8,9 @@ namespace Blackboard.Core.Caps {
     /// <see cref="https://mathworld.wolfram.com/AND.html"/>
     public class BitwiseAnd: Nary<int, int> {
 
+        /// <summary>Gets the bitwise AND of all the parent's booleans.</summary>
+        /// <param name="values">The to bitwise AND together.</param>
+        /// <returns>The bitwise AND of all the given values.</returns>
         protected override int OnEval(IEnumerable<int> values) {
             int result = int.MaxValue;
             foreach (int value in values) {

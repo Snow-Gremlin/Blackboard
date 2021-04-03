@@ -30,6 +30,7 @@ namespace Blackboard.Core.Bases {
             pending.Enqueue(root);
             while (pending.Count > 0) {
                 INode node = pending.Dequeue();
+                if (node is null) continue;
                 touched.Add(node);
                 if (targets.Contains(node)) return true;
                 foreach (INode parent in node.Parents) {
@@ -44,10 +45,7 @@ namespace Blackboard.Core.Bases {
         static private void updateDepths(LinkedList<INode> pending) {
             while (pending.Count > 0) {
                 INode node = pending.TakeFirst();
-                int depth = 0;
-                foreach (INode parent in node.Parents)
-                    depth = System.Math.Max(depth, parent.Depth);
-                depth++;
+                int depth = node.Parents.MaxDepth() + 1;
                 if (node.Depth != depth) {
                     (node as Node).Depth = depth;
                     pending.SortInsertUnique(node.Children);
@@ -92,7 +90,7 @@ namespace Blackboard.Core.Bases {
         /// <param name="checkedForLoops">Indicates if loops in the graph should be checked for.</param>
         public void AddChildren(IEnumerable<INode> children, bool checkedForLoops = true) {
             if (checkedForLoops && canReachAny(this, children))
-                throw new System.Exception("May not add children: Loop detected.");
+                throw Exception.NodeLoopDetected();
             LinkedList<INode> needsDepthUpdate = new LinkedList<INode>();
             foreach (Node child in children) {
                 if ((child is null) || this.children.Contains(child)) continue;

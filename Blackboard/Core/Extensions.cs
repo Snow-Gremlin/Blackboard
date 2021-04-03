@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace Blackboard.Core {
 
@@ -89,6 +90,16 @@ namespace Blackboard.Core {
                 if (b.Contains(value, comparer)) return true;
             }
             return false;
+        }
+
+        /// <summary>Gets the maximum depth from the given nodes.</summary>
+        /// <param name="nodes">The nodes to get the maximum depth from.</param>
+        /// <returns>The maximum found depth.</returns>
+        static public int MaxDepth(this IEnumerable<INode> nodes) {
+            int depth = 0;
+            foreach (INode node in nodes)
+                depth = Math.Max(depth, node.Depth);
+            return depth;
         }
 
         /// <summary>Gets and removes the first value from the given linked list.</summary>

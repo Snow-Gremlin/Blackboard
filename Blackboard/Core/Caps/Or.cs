@@ -8,6 +8,9 @@ namespace Blackboard.Core.Caps {
     /// <see cref="https://mathworld.wolfram.com/OR.html"/>
     public class Or: Nary<bool, bool> {
 
+        /// <summary>Gets the OR of all the parent's booleans.</summary>
+        /// <param name="values">The to OR together.</param>
+        /// <returns>The OR of all the given values.</returns>
         protected override bool OnEval(IEnumerable<bool> values) {
             foreach (bool value in values) {
                 if (value) return true;

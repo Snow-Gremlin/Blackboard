@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
-using Blackboard.Core.Interfaces;
-using Blackboard.Core.Bases;
+﻿using Blackboard.Core.Bases;
+using System.Collections.Generic;
 
 namespace Blackboard.Core.Caps {
 
+    /// <summary>Determinines the minimum integer value from all the parents.</summary>
     public class MinInt: Nary<int, int> {
 
+        /// <summary>Updates this node's value to the minimum value during evaluation.</summary>
+        /// <param name="values">The parents' values to get the min of.</param>
+        /// <returns>The minimum value from all the parents.</returns>
         protected override int OnEval(IEnumerable<int> values) {
             bool first = true;
             int result = default;

@@ -1,16 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using Blackboard.Core.Bases;
 using Blackboard.Core.Interfaces;
-using Blackboard.Core.Bases;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace Blackboard.Core.Caps {
 
     /// <summary>This is a trigger which can be triggered from user input.</summary>
     public class InputTrigger: TriggerNode, ITriggerInput {
 
+        /// <summary>The name for this namespace.</summary>
         private string name;
+
+        /// <summary>The parent scope or null.</summary>
         private INamespace scope;
 
+        /// <summary>Creates a new input trigger.</summary>
+        /// <param name="name">The initial name for this trigger.</param>
+        /// <param name="scope">The initial scope for this trigger.</param>
         public InputTrigger(string name = "Input", INamespace scope = null) {
             this.Name = name;
             this.Scope = scope;
@@ -41,8 +46,11 @@ namespace Blackboard.Core.Caps {
             }
         }
 
+        /// <summary>This is set this trigger to emit during the next evaluation.</summary>
         public void Trigger() => this.Triggered = true;
 
+        /// <summary>This updates the trigger during the an evaluation.</summary>
+        /// <returns>This returns the triggered value as it currently is.</returns>
         protected override bool UpdateTrigger() => this.Triggered;
 
         /// <summary>Gets the string for this node.</summary>

@@ -6,9 +6,13 @@ using System.Text.RegularExpressions;
 
 namespace Blackboard.Core.Caps {
 
+    /// <summary>A namespace node for containing other named nodes.</summary>
     public class Namespace: Node, INamespace {
 
+        /// <summary>The regex singleton for validating the name.</summary>
         static private Regex nameRegex = null;
+
+        /// <summary>Get the name validator regex.</summary>
         static private Regex NameValidator {
             get {
                 if (nameRegex is null)
@@ -17,9 +21,14 @@ namespace Blackboard.Core.Caps {
             }
         }
 
-        static public bool ValidName(string name) =>
-            NameValidator.IsMatch(name);
+        /// <summary>Checks if the given node is a valid name.</summary>
+        /// <param name="name">The name to check.</param>
+        /// <returns>True if the name is valis, false otherwise.</returns>
+        static public bool ValidName(string name) => NameValidator.IsMatch(name);
 
+        /// <summary>This is used to set the name of the given named while checking the name.</summary>
+        /// <param name="named">This is the named node to name.</param>
+        /// <param name="name">This is the new name to set.</param>
         static internal void SetName(INamed named, string name) {
             if (named.Name != name) {
                 if (!ValidName(name))
@@ -30,9 +39,14 @@ namespace Blackboard.Core.Caps {
             }
         }
 
+        /// <summary>The name for this namespace.</summary>
         private string name;
+
+        /// <summary>The parent scope or null.</summary>
         private INamespace scope;
 
+        /// <summary>Create a new namespace.</summary>
+        /// <param name="scope">This is the initial parent scope.</param>
         public Namespace(INamespace scope = null) {
             this.Scope = scope;
         }

@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
-using Blackboard.Core.Interfaces;
-using Blackboard.Core.Bases;
+﻿using Blackboard.Core.Bases;
+using System.Collections.Generic;
 
 namespace Blackboard.Core.Caps {
 
+    /// <summary>Determinines the maximum integer value from all the parents.</summary>
     public class MaxInt: Nary<int, int> {
 
+        /// <summary>Updates this node's value to the maximum value during evaluation.</summary>
+        /// <param name="values">The parents' values to get the max of.</param>
+        /// <returns>The maximum value from all the parents.</returns>
         protected override int OnEval(IEnumerable<int> values) {
             bool first = true;
             int result = default;

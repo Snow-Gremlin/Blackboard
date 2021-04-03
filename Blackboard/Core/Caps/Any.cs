@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using Blackboard.Core.Interfaces;
-using Blackboard.Core.Bases;
+﻿using Blackboard.Core.Bases;
+using System.Collections.Generic;
 
 namespace Blackboard.Core.Caps {
 

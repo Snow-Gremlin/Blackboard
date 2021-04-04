@@ -19,7 +19,7 @@ namespace Blackboard.Core.Caps {
         /// <summary>The parent node to get the source value from.</summary>
         public IValue<bool> Parent {
             get => this.source;
-            set => this.source = this.SetParent(this.source, value);
+            set => this.SetParent(ref this.source, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>

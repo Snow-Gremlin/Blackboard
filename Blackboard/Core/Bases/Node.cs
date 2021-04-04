@@ -81,14 +81,13 @@ namespace Blackboard.Core.Bases {
 
         /// <summary>This is a helper method for setting a parent to the node.</summary>
         /// <typeparam name="T">The node type for the parent.</typeparam>
-        /// <param name="oldParent">The old parent being replaced, or null.</param>
+        /// <param name="parent">The parent variable being set.</param>
         /// <param name="newParent">The new parent being set, or null</param>
-        /// <returns>The parent to set to this node specific instance.</returns>
-        protected T SetParent<T>(T oldParent, T newParent) where T : INode {
-            if (ReferenceEquals(oldParent, newParent)) return oldParent;
-            oldParent?.RemoveChildren(this);
+        protected void SetParent<T>(ref T parent, T newParent) where T : INode {
+            if (ReferenceEquals(parent, newParent)) return;
+            parent?.RemoveChildren(this);
+            parent = newParent;
             newParent?.AddChildren(this);
-            return newParent;
         }
 
         /// <summary>Adds children nodes onto this node.</summary>

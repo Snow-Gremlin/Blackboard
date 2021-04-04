@@ -31,20 +31,20 @@ namespace Blackboard.Core.Caps {
         /// <summary>This is the parent to toggle the value.</summary>
         public ITrigger Toggle {
             get => this.toggle;
-            set => this.toggle = this.SetParent(this.toggle, value);
+            set => this.SetParent(ref this.toggle, value);
         }
 
         /// <summary>This is the parent reset the toggle to false.</summary>
         public ITrigger Reset {
             get => this.reset;
-            set => this.reset = this.SetParent(this.reset, value);
+            set => this.SetParent(ref this.reset, value);
         }
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
         public ValueNode<bool> ResetValue {
             get => this.resetValue;
-            set => this.resetValue = this.SetParent(this.resetValue, value);
+            set => this.SetParent(ref this.resetValue, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>

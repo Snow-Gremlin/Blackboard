@@ -24,7 +24,7 @@ namespace Blackboard.Core.Bases {
         public IValue<T1> Parent {
             get => this.source;
             set {
-                this.source = this.SetParent(this.source, value);
+                this.SetParent(ref this.source, value);
                 this.UpdateValue();
             }
         }

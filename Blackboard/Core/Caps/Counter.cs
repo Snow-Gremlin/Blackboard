@@ -41,33 +41,33 @@ namespace Blackboard.Core.Caps {
         /// <summary>This is the parent to increment the counter.</summary>
         public ITrigger Increment {
             get => this.increment;
-            set => this.increment = this.SetParent(this.increment, value);
+            set => this.SetParent(ref this.increment, value);
         }
 
         /// <summary>This is the parent to decrement the counter.</summary>
         public ITrigger Decrement {
             get => this.decrement;
-            set => this.decrement = this.SetParent(this.decrement, value);
+            set => this.SetParent(ref this.decrement, value);
         }
 
         /// <summary>This is the parent reset the toggle to false.</summary>
         public ITrigger Reset {
             get => this.reset;
-            set => this.reset = this.SetParent(this.reset, value);
+            set => this.SetParent(ref this.reset, value);
         }
 
         /// <summary>The value to step during an increment or decrement.</summary>
         /// <remarks>If this parent is null then the counter will increment and decrement by one.</remarks>
         public ValueNode<int> Delta {
             get => this.delta;
-            set => this.delta = this.SetParent(this.delta, value);
+            set => this.SetParent(ref this.delta, value);
         }
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
         public ValueNode<int> ResetValue {
             get => this.resetValue;
-            set => this.resetValue = this.SetParent(this.resetValue, value);
+            set => this.SetParent(ref this.resetValue, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>

@@ -38,14 +38,14 @@ namespace Blackboard.Core.Caps {
             get => this.scope;
             set {
                 Namespace.CheckScopeChange(this, value);
-                this.scope = this.SetParent(this.scope, value);
+                this.SetParent(ref this.scope, value);
             }
         }
 
         /// <summary>The parent trigger node to listen to.</summary>
         public ITrigger Parent {
             get => this.source;
-            set => this.source = this.SetParent(this.source, value);
+            set => this.SetParent(ref this.source, value);
         }
 
         /// <summary>This event is emitted when the trigger has been triggered.</summary>

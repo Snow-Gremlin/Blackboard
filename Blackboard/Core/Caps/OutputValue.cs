@@ -42,7 +42,7 @@ namespace Blackboard.Core.Caps {
             get => this.scope;
             set {
                 Namespace.CheckScopeChange(this, value);
-                this.scope = this.SetParent(this.scope, value);
+                this.SetParent(ref this.scope, value);
             }
         }
 
@@ -50,7 +50,7 @@ namespace Blackboard.Core.Caps {
         public IValue<T> Parent {
             get => this.source;
             set {
-                this.source = this.SetParent(this.source, value);
+                this.SetParent(ref this.source, value);
                 this.UpdateValue();
             }
         }

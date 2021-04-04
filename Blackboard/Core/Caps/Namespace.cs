@@ -71,7 +71,7 @@ namespace Blackboard.Core.Caps {
             get => this.scope;
             set {
                 CheckScopeChange(this, value);
-                this.scope = this.SetParent(this.scope, value);
+                this.SetParent(ref this.scope, value);
             }
         }
 

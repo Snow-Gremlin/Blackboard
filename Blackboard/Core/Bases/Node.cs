@@ -79,6 +79,18 @@ namespace Blackboard.Core.Bases {
         /// <summary>The set of children nodes to this node in the graph.</summary>
         public IEnumerable<INode> Children => this.children;
 
+        /// <summary>This is a helper method for setting a parent to the node.</summary>
+        /// <typeparam name="T">The node type for the parent.</typeparam>
+        /// <param name="oldParent">The old parent being replaced, or null.</param>
+        /// <param name="newParent">The new parent being set, or null</param>
+        /// <returns>The parent to set to this node specific instance.</returns>
+        protected T SetParent<T>(T oldParent, T newParent) where T : INode {
+            if (ReferenceEquals(oldParent, newParent)) return oldParent;
+            oldParent?.RemoveChildren(this);
+            newParent?.AddChildren(this);
+            return newParent;
+        }
+
         /// <summary>Adds children nodes onto this node.</summary>
         /// <remarks>This will always check for loops.</remarks>
         /// <param name="children">The children to add.</param>

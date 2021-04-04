@@ -32,11 +32,8 @@ namespace Blackboard.Core.Caps {
         public INamespace Scope {
             get => this.scope;
             set {
-                if (value?.Exists(this.name) ?? false)
-                    throw Exception.RenameDuplicateInScope(this.name, value);
-                this.scope?.RemoveChildren(this);
-                this.scope = value;
-                this.scope?.AddChildren(this);
+                Namespace.CheckScopeChange(this, value);
+                this.scope = this.SetParent(this.scope, value);
             }
         }
 

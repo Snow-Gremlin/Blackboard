@@ -39,6 +39,15 @@ namespace Blackboard.Core.Caps {
             }
         }
 
+        /// <summary>This checks that the new scope can take on a node with the given name.</summary>
+        /// <param name="named">The node the scope is being added to.</param>
+        /// <param name="scope">The new scope being set, may be null.</param>
+        static internal void CheckScopeChange(INamed named, INamespace scope) {
+            string name = named.Name;
+            if (scope?.Exists(name) ?? false)
+                throw Exception.RenameDuplicateInScope(name, scope);
+        }
+
         /// <summary>The name for this namespace.</summary>
         private string name;
 
@@ -61,11 +70,8 @@ namespace Blackboard.Core.Caps {
         public INamespace Scope {
             get => this.scope;
             set {
-                if (value?.Exists(this.name) ?? false)
-                    throw Exception.RenameDuplicateInScope(this.name, value);
-                this.scope?.RemoveChildren(this);
-                this.scope = value;
-                this.scope?.AddChildren(this);
+                CheckScopeChange(this, value);
+                this.scope = this.SetParent(this.scope, value);
             }
         }
 

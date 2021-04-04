@@ -30,7 +30,7 @@ namespace Blackboard.Core.Caps {
         /// <summary>Gets or sets the name for the node.</summary>
         public string Name {
             get => this.name;
-            set => Namespace.SetName(this, value);
+            set => this.name = Namespace.SetName(this, value);
         }
 
         /// <summary>Gets or sets the containing scope for this name or null.</summary>

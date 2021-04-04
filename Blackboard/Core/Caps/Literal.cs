@@ -9,6 +9,11 @@ namespace Blackboard.Core.Caps {
     /// <typeparam name="T">The type of this literal.</typeparam>
     public class Literal<T>: ValueNode<T> {
 
+        /// <summary>Creates a new literal value node.</summary>
+        /// <param name="value">The initial value of the node.</param>
+        public Literal(T value = default) :
+            base(value) { }
+
         /// <summary>This sets the literal value.</summary>
         /// <param name="value">The value to set.</param>
         /// <returns>True if the value has changed, false otherwise.</returns>

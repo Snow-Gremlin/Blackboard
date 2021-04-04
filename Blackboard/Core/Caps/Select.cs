@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Bases;
+using Blackboard.Core.Interfaces;
 
 namespace Blackboard.Core.Caps {
 
@@ -7,6 +8,15 @@ namespace Blackboard.Core.Caps {
     /// <typeparam name="T">The type of input for the two value providing parents.</typeparam>
     public class Select<T>: Ternary<bool, T, T, T> {
 
+        /// <summary>Creates a selection value node.</summary>
+        /// <param name="source1">This is the first parent for the source value.</param>
+        /// <param name="source2">This is the second parent for the source value.</param>
+        /// <param name="source3">This is the third parent for the source value.</param>
+        /// <param name="value">The default value for this node.</param>
+        public Select(IValue<bool> source1 = null, IValue<T> source2 = null,
+            IValue<T> source3 = null, T value = default) :
+            base(source1, source2, source3, value) { }
+
         /// <summary>Selects the value to return during evaluation.</summary>
         /// <param name="value1">
         /// The parent to select with,
@@ -14,7 +24,7 @@ namespace Blackboard.Core.Caps {
         /// false will return the third parent's value.
         /// </param>
         /// <param name="value2">The value to return if the first parent is true.</param>
-        /// <param name="value3">The value to return if the second parent is true.</param>
+        /// <param name="value3">The value to return if the first parent is false.</param>
         /// <returns>The selected value to set to this node.</returns>
         protected override T OnEval(bool value1, T value2, T value3) => value1 ? value2 : value3;
 

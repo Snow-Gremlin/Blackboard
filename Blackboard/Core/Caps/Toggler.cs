@@ -21,7 +21,8 @@ namespace Blackboard.Core.Caps {
         /// <param name="reset">The initial parent reset the toggle to reset parent's value.</param>
         /// <param name="resetValue">The initial parent for the value to reset to.</param>
         /// <param name="value">The initial boolean value for this node.</param>
-        public Toggler(ITrigger toggle = null, ITrigger reset = null, ValueNode<bool> resetValue = null, bool value = false) : base(value) {
+        public Toggler(ITrigger toggle = null, ITrigger reset = null,
+            ValueNode<bool> resetValue = null, bool value = false) : base(value) {
             this.Toggle = toggle;
             this.Reset = reset;
             this.ResetValue = resetValue;

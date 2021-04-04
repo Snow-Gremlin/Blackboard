@@ -1,10 +1,21 @@
 ﻿using Blackboard.Core.Bases;
+using Blackboard.Core.Interfaces;
 using System.Collections.Generic;
 
 namespace Blackboard.Core.Caps {
 
     /// <summary>This is a trigger which will be triggered when all of its non-null parents are triggered.</summary>
     public class All: Multitrigger {
+
+        /// <summary>Creates an all trigger node.</summary>
+        /// <param name="parents">The initial set of parents to use.</param>
+        public All(params ITrigger[] parents) :
+            base(parents) { }
+
+        /// <summary>Creates an all trigger node.</summary>
+        /// <param name="parents">The initial set of parents to use.</param>
+        public All(IEnumerable<ITrigger> parents = null) :
+            base(parents) { }
 
         /// <summary>Checks if all of the parents are triggered during evaluation.</summary>
         /// <param name="triggered">The triggered values from the parents.</param>

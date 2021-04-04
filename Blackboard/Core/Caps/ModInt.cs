@@ -1,9 +1,17 @@
 ﻿using Blackboard.Core.Bases;
+using Blackboard.Core.Interfaces;
 
 namespace Blackboard.Core.Caps {
 
     /// <summary>This will get the modulo the first parent value by the second parent value.</summary>
     public class ModInt: Binary<int, int, int> {
+
+        /// <summary>Creates a modulo value node.</summary>
+        /// <param name="source1">This is the first parent for the source value.</param>
+        /// <param name="source2">This is the second parent for the source value.</param>
+        /// <param name="value">The default value for this node.</param>
+        public ModInt(IValue<int> source1 = null, IValue<int> source2 = null, int value = default) :
+            base(source1, source2, value) { }
 
         /// <summary>Gets the first value moduled by a second value.</summary>
         /// <param name="value1">The first value to modulo.</param>

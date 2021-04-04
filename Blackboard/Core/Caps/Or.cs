@@ -8,6 +8,17 @@ namespace Blackboard.Core.Caps {
     /// <see cref="https://mathworld.wolfram.com/OR.html"/>
     public class Or: Nary<bool, bool> {
 
+        /// <summary>Creates a boolean OR value node.</summary>
+        /// <param name="parents">The initial set of parents to use.</param>
+        public Or(params IValue<bool>[] parents) :
+            base(parents) { }
+
+        /// <summary>Creates a boolean OR value node.</summary>
+        /// <param name="parents">The initial set of parents to use.</param>
+        /// <param name="value">The default value for this node.</param>
+        public Or(IEnumerable<IValue<bool>> parents = null, bool value = default) :
+            base(parents, value) { }
+
         /// <summary>Gets the OR of all the parent's booleans.</summary>
         /// <param name="values">The to OR together.</param>
         /// <returns>The OR of all the given values.</returns>

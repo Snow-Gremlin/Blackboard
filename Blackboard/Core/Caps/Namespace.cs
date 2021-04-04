@@ -29,14 +29,14 @@ namespace Blackboard.Core.Caps {
         /// <summary>This is used to set the name of the given named while checking the name.</summary>
         /// <param name="named">This is the named node to name.</param>
         /// <param name="name">This is the new name to set.</param>
-        static internal void SetName(INamed named, string name) {
-            if (named.Name != name) {
-                if (!ValidName(name))
-                    throw Exception.InvalidName(name);
-                if (named?.Scope?.Exists(name) ?? false)
-                    throw Exception.RenameDuplicateInScope(name, named.Scope);
-                named.Name = name;
-            }
+        static internal string SetName(INamed named, string name) {
+            if (named.Name == name) return named.Name;
+            if (!ValidName(name))
+                throw Exception.InvalidName(name);
+            if (named?.Scope?.Exists(name) ?? false)
+                throw Exception.RenameDuplicateInScope(name, named.Scope);
+            // Name is valid an unique, return it to be set.
+            return name;
         }
 
         /// <summary>This checks that the new scope can take on a node with the given name.</summary>
@@ -63,7 +63,7 @@ namespace Blackboard.Core.Caps {
         /// <summary>Gets or sets the name for the node.</summary>
         public string Name {
             get => this.name;
-            set => SetName(this, value);
+            set => this.name = SetName(this, value);
         }
 
         /// <summary>Gets or sets the containing scope for this name or null.</summary>

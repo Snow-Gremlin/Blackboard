@@ -5,8 +5,8 @@ using System.Collections.Generic;
 
 namespace Blackboard.Core.Caps {
 
-    /// <summary>This is a trigger which can be triggered from user input.</summary>
-    public class InputTrigger: TriggerNode, ITriggerInput {
+    /// <summary>This is a trigger which can be triggered from user output.</summary>
+    public class OutputTrigger: TriggerNode, ITriggerOutput {
 
         /// <summary>The name for this namespace.</summary>
         private string name;
@@ -14,10 +14,15 @@ namespace Blackboard.Core.Caps {
         /// <summary>The parent scope or null.</summary>
         private INamespace scope;
 
-        /// <summary>Creates a new input trigger.</summary>
+        /// <summary>The parent source to listen to.</summary>
+        private ITrigger source;
+
+        /// <summary>Creates a new output trigger.</summary>
+        /// <param name="source">The initial source trigger to listen to.</param>
         /// <param name="name">The initial name for this trigger.</param>
         /// <param name="scope">The initial scope for this trigger.</param>
-        public InputTrigger(string name = "Input", INamespace scope = null) {
+        public OutputTrigger(ITrigger source = null, string name = "Output", INamespace scope = null) {
+            this.Parent = source;
             this.Name = name;
             this.Scope = scope;
         }
@@ -40,6 +45,18 @@ namespace Blackboard.Core.Caps {
             }
         }
 
+        /// <summary>The parent trigger node to listen to.</summary>
+        public ITrigger Parent {
+            get => this.source;
+            set {
+                if (!(this.source is null))
+                    this.source.RemoveChildren(this);
+                this.source = value;
+                if (!(this.source is null))
+                    this.source.AddChildren(this);
+            }
+        }
+
         /// <summary>This event is emitted when the trigger has been triggered.</summary>
         public event EventHandler OnTriggered;
 
@@ -47,16 +64,14 @@ namespace Blackboard.Core.Caps {
         public override IEnumerable<INode> Parents {
             get {
                 if (!(this.scope is null)) yield return this.scope;
+                if (!(this.source is null)) yield return this.source;
             }
         }
-
-        /// <summary>This is set this trigger to emit during the next evaluation.</summary>
-        public void Trigger() => this.Triggered = true;
 
         /// <summary>This updates the trigger during the an evaluation.</summary>
         /// <returns>This returns the triggered value as it currently is.</returns>
         protected override bool UpdateTrigger() {
-            if (this.Triggered) {
+            if (this.source.Triggered) {
                 if (!(this.OnTriggered is null))
                     this.OnTriggered(this, EventArgs.Empty);
                 return true;

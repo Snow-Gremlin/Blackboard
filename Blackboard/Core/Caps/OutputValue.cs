@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace Blackboard.Core.Caps {
 
-    /// <summary>A node for user inputted values.</summary>
+    /// <summary>A node for user outputted values.</summary>
     /// <typeparam name="T">The type of the value to hold.</typeparam>
-    public class InputValue<T>: ValueNode<T>, IValueInput<T> {
+    public class OutputValue<T>: ValueNode<T>, IValueOutput<T> {
 
         /// <summary>The name for this namespace.</summary>
         private string name;
@@ -15,13 +15,20 @@ namespace Blackboard.Core.Caps {
         /// <summary>The parent scope or null.</summary>
         private INamespace scope;
 
-        /// <summary>Creates a new input value node.</summary>
+        /// <summary>The parent source to listen to.</summary>
+        private IValue<T> source;
+
+        /// <summary>Creates a new output value node.</summary>
+        /// <param name="source">The initial source to get the value from.</param>
         /// <param name="name">The initial name for this value node.</param>
         /// <param name="scope">The initial scope for this value node.</param>
         /// <param name="value">The initial value for this node.</param>
-        public InputValue(string name = "Input", INamespace scope = null, T value = default) : base(value) {
+        public OutputValue(IValue<T> source = null, string name = "Input",
+            INamespace scope = null, T value = default) : base(value) {
+            this.Parent = source;
             this.Name = name;
             this.Scope = scope;
+            this.UpdateValue();
         }
 
         /// <summary>Gets or sets the name for the node.</summary>
@@ -42,6 +49,19 @@ namespace Blackboard.Core.Caps {
             }
         }
 
+        /// <summary>The parent node to get the value from.</summary>
+        public IValue<T> Parent {
+            get => this.source;
+            set {
+                if (!(this.source is null))
+                    this.source.RemoveChildren(this);
+                this.source = value;
+                if (!(this.source is null))
+                    this.source.AddChildren(this);
+                this.UpdateValue();
+            }
+        }
+
         /// <summary>This event is emitted when the value is changed.</summary>
         public event EventHandler OnChanged;
 
@@ -49,24 +69,20 @@ namespace Blackboard.Core.Caps {
         public override IEnumerable<INode> Parents {
             get {
                 if (!(this.scope is null)) yield return this.scope;
+                if (!(this.source is null)) yield return this.source;
             }
         }
 
-        /// <summary>This sets the value of this node.</summary>
-        /// <param name="value">The value to set.</param>
-        /// <returns>True if the value has changed, false otherwise.</returns>
-        public bool SetValue(T value) => this.SetNodeValue(value);
-
         /// <summary>This will update the value.</summary>
-        /// <remarks>
-        /// Since the value is set by the user this will always return true.
-        /// If the value didn't change during setting then it should not be evaluated.
-        /// </remarks>
         /// <returns>This will always return true.</returns>
         protected override bool UpdateValue() {
-            if (!(this.OnChanged is null))
-                this.OnChanged(this, EventArgs.Empty);
-            return true;
+            if (this.source is null) return false;
+            if (this.SetNodeValue(this.source.Value)) {
+                if (!(this.OnChanged is null))
+                    this.OnChanged(this, EventArgs.Empty);
+                return true;
+            }
+            return false;
         }
 
         /// <summary>Gets the string for this node.</summary>

@@ -13,8 +13,8 @@ namespace Blackboard.Core.Bases {
 
         /// <summary>Creates a N-ary value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Nary(params IValue<TIn>[] sources) :
-            this(sources as IEnumerable<IValue<TIn>>) { }
+        public Nary(params IValue<TIn>[] parents) :
+            this(parents as IEnumerable<IValue<TIn>>) { }
 
         /// <summary>Creates a N-ary value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>

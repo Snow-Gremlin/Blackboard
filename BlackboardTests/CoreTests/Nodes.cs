@@ -69,15 +69,18 @@ namespace BlackboardTests.CoreTests {
             checkValue(not123, true);
 
             StringWriter buf = new StringWriter();
-            input1.SetValue(true);
-            input3.SetValue(true);
-            Evaluator.Eval(buf, input1, input3);
+            Driver drv = new Driver(buf);
+            drv.Nodes.AddChildren(input1, input2, input3);
+
+            drv.SetValue("One", true);
+            drv.SetValue("Three", true);
+            drv.Evalate();
             checkLog(buf,
-                "Eval(0): One",
-                "Eval(0): Three",
-                "Eval(1): And(One, Two)",
-                "Eval(2): Or(And(One, Two), Three)",
-                "Eval(3): Not(Or(And(One, Two), Three))");
+                "Eval(1): One",
+                "Eval(1): Three",
+                "Eval(2): And(One, Two)",
+                "Eval(3): Or(And(One, Two), Three)",
+                "Eval(4): Not(Or(And(One, Two), Three))");
             checkValue(input1, true);
             checkValue(input2, false);
             checkValue(input3, true);
@@ -85,13 +88,13 @@ namespace BlackboardTests.CoreTests {
             checkValue(or123, true);
             checkValue(not123, false);
 
-            buf = new StringWriter();
-            input3.SetValue(false);
-            Evaluator.Eval(buf, input3);
+            drv.Log = new StringWriter();
+            drv.SetValue("Three", false);
+            drv.Evalate();
             checkLog(buf,
-                "Eval(0): Three",
-                "Eval(2): Or(And(One, Two), Three)",
-                "Eval(3): Not(Or(And(One, Two), Three))");
+                "Eval(1): Three",
+                "Eval(3): Or(And(One, Two), Three)",
+                "Eval(4): Not(Or(And(One, Two), Three))");
             checkValue(input1, true);
             checkValue(input2, false);
             checkValue(input3, false);
@@ -99,14 +102,14 @@ namespace BlackboardTests.CoreTests {
             checkValue(or123, false);
             checkValue(not123, true);
 
-            buf = new StringWriter();
-            input2.SetValue(true);
-            Evaluator.Eval(buf, input2);
+            drv.Log = new StringWriter();
+            drv.SetValue("Two", true);
+            drv.Evalate();
             checkLog(buf,
-                "Eval(0): Two",
-                "Eval(1): And(One, Two)",
-                "Eval(2): Or(And(One, Two), Three)",
-                "Eval(3): Not(Or(And(One, Two), Three))");
+                "Eval(1): Two",
+                "Eval(2): And(One, Two)",
+                "Eval(3): Or(And(One, Two), Three)",
+                "Eval(4): Not(Or(And(One, Two), Three))");
             checkValue(input1, true);
             checkValue(input2, true);
             checkValue(input3, false);

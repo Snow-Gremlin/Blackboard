@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Bases;
 using Blackboard.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -7,7 +8,7 @@ using System.Text.RegularExpressions;
 namespace Blackboard.Core.Caps {
 
     /// <summary>A namespace node for containing other named nodes.</summary>
-    public class Namespace: Node, INamespace {
+    public class Namespace: Node, INamespace, INamed {
 
         /// <summary>The regex singleton for validating the name.</summary>
         static private Regex nameRegex = null;
@@ -46,6 +47,32 @@ namespace Blackboard.Core.Caps {
             string name = named.Name;
             if (scope?.Exists(name) ?? false)
                 throw Exception.RenameDuplicateInScope(name, scope);
+        }
+
+        /// <summary>
+        /// This finds the name or location a name should
+        /// be in the children of the given namespace.
+        /// </summary>
+        /// <param name="nodes">The sorted set of nodes to search within.</param>
+        /// <param name="name">The name to find the location for.</param>
+        /// <param name="found">The node found or null if not found.</param>
+        /// <returns>The index the name should go or was found.</returns>
+        static protected int FindPossibleIndex(List<INode> nodes, string name, out INode found) {
+            int low = 0;
+            int high = nodes.Count - 1;
+            while (low <= high) {
+                int mid = (low + high) / 2;
+                INamed node = nodes[mid] as INamed;
+                int comp = node.Name.CompareTo(name);
+
+                if (comp == 0) {
+                    found = node;
+                    return mid;
+                }  else if (comp > 0) low = mid + 1;
+                else high = mid - 1;
+            }
+            found = null;
+            return low;
         }
 
         /// <summary>The name for this namespace.</summary>

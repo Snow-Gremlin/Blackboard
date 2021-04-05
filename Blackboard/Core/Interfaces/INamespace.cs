@@ -1,7 +1,8 @@
 ﻿namespace Blackboard.Core.Interfaces {
 
     /// <summary>The interface for a namespace.</summary>
-    public interface INamespace: INamed {
+    /// <remarks>The children for a namespace should always be sorted by name.</remarks>
+    public interface INamespace: INode {
 
         /// <summary>This determines if the namespace has a child with the given name.</summary>
         /// <param name="name">The name of the child to check for.</param>

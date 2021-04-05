@@ -55,6 +55,7 @@
     <Compile Include="Core\Caps\GreaterThanOrEqual.cs" />
     <Compile Include="Core\Caps\LessThan.cs" />
     <Compile Include="Core\Caps\GreaterThan.cs" />
+    <Compile Include="Core\Caps\Global.cs" />
     <Compile Include="Core\Caps\NotEqual.cs" />
     <Compile Include="Core\Caps\Equal.cs" />
     <Compile Include="Core\Caps\Literal.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="Core\Caps\Counter.cs" />
     <Compile Include="Core\Caps\Lerp.cs" />
     <Compile Include="Core\Caps\Toggler.cs" />
+    <Compile Include="Core\Driver.cs" />
     <Compile Include="Core\Exception.cs" />
     <Compile Include="Core\Caps\Namespace.cs" />
     <Compile Include="Core\Caps\Truncate.cs" />
@@ -105,7 +107,6 @@
     <Compile Include="Core\Caps\Not.cs" />
     <Compile Include="Core\Caps\Or.cs" />
     <Compile Include="Core\Caps\And.cs" />
-    <Compile Include="Core\Evaluator.cs" />
     <Compile Include="Core\Extensions.cs" />
     <Compile Include="Core\Interfaces\IInput.cs" />
     <Compile Include="Core\Interfaces\INode.cs" />

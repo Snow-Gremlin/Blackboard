@@ -5,6 +5,7 @@ using Blackboard.Core.Bases;
 using Blackboard.Core.Interfaces;
 using System.IO;
 using System.Linq;
+using System;
 
 namespace BlackboardTests.CoreTests {
 
@@ -68,14 +69,13 @@ namespace BlackboardTests.CoreTests {
             checkValue(or123, false);
             checkValue(not123, true);
 
-            StringWriter buf = new StringWriter();
-            Driver drv = new Driver(buf);
+            Driver drv = new Driver(new StringWriter());
             drv.Nodes.AddChildren(input1, input2, input3);
 
             drv.SetValue("One", true);
             drv.SetValue("Three", true);
             drv.Evalate();
-            checkLog(buf,
+            checkLog(drv.Log as StringWriter,
                 "Eval(1): One",
                 "Eval(1): Three",
                 "Eval(2): And(One, Two)",
@@ -91,7 +91,7 @@ namespace BlackboardTests.CoreTests {
             drv.Log = new StringWriter();
             drv.SetValue("Three", false);
             drv.Evalate();
-            checkLog(buf,
+            checkLog(drv.Log as StringWriter,
                 "Eval(1): Three",
                 "Eval(3): Or(And(One, Two), Three)",
                 "Eval(4): Not(Or(And(One, Two), Three))");
@@ -105,7 +105,7 @@ namespace BlackboardTests.CoreTests {
             drv.Log = new StringWriter();
             drv.SetValue("Two", true);
             drv.Evalate();
-            checkLog(buf,
+            checkLog(drv.Log as StringWriter,
                 "Eval(1): Two",
                 "Eval(2): And(One, Two)",
                 "Eval(3): Or(And(One, Two), Three)",
@@ -116,6 +116,29 @@ namespace BlackboardTests.CoreTests {
             checkValue(and12, true);
             checkValue(or123, true);
             checkValue(not123, false);
+        }
+
+        [TestMethod]
+        public void TestTriggerNodes() {
+            Driver drv = new Driver(new StringWriter());
+            InputTrigger inputA = new InputTrigger("TrigA", drv.Nodes);
+            InputTrigger inputB = new InputTrigger("TrigB", drv.Nodes);
+            InputTrigger inputC = new InputTrigger("TrigC", drv.Nodes);
+            Counter counter = new Counter(
+                new Any(inputA, inputB, inputC), null,
+                new All(inputA, inputB, inputC));
+            OnTrue over3 = new OnTrue(new GreaterThan<int>(counter, new Literal<int>(3)));
+            OutputValue<int> output1 = new OutputValue<int>(counter, "Count", drv.Nodes);
+            OutputTrigger output2 = new OutputTrigger(over3, "High", drv.Nodes);
+
+            Action<bool, bool, bool, int, bool> check = delegate(bool triggerA,
+                bool triggerB, bool triggerC, int expCount, bool expHigh) {
+
+
+
+
+            };
+
         }
     }
 }

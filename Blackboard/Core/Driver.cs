@@ -73,6 +73,7 @@ namespace Blackboard.Core {
             LinkedList<ITrigger> needsReset = new LinkedList<ITrigger>();
             pending.SortInsertUnique(this.touched);
             this.touched.Clear();
+
             while (pending.Count > 0) {
                 INode node = pending.TakeFirst();
                 if (!(this.Log is null))
@@ -81,6 +82,7 @@ namespace Blackboard.Core {
                 if (node is ITrigger)
                     needsReset.AddLast(node as ITrigger);
             }
+
             foreach (ITrigger trigger in needsReset)
                 trigger.Reset();
         }

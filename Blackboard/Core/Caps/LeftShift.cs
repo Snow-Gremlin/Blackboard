@@ -4,7 +4,7 @@ using Blackboard.Core.Interfaces;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a left shifts the first integer parent the amount of the second parent.</summary>
-    public class LeftShift: Binary<int, int, int> {
+    sealed public class LeftShift: Binary<int, int, int> {
 
         /// <summary>Creates a left shift value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

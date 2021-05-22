@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Triggers a when one and only one of the parents is triggered.</summary>
-    public class OnlyOne: Multitrigger {
+    sealed public class OnlyOne: Multitrigger {
 
         /// <summary>Creates a one and only one trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

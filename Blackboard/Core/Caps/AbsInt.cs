@@ -5,7 +5,7 @@ using System;
 namespace Blackboard.Core.Caps {
 
     /// <summary>A integer value node that gets the absolute value of the parent.</summary>
-    public class AbsInt: Unary<int, int> {
+    sealed public class AbsInt: Unary<int, int> {
 
         /// <summary>Creates an absolute value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>

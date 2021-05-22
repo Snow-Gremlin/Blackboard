@@ -5,7 +5,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a bitwise Exclusive OR of two integer parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/XOR.html"/>
-    public class BitwiseXor: Binary<int, int, int> {
+    sealed public class BitwiseXor: Binary<int, int, int> {
 
         /// <summary>Creates a bitwise Exclusive OR value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

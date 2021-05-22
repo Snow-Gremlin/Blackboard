@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Determinines the minimum integer value from all the parents.</summary>
-    public class MinInt: Nary<int, int> {
+    sealed public class MinInt: Nary<int, int> {
 
         /// <summary>Creates a minimum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

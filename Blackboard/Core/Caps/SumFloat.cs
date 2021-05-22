@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Gets the sum of all of the parent values.</summary>
-    public class SumFloat: Nary<double, double> {
+    sealed public class SumFloat: Nary<double, double> {
 
         /// <summary>Creates a sum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

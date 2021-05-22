@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>This is a boolean value which can be toggled by triggers.</summary>
-    public class Toggler: ValueNode<bool> {
+    sealed public class Toggler: ValueNode<bool> {
 
         /// <summary>This is the parent to toggle the value.</summary>
         private ITrigger toggle;

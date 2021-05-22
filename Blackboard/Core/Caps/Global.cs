@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 namespace Blackboard.Core.Caps {
 
     /// <summary>The global namespace node for containing other named nodes.</summary>
-    public class Global: Node, INamespace {
+    sealed public class Global: Node, INamespace {
 
         /// <summary>Create a new global namespace.</summary>
         public Global() { }

@@ -6,7 +6,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>Determines if the two values are less than or equal.</summary>
     /// <typeparam name="T">The type being compared.</typeparam>
-    public class LessThanOrEqual<T>: Binary<T, T, bool> {
+    sealed public class LessThanOrEqual<T>: Binary<T, T, bool> {
 
         /// <summary>Creates a less than or equal value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

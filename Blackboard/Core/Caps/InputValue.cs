@@ -7,7 +7,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>A node for user inputted values.</summary>
     /// <typeparam name="T">The type of the value to hold.</typeparam>
-    public class InputValue<T>: ValueNode<T>, IValueInput<T> {
+    sealed public class InputValue<T>: ValueNode<T>, IValueInput<T> {
 
         /// <summary>The name for this namespace.</summary>
         private string name;

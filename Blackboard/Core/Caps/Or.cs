@@ -6,7 +6,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a boolean OR of all the boolean parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/OR.html"/>
-    public class Or: Nary<bool, bool> {
+    sealed public class Or: Nary<bool, bool> {
 
         /// <summary>Creates a boolean OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Provides a node which can be used to count trigger events.</summary>
-    public class Counter: ValueNode<int> {
+    sealed public class Counter: ValueNode<int> {
 
         /// <summary>This is the parent to increment the counter.</summary>
         private ITrigger increment;

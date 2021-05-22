@@ -4,7 +4,7 @@ using Blackboard.Core.Interfaces;
 namespace Blackboard.Core.Caps {
 
     /// <summary>This will get the modulo the first parent value by the second parent value.</summary>
-    public class ModInt: Binary<int, int, int> {
+    sealed public class ModInt: Binary<int, int, int> {
 
         /// <summary>Creates a modulo value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

@@ -4,7 +4,7 @@ using Blackboard.Core.Interfaces;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Gets the difference between the two parent values.</summary>
-    public class SubInt: Binary<int, int, int> {
+    sealed public class SubInt: Binary<int, int, int> {
 
         /// <summary>Creates a subtraction value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

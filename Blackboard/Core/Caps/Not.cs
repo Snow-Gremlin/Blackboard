@@ -5,7 +5,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a boolean NOT of one boolean parent.</summary>
     /// <see cref="https://mathworld.wolfram.com/NOT.html"/>
-    public class Not: Unary<bool, bool> {
+    sealed public class Not: Unary<bool, bool> {
 
         /// <summary>Creates a boolean NOT value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>

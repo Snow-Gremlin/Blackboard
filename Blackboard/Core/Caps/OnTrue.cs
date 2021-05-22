@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a trigger when the parent becomes true.</summary>
-    public class OnTrue: TriggerNode {
+    sealed public class OnTrue: TriggerNode {
 
         /// <summary>This is the parent node to read from.</summary>
         private IValue<bool> source;

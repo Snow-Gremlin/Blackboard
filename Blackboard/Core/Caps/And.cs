@@ -6,7 +6,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a boolean AND of all the boolean parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/AND.html"/>
-    public class And: Nary<bool, bool> {
+    sealed public class And: Nary<bool, bool> {
 
         /// <summary>Creates a boolean AND value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>This is a trigger which will be triggered when all of its non-null parents are triggered.</summary>
-    public class All: Multitrigger {
+    sealed public class All: Multitrigger {
 
         /// <summary>Creates an all trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

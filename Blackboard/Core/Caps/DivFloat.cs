@@ -4,7 +4,7 @@ using Blackboard.Core.Interfaces;
 namespace Blackboard.Core.Caps {
 
     /// <summary>This will divide the first parent value by the second parent value.</summary>
-    public class DivFloat: Binary<double, double, double> {
+    sealed public class DivFloat: Binary<double, double, double> {
 
         /// <summary>Creates a divided value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

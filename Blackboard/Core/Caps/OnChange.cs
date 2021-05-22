@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a trigger when any parent is changed.</summary>
-    public class OnChange: TriggerNode  {
+    sealed public class OnChange: TriggerNode  {
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
         private List<INode> sources;

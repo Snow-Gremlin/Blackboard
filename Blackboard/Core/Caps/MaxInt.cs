@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Determinines the maximum integer value from all the parents.</summary>
-    public class MaxInt: Nary<int, int> {
+    sealed public class MaxInt: Nary<int, int> {
 
         /// <summary>Creates a maximum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

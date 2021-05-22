@@ -4,7 +4,7 @@ using Blackboard.Core.Interfaces;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Negates the given parents value.</summary>
-    public class NegInt: Unary<int, int> {
+    sealed public class NegInt: Unary<int, int> {
 
         /// <summary>Creates a negated value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>

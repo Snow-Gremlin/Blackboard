@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Determinines the minimum float value from all the parents.</summary>
-    public class MinFloat: Nary<double, double> {
+    sealed public class MinFloat: Nary<double, double> {
 
         /// <summary>Creates a minimum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

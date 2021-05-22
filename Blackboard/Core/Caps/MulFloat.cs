@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>This gets the product of all the float parents.</summary>
-    public class MulFloat: Nary<double, double> {
+    sealed public class MulFloat: Nary<double, double> {
 
         /// <summary>Creates a product value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

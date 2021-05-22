@@ -6,7 +6,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>Determines if the two values are equal.</summary>
     /// <typeparam name="T">The type being compared.</typeparam>
-    public class Equal<T>: Binary<T, T, bool> {
+    sealed public class Equal<T>: Binary<T, T, bool> {
 
         /// <summary>Creates an equal value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

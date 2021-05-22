@@ -4,7 +4,7 @@ using Blackboard.Core.Interfaces;
 namespace Blackboard.Core.Caps {
 
     /// <summary>This will return the linear interpolation between two parent values.</summary>
-    public class Lerp: Ternary<double, double, double, double> {
+    sealed public class Lerp: Ternary<double, double, double, double> {
 
         /// <summary>Creates a selection value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

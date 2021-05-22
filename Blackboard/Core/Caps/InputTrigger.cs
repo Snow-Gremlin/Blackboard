@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>This is a trigger which can be triggered from user input.</summary>
-    public class InputTrigger: TriggerNode, ITriggerInput {
+    sealed public class InputTrigger: TriggerNode, ITriggerInput {
 
         /// <summary>The name for this namespace.</summary>
         private string name;

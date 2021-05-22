@@ -5,7 +5,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a boolean Exclusive OR of two boolean parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/XOR.html"/>
-    public class Xor: Binary<bool, bool, bool> {
+    sealed public class Xor: Binary<bool, bool, bool> {
 
         /// <summary>Creates a boolean XOR value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

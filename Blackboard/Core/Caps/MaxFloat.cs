@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Determinines the maximum float value from all the parents.</summary>
-    public class MaxFloat: Nary<double, double> {
+    sealed public class MaxFloat: Nary<double, double> {
 
         /// <summary>Creates a maximum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

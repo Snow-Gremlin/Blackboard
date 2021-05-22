@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Bases;
 using Blackboard.Core.Interfaces;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -8,7 +7,7 @@ using System.Text.RegularExpressions;
 namespace Blackboard.Core.Caps {
 
     /// <summary>A namespace node for containing other named nodes.</summary>
-    public class Namespace: Node, INamespace, INamed {
+    sealed public class Namespace: Node, INamespace, INamed {
 
         /// <summary>The regex singleton for validating the name.</summary>
         static private Regex nameRegex = null;

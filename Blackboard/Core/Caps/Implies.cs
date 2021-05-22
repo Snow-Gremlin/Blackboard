@@ -5,7 +5,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a boolean implies of two boolean parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/Implies.html"/>
-    public class Implies: Binary<bool, bool, bool> {
+    sealed public class Implies: Binary<bool, bool, bool> {
 
         /// <summary>Creates an implied value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

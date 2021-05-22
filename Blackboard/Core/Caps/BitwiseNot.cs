@@ -4,7 +4,7 @@ using Blackboard.Core.Interfaces;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a bitwise NOT of one integer parent.</summary>
-    public class BitwiseNot: Unary<int, int> {
+    sealed public class BitwiseNot: Unary<int, int> {
 
         /// <summary>Creates a bitwise NOT value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>

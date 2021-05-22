@@ -6,7 +6,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a bitwise OR of all the integer parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/OR.html"/>
-    public class BitwiseOr: Nary<int, int> {
+    sealed public class BitwiseOr: Nary<int, int> {
 
         /// <summary>Creates a bitwise OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

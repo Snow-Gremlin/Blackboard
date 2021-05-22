@@ -6,7 +6,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a bitwise AND of all the integer parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/AND.html"/>
-    public class BitwiseAnd: Nary<int, int> {
+    sealed public class BitwiseAnd: Nary<int, int> {
 
         /// <summary>Creates a bitwise AND value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

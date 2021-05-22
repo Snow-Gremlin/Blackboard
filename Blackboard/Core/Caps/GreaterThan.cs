@@ -6,7 +6,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>Determines if the two values are greater than.</summary>
     /// <typeparam name="T">The type being compared.</typeparam>
-    public class GreaterThan<T>: Binary<T, T, bool> {
+    sealed public class GreaterThan<T>: Binary<T, T, bool> {
 
         /// <summary>Creates a greater than value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

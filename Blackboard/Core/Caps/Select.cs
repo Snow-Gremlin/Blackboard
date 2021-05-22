@@ -6,7 +6,7 @@ namespace Blackboard.Core.Caps {
     /// <summary>This will return the value of one of two parents based on a boolean parent.</summary>
     /// <remarks>This functions just like a typical ternary statement.</remarks>
     /// <typeparam name="T">The type of input for the two value providing parents.</typeparam>
-    public class Select<T>: Ternary<bool, T, T, T> {
+    sealed public class Select<T>: Ternary<bool, T, T, T> {
 
         /// <summary>Creates a selection value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

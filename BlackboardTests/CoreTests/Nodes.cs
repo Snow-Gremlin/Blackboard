@@ -133,7 +133,7 @@ namespace BlackboardTests.CoreTests {
 
             Action<bool, bool, bool, int, bool> check = delegate(bool triggerA,
                 bool triggerB, bool triggerC, int expCount, bool expHigh) {
-
+                    //drv.Trigger(inputA);
 
 
 

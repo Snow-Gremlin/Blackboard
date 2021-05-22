@@ -1,12 +1,6 @@
 ﻿using Blackboard.Core.Caps;
-using Blackboard.Core.Bases;
 using Blackboard.Core.Interfaces;
-using Blackboard.Core;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace Blackboard.Core {
@@ -46,11 +40,16 @@ namespace Blackboard.Core {
 
         public bool SetValue<T>(string name, T value) {
             INode node = this.Find(name);
-            if (!(node is IValueInput<T>)) return false;
-            IValueInput<T> input = node as IValueInput<T>;
+            if (node is IValueInput<T> input) {
+                this.SetValue(input, value);
+                return true;
+            }
+            return false;
+        }
+
+        public void SetValue<T>(IValueInput<T> input, T value) {
             bool changed = input.SetValue(value);
             if (changed) this.touched.Add(input);
-            return true;
         }
 
         public T GetValue<T>(string name) {

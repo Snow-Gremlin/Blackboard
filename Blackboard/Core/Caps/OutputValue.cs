@@ -61,8 +61,8 @@ namespace Blackboard.Core.Caps {
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public override IEnumerable<INode> Parents {
             get {
-                if (!(this.scope is null)) yield return this.scope;
-                if (!(this.source is null)) yield return this.source;
+                if (this.scope is not null) yield return this.scope;
+                if (this.source is not null) yield return this.source;
             }
         }
 
@@ -71,7 +71,7 @@ namespace Blackboard.Core.Caps {
         protected override bool UpdateValue() {
             if (this.source is null) return false;
             if (this.SetNodeValue(this.source.Value)) {
-                if (!(this.OnChanged is null))
+                if (this.OnChanged is not null)
                     this.OnChanged(this, EventArgs.Empty);
                 return true;
             }

@@ -32,7 +32,7 @@ namespace Blackboard.Core.Bases {
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public override IEnumerable<INode> Parents {
             get {
-                if (!(this.source is null)) yield return this.source;
+                if (this.source is not null) yield return this.source;
             }
         }
 

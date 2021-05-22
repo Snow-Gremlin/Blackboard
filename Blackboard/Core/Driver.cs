@@ -32,7 +32,7 @@ namespace Blackboard.Core {
                 // TODO: Should sort children in global and namespace to make a faster lookup.
                 INode node = scope.Find(parts[i]);
                 if (i == max) return node;
-                if (!(node is INamespace)) return null;
+                if (node is not INamespace) return null;
                 scope = node as INamespace;
             }
             return null;
@@ -54,28 +54,33 @@ namespace Blackboard.Core {
 
         public T GetValue<T>(string name) {
             INode node = this.Find(name);
-            return (node is IValueOutput<T>) ? (node as IValueOutput<T>).Value : default;
+            return (node is IValueOutput<T> input) ? input.Value : default;
         }
 
         public bool Trigger(string name) {
             INode node = this.Find(name);
-            if (!(node is ITriggerInput)) return false;
-            ITriggerInput input = node as ITriggerInput;
+            if (node is ITriggerInput input) {
+                this.Trigger(input);
+                return true;
+            }
+            return false;
+        }
+
+        public void Trigger(ITriggerInput input) {
             input.Trigger();
             this.touched.Add(input);
-            return true;
         }
 
         /// <summary>Updates and propogates the changes from the given inputs through the blackboard nodes.</summary>
         public void Evalate() {
-            LinkedList<INode> pending = new LinkedList<INode>();
-            LinkedList<ITrigger> needsReset = new LinkedList<ITrigger>();
+            LinkedList<INode> pending = new();
+            LinkedList<ITrigger> needsReset = new();
             pending.SortInsertUnique(this.touched);
             this.touched.Clear();
 
             while (pending.Count > 0) {
                 INode node = pending.TakeFirst();
-                if (!(this.Log is null))
+                if (this.Log is not null)
                     this.Log.WriteLine("Eval("+node.Depth+"): "+node);
                 pending.SortInsertUnique(node.Eval());
                 if (node is ITrigger)

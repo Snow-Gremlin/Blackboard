@@ -56,7 +56,7 @@ namespace Blackboard.Core.Caps {
         /// <param name="name">The name to find the location for.</param>
         /// <param name="found">The node found or null if not found.</param>
         /// <returns>The index the name should go or was found.</returns>
-        static protected int FindPossibleIndex(List<INode> nodes, string name, out INode found) {
+        static private int findPossibleIndex(List<INode> nodes, string name, out INode found) {
             int low = 0;
             int high = nodes.Count - 1;
             while (low <= high) {
@@ -104,7 +104,7 @@ namespace Blackboard.Core.Caps {
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public override IEnumerable<INode> Parents {
             get {
-                if (!(this.scope is null)) yield return this.scope;
+                if (this.scope is not null) yield return this.scope;
             }
         }
 

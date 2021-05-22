@@ -73,11 +73,11 @@ namespace Blackboard.Core.Caps {
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public override IEnumerable<INode> Parents {
             get {
-                if (!(this.increment is null)) yield return this.increment;
-                if (!(this.decrement is null)) yield return this.decrement;
-                if (!(this.reset is null)) yield return this.reset;
-                if (!(this.delta is null)) yield return this.delta;
-                if (!(this.resetValue is null)) yield return this.resetValue;
+                if (this.increment is not null) yield return this.increment;
+                if (this.decrement is not null) yield return this.decrement;
+                if (this.reset is not null) yield return this.reset;
+                if (this.delta is not null) yield return this.delta;
+                if (this.resetValue is not null) yield return this.resetValue;
             }
         }
 

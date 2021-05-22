@@ -29,12 +29,12 @@ namespace BlackboardTests.CoreTests {
 
         [TestMethod]
         public void TestAddNodes() {
-            InputValue<bool> input1 = new InputValue<bool>("One");
-            InputValue<bool> input2 = new InputValue<bool>("Two");
-            InputValue<bool> input3 = new InputValue<bool>("Three");
-            And and12 = new And(input1, input2);
-            Or or123 = new Or(and12, input3);
-            Not not123 = new Not(or123);
+            InputValue<bool> input1 = new("One");
+            InputValue<bool> input2 = new("Two");
+            InputValue<bool> input3 = new("Three");
+            And and12 = new(input1, input2);
+            Or or123 = new(and12, input3);
+            Not not123 = new(or123);
 
             checkString(and12, "And(One, Two)");
             checkString(not123, "Not(Or(And(One, Two), Three))");
@@ -56,12 +56,12 @@ namespace BlackboardTests.CoreTests {
 
         [TestMethod]
         public void TestEvaluateNodes() {
-            InputValue<bool> input1 = new InputValue<bool>("One");
-            InputValue<bool> input2 = new InputValue<bool>("Two");
-            InputValue<bool> input3 = new InputValue<bool>("Three");
-            And and12 = new And(input1, input2);
-            Or or123 = new Or(and12, input3);
-            Not not123 = new Not(or123);
+            InputValue<bool> input1 = new("One");
+            InputValue<bool> input2 = new("Two");
+            InputValue<bool> input3 = new("Three");
+            And and12 = new(input1, input2);
+            Or or123 = new(and12, input3);
+            Not not123 = new(or123);
             checkValue(input1, false);
             checkValue(input2, false);
             checkValue(input3, false);
@@ -69,7 +69,7 @@ namespace BlackboardTests.CoreTests {
             checkValue(or123, false);
             checkValue(not123, true);
 
-            Driver drv = new Driver(new StringWriter());
+            Driver drv = new(new StringWriter());
             drv.Nodes.AddChildren(input1, input2, input3);
 
             drv.SetValue("One", true);
@@ -120,16 +120,16 @@ namespace BlackboardTests.CoreTests {
 
         [TestMethod]
         public void TestTriggerNodes() {
-            Driver drv = new Driver(new StringWriter());
-            InputTrigger inputA = new InputTrigger("TrigA", drv.Nodes);
-            InputTrigger inputB = new InputTrigger("TrigB", drv.Nodes);
-            InputTrigger inputC = new InputTrigger("TrigC", drv.Nodes);
-            Counter counter = new Counter(
+            Driver drv = new(new StringWriter());
+            InputTrigger inputA = new("TrigA", drv.Nodes);
+            InputTrigger inputB = new("TrigB", drv.Nodes);
+            InputTrigger inputC = new("TrigC", drv.Nodes);
+            Counter counter = new(
                 new Any(inputA, inputB, inputC), null,
                 new All(inputA, inputB, inputC));
-            OnTrue over3 = new OnTrue(new GreaterThan<int>(counter, new Literal<int>(3)));
-            OutputValue<int> output1 = new OutputValue<int>(counter, "Count", drv.Nodes);
-            OutputTrigger output2 = new OutputTrigger(over3, "High", drv.Nodes);
+            OnTrue over3 = new(new GreaterThan<int>(counter, new Literal<int>(3)));
+            OutputValue<int> output1 = new(counter, "Count", drv.Nodes);
+            OutputTrigger output2 = new(over3, "High", drv.Nodes);
 
             Action<bool, bool, bool, int, bool> check = delegate(bool triggerA,
                 bool triggerB, bool triggerC, int expCount, bool expHigh) {

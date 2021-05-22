@@ -50,8 +50,8 @@ namespace Blackboard.Core.Caps {
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public override IEnumerable<INode> Parents {
             get {
-                if (!(this.toggle is null)) yield return this.toggle;
-                if (!(this.reset is null)) yield return this.reset;
+                if (this.toggle is not null) yield return this.toggle;
+                if (this.reset is not null) yield return this.reset;
             }
         }
 

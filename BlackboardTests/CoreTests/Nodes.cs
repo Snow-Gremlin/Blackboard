@@ -1,11 +1,10 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Blackboard.Core.Caps;
 using Blackboard.Core;
 using Blackboard.Core.Bases;
+using Blackboard.Core.Caps;
 using Blackboard.Core.Interfaces;
-using System.IO;
-using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.IO;
 
 namespace BlackboardTests.CoreTests {
 
@@ -25,32 +24,32 @@ namespace BlackboardTests.CoreTests {
             Assert.AreEqual(exp, node.Value);
 
         static private void checkLog(StringWriter buf, params string[] lines) =>
-            Assert.AreEqual(string.Join(System.Environment.NewLine, lines), buf.ToString().Trim());
+            Assert.AreEqual(string.Join(Environment.NewLine, lines), buf.ToString().Trim());
 
         [TestMethod]
         public void TestAddNodes() {
             InputValue<bool> input1 = new("One");
             InputValue<bool> input2 = new("Two");
             InputValue<bool> input3 = new("Three");
-            And and12 = new(input1, input2);
-            Or or123 = new(and12, input3);
+            And and12  = new(input1, input2);
+            Or  or123  = new(and12, input3);
             Not not123 = new(or123);
 
-            checkString(and12, "And(One, Two)");
+            checkString(and12,  "And(One, Two)");
             checkString(not123, "Not(Or(And(One, Two), Three))");
 
             checkParents(input1, "");
             checkParents(input2, "");
             checkParents(input3, "");
-            checkParents(and12, "One, Two");
-            checkParents(or123, "And(One, Two), Three");
+            checkParents(and12,  "One, Two");
+            checkParents(or123,  "And(One, Two), Three");
             checkParents(not123, "Or(And(One, Two), Three)");
 
             checkDepth(input1, 0);
             checkDepth(input2, 0);
             checkDepth(input3, 0);
-            checkDepth(and12, 1);
-            checkDepth(or123, 2);
+            checkDepth(and12,  1);
+            checkDepth(or123,  2);
             checkDepth(not123, 3);
         }
 
@@ -59,20 +58,20 @@ namespace BlackboardTests.CoreTests {
             InputValue<bool> input1 = new("One");
             InputValue<bool> input2 = new("Two");
             InputValue<bool> input3 = new("Three");
-            And and12 = new(input1, input2);
-            Or or123 = new(and12, input3);
+            And and12  = new(input1, input2);
+            Or  or123  = new(and12, input3);
             Not not123 = new(or123);
             checkValue(input1, false);
             checkValue(input2, false);
             checkValue(input3, false);
-            checkValue(and12, false);
-            checkValue(or123, false);
+            checkValue(and12,  false);
+            checkValue(or123,  false);
             checkValue(not123, true);
 
             Driver drv = new(new StringWriter());
             drv.Nodes.AddChildren(input1, input2, input3);
 
-            drv.SetValue("One", true);
+            drv.SetValue("One",   true);
             drv.SetValue("Three", true);
             drv.Evalate();
             checkLog(drv.Log as StringWriter,
@@ -84,8 +83,8 @@ namespace BlackboardTests.CoreTests {
             checkValue(input1, true);
             checkValue(input2, false);
             checkValue(input3, true);
-            checkValue(and12, false);
-            checkValue(or123, true);
+            checkValue(and12,  false);
+            checkValue(or123,  true);
             checkValue(not123, false);
 
             drv.Log = new StringWriter();
@@ -98,8 +97,8 @@ namespace BlackboardTests.CoreTests {
             checkValue(input1, true);
             checkValue(input2, false);
             checkValue(input3, false);
-            checkValue(and12, false);
-            checkValue(or123, false);
+            checkValue(and12,  false);
+            checkValue(or123,  false);
             checkValue(not123, true);
 
             drv.Log = new StringWriter();
@@ -113,8 +112,8 @@ namespace BlackboardTests.CoreTests {
             checkValue(input1, true);
             checkValue(input2, true);
             checkValue(input3, false);
-            checkValue(and12, true);
-            checkValue(or123, true);
+            checkValue(and12,  true);
+            checkValue(or123,  true);
             checkValue(not123, false);
         }
 
@@ -144,11 +143,11 @@ namespace BlackboardTests.CoreTests {
                 high = false;
                 drv.Evalate();
 
-                int count = drv.GetValue<int>("Count");
+                int  count  = drv.GetValue<int>("Count");
                 bool toggle = drv.GetValue<bool>("Toggle");
 
-                Assert.AreEqual(expCount, count);
-                Assert.AreEqual(expHigh, high);
+                Assert.AreEqual(expCount,  count);
+                Assert.AreEqual(expHigh,   high);
                 Assert.AreEqual(expToggle, toggle);
             }
 

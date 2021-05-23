@@ -120,25 +120,46 @@ namespace BlackboardTests.CoreTests {
 
         [TestMethod]
         public void TestTriggerNodes() {
-            Driver drv = new(new StringWriter());
+            Driver drv = new(Console.Out);
             InputTrigger inputA = new("TrigA", drv.Nodes);
             InputTrigger inputB = new("TrigB", drv.Nodes);
             InputTrigger inputC = new("TrigC", drv.Nodes);
             Counter counter = new(
                 new Any(inputA, inputB, inputC), null,
                 new All(inputA, inputB, inputC));
-            OnTrue over3 = new(new GreaterThan<int>(counter, new Literal<int>(3)));
-            OutputValue<int> output1 = new(counter, "Count", drv.Nodes);
-            OutputTrigger output2 = new(over3, "High", drv.Nodes);
+            _ = new OutputValue<int>(counter, "Count", drv.Nodes);
+            OnTrue over3 = new(new GreaterThanOrEqual<int>(counter, new Literal<int>(3)));
+            OutputTrigger outTrig = new(over3, "High", drv.Nodes);
+            Toggler toggle = new(outTrig);
+            _ = new OutputValue<bool>(toggle, "Toggle", drv.Nodes);
 
-            Action<bool, bool, bool, int, bool> check = delegate(bool triggerA,
-                bool triggerB, bool triggerC, int expCount, bool expHigh) {
-                    //drv.Trigger(inputA);
+            bool high;
+            outTrig.OnTriggered += (object sender, EventArgs e) => high = true;
 
+            void check(bool triggerA, bool triggerB, bool triggerC,
+                int expCount, bool expHigh, bool expToggle) {
+                if (triggerA) drv.Trigger("TrigA");
+                if (triggerB) drv.Trigger("TrigB");
+                if (triggerC) drv.Trigger("TrigC");
+                high = false;
+                drv.Evalate();
 
+                int count = drv.GetValue<int>("Count");
+                bool toggle = drv.GetValue<bool>("Toggle");
 
-            };
+                Assert.AreEqual(expCount, count);
+                Assert.AreEqual(expHigh, high);
+                Assert.AreEqual(expToggle, toggle);
+            }
 
+            check(true,  false, false, 1, false, false);
+            check(false, true,  false, 2, false, false);
+            check(false, false, true,  3, true,  true);
+            check(true,  true,  false, 4, false, true);
+            check(true,  true,  true,  0, false, true);
+            check(true,  false, true,  1, false, true);
+            check(false, true,  true,  2, false, true);
+            check(false, false, true,  3, true,  false);
         }
     }
 }

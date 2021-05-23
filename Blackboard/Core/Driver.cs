@@ -22,7 +22,7 @@ namespace Blackboard.Core {
 
         public bool HasPending => this.touched.Count > 0;
 
-        public bool Contains(string name) => !(this.Find(name) is null);
+        public bool Contains(string name) => this.Find(name) is not null;
 
         public INode Find(string name) {
             INamespace scope = this.Nodes;
@@ -80,11 +80,10 @@ namespace Blackboard.Core {
 
             while (pending.Count > 0) {
                 INode node = pending.TakeFirst();
-                if (this.Log is not null)
-                    this.Log.WriteLine("Eval("+node.Depth+"): "+node);
+                this.Log?.WriteLine("Eval("+node.Depth+"): "+node);
                 pending.SortInsertUnique(node.Eval());
-                if (node is ITrigger)
-                    needsReset.AddLast(node as ITrigger);
+                if (node is ITrigger trigger)
+                    needsReset.AddLast(trigger);
             }
 
             foreach (ITrigger trigger in needsReset)

@@ -20,7 +20,7 @@ namespace Blackboard.Core.Caps {
         /// <param name="value2">The second parent's value to compare.</param>
         /// <returns>True if the first value is greater than or equal than the second value, false otherwise.</returns>
         protected override bool OnEval(T value1, T value2) =>
-            Comparer<T>.Default.Compare(value1, value2) > 0;
+            Comparer<T>.Default.Compare(value1, value2) >= 0;
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>

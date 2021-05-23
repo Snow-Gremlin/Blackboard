@@ -48,32 +48,6 @@ namespace Blackboard.Core.Caps {
                 throw Exception.RenameDuplicateInScope(name, scope);
         }
 
-        /// <summary>
-        /// This finds the name or location a name should
-        /// be in the children of the given namespace.
-        /// </summary>
-        /// <param name="nodes">The sorted set of nodes to search within.</param>
-        /// <param name="name">The name to find the location for.</param>
-        /// <param name="found">The node found or null if not found.</param>
-        /// <returns>The index the name should go or was found.</returns>
-        static private int findPossibleIndex(List<INode> nodes, string name, out INode found) {
-            int low = 0;
-            int high = nodes.Count - 1;
-            while (low <= high) {
-                int mid = (low + high) / 2;
-                INamed node = nodes[mid] as INamed;
-                int comp = node.Name.CompareTo(name);
-
-                if (comp == 0) {
-                    found = node;
-                    return mid;
-                }  else if (comp > 0) low = mid + 1;
-                else high = mid - 1;
-            }
-            found = null;
-            return low;
-        }
-
         /// <summary>The name for this namespace.</summary>
         private string name;
 
@@ -111,17 +85,14 @@ namespace Blackboard.Core.Caps {
         /// <summary>This determines if the namespace has a child with the given name.</summary>
         /// <param name="name">The name of the child to check for.</param>
         /// <returns>True if the child exists, false otherwise.</returns>
-        public bool Exists(string name) => !(this.Find(name) is null);
+        public bool Exists(string name) => this.Find(name) is not null;
 
         /// <summary>Finds the child with the given name.</summary>
         /// <param name="name">The name of the child to check for.</param>
         /// <returns>The child with the given name, otherwise null is returned.</returns>
         public INamed Find(string name) {
             foreach (INode node in this.Children) {
-                if (node is INamed) {
-                    INamed named = node as INamed;
-                    if (named.Name == name) return named;
-                }
+                if ((node is INamed named) && (named.Name == name)) return named;
             }
             return null;
         }
@@ -129,5 +100,10 @@ namespace Blackboard.Core.Caps {
         /// <summary>Evaluates this node and updates it.</summary>
         /// <returns>The namespace shouldn't be evaluated so this will always return nothing.</returns>
         public override IEnumerable<INode> Eval() => Enumerable.Empty<INode>();
+
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
+        public override string ToString() =>
+            (this.scope is null ? "" : this.Scope.ToString()+".")+this.Name;
     }
 }

@@ -25,8 +25,8 @@ namespace Blackboard.Core.Bases {
         /// <returns>True if any of the targets can be reached, false otherwise.</returns>
         static private bool canReachAny(INode root, IEnumerable<INode> targets) {
             // TODO:  Could the loop check be improved using the depth?
-            List<INode> touched = new List<INode>();
-            Queue<INode> pending = new Queue<INode>();
+            List<INode> touched = new();
+            Queue<INode> pending = new();
             pending.Enqueue(root);
             while (pending.Count > 0) {
                 INode node = pending.Dequeue();
@@ -102,7 +102,7 @@ namespace Blackboard.Core.Bases {
         public void AddChildren(IEnumerable<INode> children, bool checkedForLoops = true) {
             if (checkedForLoops && canReachAny(this, children))
                 throw Exception.NodeLoopDetected();
-            LinkedList<INode> needsDepthUpdate = new LinkedList<INode>();
+            LinkedList<INode> needsDepthUpdate = new();
             foreach (Node child in children) {
                 if ((child is null) || this.children.Contains(child)) continue;
                 this.children.Add(child);
@@ -119,7 +119,7 @@ namespace Blackboard.Core.Bases {
         /// <summary>Removes all the given children from this node if they exist.</summary>
         /// <param name="children">The children to remove.</param>
         public void RemoveChildren(IEnumerable<INode> children) {
-            LinkedList<INode> needsDepthUpdate = new LinkedList<INode>();
+            LinkedList<INode> needsDepthUpdate = new();
             foreach (Node child in children) {
                 if ((child is null) || !this.children.Contains(child)) continue;
                 this.children.Remove(child);

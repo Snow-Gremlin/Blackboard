@@ -39,7 +39,7 @@ namespace Blackboard.Core {
         /// <param name="values">The values to add to the list.</param>
         /// <returns>The list of values which were added.</returns>
         static public List<T> AddWhichUnique<T>(this List<T> list, IEnumerable<T> values) {
-            List<T> result = new List<T>();
+            List<T> result = new();
             foreach (T value in values) {
                 if (!list.Contains(value)) {
                     list.Add(value);
@@ -75,7 +75,7 @@ namespace Blackboard.Core {
         /// <returns>The triggers from the given non-null nodes.</returns>
         static public IEnumerable<bool> Triggers(this IEnumerable<ITrigger> nodes) {
             foreach (ITrigger node in nodes) {
-                yield return !(node is null) && node.Triggered;
+                yield return node?.Triggered ?? false;
             }
         }
 
@@ -125,8 +125,8 @@ namespace Blackboard.Core {
         static public void SortInsertUnique(this LinkedList<INode> list, IEnumerable<INode> nodes) {
             foreach (INode node in nodes) {
                 bool addToEnd = true;
-                for (LinkedListNode<INode> pend = list.First; !(pend is null); pend = pend.Next) {
-                    if (ReferenceEquals(node, pend)) {
+                for (LinkedListNode<INode> pend = list.First; pend is not null; pend = pend.Next) {
+                    if (ReferenceEquals(node, pend.Value)) {
                         addToEnd = false;
                         break;
                     }

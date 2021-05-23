@@ -6,6 +6,7 @@
     public interface IValueInput<T>: IValueOutput<T>, IInput {
 
         /// <summary>Sets the value of this input.</summary>
+        /// <remarks>This is not intended to be be called directly, it should be called via the driver.</remarks>
         /// <param name="value">The value to input.</param>
         /// <returns>True if the value changed, false otherwise.</returns>
         bool SetValue(T value);

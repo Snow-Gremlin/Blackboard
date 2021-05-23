@@ -5,6 +5,7 @@
     public interface ITriggerInput: ITriggerOutput, IInput {
 
         /// <summary>Triggers this trigger so that this node is triggered during the next evaluation.</summary>
+        /// <remarks>This is not intended to be be called directly, it should be called via the driver.</remarks>
         void Trigger();
     }
 }

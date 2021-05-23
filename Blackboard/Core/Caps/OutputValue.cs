@@ -71,8 +71,7 @@ namespace Blackboard.Core.Caps {
         protected override bool UpdateValue() {
             if (this.source is null) return false;
             if (this.SetNodeValue(this.source.Value)) {
-                if (this.OnChanged is not null)
-                    this.OnChanged(this, EventArgs.Empty);
+                this.OnChanged?.Invoke(this, EventArgs.Empty);
                 return true;
             }
             return false;

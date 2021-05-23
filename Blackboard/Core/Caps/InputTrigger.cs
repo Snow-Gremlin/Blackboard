@@ -48,14 +48,14 @@ namespace Blackboard.Core.Caps {
         }
 
         /// <summary>This is set this trigger to emit during the next evaluation.</summary>
+        /// <remarks>This is not intended to be be called directly, it should be called via the driver.</remarks>
         public void Trigger() => this.Triggered = true;
 
         /// <summary>This updates the trigger during the an evaluation.</summary>
         /// <returns>This returns the triggered value as it currently is.</returns>
         protected override bool UpdateTrigger() {
             if (this.Triggered) {
-                if (this.OnTriggered is not null)
-                    this.OnTriggered(this, EventArgs.Empty);
+                this.OnTriggered?.Invoke(this, EventArgs.Empty);
                 return true;
             }
             return false;

@@ -63,8 +63,7 @@ namespace Blackboard.Core.Caps {
         /// <returns>This returns the triggered value as it currently is.</returns>
         protected override bool UpdateTrigger() {
             if (this.source.Triggered) {
-                if (this.OnTriggered is not null)
-                    this.OnTriggered(this, EventArgs.Empty);
+                this.OnTriggered?.Invoke(this, EventArgs.Empty);
                 return true;
             }
             return false;

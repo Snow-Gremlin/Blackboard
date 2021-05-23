@@ -27,12 +27,12 @@ namespace Blackboard.Core {
         /// <summary>An exception for when a loop is detected adding children to a node.</summary>
         /// <returns>The new exception.</returns>
         static public Exception NodeLoopDetected() =>
-            new Exception("May not add children: Loop detected.");
+            new("May not add children: Loop detected.");
 
         /// <summary>An exception for when a loop is detected adding a group to a scope.</summary>
         /// <returns>The new exception.</returns>
         static public Exception ScopeLoopDetected() =>
-            new Exception("May not add to scope: Loop detected.");
+            new("May not add to scope: Loop detected.");
 
         /// <summary>Creates a new exception.</summary>
         /// <param name="message">The message for this exception.</param>

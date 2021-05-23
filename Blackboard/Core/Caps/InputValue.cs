@@ -50,6 +50,7 @@ namespace Blackboard.Core.Caps {
         }
 
         /// <summary>This sets the value of this node.</summary>
+        /// <remarks>This is not intended to be be called directly, it should be called via the driver.</remarks>
         /// <param name="value">The value to set.</param>
         /// <returns>True if the value has changed, false otherwise.</returns>
         public bool SetValue(T value) => this.SetNodeValue(value);
@@ -61,8 +62,7 @@ namespace Blackboard.Core.Caps {
         /// </remarks>
         /// <returns>This will always return true.</returns>
         protected override bool UpdateValue() {
-            if (this.OnChanged is not null)
-                this.OnChanged(this, EventArgs.Empty);
+            this.OnChanged?.Invoke(this, EventArgs.Empty);
             return true;
         }
 

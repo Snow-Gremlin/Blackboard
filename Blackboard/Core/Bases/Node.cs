@@ -23,7 +23,7 @@ namespace Blackboard.Core.Bases {
         /// <param name="root">The root to start checking from.</param>
         /// <param name="targets">The target nodes to try to reach.</param>
         /// <returns>True if any of the targets can be reached, false otherwise.</returns>
-        static private bool canReachAny(INode root, IEnumerable<INode> targets) {
+        static public bool CanReachAny(INode root, IEnumerable<INode> targets) {
             // TODO:  Could the loop check be improved using the depth?
             List<INode> touched = new();
             Queue<INode> pending = new();
@@ -42,7 +42,7 @@ namespace Blackboard.Core.Bases {
 
         /// <summary>This updates the depth values of the given pending nodes.</summary>
         /// <param name="pending">The initial set of nodes which are pending depth update.</param>
-        static private void updateDepths(LinkedList<INode> pending) {
+        static public void UpdateDepths(LinkedList<INode> pending) {
             while (pending.Count > 0) {
                 INode node = pending.TakeFirst();
                 int depth = node.Parents.MaxDepth() + 1;
@@ -100,15 +100,16 @@ namespace Blackboard.Core.Bases {
         /// <param name="children">The children to add.</param>
         /// <param name="checkedForLoops">Indicates if loops in the graph should be checked for.</param>
         public void AddChildren(IEnumerable<INode> children, bool checkedForLoops = true) {
-            if (checkedForLoops && canReachAny(this, children))
+            if (checkedForLoops && CanReachAny(this, children))
                 throw Exception.NodeLoopDetected();
             LinkedList<INode> needsDepthUpdate = new();
             foreach (Node child in children) {
-                if ((child is null) || this.children.Contains(child)) continue;
-                this.children.Add(child);
-                needsDepthUpdate.SortInsertUnique(child);
+                if (child is not null && !this.children.Contains(child)) {
+                    this.children.Add(child);
+                    needsDepthUpdate.SortInsertUnique(child);
+                }
             }
-            updateDepths(needsDepthUpdate);
+            UpdateDepths(needsDepthUpdate);
         }
 
         /// <summary>Removes all the given children from this node if they exist.</summary>
@@ -121,11 +122,15 @@ namespace Blackboard.Core.Bases {
         public void RemoveChildren(IEnumerable<INode> children) {
             LinkedList<INode> needsDepthUpdate = new();
             foreach (Node child in children) {
-                if ((child is null) || !this.children.Contains(child)) continue;
-                this.children.Remove(child);
-                needsDepthUpdate.SortInsertUnique(child);
+                if (child is not null) {
+                    int index = this.children.IndexOf(child);
+                    if (index >= 0) {
+                        this.children.RemoveAt(index);
+                        needsDepthUpdate.SortInsertUnique(child);
+                    }
+                }
             }
-            updateDepths(needsDepthUpdate);
+            UpdateDepths(needsDepthUpdate);
         }
     }
 }

@@ -20,6 +20,9 @@ namespace Blackboard.Core {
             this.Log = log;
             this.touched = new List<IInput>();
             this.Nodes = new Global();
+
+            // TODO: Come up with a way to specify which nodes need to be persisted (inputs, counters, toggles, etc?).
+            // TODO: Add persistends which also keeps track of deltas to recover if crashed before save.
         }
 
         /// <summary>An optional log to keep track of which nodes and what order they are evaluated.</summary>

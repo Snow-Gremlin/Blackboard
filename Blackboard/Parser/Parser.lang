@@ -1,0 +1,107 @@
+﻿# Blackboard Parser Language v1.0
+
+> (Start);
+
+# Integers
+(Start): '0' => (Zero): '0'..'9' => (Int);
+(Start): '1'..'9' => (Int): '0'..'9' => [Int];
+(Zero) => [Int];
+
+# Floats
+(Start): '.' => (Decimal);
+(Int): '.' => (Decimal): '0'..'9' => (Float-Dec): '0'..'9' => (Float-Dec) => [Float];
+(Int): 'eE' => (Float-Exp-Start): '-' => (Float-Exp-Neg): '0'..'9' => (Float-Exp);
+(Float-Dec): 'eE' => (Exp-Start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) = [Float];
+
+# Hexadecimals
+(Zero): 'x' => (Hex-Start): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
+
+# Identifiers
+(Start): 'a'..'z', 'A'..'Z', '_' => (Identifier): '0'..'9', 'a'..'z', 'A'..'Z', '_' => [Identifier];
+(Identifier): '.' => (Scoping): 'a'..'z', 'A'..'Z', '_' => (Identifier);
+
+# Symbols
+(Start): '&' => [And];
+(Start): '|' => [Or];
+(Start): '+' => [Pos];
+(Start): '-' => [Neg]: '>' => [Trigger];
+(Start): '/' => [Div];
+(Start): '*' => [Mul];
+(Start): '%' => [Mod];
+(Start): '^' => [Xor];
+(Start): '~' => [Invert];
+(Start): '?' => [Test];
+(Start): ':' => [Else]: '=' => [Define];
+(Start): ';' => [End];
+(Start): ',' => [Comma];
+
+(Start): '(' => [Par-Open];
+(Start): ')' => [Par-Close];
+(Start): '[' => [Sqr-Open];
+(Start): ']' => [Sqr-Close];
+(Start): '{' => [Curl-Open];
+(Start): '}' => [curl-Close];
+
+(Start): '=' => [Assign]:  '=' => [Equal];
+(Start): '>' => [Greater]: '=' => [Greater-Equal];
+(Start): '<' => [Less]:    '=' => [Less-Equal];
+(Start): '!' => [Not]:     '=' => [Not-Equal];
+
+# Comments
+(Div): '/' => (Comment-Single): !'\n' => (Comment-Single) => ^[Comment];
+(Div): '*' => (Comment-Multiple): '*' => (Comment-Multiple-End): '/' => (Comment-End) => ^[Comment];
+(Comment-Multiple): * => (Comment-Multiple);
+(Comment-Multiple-End): * => (Comment-Multiple);
+
+# Reserved Identifiers
+[Identifier] = 'in'  => [In];
+[Identifier] = 'bool', 'int', 'float', 'trigger', 'counter', 'toggle' => [Type];
+[Identifier] = 'true', 'false' => [Bool];
+[Identifier] = 'out', 'set', 'list', 'enum', 'string', 'class', 'namespace', 'when',
+               'if', 'else', 'while', 'do', 'for', 'foreach' => [Reserved];
+
+#==========================================================
+# Grammar Rules
+
+> <Code> := _
+    | <Statement> [End] <Code>;
+
+<Statement> := _
+    | [In] [Type] [Identifier] {InputDefault}
+    | [In] [Type] [Identifier] {InputAssign} [Assign] {StartAssign} <Complex> {EndAssign}
+    | [Trigger] [Identifier] {PullTrigger}
+    | [Identifier] [Assign] {StartAssign} <Complex> {EndAssign}
+    | [Identifier] [Define] {StartDefine} <Complex> {EndDefine};
+
+<Complex> := <Expression>
+    | <Complex> [Test] <Complex> [Else] <Complex> {Trinary};
+
+<Expression> := <Term>
+    | <Expression> [Pos] <Term> {Add}
+    | <Expression> [Neg] <Term> {Subtract}
+    | <Expression> [Or] <Term> {Or};
+
+<Term> := <Factor>
+    | <Term> [Mul] <Factor> {Multiply}
+    | <Term> [Div] <Factor> {Divide}
+    | <Term> [Mod] <Factor> {Modulo}
+    | <Term> [And] <Factor> {And}
+    | <Term> [Xor] <Factor> {Xor};
+
+<Factor> := <Value>
+    | [Par-Open] <Complex> [Par-Close]
+    | [Neg] <Factor> {Negate}
+    | [Pos] <Factor>
+    | [Invert] <Factor> {Invert}
+    | [Identifier] {StartCall} [Par-Open] <Args> [Par-Close] {Call};
+    
+<Args> := _
+    | <Complex> <Args-Tail>;
+
+<Args-Tail> := _
+    | [Comma] <Complex> <Args-Tail>;
+
+<Value> := [Id] {PushId}
+    | [Bool] {PushBool}
+    | [Int] {PushInt}
+    | [Float] {PushFloat};

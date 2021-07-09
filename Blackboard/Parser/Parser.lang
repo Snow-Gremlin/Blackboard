@@ -11,7 +11,7 @@
 (Start): '.' => (Decimal);
 (Int): '.' => (Decimal): '0'..'9' => (Float-Dec): '0'..'9' => (Float-Dec) => [Float];
 (Int): 'eE' => (Float-Exp-Start): '-' => (Float-Exp-Neg): '0'..'9' => (Float-Exp);
-(Float-Dec): 'eE' => (Exp-Start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) = [Float];
+(Float-Dec): 'eE' => (Float-Exp-Start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) = [Float];
 
 # Hexadecimals
 (Zero): 'x' => (Hex-Start): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
@@ -64,6 +64,7 @@
 # Grammar Rules
 
 > <Code> := _
+    | <Statement>
     | <Statement> [End] <Code>;
 
 <Statement> := _
@@ -101,7 +102,7 @@
 <Args-Tail> := _
     | [Comma] <Complex> <Args-Tail>;
 
-<Value> := [Id] {PushId}
+<Value> := [Identifier] {PushId}
     | [Bool] {PushBool}
     | [Int] {PushInt}
     | [Float] {PushFloat};

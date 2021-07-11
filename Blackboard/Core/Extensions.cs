@@ -1,7 +1,8 @@
-﻿using Blackboard.Core.Interfaces;
+﻿using Blackboard.Core.Caps;
+using Blackboard.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace Blackboard.Core {
 

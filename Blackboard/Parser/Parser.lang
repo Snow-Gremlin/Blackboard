@@ -55,13 +55,17 @@
 
 # Reserved Identifiers
 [Identifier] = 'in'  => [In];
-[Identifier] = 'bool', 'int', 'float', 'trigger', 'counter', 'toggle' => [Type];
+[Identifier] = 'bool', 'int', 'float', 'trigger', 'counter', 'toggler' => [Type];
 [Identifier] = 'true', 'false' => [Bool];
-[Identifier] = 'out', 'set', 'list', 'enum', 'string', 'class', 'namespace', 'when',
-               'if', 'else', 'while', 'do', 'for', 'foreach' => [Reserved];
+[Identifier] = 'as', 'byte', 'catch', 'case', 'char', 'class', 'complex', 'const', 'default', 'do', 'dynamic',
+               'else', 'enum', 'finally', 'for', 'foreach', 'func', 'get', 'if', 'interface', 'import', 'is',
+               'list', 'map', 'namespace', 'not', 'on', 'out', 'select', 'set', 'static', 'string', 'switch',
+               'then', 'try', 'uint', 'until', 'var', 'void', 'when', 'while, 'yield' => [Reserved];
 
 #==========================================================
 # Grammar Rules
+# TODO: Need to add equality tests
+# TODO: Add constants
 
 > <Code> := _
     | <Statement>
@@ -92,6 +96,7 @@
 <Factor> := <Value>
     | [Par-Open] <Complex> [Par-Close]
     | [Neg] <Factor> {Negate}
+    | [Not] <Factor> {Not}
     | [Pos] <Factor>
     | [Invert] <Factor> {Invert}
     | [Identifier] {StartCall} [Par-Open] <Args> [Par-Close] {Call};

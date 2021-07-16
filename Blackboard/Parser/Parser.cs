@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Blackboard.Parser.Functions;
 using Blackboard.Core;
 using Blackboard.Core.Bases;
 using Blackboard.Core.Caps;
@@ -16,10 +17,85 @@ namespace Blackboard.Parser {
 
         private Driver driver;
         private LinkedList<INode> stack;
+        private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
+        private Collection ops;
 
         public Parser(Driver driver) {
             this.driver = driver;
             this.stack = new LinkedList<INode>();
+            this.prompts = null;
+            this.ops = null;
+            this.initPrompts();
+            this.initOps();
+        }
+
+        private void initPrompts() {
+            this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>() {
+                { "Clean",          this.handleClean },
+                { "NewInput",       this.handleNewInput },
+                { "LookupInput",    this.handleLookupInput },
+                { "Assign",         this.handleAssign },
+                { "PullTrigger",    this.handlePullTrigger },
+                { "Define",         this.handleDefine },
+                { "DefineWithType", this.handleDefineWithType },
+                { "Trinary",        this.handleTrinary },
+                { "StartCall",      this.handleStartCall },
+                { "Call",           this.handleCall },
+                { "PushId",         this.handlePushId },
+                { "PushBool",       this.handlePushBool },
+                { "PushInt",        this.handlePushInt },
+                { "PushFloat",      this.handlePushFloat },
+            };
+            this.addProcess("Sum", 2);
+            this.addProcess("Subtract", 2);
+            this.addProcess("Or", 2);
+            this.addProcess("Multiply", 2);
+            this.addProcess("Divide", 2);
+            this.addProcess("Modulo", 2);
+            this.addProcess("And", 2);
+            this.addProcess("Xor", 2);
+            this.addProcess("Negate", 1);
+            this.addProcess("Not", 1);
+            this.addProcess("Invert", 1);
+        }
+
+        private void initOps() {
+            this.ops = new Collection {
+                { "Sum",
+                    new Input2<IValue<int>,    IValue<int>>(   (left, right) => new SumInt(left, right)),
+                    new Input2<IValue<double>, IValue<double>>((left, right) => new SumFloat(left, right)) },
+                { "Subtract",
+                    new Input2<IValue<int>,    IValue<int>>(   (left, right) => new SubInt(left, right)),
+                    new Input2<IValue<double>, IValue<double>>((left, right) => new SubFloat(left, right)) },
+                { "Or",
+                    new Input2<IValue<bool>, IValue<bool>>((left, right) => new Or(left, right)),
+                    new Input2<IValue<int>,  IValue<int>>( (left, right) => new BitwiseOr(left, right)),
+                    new Input2<ITrigger,     ITrigger>(    (left, right) => new Any(left, right)) },
+                { "Multiply",
+                    new Input2<IValue<int>,    IValue<int>>(   (left, right) => new MulInt(left, right)),
+                    new Input2<IValue<double>, IValue<double>>((left, right) => new MulFloat(left, right)) },
+                { "Divide",
+                    new Input2<IValue<int>,    IValue<int>>(   (left, right) => new DivInt(left, right)),
+                    new Input2<IValue<double>, IValue<double>>((left, right) => new DivFloat(left, right)) },
+                { "Modulo",
+                    new Input2<IValue<int>,    IValue<int>>(   (left, right) => new ModInt(left, right)),
+                    new Input2<IValue<double>, IValue<double>>((left, right) => new ModFloat(left, right)) },
+                { "And",
+                    new Input2<IValue<bool>, IValue<bool>>((left, right) => new And(left, right)),
+                    new Input2<IValue<int>,  IValue<int>>( (left, right) => new BitwiseAnd(left, right)),
+                    new Input2<ITrigger,     ITrigger>(    (left, right) => new All(left, right)) },
+                { "Xor",
+                    new Input2<IValue<bool>, IValue<bool>>((left, right) => new Xor(left, right)),
+                    new Input2<IValue<int>,  IValue<int>>( (left, right) => new BitwiseXor(left, right)),
+                    new Input2<ITrigger,     ITrigger>(    (left, right) => new OnlyOne(left, right)) },
+                { "Negate",
+                    new Input1<IValue<int>>(   (input) => new NegInt(input)),
+                    new Input1<IValue<double>>((input) => new NegFloat(input)) },
+                { "Not",
+                    new Input1<IValue<bool>>((input) => new Not(input)) },
+                { "Invert",
+                    new Input1<IValue<int>>((input) => new BitwiseNot(input)) }
+            };
         }
 
         public void Read(params string[] input) =>
@@ -32,147 +108,41 @@ namespace Blackboard.Parser {
             this.read(result.Tree);
         }
 
-        private void read(PP.ParseTree.ITreeNode node) {
-            node.Process(new Dictionary<string, PP.ParseTree.PromptHandle>(){
-                { "InputDefault", this.handleInputDefault },
-                { "InputAssign",  this.handleInputAssign },
-                { "StartAssign",  this.handleStartAssign },
-                { "EndAssign",    this.handleEndAssign },
-                { "PullTrigger",  this.handlePullTrigger },
-                { "StartDefine",  this.handleStartDefine },
-                { "EndDefine",    this.handleEndDefine },
-                { "Trinary",      this.handleTrinary },
-                { "Add",          this.handleAdd },
-                { "Subtract",     this.handleSubtract },
-                { "Or",           this.handleOr },
-                { "Multiply",     this.handleMultiply },
-                { "Divide",       this.handleDivide },
-                { "Modulo",       this.handleModulo },
-                { "And",          this.handleAnd },
-                { "Xor",          this.handleXor },
-                { "Negate",       this.handleNegate },
-                { "Not",          this.handleNot },
-                { "Invert",       this.handleInvert },
-                { "StartCall",    this.handleStartCall },
-                { "Call",         this.handleCall },
-                { "PushId",       this.handlePushId },
-                { "PushBool",     this.handlePushBool },
-                { "PushInt",      this.handlePushInt },
-                { "PushFloat",    this.handlePushFloat },
-            });
-        }
+        private void read(PP.ParseTree.ITreeNode node) =>
+            node.Process(this.prompts);
 
-        #region Helpers...
+        private void push(INode node) => this.stack.AddLast(node);
 
-        private void push(INode node) =>
-            this.stack.AddLast(node);
+        private IEnumerable<INode> pop(int count = 1) => this.stack.TakeLast(count);
 
-        private INode pop() {
-            INode node = this.stack.Last();
-            this.stack.RemoveLast();
-            return node;
-        }
+        private void addProcess(string name, int count) =>
+            this.prompts[name] = (PP.ParseTree.PromptArgs args) => this.push(this.ops.Build(name, this.pop(count)));
 
-        /// <summary>Determines if the given nodes can be cast to bool IValues.</summary>
-        /// <param name="nodes">The nodes to check.</param>
-        /// <returns>True if they can be cast, otherwise false.</returns>
-        static private bool isBool(params INode[] nodes) {
-            foreach (INode node in nodes) {
-                if (node is not IValue<bool>) return false;
-            }
-            return true;
-        }
-
-        /// <summary>Determines if the given nodes can be cast to triggers.</summary>
-        /// <param name="nodes">The nodes to check.</param>
-        /// <returns>True if they can be cast, otherwise false.</returns>
-        static private bool isTrigger(params INode[] nodes) {
-            foreach (INode node in nodes) {
-                if (node is not ITrigger &&
-                    node is not IValue<bool>) return false;
-            }
-            return true;
-        }
-
-        /// <summary>Determines if the given nodes can be cast to int IValues.</summary>
-        /// <param name="nodes">The nodes to check.</param>
-        /// <returns>True if they can be cast, otherwise false.</returns>
-        static private bool isInt(params INode[] nodes) {
-            foreach (INode node in nodes) {
-                if (node is not IValue<int>) return false;
-            }
-            return true;
-        }
-
-        /// <summary>Determines if the given nodes can be cast to double IValues.</summary>
-        /// <param name="nodes">The nodes to check.</param>
-        /// <returns>True if they can be cast, otherwise false.</returns>
-        static private bool isDouble(params INode[] nodes) {
-            foreach (INode node in nodes) {
-                if (node is not IValue<double> &&
-                    node is not IValue<int>) return false;
-            }
-            return true;
-        }
-
-        /// <summary>Casts the given node to a bool IValue.</summary>
-        /// <param name="node">The node to cast.</param>
-        /// <returns>The bool IValue or it throws an exception if it can't cast.</returns>
-        static private IValue<bool> asBool(INode node) =>
-            node is IValue<bool> value ? value :
-            throw new Exception("Can not cast "+node+" to IValue<bool>.");
-
-        /// <summary>Casts the given node to a trigger.</summary>
-        /// <param name="node">The node to cast.</param>
-        /// <returns>The bool IValue or it throws an exception if it can't cast.</returns>
-        static private ITrigger asTrigger(INode node) =>
-            node is ITrigger trig ? trig :
-            node is IValue<bool> value ? new OnTrue(value) :
-            throw new Exception("Can not cast "+node+" to ITrigger.");
-
-        /// <summary>Casts the given node to a int IValue.</summary>
-        /// <param name="node">The node to cast.</param>
-        /// <returns>The int IValue or it throws an exception if it can't cast.</returns>
-        static private IValue<int> asInt(INode node) =>
-            node is IValue<int> value ? value :
-            throw new Exception("Can not cast "+node+" to IValue<int>.");
-
-        /// <summary>Casts the given node to a double IValue.</summary>
-        /// <param name="node">The node to cast.</param>
-        /// <returns>The double IValue or it throws an exception if it can't cast.</returns>
-        static private IValue<double> asDouble(INode node) =>
-            node is IValue<double> dValue ? dValue :
-            node is IValue<int> iValue ? new IntToFloat(iValue) :
-            throw new Exception("Can not cast "+node+" to IValue<double>.");
-
-        /// <summary>Gets a pretty name used for exceptions which can be thrown for invalid input.</summary>
-        /// <param name="node">The node to get the name for.</param>
-        /// <returns>The name for the node.</returns>
-        static private string prettyName(INode node) =>
-            node is Counter        ? "counter" :
-            node is Toggler        ? "toggler" :
-            node is IValue<bool>   ? "bool" :
-            node is IValue<int>    ? "int" :
-            node is IValue<double> ? "float" :
-            node is ITrigger       ? "trigger" :
-            "unknown:"+node;
-
-        #endregion
         #region Handlers...
 
-        private void handleInputDefault(PP.ParseTree.PromptArgs args) {
-            // TODO: Implement
+        private void handleClean(PP.ParseTree.PromptArgs args) =>
+            args.Tokens.Clear();
+
+        private void handleNewInput(PP.ParseTree.PromptArgs args) {
+            string type = args.Tokens[^2].Text;
+            string id   = args.Tokens[^1].Text;
+            if      (type == "bool")    this.push(new InputValue<bool>(  id, this.driver.Nodes));
+            else if (type == "int")     this.push(new InputValue<int>(   id, this.driver.Nodes));
+            else if (type == "float")   this.push(new InputValue<double>(id, this.driver.Nodes));
+            else if (type == "trigger") this.push(new InputTrigger(      id, this.driver.Nodes));
+            else throw new Exception("Unexpected type: "+type);
         }
 
-        private void handleInputAssign(PP.ParseTree.PromptArgs args) {
-            // TODO: Implement
+        private void handleLookupInput(PP.ParseTree.PromptArgs args) {
+            string name = args.Tokens[^1].Text;
+            INode node = this.driver.Find(name);
+            if (node is not IInput)
+                throw new Exception("May only assign a value directly " + 
+                    "to a input variable. " + name + " is not an input variable.");
+            this.push(node);
         }
 
-        private void handleStartAssign(PP.ParseTree.PromptArgs args) {
-            // TODO: Implement
-        }
-
-        private void handleEndAssign(PP.ParseTree.PromptArgs args) {
+        private void handleAssign(PP.ParseTree.PromptArgs args) {
             // TODO: Implement
         }
 
@@ -180,102 +150,16 @@ namespace Blackboard.Parser {
             // TODO: Implement
         }
 
-        private void handleStartDefine(PP.ParseTree.PromptArgs args) {
+        private void handleDefine(PP.ParseTree.PromptArgs args) {
             // TODO: Implement
         }
 
-        private void handleEndDefine(PP.ParseTree.PromptArgs args) {
+        private void handleDefineWithType(PP.ParseTree.PromptArgs args) {
             // TODO: Implement
         }
 
         private void handleTrinary(PP.ParseTree.PromptArgs args) {
             // TODO: Implement
-        }
-
-        private void handleAdd(PP.ParseTree.PromptArgs args) {
-            INode right = this.pop(), left = this.pop();
-            if (isInt(left, right))         this.push(new SumInt(asInt(left), asInt(right)));
-            else if (isDouble(left, right)) this.push(new SumFloat(asDouble(left), asDouble(right)));
-            else throw new Exception("Add expected two ints or two double " +
-                "but got " + prettyName(left) + " and " + prettyName(right) + ".");
-        }
-
-        private void handleSubtract(PP.ParseTree.PromptArgs args) {
-            INode right = this.pop(), left = this.pop();
-            if (isInt(left, right))         this.push(new SubInt(asInt(left), asInt(right)));
-            else if (isDouble(left, right)) this.push(new SubFloat(asDouble(left), asDouble(right)));
-            else throw new Exception("Subtract expected two ints or two double " +
-                "but got " + prettyName(left) + " and " + prettyName(right) + ".");
-        }
-
-        private void handleOr(PP.ParseTree.PromptArgs args) {
-            INode right = this.pop(), left = this.pop();
-            if (isBool(left, right))         this.push(new Or(asBool(left), asBool(right)));
-            else if (isTrigger(left, right)) this.push(new Any(asTrigger(left), asTrigger(right)));
-            else if (isInt(left, right))     this.push(new BitwiseOr(asInt(left), asInt(right)));
-            else throw new Exception("Or expected two triggers, two bools, or two ints " +
-                "but got " + prettyName(left) + " and " + prettyName(right) + ".");
-        }
-
-        private void handleMultiply(PP.ParseTree.PromptArgs args) {
-            INode right = this.pop(), left = this.pop();
-            if (isInt(left, right))         this.push(new MulInt(asInt(left), asInt(right)));
-            else if (isDouble(left, right)) this.push(new MulFloat(asDouble(left), asDouble(right)));
-            else throw new Exception("Multiply expected two ints or two double " +
-                "but got " + prettyName(left) + " and " + prettyName(right) + ".");
-        }
-
-        private void handleDivide(PP.ParseTree.PromptArgs args) {
-            INode right = this.pop(), left = this.pop();
-            if (isInt(left, right))         this.push(new DivInt(asInt(left), asInt(right)));
-            else if (isDouble(left, right)) this.push(new DivFloat(asDouble(left), asDouble(right)));
-            else throw new Exception("Divide expected two ints or two double " +
-                "but got " + prettyName(left) + " and " + prettyName(right) + ".");
-        }
-
-        private void handleModulo(PP.ParseTree.PromptArgs args) {
-            INode right = this.pop(), left = this.pop();
-            if (isInt(left, right))         this.push(new ModInt(asInt(left), asInt(right)));
-            else if (isDouble(left, right)) this.push(new ModFloat(asDouble(left), asDouble(right)));
-            else throw new Exception("Modulo expected two ints or two double " +
-                "but got " + prettyName(left) + " and " + prettyName(right) + ".");
-        }
-
-        private void handleAnd(PP.ParseTree.PromptArgs args) {
-            INode right = this.pop(), left = this.pop();
-            if (isBool(left, right))         this.push(new And(asBool(left), asBool(right)));
-            else if (isTrigger(left, right)) this.push(new All(asTrigger(left), asTrigger(right)));
-            else if (isInt(left, right))     this.push(new BitwiseAnd(asInt(left), asInt(right)));
-            else throw new Exception("And expected two triggers, two bools, or two ints " +
-                "but got " + prettyName(left) + " and " + prettyName(right) + ".");
-        }
-         
-        private void handleXor(PP.ParseTree.PromptArgs args) {
-            INode right = this.pop(), left = this.pop();
-            if (isBool(left, right))         this.push(new Xor(asBool(left), asBool(right)));
-            else if (isTrigger(left, right)) this.push(new OnlyOne(asTrigger(left), asTrigger(right)));
-            else if (isInt(left, right))     this.push(new BitwiseXor(asInt(left), asInt(right)));
-            else throw new Exception("Xor expected two triggers, two bools, or two ints " +
-                "but got " + prettyName(left) + " and " + prettyName(right) + ".");
-        }
-
-        private void handleNegate(PP.ParseTree.PromptArgs args) {
-            INode node = this.pop();
-            if (isInt(node))         this.push(new NegInt(asInt(node)));
-            else if (isDouble(node)) this.push(new NegFloat(asDouble(node)));
-            else throw new Exception("Negate expected an int or float but got " + prettyName(node) + ".");
-        }
-
-        private void handleNot(PP.ParseTree.PromptArgs args) {
-            INode node = this.pop();
-            if (isBool(node)) this.push(new Not(asBool(node)));
-            else throw new Exception("Not expected a bool but got " + prettyName(node) + ".");
-        }
-
-        private void handleInvert(PP.ParseTree.PromptArgs args) {
-            INode node = this.pop();
-            if (isInt(node)) this.push(new BitwiseNot(asInt(node)));
-            else throw new Exception("Invert expected an int but got " + prettyName(node) + ".");
         }
 
         private void handleStartCall(PP.ParseTree.PromptArgs args) {
@@ -288,7 +172,10 @@ namespace Blackboard.Parser {
 
         private void handlePushId(PP.ParseTree.PromptArgs args) {
             string name = args.Tokens[^1].Text;
-            this.push(this.driver.Find(name));
+            INode node = this.driver.Find(name);
+            if (node is null)
+                throw new Exception(name + " is unknown");
+            this.push(node);
         }
 
         private void handlePushBool(PP.ParseTree.PromptArgs args) {

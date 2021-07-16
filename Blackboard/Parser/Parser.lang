@@ -17,18 +17,18 @@
 (Zero): 'x' => (Hex-Start): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
 
 # Identifiers
-(Start): 'a'..'z', 'A'..'Z', '_' => (Identifier): '0'..'9', 'a'..'z', 'A'..'Z', '_' => [Identifier];
+(Start): 'a'..'z', 'A'..'Z', '_$' => (Identifier): '0'..'9', 'a'..'z', 'A'..'Z', '_' => [Identifier];
 (Identifier): '.' => (Scoping): 'a'..'z', 'A'..'Z', '_' => (Identifier);
 
 # Symbols
-(Start): '&' => [And];
-(Start): '|' => [Or];
+(Start): '&' => [And]: '&' => [Logical-And];
+(Start): '|' => [Or]: '|' => [Logical-Or];
 (Start): '+' => [Pos];
 (Start): '-' => [Neg]: '>' => [Trigger];
 (Start): '/' => [Div];
-(Start): '*' => [Mul];
-(Start): '%' => [Mod];
-(Start): '^' => [Xor];
+(Start): '*' => [Mul]: '*' => [Power];
+(Start): '%' => [Mod]: '%' => [Remainder];
+(Start): '^' => [Xor]: '^' => [Logical-Xor];
 (Start): '~' => [Invert];
 (Start): '?' => [Test];
 (Start): ':' => [Else]: '=' => [Define];
@@ -46,6 +46,8 @@
 (Start): '>' => [Greater]: '=' => [Greater-Equal];
 (Start): '<' => [Less]:    '=' => [Less-Equal];
 (Start): '!' => [Not]:     '=' => [Not-Equal];
+(Greater): '>' => [Shift-Right];
+(Less):    '<' => [Shift-Left];
 
 # Comments
 (Div): '/' => (Comment-Single): !'\n' => (Comment-Single) => ^[Comment];
@@ -55,34 +57,34 @@
 
 # Reserved Identifiers
 [Identifier] = 'in'  => [In];
-[Identifier] = 'bool', 'int', 'float', 'trigger', 'counter', 'toggler' => [Type];
+[Identifier] = 'const' => [Const];
+[Identifier] = 'bool', 'int', 'float', 'trigger' => [Type];
 [Identifier] = 'true', 'false' => [Bool];
-[Identifier] = 'as', 'byte', 'catch', 'case', 'char', 'class', 'complex', 'const', 'default', 'do', 'dynamic',
+[Identifier] = 'and', 'as', 'byte', 'catch', 'case', 'char', 'class', 'complex', 'def', 'default', 'do', 'dynamic',
                'else', 'enum', 'finally', 'for', 'foreach', 'func', 'get', 'if', 'interface', 'import', 'is',
-               'list', 'map', 'namespace', 'not', 'on', 'out', 'select', 'set', 'static', 'string', 'switch',
-               'then', 'try', 'uint', 'until', 'var', 'void', 'when', 'while, 'yield' => [Reserved];
+               'list', 'map', 'namespace', 'not', 'null', 'on', 'operator', 'or', 'out', 'override', 'select',
+               'set', 'static', 'string', 'switch', 'then', 'try', 'type', 'typedef', 'typeof', 'uint', 'until',
+               'var', 'void', 'when', 'while, 'yield', 'xor' => [Reserved];
 
 #==========================================================
 # Grammar Rules
-# TODO: Need to add equality tests
-# TODO: Add constants
 
 > <Code> := _
     | <Statement>
-    | <Statement> [End] <Code>;
+    | <Statement> [End] {Clean} <Code>;
 
 <Statement> := _
-    | [In] [Type] [Identifier] {InputDefault}
-    | [In] [Type] [Identifier] {InputAssign} [Assign] {StartAssign} <Complex> {EndAssign}
+    | [In] [Type] [Identifier] {DefineID}
+    | [In] [Type] [Identifier] {DefineID} [Assign] <Complex> {Assign}
     | [Trigger] [Identifier] {PullTrigger}
-    | [Identifier] [Assign] {StartAssign} <Complex> {EndAssign}
-    | [Identifier] [Define] {StartDefine} <Complex> {EndDefine};
+    | [Identifier] {LookupID} [Assign] <Complex> {Assign}
+    | [Identifier] {LookupID} [Define] <Complex> {Define};
 
 <Complex> := <Expression>
     | <Complex> [Test] <Complex> [Else] <Complex> {Trinary};
 
 <Expression> := <Term>
-    | <Expression> [Pos] <Term> {Add}
+    | <Expression> [Pos] <Term> {Sum}
     | <Expression> [Neg] <Term> {Subtract}
     | <Expression> [Or] <Term> {Or};
 
@@ -90,7 +92,6 @@
     | <Term> [Mul] <Factor> {Multiply}
     | <Term> [Div] <Factor> {Divide}
     | <Term> [Mod] <Factor> {Modulo}
-    | <Term> [And] <Factor> {And}
     | <Term> [Xor] <Factor> {Xor};
 
 <Factor> := <Value>

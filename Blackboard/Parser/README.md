@@ -24,6 +24,13 @@ Z = int(3.15); // Z = truncate(3.15);
 out Z;
 ```
 
+## Todo
+
+- Need to add equality tests and logical-and/or/xor
+- Add power and remainder
+- Add shift left and right
+- Add constants
+
 ## Ideas
 
 - Concatinate, Format, etc for strings

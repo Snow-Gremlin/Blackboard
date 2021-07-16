@@ -11,7 +11,7 @@
 (Start): '.' => (Decimal);
 (Int): '.' => (Decimal): '0'..'9' => (Float-Dec): '0'..'9' => (Float-Dec) => [Float];
 (Int): 'eE' => (Float-Exp-Start): '-' => (Float-Exp-Neg): '0'..'9' => (Float-Exp);
-(Float-Dec): 'eE' => (Float-Exp-Start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) = [Float];
+(Float-Dec): 'eE' => (Float-Exp-Start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) => [Float];
 
 # Hexadecimals
 (Zero): 'x' => (Hex-Start): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
@@ -55,30 +55,33 @@
 (Comment-Multiple): * => (Comment-Multiple);
 (Comment-Multiple-End): * => (Comment-Multiple);
 
+# Whitespace
+(Start): ' \t\n' => (Whitespace): ' \t\n' => ^[Whitespace];
+
 # Reserved Identifiers
-[Identifier] = 'in'  => [In];
+[Identifier] = 'in' => [In];
 [Identifier] = 'const' => [Const];
 [Identifier] = 'bool', 'int', 'float', 'trigger' => [Type];
 [Identifier] = 'true', 'false' => [Bool];
 [Identifier] = 'and', 'as', 'byte', 'catch', 'case', 'char', 'class', 'complex', 'def', 'default', 'do', 'dynamic',
-               'else', 'enum', 'finally', 'for', 'foreach', 'func', 'get', 'if', 'interface', 'import', 'is',
-               'list', 'map', 'namespace', 'not', 'null', 'on', 'operator', 'or', 'out', 'override', 'select',
+               'else', 'enum', 'finally', 'for', 'foreach', 'func', 'get', 'global', 'if', 'interface', 'import', 'is',
+               'list', 'local', 'map', 'namespace', 'not', 'null', 'on', 'operator', 'or', 'out', 'override', 'select',
                'set', 'static', 'string', 'switch', 'then', 'try', 'type', 'typedef', 'typeof', 'uint', 'until',
-               'var', 'void', 'when', 'while, 'yield', 'xor' => [Reserved];
+               'var', 'void', 'when', 'while', 'yield', 'xor' => [Reserved];
 
 #==========================================================
 # Grammar Rules
 
 > <Code> := _
-    | <Statement>
     | <Statement> [End] {Clean} <Code>;
 
 <Statement> := _
-    | [In] [Type] [Identifier] {DefineID}
-    | [In] [Type] [Identifier] {DefineID} [Assign] <Complex> {Assign}
-    | [Trigger] [Identifier] {PullTrigger}
-    | [Identifier] {LookupID} [Assign] <Complex> {Assign}
-    | [Identifier] {LookupID} [Define] <Complex> {Define};
+    | [In] [Type] [Identifier] {NewInput}
+    | [In] [Type] [Identifier] {NewInput} {StartAssign} [Assign] <Complex> {EndAssign}
+    | [Identifier] {LookupInput} {StartAssign} [Assign] <Complex> {EndAssign}
+    | [Identifier] [Define] {StartDefine} <Complex> {EndDefine}
+    | [Type] [Identifier] [Define] {StartDefine} <Complex> {EndDefineWithType}
+    | [Trigger] [Identifier] {PullTrigger};
 
 <Complex> := <Expression>
     | <Complex> [Test] <Complex> [Else] <Complex> {Trinary};
@@ -100,7 +103,7 @@
     | [Not] <Factor> {Not}
     | [Pos] <Factor>
     | [Invert] <Factor> {Invert}
-    | [Identifier] {StartCall} [Par-Open] <Args> [Par-Close] {Call};
+    | [Identifier] {StartCall} [Par-Open] <Args> [Par-Close] {EndCall};
     
 <Args> := _
     | <Complex> <Args-Tail>;

@@ -48,8 +48,9 @@ namespace Blackboard.Core.Caps {
         }
 
         /// <summary>This is set this trigger to emit during the next evaluation.</summary>
+        /// <param name="value">True will trigger, false will reset the trigger.</param>
         /// <remarks>This is not intended to be be called directly, it should be called via the driver.</remarks>
-        public void Trigger() => this.Triggered = true;
+        public void Trigger(bool value = true) => this.Triggered = value;
 
         /// <summary>This updates the trigger during the an evaluation.</summary>
         /// <returns>This returns the triggered value as it currently is.</returns>

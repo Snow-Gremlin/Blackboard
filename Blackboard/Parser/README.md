@@ -30,6 +30,9 @@ out Z;
 - Add power and remainder
 - Add shift left and right
 - Add constants
+- Add temp/local value which exists only in a single parse, used for assigning to not recalculate the same value.
+- Add multiple assignment (x=y=1)
+- Add a way to read values out of a parse, get/out/return/yield
 
 ## Ideas
 

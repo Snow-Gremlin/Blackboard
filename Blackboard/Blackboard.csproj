@@ -5,6 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Parser\Parser.lang" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Parser\Parser.lang">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="PetiteParser">
       <HintPath>..\..\PetiteParserCSharp\PetiteParser\PetiteParser\bin\Debug\net5.0\PetiteParser.dll</HintPath>
     </Reference>

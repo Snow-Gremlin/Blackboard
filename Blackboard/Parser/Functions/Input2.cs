@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Interfaces;
+using Blackboard.Core;
 
 namespace Blackboard.Parser.Functions {
 
@@ -25,17 +26,17 @@ namespace Blackboard.Parser.Functions {
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>
         /// <param name="nodes">The nodes to match against.</param>
         /// <returns>The closest match is lower but not negatve.</returns>
-        public int Match(INode[] nodes) => IFunction.JoinMatches(
+        public int Match(INode[] nodes) => Cast.JoinMatches(
             nodes.Length == 2 ? 0 : -1,
-            IFunction.Match<T1>(nodes[0]),
-            IFunction.Match<T2>(nodes[1]));
+            Cast.Match<T1>(nodes[0]),
+            Cast.Match<T2>(nodes[1]));
 
         /// <summary>Builds and returns the function object.</summary>
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new function.</returns>
         public INode Build(INode[] nodes) {
-            T1 node1 = IFunction.As<T1>(nodes[0]);
-            T2 node2 = IFunction.As<T2>(nodes[1]);
+            T1 node1 = Cast.As<T1>(nodes[0]);
+            T2 node2 = Cast.As<T2>(nodes[1]);
             return this.hndl(node1, node2);
         }
     }

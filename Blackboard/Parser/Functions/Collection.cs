@@ -16,7 +16,7 @@ namespace Blackboard.Parser.Functions {
         /// <param name="nodes">The nodes which will be used for arguments.</param>
         /// <returns>The nearest function or null if none found.</returns>
         public IFunction Find(string name, params INode[] nodes) =>
-            this.Find(name, nodes);
+            this.Find(name, nodes as IEnumerable<INode>);
 
         /// <summary>Finds the function which best matches the given input nodes.</summary>
         /// <param name="name">The name of the functions to look through.</param>
@@ -41,7 +41,7 @@ namespace Blackboard.Parser.Functions {
         /// <param name="nodes">The nodes which will be used for arguments.</param>
         /// <returns>The built function or null if nofunction was found.</returns>
         public INode Build(string name, params INode[] nodes) =>
-            this.Build(name, nodes);
+            this.Build(name, nodes as IEnumerable<INode>);
 
         /// <summary>Builds the function with the given name and arguments.</summary>
         /// <param name="name">The name of the functions to look through.</param>
@@ -52,7 +52,7 @@ namespace Blackboard.Parser.Functions {
             INode[] inputs = nodes.ToArray();
             if (func is null) {
                 // TODO: Improve this message since it is can be hit by users of Blackboard when they input bad code.
-                string input = string.Join(", ", nodes.Select((node) => IFunction.PrettyName(node)));
+                string input = string.Join(", ", nodes.Select((node) => Cast.PrettyName(node)));
                 throw new Exception("No known procedure to handle "+name+"(" + input + ").");
             }
             return func.Build(inputs);
@@ -63,7 +63,7 @@ namespace Blackboard.Parser.Functions {
         /// <param name="funcs">The function factories to add.</param>
         /// <returns>The collection so that adds can be chained together.</returns>
         public Collection Add(string name, params IFunction[] funcs) =>
-            this.Add(name, funcs);
+            this.Add(name, funcs as IEnumerable<IFunction>);
 
         /// <summary>Adds new function to this collection.</summary>
         /// <param name="name">The name of the functions to add.</param>

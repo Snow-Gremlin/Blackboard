@@ -33,21 +33,24 @@ namespace Blackboard.Parser {
 
         private void initPrompts() {
             this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>() {
-                { "Clean",             this.handleClean },
-                { "NewInput",          this.handleNewInput },
-                { "LookupInput",       this.handleLookupInput },
-                { "StartAssign",       this.handleStartAssign },
-                { "EndAssign",         this.handleEndAssign },
-                { "StartDefine",       this.handleStartDefine },
-                { "EndDefine",         this.handleEndDefine },
-                { "EndDefineWithType", this.handleEndDefineWithType },
-                { "PullTrigger",       this.handlePullTrigger },
-                { "StartCall",         this.handleStartCall },
-                { "Call",              this.handleEndCall },
-                { "PushId",            this.handlePushId },
-                { "PushBool",          this.handlePushBool },
-                { "PushInt",           this.handlePushInt },
-                { "PushFloat",         this.handlePushFloat },
+                { "Clean",       this.handleClean },
+                { "StartAssign", this.handleStartAssign },
+                { "StartDefine", this.handleStartDefine },
+
+                { "NewInput",             this.handleNewInput },
+                { "EndAssignWithType",    this.handleEndAssignWithType },
+                { "EndAssignWithoutType", this.handleEndAssignWithoutType },
+                { "EndAssignExisting",    this.handleEndAssignExisting },
+                { "EndDefineWithType",    this.handleEndDefineWithType },
+                { "EndDefineWithoutType", this.handleEndDefineWithoutType },
+                { "PullTrigger",          this.handlePullTrigger },
+
+                { "StartCall", this.handleStartCall },
+                { "Call",      this.handleEndCall },
+                { "PushId",    this.handlePushId },
+                { "PushBool",  this.handlePushBool },
+                { "PushInt",   this.handlePushInt },
+                { "PushFloat", this.handlePushFloat },
             };
             this.addProcess("Sum", 2);
             this.addProcess("Subtract", 2);
@@ -116,6 +119,8 @@ namespace Blackboard.Parser {
             this.read(result.Tree);
         }
 
+        #region Helpers...
+
         private void read(PP.ParseTree.ITreeNode node) =>
             node.Process(this.prompts);
 
@@ -133,36 +138,18 @@ namespace Blackboard.Parser {
         private void addProcess(string name, int count) =>
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => this.push(this.ops.Build(name, this.pop(count)));
 
-        #region Handlers...
-
-        private void handleClean(PP.ParseTree.PromptArgs args) =>
-            args.Tokens.Clear();
-
-        private void handleNewInput(PP.ParseTree.PromptArgs args) {
-            string type = args.Tokens[^2].Text;
-            string id   = args.Tokens[^1].Text;
-            if      (type == "bool")    this.push(new InputValue<bool>(  id, this.driver.Nodes));
-            else if (type == "int")     this.push(new InputValue<int>(   id, this.driver.Nodes));
-            else if (type == "float")   this.push(new InputValue<double>(id, this.driver.Nodes));
-            else if (type == "trigger") this.push(new InputTrigger(      id, this.driver.Nodes));
-            else throw new Exception("Unknown type: "+type);
+        private INode newInputNode(PP.ParseTree.PromptArgs args) {
+            string type = args.Tokens[1].Text;
+            string id   = args.Tokens[2].Text;
+            return type == "bool" ? new InputValue<bool>(  id, this.driver.Nodes) :
+                type == "int"     ? new InputValue<int>(   id, this.driver.Nodes) :
+                type == "float"   ? new InputValue<double>(id, this.driver.Nodes) :
+                type == "trigger" ? new InputTrigger(      id, this.driver.Nodes) :
+                throw new Exception("Unknown type: "+type);
         }
 
-        private void handleLookupInput(PP.ParseTree.PromptArgs args) {
-            string name = args.Tokens[^1].Text;
-            INode node = this.driver.Find(name);
-            if (node is not IInput)
-                throw new Exception("May only assign a value directly " +
-                    "to a input variable. " + name + " is not an input variable.");
-            this.push(node);
-        }
-
-        private void handleStartAssign(PP.ParseTree.PromptArgs args) =>
-            this.isAssign = true;
-
-        private void handleEndAssign(PP.ParseTree.PromptArgs args) {
-            INode[] nodes = this.pop(2).ToArray();
-            INode left = nodes[0], right = nodes[1];
+        private void assignNode(INode left) {
+            INode right = this.pop().First();
             if (right is IValue<bool> rightBool) {
                 bool value = rightBool.Value;
                 if (left is InputValue<bool> leftBool) {
@@ -197,21 +184,47 @@ namespace Blackboard.Parser {
             throw new Exception(Cast.PrettyName(right) + " can not be assigned to " + Cast.PrettyName(left) + ".");
         }
 
+        #endregion
+        #region Handlers...
+
+        private void handleClean(PP.ParseTree.PromptArgs args) {
+            args.Tokens.Clear();
+            this.stack.Clear(); // should be already clear
+        }
+
+        private void handleStartAssign(PP.ParseTree.PromptArgs args) =>
+            this.isAssign = true;
+
         private void handleStartDefine(PP.ParseTree.PromptArgs args) =>
             this.isAssign = false;
 
-        private void handleEndDefine(PP.ParseTree.PromptArgs args) {
-            string name = args.Tokens[0].Text;
+        private void handleNewInput(PP.ParseTree.PromptArgs args) =>
+            this.newInputNode(args);
+
+        private void handleEndAssignWithType(PP.ParseTree.PromptArgs args) =>
+            this.assignNode(this.newInputNode(args));
+        
+        private void handleEndAssignWithoutType(PP.ParseTree.PromptArgs args) {
+            string name = args.Tokens[1].Text;
             INode right = this.pop().First();
-            INode _ = right is IValue<bool> rightBool ?
-                    new OutputValue<bool>(rightBool, name, this.driver.Nodes) :
-                right is IValue<int> rightInt ?
-                    new OutputValue<int>(rightInt, name, this.driver.Nodes) :
-                right is IValue<double> rightFloat ?
-                    new OutputValue<double>(rightFloat, name, this.driver.Nodes) :
-                right is ITrigger rightTrigger ?
-                    new OutputTrigger(rightTrigger, name, this.driver.Nodes) :
-                throw new Exception(Cast.PrettyName(right) + " can not be used in a definition.");
+            if (right is IValue<bool> rightBool)
+                _ = new InputValue<bool>(name, this.driver.Nodes, rightBool.Value);
+            else if (right is IValue<int> rightInt)
+                _ = new InputValue<int>(name, this.driver.Nodes, rightInt.Value);
+            else if (right is IValue<double> rightFloat)
+                _ = new InputValue<double>(name, this.driver.Nodes, rightFloat.Value);
+            else if (right is ITrigger rightTrigger)
+                new InputTrigger(name, this.driver.Nodes).Trigger(rightTrigger.Triggered);
+            else throw new Exception(Cast.PrettyName(right) + " can not be assigned.");
+        }
+
+        private void handleEndAssignExisting(PP.ParseTree.PromptArgs args) {
+            string name = args.Tokens[0].Text;
+            INode left = this.driver.Find(name);
+            if (left is not IInput)
+                throw new Exception("May only assign a value directly " +
+                    "to a input variable. " + name + " is not an input variable.");
+            this.assignNode(left);
         }
 
         private void handleEndDefineWithType(PP.ParseTree.PromptArgs args) {
@@ -237,6 +250,20 @@ namespace Blackboard.Parser {
                     throw new Exception("May not define a "+type+" with a trigger value.");
                 _ = new OutputTrigger(rightTrigger, name, this.driver.Nodes);
             } else throw new Exception(Cast.PrettyName(right) + " can not be used in a definition.");
+        }
+
+        private void handleEndDefineWithoutType(PP.ParseTree.PromptArgs args) {
+            string name = args.Tokens[0].Text;
+            INode right = this.pop().First();
+            INode _ = right is IValue<bool> rightBool ?
+                    new OutputValue<bool>(rightBool, name, this.driver.Nodes) :
+                right is IValue<int> rightInt ?
+                    new OutputValue<int>(rightInt, name, this.driver.Nodes) :
+                right is IValue<double> rightFloat ?
+                    new OutputValue<double>(rightFloat, name, this.driver.Nodes) :
+                right is ITrigger rightTrigger ?
+                    new OutputTrigger(rightTrigger, name, this.driver.Nodes) :
+                throw new Exception(Cast.PrettyName(right) + " can not be used in a definition.");
         }
 
         private void handlePullTrigger(PP.ParseTree.PromptArgs args) {

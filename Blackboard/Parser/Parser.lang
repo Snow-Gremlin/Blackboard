@@ -73,14 +73,15 @@
 # Grammar Rules
 
 > <Code> := _
-    | <Statement> [End] {Clean} <Code>;
+    | {Clean} <Statement> [End] <Code>;
 
 <Statement> := _
     | [In] [Type] [Identifier] {NewInput}
-    | [In] [Type] [Identifier] {NewInput} {StartAssign} [Assign] <Complex> {EndAssign}
-    | [Identifier] {LookupInput} {StartAssign} [Assign] <Complex> {EndAssign}
-    | [Identifier] [Define] {StartDefine} <Complex> {EndDefine}
-    | [Type] [Identifier] [Define] {StartDefine} <Complex> {EndDefineWithType}
+    | {StartAssign} [In] [Type] [Identifier] [Assign] <Complex> {EndAssignWithType}
+    | {StartAssign} [In]        [Identifier] [Assign] <Complex> {EndAssignWithoutType}
+    | {StartAssign}             [Identifier] [Assign] <Complex> {EndAssignExisting}
+    | {StartDefine} [Type] [Identifier] [Define] <Complex> {EndDefineWithType}
+    | {StartDefine}        [Identifier] [Define] <Complex> {EndDefineWithoutType}
     | [Trigger] [Identifier] {PullTrigger};
 
 <Complex> := <Expression>

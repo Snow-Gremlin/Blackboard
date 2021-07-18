@@ -7,7 +7,7 @@ namespace Blackboard.Core.Caps {
 
     /// <summary>This is a literal value.</summary>
     /// <typeparam name="T">The type of this literal.</typeparam>
-    sealed public class Literal<T>: ValueNode<T> {
+    sealed public class Literal<T>: ValueNode<T>, IConstant {
 
         /// <summary>Creates a new literal value node.</summary>
         /// <param name="value">The initial value of the node.</param>

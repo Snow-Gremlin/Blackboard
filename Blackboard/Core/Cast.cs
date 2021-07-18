@@ -128,5 +128,26 @@ namespace Blackboard.Core {
             node is IValue<double> ? "float" :
             node is ITrigger       ? "trigger" :
             "unknown:"+node;
+
+        /// <summary>Converts the given node into a literal.</summary>
+        /// <remarks>Triggers will be returned as a bool value.</remarks>
+        /// <param name="node">The node to get a literal version of.</param>
+        /// <returns>The literal node or null if can't be converted.</returns>
+        static public INode ToLiteral(INode node) =>
+            node is IValue<bool>   nodeBool    ? new Literal<bool>(  nodeBool.Value) :
+            node is IValue<int>    nodeInt     ? new Literal<int>(   nodeInt.Value) :
+            node is IValue<double> nodeFloat   ? new Literal<double>(nodeFloat.Value) :
+            node is ITrigger       nodeTrigger ? new Literal<bool>(  nodeTrigger.Triggered) :
+            null;
+
+        /// <summary>Determines if all the given nodes are constants.</summary>
+        /// <param name="nodes">The nodes to check.</param>
+        /// <returns>True if all the nodes are constants.</returns>
+        static public bool IsConstant(IEnumerable<INode> nodes) {
+            foreach (INode node in nodes) {
+                if (node is not IConstant) return false;
+            }
+            return true;
+        }
     }
 }

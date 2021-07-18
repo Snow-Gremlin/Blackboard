@@ -80,7 +80,7 @@ namespace Blackboard.Core.Bases {
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>
         protected override bool UpdateValue() {
-            if (this.source1 is null || this.source2 is null) return false;
+            if (this.source1 is null || this.source2 is null || this.source3 is null) return false;
             TResult value = this.OnEval(this.source1.Value, this.source2.Value, this.source3.Value);
             return this.SetNodeValue(value);
         }

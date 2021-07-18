@@ -2,6 +2,7 @@
 using Blackboard.Core.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using PP = PetiteParser;
 
 namespace Blackboard.Parser.Functions {
 
@@ -40,20 +41,21 @@ namespace Blackboard.Parser.Functions {
         /// <param name="name">The name of the functions to look through.</param>
         /// <param name="nodes">The nodes which will be used for arguments.</param>
         /// <returns>The built function or null if nofunction was found.</returns>
-        public INode Build(string name, params INode[] nodes) =>
-            this.Build(name, nodes as IEnumerable<INode>);
+        public INode Build(string name, PP.Scanner.Location loc = null, params INode[] nodes) =>
+            this.Build(name, nodes as IEnumerable<INode>, loc);
 
         /// <summary>Builds the function with the given name and arguments.</summary>
         /// <param name="name">The name of the functions to look through.</param>
         /// <param name="nodes">The nodes which will be used for arguments.</param>
         /// <returns>The built function or null if nofunction was found.</returns>
-        public INode Build(string name, IEnumerable<INode> nodes) {
+        public INode Build(string name, IEnumerable<INode> nodes, PP.Scanner.Location loc = null) {
             IFunction func = this.Find(name, nodes);
             INode[] inputs = nodes.ToArray();
             if (func is null) {
                 // TODO: Improve this message since it is can be hit by users of Blackboard when they input bad code.
                 string input = string.Join(", ", nodes.Select((node) => Cast.PrettyName(node)));
-                throw new Exception("No known procedure to handle "+name+"(" + input + ").");
+                string part = loc is null ? "" : (" at "+loc);
+                throw new Exception("No known procedure to handle "+name+"(" + input + ")"+part+".");
             }
             return func.Build(inputs);
         }
@@ -61,21 +63,18 @@ namespace Blackboard.Parser.Functions {
         /// <summary>Adds new function to this collection.</summary>
         /// <param name="name">The name of the functions to add.</param>
         /// <param name="funcs">The function factories to add.</param>
-        /// <returns>The collection so that adds can be chained together.</returns>
-        public Collection Add(string name, params IFunction[] funcs) =>
+        public void Add(string name, params IFunction[] funcs) =>
             this.Add(name, funcs as IEnumerable<IFunction>);
 
         /// <summary>Adds new function to this collection.</summary>
         /// <param name="name">The name of the functions to add.</param>
         /// <param name="funcs">The function factories to add.</param>
-        /// <returns>The collection so that adds can be chained together.</returns>
-        public Collection Add(string name, IEnumerable<IFunction> funcs) {
+        public void Add(string name, IEnumerable<IFunction> funcs) {
             if (!this.TryGetValue(name, out List<IFunction> funcs2)) {
                 funcs2 = new List<IFunction>();
                 this[name] = funcs2;
             }
             funcs2.AddRange(funcs);
-            return this;
         }
     }
 }

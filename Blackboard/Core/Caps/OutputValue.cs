@@ -23,7 +23,7 @@ namespace Blackboard.Core.Caps {
         /// <param name="name">The initial name for this value node.</param>
         /// <param name="scope">The initial scope for this value node.</param>
         /// <param name="value">The initial value for this node.</param>
-        public OutputValue(IValue<T> source = null, string name = "Input",
+        public OutputValue(IValue<T> source = null, string name = "Output",
             INamespace scope = null, T value = default) : base(value) {
             this.Parent = source;
             this.Name = name;

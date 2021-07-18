@@ -18,7 +18,6 @@
 
 # Identifiers
 (Start): 'a'..'z', 'A'..'Z', '_$' => (Identifier): '0'..'9', 'a'..'z', 'A'..'Z', '_' => [Identifier];
-(Identifier): '.' => (Scoping): 'a'..'z', 'A'..'Z', '_' => (Identifier);
 
 # Symbols
 (Start): '&' => [And]: '&' => [Logical-And];
@@ -34,6 +33,7 @@
 (Start): ':' => [Else]: '=' => [Define];
 (Start): ';' => [End];
 (Start): ',' => [Comma];
+(Start): '.' => [Dot];
 
 (Start): '(' => [Par-Open];
 (Start): ')' => [Par-Close];
@@ -77,42 +77,82 @@
 
 <Statement> := _
     | [In] [Type] [Identifier] {NewInput}
-    | {StartAssign} [In] [Type] [Identifier] [Assign] <Complex> {EndAssignWithType}
-    | {StartAssign} [In]        [Identifier] [Assign] <Complex> {EndAssignWithoutType}
-    | {StartAssign}             [Identifier] [Assign] <Complex> {EndAssignExisting}
-    | {StartDefine} [Type] [Identifier] [Define] <Complex> {EndDefineWithType}
-    | {StartDefine}        [Identifier] [Define] <Complex> {EndDefineWithoutType}
+    | {StartAssign} [In] [Type] [Identifier] [Assign] <Conditional> {EndAssignWithType}
+    | {StartAssign} [In]        [Identifier] [Assign] <Conditional> {EndAssignWithoutType}
+    | {StartAssign}             [Identifier] [Assign] <Conditional> {EndAssignExisting}
+    | {StartDefine} [Type] [Identifier] [Define] <Conditional> {EndDefineWithType}
+    | {StartDefine}        [Identifier] [Define] <Conditional> {EndDefineWithoutType}
+    | {StartConst}  [Const] [Type] [Identifier] [Assign] <Conditional> {EndConstWithType}
+    | {StartConst}  [Const]        [Identifier] [Assign] <Conditional> {EndConstWithoutType}
     | [Trigger] [Identifier] {PullTrigger};
 
-<Complex> := <Expression>
-    | <Complex> [Test] <Complex> [Else] <Complex> {Trinary};
+<Conditional> := <Logical-Or>
+    | <Conditional> [Test] <Conditional> [Else] <Conditional> {Trinary};
 
-<Expression> := <Term>
-    | <Expression> [Pos] <Term> {Sum}
-    | <Expression> [Neg] <Term> {Subtract}
-    | <Expression> [Or] <Term> {Or};
-
-<Term> := <Factor>
-    | <Term> [Mul] <Factor> {Multiply}
-    | <Term> [Div] <Factor> {Divide}
-    | <Term> [Mod] <Factor> {Modulo}
-    | <Term> [Xor] <Factor> {Xor};
-
-<Factor> := <Value>
-    | [Par-Open] <Complex> [Par-Close]
-    | [Neg] <Factor> {Negate}
-    | [Not] <Factor> {Not}
-    | [Pos] <Factor>
-    | [Invert] <Factor> {Invert}
-    | [Identifier] {StartCall} [Par-Open] <Args> [Par-Close] {EndCall};
+<Logical-Or> := <Logical-Xor>
+    | <Logical-Or> [Logical-Or] <Logical-Xor> {Logical-Or};
     
+<Logical-Xor> := <Logical-And>
+    | <Logical-Xor> [Logical-Xor] <Logical-And> {Logical-Xor};
+
+<Logical-And> := <Equality>
+    | <Logical-And> [Logical-And] <Equality> {Logical-And};
+
+<Equality> := <Relational>
+    | <Equality> [Equal]     <Relational> {Equal}
+    | <Equality> [Not-Equal] <Relational> {Not-Equal};
+
+<Relational> := <Bitwise-Or>
+    | <Relational> [Greater]       <Bitwise-Or> {Greater}
+    | <Relational> [Less]          <Bitwise-Or> {Less}
+    | <Relational> [Greater-Equal] <Bitwise-Or> {Greater-Equal}
+    | <Relational> [Less-Equal]    <Bitwise-Or> {Less-Equal};
+
+<Bitwise-Or> := <Bitwise-Xor>
+    | <Bitwise-Or> [Or] <Bitwise-Xor> {Or};
+    
+<Bitwise-Xor> := <Bitwise-And>
+    | <Bitwise-Xor> [Xor] <Bitwise-And> {Xor};
+
+<Bitwise-And> := <Bitwise-Shift>
+    | <Bitwise-And> [And] <Bitwise-Shift> {And};
+
+<Bitwise-Shift> := <Additive>
+    | <Bitwise-Shift> [Shift-Right] <Additive> {Shift-Right}
+    | <Bitwise-Shift> [Shift-Left]  <Additive> {Shift-Left};
+
+<Additive> := <Multiplicative>
+    | <Additive> [Pos] <Multiplicative> {Sum}
+    | <Additive> [Neg] <Multiplicative> {Subtract};
+
+<Multiplicative> := <Unary>
+    | <Multiplicative> [Mul]       <Exponent> {Multiply}
+    | <Multiplicative> [Div]       <Exponent> {Divide}
+    | <Multiplicative> [Mod]       <Exponent> {Modulo}
+    | <Multiplicative> [Remainder] <Exponent> {Remainder};
+
+<Exponent> := <Unary>
+    | <Exponent> [Power] <Unary> {Power};
+
+<Unary> := <Expression>
+    | [Neg]    <Expression> {Negate}
+    | [Not]    <Expression> {Not}
+    | [Pos]    <Expression>
+    | [Invert] <Expression> {Invert};
+
+<Expression> := <Value>
+    | <Expression> [Dot] [Identifier] {Receiver}
+    | [Par-Open] <Conditional> [Par-Close]
+    | [Identifier] {StartCall} [Par-Open] <Args> [Par-Close] {EndCall};
+
 <Args> := _
-    | <Complex> <Args-Tail>;
+    | <Conditional> <Args-Tail>;
 
 <Args-Tail> := _
-    | [Comma] <Complex> <Args-Tail>;
+    | [Comma] <Conditional> <Args-Tail>;
 
 <Value> := [Identifier] {PushId}
     | [Bool] {PushBool}
     | [Int] {PushInt}
+    | [Hex] {PushHex}
     | [Float] {PushFloat};

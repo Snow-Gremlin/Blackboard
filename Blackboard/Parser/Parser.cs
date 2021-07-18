@@ -40,6 +40,7 @@ namespace Blackboard.Parser {
             this.isLocal = false;
             this.initPrompts();
             this.initFuncs();
+            this.initConsts();
         }
 
         /// <summary>Reads the given lines of input Blackline code.</summary>
@@ -190,8 +191,74 @@ namespace Blackboard.Parser {
 
         /// <summary>Prepares all the functions that can be called.</summary>
         private void initFuncs() {
-            this.funcs = new Collection();
-            // TODO: Implement
+            this.funcs = new Collection().
+                Add("abs",
+                    new Input1<IValue<int>>(   (input) => new AbsInt(  input)),
+                    new Input1<IValue<double>>((input) => new AbsFloat(input))).
+                Add("all",
+                    new InputN<ITrigger>((inputs) => new All(inputs))).
+                Add("and",
+                    new InputN<IValue<bool>>((inputs) => new And(inputs))).
+                Add("any",
+                    new InputN<ITrigger>((inputs) => new Any(inputs))).
+                Add("clamp",
+                    new Input3<IValue<int>,    IValue<int>,    IValue<int>>(   (input1, input2, input3) => new Clamp<int>(   input1, input2, input3)),
+                    new Input3<IValue<double>, IValue<double>, IValue<double>>((input1, input2, input3) => new Clamp<double>(input1, input2, input3))).
+                Add("float",
+                    new Input1<IValue<int>>((input) => new IntToFloat(input))).
+                Add("int",
+                    new Input1<IValue<double>>((input) => new Truncate(input))).
+                Add("implies",
+                    new Input2<IValue<bool>, IValue<bool>>((input1, input2) => new Implies(input1, input2))).
+                Add("latch",
+                    new Input2<ITrigger, IValue<bool>>(  (input1, input2) => new Latch<bool>(  input1, input2)),
+                    new Input2<ITrigger, IValue<int>>(   (input1, input2) => new Latch<int>(   input1, input2)),
+                    new Input2<ITrigger, IValue<double>>((input1, input2) => new Latch<double>(input1, input2))).
+                Add("lerp",
+                    new Input3<IValue<double>, IValue<double>, IValue<double>>((input1, input2, input3) => new Lerp(input1, input2, input3))).
+                Add("max",
+                    new InputN<IValue<int>>(   (inputs) => new Max<int>(   inputs)),
+                    new InputN<IValue<double>>((inputs) => new Max<double>(inputs))).
+                Add("min",
+                    new InputN<IValue<int>>(   (inputs) => new Min<int>(   inputs)),
+                    new InputN<IValue<double>>((inputs) => new Min<double>(inputs))).
+                Add("mul",
+                    new InputN<IValue<int>>(   (inputs) => new MulInt(  inputs)),
+                    new InputN<IValue<double>>((inputs) => new MulFloat(inputs))).
+                Add("on",
+                    new Input1<IValue<bool>>((input) => new OnTrue(input))).
+                Add("onChange",
+                    new InputN<INode>((inputs) => new OnChange(inputs))).
+                Add("onFalse",
+                    new Input1<IValue<bool>>((input) => new OnFalse(input))).
+                Add("onlyOne",
+                    new InputN<ITrigger>((inputs) => new OnlyOne(inputs))).
+                Add("onTrue",
+                    new Input1<IValue<bool>>((input) => new OnTrue(input))).
+                Add("or",
+                    new InputN<IValue<bool>>((inputs) => new Or(inputs))).
+                Add("round",
+                    new Input1<IValue<double>>((input) => new Round(input))).
+                Add("trunc",
+                    new Input1<IValue<double>>((input) => new Truncate(input)));
+        }
+
+        /// <summary>Adds in initial constants.</summary>
+        private void initConsts() {
+            _ = new Const<double>("e",         this.driver.Nodes, S.Math.E);
+            _ = new Const<double>("pi",        this.driver.Nodes, S.Math.PI);
+            _ = new Const<double>("tau",       this.driver.Nodes, S.Math.Tau);
+            _ = new Const<double>("sqrt2",     this.driver.Nodes, S.Math.Sqrt(2));
+            _ = new Const<double>("nan",       this.driver.Nodes, double.NaN);
+            _ = new Const<double>("inf",       this.driver.Nodes, double.PositiveInfinity);
+            _ = new Const<double>("posInf",    this.driver.Nodes, double.PositiveInfinity);
+            _ = new Const<double>("negInf",    this.driver.Nodes, double.NegativeInfinity);
+            _ = new Const<double>("maxFloat",  this.driver.Nodes, double.MaxValue);
+            _ = new Const<double>("minFloat",  this.driver.Nodes, double.MinValue);
+            _ = new Const<double>("maxInt",    this.driver.Nodes, int.MaxValue);
+            _ = new Const<double>("minInt",    this.driver.Nodes, int.MinValue);
+            _ = new Const<double>("floatSize", this.driver.Nodes, sizeof(double));
+            _ = new Const<double>("intSize",   this.driver.Nodes, sizeof(int));
         }
 
         /// <summary>Pushes a new node onto the stack of nodes.</summary>
@@ -215,11 +282,15 @@ namespace Blackboard.Parser {
         /// <returns>The newly created node.</returns>
         private INode newInputNode(PP.ParseTree.PromptArgs args) {
             string type = args.Tokens[1].Text;
-            string id   = args.Tokens[2].Text;
-            return type == "bool" ? new InputValue<bool>(  id, this.driver.Nodes) :
-                type == "int"     ? new InputValue<int>(   id, this.driver.Nodes) :
-                type == "float"   ? new InputValue<double>(id, this.driver.Nodes) :
-                type == "trigger" ? new InputTrigger(      id, this.driver.Nodes) :
+            string name = args.Tokens[2].Text;
+            if (this.driver.Nodes.Exists(name))
+                throw new Exception("Can not assign a new " + type+ " input. An identifier already exists by the name " + name + ".");
+            
+            // Create and return an input based on type.
+            return type == "bool" ? new InputValue<bool>(  name, this.driver.Nodes) :
+                type == "int"     ? new InputValue<int>(   name, this.driver.Nodes) :
+                type == "float"   ? new InputValue<double>(name, this.driver.Nodes) :
+                type == "trigger" ? new InputTrigger(      name, this.driver.Nodes) :
                 throw new Exception("Unknown type: "+type);
         }
 
@@ -286,6 +357,9 @@ namespace Blackboard.Parser {
         
         private void handleEndAssignWithoutType(PP.ParseTree.PromptArgs args) {
             string name = args.Tokens[1].Text;
+            if (this.driver.Nodes.Exists(name))
+                throw new Exception("Can not assign input. An identifier already exists by the name " + name + ".");
+
             INode right = this.pop().First();
             if (right is IValue<bool> rightBool)
                 _ = new InputValue<bool>(name, this.driver.Nodes, rightBool.Value);
@@ -300,6 +374,9 @@ namespace Blackboard.Parser {
 
         private void handleEndAssignExisting(PP.ParseTree.PromptArgs args) {
             string name = args.Tokens[0].Text;
+            if (!this.driver.Nodes.Exists(name))
+                throw new Exception("Failed to find " + name + " to be assigned.");
+
             INode left = this.driver.Find(name);
             if (left is not IInput) throw new Exception("May only assign a value " +
                 "directly to a input variable. " + name + " is not an input variable.");
@@ -309,6 +386,9 @@ namespace Blackboard.Parser {
         private void handleEndDefineWithType(PP.ParseTree.PromptArgs args) {
             string type = args.Tokens[0].Text;
             string name = args.Tokens[1].Text;
+            if (this.driver.Nodes.Exists(name))
+                throw new Exception("May not define a " + type + ". An identifier already exists by the name " + name + ".");
+
             INode right = this.pop().First();
             if (right is IValue<bool> rightBool) {
                 if (type != "bool")
@@ -333,6 +413,9 @@ namespace Blackboard.Parser {
 
         private void handleEndDefineWithoutType(PP.ParseTree.PromptArgs args) {
             string name = args.Tokens[0].Text;
+            if (this.driver.Nodes.Exists(name))
+                throw new Exception("May not define an identifier. An identifier already exists by the name " + name + ".");
+
             INode right = this.pop().First();
             INode _ = right is IValue<bool> rightBool ?
                     new OutputValue<bool>(rightBool, name, this.driver.Nodes) :
@@ -348,6 +431,9 @@ namespace Blackboard.Parser {
         private void handleEndConstWithType(PP.ParseTree.PromptArgs args) {
             string type = args.Tokens[1].Text;
             string name = args.Tokens[2].Text;
+            if (this.driver.Nodes.Exists(name))
+                throw new Exception("May not create " + type + " constant. An identifier already exists by the name " + name + ".");
+
             INode right = this.pop().First();
             if (type == "trigger")
                 throw new Exception("May not define a constant trigger value.");
@@ -365,11 +451,15 @@ namespace Blackboard.Parser {
                 if (type != "float")
                     throw new Exception("May not define a "+type+" with a float constant.");
                 _ = new Const<double>(name, this.driver.Nodes, rightFloat.Value);
-            } else throw new Exception(Cast.PrettyName(right) + " can not be used in a definition of a constant.");
+            } else throw new Exception(Cast.PrettyName(right) + " can not be used in a " +
+                "definition of a " + type + " constant by the name " + name + ".");
         }
 
         private void handleEndConstWithoutType(PP.ParseTree.PromptArgs args) {
-            string name = args.Tokens[0].Text;
+            string name = args.Tokens[1].Text;
+            if (this.driver.Nodes.Exists(name))
+                throw new Exception("May not create constant. An identifier already exists by the name " + name + ".");
+
             INode right = this.pop().First();
             INode _ = right is IValue<bool> rightBool ?
                     new Const<bool>(name, this.driver.Nodes, rightBool.Value) :
@@ -379,7 +469,8 @@ namespace Blackboard.Parser {
                     new Const<double>(name, this.driver.Nodes, rightFloat.Value) :
                 right is ITrigger ?
                     throw new Exception("Can not create a constant trigger.") :
-                throw new Exception(Cast.PrettyName(right) + " can not be used in a definition.");
+                throw new Exception(Cast.PrettyName(right) + " can not be used in a " +
+                    "definition of a constant by the name " + name + ".");
         }
 
         private void handlePullTrigger(PP.ParseTree.PromptArgs args) {
@@ -427,7 +518,7 @@ namespace Blackboard.Parser {
             string name = args.Tokens[^1].Text;
             INode node = this.driver.Find(name);
             if (node is null)
-                throw new Exception(name + " is unknown");
+                throw new Exception("Identifier " + name + " is unknown.");
             if (this.isLocal) {
                 INode literal = Cast.ToLiteral(node);
                 if (literal is not null) this.push(literal);

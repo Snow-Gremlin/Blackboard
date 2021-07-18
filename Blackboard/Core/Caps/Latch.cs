@@ -1,11 +1,12 @@
-﻿using Blackboard.Core.Interfaces;
+﻿using Blackboard.Core.Bases;
+using Blackboard.Core.Interfaces;
 using System.Collections.Generic;
 
-namespace Blackboard.Core.Bases {
+namespace Blackboard.Core.Caps {
 
     /// <summary>This is a latching value node.</summary>
     /// <typeparam name="T">The type of the value for this node.</typeparam>
-    public abstract class Latch<T>: ValueNode<T> {
+    sealed public class Latch<T>: ValueNode<T> {
 
         /// <summary>This is the first parent node to read from.</summary>
         private ITrigger source1;

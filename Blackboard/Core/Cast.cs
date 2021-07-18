@@ -49,6 +49,7 @@ namespace Blackboard.Core {
                    type == typeof(ITrigger)       ? TriggerMatch(node) :
                    type == typeof(IValue<int>)    ? IntMatch(node) :
                    type == typeof(IValue<double>) ? DoubleMatch(node) :
+                   type == typeof(INode)          ? 0 :
                    -1;
         }
 
@@ -114,6 +115,7 @@ namespace Blackboard.Core {
                    type == typeof(ITrigger)       ? (T)AsTrigger(node) :
                    type == typeof(IValue<int>)    ? (T)AsInt(node) :
                    type == typeof(IValue<double>) ? (T)AsDouble(node) :
+                   type == typeof(INode)          ? (T)node :
                    throw new Exception("Can not cast "+node+" to "+typeof(T)+".");
         }
 

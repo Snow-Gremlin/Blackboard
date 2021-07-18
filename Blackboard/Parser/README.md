@@ -26,13 +26,14 @@ out Z;
 
 ## Todo
 
-- Need to add equality tests and logical-and/or/xor
-- Add power and remainder
-- Add shift left and right
-- Add constants
-- Add temp/local value which exists only in a single parse, used for assigning to not recalculate the same value.
+- Need to handle receivers in definition.
+- Add temp/local value which exists only in a single parse, used for assigning to not recalculate the same value
 - Add multiple assignment (x=y=1)
 - Add a way to read values out of a parse, get/out/return/yield
+- Need to make it not apply until later
+- Need to add uint, int64, uint64, and bytes
+- Need to add counters, latch, and triggers
+- Add Log and Ln
 
 ## Ideas
 

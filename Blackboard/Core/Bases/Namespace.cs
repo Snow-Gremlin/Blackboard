@@ -80,7 +80,8 @@ namespace Blackboard.Core.Bases {
         /// <summary>Finds the child with the given name.</summary>
         /// <param name="name">The name of the child to check for.</param>
         /// <returns>The child with the given name, otherwise null is returned.</returns>
-        public INamed Find(string name) => this.children[name];
+        public INamed Find(string name) =>
+            this.children.TryGetValue(name, out INamed node) ? node : null;
 
         /// <summary>This is a helper method for setting a parent to the node.</summary>
         /// <typeparam name="T">The node type for the parent.</typeparam>

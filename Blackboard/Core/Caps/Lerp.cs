@@ -6,7 +6,7 @@ namespace Blackboard.Core.Caps {
     /// <summary>This will return the linear interpolation between two parent values.</summary>
     sealed public class Lerp: Ternary<double, double, double, double> {
 
-        /// <summary>Creates a selection value node.</summary>
+        /// <summary>Creates a linear interpolation value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="source3">This is the third parent for the source value.</param>
@@ -24,7 +24,7 @@ namespace Blackboard.Core.Caps {
         /// </param>
         /// <param name="value2">The first value to return.</param>
         /// <param name="value3">The second value to return.</param>
-        /// <returns>The selected value to set to this node.</returns>
+        /// <returns>The lerp value to set to this node.</returns>
         protected override double OnEval(double value1, double value2, double value3) =>
             (value1 <= 0.0) ? value2 : (value1 >= 1.0) ? value3 : (value3-value2)*value1 + value2;
 

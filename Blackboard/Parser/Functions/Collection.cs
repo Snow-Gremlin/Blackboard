@@ -63,18 +63,21 @@ namespace Blackboard.Parser.Functions {
         /// <summary>Adds new function to this collection.</summary>
         /// <param name="name">The name of the functions to add.</param>
         /// <param name="funcs">The function factories to add.</param>
-        public void Add(string name, params IFunction[] funcs) =>
+        /// <returns>Returns this collection so that adds can be chained.</returns>
+        public Collection Add(string name, params IFunction[] funcs) =>
             this.Add(name, funcs as IEnumerable<IFunction>);
 
         /// <summary>Adds new function to this collection.</summary>
         /// <param name="name">The name of the functions to add.</param>
         /// <param name="funcs">The function factories to add.</param>
-        public void Add(string name, IEnumerable<IFunction> funcs) {
+        /// <returns>Returns this collection so that adds can be chained.</returns>
+        public Collection Add(string name, IEnumerable<IFunction> funcs) {
             if (!this.TryGetValue(name, out List<IFunction> funcs2)) {
                 funcs2 = new List<IFunction>();
                 this[name] = funcs2;
             }
             funcs2.AddRange(funcs);
+            return this;
         }
     }
 }

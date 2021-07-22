@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Blackboard.Core.Caps {
 
-    /// <summary>This is a trigger which can be triggered from user output.</summary>
+    /// <summary>This is a trigger which can be provoked from user output.</summary>
     sealed public class OutputTrigger: TriggerNode, ITriggerOutput {
 
         /// <summary>The name for this namespace.</summary>
@@ -48,8 +48,8 @@ namespace Blackboard.Core.Caps {
             set => this.SetParent(ref this.source, value);
         }
 
-        /// <summary>This event is emitted when the trigger has been triggered.</summary>
-        public event EventHandler OnTriggered;
+        /// <summary>This event is emitted when the trigger has been provoked.</summary>
+        public event EventHandler OnProvoked;
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public override IEnumerable<INode> Parents {
@@ -60,10 +60,10 @@ namespace Blackboard.Core.Caps {
         }
 
         /// <summary>This updates the trigger during the an evaluation.</summary>
-        /// <returns>This returns the triggered value as it currently is.</returns>
+        /// <returns>This returns the provoked value as it currently is.</returns>
         protected override bool UpdateTrigger() {
-            if (this.source.Triggered) {
-                this.OnTriggered?.Invoke(this, EventArgs.Empty);
+            if (this.source.Provoked) {
+                this.OnProvoked?.Invoke(this, EventArgs.Empty);
                 return true;
             }
             return false;

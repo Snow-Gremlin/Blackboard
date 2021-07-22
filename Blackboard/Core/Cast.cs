@@ -108,7 +108,7 @@ namespace Blackboard.Core {
         /// <summary>Determines if the given node can be cast to the given type.</summary>
         /// <typeparam name="T">Must be a bool, int, ITrigger, or double otherwise an exception is thrown.</typeparam>
         /// <param name="node">The node to check.</param>
-        /// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
+        /// <returns>The node as the requested node type or this throws an exception.</returns>
         static public T As<T>(INode node) {
             System.Type type = typeof(T);
             return type == typeof(IValue<bool>)   ? (T)AsBool(node) :
@@ -139,7 +139,7 @@ namespace Blackboard.Core {
             node is IValue<bool>   nodeBool    ? new Literal<bool>(  nodeBool.Value) :
             node is IValue<int>    nodeInt     ? new Literal<int>(   nodeInt.Value) :
             node is IValue<double> nodeFloat   ? new Literal<double>(nodeFloat.Value) :
-            node is ITrigger       nodeTrigger ? new Literal<bool>(  nodeTrigger.Triggered) :
+            node is ITrigger       nodeTrigger ? new Literal<bool>(  nodeTrigger.Provoked) :
             null;
 
         /// <summary>Determines if all the given nodes are constants.</summary>

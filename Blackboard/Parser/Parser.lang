@@ -102,9 +102,9 @@
 <Assign-Existing-More> := _
     | [Assign] <Id> <Assign-Existing-More>;
 
-<Define-Typed-Rule> := [Type] {SetType} <Id> {StartDefine} [Define] <Conditional> {EndDefine};
+<Define-Typed-Rule> := [Type] {SetType} <Id> [Define] <Conditional> {EndTypeDefine};
 
-<Define-Var-Rule> := <Id> {StartDefine} [Define] <Conditional> {EndDefine};
+<Define-Var-Rule> := <Id> [Define] <Conditional> {EndVarDefine};
 
 <Pull-Trigger> := [Trigger] <Id> {PullTrigger}
     | <Conditional> [Trigger] <Id> {ConditionalPullTrigger};

@@ -17,7 +17,7 @@ namespace Blackboard.Core.Caps {
         /// <summary>Creates a latching value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="source1">This is the parent that indicates the value should be set.</param>
-        /// <param name="source2">This is the parent to get the value from when the other is triggered.</param>
+        /// <param name="source2">This is the parent to get the value from when the other is provoked.</param>
         /// <param name="value">The default value for this node.</param>
         public Latch(ITrigger source1 = null, IValue<T> source2 = null, T value = default) : base(value) {
             this.Parent1 = source1;
@@ -34,7 +34,7 @@ namespace Blackboard.Core.Caps {
             }
         }
 
-        /// <summary>The parent node to get the source value from if the other parent is triggered.</summary>
+        /// <summary>The parent node to get the source value from if the other parent is provoked.</summary>
         public IValue<T> Parent2 {
             get => this.source2;
             set {
@@ -55,7 +55,7 @@ namespace Blackboard.Core.Caps {
         /// <returns>True if the value was changed, false otherwise.</returns>
         protected override bool UpdateValue() {
             if (this.source1 is null || this.source2 is null) return false;
-            if (!this.source1.Triggered) return false;
+            if (!this.source1.Provoked) return false;
             T value = this.source2.Value;
             return this.SetNodeValue(value);
         }

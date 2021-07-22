@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Blackboard.Core.Caps {
 
-    /// <summary>This is a trigger which will be triggered when any of its non-null parents are triggered.</summary>
+    /// <summary>This is a trigger which will be provoked when any of its non-null parents are provoked.</summary>
     sealed public class Any: Multitrigger {
 
         /// <summary>Creates an any trigger node.</summary>
@@ -17,11 +17,11 @@ namespace Blackboard.Core.Caps {
         public Any(IEnumerable<ITrigger> parents = null) :
             base(parents) { }
 
-        /// <summary>Checks if any of the parents are triggered during evaluation.</summary>
-        /// <param name="triggered">The triggered values from the parents.</param>
-        /// <returns>True if any of the parents are triggered, false otherwise.</returns>
-        protected override bool OnEval(IEnumerable<bool> triggered) {
-            foreach (bool trig in triggered) {
+        /// <summary>Checks if any of the parents are provoked during evaluation.</summary>
+        /// <param name="provoked">The provoked values from the parents.</param>
+        /// <returns>True if any of the parents are provoked, false otherwise.</returns>
+        protected override bool OnEval(IEnumerable<bool> provoked) {
+            foreach (bool trig in provoked) {
                 if (trig) return true;
             }
             return false;

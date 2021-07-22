@@ -85,8 +85,8 @@ namespace Blackboard.Parser {
                 { "NewVarInputWithAssign",  this.handleNewVarInputWithAssign },
                 { "AssignExisting",         this.handleAssignExisting },
 
-                { "EndTypeDefine",          this.handleEndTypeDefine },
-                { "EndVarDefine",           this.handleEndVarDefine },
+                { "TypeDefine",             this.handleTypeDefine },
+                { "VarDefine",              this.handleVarDefine },
                 { "PullTrigger",            this.handlePullTrigger },
                 { "ConditionalPullTrigger", this.handleConditionalPullTrigger },
 
@@ -254,20 +254,21 @@ namespace Blackboard.Parser {
 
         /// <summary>Adds in initial constants.</summary>
         private void initConsts() {
-            _ = new Const<double>("e",         this.driver.Nodes, S.Math.E);
-            _ = new Const<double>("pi",        this.driver.Nodes, S.Math.PI);
-            _ = new Const<double>("tau",       this.driver.Nodes, S.Math.Tau);
-            _ = new Const<double>("sqrt2",     this.driver.Nodes, S.Math.Sqrt(2));
-            _ = new Const<double>("nan",       this.driver.Nodes, double.NaN);
-            _ = new Const<double>("inf",       this.driver.Nodes, double.PositiveInfinity);
-            _ = new Const<double>("posInf",    this.driver.Nodes, double.PositiveInfinity);
-            _ = new Const<double>("negInf",    this.driver.Nodes, double.NegativeInfinity);
-            _ = new Const<double>("maxFloat",  this.driver.Nodes, double.MaxValue);
-            _ = new Const<double>("minFloat",  this.driver.Nodes, double.MinValue);
-            _ = new Const<double>("maxInt",    this.driver.Nodes, int.MaxValue);
-            _ = new Const<double>("minInt",    this.driver.Nodes, int.MinValue);
-            _ = new Const<double>("floatSize", this.driver.Nodes, sizeof(double));
-            _ = new Const<double>("intSize",   this.driver.Nodes, sizeof(int));
+            INamespace scope = this.driver.Nodes;
+            _ = new Const<double>("e",         scope, S.Math.E);
+            _ = new Const<double>("pi",        scope, S.Math.PI);
+            _ = new Const<double>("tau",       scope, S.Math.Tau);
+            _ = new Const<double>("sqrt2",     scope, S.Math.Sqrt(2));
+            _ = new Const<double>("nan",       scope, double.NaN);
+            _ = new Const<double>("inf",       scope, double.PositiveInfinity);
+            _ = new Const<double>("posInf",    scope, double.PositiveInfinity);
+            _ = new Const<double>("negInf",    scope, double.NegativeInfinity);
+            _ = new Const<double>("maxFloat",  scope, double.MaxValue);
+            _ = new Const<double>("minFloat",  scope, double.MinValue);
+            _ = new Const<double>("maxInt",    scope, int.MaxValue);
+            _ = new Const<double>("minInt",    scope, int.MinValue);
+            _ = new Const<double>("floatSize", scope, sizeof(double));
+            _ = new Const<double>("intSize",   scope, sizeof(int));
         }
 
         /// <summary>Pushes a new node or stack item onto the stack.</summary>
@@ -386,7 +387,7 @@ namespace Blackboard.Parser {
                 _ = new InputValue<double>(name, scope, value);
             } else if (this.typeText == "trigger") {
                 bool value =
-                    (right is ITrigger     rightTrigger) ? rightTrigger.Triggered :
+                    (right is ITrigger     rightTrigger) ? rightTrigger.Provoked :
                     (right is IValue<bool> rightBool)    ? rightBool.Value :
                     throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a trigger.");
                 new InputTrigger(name, scope).Trigger(value);
@@ -411,15 +412,12 @@ namespace Blackboard.Parser {
             if (scope.Exists(name)) throw new Exception("Can not assign a new untyped " + this.typeText+ " input. "+
                     "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
 
-            if (right is IValue<bool> rightBool)
-                _ = new InputValue<bool>(name, this.driver.Nodes, rightBool.Value);
-            else if (right is IValue<int> rightInt)
-                _ = new InputValue<int>(name, this.driver.Nodes, rightInt.Value);
-            else if (right is IValue<double> rightFloat)
-                _ = new InputValue<double>(name, this.driver.Nodes, rightFloat.Value);
-            else if (right is ITrigger rightTrigger)
-                new InputTrigger(name, this.driver.Nodes).Trigger(rightTrigger.Triggered);
-            else throw new Exception(Cast.PrettyName(right) + " can not be assigned.");
+            INode _ =
+                right is IValue<bool>   rightBool    ? new InputValue<bool>(  name, scope, rightBool.Value) :
+                right is IValue<int>    rightInt     ? new InputValue<int>(   name, scope, rightInt.Value) :
+                right is IValue<double> rightFloat   ? new InputValue<double>(name, scope, rightFloat.Value) :
+                right is ITrigger       rightTrigger ? new InputTrigger(      name, scope, rightTrigger.Provoked):
+                throw new Exception(Cast.PrettyName(right) + " can not be assigned.");
         }
 
         /// <summary>This assigns several existing input nodes with a new value.</summary>
@@ -432,129 +430,73 @@ namespace Blackboard.Parser {
                 if (left is null) throw new Exception("Unknown input variable " + id + " at " + id.Location + ".");
                 if (left is IValueInput<bool> leftBool) {
                     bool value =
-                    (right is IValue<bool> rightBool) ? rightBool.Value :
-                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a bool.");
+                        (right is IValue<bool> rightBool) ? rightBool.Value :
+                        throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a bool.");
                     leftBool.SetValue(value);
                 } else if (left is IValueInput<int> leftInt) {
                     int value =
-                    (right is IValue<int> rightInt) ? rightInt.Value :
-                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to an int.");
+                        (right is IValue<int> rightInt) ? rightInt.Value :
+                        throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to an int.");
                     leftInt.SetValue(value);
                 } else if (left is IValueInput<double> leftFloat) {
                     double value =
-                    (right is IValue<double> rightFloat) ? rightFloat.Value :
-                    (right is IValue<int>    rightInt)   ? rightInt.Value :
-                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a float.");
+                        (right is IValue<double> rightFloat) ? rightFloat.Value :
+                        (right is IValue<int>    rightInt)   ? rightInt.Value :
+                        throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a float.");
                     leftFloat.SetValue(value);
                 } else if (left is ITriggerInput leftTrigger) {
                     bool value =
-                    (right is ITrigger     rightTrigger) ? rightTrigger.Triggered :
-                    (right is IValue<bool> rightBool)    ? rightBool.Value :
-                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a trigger.");
+                        (right is ITrigger     rightTrigger) ? rightTrigger.Provoked :
+                        (right is IValue<bool> rightBool)    ? rightBool.Value :
+                        throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a trigger.");
                     leftTrigger.Trigger(value);
                 } else throw new Exception("Unable to assign to " + Cast.PrettyName(left) + " at " + id.Location + ".");
             }
         }
 
-        private void handleEndTypeDefine(PP.ParseTree.PromptArgs args) {
-            // TODO: Implement
+        /// <summary>This handles defining a new typed output node.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleTypeDefine(PP.ParseTree.PromptArgs args) {
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            INode right = this.popNode().First();
+            Identifier id = this.pop() as Identifier;
+            INamespace scope = this.scope(id, true);
+            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
+                    "so it can not be used as a scope for a typed definition at " + loc + ".");
+
+            string name = id[^1];
+            if (scope.Exists(name)) throw new Exception("Can not define a new typed " + this.typeText+ " node. "+
+                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
+
+            INode _ =
+                this.typeText == "bool"    ? new OutputValue<bool>(  Cast.As<IValue<bool>>(right),   name, scope) :
+                this.typeText == "int"     ? new OutputValue<int>(   Cast.As<IValue<int>>(right),    name, scope) :
+                this.typeText == "float"   ? new OutputValue<double>(Cast.As<IValue<double>>(right), name, scope) :
+                this.typeText == "trigger" ? new OutputTrigger(      Cast.As<ITrigger>(right),       name, scope) :
+                throw new Exception("Unable to define " + id + " of type " + this.typeText + " with " + Cast.PrettyName(right) + " at " + id.Location + ".");
         }
 
-        private void handleEndVarDefine(PP.ParseTree.PromptArgs args) {
-            // TODO: Implement
+        /// <summary>This handles defining a new untyped output node.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleVarDefine(PP.ParseTree.PromptArgs args) {
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            INode right = this.popNode().First();
+            Identifier id = this.pop() as Identifier;
+            INamespace scope = this.scope(id, true);
+            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
+                    "so it can not be used as a scope for a typed definition at " + loc + ".");
+
+            string name = id[^1];
+            if (scope.Exists(name)) throw new Exception("Can not define a new typed " + this.typeText+ " node. "+
+                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
+            
+            INode _ =
+                right is IValue<bool>   rightBool    ? new OutputValue<bool>(  rightBool,    name, scope) :
+                right is IValue<int>    rightInt     ? new OutputValue<int>(   rightInt,     name, scope) :
+                right is IValue<double> rightFloat   ? new OutputValue<double>(rightFloat,   name, scope) :
+                right is ITrigger       rightTrigger ? new OutputTrigger(      rightTrigger, name, scope):
+                throw new Exception(Cast.PrettyName(right) + " can not be assigned.");
         }
-
-        /*
-        private void handleEndDefineWithType(PP.ParseTree.PromptArgs args) {
-            string type = args.Tokens[0].Text;
-            string name = args.Tokens[1].Text;
-            if (this.driver.Nodes.Exists(name))
-                throw new Exception("May not define a " + type + ". An identifier already exists by the name " + name + ".");
-
-            INode right = this.pop().First();
-            if (right is IValue<bool> rightBool) {
-                if (type != "bool")
-                    throw new Exception("May not define a "+type+" with a bool value.");
-                _ = new OutputValue<bool>(rightBool, name, this.driver.Nodes);
-            } else if (right is IValue<int> rightInt) {
-                INode _ = type == "float" ?
-                        new OutputValue<double>(new IntToFloat(rightInt), name, this.driver.Nodes) :
-                    type == "int" ?
-                        new OutputValue<int>(rightInt, name, this.driver.Nodes) :
-                    throw new Exception("May not define a "+type+" with an int value.");
-            } else if(right is IValue<double> rightFloat) {
-                if (type != "float")
-                    throw new Exception("May not define a "+type+" with a float value.");
-                _ = new OutputValue<double>(rightFloat, name, this.driver.Nodes);
-            } else if(right is ITrigger rightTrigger) {
-                if (type != "trigger")
-                    throw new Exception("May not define a "+type+" with a trigger value.");
-                _ = new OutputTrigger(rightTrigger, name, this.driver.Nodes);
-            } else throw new Exception(Cast.PrettyName(right) + " can not be used in a definition.");
-        }
-
-        private void handleEndDefineWithoutType(PP.ParseTree.PromptArgs args) {
-            string name = args.Tokens[0].Text;
-            if (this.driver.Nodes.Exists(name))
-                throw new Exception("May not define an identifier. An identifier already exists by the name " + name + ".");
-
-            INode right = this.pop().First();
-            INode _ = right is IValue<bool> rightBool ?
-                    new OutputValue<bool>(rightBool, name, this.driver.Nodes) :
-                right is IValue<int> rightInt ?
-                    new OutputValue<int>(rightInt, name, this.driver.Nodes) :
-                right is IValue<double> rightFloat ?
-                    new OutputValue<double>(rightFloat, name, this.driver.Nodes) :
-                right is ITrigger rightTrigger ?
-                    new OutputTrigger(rightTrigger, name, this.driver.Nodes) :
-                throw new Exception(Cast.PrettyName(right) + " can not be used in a definition.");
-        }
-
-        private void handleEndConstWithType(PP.ParseTree.PromptArgs args) {
-            string type = args.Tokens[1].Text;
-            string name = args.Tokens[2].Text;
-            if (this.driver.Nodes.Exists(name))
-                throw new Exception("May not create " + type + " constant. An identifier already exists by the name " + name + ".");
-
-            INode right = this.pop().First();
-            if (type == "trigger")
-                throw new Exception("May not define a constant trigger value.");
-            else if (right is IValue<bool> rightBool) {
-                if (type != "bool")
-                    throw new Exception("May not define a "+type+" with a bool constant.");
-                _ = new Const<bool>(name, this.driver.Nodes, rightBool.Value);
-            } else if (right is IValue<int> rightInt) {
-                INode _ = type == "float" ?
-                        new Const<double>(name, this.driver.Nodes, rightInt.Value) :
-                    type == "int" ?
-                        new Const<int>(name, this.driver.Nodes, rightInt.Value) :
-                    throw new Exception("May not define a "+type+" with an int constant.");
-            } else if (right is IValue<double> rightFloat) {
-                if (type != "float")
-                    throw new Exception("May not define a "+type+" with a float constant.");
-                _ = new Const<double>(name, this.driver.Nodes, rightFloat.Value);
-            } else throw new Exception(Cast.PrettyName(right) + " can not be used in a " +
-                "definition of a " + type + " constant by the name " + name + ".");
-        }
-
-        private void handleEndConstWithoutType(PP.ParseTree.PromptArgs args) {
-            string name = args.Tokens[1].Text;
-            if (this.driver.Nodes.Exists(name))
-                throw new Exception("May not create constant. An identifier already exists by the name " + name + ".");
-
-            INode right = this.pop().First();
-            INode _ = right is IValue<bool> rightBool ?
-                    new Const<bool>(name, this.driver.Nodes, rightBool.Value) :
-                right is IValue<int> rightInt ?
-                    new Const<int>(name, this.driver.Nodes, rightInt.Value) :
-                right is IValue<double> rightFloat ?
-                    new Const<double>(name, this.driver.Nodes, rightFloat.Value) :
-                right is ITrigger ?
-                    throw new Exception("Can not create a constant trigger.") :
-                throw new Exception(Cast.PrettyName(right) + " can not be used in a " +
-                    "definition of a constant by the name " + name + ".");
-        }
-        */
 
         /// <summary>This handles when a trigger is provoked unconditionally.</summary>
         /// <param name="args">The token information from the parser.</param>
@@ -569,7 +511,7 @@ namespace Blackboard.Parser {
             trigger.Trigger();
         }
 
-        /// <summary>This handles when a trigger should only be triggered if a condition returns true.</summary>
+        /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleConditionalPullTrigger(PP.ParseTree.PromptArgs args) {
             PP.Scanner.Location loc = args.Tokens[^1].End;

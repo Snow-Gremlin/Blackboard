@@ -59,17 +59,17 @@ namespace Blackboard.Core.Bases {
 
         /// <summary>
         /// This handles updating this node's value given the
-        /// parents' triggered state during evaluation.
+        /// parents' provoked state during evaluation.
         /// </summary>
         /// <remarks>Any null parents are ignored.</remarks>
-        /// <param name="triggered">The value from the all the non-null parents.</param>
+        /// <param name="provoked">The value from the all the non-null parents.</param>
         /// <returns>The new value for this node.</returns>
-        protected abstract bool OnEval(IEnumerable<bool> triggered);
+        protected abstract bool OnEval(IEnumerable<bool> provoked);
 
         /// <summary>This updates the trigger during evaluation.</summary>
-        /// <returns>True if the value was triggered, false otherwise.</returns>
+        /// <returns>True if the value was provoked, false otherwise.</returns>
         protected override bool UpdateTrigger() =>
-            this.Triggered = this.OnEval(this.sources.NotNull().Triggers());
+            this.Provoked = this.OnEval(this.sources.NotNull().Triggers());
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>

@@ -86,9 +86,9 @@ namespace Blackboard.Core.Caps {
         protected override bool UpdateValue() {
             int value = this.Value;
             int delta = this.delta?.Value ?? 1;
-            if (this.increment?.Triggered ?? false) value += delta;
-            if (this.decrement?.Triggered ?? false) value -= delta;
-            if (this.reset?.Triggered ?? false) value = this.resetValue?.Value ?? 0;
+            if (this.increment?.Provoked ?? false) value += delta;
+            if (this.decrement?.Provoked ?? false) value -= delta;
+            if (this.reset?.Provoked ?? false) value = this.resetValue?.Value ?? 0;
             return this.SetNodeValue(value);
         }
 

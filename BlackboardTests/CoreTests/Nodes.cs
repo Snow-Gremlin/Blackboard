@@ -133,7 +133,7 @@ namespace BlackboardTests.CoreTests {
             _ = new OutputValue<bool>(toggle, "Toggle", drv.Nodes);
 
             bool high;
-            outTrig.OnTriggered += (object sender, EventArgs e) => high = true;
+            outTrig.OnProvoked += (object sender, EventArgs e) => high = true;
 
             void check(bool triggerA, bool triggerB, bool triggerC,
                 int expCount, bool expHigh, bool expToggle) {

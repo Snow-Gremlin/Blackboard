@@ -76,7 +76,7 @@ namespace Blackboard.Core {
         /// <returns>The triggers from the given non-null nodes.</returns>
         static public IEnumerable<bool> Triggers(this IEnumerable<ITrigger> nodes) {
             foreach (ITrigger node in nodes) {
-                yield return node?.Triggered ?? false;
+                yield return node?.Provoked ?? false;
             }
         }
 

@@ -39,20 +39,23 @@ namespace Blackboard.Core {
         /// <returns>True if the name exists in this node structure.</returns>
         public bool Contains(string name) => this.Find(name) is not null;
 
-        /// <summary>Finds the given input or output node by name.</summary>
-        /// <param name="name">The name of the input or output to look for.</param>
-        /// <returns>The input or output node.</returns>
-        public INode Find(string name) {
+        /// <summary>Finds the given named node by name.</summary>
+        /// <param name="name">The name of the dot separated named to look for.</param>
+        /// <returns>The named node or null if not found.</returns>
+        public INamed Find(string name) => this.Find(name.Split('.'));
+
+        /// <summary>Finds the given named node by scoped names.</summary>
+        /// <param name="names">The names to look for.</param>
+        /// <returns>The named node or null if not found.</returns>
+        public INamed Find(IEnumerable<string> names) {
             INamespace scope = this.Nodes;
-            string[] parts = name.Split('.');
-            int max = parts.Length-1;
-            for (int i = 0; i <= max; ++i) {
-                INode node = scope.Find(parts[i]);
-                if (i == max) return node;
-                if (node is not INamespace) return null;
-                scope = node as INamespace;
+            INamed cur = null;
+            foreach (string name in names) {
+                if (scope is null) return null;
+                cur = scope.Find(name);
+                scope = cur is INamespace curScope ? curScope : null;
             }
-            return null;
+            return cur;
         }
 
         /// <summary>Sets a value for the given named input.</summary>
@@ -96,6 +99,18 @@ namespace Blackboard.Core {
         /// <param name="name">The name of trigger node to trigger.</param>
         /// <returns>True if a node by that name is found and it was a trigger, false otherwise.</returns>
         public bool Trigger(string name) {
+            INode node = this.Find(name);
+            if (node is ITriggerInput input) {
+                this.Trigger(input);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>This will trigger the node with the given name.</summary>
+        /// <param name="name">The name of trigger node to trigger.</param>
+        /// <returns>True if a node by that name is found and it was a trigger, false otherwise.</returns>
+        public bool Trigger(IEnumerable<string> name) {
             INode node = this.Find(name);
             if (node is ITriggerInput input) {
                 this.Trigger(input);

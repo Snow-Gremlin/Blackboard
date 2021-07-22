@@ -8,11 +8,14 @@ using System.Linq;
 using System.Reflection;
 using PP = PetiteParser;
 using S = System;
+using Blackboard.Parser.StackItems;
 
 namespace Blackboard.Parser {
 
     /// <summary>This will parse the Blackboard language into actions and nodes to apply to the driver.</summary>
     public class Parser {
+
+        private const string undefinedType = "undefined";
 
         /// <summary>The resource file for the Blackboard language definition.</summary>
         private const string resourceName = "Blackboard.Parser.Parser.lang";
@@ -23,21 +26,28 @@ namespace Blackboard.Parser {
         static private PP.Parser.Parser ParserSingleton;
 
         private Driver driver;
+
+        private bool isDefine;
+        private string typeText;
+
         private LinkedList<object> stack;
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
         private Collection ops;
         private Collection funcs;
-        private bool isLocal;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="driver">The driver to modify.</param>
         public Parser(Driver driver) {
             this.driver = driver;
-            this.stack = new LinkedList<object>();
+
+            this.isDefine = false;
+            this.typeText = undefinedType;
+
+            this.stack   = new LinkedList<object>();
             this.prompts = null;
-            this.ops = null;
-            this.funcs = null;
-            this.isLocal = false;
+            this.ops     = null;
+            this.funcs   = null;
+
             this.initPrompts();
             this.initFuncs();
             this.initConsts();
@@ -68,22 +78,19 @@ namespace Blackboard.Parser {
         private void initPrompts() {
             this.ops = new Collection();
             this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>() {
-                { "Clean",       this.handleClean },
-                { "StartAssign", this.handleStartAssign },
-                { "StartDefine", this.handleStartDefine },
-                { "StartConst",  this.handleStartConst },
+                { "Clean", this.handleClean },
 
-                { "NewInput",             this.handleNewInput },
-                { "EndAssignWithType",    this.handleEndAssignWithType },
-                { "EndAssignWithoutType", this.handleEndAssignWithoutType },
-                { "EndAssignExisting",    this.handleEndAssignExisting },
-                { "EndDefineWithType",    this.handleEndDefineWithType },
-                { "EndDefineWithoutType", this.handleEndDefineWithoutType },
-                { "EndConstWithType",     this.handleEndConstWithType },
-                { "EndConstWithoutType",  this.handleEndConstWithoutType },
-                { "PullTrigger",          this.handlePullTrigger },
+                { "NewTypeInputNoAssign",   this.handleNewTypeInputNoAssign },
+                { "NewTypeInputWithAssign", this.handleNewTypeInputWithAssign },
+                { "NewVarInputWithAssign",  this.handleNewVarInputWithAssign },
+                { "AssignExisting",         this.handleAssignExisting },
 
-                { "Receiver",  this.handleReceiver },
+                { "EndTypeDefine",          this.handleEndTypeDefine },
+                { "EndVarDefine",           this.handleEndVarDefine },
+                { "PullTrigger",            this.handlePullTrigger },
+                { "ConditionalPullTrigger", this.handleConditionalPullTrigger },
+
+                { "SetType",   this.handleSetType },
                 { "StartCall", this.handleStartCall },
                 { "Call",      this.handleEndCall },
                 { "PushId",    this.handlePushId },
@@ -91,6 +98,8 @@ namespace Blackboard.Parser {
                 { "PushInt",   this.handlePushInt },
                 { "PushHex",   this.handlePushHex },
                 { "PushFloat", this.handlePushFloat },
+                { "StartId",   this.handleStartId },
+                { "AddId",     this.handleAddId },
             };
             this.addProcess("Trinary", 3,
                 new Input3<IValue<bool>, IValue<bool>,   IValue<bool>>(  (test, left, right) => new Select<bool>(  test, left, right)),
@@ -181,7 +190,7 @@ namespace Blackboard.Parser {
         /// <param name="funcs">The functions that will handle this prompt based on types of values popped off the stack.</param>
         private void addProcess(string name, int count, params IFunction[] funcs) {
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
-                INode[] inputs = this.pop(count);
+                INode[] inputs = this.popNode(count);
                 PP.Scanner.Location loc = args.Tokens[^1].End;
                 INode node = this.ops.Build(name, inputs, loc);
                 this.push(Cast.IsConstant(inputs) ? Cast.ToLiteral(node) : node);
@@ -261,14 +270,14 @@ namespace Blackboard.Parser {
             _ = new Const<double>("intSize",   this.driver.Nodes, sizeof(int));
         }
 
-        /// <summary>Pushes a new node onto the stack of nodes.</summary>
-        /// <param name="node">The node to push.</param>
-        private void push(INode node) => this.stack.AddLast(node);
+        /// <summary>Pushes a new node or stack item onto the stack.</summary>
+        /// <param name="value">The value to push.</param>
+        private void push(object value) => this.stack.AddLast(value);
 
         /// <summary>Pops one or more values off the stack of nodes.</summary>
         /// <param name="count">The number of nodes to pop.</param>
         /// <returns>The popped nodes in the order oldest to newest.</returns>
-        private INode[] pop(int count = 1) {
+        private INode[] popNode(int count = 1) {
             INode[] nodes = new INode[count];
             for (int i = 0; i < count; i++) {
                 nodes[count-1-i] = this.stack.Last.Value as INode;
@@ -277,90 +286,131 @@ namespace Blackboard.Parser {
             return nodes;
         }
 
-        /// <summary>Creates a new input variable from the given prompt arguments.</summary>
-        /// <param name="args">Only the second and third values are used from the arguments as the type and id name respectivally.</param>
-        /// <returns>The newly created node.</returns>
-        private INode newInputNode(PP.ParseTree.PromptArgs args) {
-            string type = args.Tokens[1].Text;
-            string name = args.Tokens[2].Text;
-            if (this.driver.Nodes.Exists(name))
-                throw new Exception("Can not assign a new " + type+ " input. An identifier already exists by the name " + name + ".");
-            
-            // Create and return an input based on type.
-            return type == "bool" ? new InputValue<bool>(  name, this.driver.Nodes) :
-                type == "int"     ? new InputValue<int>(   name, this.driver.Nodes) :
-                type == "float"   ? new InputValue<double>(name, this.driver.Nodes) :
-                type == "trigger" ? new InputTrigger(      name, this.driver.Nodes) :
-                throw new Exception("Unknown type: "+type);
+        /// <summary>Pops off whatever is on the top of the stack.</summary>
+        /// <returns>The value which was on top of the stack.</returns>
+        private object pop() {
+            object value = this.stack.Last.Value;
+            this.stack.RemoveLast();
+            return value;
         }
 
-        /// <summary>Assigns the given node with the newest value on the stack.</summary>
-        /// <param name="left">The node to assign.</param>
-        private void assignNode(INode left) {
-            INode right = this.pop().First();
-            if (right is IValue<bool> rightBool) {
-                bool value = rightBool.Value;
-                if (left is InputValue<bool> leftBool) {
-                    leftBool.SetValue(value);
-                    return;
-                }
-            } else if (right is IValue<int> rightInt) {
-                int value = rightInt.Value;
-                if (left is InputValue<int> leftInt) {
-                    leftInt.SetValue(value);
-                    return;
-                } else if (left is InputValue<double> leftFloat) {
-                    leftFloat.SetValue(value);
-                    return;
-                }
-            } else if (right is IValue<double> rightFloat) {
-                double value = rightFloat.Value;
-                if (left is InputValue<double> leftFloat) {
-                    leftFloat.SetValue(value);
-                    return;
-                }
-            } else if (right is ITrigger rightTrigger) {
-                bool value = rightTrigger.Triggered;
-                if (left is InputTrigger leftTrigger) {
-                    leftTrigger.Trigger(value);
-                    return;
-                } else if (left is InputValue<bool> leftBool) {
-                    leftBool.SetValue(value);
-                    return;
-                }
+        /// <summary>Gets the scope upto the last name in the given identifier.</summary>
+        /// <param name="id">The identifier to get the scope from.</param>
+        /// <param name="createMissing">Indicates that if a group doesn't exist, it should be added.</param>
+        /// <returns>The scope or null if that pass doesn't exist or exists not as a namespace group.</returns>
+        private INamespace scope(Identifier id, bool createMissing) {
+            INamespace scope = this.driver.Nodes;
+            for (int i = 0; i < id.Count - 1; i++) {
+                string name = id[i];
+                INamed node = scope.Find(name);
+                if (node is null) {
+                    if (createMissing) scope = new Group(name, scope);
+                    else return null;
+                } else if (node is INamespace subscope) scope = subscope;
+                else return null;
             }
-            throw new Exception(Cast.PrettyName(right) + " can not be assigned to " + Cast.PrettyName(left) + ".");
+            return scope;
         }
+
+        /// <summary>Finds the node at the given id.</summary>
+        /// <param name="id">The identifier to find the node for.</param>
+        /// <returns>The found node or null if not found.</returns>
+        private INode find(Identifier id) =>
+            this.scope(id, false)?.Find(id[^1]);
 
         #endregion
         #region Handlers...
 
+        /// <summary>This is called before each statement to prepare and clean up the parser.</summary>
+        /// <param name="args">The token information from the parser.</param>
         private void handleClean(PP.ParseTree.PromptArgs args) {
             args.Tokens.Clear();
             this.stack.Clear(); // Should be already clear.
+
+            this.isDefine = false;
+            this.typeText = undefinedType;
         }
 
-        private void handleStartAssign(PP.ParseTree.PromptArgs args) =>
-            this.isLocal = true;
+        /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleNewTypeInputNoAssign(PP.ParseTree.PromptArgs args) {
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            Identifier id = this.pop() as Identifier;
+            INamespace scope = this.scope(id, true);
+            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
+                    "so it can not be used as a scope for an input variable at " + loc + ".");
 
-        private void handleStartDefine(PP.ParseTree.PromptArgs args) =>
-            this.isLocal = false;
+            string name = id[^1];
+            if (scope.Exists(name)) throw new Exception("Can not create a new " + this.typeText+ " input. "+
+                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
 
-        private void handleStartConst(PP.ParseTree.PromptArgs args) =>
-            this.isLocal = true;
+            INode _ =
+                this.typeText == "bool"    ? new InputValue<bool>(  name, scope) :
+                this.typeText == "int"     ? new InputValue<int>(   name, scope) :
+                this.typeText == "float"   ? new InputValue<double>(name, scope) :
+                this.typeText == "trigger" ? new InputTrigger(      name, scope) :
+                // The following shouldn't happen since parser language checks type,
+                // unless the parser language is updated and not this method.
+                throw new Exception("Unknown type: " + this.typeText);
+        }
 
-        private void handleNewInput(PP.ParseTree.PromptArgs args) =>
-            this.newInputNode(args);
+        /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleNewTypeInputWithAssign(PP.ParseTree.PromptArgs args) {
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            INode right = this.popNode().First();
+            Identifier id = this.pop() as Identifier;
+            INamespace scope = this.scope(id, true);
+            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
+                    "so it can not be used as a scope for an assigned input variable at " + loc + ".");
 
-        private void handleEndAssignWithType(PP.ParseTree.PromptArgs args) =>
-            this.assignNode(this.newInputNode(args));
-        
-        private void handleEndAssignWithoutType(PP.ParseTree.PromptArgs args) {
-            string name = args.Tokens[1].Text;
-            if (this.driver.Nodes.Exists(name))
-                throw new Exception("Can not assign input. An identifier already exists by the name " + name + ".");
+            string name = id[^1];
+            if (scope.Exists(name)) throw new Exception("Can not assign a new " + this.typeText+ " input. "+
+                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
+            
+            if (this.typeText == "bool") {
+                bool value =
+                    (right is IValue<bool> rightBool) ? rightBool.Value :
+                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a bool.");
+                _ = new InputValue<bool>(name, scope, value);
+            } else if (this.typeText == "int") {
+                int value =
+                    (right is IValue<int> rightInt) ? rightInt.Value :
+                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to an int.");
+                _ = new InputValue<int>(name, scope, value);
+            } else if (this.typeText == "float") {
+                double value =
+                    (right is IValue<double> rightFloat) ? rightFloat.Value :
+                    (right is IValue<int>    rightInt)   ? rightInt.Value :
+                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a float.");
+                _ = new InputValue<double>(name, scope, value);
+            } else if (this.typeText == "trigger") {
+                bool value =
+                    (right is ITrigger     rightTrigger) ? rightTrigger.Triggered :
+                    (right is IValue<bool> rightBool)    ? rightBool.Value :
+                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a trigger.");
+                new InputTrigger(name, scope).Trigger(value);
+            } else {
+                // The following shouldn't happen since parser language checks type,
+                // unless the parser language is updated and not this method.
+                throw new Exception("Unknown type: " + this.typeText);
+            }
+        }
 
-            INode right = this.pop().First();
+        /// <summary>This creates a new input node and assigns it with an initial value.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleNewVarInputWithAssign(PP.ParseTree.PromptArgs args) {
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            INode right = this.popNode().First();
+            Identifier id = this.pop() as Identifier;
+            INamespace scope = this.scope(id, true);
+            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
+                    "so it can not be used as a scope for an untyped input variable at " + loc + ".");
+
+            string name = id[^1];
+            if (scope.Exists(name)) throw new Exception("Can not assign a new untyped " + this.typeText+ " input. "+
+                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
+
             if (right is IValue<bool> rightBool)
                 _ = new InputValue<bool>(name, this.driver.Nodes, rightBool.Value);
             else if (right is IValue<int> rightInt)
@@ -372,17 +422,49 @@ namespace Blackboard.Parser {
             else throw new Exception(Cast.PrettyName(right) + " can not be assigned.");
         }
 
-        private void handleEndAssignExisting(PP.ParseTree.PromptArgs args) {
-            string name = args.Tokens[0].Text;
-            if (!this.driver.Nodes.Exists(name))
-                throw new Exception("Failed to find " + name + " to be assigned.");
-
-            INode left = this.driver.Find(name);
-            if (left is not IInput) throw new Exception("May only assign a value " +
-                "directly to a input variable. " + name + " is not an input variable.");
-            this.assignNode(left);
+        /// <summary>This assigns several existing input nodes with a new value.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleAssignExisting(PP.ParseTree.PromptArgs args) {
+            INode right = this.popNode().First();
+            while (this.stack.Count > 0) {
+                Identifier id = this.pop() as Identifier;
+                INode left = this.find(id);
+                if (left is null) throw new Exception("Unknown input variable " + id + " at " + id.Location + ".");
+                if (left is IValueInput<bool> leftBool) {
+                    bool value =
+                    (right is IValue<bool> rightBool) ? rightBool.Value :
+                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a bool.");
+                    leftBool.SetValue(value);
+                } else if (left is IValueInput<int> leftInt) {
+                    int value =
+                    (right is IValue<int> rightInt) ? rightInt.Value :
+                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to an int.");
+                    leftInt.SetValue(value);
+                } else if (left is IValueInput<double> leftFloat) {
+                    double value =
+                    (right is IValue<double> rightFloat) ? rightFloat.Value :
+                    (right is IValue<int>    rightInt)   ? rightInt.Value :
+                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a float.");
+                    leftFloat.SetValue(value);
+                } else if (left is ITriggerInput leftTrigger) {
+                    bool value =
+                    (right is ITrigger     rightTrigger) ? rightTrigger.Triggered :
+                    (right is IValue<bool> rightBool)    ? rightBool.Value :
+                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a trigger.");
+                    leftTrigger.Trigger(value);
+                } else throw new Exception("Unable to assign to " + Cast.PrettyName(left) + " at " + id.Location + ".");
+            }
         }
 
+        private void handleEndTypeDefine(PP.ParseTree.PromptArgs args) {
+            // TODO: Implement
+        }
+
+        private void handleEndVarDefine(PP.ParseTree.PromptArgs args) {
+            // TODO: Implement
+        }
+
+        /*
         private void handleEndDefineWithType(PP.ParseTree.PromptArgs args) {
             string type = args.Tokens[0].Text;
             string name = args.Tokens[1].Text;
@@ -472,70 +554,105 @@ namespace Blackboard.Parser {
                 throw new Exception(Cast.PrettyName(right) + " can not be used in a " +
                     "definition of a constant by the name " + name + ".");
         }
+        */
 
+        /// <summary>This handles when a trigger is provoked unconditionally.</summary>
+        /// <param name="args">The token information from the parser.</param>
         private void handlePullTrigger(PP.ParseTree.PromptArgs args) {
-            string name = args.Tokens[^1].Text;
-            if (!driver.Trigger(name))
-                throw new Exception("May only provoke an input trigger. " + name + " is not an input trigger.");
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            Identifier id = this.pop() as Identifier;
+            INode node = this.find(id);
+            if (node is null)
+                throw new Exception("No trigger by the name " + id + " was found at " + loc + ".");
+            if (node is not ITriggerInput trigger)
+                throw new Exception("May only provoke an input trigger. " + id + " is not an input trigger at " + loc + ".");
+            trigger.Trigger();
         }
 
-        private void handleReceiver(PP.ParseTree.PromptArgs args) {
-            string name = args.Tokens[^1].Text;
-            INode node = this.pop().First();
-            if (node is INamespace scope) {
-                INode child = scope.Find(name);
-                if (child is not null) this.push(child);
-                else throw new Exception("No child by the name "+name+" found in "+scope+".");
-            } else throw new Exception("May not find a child in "+node+".");
+        /// <summary>This handles when a trigger should only be triggered if a condition returns true.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleConditionalPullTrigger(PP.ParseTree.PromptArgs args) {
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            Identifier id = this.pop() as Identifier;
+            INode node = this.popNode().First();
+            if (node is not IValue<bool> boolNode)
+                throw new Exception("May only conditionally provoke the trigger " + id + " with a bool or trigger at " + loc + ".");
+
+            if (boolNode.Value) {
+                if (node is null)
+                    throw new Exception("No trigger by the name " + id + " was found at " + loc + ".");
+                if (node is not ITriggerInput trigger)
+                    throw new Exception("May only provoke an input trigger. " + id + " is not an input trigger at " + loc + ".");
+                trigger.Trigger();
+            }
         }
-        
+
+        /// <summary>This handles setting the value type.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleSetType(PP.ParseTree.PromptArgs args) =>
+            this.typeText = args.Tokens[^1].Text;
+
+        /// <summary>This handles preparing for a method call.</summary>
+        /// <param name="args">The token information from the parser.</param>
         private void handleStartCall(PP.ParseTree.PromptArgs args) {
-            string name = args.Tokens[^1].Text;
-            if (!this.funcs.ContainsKey(name))
-                throw new Exception("No function by the name "+name+".");
-            // Push non-INode onto the stack to mark the start of the function.
-            this.stack.AddLast(name);
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            Identifier id = this.pop() as Identifier;
+            this.stack.AddLast(new Call(id, loc));
         }
 
+        /// <summary>This handles the end of a method call and creates the node for the method.</summary>
+        /// <param name="args">The token information from the parser.</param>
         private void handleEndCall(PP.ParseTree.PromptArgs args) {
-            string name;
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            Call call;
             LinkedList<INode> inputs = new();
             while (true) {
                 object obj = this.stack.Last.Value;
                 this.stack.RemoveLast();
                 if (obj is INode node) inputs.AddFirst(node);
-                else {
-                    name = obj as string;
+                else if (obj is Call callObj) {
+                    call = callObj;
                     break;
-                }
+                } else throw new Exception("Expected a node or a call but got " + obj + " at " + loc+ ".");
             }
 
+            // NOTE: Currently functions can't be namespaced, part of types, and there are no classes yet,
+            //       so simply do a lookup of the function in the dictionary of functions.
+            string name = call.Identifier.ToString();
             INode funcNode = this.funcs.Build(name, inputs);
             this.push(Cast.IsConstant(inputs) ? Cast.ToLiteral(funcNode) : funcNode);
         }
 
+        /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
+        /// <param name="args">The token information from the parser.</param>
         private void handlePushId(PP.ParseTree.PromptArgs args) {
-            string name = args.Tokens[^1].Text;
-            INode node = this.driver.Find(name);
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            Identifier id = this.pop() as Identifier;
+            INode node = this.driver.Find(id);
             if (node is null)
-                throw new Exception("Identifier " + name + " is unknown.");
-            if (this.isLocal) {
+                throw new Exception("Identifier " + id + " at " + loc + " is unknown.");
+            if (this.isDefine) this.push(node);
+            else {
                 INode literal = Cast.ToLiteral(node);
                 if (literal is not null) this.push(literal);
-                else throw new Exception(name + " could not be used in assignment.");
-            } else this.push(node);
+                else throw new Exception("The identifier " + id + " can not be used in assignment at " + loc + ".");
+            }
         }
 
+        /// <summary>This handles pushing a bool literal value onto the stack.</summary>
+        /// <param name="args">The token information from the parser.</param>
         private void handlePushBool(PP.ParseTree.PromptArgs args) {
             string text = args.Tokens[^1].Text;
             try {
                 bool value = bool.Parse(text);
                 this.push(new Literal<bool>(value));
             } catch (S.Exception ex) {
-                throw new Exception("Failed to parse \""+text+"\" as a bool.", ex);
+                throw new Exception("Failed to parse \"" + text + "\" as a bool.", ex);
             }
         }
 
+        /// <summary>This handles pushing an int literal value onto the stack.</summary>
+        /// <param name="args">The token information from the parser.</param>
         private void handlePushInt(PP.ParseTree.PromptArgs args) {
             string text = args.Tokens[^1].Text;
             try {
@@ -546,6 +663,8 @@ namespace Blackboard.Parser {
             }
         }
 
+        /// <summary>This handles pushing a hexadecimal int literal value onto the stack.</summary>
+        /// <param name="args">The token information from the parser.</param>
         private void handlePushHex(PP.ParseTree.PromptArgs args) {
             string text = args.Tokens[^1].Text[2..];
             try {
@@ -556,6 +675,8 @@ namespace Blackboard.Parser {
             }
         }
 
+        /// <summary>This handles pushing a float literal value onto the stack.</summary>
+        /// <param name="args">The token information from the parser.</param>
         private void handlePushFloat(PP.ParseTree.PromptArgs args) {
             string text = args.Tokens[^1].Text;
             try {
@@ -565,6 +686,16 @@ namespace Blackboard.Parser {
                 throw new Exception("Failed to parse \""+text+"\" as a float.", ex);
             }
         }
+
+        /// <summary>This handles an identifier item being added.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleStartId(PP.ParseTree.PromptArgs args) =>
+            this.stack.AddLast(new Identifier(args.Tokens[^1].Start, args.Tokens[^1].Text ));
+
+        /// <summary>This handles an identifier being added to the existing identifier.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleAddId(PP.ParseTree.PromptArgs args) =>
+            (this.stack.Last.Value as Identifier).Add(args.Tokens[^1].Text);
 
         #endregion
     }

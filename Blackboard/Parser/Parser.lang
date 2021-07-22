@@ -60,7 +60,6 @@
 
 # Reserved Identifiers
 [Identifier] = 'in' => [In];
-[Identifier] = 'const' => [Const];
 [Identifier] = 'bool', 'int', 'float', 'trigger' => [Type];
 [Identifier] = 'true', 'false' => [Bool];
 [Identifier] = 'and', 'as', 'byte', 'catch', 'case', 'char', 'class', 'complex', 'def', 'default', 'do', 'dynamic',
@@ -76,15 +75,41 @@
     | {Clean} <Statement> [End] <Code>;
 
 <Statement> := _
-    | [In] [Type] [Identifier] {NewInput}
-    | {StartAssign} [In] [Type] [Identifier] [Assign] <Conditional> {EndAssignWithType}
-    | {StartAssign} [In]        [Identifier] [Assign] <Conditional> {EndAssignWithoutType}
-    | {StartAssign}             [Identifier] [Assign] <Conditional> {EndAssignExisting}
-    | {StartDefine} [Type] [Identifier] [Define] <Conditional> {EndDefineWithType}
-    | {StartDefine}        [Identifier] [Define] <Conditional> {EndDefineWithoutType}
-    | {StartConst}  [Const] [Type] [Identifier] [Assign] <Conditional> {EndConstWithType}
-    | {StartConst}  [Const]        [Identifier] [Assign] <Conditional> {EndConstWithoutType}
-    | [Trigger] [Identifier] {PullTrigger};
+    | <New-Typed-Input>
+    | <New-Var-Input>
+    | <Assign-Existing>
+    | <Define-Typed-Rule>
+    | <Define-Var-Rule>
+    | <Pull-Trigger>;
+
+<New-Typed-Input> := [In] [Type] {SetType} <New-Typed-Input-Part> <New-Typed-Input-Tail>;
+
+<New-Typed-Input-Tail> := _
+    | [Comma] <New-Typed-Input-Part> <New-Typed-Input-Tail>;
+
+<New-Typed-Input-Part> := <Id> {NewTypeInputNoAssign}
+    | <Id> [Assign] <Conditional> {NewTypeInputWithAssign};
+
+<New-Var-Input> := [In] <New-Var-Input-Part> <New-Var-Input-Tail>;
+
+<New-Var-Input-Tail> := _
+    | [Comma] <New-Var-Input-Part> <New-Var-Input-Tail>;
+
+<New-Var-Input-Part> := <Id> [Assign] <Conditional> {NewVarInputWithAssign};
+
+<Assign-Existing> := <Id> <Assign-Existing-More> [Assign] <Conditional> {AssignExisting};
+
+<Assign-Existing-More> := _
+    | [Assign] <Id> <Assign-Existing-More>;
+
+<Define-Typed-Rule> := [Type] {SetType} <Id> {StartDefine} [Define] <Conditional> {EndDefine};
+
+<Define-Var-Rule> := <Id> {StartDefine} [Define] <Conditional> {EndDefine};
+
+<Pull-Trigger> := [Trigger] <Id> {PullTrigger}
+    | <Conditional> [Trigger] <Id> {ConditionalPullTrigger};
+
+#----------------------------------------------------------
 
 <Conditional> := <Logical-Or>
     | <Conditional> [Test] <Conditional> [Else] <Conditional> {Trinary};
@@ -141,9 +166,8 @@
     | [Invert] <Expression> {Invert};
 
 <Expression> := <Value>
-    | <Expression> [Dot] [Identifier] {Receiver}
     | [Par-Open] <Conditional> [Par-Close]
-    | [Identifier] {StartCall} [Par-Open] <Args> [Par-Close] {EndCall};
+    | <id> {StartCall} [Par-Open] <Args> [Par-Close] {EndCall};
 
 <Args> := _
     | <Conditional> <Args-Tail>;
@@ -151,8 +175,13 @@
 <Args-Tail> := _
     | [Comma] <Conditional> <Args-Tail>;
 
-<Value> := [Identifier] {PushId}
+<Value> := <Id> {PushId}
     | [Bool] {PushBool}
     | [Int] {PushInt}
     | [Hex] {PushHex}
     | [Float] {PushFloat};
+
+<Id> := [Identifier] {StartId} <Id-Tail>;
+
+<Id-Tail> := _ 
+    | [Dot] [Identifier] {AddId} <Id-Tail>;

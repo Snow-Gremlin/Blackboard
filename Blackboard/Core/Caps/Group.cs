@@ -21,6 +21,14 @@ namespace Blackboard.Core.Caps {
             this.Scope = scope;
         }
 
+        /// <summary>Create a new namespace.</summary>
+        /// <param name="name">The name of the group.</param>
+        /// <param name="scope">This is the initial parent scope.</param>
+        public Group(string name, INamespace scope = null) {
+            this.Name  = name;
+            this.Scope = scope;
+        }
+
         /// <summary>Gets or sets the name for the node.</summary>
         public string Name {
             get => this.name;

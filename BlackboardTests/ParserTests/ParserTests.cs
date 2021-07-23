@@ -76,7 +76,7 @@ namespace BlackboardTests.ParserTests {
             Parser parser = new(driver);
             checkException(() => {
                 parser.Read("in int A = 3.14;");
-            }, "float can not be assigned to int.");
+            }, "Can not assign a float to an int.");
         }
 
         [TestMethod]
@@ -85,7 +85,7 @@ namespace BlackboardTests.ParserTests {
             Parser parser = new(driver);
             checkException(() => {
                 parser.Read("in int A = 3.14;");
-            }, "float can not be assigned to int.");
+            }, "Can not assign a float to an int.");
         }
 
         [TestMethod]
@@ -95,8 +95,8 @@ namespace BlackboardTests.ParserTests {
             parser.Read(
                 "in A = 2;",
                 "in B = 3;",
-                "const min = 3;",
-                "C := A <= min && A > B ? 1 : 0;");
+                "maxA := 3;",
+                "C := A <= maxA && A > B ? 1 : 0;");
             checkValue(driver, "A", 2);
             checkValue(driver, "B", 3);
             checkValue(driver, "C", 0);
@@ -117,7 +117,7 @@ namespace BlackboardTests.ParserTests {
             Parser parser = new(driver);
             parser.Read(
                 "in int A = 0x0F;",
-                "const int shift = 1;",
+                "int shift := 1;",
                 "int B := (A | 0x10) & 0x15;",
                 "int C := B << shift;",
                 "int D := ~C;");

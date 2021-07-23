@@ -72,7 +72,7 @@ namespace Blackboard.Parser {
         private void read(PP.ParseTree.ITreeNode node) =>
             node.Process(this.prompts);
 
-        #region Helpers...
+        #region Definitions...
 
         /// <summary>Initializes the prompts and operators for this parser.</summary>
         private void initPrompts() {
@@ -85,6 +85,7 @@ namespace Blackboard.Parser {
                 { "NewVarInputWithAssign",  this.handleNewVarInputWithAssign },
                 { "AssignExisting",         this.handleAssignExisting },
 
+                { "StartDefine",            this.handleStartDefine },
                 { "TypeDefine",             this.handleTypeDefine },
                 { "VarDefine",              this.handleVarDefine },
                 { "PullTrigger",            this.handlePullTrigger },
@@ -271,6 +272,9 @@ namespace Blackboard.Parser {
             _ = new Const<double>("intSize",   scope, sizeof(int));
         }
 
+        #endregion
+        #region Helpers...
+
         /// <summary>Pushes a new node or stack item onto the stack.</summary>
         /// <param name="value">The value to push.</param>
         private void push(object value) => this.stack.AddLast(value);
@@ -316,8 +320,74 @@ namespace Blackboard.Parser {
         /// <summary>Finds the node at the given id.</summary>
         /// <param name="id">The identifier to find the node for.</param>
         /// <returns>The found node or null if not found.</returns>
-        private INode find(Identifier id) =>
-            this.scope(id, false)?.Find(id[^1]);
+        private INode find(Identifier id) => this.scope(id, false)?.Find(id[^1]);
+        
+        /// <summary>Creates a new input value node or trigger.</summary>
+        /// <param name="loc">The location this assignment was written at.</param>
+        /// <param name="typeText">The type of the input node to create.</param>
+        /// <param name="id">The identifier of the input node to create.</param>
+        /// <param name="node">This is the value to initialize the input node with, may be null to use a default value.</param>
+        private void createInputValue(PP.Scanner.Location loc, string typeText, Identifier id, INode node) {
+            INamespace scope = this.scope(id, true);
+            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
+                    "so it can not be used as a scope for an assigned input variable at " + loc + ".");
+
+            string name = id[^1];
+            if (scope.Exists(name)) throw new Exception("Can not assign a new " + typeText+ " input. "+
+                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
+            
+            INode _ =
+                typeText == "bool" ?   new InputValue<bool>(  name, scope, Cast.AsBoolValue(   node)) :
+                typeText == "int"?     new InputValue<int>(   name, scope, Cast.AsIntValue(    node)) :
+                typeText == "float"?   new InputValue<double>(name, scope, Cast.AsFloatValue(  node)) :
+                typeText == "trigger"? new InputTrigger(      name, scope, Cast.AsTriggerValue(node)) :
+                throw new Exception("Unknown type: " + typeText);
+        }
+
+        /// <summary>Defines an output value node or a constant value.</summary>
+        /// <param name="loc">The location this defition was written at.</param>
+        /// <param name="typeText">The type of the value to define.</param>
+        /// <param name="id">The identifier of the value to create.</param>
+        /// <param name="node">The node to define the value with.</param>
+        private void defineValue(PP.Scanner.Location loc, string typeText, Identifier id, INode node) {
+            INamespace scope = this.scope(id, true);
+            if (scope is null) throw new Exception("The top group in " + id + " is not an identifier group "+
+                    "so it can not be used as a scope for a typed definition at " + loc + ".");
+
+            string name = id[^1];
+            if (scope.Exists(name)) throw new Exception("Can not define a new " + typeText+ " node. "+
+                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
+
+            // If right is constant or literal create a const node instead of an output node.
+            if (Cast.IsConstant(node)) {
+                INode _ =
+                    typeText == "bool"  ? new Const<bool>(  name, scope, Cast.AsBoolValue( node)) :
+                    typeText == "int"   ? new Const<int>(   name, scope, Cast.AsIntValue(  node)) :
+                    typeText == "float" ? new Const<double>(name, scope, Cast.AsFloatValue(node)) :
+                    throw new Exception("Unable to define " + id + " of constant type " + typeText +
+                        " with " + Cast.TypeName(node) + " at " + id.Location + ".");
+            } else {
+                INode _ =
+                    typeText == "bool"    ? new OutputValue<bool>(  Cast.As<IValue<bool>>(  node), name, scope) :
+                    typeText == "int"     ? new OutputValue<int>(   Cast.As<IValue<int>>(   node), name, scope) :
+                    typeText == "float"   ? new OutputValue<double>(Cast.As<IValue<double>>(node), name, scope) :
+                    typeText == "trigger" ? new OutputTrigger(      Cast.As<ITrigger>(      node), name, scope) :
+                    throw new Exception("Unable to define " + id + " of type " + typeText +
+                        " with " + Cast.TypeName(node) + " at " + id.Location + ".");
+            }
+        }
+
+        /// <summary>This will try to provoke a trigger.</summary>
+        /// <param name="loc">The location this provoke was written at.</param>
+        /// <param name="id">The identifier of the value to provoke.</param>
+        private void provokeTrigger(PP.Scanner.Location loc, Identifier id) {
+            INode node = this.find(id);
+            if (node is null)
+                throw new Exception("No trigger by the name " + id + " was found at " + loc + ".");
+            if (node is not ITriggerInput trigger)
+                throw new Exception("May only provoke an input trigger. " + id + " is not an input trigger at " + loc + ".");
+            trigger.Trigger();
+        }
 
         #endregion
         #region Handlers...
@@ -337,22 +407,7 @@ namespace Blackboard.Parser {
         private void handleNewTypeInputNoAssign(PP.ParseTree.PromptArgs args) {
             PP.Scanner.Location loc = args.Tokens[^1].End;
             Identifier id = this.pop() as Identifier;
-            INamespace scope = this.scope(id, true);
-            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
-                    "so it can not be used as a scope for an input variable at " + loc + ".");
-
-            string name = id[^1];
-            if (scope.Exists(name)) throw new Exception("Can not create a new " + this.typeText+ " input. "+
-                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
-
-            INode _ =
-                this.typeText == "bool"    ? new InputValue<bool>(  name, scope) :
-                this.typeText == "int"     ? new InputValue<int>(   name, scope) :
-                this.typeText == "float"   ? new InputValue<double>(name, scope) :
-                this.typeText == "trigger" ? new InputTrigger(      name, scope) :
-                // The following shouldn't happen since parser language checks type,
-                // unless the parser language is updated and not this method.
-                throw new Exception("Unknown type: " + this.typeText);
+            this.createInputValue(loc, this.typeText, id, null);
         }
 
         /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
@@ -361,41 +416,7 @@ namespace Blackboard.Parser {
             PP.Scanner.Location loc = args.Tokens[^1].End;
             INode right = this.popNode().First();
             Identifier id = this.pop() as Identifier;
-            INamespace scope = this.scope(id, true);
-            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
-                    "so it can not be used as a scope for an assigned input variable at " + loc + ".");
-
-            string name = id[^1];
-            if (scope.Exists(name)) throw new Exception("Can not assign a new " + this.typeText+ " input. "+
-                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
-            
-            if (this.typeText == "bool") {
-                bool value =
-                    (right is IValue<bool> rightBool) ? rightBool.Value :
-                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a bool.");
-                _ = new InputValue<bool>(name, scope, value);
-            } else if (this.typeText == "int") {
-                int value =
-                    (right is IValue<int> rightInt) ? rightInt.Value :
-                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to an int.");
-                _ = new InputValue<int>(name, scope, value);
-            } else if (this.typeText == "float") {
-                double value =
-                    (right is IValue<double> rightFloat) ? rightFloat.Value :
-                    (right is IValue<int>    rightInt)   ? rightInt.Value :
-                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a float.");
-                _ = new InputValue<double>(name, scope, value);
-            } else if (this.typeText == "trigger") {
-                bool value =
-                    (right is ITrigger     rightTrigger) ? rightTrigger.Provoked :
-                    (right is IValue<bool> rightBool)    ? rightBool.Value :
-                    throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a trigger.");
-                new InputTrigger(name, scope).Trigger(value);
-            } else {
-                // The following shouldn't happen since parser language checks type,
-                // unless the parser language is updated and not this method.
-                throw new Exception("Unknown type: " + this.typeText);
-            }
+            this.createInputValue(loc, this.typeText, id, right);
         }
 
         /// <summary>This creates a new input node and assigns it with an initial value.</summary>
@@ -404,20 +425,7 @@ namespace Blackboard.Parser {
             PP.Scanner.Location loc = args.Tokens[^1].End;
             INode right = this.popNode().First();
             Identifier id = this.pop() as Identifier;
-            INamespace scope = this.scope(id, true);
-            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
-                    "so it can not be used as a scope for an untyped input variable at " + loc + ".");
-
-            string name = id[^1];
-            if (scope.Exists(name)) throw new Exception("Can not assign a new untyped " + this.typeText+ " input. "+
-                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
-
-            INode _ =
-                right is IValue<bool>   rightBool    ? new InputValue<bool>(  name, scope, rightBool.Value) :
-                right is IValue<int>    rightInt     ? new InputValue<int>(   name, scope, rightInt.Value) :
-                right is IValue<double> rightFloat   ? new InputValue<double>(name, scope, rightFloat.Value) :
-                right is ITrigger       rightTrigger ? new InputTrigger(      name, scope, rightTrigger.Provoked):
-                throw new Exception(Cast.PrettyName(right) + " can not be assigned.");
+            this.createInputValue(loc, Cast.TypeName(right), id, right);
         }
 
         /// <summary>This assigns several existing input nodes with a new value.</summary>
@@ -428,30 +436,16 @@ namespace Blackboard.Parser {
                 Identifier id = this.pop() as Identifier;
                 INode left = this.find(id);
                 if (left is null) throw new Exception("Unknown input variable " + id + " at " + id.Location + ".");
-                if (left is IValueInput<bool> leftBool) {
-                    bool value =
-                        (right is IValue<bool> rightBool) ? rightBool.Value :
-                        throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a bool.");
-                    leftBool.SetValue(value);
-                } else if (left is IValueInput<int> leftInt) {
-                    int value =
-                        (right is IValue<int> rightInt) ? rightInt.Value :
-                        throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to an int.");
-                    leftInt.SetValue(value);
-                } else if (left is IValueInput<double> leftFloat) {
-                    double value =
-                        (right is IValue<double> rightFloat) ? rightFloat.Value :
-                        (right is IValue<int>    rightInt)   ? rightInt.Value :
-                        throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a float.");
-                    leftFloat.SetValue(value);
-                } else if (left is ITriggerInput leftTrigger) {
-                    bool value =
-                        (right is ITrigger     rightTrigger) ? rightTrigger.Provoked :
-                        (right is IValue<bool> rightBool)    ? rightBool.Value :
-                        throw new Exception("Can not assign a " + Cast.PrettyName(right) + " to a trigger.");
-                    leftTrigger.Trigger(value);
-                } else throw new Exception("Unable to assign to " + Cast.PrettyName(left) + " at " + id.Location + ".");
+                else if (left is IValueInput<bool>   leftBool)    leftBool. SetValue( Cast.AsBoolValue(   right));
+                else if (left is IValueInput<int>    leftInt)     leftInt.  SetValue( Cast.AsIntValue(    right));
+                else if (left is IValueInput<double> leftFloat)   leftFloat.SetValue( Cast.AsFloatValue(  right));
+                else if (left is ITriggerInput       leftTrigger) leftTrigger.Trigger(Cast.AsTriggerValue(right));
+                else throw new Exception("Unable to assign to " + Cast.TypeName(left) + " at " + id.Location + ".");
             }
+        }
+
+        private void handleStartDefine(PP.ParseTree.PromptArgs args) {
+            this.isDefine = true;
         }
 
         /// <summary>This handles defining a new typed output node.</summary>
@@ -460,20 +454,7 @@ namespace Blackboard.Parser {
             PP.Scanner.Location loc = args.Tokens[^1].End;
             INode right = this.popNode().First();
             Identifier id = this.pop() as Identifier;
-            INamespace scope = this.scope(id, true);
-            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
-                    "so it can not be used as a scope for a typed definition at " + loc + ".");
-
-            string name = id[^1];
-            if (scope.Exists(name)) throw new Exception("Can not define a new typed " + this.typeText+ " node. "+
-                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
-
-            INode _ =
-                this.typeText == "bool"    ? new OutputValue<bool>(  Cast.As<IValue<bool>>(right),   name, scope) :
-                this.typeText == "int"     ? new OutputValue<int>(   Cast.As<IValue<int>>(right),    name, scope) :
-                this.typeText == "float"   ? new OutputValue<double>(Cast.As<IValue<double>>(right), name, scope) :
-                this.typeText == "trigger" ? new OutputTrigger(      Cast.As<ITrigger>(right),       name, scope) :
-                throw new Exception("Unable to define " + id + " of type " + this.typeText + " with " + Cast.PrettyName(right) + " at " + id.Location + ".");
+            this.defineValue(loc, this.typeText, id, right);
         }
 
         /// <summary>This handles defining a new untyped output node.</summary>
@@ -482,20 +463,7 @@ namespace Blackboard.Parser {
             PP.Scanner.Location loc = args.Tokens[^1].End;
             INode right = this.popNode().First();
             Identifier id = this.pop() as Identifier;
-            INamespace scope = this.scope(id, true);
-            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
-                    "so it can not be used as a scope for a typed definition at " + loc + ".");
-
-            string name = id[^1];
-            if (scope.Exists(name)) throw new Exception("Can not define a new typed " + this.typeText+ " node. "+
-                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
-            
-            INode _ =
-                right is IValue<bool>   rightBool    ? new OutputValue<bool>(  rightBool,    name, scope) :
-                right is IValue<int>    rightInt     ? new OutputValue<int>(   rightInt,     name, scope) :
-                right is IValue<double> rightFloat   ? new OutputValue<double>(rightFloat,   name, scope) :
-                right is ITrigger       rightTrigger ? new OutputTrigger(      rightTrigger, name, scope):
-                throw new Exception(Cast.PrettyName(right) + " can not be assigned.");
+            this.defineValue(loc, Cast.TypeName(right), id, right);
         }
 
         /// <summary>This handles when a trigger is provoked unconditionally.</summary>
@@ -503,12 +471,7 @@ namespace Blackboard.Parser {
         private void handlePullTrigger(PP.ParseTree.PromptArgs args) {
             PP.Scanner.Location loc = args.Tokens[^1].End;
             Identifier id = this.pop() as Identifier;
-            INode node = this.find(id);
-            if (node is null)
-                throw new Exception("No trigger by the name " + id + " was found at " + loc + ".");
-            if (node is not ITriggerInput trigger)
-                throw new Exception("May only provoke an input trigger. " + id + " is not an input trigger at " + loc + ".");
-            trigger.Trigger();
+            this.provokeTrigger(loc, id);
         }
 
         /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
@@ -519,14 +482,7 @@ namespace Blackboard.Parser {
             INode node = this.popNode().First();
             if (node is not IValue<bool> boolNode)
                 throw new Exception("May only conditionally provoke the trigger " + id + " with a bool or trigger at " + loc + ".");
-
-            if (boolNode.Value) {
-                if (node is null)
-                    throw new Exception("No trigger by the name " + id + " was found at " + loc + ".");
-                if (node is not ITriggerInput trigger)
-                    throw new Exception("May only provoke an input trigger. " + id + " is not an input trigger at " + loc + ".");
-                trigger.Trigger();
-            }
+            if (boolNode.Value) this.provokeTrigger(loc, id);
         }
 
         /// <summary>This handles setting the value type.</summary>

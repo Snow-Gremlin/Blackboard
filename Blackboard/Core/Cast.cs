@@ -31,10 +31,10 @@ namespace Blackboard.Core {
         static public int IntMatch(INode node) =>
             node is IValue<int> ? 0 : -1;
 
-        /// <summary>Determines if the given node can be cast to double IValues.</summary>
+        /// <summary>Determines if the given node can be cast to float IValues.</summary>
         /// <param name="node">The node to check.</param>
         /// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
-        static public int DoubleMatch(INode node) =>
+        static public int FloatMatch(INode node) =>
             node is IValue<double> ? 0 :
             node is IValue<int>    ? 1 :
             -1;
@@ -48,7 +48,7 @@ namespace Blackboard.Core {
             return type == typeof(IValue<bool>)   ? BoolMatch(node) :
                    type == typeof(ITrigger)       ? TriggerMatch(node) :
                    type == typeof(IValue<int>)    ? IntMatch(node) :
-                   type == typeof(IValue<double>) ? DoubleMatch(node) :
+                   type == typeof(IValue<double>) ? FloatMatch(node) :
                    type == typeof(INode)          ? 0 :
                    -1;
         }
@@ -100,9 +100,9 @@ namespace Blackboard.Core {
         /// <summary>Casts the given node to a double IValue.</summary>
         /// <param name="node">The node to cast.</param>
         /// <returns>The double IValue or it throws an exception if it can't cast.</returns>
-        static public IValue<double> AsDouble(INode node) =>
+        static public IValue<double> AsFloat(INode node) =>
             node is IValue<double> dValue ? dValue :
-            node is IValue<int> iValue ? new IntToFloat(iValue) :
+            node is IValue<int>    iValue ? new IntToFloat(iValue) :
             throw new Exception("Can not cast "+node+" to IValue<double>.");
 
         /// <summary>Determines if the given node can be cast to the given type.</summary>
@@ -114,17 +114,53 @@ namespace Blackboard.Core {
             return type == typeof(IValue<bool>)   ? (T)AsBool(node) :
                    type == typeof(ITrigger)       ? (T)AsTrigger(node) :
                    type == typeof(IValue<int>)    ? (T)AsInt(node) :
-                   type == typeof(IValue<double>) ? (T)AsDouble(node) :
+                   type == typeof(IValue<double>) ? (T)AsFloat(node) :
                    type == typeof(INode)          ? (T)node :
                    throw new Exception("Can not cast "+node+" to "+typeof(T)+".");
         }
 
+        /// <summary>Casts the given node to a bool.</summary>
+        /// <remarks>This allows a null node value for default assignments.</remarks>
+        /// <param name="node">The node to cast.</param>
+        /// <returns>The bool value or it throws an exception if it can't cast.</returns>
+        static public bool AsBoolValue(INode node) =>
+            node is not null &&
+            (node is IValue<bool> nodeBool ? nodeBool.Value :
+            throw new Exception("Can not assign a " + TypeName(node) + " to a bool."));
+
+        /// <summary>Casts the given node to an int.</summary>
+        /// <remarks>This allows a null node value for default assignments.</remarks>
+        /// <param name="node">The node to cast.</param>
+        /// <returns>The int value or it throws an exception if it can't cast.</returns>
+        static public int AsIntValue(INode node) =>
+            node is null                ? default :
+            node is IValue<int> nodeInt ? nodeInt.Value :
+            throw new Exception("Can not assign a " + TypeName(node) + " to an int.");
+
+        /// <summary>Casts the given node to a float.</summary>
+        /// <remarks>This allows a null node value for default assignments.</remarks>
+        /// <param name="node">The node to cast.</param>
+        /// <returns>The float value or it throws an exception if it can't cast.</returns>
+        static public double AsFloatValue(INode node) =>
+            node is null                     ? default :
+            node is IValue<double> nodeFloat ? nodeFloat.Value :
+            node is IValue<int>    nodeInt   ? nodeInt.Value :
+            throw new Exception("Can not assign a " + TypeName(node) + " to a float.");
+
+        /// <summary>Casts the given node to a trigger value.</summary>
+        /// <remarks>This allows a null node value for default assignments.</remarks>
+        /// <param name="node">The node to cast.</param>
+        /// <returns>The trigger value or it throws an exception if it can't cast.</returns>
+        static public bool AsTriggerValue(INode node) =>
+            node is not null &&
+            (node is ITrigger    nodeTrigger ? nodeTrigger.Provoked :
+            node is IValue<bool> nodeBool    ? nodeBool.Value :
+            throw new Exception("Can not assign a " + TypeName(node) + " to a trigger."));
+
         /// <summary>Gets a pretty name used for exceptions which can be thrown for invalid input.</summary>
         /// <param name="node">The node to get the name for.</param>
         /// <returns>The name for the node.</returns>
-        static public string PrettyName(INode node) =>
-            node is Counter        ? "counter" :
-            node is Toggler        ? "toggler" :
+        static public string TypeName(INode node) =>
             node is IValue<bool>   ? "bool" :
             node is IValue<int>    ? "int" :
             node is IValue<double> ? "float" :
@@ -136,11 +172,17 @@ namespace Blackboard.Core {
         /// <param name="node">The node to get a literal version of.</param>
         /// <returns>The literal node or null if can't be converted.</returns>
         static public INode ToLiteral(INode node) =>
-            node is IValue<bool>   nodeBool    ? new Literal<bool>(  nodeBool.Value) :
-            node is IValue<int>    nodeInt     ? new Literal<int>(   nodeInt.Value) :
+            node is IValue<bool>   nodeBool    ? new Literal<bool>(  nodeBool. Value) :
+            node is IValue<int>    nodeInt     ? new Literal<int>(   nodeInt.  Value) :
             node is IValue<double> nodeFloat   ? new Literal<double>(nodeFloat.Value) :
             node is ITrigger       nodeTrigger ? new Literal<bool>(  nodeTrigger.Provoked) :
             null;
+
+        /// <summary>Determines if all the given nodes are constants.</summary>
+        /// <param name="nodes">The nodes to check.</param>
+        /// <returns>True if all the nodes are constants.</returns>
+        static public bool IsConstant(params INode[] nodes) =>
+            IsConstant(nodes as IEnumerable<INode>);
 
         /// <summary>Determines if all the given nodes are constants.</summary>
         /// <param name="nodes">The nodes to check.</param>

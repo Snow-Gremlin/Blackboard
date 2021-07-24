@@ -1,5 +1,5 @@
-﻿using Blackboard.Core.Caps;
-using Blackboard.Core.Interfaces;
+﻿using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.IO;
 

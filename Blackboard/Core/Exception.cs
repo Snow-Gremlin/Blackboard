@@ -1,4 +1,4 @@
-﻿using Blackboard.Core.Interfaces;
+﻿using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core {
 

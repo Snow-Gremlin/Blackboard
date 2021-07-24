@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Interfaces;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using PP = PetiteParser;

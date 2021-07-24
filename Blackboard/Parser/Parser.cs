@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Caps;
-using Blackboard.Core.Interfaces;
+using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Parser.Functions;
 using System.Collections.Generic;
 using System.Globalization;
@@ -163,13 +163,13 @@ namespace Blackboard.Parser {
                 new Input2<IValue<double>, IValue<double>>((left, right) => new SubDouble(left, right)));
             this.addProcess("Multiply", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new MulInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new MulDouble(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new Mul(left, right)));
             this.addProcess("Divide", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new DivInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new DivDouble(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new Div(left, right)));
             this.addProcess("Modulo", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new ModInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new ModDouble(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new Mod(left, right)));
             this.addProcess("Remainder", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new RemInt(  left, right)),
                 new Input2<IValue<double>, IValue<double>>((left, right) => new RemDouble(left, right)));
@@ -178,7 +178,7 @@ namespace Blackboard.Parser {
                 new Input2<IValue<double>, IValue<double>>((left, right) => new PowerDouble(left, right)));
             this.addProcess("Negate", 1,
                 new Input1<IValue<int>>(   (input) => new NegInt(input)),
-                new Input1<IValue<double>>((input) => new NegDouble(input)));
+                new Input1<IValue<double>>((input) => new Neg(input)));
             this.addProcess("Not", 1,
                 new Input1<IValue<bool>>((input) => new Not(input)));
             this.addProcess("Invert", 1,
@@ -204,7 +204,7 @@ namespace Blackboard.Parser {
             this.funcs = new Collection().
                 Add("abs",
                     new Input1<IValue<int>>(   (input) => new AbsInt(   input)),
-                    new Input1<IValue<double>>((input) => new AbsDouble(input))).
+                    new Input1<IValue<double>>((input) => new Abs(input))).
                 Add("all",
                     new InputN<ITrigger>((inputs) => new All(inputs))).
                 Add("and",
@@ -234,7 +234,7 @@ namespace Blackboard.Parser {
                     new InputN<IValue<double>>((inputs) => new Min<double>(inputs))).
                 Add("mul",
                     new InputN<IValue<int>>(   (inputs) => new MulInt(  inputs)),
-                    new InputN<IValue<double>>((inputs) => new MulDouble(inputs))).
+                    new InputN<IValue<double>>((inputs) => new Mul(inputs))).
                 Add("on",
                     new Input1<IValue<bool>>((input) => new OnTrue(input))).
                 Add("onChange",

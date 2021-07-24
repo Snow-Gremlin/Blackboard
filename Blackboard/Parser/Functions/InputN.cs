@@ -1,4 +1,4 @@
-﻿using Blackboard.Core.Interfaces;
+﻿using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core;
 using System.Collections.Generic;
 using System.Linq;

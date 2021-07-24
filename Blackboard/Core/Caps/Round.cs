@@ -4,7 +4,7 @@ using System;
 
 namespace Blackboard.Core.Caps {
 
-    /// <summary>This gets the rounded float value from the parent.</summary>
+    /// <summary>This gets the rounded double value from the parent.</summary>
     sealed public class Round: Binary<double, int, double> {
 
         /// <summary>Creates a rounded value node.</summary>

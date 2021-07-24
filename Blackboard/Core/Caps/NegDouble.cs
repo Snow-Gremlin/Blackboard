@@ -4,12 +4,12 @@ using Blackboard.Core.Interfaces;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Negates the given parents value.</summary>
-    sealed public class NegFloat: Unary<double, double> {
+    sealed public class NegDouble: Unary<double, double> {
 
         /// <summary>Creates a negated value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public NegFloat(IValue<double> source = null, double value = default) :
+        public NegDouble(IValue<double> source = null, double value = default) :
             base(source, value) { }
 
         /// <summary>Gets the negated value of the parent during evaluation.</summary>
@@ -19,6 +19,6 @@ namespace Blackboard.Core.Caps {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "NegFloat"+base.ToString();
+        public override string ToString() => "NegDouble"+base.ToString();
     }
 }

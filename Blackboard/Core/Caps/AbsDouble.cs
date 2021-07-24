@@ -5,12 +5,12 @@ using System;
 namespace Blackboard.Core.Caps {
 
     /// <summary>A double value node that gets the absolute value of the parent.</summary>
-    sealed public class AbsFloat: Unary<double, double> {
+    sealed public class AbsDouble: Unary<double, double> {
 
         /// <summary>Creates an absolute value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public AbsFloat(IValue<double> source = null, double value = default) :
+        public AbsDouble(IValue<double> source = null, double value = default) :
             base(source, value) { }
 
         /// <summary>This will get the absolute value of the parent's value on evaluation.</summary>
@@ -20,6 +20,6 @@ namespace Blackboard.Core.Caps {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "AbsFloat"+base.ToString();
+        public override string ToString() => "AbsDouble"+base.ToString();
     }
 }

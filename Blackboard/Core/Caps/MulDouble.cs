@@ -4,18 +4,18 @@ using System.Collections.Generic;
 
 namespace Blackboard.Core.Caps {
 
-    /// <summary>This gets the product of all the float parents.</summary>
-    sealed public class MulFloat: Nary<double, double> {
+    /// <summary>This gets the product of all the double parents.</summary>
+    sealed public class MulDouble: Nary<double, double> {
 
         /// <summary>Creates a product value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public MulFloat(params IValue<double>[] parents) :
+        public MulDouble(params IValue<double>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a product value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public MulFloat(IEnumerable<IValue<double>> parents = null, double value = default) :
+        public MulDouble(IEnumerable<IValue<double>> parents = null, double value = default) :
             base(parents, value) { }
 
         /// <summary>Gets the product of the parent values during evaluation.</summary>
@@ -29,6 +29,6 @@ namespace Blackboard.Core.Caps {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "MulFloat"+base.ToString();
+        public override string ToString() => "MulDouble"+base.ToString();
     }
 }

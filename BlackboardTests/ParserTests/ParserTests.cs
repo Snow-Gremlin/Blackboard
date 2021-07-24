@@ -14,7 +14,7 @@ namespace BlackboardTests.ParserTests {
             Assert.AreEqual(exp, value, "Checking value " + name);
         }
         
-        static private void checkException(System.Action hndl, string exp) =>
+        static private void checkException(S.Action hndl, string exp) =>
             Assert.AreEqual(Assert.ThrowsException<Exception>(hndl).Message, exp);
 
         static private void checkLog(StringWriter buf, params string[] lines) =>
@@ -46,13 +46,13 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
-        public void TestBasicParses_IntFloatSum() {
+        public void TestBasicParses_IntDoubleSum() {
             Driver driver = new();
             Parser parser = new(driver);
             parser.Read(
                 "in int A = 2;",
-                "in float B = 3.0;",
-                "float C := A + B;");
+                "in double B = 3.0;",
+                "double C := A + B;");
             checkValue(driver, "A", 2);
             checkValue(driver, "B", 3.0);
             checkValue(driver, "C", 5.0);
@@ -71,21 +71,12 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
-        public void TestBasicParses_FloatToIntAssignError() {
+        public void TestBasicParses_DoubleToIntAssignError() {
             Driver driver = new();
             Parser parser = new(driver);
             checkException(() => {
                 parser.Read("in int A = 3.14;");
-            }, "Can not assign a float to an int.");
-        }
-
-        [TestMethod]
-        public void TestBasicParses_FloatToIntAssignError2() {
-            Driver driver = new();
-            Parser parser = new(driver);
-            checkException(() => {
-                parser.Read("in int A = 3.14;");
-            }, "Can not assign a float to an int.");
+            }, "Can not assign a double to an int.");
         }
 
         [TestMethod]

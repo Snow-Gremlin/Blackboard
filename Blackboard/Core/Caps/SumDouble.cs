@@ -5,17 +5,17 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Gets the sum of all of the parent values.</summary>
-    sealed public class SumFloat: Nary<double, double> {
+    sealed public class SumDouble: Nary<double, double> {
 
         /// <summary>Creates a sum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public SumFloat(params IValue<double>[] parents) :
+        public SumDouble(params IValue<double>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a sum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public SumFloat(IEnumerable<IValue<double>> parents = null, double value = default) :
+        public SumDouble(IEnumerable<IValue<double>> parents = null, double value = default) :
             base(parents, value) { }
 
         /// <summary>Gets the sum of all the parent values.</summary>
@@ -29,6 +29,6 @@ namespace Blackboard.Core.Caps {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "SumFloat"+base.ToString();
+        public override string ToString() => "SumDouble"+base.ToString();
     }
 }

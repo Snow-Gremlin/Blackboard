@@ -3,7 +3,7 @@ using Blackboard.Core.Interfaces;
 
 namespace Blackboard.Core.Caps {
 
-    /// <summary>This gets the truncated float value from the parent as an integer.</summary>
+    /// <summary>This gets the truncated double value from the parent as an integer.</summary>
     sealed public class Truncate: Unary<double, int> {
 
         /// <summary>Creates a truncated value node.</summary>

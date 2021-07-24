@@ -21,6 +21,6 @@ namespace Blackboard.Core.Caps {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Power"+base.ToString();
+        public override string ToString() => "PowerInt"+base.ToString();
     }
 }

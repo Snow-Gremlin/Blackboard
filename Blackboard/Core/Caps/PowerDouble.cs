@@ -4,13 +4,13 @@ using Blackboard.Core.Interfaces;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Performs a power of two double parents.</summary>
-    sealed public class PowerFloat: Binary<double, double, double> {
+    sealed public class PowerDouble: Binary<double, double, double> {
 
         /// <summary>Creates a power value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public PowerFloat(IValue<double> source1 = null, IValue<double> source2 = null, double value = default) :
+        public PowerDouble(IValue<double> source1 = null, IValue<double> source2 = null, double value = default) :
             base(source1, source2, value) { }
 
         /// <summary>Gets the power of the two parents.</summary>
@@ -21,6 +21,6 @@ namespace Blackboard.Core.Caps {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Xor"+base.ToString();
+        public override string ToString() => "PowerDouble"+base.ToString();
     }
 }

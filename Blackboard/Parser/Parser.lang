@@ -7,11 +7,11 @@
 (Start): '1'..'9' => (Int): '0'..'9' => [Int];
 (Zero) => [Int];
 
-# Floats
+# Doubles
 (Start): '.' => (Decimal);
-(Int): '.' => (Decimal): '0'..'9' => (Float-Dec): '0'..'9' => (Float-Dec) => [Float];
-(Int): 'eE' => (Float-Exp-Start): '-' => (Float-Exp-Neg): '0'..'9' => (Float-Exp);
-(Float-Dec): 'eE' => (Float-Exp-Start): '0'..'9' => (Float-Exp): '0'..'9' => (Float-Exp) => [Float];
+(Int): '.' => (Decimal): '0'..'9' => (Double-Dec): '0'..'9' => (Double-Dec) => [Double];
+(Int): 'eE' => (Double-Exp-Start): '-' => (Double-Exp-Neg): '0'..'9' => (Double-Exp);
+(Double-Dec): 'eE' => (Double-Exp-Start): '0'..'9' => (Double-Exp): '0'..'9' => (Double-Exp) => [Double];
 
 # Hexadecimals
 (Zero): 'x' => (Hex-Start): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
@@ -60,10 +60,10 @@
 
 # Reserved Identifiers
 [Identifier] = 'in' => [In];
-[Identifier] = 'bool', 'int', 'float', 'trigger' => [Type];
+[Identifier] = 'bool', 'int', 'double', 'trigger' => [Type];
 [Identifier] = 'true', 'false' => [Bool];
 [Identifier] = 'and', 'as', 'byte', 'catch', 'case', 'char', 'class', 'complex', 'def', 'default', 'do', 'dynamic',
-               'else', 'enum', 'finally', 'for', 'foreach', 'func', 'get', 'global', 'if', 'interface', 'import', 'is',
+               'else', 'enum', 'finally', 'float', 'for', 'foreach', 'func', 'get', 'global', 'if', 'interface', 'import', 'is',
                'list', 'local', 'map', 'namespace', 'not', 'null', 'on', 'operator', 'or', 'out', 'override', 'select',
                'set', 'static', 'string', 'switch', 'then', 'try', 'type', 'typedef', 'typeof', 'uint', 'until',
                'var', 'void', 'when', 'while', 'yield', 'xor' => [Reserved];
@@ -179,7 +179,7 @@
     | [Bool] {PushBool}
     | [Int] {PushInt}
     | [Hex] {PushHex}
-    | [Float] {PushFloat};
+    | [Double] {PushDouble};
 
 <Id> := [Identifier] {StartId} <Id-Tail>;
 

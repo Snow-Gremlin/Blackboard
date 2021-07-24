@@ -6,7 +6,7 @@
 // Comment
 in int A;
 in bool B;
-in float C;
+in double C;
 in string D;
 in trigger T;
 
@@ -44,7 +44,7 @@ out Z;
   - `enum{1, 2, 3} S2;`
   - `enum{apple, banana, orange} S3;`
 - *Sets*: Unique collection which can be added to or removed from. Sets stay sourced.
-  Add and remove are kicked off by triggers. The set can be of type integers, floats, bool, or enum.
+  Add and remove are kicked off by triggers. The set can be of type integers, doubles, bool, or enum.
   Additionally they may have max, min, average, sum, product, etc.
 - *List*: Are like sets but not sorted and allow more than one duplicate.
   They have push, pop, queue, dequeue, get index, set index, sort, max, min, average, sum, product, etc.

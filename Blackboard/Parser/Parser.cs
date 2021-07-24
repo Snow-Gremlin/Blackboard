@@ -91,16 +91,16 @@ namespace Blackboard.Parser {
                 { "PullTrigger",            this.handlePullTrigger },
                 { "ConditionalPullTrigger", this.handleConditionalPullTrigger },
 
-                { "SetType",   this.handleSetType },
-                { "StartCall", this.handleStartCall },
-                { "Call",      this.handleEndCall },
-                { "PushId",    this.handlePushId },
-                { "PushBool",  this.handlePushBool },
-                { "PushInt",   this.handlePushInt },
-                { "PushHex",   this.handlePushHex },
-                { "PushFloat", this.handlePushFloat },
-                { "StartId",   this.handleStartId },
-                { "AddId",     this.handleAddId },
+                { "SetType",    this.handleSetType },
+                { "StartCall",  this.handleStartCall },
+                { "Call",       this.handleEndCall },
+                { "PushId",     this.handlePushId },
+                { "PushBool",   this.handlePushBool },
+                { "PushInt",    this.handlePushInt },
+                { "PushHex",    this.handlePushHex },
+                { "PushDouble", this.handlePushDouble },
+                { "StartId",    this.handleStartId },
+                { "AddId",      this.handleAddId },
             };
             this.addProcess("Trinary", 3,
                 new Input3<IValue<bool>, IValue<bool>,   IValue<bool>>(  (test, left, right) => new Select<bool>(  test, left, right)),
@@ -157,28 +157,28 @@ namespace Blackboard.Parser {
                 new Input2<IValue<int>, IValue<int>>((left, right) => new LeftShift(left, right)));
             this.addProcess("Sum", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new SumInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new SumFloat(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new SumDouble(left, right)));
             this.addProcess("Subtract", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new SubInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new SubFloat(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new SubDouble(left, right)));
             this.addProcess("Multiply", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new MulInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new MulFloat(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new MulDouble(left, right)));
             this.addProcess("Divide", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new DivInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new DivFloat(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new DivDouble(left, right)));
             this.addProcess("Modulo", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new ModInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new ModFloat(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new ModDouble(left, right)));
             this.addProcess("Remainder", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new RemInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new RemFloat(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new RemDouble(left, right)));
             this.addProcess("Power", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new PowerInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new PowerFloat(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new PowerDouble(left, right)));
             this.addProcess("Negate", 1,
                 new Input1<IValue<int>>(   (input) => new NegInt(input)),
-                new Input1<IValue<double>>((input) => new NegFloat(input)));
+                new Input1<IValue<double>>((input) => new NegDouble(input)));
             this.addProcess("Not", 1,
                 new Input1<IValue<bool>>((input) => new Not(input)));
             this.addProcess("Invert", 1,
@@ -203,8 +203,8 @@ namespace Blackboard.Parser {
         private void initFuncs() {
             this.funcs = new Collection().
                 Add("abs",
-                    new Input1<IValue<int>>(   (input) => new AbsInt(  input)),
-                    new Input1<IValue<double>>((input) => new AbsFloat(input))).
+                    new Input1<IValue<int>>(   (input) => new AbsInt(   input)),
+                    new Input1<IValue<double>>((input) => new AbsDouble(input))).
                 Add("all",
                     new InputN<ITrigger>((inputs) => new All(inputs))).
                 Add("and",
@@ -214,8 +214,8 @@ namespace Blackboard.Parser {
                 Add("clamp",
                     new Input3<IValue<int>,    IValue<int>,    IValue<int>>(   (input1, input2, input3) => new Clamp<int>(   input1, input2, input3)),
                     new Input3<IValue<double>, IValue<double>, IValue<double>>((input1, input2, input3) => new Clamp<double>(input1, input2, input3))).
-                Add("float",
-                    new Input1<IValue<int>>((input) => new IntToFloat(input))).
+                Add("double",
+                    new Input1<IValue<int>>((input) => new IntToDouble(input))).
                 Add("int",
                     new Input1<IValue<double>>((input) => new Truncate(input))).
                 Add("implies",
@@ -234,7 +234,7 @@ namespace Blackboard.Parser {
                     new InputN<IValue<double>>((inputs) => new Min<double>(inputs))).
                 Add("mul",
                     new InputN<IValue<int>>(   (inputs) => new MulInt(  inputs)),
-                    new InputN<IValue<double>>((inputs) => new MulFloat(inputs))).
+                    new InputN<IValue<double>>((inputs) => new MulDouble(inputs))).
                 Add("on",
                     new Input1<IValue<bool>>((input) => new OnTrue(input))).
                 Add("onChange",
@@ -256,20 +256,20 @@ namespace Blackboard.Parser {
         /// <summary>Adds in initial constants.</summary>
         private void initConsts() {
             INamespace scope = this.driver.Nodes;
-            _ = new Const<double>("e",         scope, S.Math.E);
-            _ = new Const<double>("pi",        scope, S.Math.PI);
-            _ = new Const<double>("tau",       scope, S.Math.Tau);
-            _ = new Const<double>("sqrt2",     scope, S.Math.Sqrt(2));
-            _ = new Const<double>("nan",       scope, double.NaN);
-            _ = new Const<double>("inf",       scope, double.PositiveInfinity);
-            _ = new Const<double>("posInf",    scope, double.PositiveInfinity);
-            _ = new Const<double>("negInf",    scope, double.NegativeInfinity);
-            _ = new Const<double>("maxFloat",  scope, double.MaxValue);
-            _ = new Const<double>("minFloat",  scope, double.MinValue);
-            _ = new Const<double>("maxInt",    scope, int.MaxValue);
-            _ = new Const<double>("minInt",    scope, int.MinValue);
-            _ = new Const<double>("floatSize", scope, sizeof(double));
-            _ = new Const<double>("intSize",   scope, sizeof(int));
+            _ = new Const<double>("e",          scope, S.Math.E);
+            _ = new Const<double>("pi",         scope, S.Math.PI);
+            _ = new Const<double>("tau",        scope, S.Math.Tau);
+            _ = new Const<double>("sqrt2",      scope, S.Math.Sqrt(2));
+            _ = new Const<double>("nan",        scope, double.NaN);
+            _ = new Const<double>("inf",        scope, double.PositiveInfinity);
+            _ = new Const<double>("posInf",     scope, double.PositiveInfinity);
+            _ = new Const<double>("negInf",     scope, double.NegativeInfinity);
+            _ = new Const<double>("maxDouble",  scope, double.MaxValue);
+            _ = new Const<double>("minDouble",  scope, double.MinValue);
+            _ = new Const<double>("maxInt",     scope, int.MaxValue);
+            _ = new Const<double>("minInt",     scope, int.MinValue);
+            _ = new Const<double>("doubleSize", scope, sizeof(double));
+            _ = new Const<double>("intSize",    scope, sizeof(int));
         }
 
         #endregion
@@ -339,7 +339,7 @@ namespace Blackboard.Parser {
             INode _ =
                 typeText == "bool" ?   new InputValue<bool>(  name, scope, Cast.AsBoolValue(   node)) :
                 typeText == "int"?     new InputValue<int>(   name, scope, Cast.AsIntValue(    node)) :
-                typeText == "float"?   new InputValue<double>(name, scope, Cast.AsFloatValue(  node)) :
+                typeText == "double"?  new InputValue<double>(name, scope, Cast.AsDoubleValue( node)) :
                 typeText == "trigger"? new InputTrigger(      name, scope, Cast.AsTriggerValue(node)) :
                 throw new Exception("Unknown type: " + typeText);
         }
@@ -361,16 +361,16 @@ namespace Blackboard.Parser {
             // If right is constant or literal create a const node instead of an output node.
             if (Cast.IsConstant(node)) {
                 INode _ =
-                    typeText == "bool"  ? new Const<bool>(  name, scope, Cast.AsBoolValue( node)) :
-                    typeText == "int"   ? new Const<int>(   name, scope, Cast.AsIntValue(  node)) :
-                    typeText == "float" ? new Const<double>(name, scope, Cast.AsFloatValue(node)) :
+                    typeText == "bool"   ? new Const<bool>(  name, scope, Cast.AsBoolValue(  node)) :
+                    typeText == "int"    ? new Const<int>(   name, scope, Cast.AsIntValue(   node)) :
+                    typeText == "double" ? new Const<double>(name, scope, Cast.AsDoubleValue(node)) :
                     throw new Exception("Unable to define " + id + " of constant type " + typeText +
                         " with " + Cast.TypeName(node) + " at " + id.Location + ".");
             } else {
                 INode _ =
                     typeText == "bool"    ? new OutputValue<bool>(  Cast.As<IValue<bool>>(  node), name, scope) :
                     typeText == "int"     ? new OutputValue<int>(   Cast.As<IValue<int>>(   node), name, scope) :
-                    typeText == "float"   ? new OutputValue<double>(Cast.As<IValue<double>>(node), name, scope) :
+                    typeText == "double"  ? new OutputValue<double>(Cast.As<IValue<double>>(node), name, scope) :
                     typeText == "trigger" ? new OutputTrigger(      Cast.As<ITrigger>(      node), name, scope) :
                     throw new Exception("Unable to define " + id + " of type " + typeText +
                         " with " + Cast.TypeName(node) + " at " + id.Location + ".");
@@ -436,10 +436,10 @@ namespace Blackboard.Parser {
                 Identifier id = this.pop() as Identifier;
                 INode left = this.find(id);
                 if (left is null) throw new Exception("Unknown input variable " + id + " at " + id.Location + ".");
-                else if (left is IValueInput<bool>   leftBool)    leftBool. SetValue( Cast.AsBoolValue(   right));
-                else if (left is IValueInput<int>    leftInt)     leftInt.  SetValue( Cast.AsIntValue(    right));
-                else if (left is IValueInput<double> leftFloat)   leftFloat.SetValue( Cast.AsFloatValue(  right));
-                else if (left is ITriggerInput       leftTrigger) leftTrigger.Trigger(Cast.AsTriggerValue(right));
+                else if (left is IValueInput<bool>   leftBool)    leftBool.   SetValue(Cast.AsBoolValue(   right));
+                else if (left is IValueInput<int>    leftInt)     leftInt.    SetValue(Cast.AsIntValue(    right));
+                else if (left is IValueInput<double> leftDouble)  leftDouble. SetValue(Cast.AsDoubleValue( right));
+                else if (left is ITriggerInput       leftTrigger) leftTrigger.Trigger( Cast.AsTriggerValue(right));
                 else throw new Exception("Unable to assign to " + Cast.TypeName(left) + " at " + id.Location + ".");
             }
         }
@@ -573,15 +573,15 @@ namespace Blackboard.Parser {
             }
         }
 
-        /// <summary>This handles pushing a float literal value onto the stack.</summary>
+        /// <summary>This handles pushing a double literal value onto the stack.</summary>
         /// <param name="args">The token information from the parser.</param>
-        private void handlePushFloat(PP.ParseTree.PromptArgs args) {
+        private void handlePushDouble(PP.ParseTree.PromptArgs args) {
             string text = args.Tokens[^1].Text;
             try {
                 double value = double.Parse(text);
                 this.push(new Literal<double>(value));
             } catch (S.Exception ex) {
-                throw new Exception("Failed to parse \""+text+"\" as a float.", ex);
+                throw new Exception("Failed to parse \""+text+"\" as a double.", ex);
             }
         }
 

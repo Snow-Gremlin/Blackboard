@@ -4,13 +4,13 @@ using Blackboard.Core.Interfaces;
 namespace Blackboard.Core.Caps {
 
     /// <summary>Gets the difference between the two parent values.</summary>
-    sealed public class SubFloat: Binary<double, double, double> {
+    sealed public class SubDouble: Binary<double, double, double> {
 
         /// <summary>Creates a subtraction value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public SubFloat(IValue<double> source1 = null, IValue<double> source2 = null, double value = default) :
+        public SubDouble(IValue<double> source1 = null, IValue<double> source2 = null, double value = default) :
             base(source1, source2, value) { }
 
         /// <summary>Gets the difference of the parents during evaluation.</summary>
@@ -21,6 +21,6 @@ namespace Blackboard.Core.Caps {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "SubFloat"+base.ToString();
+        public override string ToString() => "SubDouble"+base.ToString();
     }
 }

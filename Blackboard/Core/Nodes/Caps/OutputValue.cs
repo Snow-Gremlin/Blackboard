@@ -1,13 +1,14 @@
-﻿using Blackboard.Core.Nodes.Bases;
+﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
-using System;
 using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Caps {
 
     /// <summary>A node for user outputted values.</summary>
     /// <typeparam name="T">The type of the value to hold.</typeparam>
-    sealed public class OutputValue<T>: ValueNode<T>, IValueOutput<T> {
+    sealed public class OutputValue<T>: ValueNode<T>, IValueOutput<T>
+        where T : IComparable<T>, new() {
 
         /// <summary>The name for this namespace.</summary>
         private string name;
@@ -56,7 +57,7 @@ namespace Blackboard.Core.Nodes.Caps {
         }
 
         /// <summary>This event is emitted when the value is changed.</summary>
-        public event EventHandler OnChanged;
+        public event System.EventHandler OnChanged;
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public override IEnumerable<INode> Parents {
@@ -71,7 +72,7 @@ namespace Blackboard.Core.Nodes.Caps {
         protected override bool UpdateValue() {
             if (this.source is null) return false;
             if (this.SetNodeValue(this.source.Value)) {
-                this.OnChanged?.Invoke(this, EventArgs.Empty);
+                this.OnChanged?.Invoke(this, System.EventArgs.Empty);
                 return true;
             }
             return false;

@@ -1,11 +1,12 @@
-﻿using Blackboard.Core.Nodes.Bases;
+﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Caps {
 
     /// <summary>This is a boolean value which can be toggled by triggers.</summary>
-    sealed public class Toggler: ValueNode<bool> {
+    sealed public class Toggler: ValueNode<Bool> {
 
         /// <summary>This is the parent to toggle the value.</summary>
         private ITrigger toggle;
@@ -14,7 +15,7 @@ namespace Blackboard.Core.Nodes.Caps {
         private ITrigger reset;
 
         /// <summary>This is the parent holding the value to reset with.</summary>
-        private ValueNode<bool> resetValue;
+        private IValue<Bool> resetValue;
 
         /// <summary>Creates a toggling value node.</summary>
         /// <param name="toggle">The initial parent to toggle the value.</param>
@@ -22,7 +23,7 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <param name="resetValue">The initial parent for the value to reset to.</param>
         /// <param name="value">The initial boolean value for this node.</param>
         public Toggler(ITrigger toggle = null, ITrigger reset = null,
-            ValueNode<bool> resetValue = null, bool value = false) : base(value) {
+            IValue<Bool> resetValue = null, Bool value = default) : base(value) {
             this.Toggle = toggle;
             this.Reset = reset;
             this.ResetValue = resetValue;
@@ -42,7 +43,7 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
-        public ValueNode<bool> ResetValue {
+        public IValue<Bool> ResetValue {
             get => this.resetValue;
             set => this.SetParent(ref this.resetValue, value);
         }
@@ -58,9 +59,9 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>
         protected override bool UpdateValue() {
-            bool value = this.Value;
-            if (this.toggle?.Provoked ?? false) value = !value;
-            if (this.reset?.Provoked ?? false) value = this.resetValue?.Value ?? false;
+            Bool value = this.Value;
+            if (this.toggle?.Provoked ?? false) value = Bool.Wrap(!value.Value);
+            if (this.reset?.Provoked ?? false) value = this.resetValue?.Value ?? Bool.False;
             return this.SetNodeValue(value);
         }
 

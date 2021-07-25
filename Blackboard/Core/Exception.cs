@@ -5,6 +5,26 @@ namespace Blackboard.Core {
     /// <summary>The exceptions for the core of blackboard.</summary>
     public class Exception: System.Exception {
 
+        /// <summary>Creates a new exception.</summary>
+        /// <param name="message">The message for this exception.</param>
+        public Exception(string message) : base(message) { }
+
+        /// <summary>Creates a new exception.</summary>
+        /// <param name="message">The message for this exception.</param>
+        /// <param name="inner">The inner exception to this exception.</param>
+        public Exception(string message, System.Exception inner) : base(message, inner) { }
+
+        /// <summary>Adds additional key value pair of data to this exception.</summary>
+        /// <param name="key">The key for the additional data.</param>
+        /// <param name="value">The value for the additional data.</param>
+        /// <returns>This exception so that these calls can be chained.</returns>
+        public Exception With(string key, object value) {
+            this.Data.Add(key, value);
+            return this;
+        }
+
+        #region Predefined
+
         /// <summary>
         /// An exception for when a node or group is renamed and
         /// it has the same name as another in the same scope.
@@ -34,22 +54,6 @@ namespace Blackboard.Core {
         static public Exception ScopeLoopDetected() =>
             new("May not add to scope: Loop detected.");
 
-        /// <summary>Creates a new exception.</summary>
-        /// <param name="message">The message for this exception.</param>
-        public Exception(string message) : base(message) { }
-
-        /// <summary>Creates a new exception.</summary>
-        /// <param name="message">The message for this exception.</param>
-        /// <param name="inner">The inner exception to this exception.</param>
-        public Exception(string message, System.Exception inner) : base(message, inner) { }
-
-        /// <summary>Adds additional key value pair of data to this exception.</summary>
-        /// <param name="key">The key for the additional data.</param>
-        /// <param name="value">The value for the additional data.</param>
-        /// <returns>This exception so that these calls can be chained.</returns>
-        public Exception With(string key, object value) {
-            this.Data.Add(key, value);
-            return this;
-        }
+        #endregion
     }
 }

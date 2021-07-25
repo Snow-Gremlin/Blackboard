@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Nodes.Caps {
 
     /// <summary>Performs a trigger when any parent is changed.</summary>
-    sealed public class OnChange: TriggerNode  {
+    sealed public class OnChange: TriggerNode {
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
         private List<INode> sources;
@@ -24,7 +24,7 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This adds parents to this node.</summary>
         /// <param name="parents">The set of parents to add.</param>
-        public void AddParents(params IValue<INode>[] parents) =>
+        public void AddParents(params INode[] parents) =>
             this.AddParents(parents as IEnumerable<INode>);
 
         /// <summary>This adds parents to this node.</summary>

@@ -157,10 +157,10 @@ namespace Blackboard.Parser {
                 new Input2<IValue<int>, IValue<int>>((left, right) => new LeftShift(left, right)));
             this.addProcess("Sum", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new SumInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new SumDouble(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new Sum(left, right)));
             this.addProcess("Subtract", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new SubInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new SubDouble(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new Sub(left, right)));
             this.addProcess("Multiply", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new MulInt(  left, right)),
                 new Input2<IValue<double>, IValue<double>>((left, right) => new Mul(left, right)));
@@ -172,10 +172,10 @@ namespace Blackboard.Parser {
                 new Input2<IValue<double>, IValue<double>>((left, right) => new Mod(left, right)));
             this.addProcess("Remainder", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new RemInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new RemDouble(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new Rem(left, right)));
             this.addProcess("Power", 2,
                 new Input2<IValue<int>,    IValue<int>>(   (left, right) => new PowerInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new PowerDouble(left, right)));
+                new Input2<IValue<double>, IValue<double>>((left, right) => new Power(left, right)));
             this.addProcess("Negate", 1,
                 new Input1<IValue<int>>(   (input) => new NegInt(input)),
                 new Input1<IValue<double>>((input) => new Neg(input)));

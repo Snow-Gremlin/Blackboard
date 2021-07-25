@@ -9,6 +9,7 @@ namespace Blackboard.Core.Data.Caps {
         static Bool() {
             True = new(true);
             False = new(false);
+            Default = False;
         }
 
         /// <summary>A predefined true boolean value.</summary>
@@ -16,6 +17,9 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>A predefined false boolean value.</summary>
         static public readonly Bool False;
+
+        /// <summary>A predefined default (false) boolean value.</summary>
+        static public readonly Bool Default;
 
         /// <summary>Gets the Bool for the given C# boolean value.</summary>
         /// <remarks>This should be used to instead of a new constructor to save memory were possible.</remarks>
@@ -37,8 +41,18 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The comparison result indicating which is greater than or equal.</returns>
         public int CompareTo(Bool other) => this.Value.CompareTo(other.Value);
 
+        public override bool Equals(object obj) => obj is Bool other && this.Value == other.Value;
+        public override int GetHashCode() => this.Value.GetHashCode();
+
         /// <summary>The name of this data type.</summary>
         /// <returns>The name of the bool type.</returns>
         public override string ToString() => "bool";
+
+        public static bool operator == (Bool left, Bool right) => left.Equals(right);
+        public static bool operator != (Bool left, Bool right) => !(left == right);
+        public static bool operator < (Bool left, Bool right) => left.CompareTo(right) < 0;
+        public static bool operator <= (Bool left, Bool right) => left.CompareTo(right) <= 0;
+        public static bool operator > (Bool left, Bool right) => left.CompareTo(right) > 0;
+        public static bool operator >= (Bool left, Bool right) => left.CompareTo(right) >= 0;
     }
 }

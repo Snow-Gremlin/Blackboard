@@ -1,17 +1,32 @@
-﻿using Blackboard.Core.Nodes.Caps;
+﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
-namespace Blackboard.Core {
+namespace Blackboard.Core.Nodes {
 
-    /// <summary>Collection of tools for casting and testing node types.</summary>
+    /// <summary>Collection of tools to help with casting and testing node types.</summary>
     static public class Cast {
 
         /// <summary>Determines if the given node can be cast to bool IValues.</summary>
         /// <param name="node">The node to check.</param>
         /// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
-        static public int BoolMatch(INode node) =>
-            node is IValue<bool> ? 0 : -1;
+        static private int BoolMatch(INode node) =>
+            node is IValue<Bool> ? 0 : -1;
+
+        /// <summary>Determines if the given node can be cast to int IValues.</summary>
+        /// <param name="node">The node to check.</param>
+        /// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
+        static private int IntMatch(INode node) =>
+            node is IValue<Int> ? 0 : -1;
+
+        /// <summary>Determines if the given node can be cast to double IValues.</summary>
+        /// <param name="node">The node to check.</param>
+        /// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
+        static private int DoubleMatch(INode node) =>
+            node is IValue<Double> ? 0 :
+            node is IValue<Int>    ? 1 :
+            -1;
 
         /// <summary>Determines if the given node can be cast to triggers.</summary>
         /// <remarks>
@@ -20,23 +35,9 @@ namespace Blackboard.Core {
         /// </remarks>
         /// <param name="node">The node to check.</param>
         /// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
-        static public int TriggerMatch(INode node) =>
+        static private int TriggerMatch(INode node) =>
             node is ITrigger     ? 0 :
-            node is IValue<bool> ? 1 :
-            -1;
-
-        /// <summary>Determines if the given node can be cast to int IValues.</summary>
-        /// <param name="node">The node to check.</param>
-        /// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
-        static public int IntMatch(INode node) =>
-            node is IValue<int> ? 0 : -1;
-
-        /// <summary>Determines if the given node can be cast to double IValues.</summary>
-        /// <param name="node">The node to check.</param>
-        /// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
-        static public int DoubleMatch(INode node) =>
-            node is IValue<double> ? 0 :
-            node is IValue<int>    ? 1 :
+            node is IValue<Bool> ? 1 :
             -1;
 
         /// <summary>Determines if the given node can be cast to the given type.</summary>
@@ -45,10 +46,10 @@ namespace Blackboard.Core {
         /// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
         static public int Match<T>(INode node) {
             System.Type type = typeof(T);
-            return type == typeof(IValue<bool>)   ? BoolMatch(node) :
+            return type == typeof(IValue<Bool>)   ? BoolMatch(node) :
+                   type == typeof(IValue<Int>)    ? IntMatch(node) :
+                   type == typeof(IValue<Double>) ? DoubleMatch(node) :
                    type == typeof(ITrigger)       ? TriggerMatch(node) :
-                   type == typeof(IValue<int>)    ? IntMatch(node) :
-                   type == typeof(IValue<double>) ? DoubleMatch(node) :
                    type == typeof(INode)          ? 0 :
                    -1;
         }
@@ -74,9 +75,24 @@ namespace Blackboard.Core {
         /// <summary>Casts the given node to a bool IValue.</summary>
         /// <param name="node">The node to cast.</param>
         /// <returns>The bool IValue or it throws an exception if it can't cast.</returns>
-        static public IValue<bool> AsBool(INode node) =>
-            node is IValue<bool> value ? value :
-            throw new Exception("Can not cast "+node+" to IValue<bool>.");
+        static public IValue<Bool> AsBool(INode node) =>
+            node is IValue<Bool> value ? value :
+            throw new Exception("Can not cast "+node+" to IValue<Bool>.");
+
+        /// <summary>Casts the given node to a int IValue.</summary>
+        /// <param name="node">The node to cast.</param>
+        /// <returns>The int IValue or it throws an exception if it can't cast.</returns>
+        static public IValue<Int> AsInt(INode node) =>
+            node is IValue<Int> value ? value :
+            throw new Exception("Can not cast "+node+" to IValue<Int>.");
+
+        /// <summary>Casts the given node to a double IValue.</summary>
+        /// <param name="node">The node to cast.</param>
+        /// <returns>The double IValue or it throws an exception if it can't cast.</returns>
+        static public IValue<Double> AsDouble(INode node) =>
+            node is IValue<Double> dValue ? dValue :
+            node is IValue<Int>    iValue ? new Implicit<Int, Double>(iValue) :
+            throw new Exception("Can not cast "+node+" to IValue<double>.");
 
         /// <summary>Casts the given node to a trigger.</summary>
         /// <remarks>
@@ -86,24 +102,9 @@ namespace Blackboard.Core {
         /// <param name="node">The node to cast.</param>
         /// <returns>The bool IValue or it throws an exception if it can't cast.</returns>
         static public ITrigger AsTrigger(INode node) =>
-            node is ITrigger trig ? trig :
-            node is IValue<bool> value ? new OnTrue(value) :
+            node is ITrigger     trig  ? trig :
+            node is IValue<Bool> value ? new OnTrue(value) :
             throw new Exception("Can not cast "+node+" to ITrigger.");
-
-        /// <summary>Casts the given node to a int IValue.</summary>
-        /// <param name="node">The node to cast.</param>
-        /// <returns>The int IValue or it throws an exception if it can't cast.</returns>
-        static public IValue<int> AsInt(INode node) =>
-            node is IValue<int> value ? value :
-            throw new Exception("Can not cast "+node+" to IValue<int>.");
-
-        /// <summary>Casts the given node to a double IValue.</summary>
-        /// <param name="node">The node to cast.</param>
-        /// <returns>The double IValue or it throws an exception if it can't cast.</returns>
-        static public IValue<double> AsDouble(INode node) =>
-            node is IValue<double> dValue ? dValue :
-            node is IValue<int>    iValue ? new IntToDouble(iValue) :
-            throw new Exception("Can not cast "+node+" to IValue<double>.");
 
         /// <summary>Determines if the given node can be cast to the given type.</summary>
         /// <typeparam name="T">Must be a bool, int, ITrigger, or double otherwise an exception is thrown.</typeparam>
@@ -111,10 +112,10 @@ namespace Blackboard.Core {
         /// <returns>The node as the requested node type or this throws an exception.</returns>
         static public T As<T>(INode node) {
             System.Type type = typeof(T);
-            return type == typeof(IValue<bool>)   ? (T)AsBool(node) :
+            return type == typeof(IValue<Bool>)   ? (T)AsBool(node) :
+                   type == typeof(IValue<Int>)    ? (T)AsInt(node) :
+                   type == typeof(IValue<Double>) ? (T)AsDouble(node) :
                    type == typeof(ITrigger)       ? (T)AsTrigger(node) :
-                   type == typeof(IValue<int>)    ? (T)AsInt(node) :
-                   type == typeof(IValue<double>) ? (T)AsDouble(node) :
                    type == typeof(INode)          ? (T)node :
                    throw new Exception("Can not cast "+node+" to "+typeof(T)+".");
         }
@@ -123,28 +124,28 @@ namespace Blackboard.Core {
         /// <remarks>This allows a null node value for default assignments.</remarks>
         /// <param name="node">The node to cast.</param>
         /// <returns>The bool value or it throws an exception if it can't cast.</returns>
-        static public bool AsBoolValue(INode node) =>
-            node is not null &&
-            (node is IValue<bool> nodeBool ? nodeBool.Value :
-            throw new Exception("Can not assign a " + TypeName(node) + " to a bool."));
+        static public Bool AsBoolValue(INode node) =>
+            node is null                  ? Bool.False :
+            node is IValue<Bool> nodeBool ? nodeBool.Value :
+            throw new Exception("Can not assign a " + TypeName(node) + " to a bool.");
 
         /// <summary>Casts the given node to an int.</summary>
         /// <remarks>This allows a null node value for default assignments.</remarks>
         /// <param name="node">The node to cast.</param>
         /// <returns>The int value or it throws an exception if it can't cast.</returns>
-        static public int AsIntValue(INode node) =>
-            node is null                ? default :
-            node is IValue<int> nodeInt ? nodeInt.Value :
+        static public Int AsIntValue(INode node) =>
+            node is null                ? new() :
+            node is IValue<Int> nodeInt ? nodeInt.Value :
             throw new Exception("Can not assign a " + TypeName(node) + " to an int.");
 
         /// <summary>Casts the given node to a double.</summary>
         /// <remarks>This allows a null node value for default assignments.</remarks>
         /// <param name="node">The node to cast.</param>
         /// <returns>The double value or it throws an exception if it can't cast.</returns>
-        static public double AsDoubleValue(INode node) =>
-            node is null                      ? default :
-            node is IValue<double> nodeDouble ? nodeDouble.Value :
-            node is IValue<int>    nodeInt    ? nodeInt.Value :
+        static public Double AsDoubleValue(INode node) =>
+            node is null                      ? new() :
+            node is IValue<Double> nodeDouble ? nodeDouble.Value :
+            node is IValue<Int>    nodeInt    ? new Double().CastFrom(nodeInt.Value) :
             throw new Exception("Can not assign a " + TypeName(node) + " to a double.");
 
         /// <summary>Casts the given node to a trigger value.</summary>
@@ -153,18 +154,18 @@ namespace Blackboard.Core {
         /// <returns>The trigger value or it throws an exception if it can't cast.</returns>
         static public bool AsTriggerValue(INode node) =>
             node is not null &&
-            (node is ITrigger    nodeTrigger ? nodeTrigger.Provoked :
-            node is IValue<bool> nodeBool    ? nodeBool.Value :
+            (node is ITrigger nodeTrigger ? nodeTrigger.Provoked :
+            node is IValue<bool> nodeBool ? nodeBool.Value :
             throw new Exception("Can not assign a " + TypeName(node) + " to a trigger."));
 
         /// <summary>Gets a pretty name used for exceptions which can be thrown for invalid input.</summary>
         /// <param name="node">The node to get the name for.</param>
         /// <returns>The name for the node.</returns>
         static public string TypeName(INode node) =>
-            node is IValue<bool>   ? "bool" :
-            node is IValue<int>    ? "int" :
+            node is IValue<bool> ? "bool" :
+            node is IValue<int> ? "int" :
             node is IValue<double> ? "double" :
-            node is ITrigger       ? "trigger" :
+            node is ITrigger ? "trigger" :
             "unknown:"+node;
 
         /// <summary>Converts the given node into a literal.</summary>
@@ -172,10 +173,10 @@ namespace Blackboard.Core {
         /// <param name="node">The node to get a literal version of.</param>
         /// <returns>The literal node or null if can't be converted.</returns>
         static public INode ToLiteral(INode node) =>
-            node is IValue<bool>   nodeBool    ? new Literal<bool>(  nodeBool.   Value) :
-            node is IValue<int>    nodeInt     ? new Literal<int>(   nodeInt.    Value) :
-            node is IValue<double> nodeDouble  ? new Literal<double>(nodeDouble. Value) :
-            node is ITrigger       nodeTrigger ? new Literal<bool>(  nodeTrigger.Provoked) :
+            node is IValue<bool> nodeBool ? new Literal<bool>(nodeBool.Value) :
+            node is IValue<int> nodeInt ? new Literal<int>(nodeInt.Value) :
+            node is IValue<double> nodeDouble ? new Literal<double>(nodeDouble.Value) :
+            node is ITrigger nodeTrigger ? new Literal<bool>(nodeTrigger.Provoked) :
             null;
 
         /// <summary>Determines if all the given nodes are constants.</summary>

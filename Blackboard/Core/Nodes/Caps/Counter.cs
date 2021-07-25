@@ -19,10 +19,10 @@ namespace Blackboard.Core.Nodes.Caps {
         private ITrigger reset;
 
         /// <summary>The value to step during an increment or decrement.</summary>
-        private ValueNode<T> delta;
+        private IValue<T> delta;
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
-        private ValueNode<T> resetValue;
+        private IValue<T> resetValue;
 
         /// <summary>Creates a new node for counting events.</summary>
         /// <param name="increment">The initial parent to trigger an increment.</param>
@@ -32,7 +32,7 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <param name="resetValue">The initial reset value parent.</param>
         /// <param name="value">The initial value for this counter.</param>
         public Counter(ITrigger increment = null, ITrigger decrement = null, ITrigger reset = null,
-            ValueNode<T> delta = null, ValueNode<T> resetValue = null, T value = default) : base(value) {
+            IValue<T> delta = null, IValue<T> resetValue = null, T value = default) : base(value) {
             this.Increment = increment;
             this.Decrement = decrement;
             this.Reset = reset;
@@ -60,14 +60,14 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>The value to step during an increment or decrement.</summary>
         /// <remarks>If this parent is null then the counter will increment and decrement by one.</remarks>
-        public ValueNode<T> Delta {
+        public IValue<T> Delta {
             get => this.delta;
             set => this.SetParent(ref this.delta, value);
         }
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
-        public ValueNode<T> ResetValue {
+        public IValue<T> ResetValue {
             get => this.resetValue;
             set => this.SetParent(ref this.resetValue, value);
         }

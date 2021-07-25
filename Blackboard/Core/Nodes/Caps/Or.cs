@@ -1,32 +1,33 @@
-﻿using System.Collections.Generic;
-using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Interfaces;
+using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Caps {
 
     /// <summary>Performs a boolean OR of all the boolean parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/OR.html"/>
-    sealed public class Or: Nary<bool, bool> {
+    sealed public class Or: Nary<Bool, Bool> {
 
         /// <summary>Creates a boolean OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Or(params IValue<bool>[] parents) :
+        public Or(params IValue<Bool>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a boolean OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public Or(IEnumerable<IValue<bool>> parents = null, bool value = default) :
+        public Or(IEnumerable<IValue<Bool>> parents = null, Bool value = default) :
             base(parents, value) { }
 
         /// <summary>Gets the OR of all the parent's booleans.</summary>
         /// <param name="values">The to OR together.</param>
         /// <returns>The OR of all the given values.</returns>
-        protected override bool OnEval(IEnumerable<bool> values) {
-            foreach (bool value in values) {
-                if (value) return true;
+        protected override Bool OnEval(IEnumerable<Bool> values) {
+            foreach (Bool value in values) {
+                if (value.Value) return Bool.True;
             }
-            return false;
+            return Bool.False;
         }
 
         /// <summary>Gets the string for this node.</summary>

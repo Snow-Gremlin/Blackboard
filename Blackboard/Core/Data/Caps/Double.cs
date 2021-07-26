@@ -5,12 +5,6 @@ namespace Blackboard.Core.Data.Caps {
     public struct Double: IArithmetic<Double>, IComparable<Double>, IFloatingPoint<Double>,
         IImplicit<Int, Double> {
 
-        static Double() {
-            Default = new(0.0);
-        }
-
-        static public readonly Double Default;
-
         public readonly double Value;
 
         public Double(double value) {

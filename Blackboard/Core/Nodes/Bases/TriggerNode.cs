@@ -8,9 +8,13 @@ namespace Blackboard.Core.Nodes.Bases {
     public abstract class TriggerNode: Node, ITrigger {
 
         /// <summary>Creates a new trigger node.</summary>
-        public TriggerNode() {
-            this.Provoked = false;
+        public TriggerNode(bool provoked = false) {
+            this.Provoked = provoked;
         }
+
+        /// <summary>Converts this node to a literal.</summary>
+        /// <returns>Returns null because a trigger can not be a literal.</returns>
+        public override INode ToLiteral() => null;
 
         /// <summary>Indicates if this trigger has been fired during a current evaluation.</summary>
         public bool Provoked { get; protected set; }

@@ -5,12 +5,6 @@ namespace Blackboard.Core.Data.Caps {
     public struct Int: IArithmetic<Int>, IComparable<Int>, IBitwise<Int>,
         IExplicit<Double, Int> {
 
-        static Int() {
-            Default = new(0);
-        }
-
-        static public readonly Int Default;
-
         public readonly int Value;
 
         public Int(int value = 0) {

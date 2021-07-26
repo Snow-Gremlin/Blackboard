@@ -16,6 +16,10 @@ namespace Blackboard.Core.Nodes.Caps {
         public Literal(T value = default) :
             base(value) { }
 
+        /// <summary>Converts this node to a literal.</summary>
+        /// <returns>This returns this literal itself.</returns>
+        public override INode ToLiteral() => this;
+
         /// <summary>This sets the literal value.</summary>
         /// <param name="value">The value to set.</param>
         /// <returns>True if the value has changed, false otherwise.</returns>
@@ -25,7 +29,6 @@ namespace Blackboard.Core.Nodes.Caps {
         public override IEnumerable<INode> Parents => Enumerable.Empty<INode>();
 
         /// <summary>Updates thie value during evaluation.</summary>
-        /// <remarks>Since the value is set outside this does nothing.</remarks>
         /// <returns>This always returns true.</returns>
         protected override bool UpdateValue() => true;
 

@@ -32,7 +32,7 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This will update the trigger during evaluation.</summary>
         /// <returns>True to trigger if the source value is false, false otherwise.</returns>
-        protected override bool UpdateTrigger() => !this.source.Value.Valuee;
+        protected override bool UpdateTrigger() => !this.source.Value.Value;
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>

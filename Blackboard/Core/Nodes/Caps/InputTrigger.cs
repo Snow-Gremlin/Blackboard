@@ -1,53 +1,20 @@
 ﻿using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Core.Nodes.Caps {
 
     /// <summary>This is a trigger which can be provoked from user input.</summary>
     sealed public class InputTrigger: TriggerNode, ITriggerInput {
 
-        /// <summary>The name for this namespace.</summary>
-        private string name;
-
-        /// <summary>The parent scope or null.</summary>
-        private INamespace scope;
-
         /// <summary>Creates a new input trigger.</summary>
-        /// <param name="name">The initial name for this trigger.</param>
-        /// <param name="scope">The initial scope for this trigger.</param>
-        /// <param name="provoked"></param>
-        public InputTrigger(string name = "Input", INamespace scope = null, bool provoked = false) {
-            this.Name = name;
-            this.Scope = scope;
-            this.Provoked = provoked;
-        }
+        /// <param name="provoked">The initial provoked state of the trigger.</param>
+        public InputTrigger(bool provoked = false) :
+            base(provoked) { }
 
-        /// <summary>Gets or sets the name for the node.</summary>
-        public string Name {
-            get => this.name;
-            set => this.name = Namespace.SetName(this, value);
-        }
-
-        /// <summary>Gets or sets the containing scope for this name or null.</summary>
-        public INamespace Scope {
-            get => this.scope;
-            set {
-                Namespace.CheckScopeChange(this, value);
-                this.SetParent(ref this.scope, value);
-            }
-        }
-
-        /// <summary>This event is emitted when the trigger has been provoked.</summary>
-        public event EventHandler OnProvoked;
-
-        /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents {
-            get {
-                if (this.scope is not null) yield return this.scope;
-            }
-        }
+        /// <summary>Always returns no parents since inputs have no parent.</summary>
+        public override IEnumerable<INode> Parents => Enumerable.Empty<INode>();
 
         /// <summary>This is set this trigger to emit during the next evaluation.</summary>
         /// <param name="value">True will trigger, false will reset the trigger.</param>
@@ -56,17 +23,10 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This updates the trigger during the an evaluation.</summary>
         /// <returns>This returns the provoked value as it currently is.</returns>
-        protected override bool UpdateTrigger() {
-            if (this.Provoked) {
-                this.OnProvoked?.Invoke(this, EventArgs.Empty);
-                return true;
-            }
-            return false;
-        }
+        protected override bool UpdateTrigger() => this.Provoked;
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() =>
-            (this.scope is null ? "" : this.Scope.ToString()+".")+this.Name;
+        public override string ToString() => "InputTrigger";
     }
 }

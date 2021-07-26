@@ -1,4 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +17,10 @@ namespace Blackboard.Core.Nodes.Bases {
         public ValueNode(T value = default) {
             this.Value = value ?? new();
         }
+
+        /// <summary>Converts this node to a literal.</summary>
+        /// <returns>A literal of this node.</returns>
+        public override INode ToLiteral() => new Literal<T>(this.Value);
 
         /// <summary>The value being held by this node.</summary>
         public T Value { get; private set; }

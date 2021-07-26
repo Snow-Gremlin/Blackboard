@@ -2,6 +2,7 @@
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Core.Nodes.Caps {
 
@@ -10,48 +11,15 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class InputValue<T>: ValueNode<T>, IValueInput<T>
         where T : IComparable<T>, new() {
 
-        /// <summary>The name for this namespace.</summary>
-        private string name;
-
-        /// <summary>The parent scope or null.</summary>
-        private INamespace scope;
-
         /// <summary>Creates a new input value node.</summary>
-        /// <param name="name">The initial name for this value node.</param>
-        /// <param name="scope">The initial scope for this value node.</param>
         /// <param name="value">The initial value for this node.</param>
-        public InputValue(string name = "Input", INamespace scope = null, T value = default) : base(value) {
-            this.Name = name;
-            this.Scope = scope;
-        }
+        public InputValue(T value = default) :
+            base(value) { }
 
-        /// <summary>Gets or sets the name for the node.</summary>
-        public string Name {
-            get => this.name;
-            set => this.name = Namespace.SetName(this, value);
-        }
-
-        /// <summary>Gets or sets the containing scope for this name or null.</summary>
-        public INamespace Scope {
-            get => this.scope;
-            set {
-                Namespace.CheckScopeChange(this, value);
-                this.SetParent(ref this.scope, value);
-            }
-        }
-
-        /// <summary>This event is emitted when the value is changed.</summary>
-        public event System.EventHandler OnChanged;
-
-        /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents {
-            get {
-                if (this.scope is not null) yield return this.scope;
-            }
-        }
+        /// <summary>Always returns no parents since inputs have no parent.</summary>
+        public override IEnumerable<INode> Parents => Enumerable.Empty<INode>();
 
         /// <summary>This sets the value of this node.</summary>
-        /// <remarks>This is not intended to be be called directly, it should be called via the driver.</remarks>
         /// <param name="value">The value to set.</param>
         /// <returns>True if the value has changed, false otherwise.</returns>
         public bool SetValue(T value) => this.SetNodeValue(value);
@@ -62,14 +30,10 @@ namespace Blackboard.Core.Nodes.Caps {
         /// If the value didn't change during setting then it should not be evaluated.
         /// </remarks>
         /// <returns>This will always return true.</returns>
-        protected override bool UpdateValue() {
-            this.OnChanged?.Invoke(this, System.EventArgs.Empty);
-            return true;
-        }
+        protected override bool UpdateValue() => true;
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() =>
-            (this.scope is null ? "" : this.Scope.ToString()+".")+this.Name;
+        public override string ToString() => "InputValue(" + this.Value.ToString() + ")";
     }
 }

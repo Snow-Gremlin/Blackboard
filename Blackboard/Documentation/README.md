@@ -22,6 +22,25 @@ T6 = onAll(T1, T2, T3); // T6 := T1 & T2 & T3;
 Y = max(X, 10);
 Z = int(3.15); // Z = truncate(3.15);
 out Z;
+
+group N;
+N.P := 19;
+
+group M {
+    A := 12;
+    B := 4;
+}
+in int C = M.A + M.B;
+
+group N {
+    group M {
+        C := 5;
+    }
+}
+
+group N.M {
+    C := 5;
+}
 ```
 
 ## Todo

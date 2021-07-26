@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -64,6 +65,22 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>The depth in the graph from the furthest input of this node.</summary>
         public int Depth { get; private set; }
+
+        /// <summary>Determines if the node is constant or if all of it's parents are constant.</summary>
+        /// <returns>True if constant, false otherwise.</returns>
+        public bool IsConstant() {
+            if (this is IConstant) return true;
+            if (this is IInput) return false;
+            if (this is ITrigger) return false;
+            foreach (INode parent in this.Parents) {
+                if (parent is not IConstant) return false;
+            }
+            return true;
+        }
+
+        /// <summary>Converts this node to a literal.</summary>
+        /// <returns>A literal of this node, itself if already literal, or null if it can't become a literal.</returns>
+        public abstract INode ToLiteral();
 
         /// <summary>Evaluates this node and updates it.</summary>
         /// <returns>

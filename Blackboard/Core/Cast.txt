@@ -1,0 +1,149 @@
+﻿/// <summary>Determines if the given node can be cast to bool IValues.</summary>
+/// <param name="node">The node to check.</param>
+/// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
+static private int BoolMatch(INode node) =>
+    node is IValue<Bool> ? 0 : -1;
+
+/// <summary>Determines if the given node can be cast to int IValues.</summary>
+/// <param name="node">The node to check.</param>
+/// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
+static private int IntMatch(INode node) =>
+    node is IValue<Int> ? 0 : -1;
+
+/// <summary>Determines if the given node can be cast to double IValues.</summary>
+/// <param name="node">The node to check.</param>
+/// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
+static private int DoubleMatch(INode node) =>
+    node is IValue<Double> ? 0 :
+    node is IValue<Int>    ? 1 :
+    -1;
+
+/// <summary>Determines if the given node can be cast to triggers.</summary>
+/// <remarks>
+/// A bool can be converted to a trigger for logic equations
+/// but normally isn't implicity cast.
+/// </remarks>
+/// <param name="node">The node to check.</param>
+/// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
+static private int TriggerMatch(INode node) =>
+    node is ITrigger     ? 0 :
+    node is IValue<Bool> ? 1 :
+    -1;
+
+/// <summary>Determines if the given node can be cast to the given type.</summary>
+/// <typeparam name="T">Must be a bool, int, ITrigger, or double otherwise -1 is always returned.</typeparam>
+/// <param name="node">The node to check.</param>
+/// <returns>Negative if it can not be cast, smaller value for closer match.</returns>
+static public int Match<T>(INode node) {
+    System.Type type = typeof(T);
+    return type == typeof(IValue<Bool>)   ? BoolMatch(node) :
+            type == typeof(IValue<Int>)    ? IntMatch(node) :
+            type == typeof(IValue<Double>) ? DoubleMatch(node) :
+            type == typeof(ITrigger)       ? TriggerMatch(node) :
+            type == typeof(INode)          ? 0 :
+            -1;
+}
+
+/// <summary>Joins all the matches.</summary>
+/// <param name="values">The values to join.</param>
+/// <returns>The resulting matching or -1 if no match.</returns>
+static public int JoinMatches(params int[] values) =>
+    JoinMatches(values as IEnumerable<int>);
+
+/// <summary>Joins all the matches.</summary>
+/// <param name="values">The values to join.</param>
+/// <returns>The resulting matching or -1 if no match.</returns>
+static public int JoinMatches(IEnumerable<int> values) {
+    int sum = 0;
+    foreach (int value in values) {
+        if (value < 0) return -1;
+        sum += value;
+    }
+    return sum;
+}
+
+/// <summary>Casts the given node to a bool IValue.</summary>
+/// <param name="node">The node to cast.</param>
+/// <returns>The bool IValue or it throws an exception if it can't cast.</returns>
+static public IValue<Bool> AsBool(INode node) =>
+    node is IValue<Bool> value ? value :
+    throw new Exception("Can not cast "+node+" to IValue<Bool>.");
+
+/// <summary>Casts the given node to a int IValue.</summary>
+/// <param name="node">The node to cast.</param>
+/// <returns>The int IValue or it throws an exception if it can't cast.</returns>
+static public IValue<Int> AsInt(INode node) =>
+    node is IValue<Int> value ? value :
+    throw new Exception("Can not cast "+node+" to IValue<Int>.");
+
+/// <summary>Casts the given node to a double IValue.</summary>
+/// <param name="node">The node to cast.</param>
+/// <returns>The double IValue or it throws an exception if it can't cast.</returns>
+static public IValue<Double> AsDouble(INode node) =>
+    node is IValue<Double> dValue ? dValue :
+    node is IValue<Int>    iValue ? new Implicit<Int, Double>(iValue) :
+    throw new Exception("Can not cast "+node+" to IValue<double>.");
+
+/// <summary>Casts the given node to a trigger.</summary>
+/// <remarks>
+/// A bool can be converted to a trigger for logic equations
+/// but normally isn't implicity cast.
+/// </remarks>
+/// <param name="node">The node to cast.</param>
+/// <returns>The bool IValue or it throws an exception if it can't cast.</returns>
+static public ITrigger AsTrigger(INode node) =>
+    node is ITrigger     trig  ? trig :
+    node is IValue<Bool> value ? new OnTrue(value) :
+    throw new Exception("Can not cast "+node+" to ITrigger.");
+
+/// <summary>Determines if the given node can be cast to the given type.</summary>
+/// <typeparam name="T">Must be a bool, int, ITrigger, or double otherwise an exception is thrown.</typeparam>
+/// <param name="node">The node to check.</param>
+/// <returns>The node as the requested node type or this throws an exception.</returns>
+static public T As<T>(INode node) {
+    System.Type type = typeof(T);
+    return type == typeof(IValue<Bool>)   ? (T)AsBool(node) :
+            type == typeof(IValue<Int>)    ? (T)AsInt(node) :
+            type == typeof(IValue<Double>) ? (T)AsDouble(node) :
+            type == typeof(ITrigger)       ? (T)AsTrigger(node) :
+            type == typeof(INode)          ? (T)node :
+            throw new Exception("Can not cast "+node+" to "+typeof(T)+".");
+}
+
+/// <summary>Casts the given node to a bool.</summary>
+/// <remarks>This allows a null node value for default assignments.</remarks>
+/// <param name="node">The node to cast.</param>
+/// <returns>The bool value or it throws an exception if it can't cast.</returns>
+static public Bool AsBoolValue(INode node) =>
+    node is null                  ? Bool.False :
+    node is IValue<Bool> nodeBool ? nodeBool.Value :
+    throw new Exception("Can not assign a " + TypeName(node) + " to a bool.");
+
+/// <summary>Casts the given node to an int.</summary>
+/// <remarks>This allows a null node value for default assignments.</remarks>
+/// <param name="node">The node to cast.</param>
+/// <returns>The int value or it throws an exception if it can't cast.</returns>
+static public Int AsIntValue(INode node) =>
+    node is null                ? new() :
+    node is IValue<Int> nodeInt ? nodeInt.Value :
+    throw new Exception("Can not assign a " + TypeName(node) + " to an int.");
+
+/// <summary>Casts the given node to a double.</summary>
+/// <remarks>This allows a null node value for default assignments.</remarks>
+/// <param name="node">The node to cast.</param>
+/// <returns>The double value or it throws an exception if it can't cast.</returns>
+static public Double AsDoubleValue(INode node) =>
+    node is null                      ? new() :
+    node is IValue<Double> nodeDouble ? nodeDouble.Value :
+    node is IValue<Int>    nodeInt    ? new Double().CastFrom(nodeInt.Value) :
+    throw new Exception("Can not assign a " + TypeName(node) + " to a double.");
+
+/// <summary>Casts the given node to a trigger value.</summary>
+/// <remarks>This allows a null node value for default assignments.</remarks>
+/// <param name="node">The node to cast.</param>
+/// <returns>The trigger value or it throws an exception if it can't cast.</returns>
+static public bool AsTriggerValue(INode node) =>
+    node is not null &&
+    (node is ITrigger nodeTrigger ? nodeTrigger.Provoked :
+    node is IValue<bool> nodeBool ? nodeBool.Value :
+    throw new Exception("Can not assign a " + TypeName(node) + " to a trigger."));

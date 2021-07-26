@@ -4,12 +4,6 @@ namespace Blackboard.Core.Data.Caps {
     public struct String: IAdditive<String>, IComparable<String>,
         IImplicit<Bool, String>, IImplicit<Int, String>, IImplicit<Double, String> {
 
-        static String() {
-            Default = new("");
-        }
-
-        static public readonly String Default;
-
         public readonly string Value;
 
         public String(string value = "") {

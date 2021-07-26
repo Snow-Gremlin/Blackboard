@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core.Nodes.Interfaces;
 
-namespace Blackboard.Parser.Functions {
+namespace Blackboard.Core.Functions {
 
     /// <summary>The interface for parsable function factory.</summary>
     public interface IFunction {

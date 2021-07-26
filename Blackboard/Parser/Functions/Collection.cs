@@ -53,7 +53,7 @@ namespace Blackboard.Parser.Functions {
             INode[] inputs = nodes.ToArray();
             if (func is null) {
                 // TODO: Improve this message since it is can be hit by users of Blackboard when they input bad code.
-                string input = string.Join(", ", nodes.Select((node) => Cast.TypeName(node)));
+                string input = "UNIMPLEMENTED!"; // string.Join(", ", nodes.Select((node) => Cast.TypeName(node)));
                 string part = loc is null ? "" : (" at "+loc);
                 throw new Exception("No known procedure to handle "+name+"(" + input + ")"+part+".");
             }

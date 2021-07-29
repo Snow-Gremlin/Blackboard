@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 
@@ -7,6 +8,10 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <summary>Performs a right shifts the first parent the amount of the second parent.</summary>
     sealed public class RightShift<T>: Binary<T, T, T>
         where T : IBitwise<T>, IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory =
+            new Func<IValue<T>, IValue<T>>((left, right) => new RightShift<T>(left, right));
 
         /// <summary>Creates a right shift value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

@@ -84,9 +84,6 @@ namespace Blackboard.Core {
             return null;
         }
 
-        static private INode cast(Dictionary<Type, Caster> dict, INode node) =>
-            dict.TryGetValue(TypeOf(node), out Caster func) ? func(node) : null;
-
         private void addImplicit(Type dest, int match, Caster func) {
             this.implicitCast[dest] = func;
             this.castMatch[dest] = match;
@@ -111,9 +108,15 @@ namespace Blackboard.Core {
 
         public int Match(Type t) => this == t ? 0 : this.castMatch.TryGetValue(t, out int match) ? match : -1;
 
-        public INode Implicit(INode node) => cast(this.implicitCast, node);
+        public INode Implicit(INode node) => this.cast(this.implicitCast, node);
 
-        public INode Explicit(INode node) => cast(this.expliciteCast, node);
+        public INode Explicit(INode node) => this.cast(this.expliciteCast, node);
+
+        private INode cast(Dictionary<Type, Caster> dict, INode node) {
+            Type t = TypeOf(node);
+            return this == t ? node :
+                dict.TryGetValue(t, out Caster func) ? func(node) : null;
+        }
 
         public override bool Equals(object obj) => obj is Type other && this.Name == other.Name;
 

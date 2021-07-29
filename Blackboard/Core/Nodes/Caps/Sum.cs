@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -9,6 +10,9 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <summary>Gets the sum of all of the parent values.</summary>
     sealed public class Sum<T>: Nary<T, T>
         where T : IAdditive<T>, IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new FuncN<IValue<T>>((inputs) => new Sum<T>(inputs));
 
         /// <summary>Creates a sum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

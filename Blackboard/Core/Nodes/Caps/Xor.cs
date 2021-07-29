@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -9,6 +10,9 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <summary>Performs a boolean Exclusive OR of the boolean parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/XOR.html"/>
     sealed public class Xor: Nary<Bool, Bool> {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new FuncN<IValue<Bool>>((inputs) => new Xor(inputs));
 
         /// <summary>Creates a boolean Exclusive OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
@@ -25,7 +29,7 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <param name="values">The to Exclusive OR together.</param>
         /// <returns>The Exclusive OR of all the given values.</returns>
         protected override Bool OnEval(IEnumerable<Bool> values) =>
-            Bool.Wrap(values.Select((b) => b.Value).Aggregate((left, right) => left ^ right));
+            new(values.Select((b) => b.Value).Aggregate((left, right) => left ^ right));
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>

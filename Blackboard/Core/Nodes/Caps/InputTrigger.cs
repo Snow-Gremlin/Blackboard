@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Bases;
+﻿using Blackboard.Core.Functions;
+using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,9 @@ namespace Blackboard.Core.Nodes.Caps {
 
     /// <summary>This is a trigger which can be provoked from user input.</summary>
     sealed public class InputTrigger: TriggerNode, ITriggerInput {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new Func(() => new InputTrigger());
 
         /// <summary>Creates a new input trigger.</summary>
         /// <param name="provoked">The initial provoked state of the trigger.</param>

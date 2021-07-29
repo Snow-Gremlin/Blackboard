@@ -60,8 +60,8 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <returns>True if the value was changed, false otherwise.</returns>
         protected override bool UpdateValue() {
             Bool value = this.Value;
-            if (this.toggle?.Provoked ?? false) value = Bool.Wrap(!value.Value);
-            if (this.reset?.Provoked ?? false) value = this.resetValue?.Value ?? Bool.False;
+            if (this.toggle?.Provoked ?? false) value = new(!value.Value);
+            if (this.reset?.Provoked ?? false) value = this.resetValue?.Value ?? new(false);
             return this.SetNodeValue(value);
         }
 

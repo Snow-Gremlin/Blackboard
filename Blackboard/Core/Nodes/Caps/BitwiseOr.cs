@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -10,6 +11,9 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <see cref="https://mathworld.wolfram.com/OR.html"/>
     sealed public class BitwiseOr<T>: Nary<T, T>
         where T : IBitwise<T>, IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new FuncN<IValue<T>>((values) => new BitwiseOr<T>(values));
 
         /// <summary>Creates a bitwise OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

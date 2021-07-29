@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 
@@ -10,6 +11,10 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <typeparam name="T">The type of input for the two value providing parents.</typeparam>
     sealed public class Select<T>: Ternary<Bool, T, T, T>
         where T : IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory =
+            new Func<IValue<Bool>, IValue<T>, IValue<T>>((test, left, right) => new Select<T>(test, left, right));
 
         /// <summary>Creates a selection value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

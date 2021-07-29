@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -10,6 +11,9 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <typeparam name="T">The type of the value to hold.</typeparam>
     sealed public class InputValue<T>: ValueNode<T>, IValueInput<T>
         where T : IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new Func(() => new InputValue<T>());
 
         /// <summary>Creates a new input value node.</summary>
         /// <param name="value">The initial value for this node.</param>

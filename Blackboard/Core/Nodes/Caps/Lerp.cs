@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 
@@ -7,6 +8,10 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <summary>This will return the linear interpolation between two parent values.</summary>
     sealed public class Lerp<T>: Ternary<T, T, T, T>
         where T : IFloatingPoint<T>, IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory =
+            new Func<IValue<T>, IValue<T>, IValue<T>>((input1, input2, input3) => new Lerp<T>(input1, input2, input3));
 
         /// <summary>Creates a linear interpolation value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

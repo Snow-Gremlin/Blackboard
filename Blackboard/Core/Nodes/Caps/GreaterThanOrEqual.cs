@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 
@@ -9,6 +10,9 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <typeparam name="T">The type being compared.</typeparam>
     sealed public class GreaterThanOrEqual<T>: Binary<T, T, Bool>
         where T : IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new Func<IValue<T>>((value) => new GreaterThanOrEqual<T>(value));
 
         /// <summary>Creates a greater than or equal value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>
@@ -21,7 +25,7 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <param name="value1">The first parent's value to compare.</param>
         /// <param name="value2">The second parent's value to compare.</param>
         /// <returns>True if the first value is greater than or equal than the second value, false otherwise.</returns>
-        protected override Bool OnEval(T value1, T value2) => Bool.Wrap(value1.CompareTo(value2) >= 0);
+        protected override Bool OnEval(T value1, T value2) => new(value1.CompareTo(value2) >= 0);
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>

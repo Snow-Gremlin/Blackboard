@@ -1,12 +1,17 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Functions;
 
 namespace Blackboard.Core.Nodes.Caps {
 
     /// <summary>Performs a power of two parents.</summary>
     sealed public class Power<T>: Binary<T, T, T>
         where T : IArithmetic<T>, IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory =
+            new Func<IValue<T>, IValue<T>>((left, right) => new Power<T>(left, right));
 
         /// <summary>Creates a power value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

@@ -53,6 +53,8 @@ group N.M {
 - Need to add uint, int64, uint64, and bytes
 - Need to add counters, latch, and triggers
 - Add Log and Ln
+- Come up with a way to specify which nodes need to be persisted (inputs, counters, toggles, etc?)
+- Add persistends which also keeps track of deltas to recover if crashed before save
 
 ## Ideas
 

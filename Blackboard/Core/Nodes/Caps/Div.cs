@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 
@@ -7,6 +8,9 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <summary>This will divide the first parent value by the second parent value.</summary>
     sealed public class Div<T>: Binary<T, T, T>
         where T : IArithmetic<T>, IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new Func<IValue<T>, IValue<T>>((value1, value2) => new Div<T>(value1, value2));
 
         /// <summary>Creates a divided value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

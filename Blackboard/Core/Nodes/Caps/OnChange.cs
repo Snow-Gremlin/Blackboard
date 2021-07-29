@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Bases;
+﻿using Blackboard.Core.Functions;
+using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
@@ -6,6 +7,9 @@ namespace Blackboard.Core.Nodes.Caps {
 
     /// <summary>Performs a trigger when any parent is changed.</summary>
     sealed public class OnChange: TriggerNode {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new FuncN<INode>((inputs) => new OnChange(inputs));
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
         private List<INode> sources;
@@ -21,7 +25,7 @@ namespace Blackboard.Core.Nodes.Caps {
             this.sources = new List<INode>();
             this.AddParents(parents);
         }
-
+ 
         /// <summary>This adds parents to this node.</summary>
         /// <param name="parents">The set of parents to add.</param>
         public void AddParents(params INode[] parents) =>

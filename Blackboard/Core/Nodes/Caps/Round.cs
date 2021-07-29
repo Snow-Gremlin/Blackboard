@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 
@@ -8,6 +9,9 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <summary>This gets the rounded value from the parent.</summary>
     sealed public class Round<T>: Binary<T, Int, T>
         where T : IFloatingPoint<T>, IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new Func<IValue<T>>((input) => new Round<T>(input));
 
         /// <summary>Creates a rounded value node.</summary>
         /// <param name="source1">This is the value parent for the source value.</param>

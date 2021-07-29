@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Nodes {
+namespace Blackboard.Core {
 
     /// <summary>The set of extensions for the nodes of the blackboard.</summary>
     static internal class Extensions {

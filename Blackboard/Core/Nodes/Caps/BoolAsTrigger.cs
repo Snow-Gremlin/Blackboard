@@ -1,6 +1,7 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,6 +14,9 @@ namespace Blackboard.Core.Nodes.Caps {
     /// when the boolean changes value. This means that you can get an update from this trigger when it is not provoked.
     /// </remarks>
     sealed public class BoolAsTrigger: Node, ITrigger {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new Func<IValue<Bool>>((value) => new BoolAsTrigger(value));
 
         /// <summary>This is the parent node to read from.</summary>
         private IValue<Bool> source;

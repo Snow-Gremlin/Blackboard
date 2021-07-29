@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -9,6 +10,10 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <typeparam name="T">The type of the value for this node.</typeparam>
     sealed public class Latch<T>: ValueNode<T>
         where T : IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory =
+            new Func<ITrigger, IValue<T>>((left, right) => new Latch<T>(left, right));
 
         /// <summary>This is the first parent node to read from.</summary>
         private ITrigger source1;

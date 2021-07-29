@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -9,6 +10,9 @@ namespace Blackboard.Core.Nodes.Caps {
     /// <summary>Determinines the minimum integer value from all the parents.</summary>
     sealed public class Min<T>: Nary<T, T>
         where T : IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new FuncN<IValue<T>>((inputs) => new Min<T>(inputs));
 
         /// <summary>Creates a minimum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

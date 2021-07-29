@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -7,6 +8,9 @@ namespace Blackboard.Core.Nodes.Caps {
 
     /// <summary>Performs a trigger when the parent becomes false.</summary>
     sealed public class OnFalse: TriggerNode {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFunction Factory = new Func<IValue<Bool>>((input) => new OnFalse(input));
 
         /// <summary>This is the parent node to read from.</summary>
         private IValue<Bool> source;

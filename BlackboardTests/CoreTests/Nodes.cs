@@ -3,8 +3,10 @@ using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using System.IO;
+using S = System;
 
 namespace BlackboardTests.CoreTests {
 
@@ -20,30 +22,33 @@ namespace BlackboardTests.CoreTests {
         static private void checkParents(Node node, string exp) =>
             Assert.AreEqual(exp, string.Join(", ", node.Parents));
 
-        static private void checkValue<T>(IValue<T> node, T exp) =>
-            Assert.AreEqual(exp, node.Value);
+        static private void checkValue(IValue<Bool> node, bool exp) =>
+            Assert.AreEqual(exp, node.Value.Value);
+
+        static private void checkValue(IValue<Int> node, int exp) =>
+            Assert.AreEqual(exp, node.Value.Value);
 
         static private void checkLog(StringWriter buf, params string[] lines) =>
-            Assert.AreEqual(string.Join(Environment.NewLine, lines), buf.ToString().Trim());
+            Assert.AreEqual(string.Join(S.Environment.NewLine, lines), buf.ToString().Trim());
 
         [TestMethod]
         public void TestAddNodes() {
-            InputValue<bool> input1 = new("One");
-            InputValue<bool> input2 = new("Two");
-            InputValue<bool> input3 = new("Three");
+            InputValue<Bool> input1 = new();
+            InputValue<Bool> input2 = new();
+            InputValue<Bool> input3 = new();
             And and12  = new(input1, input2);
             Or  or123  = new(and12, input3);
             Not not123 = new(or123);
 
-            checkString(and12,  "And(One, Two)");
-            checkString(not123, "Not(Or(And(One, Two), Three))");
+            checkString(and12,  "And(Input<bool>, Input<bool>)");
+            checkString(not123, "Not(Or(And(Input<bool>, Input<bool>), Input<bool>))");
 
             checkParents(input1, "");
             checkParents(input2, "");
             checkParents(input3, "");
-            checkParents(and12,  "One, Two");
-            checkParents(or123,  "And(One, Two), Three");
-            checkParents(not123, "Or(And(One, Two), Three)");
+            checkParents(and12,  "Input<bool>, Input<bool>");
+            checkParents(or123,  "And(Input<bool>, Input<bool>), Input<bool>");
+            checkParents(not123, "Or(And(Input<bool>, Input<bool>), Input<bool>)");
 
             checkDepth(input1, 0);
             checkDepth(input2, 0);
@@ -55,11 +60,11 @@ namespace BlackboardTests.CoreTests {
 
         [TestMethod]
         public void TestEvaluateNodes() {
-            InputValue<bool> input1 = new("One");
-            InputValue<bool> input2 = new("Two");
-            InputValue<bool> input3 = new("Three");
+            InputValue<Bool> input1 = new();
+            InputValue<Bool> input2 = new();
+            InputValue<Bool> input3 = new();
             And and12  = new(input1, input2);
-            Or  or123  = new(and12, input3);
+            Or  or123  = new(and12,  input3);
             Not not123 = new(or123);
             checkValue(input1, false);
             checkValue(input2, false);
@@ -69,17 +74,19 @@ namespace BlackboardTests.CoreTests {
             checkValue(not123, true);
 
             Driver drv = new(new StringWriter());
-            drv.Nodes.AddChildren(input1, input2, input3);
+            drv.Global["One"]   = input1;
+            drv.Global["Two"]   = input2;
+            drv.Global["Three"] = input3;
 
-            drv.SetValue("One",   true);
-            drv.SetValue("Three", true);
+            drv.SetValue(true, "One");
+            drv.SetValue(true, "Three");
             drv.Evalate();
             checkLog(drv.Log as StringWriter,
-                "Eval(1): One",
-                "Eval(1): Three",
-                "Eval(2): And(One, Two)",
-                "Eval(3): Or(And(One, Two), Three)",
-                "Eval(4): Not(Or(And(One, Two), Three))");
+                "Eval(0): Input<bool>",
+                "Eval(0): Input<bool>",
+                "Eval(1): And(Input<bool>, Input<bool>)",
+                "Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
+                "Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))");
             checkValue(input1, true);
             checkValue(input2, false);
             checkValue(input3, true);
@@ -88,12 +95,12 @@ namespace BlackboardTests.CoreTests {
             checkValue(not123, false);
 
             drv.Log = new StringWriter();
-            drv.SetValue("Three", false);
+            drv.SetValue(false, "Three");
             drv.Evalate();
             checkLog(drv.Log as StringWriter,
-                "Eval(1): Three",
-                "Eval(3): Or(And(One, Two), Three)",
-                "Eval(4): Not(Or(And(One, Two), Three))");
+                "Eval(0): Input<bool>",
+                "Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
+                "Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))");
             checkValue(input1, true);
             checkValue(input2, false);
             checkValue(input3, false);
@@ -102,13 +109,13 @@ namespace BlackboardTests.CoreTests {
             checkValue(not123, true);
 
             drv.Log = new StringWriter();
-            drv.SetValue("Two", true);
+            drv.SetValue(true, "Two");
             drv.Evalate();
             checkLog(drv.Log as StringWriter,
-                "Eval(1): Two",
-                "Eval(2): And(One, Two)",
-                "Eval(3): Or(And(One, Two), Three)",
-                "Eval(4): Not(Or(And(One, Two), Three))");
+                "Eval(0): Input<bool>",
+                "Eval(1): And(Input<bool>, Input<bool>)",
+                "Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
+                "Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))");
             checkValue(input1, true);
             checkValue(input2, true);
             checkValue(input3, false);
@@ -119,21 +126,27 @@ namespace BlackboardTests.CoreTests {
 
         [TestMethod]
         public void TestTriggerNodes() {
-            Driver drv = new(Console.Out);
-            InputTrigger inputA = new("TrigA", drv.Nodes);
-            InputTrigger inputB = new("TrigB", drv.Nodes);
-            InputTrigger inputC = new("TrigC", drv.Nodes);
-            Counter counter = new(
+            Driver drv = new(S.Console.Out);
+            InputTrigger inputA = new();
+            InputTrigger inputB = new();
+            InputTrigger inputC = new();
+            drv.Global["TrigA"] = inputA;
+            drv.Global["TrigB"] = inputB;
+            drv.Global["TrigC"] = inputC;
+
+            Counter<Int> counter = new(
                 new Any(inputA, inputB, inputC), null,
                 new All(inputA, inputB, inputC));
-            _ = new OutputValue<int>(counter, "Count", drv.Nodes);
-            OnTrue over3 = new(new GreaterThanOrEqual<int>(counter, new Literal<int>(3)));
-            OutputTrigger outTrig = new(over3, "High", drv.Nodes);
-            Toggler toggle = new(outTrig);
-            _ = new OutputValue<bool>(toggle, "Toggle", drv.Nodes);
+            drv.Global["Count"] = counter;
+
+            OnTrue over3 = new(new GreaterThanOrEqual<Int>(counter, Literal.Int(3)));
+            drv.Global["High"] = over3;
+
+            Toggler toggle = new(over3);
+            drv.Global["Toggle"] = toggle;
 
             bool high;
-            outTrig.OnProvoked += (object sender, EventArgs e) => high = true;
+            over3.OnProvoked += (object sender, S.EventArgs e) => high = true;
 
             void check(bool triggerA, bool triggerB, bool triggerC,
                 int expCount, bool expHigh, bool expToggle) {
@@ -143,8 +156,8 @@ namespace BlackboardTests.CoreTests {
                 high = false;
                 drv.Evalate();
 
-                int  count  = drv.GetValue<int>("Count");
-                bool toggle = drv.GetValue<bool>("Toggle");
+                int  count  = drv.GetValue<Int>("Count").Value;
+                bool toggle = drv.GetValue<Bool>("Toggle").Value;
 
                 Assert.AreEqual(expCount,  count);
                 Assert.AreEqual(expHigh,   high);

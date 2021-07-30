@@ -1,5 +1,4 @@
-﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -70,8 +69,8 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <returns>True if constant, false otherwise.</returns>
         public bool IsConstant() {
             if (this is IConstant) return true;
-            if (this is IInput) return false;
-            if (this is ITrigger) return false;
+            if (this is IInput)    return false;
+            if (this is ITrigger)  return false;
             foreach (INode parent in this.Parents) {
                 if (parent is not IConstant) return false;
             }

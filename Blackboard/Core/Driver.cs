@@ -1,9 +1,8 @@
-﻿using Blackboard.Core.Nodes.Caps;
-using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Core.Data.Caps;
+﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Nodes;
 using Blackboard.Core.Functions;
+using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.IO;
 using S = System;
@@ -31,108 +30,110 @@ namespace Blackboard.Core {
             this.addConstants();
         }
 
+        #region Built-in Functions and Constants
+
         /// <summary>This adds all the operators used by the language.</summary>
         private void addOperators() {
             Namespace operators = new();
             this.Global["operators"] = operators;
-            void addOp(string name, params IFunction[] funcs) =>
+            void add(string name, params IFunction[] funcs) =>
                 operators[name] = new Collection(funcs);
 
-            addOp("and",
+            add("and",
                 And.Factory,
                 BitwiseAnd<Int>.Factory,
                 All.Factory);
-            addOp("cast-trigger");
-            addOp("cast-bool");
-            addOp("cast-int",
+            add("cast-trigger");
+            add("cast-bool");
+            add("cast-int",
                 Explicit<Double, Int>.Factory);
-            addOp("cast-double",
+            add("cast-double",
                 Implicit<Int, Double>.Factory);
-            addOp("cast-string",
+            add("cast-string",
                 Implicit<Bool, String>.Factory,
                 Implicit<Int, String>.Factory,
                 Implicit<Double, String>.Factory);
-            addOp("divide",
+            add("divide",
                 Div<Int>.Factory,
                 Div<Double>.Factory);
-            addOp("equal",
+            add("equal",
                 Equal<Bool>.Factory,
                 Equal<Int>.Factory,
                 Equal<Double>.Factory,
                 Equal<String>.Factory);
-            addOp("greater",
+            add("greater",
                 GreaterThan<Bool>.Factory,
                 GreaterThan<Int>.Factory,
                 GreaterThan<Double>.Factory,
                 GreaterThan<String>.Factory);
-            addOp("greater-equal",
+            add("greater-equal",
                 GreaterThanOrEqual<Bool>.Factory,
                 GreaterThanOrEqual<Int>.Factory,
                 GreaterThanOrEqual<Double>.Factory,
                 GreaterThanOrEqual<String>.Factory);
-            addOp("invert",
+            add("invert",
                 BitwiseNot<Int>.Factory);
-            addOp("less",
+            add("less",
                 LessThan<Bool>.Factory,
                 LessThan<Int>.Factory,
                 LessThan<Double>.Factory,
                 LessThan<String>.Factory);
-            addOp("less-equal",
+            add("less-equal",
                 LessThanOrEqual<Bool>.Factory,
                 LessThanOrEqual<Int>.Factory,
                 LessThanOrEqual<Double>.Factory,
                 LessThanOrEqual<String>.Factory);
-            addOp("logical-and",
+            add("logical-and",
                 And.Factory,
                 All.Factory);
-            addOp("logical-or",
+            add("logical-or",
                 Or.Factory,
                 Any.Factory);
-            addOp("logical-xor",
+            add("logical-xor",
                 Xor.Factory,
                 OnlyOne.Factory);
-            addOp("modulo",
+            add("modulo",
                 Mod<Int>.Factory,
                 Mod<Double>.Factory);
-            addOp("multiply",
+            add("multiply",
                 Mul<Int>.Factory,
                 Mul<Double>.Factory);
-            addOp("negate",
+            add("negate",
                 Neg<Int>.Factory,
                 Neg<Double>.Factory);
-            addOp("not",
+            add("not",
                 Not.Factory);
-            addOp("not-equal",
+            add("not-equal",
                 NotEqual<Bool>.Factory,
                 NotEqual<Int>.Factory,
                 NotEqual<Double>.Factory,
                 NotEqual<String>.Factory);
-            addOp("or",
+            add("or",
                 Or.Factory,
                 BitwiseOr<Int>.Factory,
                 Any.Factory);
-            addOp("power",
+            add("power",
                 Power<Int>.Factory,
                 Power<Double>.Factory);
-            addOp("remainder",
+            add("remainder",
                 Rem<Int>.Factory,
                 Rem<Double>.Factory);
-            addOp("shift-left",
+            add("shift-left",
                 LeftShift<Int>.Factory);
-            addOp("shift-right",
+            add("shift-right",
                 RightShift<Int>.Factory);
-            addOp("subtract",
+            add("subtract",
                 Sub<Int>.Factory,
                 Sub<Double>.Factory);
-            addOp("sum",
+            add("sum",
                 Sum<Int>.Factory,
                 Sum<Double>.Factory,
                 Sum<String>.Factory);
-            addOp("trinary",
+            add("trinary",
                 Select<Bool>.Factory,
                 Select<Int>.Factory,
                 Select<Double>.Factory);
-            addOp("xor",
+            add("xor",
                 Xor.Factory,
                 BitwiseXor<Int>.Factory,
                 OnlyOne.Factory);
@@ -140,118 +141,123 @@ namespace Blackboard.Core {
 
         /// <summary>This adds all global initial methods for Blackboard.</summary>
         private void addFunctions() {
-            void addFunc(string name, params IFunction[] funcs) =>
+            void add(string name, params IFunction[] funcs) =>
                 this.Global[name] = new Collection(funcs);
 
-            addFunc("abs",
+            add("abs",
                 Abs<Int>.Factory,
                 Abs<Double>.Factory);
-            addFunc("acos",
+            add("acos",
                 DoubleMath<Double>.Acos);
-            addFunc("acosh",
+            add("acosh",
                 DoubleMath<Double>.Acosh);
-            addFunc("all",
+            add("all",
                 All.Factory);
-            addFunc("and",
+            add("and",
                 And.Factory,
                 BitwiseAnd<Int>.Factory);
-            addFunc("any",
+            add("any",
                 Any.Factory);
-            addFunc("asin",
+            add("asin",
                 DoubleMath<Double>.Asin);
-            addFunc("asinh",
+            add("asinh",
                 DoubleMath<Double>.Asinh);
-            addFunc("atan",
+            add("atan",
                 Atan2<Double>.Factory,
                 DoubleMath<Double>.Atan);
-            addFunc("atanh",
+            add("atanh",
                 DoubleMath<Double>.Atanh);
-            addFunc("average",
+            add("average",
                 Average.Factory);
-            addFunc("cbrt",
+            add("cbrt",
                 DoubleMath<Double>.Cbrt);
-            addFunc("ceiling",
+            add("ceiling",
                 DoubleMath<Double>.Ceiling);
-            addFunc("clamp",
+            add("clamp",
                 Clamp<Int>.Factory,
                 Clamp<Double>.Factory);
-            addFunc("cos",
+            add("cos",
                 DoubleMath<Double>.Cos);
-            addFunc("cosh",
+            add("cosh",
                 DoubleMath<Double>.Cosh);
-            addFunc("exp",
+            add("exp",
                 DoubleMath<Double>.Exp);
-            addFunc("floor",
+            add("floor",
                 DoubleMath<Double>.Floor);
-            addFunc("implies",
+            add("implies",
                 Implies.Factory);
-            addFunc("latch",
+            add("latch",
                 Latch<Bool>.Factory,
                 Latch<Int>.Factory,
                 Latch<Double>.Factory,
                 Latch<String>.Factory);
-            addFunc("lerp",
+            add("lerp",
                 Lerp<Double>.Factory);
-            addFunc("log",
+            add("log",
                 DoubleMath<Double>.Log,
                 Log<Double>.Factory);
-            addFunc("log10",
+            add("log10",
                 DoubleMath<Double>.Log10);
-            addFunc("log2",
+            add("log2",
                 DoubleMath<Double>.Log2);
-            addFunc("max",
+            add("max",
                 Max<Int>.Factory,
                 Max<Double>.Factory);
-            addFunc("min",
+            add("min",
                 Min<Int>.Factory,
                 Min<Double>.Factory);
-            addFunc("mul",
+            add("mul",
                 Mul<Int>.Factory,
                 Mul<Double>.Factory);
-            addFunc("on",
+            add("on",
                 OnTrue.Factory);
-            addFunc("onChange",
+            add("onChange",
                 OnChange.Factory);
-            addFunc("onFalse",
+            add("onFalse",
                 OnFalse.Factory);
-            addFunc("onlyOne",
+            add("onlyOne",
                 OnlyOne.Factory);
-            addFunc("onTrue",
+            add("onTrue",
                 OnTrue.Factory);
-            addFunc("or",
+            add("or",
                 BitwiseOr<Int>.Factory,
                 Or.Factory);
-            addFunc("round",
+            add("round",
                 DoubleMath<Double>.Round,
                 Round<Double>.Factory);
-            addFunc("sin",
+            add("sin",
                 DoubleMath<Double>.Sin);
-            addFunc("sinh",
+            add("sinh",
                 DoubleMath<Double>.Sinh);
-            addFunc("sqrt",
+            add("sqrt",
                 DoubleMath<Double>.Sqrt);
-            addFunc("sum",
+            add("sum",
                 Sum<Int>.Factory,
                 Sum<Double>.Factory);
-            addFunc("tan",
+            add("tan",
                 DoubleMath<Double>.Tan);
-            addFunc("tanh",
+            add("tanh",
                 DoubleMath<Double>.Tanh);
-            addFunc("trunc",
+            add("trunc",
                 DoubleMath<Double>.Truncate);
-            addFunc("xor",
+            add("xor",
                 BitwiseXor<Int>.Factory,
                 Xor.Factory);
         }
 
         /// <summary>This adds all the initial constanst for Blackboard.</summary>
         private void addConstants() {
-            this.Global["e"]     = Literal.Double(S.Math.E);
-            this.Global["pi"]    = Literal.Double(S.Math.PI);
-            this.Global["tau"]   = Literal.Double(S.Math.Tau);
-            this.Global["sqrt2"] = Literal.Double(S.Math.Sqrt(2.0));
+            void add(string name, double value) =>
+                this.Global[name] = Literal.Double(value);
+
+            add("e", S.Math.E);
+            add("pi", S.Math.PI);
+            add("tau", S.Math.Tau);
+            add("sqrt2", S.Math.Sqrt(2.0));
         }
-        
+
+        #endregion
+
         /// <summary>An optional log to keep track of which nodes and what order they are evaluated.</summary>
         public TextWriter Log;
 
@@ -260,6 +266,38 @@ namespace Blackboard.Core {
 
         /// <summary>This indicates if any changes are pending evaluation.</summary>
         public bool HasPending => this.touched.Count > 0;
+
+        /// <summary>Sets a value for the given named input.</summary>
+        /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
+        /// <param name="value">The value to set to that node.</param>
+        /// <param name="names">The name of the input node to set.</param>
+        /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
+        public bool SetValue(bool value, params string[] names) =>
+            this.SetValue(new Bool(value), names);
+
+        /// <summary>Sets a value for the given named input.</summary>
+        /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
+        /// <param name="value">The value to set to that node.</param>
+        /// <param name="names">The name of the input node to set.</param>
+        /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
+        public bool SetValue(int value, params string[] names) =>
+            this.SetValue(new Int(value), names);
+
+        /// <summary>Sets a value for the given named input.</summary>
+        /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
+        /// <param name="value">The value to set to that node.</param>
+        /// <param name="names">The name of the input node to set.</param>
+        /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
+        public bool SetValue(double value, params string[] names) =>
+            this.SetValue(new Double(value), names);
+
+        /// <summary>Sets a value for the given named input.</summary>
+        /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
+        /// <param name="value">The value to set to that node.</param>
+        /// <param name="names">The name of the input node to set.</param>
+        /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
+        public bool SetValue(string value, params string[] names) =>
+            this.SetValue(new String(value), names);
 
         /// <summary>Sets a value for the given named input.</summary>
         /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>

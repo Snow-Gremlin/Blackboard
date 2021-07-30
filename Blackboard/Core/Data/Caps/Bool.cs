@@ -18,19 +18,24 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="other">The other boolean to compare.</param>
         /// <returns>The comparison result indicating which is greater than or equal.</returns>
         public int CompareTo(Bool other) => this.Value.CompareTo(other.Value);
+        public static bool operator ==(Bool left, Bool right) => left.CompareTo(right) == 0;
+        public static bool operator !=(Bool left, Bool right) => left.CompareTo(right) != 0;
+        public static bool operator <(Bool left, Bool right) => left.CompareTo(right) < 0;
+        public static bool operator <=(Bool left, Bool right) => left.CompareTo(right) <= 0;
+        public static bool operator >(Bool left, Bool right) => left.CompareTo(right) > 0;
+        public static bool operator >=(Bool left, Bool right) => left.CompareTo(right) >= 0;
 
+        /// <summary>Checks if the given object is equal to this data type.</summary>
+        /// <param name="obj">This is the object to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
         public override bool Equals(object obj) => obj is Bool other && this.Value == other.Value;
+
+        /// <summary>Gets the hash code of the stored value.</summary>
+        /// <returns>The stored value's hash code.</returns>
         public override int GetHashCode() => this.Value.GetHashCode();
 
-        /// <summary>The name of this data type.</summary>
+        /// <summary>Gets the name of this data type.</summary>
         /// <returns>The name of the bool type.</returns>
         public override string ToString() => "bool";
-
-        public static bool operator == (Bool left, Bool right) => left.Equals(right);
-        public static bool operator != (Bool left, Bool right) => !(left == right);
-        public static bool operator < (Bool left, Bool right) => left.CompareTo(right) < 0;
-        public static bool operator <= (Bool left, Bool right) => left.CompareTo(right) <= 0;
-        public static bool operator > (Bool left, Bool right) => left.CompareTo(right) > 0;
-        public static bool operator >= (Bool left, Bool right) => left.CompareTo(right) >= 0;
     }
 }

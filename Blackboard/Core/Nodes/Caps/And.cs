@@ -25,7 +25,7 @@ namespace Blackboard.Core.Nodes.Caps {
             base(parents, value) { }
 
         /// <summary>Gets the AND of all the parent's booleans.</summary>
-        /// <param name="values">The to AND together.</param>
+        /// <param name="values">The parents to AND together.</param>
         /// <returns>The AND of all the given values.</returns>
         protected override Bool OnEval(IEnumerable<Bool> values) {
             foreach (Bool value in values) {

@@ -84,14 +84,6 @@ namespace Blackboard.Core {
             return null;
         }
 
-        private void addImplicit(Type dest, int match, Caster func) {
-            this.implicitCast[dest] = func;
-            this.castMatch[dest] = match;
-        }
-
-        private void addExplicit(Type dest, Caster func) =>
-            this.implicitCast[dest] = func;
-
         public readonly string Name;
         public readonly S.Type BaseType;
         private Dictionary<Type, int> castMatch;
@@ -124,54 +116,62 @@ namespace Blackboard.Core {
 
         public override string ToString() => this.Name;
 
+        private void addImplicit<T>(Type dest, int match, S.Func<T, INode> func) where T: INode {
+            this.implicitCast[dest] = (INode input) => input is T value ? func(value) : null;
+            this.castMatch[dest] = match;
+        }
+
+        private void addExplicit<T>(Type dest, S.Func<T, INode> func) where T : INode =>
+            this.expliciteCast[dest] = (INode input) => input is T value ? func(value) : null;
+
         static Type() {
-            Trigger       = new Type("trigger", typeof(ITrigger));
-            Bool          = new Type("bool", typeof(IValue<Bool>));
-            Int           = new Type("int", typeof(IValue<Int>));
-            Double        = new Type("double", typeof(IValue<Double>));
-            String        = new Type("string", typeof(IValue<String>));
-            CounterInt    = new Type("counter-int", typeof(Counter<Int>));
+            Trigger       = new Type("trigger",        typeof(ITrigger));
+            Bool          = new Type("bool",           typeof(IValue<Bool>));
+            Int           = new Type("int",            typeof(IValue<Int>));
+            Double        = new Type("double",         typeof(IValue<Double>));
+            String        = new Type("string",         typeof(IValue<String>));
+            CounterInt    = new Type("counter-int",    typeof(Counter<Int>));
             CounterDouble = new Type("counter-double", typeof(Counter<Double>));
-            Toggler       = new Type("toggler", typeof(Toggler));
-            LatchBool     = new Type("latch-bool", typeof(Latch<Bool>));
-            LatchInt      = new Type("latch-int", typeof(Latch<Int>));
-            LatchDouble   = new Type("latch-double", typeof(Latch<Double>));
-            LatchString   = new Type("latch-string", typeof(Latch<String>));
+            Toggler       = new Type("toggler",        typeof(Toggler));
+            LatchBool     = new Type("latch-bool",     typeof(Latch<Bool>));
+            LatchInt      = new Type("latch-int",      typeof(Latch<Int>));
+            LatchDouble   = new Type("latch-double",   typeof(Latch<Double>));
+            LatchString   = new Type("latch-string",   typeof(Latch<String>));
 
-            Bool.addImplicit(Trigger, 1, (INode input) => input is IValue<Bool> value ? new BoolAsTrigger(value) : null);
-            Bool.addImplicit(String,  1, (INode input) => input is IValue<Bool> value ? new Implicit<Bool, String>(value) : null);
+            Bool.addImplicit<IValue<Bool>>(Trigger, 1, (input) => new BoolAsTrigger(input));
+            Bool.addImplicit<IValue<Bool>>(String,  1, (input) => new Implicit<Bool, String>(input));
 
-            Int.addImplicit(Double, 1, (INode input) => input is IValue<Int> value ? new Implicit<Int, Double>(value) : null);
-            Int.addImplicit(String, 1, (INode input) => input is IValue<Int> value ? new Implicit<Int, String>(value) : null);
+            Int.addImplicit<IValue<Int>>(Double, 1, (input) => new Implicit<Int, Double>(input));
+            Int.addImplicit<IValue<Int>>(String, 1, (input) => new Implicit<Int, String>(input));
 
-            Double.addExplicit(Int,       (INode input) => input is IValue<Double> value ? new Explicit<Double, Int>(value) : null);
-            Double.addImplicit(String, 1, (INode input) => input is IValue<Double> value ? new Implicit<Double, String>(value) : null);
+            Double.addExplicit<IValue<Double>>(Int,       (input) => new Explicit<Double, Int>(input));
+            Double.addImplicit<IValue<Double>>(String, 1, (input) => new Implicit<Double, String>(input));
 
-            CounterInt.addImplicit(Int,    1, (INode input) => input is IValue<Int> value ? value : null);
-            CounterInt.addImplicit(Double, 2, (INode input) => input is IValue<Int> value ? new Implicit<Int, Double>(value) : null);
-            CounterInt.addImplicit(String, 2, (INode input) => input is IValue<Int> value ? new Implicit<Int, String>(value) : null);
+            CounterInt.addImplicit<IValue<Int>>(Int,    1, (input) => input);
+            CounterInt.addImplicit<IValue<Int>>(Double, 2, (input) => new Implicit<Int, Double>(input));
+            CounterInt.addImplicit<IValue<Int>>(String, 2, (input) => new Implicit<Int, String>(input));
 
-            CounterDouble.addExplicit(Int,       (INode input) => input is IValue<Double> value ? new Explicit<Double, Int>(value) : null);
-            CounterDouble.addImplicit(Double, 1, (INode input) => input is IValue<Double> value ? value : null);
-            CounterDouble.addImplicit(String, 2, (INode input) => input is IValue<Double> value ? new Implicit<Double, String>(value) : null);
+            CounterDouble.addExplicit<IValue<Double>>(Int,       (input) => new Explicit<Double, Int>(input));
+            CounterDouble.addImplicit<IValue<Double>>(Double, 1, (input) => input);
+            CounterDouble.addImplicit<IValue<Double>>(String, 2, (input) => new Implicit<Double, String>(input));
 
-            Toggler.addImplicit(Trigger, 2, (INode input) => input is IValue<Bool> value ? new BoolAsTrigger(value) : null);
-            Toggler.addImplicit(Bool,    1, (INode input) => input is IValue<Bool> value ? value : null);
-            Toggler.addImplicit(String,  2, (INode input) => input is IValue<Bool> value ? new Implicit<Bool, String>(value) : null);
+            Toggler.addImplicit<IValue<Bool>>(Trigger, 2, (input) => new BoolAsTrigger(input));
+            Toggler.addImplicit<IValue<Bool>>(Bool,    1, (input) => input);
+            Toggler.addImplicit<IValue<Bool>>(String,  2, (input) => new Implicit<Bool, String>(input));
 
-            LatchBool.addImplicit(Trigger, 2, (INode input) => input is IValue<Bool> value ? new BoolAsTrigger(value) : null);
-            LatchBool.addImplicit(Bool,    1, (INode input) => input is IValue<Bool> value ? value : null);
-            LatchBool.addImplicit(String,  2, (INode input) => input is IValue<Bool> value ? new Implicit<Bool, String>(value) : null);
+            LatchBool.addImplicit<IValue<Bool>>(Trigger, 2, (input) => new BoolAsTrigger(input));
+            LatchBool.addImplicit<IValue<Bool>>(Bool,    1, (input) => input);
+            LatchBool.addImplicit<IValue<Bool>>(String,  2, (input) => new Implicit<Bool, String>(input));
 
-            LatchInt.addImplicit(Int,    1, (INode input) => input is IValue<Int> value ? value : null);
-            LatchInt.addImplicit(Double, 2, (INode input) => input is IValue<Int> value ? new Implicit<Int, Double>(value) : null);
-            LatchInt.addImplicit(String, 2, (INode input) => input is IValue<Int> value ? new Implicit<Int, String>(value) : null);
+            LatchInt.addImplicit<IValue<Int>>(Int,    1, (input) => input);
+            LatchInt.addImplicit<IValue<Int>>(Double, 2, (input) => new Implicit<Int, Double>(input));
+            LatchInt.addImplicit<IValue<Int>>(String, 2, (input) => new Implicit<Int, String>(input));
 
-            LatchDouble.addExplicit(Int,       (INode input) => input is IValue<Double> value ? new Explicit<Double, Int>(value) : null);
-            LatchDouble.addImplicit(Double, 1, (INode input) => input is IValue<Double> value ? value : null);
-            LatchDouble.addImplicit(String, 2, (INode input) => input is IValue<Double> value ? new Implicit<Double, String>(value) : null);
+            LatchDouble.addExplicit<IValue<Double>>(Int,       (input) => new Explicit<Double, Int>(input));
+            LatchDouble.addImplicit<IValue<Double>>(Double, 1, (input) => input);
+            LatchDouble.addImplicit<IValue<Double>>(String, 2, (input) => new Implicit<Double, String>(input));
 
-            LatchString.addImplicit(String, 1, (INode input) => input is IValue<String> value ? value : null);
+            LatchString.addImplicit<IValue<String>>(String, 1, (input) => input);
         }
     }
 }

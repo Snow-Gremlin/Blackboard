@@ -6,6 +6,7 @@ using Blackboard.Core.Nodes;
 using Blackboard.Core.Functions;
 using System.Collections.Generic;
 using System.IO;
+using S = System;
 
 namespace Blackboard.Core {
 
@@ -26,112 +27,231 @@ namespace Blackboard.Core {
             this.Global = new Namespace();
 
             this.addOperators();
-            // TODO: Add functions
-            // TODO: Add initial consts
+            this.addFunctions();
+            this.addConstants();
         }
 
+        /// <summary>This adds all the operators used by the language.</summary>
         private void addOperators() {
-            // TODO: Check for existing.
             Namespace operators = new();
             this.Global["operators"] = operators;
+            void addOp(string name, params IFunction[] funcs) =>
+                operators[name] = new Collection(funcs);
 
-            operators["trinary"] = new Collection(Select<Bool>.Factory, Select<Int>.Factory, Select<Double>.Factory);
-            operators["logical-or"] = new Collection(Or.Factory, Any.Factory);
-            operators["logical-xor"] = new Collection(Xor.Factory, OnlyOne.Factory);
-
-            operators["logical-and"] = new Collection(
-                new Func<IValue<Bool>, IValue<Bool>>((left, right) => new And(left, right)),
-                new Func<ITrigger,     ITrigger    >((left, right) => new All(left, right)));
-
-            operators["or"] = new Collection(
-                new Func<IValue<Bool>, IValue<Bool>>((left, right) => new Or            (left, right)),
-                new Func<IValue<Int>,  IValue<Int> >((left, right) => new BitwiseOr<Int>(left, right)),
-                new Func<ITrigger,     ITrigger    >((left, right) => new Any           (left, right)));
-
-            operators["xor"] = new Collection(
-                new Func<IValue<Bool>, IValue<Bool>>((left, right) => new Xor            (left, right)),
-                new Func<IValue<Int>,  IValue<Int> >((left, right) => new BitwiseXor<Int>(left, right)),
-                new Func<ITrigger,     ITrigger    >((left, right) => new OnlyOne        (left, right)));
-
-            operators["and"] = new Collection(
-                new Func<IValue<Bool>, IValue<Bool>>((left, right) => new And            (left, right)),
-                new Func<IValue<Int>,  IValue<Int> >((left, right) => new BitwiseAnd<Int>(left, right)),
-                new Func<ITrigger,     ITrigger    >((left, right) => new All            (left, right)));
-
-            operators["equal"] = new Collection(
-                new Func<IValue<Bool>,   IValue<Bool>  >((left, right) => new Equal<Bool>  (left, right)),
-                new Func<IValue<Int>,    IValue<Int>   >((left, right) => new Equal<Int>   (left, right)),
-                new Func<IValue<Double>, IValue<Double>>((left, right) => new Equal<Double>(left, right)),
-                new Func<IValue<String>, IValue<String>>((left, right) => new Equal<String>(left, right)));
-
-            operators["not-equal"] = new Collection(
-                new Func<IValue<Bool>,   IValue<Bool>  >((left, right) => new NotEqual<Bool>  (left, right)),
-                new Func<IValue<Int>,    IValue<Int>   >((left, right) => new NotEqual<Int>   (left, right)),
-                new Func<IValue<Double>, IValue<Double>>((left, right) => new NotEqual<Double>(left, right)),
-                new Func<IValue<String>, IValue<String>>((left, right) => new NotEqual<String>(left, right)));
-
-            operators["greater"] = new Collection(
-                new Func<IValue<Bool>,   IValue<Bool>  >((left, right) => new GreaterThan<Bool>  (left, right)),
-                new Func<IValue<Int>,    IValue<Int>   >((left, right) => new GreaterThan<Int>   (left, right)),
-                new Func<IValue<Double>, IValue<Double>>((left, right) => new GreaterThan<Double>(left, right)),
-                new Func<IValue<String>, IValue<String>>((left, right) => new GreaterThan<String>(left, right)));
-
-            operators["less"] = new Collection(
-                new Func<IValue<Bool>,   IValue<Bool>  >((left, right) => new LessThan<Bool>  (left, right)),
-                new Func<IValue<Int>,    IValue<Int>   >((left, right) => new LessThan<Int>   (left, right)),
-                new Func<IValue<Double>, IValue<Double>>((left, right) => new LessThan<Double>(left, right)),
-                new Func<IValue<String>, IValue<String>>((left, right) => new LessThan<String>(left, right)));
-
-            operators["greater-equal"] = new Collection(
-                new Func<IValue<Bool>,   IValue<Bool>  >((left, right) => new GreaterThanOrEqual<Bool>  (left, right)),
-                new Func<IValue<Int>,    IValue<Int>   >((left, right) => new GreaterThanOrEqual<Int>   (left, right)),
-                new Func<IValue<Double>, IValue<Double>>((left, right) => new GreaterThanOrEqual<Double>(left, right)),
-                new Func<IValue<String>, IValue<String>>((left, right) => new GreaterThanOrEqual<String>(left, right)));
-
-            operators["less-equal"] = new Collection(
-                new Func<IValue<Bool>,   IValue<Bool>  >((left, right) => new LessThanOrEqual<Bool>  (left, right)),
-                new Func<IValue<Int>,    IValue<Int>   >((left, right) => new LessThanOrEqual<Int>   (left, right)),
-                new Func<IValue<Double>, IValue<Double>>((left, right) => new LessThanOrEqual<Double>(left, right)),
-                new Func<IValue<String>, IValue<String>>((left, right) => new LessThanOrEqual<String>(left, right)));
-
-            /*
-            this.addProcess("Shift-Right", 2,
-                new Input2<IValue<int>, IValue<int>>((left, right) => new RightShift(left, right)));
-            this.addProcess("Shift-Left", 2,
-                new Input2<IValue<int>, IValue<int>>((left, right) => new LeftShift(left, right)));
-            this.addProcess("Sum", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new SumInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Sum(left, right)),
-                new Input2<IValue<String>, IValue<String>>((left, right) => new Sum(left, right)));
-
-            this.addProcess("Subtract", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new SubInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Sub(left, right)));
-            this.addProcess("Multiply", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new MulInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Mul(left, right)));
-            this.addProcess("Divide", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new DivInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Div(left, right)));
-            this.addProcess("Modulo", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new ModInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Mod(left, right)));
-            this.addProcess("Remainder", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new RemInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Rem(left, right)));
-            this.addProcess("Power", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new PowerInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Power(left, right)));
-            this.addProcess("Negate", 1,
-                new Input1<IValue<int>>(   (input) => new NegInt(input)),
-                new Input1<IValue<double>>((input) => new Neg(input)));
-            this.addProcess("Not", 1,
-                new Input1<IValue<bool>>((input) => new Not(input)));
-            this.addProcess("Invert", 1,
-                new Input1<IValue<int>>((input) => new BitwiseNot(input)));
-            */
+            addOp("and",
+                And.Factory,
+                BitwiseAnd<Int>.Factory,
+                All.Factory);
+            addOp("cast-trigger");
+            addOp("cast-bool");
+            addOp("cast-int",
+                Explicit<Double, Int>.Factory);
+            addOp("cast-double",
+                Implicit<Int, Double>.Factory);
+            addOp("cast-string",
+                Implicit<Bool, String>.Factory,
+                Implicit<Int, String>.Factory,
+                Implicit<Double, String>.Factory);
+            addOp("divide",
+                Div<Int>.Factory,
+                Div<Double>.Factory);
+            addOp("equal",
+                Equal<Bool>.Factory,
+                Equal<Int>.Factory,
+                Equal<Double>.Factory,
+                Equal<String>.Factory);
+            addOp("greater",
+                GreaterThan<Bool>.Factory,
+                GreaterThan<Int>.Factory,
+                GreaterThan<Double>.Factory,
+                GreaterThan<String>.Factory);
+            addOp("greater-equal",
+                GreaterThanOrEqual<Bool>.Factory,
+                GreaterThanOrEqual<Int>.Factory,
+                GreaterThanOrEqual<Double>.Factory,
+                GreaterThanOrEqual<String>.Factory);
+            addOp("invert",
+                BitwiseNot<Int>.Factory);
+            addOp("less",
+                LessThan<Bool>.Factory,
+                LessThan<Int>.Factory,
+                LessThan<Double>.Factory,
+                LessThan<String>.Factory);
+            addOp("less-equal",
+                LessThanOrEqual<Bool>.Factory,
+                LessThanOrEqual<Int>.Factory,
+                LessThanOrEqual<Double>.Factory,
+                LessThanOrEqual<String>.Factory);
+            addOp("logical-and",
+                And.Factory,
+                All.Factory);
+            addOp("logical-or",
+                Or.Factory,
+                Any.Factory);
+            addOp("logical-xor",
+                Xor.Factory,
+                OnlyOne.Factory);
+            addOp("modulo",
+                Mod<Int>.Factory,
+                Mod<Double>.Factory);
+            addOp("multiply",
+                Mul<Int>.Factory,
+                Mul<Double>.Factory);
+            addOp("negate",
+                Neg<Int>.Factory,
+                Neg<Double>.Factory);
+            addOp("not",
+                Not.Factory);
+            addOp("not-equal",
+                NotEqual<Bool>.Factory,
+                NotEqual<Int>.Factory,
+                NotEqual<Double>.Factory,
+                NotEqual<String>.Factory);
+            addOp("or",
+                Or.Factory,
+                BitwiseOr<Int>.Factory,
+                Any.Factory);
+            addOp("power",
+                Power<Int>.Factory,
+                Power<Double>.Factory);
+            addOp("remainder",
+                Rem<Int>.Factory,
+                Rem<Double>.Factory);
+            addOp("shift-left",
+                LeftShift<Int>.Factory);
+            addOp("shift-right",
+                RightShift<Int>.Factory);
+            addOp("subtract",
+                Sub<Int>.Factory,
+                Sub<Double>.Factory);
+            addOp("sum",
+                Sum<Int>.Factory,
+                Sum<Double>.Factory,
+                Sum<String>.Factory);
+            addOp("trinary",
+                Select<Bool>.Factory,
+                Select<Int>.Factory,
+                Select<Double>.Factory);
+            addOp("xor",
+                Xor.Factory,
+                BitwiseXor<Int>.Factory,
+                OnlyOne.Factory);
         }
 
+        /// <summary>This adds all global initial methods for Blackboard.</summary>
+        private void addFunctions() {
+            void addFunc(string name, params IFunction[] funcs) =>
+                this.Global[name] = new Collection(funcs);
+
+            addFunc("abs",
+                Abs<Int>.Factory,
+                Abs<Double>.Factory);
+            addFunc("acos",
+                DoubleMath<Double>.Acos);
+            addFunc("acosh",
+                DoubleMath<Double>.Acosh);
+            addFunc("all",
+                All.Factory);
+            addFunc("and",
+                And.Factory,
+                BitwiseAnd<Int>.Factory);
+            addFunc("any",
+                Any.Factory);
+            addFunc("asin",
+                DoubleMath<Double>.Asin);
+            addFunc("asinh",
+                DoubleMath<Double>.Asinh);
+            addFunc("atan",
+                Atan2<Double>.Factory,
+                DoubleMath<Double>.Atan);
+            addFunc("atanh",
+                DoubleMath<Double>.Atanh);
+            addFunc("average",
+                Average.Factory);
+            addFunc("cbrt",
+                DoubleMath<Double>.Cbrt);
+            addFunc("ceiling",
+                DoubleMath<Double>.Ceiling);
+            addFunc("clamp",
+                Clamp<Int>.Factory,
+                Clamp<Double>.Factory);
+            addFunc("cos",
+                DoubleMath<Double>.Cos);
+            addFunc("cosh",
+                DoubleMath<Double>.Cosh);
+            addFunc("exp",
+                DoubleMath<Double>.Exp);
+            addFunc("floor",
+                DoubleMath<Double>.Floor);
+            addFunc("implies",
+                Implies.Factory);
+            addFunc("latch",
+                Latch<Bool>.Factory,
+                Latch<Int>.Factory,
+                Latch<Double>.Factory,
+                Latch<String>.Factory);
+            addFunc("lerp",
+                Lerp<Double>.Factory);
+            addFunc("log",
+                DoubleMath<Double>.Log,
+                Log<Double>.Factory);
+            addFunc("log10",
+                DoubleMath<Double>.Log10);
+            addFunc("log2",
+                DoubleMath<Double>.Log2);
+            addFunc("max",
+                Max<Int>.Factory,
+                Max<Double>.Factory);
+            addFunc("min",
+                Min<Int>.Factory,
+                Min<Double>.Factory);
+            addFunc("mul",
+                Mul<Int>.Factory,
+                Mul<Double>.Factory);
+            addFunc("on",
+                OnTrue.Factory);
+            addFunc("onChange",
+                OnChange.Factory);
+            addFunc("onFalse",
+                OnFalse.Factory);
+            addFunc("onlyOne",
+                OnlyOne.Factory);
+            addFunc("onTrue",
+                OnTrue.Factory);
+            addFunc("or",
+                BitwiseOr<Int>.Factory,
+                Or.Factory);
+            addFunc("round",
+                DoubleMath<Double>.Round,
+                Round<Double>.Factory);
+            addFunc("sin",
+                DoubleMath<Double>.Sin);
+            addFunc("sinh",
+                DoubleMath<Double>.Sinh);
+            addFunc("sqrt",
+                DoubleMath<Double>.Sqrt);
+            addFunc("sum",
+                Sum<Int>.Factory,
+                Sum<Double>.Factory);
+            addFunc("tan",
+                DoubleMath<Double>.Tan);
+            addFunc("tanh",
+                DoubleMath<Double>.Tanh);
+            addFunc("trunc",
+                DoubleMath<Double>.Truncate);
+            addFunc("xor",
+                BitwiseXor<Int>.Factory,
+                Xor.Factory);
+        }
+
+        /// <summary>This adds all the initial constanst for Blackboard.</summary>
+        private void addConstants() {
+            this.Global["e"]     = Literal.Double(S.Math.E);
+            this.Global["pi"]    = Literal.Double(S.Math.PI);
+            this.Global["tau"]   = Literal.Double(S.Math.Tau);
+            this.Global["sqrt2"] = Literal.Double(S.Math.Sqrt(2.0));
+        }
+        
         /// <summary>An optional log to keep track of which nodes and what order they are evaluated.</summary>
         public TextWriter Log;
 

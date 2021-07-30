@@ -27,7 +27,7 @@ namespace Blackboard.Core.Nodes.Caps {
             base(parents, value) { }
 
         /// <summary>Gets the bitwise OR of all the parent's booleans.</summary>
-        /// <param name="values">The to bitwise OR together.</param>
+        /// <param name="values">The parents to bitwise OR together.</param>
         /// <returns>The bitwise OR of all the given values.</returns>
         protected override T OnEval(IEnumerable<T> values) =>
             values.Aggregate((left, right) => left.BitwiseOr(right));

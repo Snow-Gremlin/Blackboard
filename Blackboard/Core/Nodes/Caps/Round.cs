@@ -6,7 +6,7 @@ using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Nodes.Caps {
 
-    /// <summary>This gets the rounded value from the parent.</summary>
+    /// <summary>This gets the rounded value from the parent at the given decimal point.</summary>
     sealed public class Round<T>: Binary<T, Int, T>
         where T : IFloatingPoint<T>, IComparable<T>, new() {
 

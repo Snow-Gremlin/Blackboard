@@ -26,7 +26,7 @@ namespace Blackboard.Core.Nodes.Caps {
             base(parents, value) { }
 
         /// <summary>Gets the Exclusive OR of all the parent's booleans.</summary>
-        /// <param name="values">The to Exclusive OR together.</param>
+        /// <param name="values">The parents to Exclusive OR together.</param>
         /// <returns>The Exclusive OR of all the given values.</returns>
         protected override Bool OnEval(IEnumerable<Bool> values) =>
             new(values.Select((b) => b.Value).Aggregate((left, right) => left ^ right));

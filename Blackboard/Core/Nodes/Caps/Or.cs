@@ -25,7 +25,7 @@ namespace Blackboard.Core.Nodes.Caps {
             base(parents, value) { }
 
         /// <summary>Gets the OR of all the parent's booleans.</summary>
-        /// <param name="values">The to OR together.</param>
+        /// <param name="values">The parents to OR together.</param>
         /// <returns>The OR of all the given values.</returns>
         protected override Bool OnEval(IEnumerable<Bool> values) {
             foreach (Bool value in values) {

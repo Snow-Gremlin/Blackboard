@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Data.Interfaces;
+﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
@@ -6,6 +7,30 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Blackboard.Core.Nodes.Caps {
+
+    /// <summary>These are factories for easily making literals.</summary>
+    static public class Literal {
+
+        /// <summary>Creates a new boolean literal.</summary>
+        /// <param name="value">The value to use for the literal.</param>
+        /// <returns>The new literal node.</returns>
+        static public Literal<Bool> Bool(bool value) => new(new Bool(value));
+
+        /// <summary>Creates a new integer literal.</summary>
+        /// <param name="value">The value to use for the literal.</param>
+        /// <returns>The new literal node.</returns>
+        static public Literal<Int> Int(int value) => new(new Int(value));
+
+        /// <summary>Creates a new double literal.</summary>
+        /// <param name="value">The value to use for the literal.</param>
+        /// <returns>The new literal node.</returns>
+        static public Literal<Double> Double(double value) => new(new Double(value));
+
+        /// <summary>Creates a new string literal.</summary>
+        /// <param name="value">The value to use for the literal.</param>
+        /// <returns>The new literal node.</returns>
+        static public Literal<String> String(string value) => new(new String(value));
+    }
 
     /// <summary>This is a literal value.</summary>
     /// <typeparam name="T">The type of this literal.</typeparam>

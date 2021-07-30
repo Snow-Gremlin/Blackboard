@@ -27,7 +27,7 @@ namespace Blackboard.Core.Nodes.Caps {
             base(parents, value) { }
 
         /// <summary>Gets the bitwise AND of all the parent's booleans.</summary>
-        /// <param name="values">The to bitwise AND together.</param>
+        /// <param name="values">The parents to bitwise AND together.</param>
         /// <returns>The bitwise AND of all the given values.</returns>
         protected override T OnEval(IEnumerable<T> values) =>
             values.Aggregate((left, right) => left.BitwiseAnd(right));

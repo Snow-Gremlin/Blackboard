@@ -21,24 +21,29 @@ namespace Blackboard.Core.Data.Caps {
         public Double Sub(Double other) => new(this.Value - other.Value);
         public Double Sum(Double other) => new(this.Value + other.Value);
         public Double Pow(Double other) => new(S.Math.Pow(this.Value, other.Value));
+
         public Double Lerp(Double min, Double max) =>
             (this.Value <= 0.0) ? min :
             (this.Value >= 1.0) ? max :
             new((max.Value-min.Value)*this.Value + min.Value);
         public Double Round(Int decimals) => new(S.Math.Round(this.Value, decimals.Value));
-        public Double Ceiling() => new(S.Math.Ceiling(this.Value));
-        public Double Floor() => new(S.Math.Floor(this.Value));
-        public Double Truncate() => new(S.Math.Truncate(this.Value));
+        public Double Atan2(Double x) => new(S.Math.Atan2(this.Value, x.Value));
+        public Double Log(Double newBase) => new(S.Math.Log(this.Value, newBase.Value));
+        public Double DoubleMath(S.Func<double, double> func) => new(func(this.Value));
+
         public Double CastFrom(Int value) => new(value.Value);
+
         public int CompareTo(Double other) => this.Value.CompareTo(other.Value);
         public override bool Equals(object obj) => obj is Double other && this.Value == other.Value;
-        public override int GetHashCode() => this.Value.GetHashCode();
-        public override string ToString() => "double";
         public static bool operator == (Double left, Double right) => left.Equals(right);
         public static bool operator != (Double left, Double right) => !(left == right);
         public static bool operator < (Double left, Double right) => left.CompareTo(right) < 0;
         public static bool operator <= (Double left, Double right) => left.CompareTo(right) <= 0;
         public static bool operator > (Double left, Double right) => left.CompareTo(right) > 0;
         public static bool operator >= (Double left, Double right) => left.CompareTo(right) >= 0;
+
+
+        public override int GetHashCode() => this.Value.GetHashCode();
+        public override string ToString() => "double";
     }
 }

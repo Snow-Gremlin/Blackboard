@@ -15,6 +15,8 @@ namespace Blackboard.Core.Functions {
         /// <param name="hndl">The factory handle.</param>
         public Function(S.Func<T, INode> hndl) {
             this.hndl = hndl;
+
+            if (Type.FromType<T>() is null) throw Exception.UnknownFunctionParamType(typeof(T), 1);
         }
 
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>
@@ -22,13 +24,13 @@ namespace Blackboard.Core.Functions {
         /// <returns>The closest match is lower but not negatve.</returns>
         public int Match(INode[] nodes) => IFunction.Join(
             nodes.Length == 1 ? 0 : -1,
-            Type.FromType<T>().Match(Type.TypeOf(nodes[0])));
+            Type.Match<T>(nodes[0]));
 
         /// <summary>Builds and returns the function object.</summary>
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new function.</returns>
         public INode Build(INode[] nodes) {
-            T node = Type.FromType<T>().Implicit(nodes[0]) as T;
+            T node = Type.Implicit<T>(nodes[0]);
             return this.hndl(node);
         }
     }

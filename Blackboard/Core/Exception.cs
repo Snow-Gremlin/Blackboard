@@ -23,6 +23,15 @@
 
         #region Predefined...
 
+        /// <summary>An exception for a function which was defined with an unknown type.</summary>
+        /// <param name="type">The type which is unknown.</param>
+        /// <param name="typeIndex">The index of the type.</param>
+        /// <returns>The new exception.</returns>
+        static public Exception UnknownFunctionParamType(System.Type type, string typeName) =>
+            new Exception("The type used to define a function is not known by the Blackboard type system.").
+                With("type", type.FullName).
+                With("type name", typeName);
+
         /// <summary>An exception for a node or group is being renames and it is invalid.</summary>
         /// <param name="name">The name which is invalid.</param>
         /// <returns>The new exception.</returns>

@@ -30,7 +30,7 @@ namespace Blackboard.Core {
             this.addConstants();
         }
 
-        #region Built-in Functions and Constants
+        #region Built-in Functions and Constants...
 
         /// <summary>This adds all the operators used by the language.</summary>
         private void addOperators() {
@@ -264,7 +264,7 @@ namespace Blackboard.Core {
         /// <summary>The base set of named nodes to access the total node structure.</summary>
         public Namespace Global { get; }
 
-        #region Value Setters
+        #region Value Setters...
 
         /// <summary>Sets a value for the given named input.</summary>
         /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
@@ -331,7 +331,7 @@ namespace Blackboard.Core {
         }
 
         #endregion
-        #region Provokers
+        #region Provokers...
 
         /// <summary>This will provoke the node with the given name.</summary>
         /// <param name="names">The name of trigger node to provoke.</param>
@@ -358,16 +358,62 @@ namespace Blackboard.Core {
         }
 
         #endregion
-        #region Value Getters
+        #region Value Getters...
 
-        /// <summary>Gets the value of from an named output node.</summary>
+        /// <summary>Gets the value of from an named node.</summary>
+        /// <param name="name">The name of the node to read the value from.</param>
+        /// <returns>
+        /// The value from the node or the default value if the node
+        /// by that name doesn't exists and the found node is the incorrect type.
+        /// </returns>
+        public bool GetBool(params string[] names) =>
+            this.GetValue<Bool>(names).Value;
+
+        /// <summary>Gets the value of from an named node.</summary>
+        /// <param name="name">The name of the node to read the value from.</param>
+        /// <returns>
+        /// The value from the node or the default value if the node
+        /// by that name doesn't exists and the found node is the incorrect type.
+        /// </returns>
+        public int GetInt(params string[] names) =>
+            this.GetValue<Int>(names).Value;
+
+        /// <summary>Gets the value of from an named node.</summary>
+        /// <param name="name">The name of the node to read the value from.</param>
+        /// <returns>
+        /// The value from the node or the default value if the node
+        /// by that name doesn't exists and the found node is the incorrect type.
+        /// </returns>
+        public double GetDouble(params string[] names) =>
+            this.GetValue<Double>(names).Value;
+
+        /// <summary>Gets the value of from an named node.</summary>
+        /// <param name="name">The name of the node to read the value from.</param>
+        /// <returns>
+        /// The value from the node or the default value if the node
+        /// by that name doesn't exists and the found node is the incorrect type.
+        /// </returns>
+        public string GetString(params string[] names) =>
+            this.GetValue<String>(names).Value;
+
+        /// <summary>Gets the value of from an named node.</summary>
         /// <typeparam name="T">The type of value to read.</typeparam>
-        /// <param name="name">The name of the nde to read the value from.</param>
+        /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>
         /// The value from the node or the default value if the node
         /// by that name doesn't exists and the found node is the incorrect type.
         /// </returns>
         public T GetValue<T>(params string[] names) where T : IData =>
+            this.GetValue<T>(names as IEnumerable<string>);
+
+        /// <summary>Gets the value of from an named node.</summary>
+        /// <typeparam name="T">The type of value to read.</typeparam>
+        /// <param name="name">The name of the node to read the value from.</param>
+        /// <returns>
+        /// The value from the node or the default value if the node
+        /// by that name doesn't exists and the found node is the incorrect type.
+        /// </returns>
+        public T GetValue<T>(IEnumerable<string> names) where T : IData =>
             this.Global.Find(names) is IValue<T> node ? node.Value : default;
 
         #endregion

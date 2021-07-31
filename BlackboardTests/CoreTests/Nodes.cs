@@ -1,10 +1,9 @@
 using Blackboard.Core;
+using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Data.Interfaces;
 using System.IO;
 using S = System;
 
@@ -23,9 +22,6 @@ namespace BlackboardTests.CoreTests {
             Assert.AreEqual(exp, string.Join(", ", node.Parents));
 
         static private void checkValue(IValue<Bool> node, bool exp) =>
-            Assert.AreEqual(exp, node.Value.Value);
-
-        static private void checkValue(IValue<Int> node, int exp) =>
             Assert.AreEqual(exp, node.Value.Value);
 
         static private void checkLog(StringWriter buf, params string[] lines) =>
@@ -78,8 +74,8 @@ namespace BlackboardTests.CoreTests {
             drv.Global["Two"]   = input2;
             drv.Global["Three"] = input3;
 
-            drv.SetValue(true, "One");
-            drv.SetValue(true, "Three");
+            drv.SetBool(true, "One");
+            drv.SetBool(true, "Three");
             drv.Evalate();
             checkLog(drv.Log as StringWriter,
                 "Eval(0): Input<bool>",
@@ -95,7 +91,7 @@ namespace BlackboardTests.CoreTests {
             checkValue(not123, false);
 
             drv.Log = new StringWriter();
-            drv.SetValue(false, "Three");
+            drv.SetBool(false, "Three");
             drv.Evalate();
             checkLog(drv.Log as StringWriter,
                 "Eval(0): Input<bool>",
@@ -109,7 +105,7 @@ namespace BlackboardTests.CoreTests {
             checkValue(not123, true);
 
             drv.Log = new StringWriter();
-            drv.SetValue(true, "Two");
+            drv.SetBool(true, "Two");
             drv.Evalate();
             checkLog(drv.Log as StringWriter,
                 "Eval(0): Input<bool>",
@@ -146,13 +142,14 @@ namespace BlackboardTests.CoreTests {
             drv.Global["Toggle"] = toggle;
 
             bool high;
-            over3.OnProvoked += (object sender, S.EventArgs e) => high = true;
+            OutputTrigger outTrig = new(over3);
+            outTrig.OnProvoked += (object sender, S.EventArgs e) => high = true;
 
             void check(bool triggerA, bool triggerB, bool triggerC,
                 int expCount, bool expHigh, bool expToggle) {
-                if (triggerA) drv.Trigger("TrigA");
-                if (triggerB) drv.Trigger("TrigB");
-                if (triggerC) drv.Trigger("TrigC");
+                if (triggerA) drv.Provoke("TrigA");
+                if (triggerB) drv.Provoke("TrigB");
+                if (triggerC) drv.Provoke("TrigC");
                 high = false;
                 drv.Evalate();
 

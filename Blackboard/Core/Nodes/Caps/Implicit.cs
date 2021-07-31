@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Caps {
         where T2 : IImplicit<T1, T2>, IComparable<T2>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new Func<IValue<T1>>((value) => new Implicit<T1, T2>(value));
+        static public readonly IFunction Factory = new Function<IValue<T1>>((value) => new Implicit<T1, T2>(value));
 
         /// <summary>Creates a node implicit cast.</summary>
         /// <param name="source">This is the single parent for the source value.</param>

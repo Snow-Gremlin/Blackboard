@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Caps {
         where T : IArithmetic<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new Func<IValue<T>>((input) => new Neg<T>(input));
+        static public readonly IFunction Factory = new Function<IValue<T>>((input) => new Neg<T>(input));
 
         /// <summary>Creates a negated value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>

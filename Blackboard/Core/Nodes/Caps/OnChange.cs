@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class OnChange: TriggerNode {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new FuncN<INode>((inputs) => new OnChange(inputs));
+        static public readonly IFunction Factory = new FunctionN<INode>((inputs) => new OnChange(inputs));
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
         private List<INode> sources;

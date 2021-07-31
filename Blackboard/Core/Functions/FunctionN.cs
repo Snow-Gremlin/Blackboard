@@ -7,7 +7,7 @@ namespace Blackboard.Core.Functions {
 
     /// <summary>This is the factory for a node which has abritrary parents as the source of the value.</summary>
     /// <typeparam name="T">The type of the parents' values for this node.</typeparam>
-    public class FuncN<T>: IFunction
+    public class FunctionN<T>: IFunction
         where T : class, INode {
 
         /// <summary>The factory for creating the node.</summary>
@@ -15,7 +15,7 @@ namespace Blackboard.Core.Functions {
 
         /// <summary>Creates a new dual node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
-        public FuncN(S.Func<IEnumerable<T>, INode> hndl) {
+        public FunctionN(S.Func<IEnumerable<T>, INode> hndl) {
             this.hndl = hndl;
         }
 

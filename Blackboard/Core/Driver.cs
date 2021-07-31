@@ -264,15 +264,14 @@ namespace Blackboard.Core {
         /// <summary>The base set of named nodes to access the total node structure.</summary>
         public Namespace Global { get; }
 
-        /// <summary>This indicates if any changes are pending evaluation.</summary>
-        public bool HasPending => this.touched.Count > 0;
+        #region Value Setters
 
         /// <summary>Sets a value for the given named input.</summary>
         /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
         /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
-        public bool SetValue(bool value, params string[] names) =>
+        public bool SetBool(bool value, params string[] names) =>
             this.SetValue(new Bool(value), names);
 
         /// <summary>Sets a value for the given named input.</summary>
@@ -280,7 +279,7 @@ namespace Blackboard.Core {
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
         /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
-        public bool SetValue(int value, params string[] names) =>
+        public bool SetInt(int value, params string[] names) =>
             this.SetValue(new Int(value), names);
 
         /// <summary>Sets a value for the given named input.</summary>
@@ -288,7 +287,7 @@ namespace Blackboard.Core {
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
         /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
-        public bool SetValue(double value, params string[] names) =>
+        public bool SetDouble(double value, params string[] names) =>
             this.SetValue(new Double(value), names);
 
         /// <summary>Sets a value for the given named input.</summary>
@@ -296,7 +295,7 @@ namespace Blackboard.Core {
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
         /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
-        public bool SetValue(string value, params string[] names) =>
+        public bool SetString(string value, params string[] names) =>
             this.SetValue(new String(value), names);
 
         /// <summary>Sets a value for the given named input.</summary>
@@ -305,9 +304,18 @@ namespace Blackboard.Core {
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
         /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
-        public bool SetValue<T>(T value, params string[] names) where T : IData {
+        public bool SetValue<T>(T value, params string[] names) where T : IData =>
+            this.SetValue<T>(value, names as IEnumerable<string>);
+
+        /// <summary>Sets a value for the given named input.</summary>
+        /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
+        /// <typeparam name="T">The type of the value to set to the input.</typeparam>
+        /// <param name="value">The value to set to that node.</param>
+        /// <param name="names">The name of the input node to set.</param>
+        /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
+        public bool SetValue<T>(T value, IEnumerable<string> names) where T : IData {
             if (this.Global.Find(names) is IValueInput<T> node) {
-                this.SetValue(node, value);
+                this.SetValue(value, node);
                 return true;
             }
             return false;
@@ -318,9 +326,39 @@ namespace Blackboard.Core {
         /// <typeparam name="T">The type of value to set.</typeparam>
         /// <param name="input">The input node to set the value of.</param>
         /// <param name="value">The value to set to the given input.</param>
-        public void SetValue<T>(IValueInput<T> input, T value) where T : IData {
+        public void SetValue<T>(T value, IValueInput<T> input) where T : IData {
             if (input.SetValue(value)) this.touched.Add(input);
         }
+
+        #endregion
+        #region Provokers
+
+        /// <summary>This will provoke the node with the given name.</summary>
+        /// <param name="names">The name of trigger node to provoke.</param>
+        /// <returns>True if a node by that name is found and it was a trigger, false otherwise.</returns>
+        public bool Provoke(params string[] names) =>
+            this.Provoke(names as IEnumerable<string>);
+
+        /// <summary>This will provoke the node with the given name.</summary>
+        /// <param name="names">The name of trigger node to provoke.</param>
+        /// <returns>True if a node by that name is found and it was a trigger, false otherwise.</returns>
+        public bool Provoke(IEnumerable<string> names) {
+            if (this.Global.Find(names) is ITriggerInput node) {
+                this.Provoke(node);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>This will provoke the given trigger node.</summary>
+        /// <param name="input">The input trigger node to provoke.</param>
+        public void Provoke(ITriggerInput input) {
+            input.Provoke();
+            this.touched.Add(input);
+        }
+
+        #endregion
+        #region Value Getters
 
         /// <summary>Gets the value of from an named output node.</summary>
         /// <typeparam name="T">The type of value to read.</typeparam>
@@ -332,23 +370,10 @@ namespace Blackboard.Core {
         public T GetValue<T>(params string[] names) where T : IData =>
             this.Global.Find(names) is IValue<T> node ? node.Value : default;
 
-        /// <summary>This will trigger the node with the given name.</summary>
-        /// <param name="names">The name of trigger node to trigger.</param>
-        /// <returns>True if a node by that name is found and it was a trigger, false otherwise.</returns>
-        public bool Trigger(params string[] names) {
-            if (this.Global.Find(names) is ITriggerInput node) {
-                this.Trigger(node);
-                return true;
-            }
-            return false;
-        }
+        #endregion
 
-        /// <summary>This will trigger the given trigger node.</summary>
-        /// <param name="input">The input trigger node to trigger.</param>
-        public void Trigger(ITriggerInput input) {
-            input.Trigger();
-            this.touched.Add(input);
-        }
+        /// <summary>This indicates if any changes are pending evaluation.</summary>
+        public bool HasPending => this.touched.Count > 0;
 
         /// <summary>Updates and propogates the changes from the given inputs through the blackboard nodes.</summary>
         public void Evalate() {

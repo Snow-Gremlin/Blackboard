@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Caps {
         where T : IAdditive<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new FuncN<IValue<T>>((inputs) => new Sum<T>(inputs));
+        static public readonly IFunction Factory = new FunctionN<IValue<T>>((inputs) => new Sum<T>(inputs));
 
         /// <summary>Creates a sum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

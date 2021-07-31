@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Func<IValue<T>, IValue<T>>((input1, input2) => new Log<T>(input1, input2));
+            new Function<IValue<T>, IValue<T>>((input1, input2) => new Log<T>(input1, input2));
 
         /// <summary>Creates a log value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

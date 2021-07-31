@@ -13,7 +13,7 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Func<ITrigger, IValue<T>>((left, right) => new Latch<T>(left, right));
+            new Function<ITrigger, IValue<T>>((left, right) => new Latch<T>(left, right));
 
         /// <summary>This is the first parent node to read from.</summary>
         private ITrigger source1;

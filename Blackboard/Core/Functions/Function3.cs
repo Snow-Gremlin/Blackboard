@@ -7,7 +7,7 @@ namespace Blackboard.Core.Functions {
     /// <typeparam name="T1">The type of the first parent's value for this node.</typeparam>
     /// <typeparam name="T2">The type of the second parent's value for this node.</typeparam>
     /// <typeparam name="T3">The type of the thrid parent's value for this node.</typeparam>
-    public class Func<T1, T2, T3>: IFunction
+    public class Function<T1, T2, T3>: IFunction
         where T1 : class, INode
         where T2 : class, INode
         where T3 : class, INode {
@@ -17,7 +17,7 @@ namespace Blackboard.Core.Functions {
 
         /// <summary>Creates a new dual node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
-        public Func(S.Func<T1, T2, T3, INode> hndl) {
+        public Function(S.Func<T1, T2, T3, INode> hndl) {
             this.hndl = hndl;
         }
 

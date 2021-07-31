@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class Xor: Nary<Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new FuncN<IValue<Bool>>((inputs) => new Xor(inputs));
+        static public readonly IFunction Factory = new FunctionN<IValue<Bool>>((inputs) => new Xor(inputs));
 
         /// <summary>Creates a boolean Exclusive OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

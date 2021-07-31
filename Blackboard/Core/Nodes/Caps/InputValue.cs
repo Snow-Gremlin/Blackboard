@@ -13,7 +13,7 @@ namespace Blackboard.Core.Nodes.Caps {
         where T : IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new Func(() => new InputValue<T>());
+        static public readonly IFunction Factory = new Function(() => new InputValue<T>());
 
         /// <summary>Creates a new input value node.</summary>
         /// <param name="value">The initial value for this node.</param>

@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class OnlyOne: Multitrigger {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new FuncN<ITrigger>((inputs) => new OnlyOne(inputs));
+        static public readonly IFunction Factory = new FunctionN<ITrigger>((inputs) => new OnlyOne(inputs));
 
         /// <summary>Creates a one and only one trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

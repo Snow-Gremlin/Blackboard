@@ -4,15 +4,15 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Functions {
 
     /// <summary>A collection of function signatures. Typically these should all have the same name.</summary>
-    public class Collection: List<IFunction> {
+    public class FunctionGroup: List<IFunction> {
 
         /// <summary>Creates a new function collection.</summary>
         /// <param name="funcs">The functions to initially add.</param>
-        public Collection(params IFunction[] funcs) : base(funcs) { }
+        public FunctionGroup(params IFunction[] funcs) : base(funcs) { }
 
         /// <summary>Creates a new function collection.</summary>
         /// <param name="funcs">The functions to initially add.</param>
-        public Collection(IEnumerable<IFunction> funcs) : base(funcs) { }
+        public FunctionGroup(IEnumerable<IFunction> funcs) : base(funcs) { }
 
         /// <summary>Finds and returns the best matching function in this collection.</summary>
         /// <param name="nodes">The input to match against the function signatures with.</param>

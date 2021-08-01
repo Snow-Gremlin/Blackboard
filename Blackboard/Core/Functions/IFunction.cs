@@ -30,6 +30,7 @@ namespace Blackboard.Core.Functions {
         int Match(INode[] nodes);
 
         /// <summary>Builds and returns the function object.</summary>
+        /// <remarks>Before this is called, Match must have been positive.</remarks>
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new function.</returns>
         INode Build(INode[] nodes);

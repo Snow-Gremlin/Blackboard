@@ -122,7 +122,7 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <summary>The result of the double mathmatical function the parent's value during evaluation.</summary>
         /// <param name="value">The value to ceiling.</param>
         /// <returns>The ceiling value.</returns>
-        protected override T OnEval(T value) => value.DoubleMath(this.func);
+        protected override T OnEval(T value) => this.func is null ? value : value.DoubleMath(this.func);
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>

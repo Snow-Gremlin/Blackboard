@@ -28,13 +28,12 @@ namespace Blackboard.Core.Functions {
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>
         /// <param name="nodes">The nodes to match against.</param>
         /// <returns>The closest match is lower but not negatve.</returns>
-        public int Match(INode[] nodes) => IFunction.Join(
-            nodes.Length == 2 ? 0 : -1,
-            Type.Match<T1>(nodes[0]),
-            Type.Match<T2>(nodes[1]),
-            Type.Match<T3>(nodes[2]));
+        public int Match(INode[] nodes) =>
+            nodes.Length != 3 ? -1 :
+            IFunction.Join(Type.Match<T1>(nodes[0]), Type.Match<T2>(nodes[1]), Type.Match<T3>(nodes[2]));
 
         /// <summary>Builds and returns the function object.</summary>
+        /// <remarks>Before this is called, Match must have been positive.</remarks>
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new function.</returns>
         public INode Build(INode[] nodes) {

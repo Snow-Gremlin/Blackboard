@@ -34,7 +34,7 @@ namespace Blackboard.Core {
             Namespace operators = new();
             this.Global["operators"] = operators;
             void add(string name, params IFunction[] funcs) =>
-                operators[name] = new Collection(funcs);
+                operators[name] = new FunctionGroup(funcs);
 
             add("and",
                 And.Factory,
@@ -139,7 +139,7 @@ namespace Blackboard.Core {
         /// <summary>This adds all global initial methods for Blackboard.</summary>
         private void addFunctions() {
             void add(string name, params IFunction[] funcs) =>
-                this.Global[name] = new Collection(funcs);
+                this.Global[name] = new FunctionGroup(funcs);
 
             add("abs",
                 Abs<Int>.Factory,
@@ -230,7 +230,8 @@ namespace Blackboard.Core {
                 DoubleMath<Double>.Sqrt);
             add("sum",
                 Sum<Int>.Factory,
-                Sum<Double>.Factory);
+                Sum<Double>.Factory,
+                Sum<String>.Factory);
             add("tan",
                 DoubleMath<Double>.Tan);
             add("tanh",

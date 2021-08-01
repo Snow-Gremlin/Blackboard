@@ -12,13 +12,18 @@ namespace Blackboard.Core.Functions {
         where T2 : class, INode
         where T3 : class, INode {
 
+        /// <summary>Indicates that at least one argument must not be a cast.</summary>
+        readonly private bool needOneNoCast;
+
         /// <summary>The factory for creating the node.</summary>
         readonly private S.Func<T1, T2, T3, INode> hndl;
 
         /// <summary>Creates a new dual node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
-        public Function(S.Func<T1, T2, T3, INode> hndl) {
+        /// <param name="needOneNoCast">Indicates that at least one argument must not be a cast.</param>
+        public Function(S.Func<T1, T2, T3, INode> hndl, bool needOneNoCast = false) {
             this.hndl = hndl;
+            this.needOneNoCast = needOneNoCast;
 
             if (Type.FromType<T1>() is null) throw Exception.UnknownFunctionParamType(typeof(T1), "T1");
             if (Type.FromType<T2>() is null) throw Exception.UnknownFunctionParamType(typeof(T2), "T2");
@@ -27,10 +32,10 @@ namespace Blackboard.Core.Functions {
 
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>
         /// <param name="nodes">The nodes to match against.</param>
-        /// <returns>The closest match is lower but not negatve.</returns>
-        public int Match(INode[] nodes) =>
-            nodes.Length != 3 ? -1 :
-            IFunction.Join(Type.Match<T1>(nodes[0]), Type.Match<T2>(nodes[1]), Type.Match<T3>(nodes[2]));
+        /// <returns>The matching results for this function.</returns>
+        public FuncMatch Match(INode[] nodes) =>
+            nodes.Length != 3 ? FuncMatch.NoMatch :
+            FuncMatch.Create(this.needOneNoCast, Type.Match<T1>(nodes[0]), Type.Match<T2>(nodes[1]), Type.Match<T3>(nodes[2]));
 
         /// <summary>Builds and returns the function object.</summary>
         /// <remarks>Before this is called, Match must have been positive.</remarks>

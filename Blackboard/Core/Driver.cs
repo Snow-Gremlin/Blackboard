@@ -123,9 +123,9 @@ namespace Blackboard.Core {
                 Sub<Int>.Factory,
                 Sub<Double>.Factory);
             add("sum",
-                Sum<Int>.Factory,
-                Sum<Double>.Factory,
-                Sum<String>.Factory);
+                Sum<Int>.Factory(),
+                Sum<Double>.Factory(),
+                Sum<String>.Factory(true));
             add("trinary",
                 Select<Bool>.Factory,
                 Select<Int>.Factory,
@@ -229,9 +229,9 @@ namespace Blackboard.Core {
             add("sqrt",
                 DoubleMath<Double>.Sqrt);
             add("sum",
-                Sum<Int>.Factory,
-                Sum<Double>.Factory,
-                Sum<String>.Factory);
+                Sum<Int>.Factory(),
+                Sum<Double>.Factory(),
+                Sum<String>.Factory(true));
             add("tan",
                 DoubleMath<Double>.Tan);
             add("tanh",

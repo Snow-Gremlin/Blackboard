@@ -64,16 +64,35 @@ namespace BlackboardTests.CoreTests {
             InputValue<Double> dNode = new();
             InputValue<String> sNode = new();
 
-            Assert.AreEqual("Sum(Implicit<string>(Input<bool>), Implicit<string>(Input<bool>))", toStr(group.Build(bNode, bNode)));
-            Assert.AreEqual("Sum(Implicit<string>(Input<bool>), Implicit<string>(Input<int>))",  toStr(group.Build(bNode, iNode)));
-            Assert.AreEqual("Sum(Input<int>, Input<int>)",                                       toStr(group.Build(iNode, iNode)));
-            Assert.AreEqual("Sum(Input<double>, Implicit<double>(Input<int>))",                  toStr(group.Build(dNode, iNode)));
-            Assert.AreEqual("Sum(Implicit<double>(Input<int>), Input<double>)",                  toStr(group.Build(iNode, dNode)));
-            Assert.AreEqual("Sum(Input<double>, Input<double>)",                                 toStr(group.Build(dNode, dNode)));
-            Assert.AreEqual("Sum(Input<string>, Input<string>)",                                 toStr(group.Build(sNode, sNode)));
-            Assert.AreEqual("Sum(Implicit<string>(Input<bool>), Input<string>)",                 toStr(group.Build(bNode, sNode)));
-            Assert.AreEqual("Sum(Implicit<string>(Input<int>), Input<string>)",                  toStr(group.Build(iNode, sNode)));
-            Assert.AreEqual("Sum(Implicit<string>(Input<double>), Input<string>)",               toStr(group.Build(dNode, sNode)));
+            Assert.AreEqual("null",                                                toStr(group.Build(bNode, bNode)));
+            Assert.AreEqual("null",                                                toStr(group.Build(bNode, iNode)));
+            Assert.AreEqual("Sum(Input<int>, Input<int>)",                         toStr(group.Build(iNode, iNode)));
+            Assert.AreEqual("Sum(Input<double>, Implicit<double>(Input<int>))",    toStr(group.Build(dNode, iNode)));
+            Assert.AreEqual("Sum(Implicit<double>(Input<int>), Input<double>)",    toStr(group.Build(iNode, dNode)));
+            Assert.AreEqual("Sum(Input<double>, Input<double>)",                   toStr(group.Build(dNode, dNode)));
+            Assert.AreEqual("Sum(Input<string>, Input<string>)",                   toStr(group.Build(sNode, sNode)));
+            Assert.AreEqual("Sum(Implicit<string>(Input<bool>), Input<string>)",   toStr(group.Build(bNode, sNode)));
+            Assert.AreEqual("Sum(Implicit<string>(Input<int>), Input<string>)",    toStr(group.Build(iNode, sNode)));
+            Assert.AreEqual("Sum(Implicit<string>(Input<double>), Input<string>)", toStr(group.Build(dNode, sNode)));
+        }
+
+        [TestMethod]
+        public void TestFunctionsAtan() {
+            Driver driver = new();
+            FunctionGroup group = driver.Global.Find("atan") as FunctionGroup;
+
+            InputValue<Int>    iNode = new();
+            InputValue<Double> dNode = new();
+
+            Assert.AreEqual("null",                                                              toStr(group.Build()));
+            Assert.AreEqual("Atan(Implicit<double>(Input<int>))",                                toStr(group.Build(iNode)));
+            Assert.AreEqual("Atan(Input<double>)",                                               toStr(group.Build(dNode)));
+            Assert.AreEqual("Atan2(Implicit<double>(Input<int>), Implicit<double>(Input<int>))", toStr(group.Build(iNode, iNode)));
+            Assert.AreEqual("Atan2(Implicit<double>(Input<int>), Input<double>)",                toStr(group.Build(iNode, dNode)));
+            Assert.AreEqual("Atan2(Input<double>, Implicit<double>(Input<int>))",                toStr(group.Build(dNode, iNode)));
+            Assert.AreEqual("Atan2(Input<double>, Input<double>)",                               toStr(group.Build(dNode, dNode)));
+            Assert.AreEqual("null",                                                              toStr(group.Build(iNode, iNode, iNode)));
+            Assert.AreEqual("null",                                                              toStr(group.Build(dNode, dNode, dNode)));
         }
     }
 }

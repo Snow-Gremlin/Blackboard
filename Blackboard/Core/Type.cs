@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -129,39 +129,38 @@ namespace Blackboard.Core {
             this.exps = new();
         }
 
-        /// <summary>This determines the implicit and inheritence cast distance.</summary>
+        /// <summary>This determines the implicit and inheritence math.</summary>
         /// <param name="t">The type to try castig to.</param>
-        /// <returns>The lower the positive number the better the cast, -1 if not able to cast.</returns>
-        static public int Match<T>(INode node) where T : INode =>
+        /// <returns>The result of the match.</returns>
+        static public TypeMatch Match<T>(INode node) where T : INode =>
             FromType<T>().Match(TypeOf(node));
 
-        /// <summary>This determines the implicit and inheritence cast distance.</summary>
-        /// <remarks>This is used for choosing the most specific method for a function.</remarks>
+        /// <summary>This determines the implicit and inheritence match.</summary>
         /// <param name="t">The type to try castig to.</param>
-        /// <returns>The lower the positive number the better the cast, -1 if not able to cast.</returns>
-        public int Match(Type t) {
-            int match;
+        /// <returns>The result of the match.</returns>
+        public TypeMatch Match(Type t) {
+            int steps;
 
             // Check if inheritance can be used.
             // Find the closest inherited type so that the most specific match can be choosen.
             if (t.RealType.IsAssignableTo(this.RealType)) {
-                match = -1;
+                steps = -1;
                 do {
                     t = t.BaseType;
-                    match++;
+                    steps++;
                 } while (t is not null && t.RealType.IsAssignableTo(this.RealType));
-                return match;
+                return TypeMatch.Inherit(steps);
             }
 
             // Check if implicit casts exist.
             // Add an initial penalty for using an implicit cast instead of inheritance.
-            match = 10;
+            steps = 0;
             do {
-                if (t.imps.ContainsKey(this)) return match;
+                if (t.imps.ContainsKey(this)) return TypeMatch.Cast(steps);
                 t = t.BaseType;
-                match++;
+                steps++;
             } while (t is not null);
-            return -1;
+            return TypeMatch.NoMatch;
         }
 
         /// <summary>Performs an implicit cast of the given node into this type.</summary>

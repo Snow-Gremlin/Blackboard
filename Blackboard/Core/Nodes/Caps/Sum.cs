@@ -12,7 +12,12 @@ namespace Blackboard.Core.Nodes.Caps {
         where T : IAdditive<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new FunctionN<IValue<T>>((inputs) => new Sum<T>(inputs));
+        /// <param name="needOneNoCast">
+        /// Indicates that at least one argument must not be a cast.
+        /// This is used for things like String where all types can implicit cast to a string.
+        /// </param>
+        static public IFunction Factory(bool needOneNoCast = false) => 
+            new FunctionN<IValue<T>>((inputs) => new Sum<T>(inputs), needOneNoCast: needOneNoCast);
 
         /// <summary>Creates a sum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

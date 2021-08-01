@@ -18,13 +18,20 @@ namespace Blackboard.Core.Functions {
         /// <param name="nodes">The input to match against the function signatures with.</param>
         /// <returns>The best matching function or null if none match.</returns>
         public IFunction Find(params INode[] nodes) {
-            int minVal = -1;
+            FuncMatch minMatch = null;
             IFunction minFunc = null;
             foreach (IFunction func in this) {
-                int value = func.Match(nodes);
-                if (value < 0) continue;
-                if (minVal < 0 || minVal > value) {
-                    minVal = value;
+                FuncMatch match = func.Match(nodes);
+                if (!match.IsMatch) continue;
+
+                if (minMatch is null) {
+                    minMatch = match;
+                    minFunc = func;
+                    continue;
+                }
+
+                if (minMatch.CompareTo(match) > 0) {
+                    minMatch = match;
                     minFunc = func;
                 }
             }

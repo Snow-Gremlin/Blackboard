@@ -18,8 +18,8 @@ namespace Blackboard.Core.Functions {
 
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>
         /// <param name="nodes">The nodes to match against.</param>
-        /// <returns>The closest match is lower but not negatve.</returns>
-        public int Match(INode[] nodes) => nodes.Length != 0 ? -1 : 0;
+        /// <returns>The matching results for this function.</returns>
+        public FuncMatch Match(INode[] nodes) => nodes.Length != 0 ? FuncMatch.NoMatch : FuncMatch.Create(false);
 
         /// <summary>Builds and returns the function object.</summary>
         /// <remarks>Before this is called, Match must have been positive.</remarks>

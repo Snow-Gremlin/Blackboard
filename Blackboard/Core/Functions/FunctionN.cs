@@ -10,6 +10,9 @@ namespace Blackboard.Core.Functions {
     public class FunctionN<Tn>: IFunction
         where Tn : class, INode {
 
+        /// <summary>Indicates that at least one argument must not be a cast.</summary>
+        readonly private bool needOneNoCast;
+
         /// <summary>Indicates if there is only one argument for a new node, return the argument.</summary>
         private readonly bool passOne;
 
@@ -21,10 +24,12 @@ namespace Blackboard.Core.Functions {
 
         /// <summary>Creates a new dual node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
+        /// <param name="needOneNoCast">Indicates that at least one argument must not be a cast.</param>
         /// <param name="passOne">Indicates if there is only one argument for a new node, return the argument.</param>
         /// <param name="min">The minimum number of required nodes.</param>
-        public FunctionN(S.Func<IEnumerable<Tn>, INode> hndl, bool passOne = true, int min = 1) {
+        public FunctionN(S.Func<IEnumerable<Tn>, INode> hndl, bool needOneNoCast = false, bool passOne = true, int min = 1) {
             this.hndl = hndl;
+            this.needOneNoCast = needOneNoCast;
             this.passOne = passOne;
             this.min = min;
 
@@ -33,11 +38,11 @@ namespace Blackboard.Core.Functions {
 
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>
         /// <param name="nodes">The nodes to match against.</param>
-        /// <returns>The closest match is lower but not negatve.</returns>
-        public int Match(INode[] nodes) {
-            if (nodes.Length < this.min) return -1;
+        /// <returns>The matching results for this function.</returns>
+        public FuncMatch Match(INode[] nodes) {
+            if (nodes.Length < this.min) return FuncMatch.NoMatch;
             Type t = Type.FromType<Tn>();
-            return IFunction.Join(nodes.Select((node) => t.Match(Type.TypeOf(node))));
+            return FuncMatch.Create(this.needOneNoCast, nodes.Select((node) => t.Match(Type.TypeOf(node))));
         }
 
         /// <summary>Builds and returns the function object.</summary>

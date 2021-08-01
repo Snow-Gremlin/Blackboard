@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -88,14 +89,14 @@ namespace Blackboard.Core {
         /// <summary>This gets the type from the given generic.</summary>
         /// <typeparam name="T">The generic type to get the type of.</typeparam>
         /// <returns>The type for the given generic or null if not found.</returns>
-        static public Type FromType<T>() => FromType(typeof(T));
+        static public Type FromType<T>() where T : INode => FromType(typeof(T));
 
         /// <summary>This get the type from the given C# type.</summary>
         /// <param name="type">The C# type to get this type of.</param>
         /// <returns>The type for the given C# type or null if not found.</returns>
         static public Type FromType(S.Type type) {
             foreach (Type t in AllTypes) {
-                if (t.RealType.IsAssignableTo(type)) return t;
+                if (type.IsAssignableTo(t.RealType)) return t;
             }
             return null;
         }
@@ -135,13 +136,33 @@ namespace Blackboard.Core {
             FromType<T>().Match(TypeOf(node));
 
         /// <summary>This determines the implicit and inheritence cast distance.</summary>
+        /// <remarks>This is used for choosing the most specific method for a function.</remarks>
         /// <param name="t">The type to try castig to.</param>
         /// <returns>The lower the positive number the better the cast, -1 if not able to cast.</returns>
-        public int Match(Type t) =>
-            this == t ? 0 :
-            this.imps.ContainsKey(t) ? 1 :
-            this.BaseType is null ? -1 :
-            this.BaseType.Match(t) + 1;
+        public int Match(Type t) {
+            int match;
+
+            // Check if inheritance can be used.
+            // Find the closest inherited type so that the most specific match can be choosen.
+            if (t.RealType.IsAssignableTo(this.RealType)) {
+                match = -1;
+                do {
+                    t = t.BaseType;
+                    match++;
+                } while (t is not null && t.RealType.IsAssignableTo(this.RealType));
+                return match;
+            }
+
+            // Check if implicit casts exist.
+            // Add an initial penalty for using an implicit cast instead of inheritance.
+            match = 10;
+            do {
+                if (t.imps.ContainsKey(this)) return match;
+                t = t.BaseType;
+                match++;
+            } while (t is not null);
+            return -1;
+        }
 
         /// <summary>Performs an implicit cast of the given node into this type.</summary>
         /// <param name="node">The node to implicitly cast.</param>
@@ -172,11 +193,13 @@ namespace Blackboard.Core {
         /// <param name="dest">The destination type to cast into.</param>
         /// <returns>The node cast into the destination type or null if it can not be cast.</returns>
         static private INode cast(bool imp, INode node, Type src, Type dest) {
-            if (src == dest) return node;
-            Dictionary<Type, Caster> dict = imp ? src.imps : src.exps;
-            return dict.TryGetValue(src, out Caster func) ? func(node) :
-                src.BaseType is null ? null :
-                cast(imp, node, src.BaseType, dest);
+            if (src.RealType.IsAssignableTo(dest.RealType)) return node;
+            do {
+                Dictionary<Type, Caster> dict = imp ? src.imps : src.exps;
+                if (dict.TryGetValue(dest, out Caster func)) return func(node);
+                src = src.BaseType;
+            } while (src is not null);
+            return null;
         }
 
         /// <summary>Checks the equality of these two types.</summary>

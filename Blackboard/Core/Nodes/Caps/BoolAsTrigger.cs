@@ -80,5 +80,9 @@ namespace Blackboard.Core.Nodes.Caps {
         /// </returns>
         sealed public override IEnumerable<INode> Eval() =>
             this.updateTrigger() ? this.Children : Enumerable.Empty<INode>();
+
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
+        public override string ToString() => "BoolAsTrigger("+NodeString(this.source)+")";
     }
 }

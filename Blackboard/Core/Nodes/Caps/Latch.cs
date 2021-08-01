@@ -69,6 +69,7 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Latch("+NodeString(this.source1)+", "+NodeString(this.source2)+")";
+        public override string ToString() => "Latch<"+this.Value+">("+
+            NodeString(this.source1)+", "+NodeString(this.source2)+")";
     }
 }

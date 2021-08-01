@@ -38,7 +38,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Compares two strings together.</summary>
         /// <param name="other">The other string to compare.</param>
         /// <returns>The comparison result indicating which is greater than or equal.</returns>
-        public int CompareTo(String other) => this.Value.CompareTo(other.Value);
+        public int CompareTo(String other) => string.Compare(this.Value, other.Value);
         public static bool operator ==(String left, String right) => left.CompareTo(right) == 0;
         public static bool operator !=(String left, String right) => left.CompareTo(right) != 0;
         public static bool operator <(String left, String right) => left.CompareTo(right) < 0;

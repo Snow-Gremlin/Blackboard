@@ -1,31 +1,13 @@
 using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Caps;
-using Blackboard.Core.Nodes.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
 using S = System;
 
 namespace BlackboardTests.CoreTests {
 
     [TestClass]
     public class Nodes {
-
-        static private void checkString(Node node, string exp) =>
-            Assert.AreEqual(exp, node.ToString());
-
-        static private void checkDepth(Node node, int exp) =>
-            Assert.AreEqual(exp, node.Depth);
-
-        static private void checkParents(Node node, string exp) =>
-            Assert.AreEqual(exp, string.Join(", ", node.Parents));
-
-        static private void checkValue(IValue<Bool> node, bool exp) =>
-            Assert.AreEqual(exp, node.Value.Value);
-
-        static private void checkLog(StringWriter buf, params string[] lines) =>
-            Assert.AreEqual(string.Join(S.Environment.NewLine, lines), buf.ToString().Trim());
 
         [TestMethod]
         public void TestAddNodes() {
@@ -36,22 +18,22 @@ namespace BlackboardTests.CoreTests {
             Or  or123  = new(and12, input3);
             Not not123 = new(or123);
 
-            checkString(and12,  "And(Input<bool>, Input<bool>)");
-            checkString(not123, "Not(Or(And(Input<bool>, Input<bool>), Input<bool>))");
+            and12 .CheckString("And(Input<bool>, Input<bool>)");
+            not123.CheckString("Not(Or(And(Input<bool>, Input<bool>), Input<bool>))");
 
-            checkParents(input1, "");
-            checkParents(input2, "");
-            checkParents(input3, "");
-            checkParents(and12,  "Input<bool>, Input<bool>");
-            checkParents(or123,  "And(Input<bool>, Input<bool>), Input<bool>");
-            checkParents(not123, "Or(And(Input<bool>, Input<bool>), Input<bool>)");
+            input1.CheckParents("");
+            input2.CheckParents("");
+            input3.CheckParents("");
+            and12 .CheckParents("Input<bool>, Input<bool>");
+            or123 .CheckParents("And(Input<bool>, Input<bool>), Input<bool>");
+            not123.CheckParents("Or(And(Input<bool>, Input<bool>), Input<bool>)");
 
-            checkDepth(input1, 0);
-            checkDepth(input2, 0);
-            checkDepth(input3, 0);
-            checkDepth(and12,  1);
-            checkDepth(or123,  2);
-            checkDepth(not123, 3);
+            input1.CheckDepth(0);
+            input2.CheckDepth(0);
+            input3.CheckDepth(0);
+            and12 .CheckDepth(1);
+            or123 .CheckDepth(2);
+            not123.CheckDepth(3);
         }
 
         [TestMethod]
@@ -62,67 +44,68 @@ namespace BlackboardTests.CoreTests {
             And and12  = new(input1, input2);
             Or  or123  = new(and12,  input3);
             Not not123 = new(or123);
-            checkValue(input1, false);
-            checkValue(input2, false);
-            checkValue(input3, false);
-            checkValue(and12,  false);
-            checkValue(or123,  false);
-            checkValue(not123, true);
+            input1.CheckValue(false);
+            input2.CheckValue(false);
+            input3.CheckValue(false);
+            and12 .CheckValue(false);
+            or123 .CheckValue(false);
+            not123.CheckValue(true);
 
-            Driver drv = new(new StringWriter());
+            Driver drv = new();
             drv.Global["One"]   = input1;
             drv.Global["Two"]   = input2;
             drv.Global["Three"] = input3;
 
             drv.SetBool(true, "One");
             drv.SetBool(true, "Three");
-            drv.Evalate();
-            checkLog(drv.Log as StringWriter,
-                "Eval(0): Input<bool>",
-                "Eval(0): Input<bool>",
-                "Eval(1): And(Input<bool>, Input<bool>)",
-                "Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
-                "Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))");
-            checkValue(input1, true);
-            checkValue(input2, false);
-            checkValue(input3, true);
-            checkValue(and12,  false);
-            checkValue(or123,  true);
-            checkValue(not123, false);
+            drv.CheckEvaluate(
+                "Start(Pending: 2)",
+                "  Eval(0): Input<bool>",
+                "  Eval(0): Input<bool>",
+                "  Eval(1): And(Input<bool>, Input<bool>)",
+                "  Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
+                "  Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))",
+                "End(Provoked: 0)");
+            input1.CheckValue(true);
+            input2.CheckValue(false);
+            input3.CheckValue(true);
+            and12 .CheckValue(false);
+            or123 .CheckValue(true);
+            not123.CheckValue(false);
 
-            drv.Log = new StringWriter();
             drv.SetBool(false, "Three");
-            drv.Evalate();
-            checkLog(drv.Log as StringWriter,
-                "Eval(0): Input<bool>",
-                "Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
-                "Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))");
-            checkValue(input1, true);
-            checkValue(input2, false);
-            checkValue(input3, false);
-            checkValue(and12,  false);
-            checkValue(or123,  false);
-            checkValue(not123, true);
+            drv.CheckEvaluate(
+                "Start(Pending: 1)",
+                "  Eval(0): Input<bool>",
+                "  Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
+                "  Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))",
+                "End(Provoked: 0)");
+            input1.CheckValue(true);
+            input2.CheckValue(false);
+            input3.CheckValue(false);
+            and12 .CheckValue(false);
+            or123 .CheckValue(false);
+            not123.CheckValue(true);
 
-            drv.Log = new StringWriter();
             drv.SetBool(true, "Two");
-            drv.Evalate();
-            checkLog(drv.Log as StringWriter,
-                "Eval(0): Input<bool>",
-                "Eval(1): And(Input<bool>, Input<bool>)",
-                "Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
-                "Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))");
-            checkValue(input1, true);
-            checkValue(input2, true);
-            checkValue(input3, false);
-            checkValue(and12,  true);
-            checkValue(or123,  true);
-            checkValue(not123, false);
+            drv.CheckEvaluate(
+                "Start(Pending: 1)",
+                "  Eval(0): Input<bool>",
+                "  Eval(1): And(Input<bool>, Input<bool>)",
+                "  Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
+                "  Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))",
+                "End(Provoked: 0)");
+            input1.CheckValue(true);
+            input2.CheckValue(true);
+            input3.CheckValue(false);
+            and12 .CheckValue(true);
+            or123 .CheckValue(true);
+            not123.CheckValue(false);
         }
 
         [TestMethod]
         public void TestTriggerNodes() {
-            Driver drv = new(S.Console.Out);
+            Driver drv = new();
             InputTrigger inputA = new();
             InputTrigger inputB = new();
             InputTrigger inputC = new();
@@ -151,7 +134,7 @@ namespace BlackboardTests.CoreTests {
                 if (triggerB) drv.Provoke("TrigB");
                 if (triggerC) drv.Provoke("TrigC");
                 high = false;
-                drv.Evalate();
+                drv.Evaluate();
 
                 int  count  = drv.GetValue<Int>("Count").Value;
                 bool toggle = drv.GetValue<Bool>("Toggle").Value;

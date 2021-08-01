@@ -4,7 +4,6 @@ using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
-using System.IO;
 using S = System;
 
 namespace Blackboard.Core {
@@ -19,9 +18,7 @@ namespace Blackboard.Core {
         private List<INode> touched;
 
         /// <summary>Creates a new driver.</summary>
-        /// <param name="log">The optional log to write debug information to during evaluations.</param>
-        public Driver(TextWriter log = null) {
-            this.Log = log;
+        public Driver() {
             this.touched = new List<INode>();
             this.Global = new Namespace();
 
@@ -257,13 +254,6 @@ namespace Blackboard.Core {
         }
 
         #endregion
-
-        /// <summary>An optional log to keep track of which nodes and what order they are evaluated.</summary>
-        public TextWriter Log;
-
-        /// <summary>The base set of named nodes to access the total node structure.</summary>
-        public Namespace Global { get; }
-
         #region Value Setters...
 
         /// <summary>Sets a value for the given named input.</summary>
@@ -418,24 +408,32 @@ namespace Blackboard.Core {
 
         #endregion
 
+        /// <summary>The base set of named nodes to access the total node structure.</summary>
+        public Namespace Global { get; }
+
         /// <summary>This indicates if any changes are pending evaluation.</summary>
         public bool HasPending => this.touched.Count > 0;
 
         /// <summary>Updates and propogates the changes from the given inputs through the blackboard nodes.</summary>
-        public void Evalate() {
+        /// <param name="logger">An optional logger for debugging this evaluation.</param>
+        public void Evaluate(EvalLogger logger = null) {
             LinkedList<INode> pending = new();
             LinkedList<ITrigger> needsReset = new();
             pending.SortInsertUnique(this.touched);
             this.touched.Clear();
+            logger?.StartEval(pending);
 
             while (pending.Count > 0) {
                 INode node = pending.TakeFirst();
-                this.Log?.WriteLine("Eval("+node.Depth+"): "+node);
-                pending.SortInsertUnique(node.Eval());
+                logger?.Eval(node);
+                IEnumerable<INode> children = node.Eval();
+                logger?.EvalResult(children);
+                pending.SortInsertUnique(children);
                 if (node is ITrigger trigger)
                     needsReset.AddLast(trigger);
             }
 
+            logger?.EndEval(needsReset);
             foreach (ITrigger trigger in needsReset)
                 trigger.Reset();
         }

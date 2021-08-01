@@ -16,7 +16,7 @@ namespace Blackboard.Core.Functions {
         public Function(S.Func<T, INode> hndl) {
             this.hndl = hndl;
 
-            if (Type.FromType<T>() is null) throw Exception.UnknownFunctionParamType(typeof(T), 1);
+            if (Type.FromType<T>() is null) throw Exception.UnknownFunctionParamType(typeof(T), "T1");
         }
 
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>

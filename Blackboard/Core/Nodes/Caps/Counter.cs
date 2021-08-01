@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core;
 using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Caps {
@@ -93,11 +94,11 @@ namespace Blackboard.Core.Nodes.Caps {
             if (this.reset?.Provoked     ?? false) value = this.resetValue is null ? new() : this.resetValue.Value;
             return this.SetNodeValue(value);
         }
-
+        
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
         public override string ToString() =>
-            "Counter("+NodeString(this.increment)+", "+NodeString(this.decrement)+", "+
+            "Counter<"+this.Value+">("+NodeString(this.increment)+", "+NodeString(this.decrement)+", "+
                 NodeString(this.reset)+", "+NodeString(this.delta)+", "+NodeString(this.resetValue)+")";
     }
 }

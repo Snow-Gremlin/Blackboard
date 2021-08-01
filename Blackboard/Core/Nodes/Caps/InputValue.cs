@@ -38,6 +38,6 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Input<" + this.Value.ToString() + ">";
+        public override string ToString() => "Input<" + this.Value + ">";
     }
 }

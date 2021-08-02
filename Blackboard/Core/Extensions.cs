@@ -82,6 +82,18 @@ namespace Blackboard.Core {
             }
         }
 
+        /// <summary>This determines if all the given nodes are constant.</summary>
+        /// <param name="nodes">The nodes to check if constant.</param>
+        /// <returns>True if all nodes are constant, false otherwise.</returns>
+        static public bool IsConstant(this IEnumerable<INode> nodes) =>
+            nodes.All((node) => node.IsConstant());
+
+        /// <summary>The string of the type names for all the given name.</summary>
+        /// <param name="nodes">The nodes to get the string type for.</param>
+        /// <returns>The strings for the types of the given nodes.</returns>
+        static public IEnumerable<string> TypeNames(this IEnumerable<INode> nodes) =>
+            nodes.Select((node) => Type.TypeOf(node).ToString());
+
         /// <summary>Determines if any of values exists in both lists.</summary>
         /// <typeparam name="T">The types of values to find.</typeparam>
         /// <param name="a">The first input set of values to check within.</param>

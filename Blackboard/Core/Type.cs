@@ -99,7 +99,7 @@ namespace Blackboard.Core {
                 if (type.IsAssignableTo(t.RealType)) return t;
             }
             return null;
-        }
+        } 
 
         /// <summary>The display name of the type.</summary>
         public readonly string Name;

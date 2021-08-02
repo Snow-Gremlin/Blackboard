@@ -19,6 +19,17 @@
 # Identifiers
 (Start): 'a'..'z', 'A'..'Z', '_$' => (Identifier): '0'..'9', 'a'..'z', 'A'..'Z', '_' => [Identifier];
 
+# Strings
+(Start): '"' => (String-Body): '"' => [String];
+(String-Body): '\\' => (Escaped);
+(Escaped): 'x' => (Ascii-0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                  (Ascii-1): '0'..'9', 'a'..'f', 'A'..'F' => (String-Body);
+(Escaped): 'u' => (Unicode-0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                  (Unicode-1): '0'..'9', 'a'..'f', 'A'..'F' =>
+                  (Unicode-2): '0'..'9', 'a'..'f', 'A'..'F' =>
+                  (Unicode-3): '0'..'9', 'a'..'f', 'A'..'F' => (String-Body);
+(Escaped): * => (String-Body);
+
 # Symbols
 (Start): '&' => [And]: '&' => [Logical-And];
 (Start): '|' => [Or]: '|' => [Logical-Or];
@@ -40,7 +51,7 @@
 (Start): '[' => [Sqr-Open];
 (Start): ']' => [Sqr-Close];
 (Start): '{' => [Curl-Open];
-(Start): '}' => [curl-Close];
+(Start): '}' => [Curl-Close];
 
 (Start): '=' => [Assign]:  '=' => [Equal];
 (Start): '>' => [Greater]: '=' => [Greater-Equal];
@@ -58,58 +69,103 @@
 # Whitespace
 (Start): ' \t\n' => (Whitespace): ' \t\n' => ^[Whitespace];
 
-# Reserved Identifiers
-[Identifier] = 'in' => [In];
-[Identifier] = 'bool', 'int', 'double', 'trigger' => [Type];
+# Specific Keywords
 [Identifier] = 'true', 'false' => [Bool];
-[Identifier] = 'and', 'as', 'byte', 'catch', 'case', 'char', 'class', 'complex', 'def', 'default', 'do', 'dynamic',
-               'else', 'enum', 'finally', 'float', 'for', 'foreach', 'func', 'get', 'global', 'if', 'interface', 'import', 'is',
-               'list', 'local', 'map', 'namespace', 'not', 'null', 'on', 'operator', 'or', 'out', 'override', 'select',
-               'set', 'static', 'string', 'switch', 'then', 'try', 'type', 'typedef', 'typeof', 'uint', 'until',
-               'var', 'void', 'when', 'while', 'yield', 'xor' => [Reserved];
+[Identifier] = 'namespace' => [Namespace];
+
+[Identifier] = 'in'      => [Declare-In];
+[Identifier] = 'get'     => [Declare-Get];
+[Identifier] = 'const'   => [Declare-Const];
+[Identifier] = 'counter' => [Declare-Counter];
+[Identifier] = 'latch'   => [Declare-Latch];
+[Identifier] = 'toggle'  => [Declare-Toggle];
+
+[Identifier] = 'bool'    => [Type-Bool];
+[Identifier] = 'int'     => [Type-Int];
+[Identifier] = 'double'  => [Type-Double];
+[Identifier] = 'string'  => [Type-String];
+[Identifier] = 'trigger' => [Type-Trigger];
+
+# Reserved Identifiers (Keeping options open for future versions)
+[Identifier] = 'byte', 'char', 'enum', 'float', 'int8', 'int16', 'int32', 'int64',
+               'list', 'long', 'map', 'set', 'short', 'struct', 'type', 'uint',
+               'uint8', 'uint16', 'uint32', 'uint64', 'ulong', 'ushort', 'var' => [Reserved-Types];
+
+[Identifier] = 'internal', 'global', 'local',
+               'private', 'protected', 'public', 'static' => [Reserved-Scoping];
+
+[Identifier] = 'abstract', 'class', 'def', 'define', 'func', 'interface', 'operator',
+               'override', 'typedef', 'void', 'virtual' => [Reserved-Definitions];
+
+[Identifier] = 'as', 'break', 'catch', 'case', 'continue', 'default', 'else',
+               'finally', 'go', 'if', 'import', 'intersect', 'is', 'out', 'return', 'select',
+               'switch', 'then', 'try', 'typeof', 'union', 'using', 'when', 'yield' => [Reserved-Constructs];
+
+[Identifier] = 'complex', 'do', 'dynamic', 'for', 'foreach', 'goto',
+               'label', 'null', 'readonly', 'sealed', 'until', 'while' => [Reserved-Unsupported];
 
 #==========================================================
 # Grammar Rules
 
 > <Code> := _
-    | {Clean} <Statement> [End] <Code>;
+    | {Clean} <Statement> <Code>;
 
 <Statement> := _
+    | <Namespace>
     | <New-Typed-Input>
     | <New-Var-Input>
-    | <Assign-Existing>
-    | <Define-Typed-Rule>
-    | <Define-Var-Rule>
-    | <Pull-Trigger>;
+#    | <Assign-Existing>
+#    | <Define-Typed-Rule>
+#    | <Define-Var-Rule>
+#    | <Pull-Trigger>
+    ;
 
-<New-Typed-Input> := [In] [Type] {SetType} <New-Typed-Input-Part> <New-Typed-Input-Tail>;
+#----------------------------------------------------------
+
+<Namespace> := [Namespace] <Create-Namespaced-Id> {Push-Namespace} [Curl-Open] <Code> [Curl-Close] {Pop-Namespace};
+    | [Namespace] <Create-Namespaced-Id> [End];
+
+#----------------------------------------------------------
+
+<New-Typed-Input> := [Declare-In] <Any-Type> <New-Typed-Input-Part> <New-Typed-Input-Tail> [End];
 
 <New-Typed-Input-Tail> := _
     | [Comma] <New-Typed-Input-Part> <New-Typed-Input-Tail>;
 
-<New-Typed-Input-Part> := <Id> {NewTypeInputNoAssign}
-    | <Id> [Assign] <Conditional> {NewTypeInputWithAssign};
+<New-Typed-Input-Part> := <Create-Namespaced-Id> {New-Type-Input-No-Assign}
+    | <Create-Namespaced-Id> [Assign] <Conditional> {New-Type-Input-With-Assign};
 
-<New-Var-Input> := [In] <New-Var-Input-Part> <New-Var-Input-Tail>;
+#----------------------------------------------------------
+
+<New-Var-Input> := [Declare-In] <New-Var-Input-Part> <New-Var-Input-Tail> [End];
 
 <New-Var-Input-Tail> := _
     | [Comma] <New-Var-Input-Part> <New-Var-Input-Tail>;
 
-<New-Var-Input-Part> := <Id> [Assign] <Conditional> {NewVarInputWithAssign};
-
-<Assign-Existing> := <Id> <Assign-Existing-More> [Assign] <Conditional> {AssignExisting};
-
-<Assign-Existing-More> := _
-    | [Assign] <Id> <Assign-Existing-More>;
-
-<Define-Typed-Rule> := {StartDefine} [Type] {SetType} <Id> [Define] <Conditional> {TypeDefine};
-
-<Define-Var-Rule> := {StartDefine} <Id> [Define] <Conditional> {VarDefine};
-
-<Pull-Trigger> := [Trigger] <Id> {PullTrigger}
-    | <Conditional> [Trigger] <Id> {ConditionalPullTrigger};
+<New-Var-Input-Part> := <Create-Namespaced-Id> [Assign] <Conditional> {New-Var-Input-With-Assign};
 
 #----------------------------------------------------------
+
+###<Assign-Existing> := <Id> <Assign-Existing-More> [Assign] <Conditional> {Assign-Existing};
+###
+###<Assign-Existing-More> := _
+###    | [Assign] <Id> <Assign-Existing-More>;
+###
+###<Define-Typed-Rule> := {Start-Define} [Type] {Set-Type} <Id> [Define] <Conditional> {Type-Define};
+###
+###<Define-Var-Rule> := {Start-Define} <Id> [Define] <Conditional> {Var-Define};
+###
+###<Pull-Trigger> := [Trigger] <Id> {Pull-Trigger}
+###    | <Conditional> [Trigger] <Id> {Conditional-Pull-Trigger};
+
+#----------------------------------------------------------
+
+<Create-Namespaced-Id> := [Identifier] {Create-Id-Start} <Create-Namespaced-Id-Tail>;
+
+<Create-Namespaced-Id-Tail> := _
+    | [Dot] [Identifier] {Member-Create} <Create-Namespaced-Id-Tail>;
+    
+#==========================================================
 
 <Conditional> := <Logical-Or>
     | <Conditional> [Test] <Conditional> [Else] <Conditional> {Trinary};
@@ -163,25 +219,29 @@
     | [Neg]    <Expression> {Negate}
     | [Not]    <Expression> {Not}
     | [Pos]    <Expression>
-    | [Invert] <Expression> {Invert};
+    | [Invert] <Expression> {Invert}
+    | [Par-Open] <Any-Type> [Par-Close] <Expression> {Cast};
 
 <Expression> := <Value>
     | [Par-Open] <Conditional> [Par-Close]
-    | <Id> {StartCall} [Par-Open] <Args> [Par-Close] {EndCall};
+    | <Expression> [Par-Open] {Start-Args} <Args> [Par-Close] {Call}
+    | <Expression> [Dot] <Value> {Member-Access};
 
 <Args> := _
-    | <Conditional> <Args-Tail>;
+    | <Conditional> {Add-Arg} <Args-Tail>;
 
 <Args-Tail> := _
-    | [Comma] <Conditional> <Args-Tail>;
+    | [Comma] <Conditional> {Add-Arg} <Args-Tail>;
 
-<Value> := <Id> {PushId}
-    | [Bool] {PushBool}
-    | [Int] {PushInt}
-    | [Hex] {PushHex}
-    | [Double] {PushDouble};
+<Value> := [Identifier] {Push-Id}
+    | [Bool] {Push-Bool}
+    | [Int] {Push-Int}
+    | [Hex] {Push-Hex}
+    | [Double] {Push-Double}
+    | [String] {Push-String};
 
-<Id> := [Identifier] {StartId} <Id-Tail>;
-
-<Id-Tail> := _ 
-    | [Dot] [Identifier] {AddId} <Id-Tail>;
+<Any-Type> := [Type-Bool] {Push-Type}
+    | [Type-Int] {Push-Type}
+    | [Type-Double] {Push-Type}
+    | [Type-String] {Push-Type}
+    | [Type-Trigger] {Push-Type};

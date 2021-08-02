@@ -15,7 +15,7 @@ namespace BlackboardTests.CoreTests {
         [TestMethod]
         public void TestFunctionsOr() {
             Driver driver = new();
-            FunctionGroup group = driver.Global.Find("operators", "or") as FunctionGroup;
+            FuncGroup group = driver.Global.Find("operators", "or") as FuncGroup;
 
             InputTrigger       tNode = new();
             InputValue<Bool>   bNode = new();
@@ -38,7 +38,7 @@ namespace BlackboardTests.CoreTests {
         [TestMethod]
         public void TestFunctionsRound() {
             Driver driver = new();
-            FunctionGroup group = driver.Global.Find("round") as FunctionGroup;
+            FuncGroup group = driver.Global.Find("round") as FuncGroup;
 
             InputValue<Bool>   bNode = new();
             InputValue<Int>    iNode = new();
@@ -57,7 +57,7 @@ namespace BlackboardTests.CoreTests {
         [TestMethod]
         public void TestFunctionsSum() {
             Driver driver = new();
-            FunctionGroup group = driver.Global.Find("operators", "sum") as FunctionGroup;
+            FuncGroup group = driver.Global.Find("operators", "sum") as FuncGroup;
 
             InputValue<Bool>   bNode = new();
             InputValue<Int>    iNode = new();
@@ -79,7 +79,7 @@ namespace BlackboardTests.CoreTests {
         [TestMethod]
         public void TestFunctionsAtan() {
             Driver driver = new();
-            FunctionGroup group = driver.Global.Find("atan") as FunctionGroup;
+            FuncGroup group = driver.Global.Find("atan") as FuncGroup;
 
             InputValue<Int>    iNode = new();
             InputValue<Double> dNode = new();

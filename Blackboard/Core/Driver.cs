@@ -34,19 +34,19 @@ namespace Blackboard.Core {
             Namespace operators = new();
             this.Global["operators"] = operators;
             void add(string name, params IFunction[] funcs) =>
-                operators[name] = new FunctionGroup(funcs);
+                operators[name] = new FuncGroup(funcs);
 
             add("and",
                 And.Factory,
                 BitwiseAnd<Int>.Factory,
                 All.Factory);
-            add("cast-trigger");
-            add("cast-bool");
-            add("cast-int",
+            add("castTrigger");
+            add("castBool");
+            add("castInt",
                 Explicit<Double, Int>.Factory);
-            add("cast-double",
+            add("castDouble",
                 Implicit<Int, Double>.Factory);
-            add("cast-string",
+            add("castString",
                 Implicit<Bool, String>.Factory,
                 Implicit<Int, String>.Factory,
                 Implicit<Double, String>.Factory);
@@ -63,7 +63,7 @@ namespace Blackboard.Core {
                 GreaterThan<Int>.Factory,
                 GreaterThan<Double>.Factory,
                 GreaterThan<String>.Factory);
-            add("greater-equal",
+            add("greaterEqual",
                 GreaterThanOrEqual<Bool>.Factory,
                 GreaterThanOrEqual<Int>.Factory,
                 GreaterThanOrEqual<Double>.Factory,
@@ -75,18 +75,18 @@ namespace Blackboard.Core {
                 LessThan<Int>.Factory,
                 LessThan<Double>.Factory,
                 LessThan<String>.Factory);
-            add("less-equal",
+            add("lessEqual",
                 LessThanOrEqual<Bool>.Factory,
                 LessThanOrEqual<Int>.Factory,
                 LessThanOrEqual<Double>.Factory,
                 LessThanOrEqual<String>.Factory);
-            add("logical-and",
+            add("logicalAnd",
                 And.Factory,
                 All.Factory);
-            add("logical-or",
+            add("logicalOr",
                 Or.Factory,
                 Any.Factory);
-            add("logical-xor",
+            add("logicalXor",
                 Xor.Factory,
                 OnlyOne.Factory);
             add("modulo",
@@ -100,7 +100,7 @@ namespace Blackboard.Core {
                 Neg<Double>.Factory);
             add("not",
                 Not.Factory);
-            add("not-equal",
+            add("notEqual",
                 NotEqual<Bool>.Factory,
                 NotEqual<Int>.Factory,
                 NotEqual<Double>.Factory,
@@ -115,9 +115,9 @@ namespace Blackboard.Core {
             add("remainder",
                 Rem<Int>.Factory,
                 Rem<Double>.Factory);
-            add("shift-left",
+            add("shiftLeft",
                 LeftShift<Int>.Factory);
-            add("shift-right",
+            add("shiftRight",
                 RightShift<Int>.Factory);
             add("subtract",
                 Sub<Int>.Factory,
@@ -139,7 +139,7 @@ namespace Blackboard.Core {
         /// <summary>This adds all global initial methods for Blackboard.</summary>
         private void addFunctions() {
             void add(string name, params IFunction[] funcs) =>
-                this.Global[name] = new FunctionGroup(funcs);
+                this.Global[name] = new FuncGroup(funcs);
 
             add("abs",
                 Abs<Int>.Factory,

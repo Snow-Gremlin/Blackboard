@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Parser.Functions;
+using Blackboard.Core.Functions;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -9,13 +9,12 @@ using System.Reflection;
 using PP = PetiteParser;
 using S = System;
 using Blackboard.Parser.StackItems;
+using Blackboard.Core.Data.Caps;
 
 namespace Blackboard.Parser {
 
     /// <summary>This will parse the Blackboard language into actions and nodes to apply to the driver.</summary>
     public class Parser {
-
-        private const string undefinedType = "undefined";
 
         /// <summary>The resource file for the Blackboard language definition.</summary>
         private const string resourceName = "Blackboard.Parser.Parser.lang";
@@ -26,31 +25,20 @@ namespace Blackboard.Parser {
         static private PP.Parser.Parser ParserSingleton;
 
         private Driver driver;
-
-        private bool isDefine;
-        private string typeText;
-
         private LinkedList<object> stack;
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
-        private Collection ops;
-        private Collection funcs;
+        private Stack<Namespace> namescope;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="driver">The driver to modify.</param>
         public Parser(Driver driver) {
-            this.driver = driver;
-
-            this.isDefine = false;
-            this.typeText = undefinedType;
-
+            this.driver  = driver;
             this.stack   = new LinkedList<object>();
             this.prompts = null;
-            this.ops     = null;
-            this.funcs   = null;
+            this.namescope = new Stack<Namespace>();
+            this.namescope.Push(this.driver.Global);
 
             this.initPrompts();
-            this.initFuncs();
-            this.initConsts();
         }
 
         /// <summary>Reads the given lines of input Blackline code.</summary>
@@ -72,11 +60,10 @@ namespace Blackboard.Parser {
         private void read(PP.ParseTree.ITreeNode node) =>
             node.Process(this.prompts);
 
-        #region Definitions...
+        #region Prompts Setup...
 
         /// <summary>Initializes the prompts and operators for this parser.</summary>
         private void initPrompts() {
-            this.ops = new Collection();
             this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>() {
                 { "Clean", this.handleClean },
 
@@ -102,174 +89,54 @@ namespace Blackboard.Parser {
                 { "StartId",    this.handleStartId },
                 { "AddId",      this.handleAddId },
             };
-            this.addProcess("Trinary", 3,
-                new Input3<IValue<bool>, IValue<bool>,   IValue<bool>>(  (test, left, right) => new Select<bool>(  test, left, right)),
-                new Input3<IValue<bool>, IValue<int>,    IValue<int>>(   (test, left, right) => new Select<int>(   test, left, right)),
-                new Input3<IValue<bool>, IValue<double>, IValue<double>>((test, left, right) => new Select<double>(test, left, right)));
-            this.addProcess("Logical-Or", 2,
-                new Input2<IValue<bool>, IValue<bool>>((left, right) => new Or( left, right)),
-                new Input2<ITrigger,     ITrigger>(    (left, right) => new Any(left, right)));
-            this.addProcess("Logical-Xor", 2,
-                new Input2<IValue<bool>, IValue<bool>>((left, right) => new Xor(    left, right)),
-                new Input2<ITrigger,     ITrigger>(    (left, right) => new OnlyOne(left, right)));
-            this.addProcess("Logical-And", 2,
-                new Input2<IValue<bool>, IValue<bool>>((left, right) => new And(left, right)),
-                new Input2<ITrigger,     ITrigger>(    (left, right) => new All(left, right)));
-            this.addProcess("Or", 2,
-                new Input2<IValue<bool>, IValue<bool>>((left, right) => new Or(       left, right)),
-                new Input2<IValue<int>,  IValue<int>>( (left, right) => new BitwiseOr(left, right)),
-                new Input2<ITrigger,     ITrigger>(    (left, right) => new Any(      left, right)));
-            this.addProcess("Xor", 2,
-                new Input2<IValue<bool>, IValue<bool>>((left, right) => new Xor(       left, right)),
-                new Input2<IValue<int>,  IValue<int>>( (left, right) => new BitwiseXor(left, right)),
-                new Input2<ITrigger,     ITrigger>(    (left, right) => new OnlyOne(   left, right)));
-            this.addProcess("And", 2,
-                new Input2<IValue<bool>, IValue<bool>>((left, right) => new And(       left, right)),
-                new Input2<IValue<int>,  IValue<int>>( (left, right) => new BitwiseAnd(left, right)),
-                new Input2<ITrigger,     ITrigger>(    (left, right) => new All(       left, right)));
-            this.addProcess("Equal", 2,
-                new Input2<IValue<bool>,   IValue<bool>>(  (left, right) => new Equal<bool>(  left, right)),
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new Equal<int>(   left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Equal<double>(left, right)));
-            this.addProcess("Not-Equal", 2,
-                new Input2<IValue<bool>,   IValue<bool>>(  (left, right) => new NotEqual<bool>(  left, right)),
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new NotEqual<int>(   left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new NotEqual<double>(left, right)));
-            this.addProcess("Greater", 2,
-                new Input2<IValue<bool>,   IValue<bool>>(  (left, right) => new GreaterThan<bool>(  left, right)),
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new GreaterThan<int>(   left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new GreaterThan<double>(left, right)));
-            this.addProcess("Less", 2,
-                new Input2<IValue<bool>,   IValue<bool>>(  (left, right) => new LessThan<bool>(  left, right)),
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new LessThan<int>(   left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new LessThan<double>(left, right)));
-            this.addProcess("Greater-Equal", 2,
-                new Input2<IValue<bool>,   IValue<bool>>(  (left, right) => new GreaterThanOrEqual<bool>(  left, right)),
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new GreaterThanOrEqual<int>(   left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new GreaterThanOrEqual<double>(left, right)));
-            this.addProcess("Less-Equal", 2,
-                new Input2<IValue<bool>,   IValue<bool>>(  (left, right) => new LessThanOrEqual<bool>(  left, right)),
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new LessThanOrEqual<int>(   left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new LessThanOrEqual<double>(left, right)));
-            this.addProcess("Shift-Right", 2,
-                new Input2<IValue<int>, IValue<int>>((left, right) => new RightShift(left, right)));
-            this.addProcess("Shift-Left", 2,
-                new Input2<IValue<int>, IValue<int>>((left, right) => new LeftShift(left, right)));
-            this.addProcess("Sum", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new SumInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Sum(left, right)));
-            this.addProcess("Subtract", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new SubInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Sub(left, right)));
-            this.addProcess("Multiply", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new MulInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Mul(left, right)));
-            this.addProcess("Divide", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new DivInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Div(left, right)));
-            this.addProcess("Modulo", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new ModInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Mod(left, right)));
-            this.addProcess("Remainder", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new RemInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Rem(left, right)));
-            this.addProcess("Power", 2,
-                new Input2<IValue<int>,    IValue<int>>(   (left, right) => new PowerInt(  left, right)),
-                new Input2<IValue<double>, IValue<double>>((left, right) => new Power(left, right)));
-            this.addProcess("Negate", 1,
-                new Input1<IValue<int>>(   (input) => new NegInt(input)),
-                new Input1<IValue<double>>((input) => new Neg(input)));
-            this.addProcess("Not", 1,
-                new Input1<IValue<bool>>((input) => new Not(input)));
-            this.addProcess("Invert", 1,
-                new Input1<IValue<int>>((input) => new BitwiseNot(input)));
+
+            this.addProcess("Trinary",       3, "trinary");
+            this.addProcess("Logical-Or",    2, "logicalOr");
+            this.addProcess("Logical-Xor",   2, "logicalXor");
+            this.addProcess("Logical-And",   2, "logicalAnd");
+            this.addProcess("Or",            2, "or");
+            this.addProcess("Xor",           2, "xor");
+            this.addProcess("And",           2, "and");
+            this.addProcess("Equal",         2, "equal");
+            this.addProcess("Not-Equal",     2, "notEqual");
+            this.addProcess("Greater",       2, "greater");
+            this.addProcess("Less",          2, "less");
+            this.addProcess("Greater-Equal", 2, "greaterEqual");
+            this.addProcess("Less-Equal",    2, "lessEqual");
+            this.addProcess("Shift-Right",   2, "shiftRight");
+            this.addProcess("Shift-Left",    2, "shiftLeft");
+            this.addProcess("Sum",           2, "sum");
+            this.addProcess("Subtract",      2, "subtract");
+            this.addProcess("Multiply",      2, "multiply");
+            this.addProcess("Divide",        2, "divide");
+            this.addProcess("Modulo",        2, "modulo");
+            this.addProcess("Remainder",     2, "remainder");
+            this.addProcess("Power",         2, "power");
+            this.addProcess("Negate",        1, "negate");
+            this.addProcess("Not",           1, "not");
+            this.addProcess("Invert",        1, "invert");
         }
 
-        /// <summary>This adds a prompt and operator handler methods.</summary>
+        /// <summary>This adds a prompt for an operator handler.</summary>
         /// <param name="name">The name of the prompt to add to.</param>
         /// <param name="count">The number of values to pop off the stack for this function.</param>
-        /// <param name="funcs">The functions that will handle this prompt based on types of values popped off the stack.</param>
-        private void addProcess(string name, int count, params IFunction[] funcs) {
+        /// <param name="opName">The name of the operator function in the "operators" namespace.</param>
+        private void addProcess(string name, int count, string opName) {
+            FuncGroup op = this.driver.Global.Find("operators", opName) as FuncGroup;
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 INode[] inputs = this.popNode(count);
-                PP.Scanner.Location loc = args.Tokens[^1].End;
-                INode node = this.ops.Build(name, inputs, loc);
-                this.push(Cast.IsConstant(inputs) ? Cast.ToLiteral(node) : node);
+                INode node = op.Build(inputs);
+                
+                if (node is null) {
+                    PP.Scanner.Location loc = args.Tokens[^1].End;
+                    throw new Exception("The operator can not be called with given input.").
+                        With("Operation", opName).
+                        With("Inputs", string.Join(", ", inputs.TypeNames())).
+                        With("Location", loc.ToString());
+                }
+
+                this.push(inputs.IsConstant() ? node.ToLiteral() : node);
             };
-            this.ops.Add(name, funcs);
-        }
-
-        /// <summary>Prepares all the functions that can be called.</summary>
-        private void initFuncs() {
-            this.funcs = new Collection().
-                Add("abs",
-                    new Input1<IValue<int>>(   (input) => new AbsInt(   input)),
-                    new Input1<IValue<double>>((input) => new Abs(input))).
-                Add("all",
-                    new InputN<ITrigger>((inputs) => new All(inputs))).
-                Add("and",
-                    new InputN<IValue<bool>>((inputs) => new And(inputs))).
-                Add("any",
-                    new InputN<ITrigger>((inputs) => new Any(inputs))).
-                Add("clamp",
-                    new Input3<IValue<int>,    IValue<int>,    IValue<int>>(   (input1, input2, input3) => new Clamp<int>(   input1, input2, input3)),
-                    new Input3<IValue<double>, IValue<double>, IValue<double>>((input1, input2, input3) => new Clamp<double>(input1, input2, input3))).
-                Add("double",
-                    new Input1<IValue<int>>((input) => new IntToDouble(input))).
-                Add("int",
-                    new Input1<IValue<double>>((input) => new Truncate(input))).
-                Add("implies",
-                    new Input2<IValue<bool>, IValue<bool>>((input1, input2) => new Implies(input1, input2))).
-                Add("latch",
-                    new Input2<ITrigger, IValue<bool>>(  (input1, input2) => new Latch<bool>(  input1, input2)),
-                    new Input2<ITrigger, IValue<int>>(   (input1, input2) => new Latch<int>(   input1, input2)),
-                    new Input2<ITrigger, IValue<double>>((input1, input2) => new Latch<double>(input1, input2))).
-                Add("lerp",
-                    new Input3<IValue<double>, IValue<double>, IValue<double>>((input1, input2, input3) => new Lerp(input1, input2, input3))).
-                Add("max",
-                    new InputN<IValue<int>>(   (inputs) => new Max<int>(   inputs)),
-                    new InputN<IValue<double>>((inputs) => new Max<double>(inputs))).
-                Add("min",
-                    new InputN<IValue<int>>(   (inputs) => new Min<int>(   inputs)),
-                    new InputN<IValue<double>>((inputs) => new Min<double>(inputs))).
-                Add("mul",
-                    new InputN<IValue<int>>(   (inputs) => new MulInt(  inputs)),
-                    new InputN<IValue<double>>((inputs) => new Mul(inputs))).
-                Add("on",
-                    new Input1<IValue<bool>>((input) => new OnTrue(input))).
-                Add("onChange",
-                    new InputN<INode>((inputs) => new OnChange(inputs))).
-                Add("onFalse",
-                    new Input1<IValue<bool>>((input) => new OnFalse(input))).
-                Add("onlyOne",
-                    new InputN<ITrigger>((inputs) => new OnlyOne(inputs))).
-                Add("onTrue",
-                    new Input1<IValue<bool>>((input) => new OnTrue(input))).
-                Add("or",
-                    new InputN<IValue<bool>>((inputs) => new Or(inputs))).
-                Add("round",
-                    new Input1<IValue<double>>((input) => new Round(input))).
-                Add("trunc",
-                    new Input1<IValue<double>>((input) => new Truncate(input)));
-        }
-
-        /// <summary>Adds in initial constants.</summary>
-        private void initConsts() {
-            INamespace scope = this.driver.Nodes;
-            _ = new Const<double>("e",          scope, S.Math.E);
-            _ = new Const<double>("pi",         scope, S.Math.PI);
-            _ = new Const<double>("tau",        scope, S.Math.Tau);
-            _ = new Const<double>("sqrt2",      scope, S.Math.Sqrt(2));
-            _ = new Const<double>("nan",        scope, double.NaN);
-            _ = new Const<double>("inf",        scope, double.PositiveInfinity);
-            _ = new Const<double>("posInf",     scope, double.PositiveInfinity);
-            _ = new Const<double>("negInf",     scope, double.NegativeInfinity);
-            _ = new Const<double>("maxDouble",  scope, double.MaxValue);
-            _ = new Const<double>("minDouble",  scope, double.MinValue);
-            _ = new Const<double>("maxInt",     scope, int.MaxValue);
-            _ = new Const<double>("minInt",     scope, int.MinValue);
-            _ = new Const<double>("doubleSize", scope, sizeof(double));
-            _ = new Const<double>("intSize",    scope, sizeof(int));
         }
 
         #endregion
@@ -543,7 +410,7 @@ namespace Blackboard.Parser {
             string text = args.Tokens[^1].Text;
             try {
                 bool value = bool.Parse(text);
-                this.push(new Literal<bool>(value));
+                this.push(Literal.Bool(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse \"" + text + "\" as a bool.", ex);
             }
@@ -555,7 +422,7 @@ namespace Blackboard.Parser {
             string text = args.Tokens[^1].Text;
             try {
                 int value = int.Parse(text);
-                this.push(new Literal<int>(value));
+                this.push(Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse \""+text+"\" as a int.", ex);
             }
@@ -567,7 +434,7 @@ namespace Blackboard.Parser {
             string text = args.Tokens[^1].Text[2..];
             try {
                 int value = int.Parse(text, NumberStyles.HexNumber);
-                this.push(new Literal<int>(value));
+                this.push(Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse \""+text+"\" as a hex int.", ex);
             }
@@ -579,7 +446,7 @@ namespace Blackboard.Parser {
             string text = args.Tokens[^1].Text;
             try {
                 double value = double.Parse(text);
-                this.push(new Literal<double>(value));
+                this.push(Literal.Double(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse \""+text+"\" as a double.", ex);
             }

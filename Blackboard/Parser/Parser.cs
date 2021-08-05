@@ -1,15 +1,15 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Core.Functions;
+using Blackboard.Core.Data.Caps;
+using Blackboard.Parser.StackItems;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using PP = PetiteParser;
 using S = System;
-using Blackboard.Parser.StackItems;
-using Blackboard.Core.Data.Caps;
 
 namespace Blackboard.Parser {
 
@@ -19,26 +19,33 @@ namespace Blackboard.Parser {
         /// <summary>The resource file for the Blackboard language definition.</summary>
         private const string resourceName = "Blackboard.Parser.Parser.lang";
 
+        /// <summary>Prepares the parser's static variables before they are used.</summary>
+        static Parser() {
+            BaseParser = PP.Loader.Loader.LoadParser(
+                PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
+        }
+
         /// <summary>The Blackboard language base parser lazy singleton.</summary>
-        static private PP.Parser.Parser BaseParser => ParserSingleton ??= PP.Loader.Loader.LoadParser(
-            PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
-        static private PP.Parser.Parser ParserSingleton;
+        static private readonly PP.Parser.Parser BaseParser;
 
         private Driver driver;
-        private LinkedList<object> stack;
+        private LinkedList<StackItem> stack;
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
-        private Stack<Namespace> namescope;
+        private LinkedList<Namespace> scopeStack;
+        private bool reduceNodes;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="driver">The driver to modify.</param>
         public Parser(Driver driver) {
             this.driver  = driver;
-            this.stack   = new LinkedList<object>();
+            this.stack   = new LinkedList<StackItem>();
             this.prompts = null;
-            this.namescope = new Stack<Namespace>();
-            this.namescope.Push(this.driver.Global);
+            this.scopeStack = new LinkedList<Namespace>();
+            this.scopeStack.AddFirst(this.driver.Global);
+            this.reduceNodes = false;
 
             this.initPrompts();
+            this.validatePrompts();
         }
 
         /// <summary>Reads the given lines of input Blackline code.</summary>
@@ -65,78 +72,95 @@ namespace Blackboard.Parser {
         /// <summary>Initializes the prompts and operators for this parser.</summary>
         private void initPrompts() {
             this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>() {
-                { "Clean", this.handleClean },
+                { "clear",              this.handleClear },
+                { "startNewTypedInput", this.handleStartNewTypedInput },
 
-                { "NewTypeInputNoAssign",   this.handleNewTypeInputNoAssign },
-                { "NewTypeInputWithAssign", this.handleNewTypeInputWithAssign },
-                { "NewVarInputWithAssign",  this.handleNewVarInputWithAssign },
-                { "AssignExisting",         this.handleAssignExisting },
+                { "newTypeInputNoAssign",   this.handleNewTypeInputNoAssign },
+                { "newTypeInputWithAssign", this.handleNewTypeInputWithAssign },
+                //{ "newVarInputWithAssign",  this.handleNewVarInputWithAssign },
+                //{ "assignExisting",         this.handleAssignExisting },
 
-                { "StartDefine",            this.handleStartDefine },
-                { "TypeDefine",             this.handleTypeDefine },
-                { "VarDefine",              this.handleVarDefine },
-                { "PullTrigger",            this.handlePullTrigger },
-                { "ConditionalPullTrigger", this.handleConditionalPullTrigger },
+                //{ "startDefine",            this.handleStartDefine },
+                //{ "typeDefine",             this.handleTypeDefine },
+                //{ "varDefine",              this.handleVarDefine },
+                //{ "pullTrigger",            this.handlePullTrigger },
+                //{ "conditionalPullTrigger", this.handleConditionalPullTrigger },
 
-                { "SetType",    this.handleSetType },
-                { "StartCall",  this.handleStartCall },
-                { "Call",       this.handleEndCall },
-                { "PushId",     this.handlePushId },
-                { "PushBool",   this.handlePushBool },
-                { "PushInt",    this.handlePushInt },
-                { "PushHex",    this.handlePushHex },
-                { "PushDouble", this.handlePushDouble },
-                { "StartId",    this.handleStartId },
-                { "AddId",      this.handleAddId },
+                { "cast",         this.handleCast },
+                { "memberAccess", this.handleMemberAccess },
+                { "startCall",    this.handleStartCall },
+                { "addArg",       this.handleAddArg },
+                { "endCall",      this.handleEndCall },
+                { "pushId",       this.handlePushId },
+                { "pushBool",     this.handlePushBool },
+                { "pushInt",      this.handlePushInt },
+                { "pushHex",      this.handlePushHex },
+                { "pushDouble",   this.handlePushDouble },
+                { "pushString",   this.handlePushString },
+                { "pushType",     this.handlePushType },
             };
 
-            this.addProcess("Trinary",       3, "trinary");
-            this.addProcess("Logical-Or",    2, "logicalOr");
-            this.addProcess("Logical-Xor",   2, "logicalXor");
-            this.addProcess("Logical-And",   2, "logicalAnd");
-            this.addProcess("Or",            2, "or");
-            this.addProcess("Xor",           2, "xor");
-            this.addProcess("And",           2, "and");
-            this.addProcess("Equal",         2, "equal");
-            this.addProcess("Not-Equal",     2, "notEqual");
-            this.addProcess("Greater",       2, "greater");
-            this.addProcess("Less",          2, "less");
-            this.addProcess("Greater-Equal", 2, "greaterEqual");
-            this.addProcess("Less-Equal",    2, "lessEqual");
-            this.addProcess("Shift-Right",   2, "shiftRight");
-            this.addProcess("Shift-Left",    2, "shiftLeft");
-            this.addProcess("Sum",           2, "sum");
-            this.addProcess("Subtract",      2, "subtract");
-            this.addProcess("Multiply",      2, "multiply");
-            this.addProcess("Divide",        2, "divide");
-            this.addProcess("Modulo",        2, "modulo");
-            this.addProcess("Remainder",     2, "remainder");
-            this.addProcess("Power",         2, "power");
-            this.addProcess("Negate",        1, "negate");
-            this.addProcess("Not",           1, "not");
-            this.addProcess("Invert",        1, "invert");
+            this.addProcess(3, "trinary");
+            this.addProcess(2, "logicalOr");
+            this.addProcess(2, "logicalXor");
+            this.addProcess(2, "logicalAnd");
+            this.addProcess(2, "or");
+            this.addProcess(2, "xor");
+            this.addProcess(2, "and");
+            this.addProcess(2, "equal");
+            this.addProcess(2, "notEqual");
+            this.addProcess(2, "greater");
+            this.addProcess(2, "less");
+            this.addProcess(2, "greaterEqual");
+            this.addProcess(2, "lessEqual");
+            this.addProcess(2, "shiftRight");
+            this.addProcess(2, "shiftLeft");
+            this.addProcess(2, "sum");
+            this.addProcess(2, "subtract");
+            this.addProcess(2, "multiply");
+            this.addProcess(2, "divide");
+            this.addProcess(2, "modulo");
+            this.addProcess(2, "remainder");
+            this.addProcess(2, "power");
+            this.addProcess(1, "negate");
+            this.addProcess(1, "not");
+            this.addProcess(1, "invert");
         }
 
         /// <summary>This adds a prompt for an operator handler.</summary>
-        /// <param name="name">The name of the prompt to add to.</param>
         /// <param name="count">The number of values to pop off the stack for this function.</param>
-        /// <param name="opName">The name of the operator function in the "operators" namespace.</param>
-        private void addProcess(string name, int count, string opName) {
-            FuncGroup op = this.driver.Global.Find("operators", opName) as FuncGroup;
+        /// <param name="name">The name of the prompt to add to.</param>
+        private void addProcess(int count, string name) {
+            FuncGroup op = this.driver.Global.Find("operators", name) as FuncGroup;
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
+                PP.Scanner.Location loc = args.Tokens[^1].End;
                 INode[] inputs = this.popNode(count);
                 INode node = op.Build(inputs);
                 
                 if (node is null) {
-                    PP.Scanner.Location loc = args.Tokens[^1].End;
                     throw new Exception("The operator can not be called with given input.").
-                        With("Operation", opName).
+                        With("Operation", name).
                         With("Inputs", string.Join(", ", inputs.TypeNames())).
                         With("Location", loc.ToString());
                 }
 
-                this.push(inputs.IsConstant() ? node.ToLiteral() : node);
+                if (inputs.IsConstant()) node = node.ToLiteral();
+                this.push(new NodeItem(loc, node));
             };
+        }
+    
+        /// <summary>Validates that all prompts in the grammar are handled.</summary>
+        private void validatePrompts() {
+            HashSet<string> remaining = new(BaseParser.Grammar.Prompts.Select((prompt) => prompt.Name));
+            HashSet<string> missing = new();
+            foreach (string name in this.prompts.Keys) {
+                if (remaining.Contains(name)) remaining.Remove(name);
+                else missing.Add(name);
+            }
+            if (remaining.Count > 0 || missing.Count > 0)
+                throw new Exception("Blackboard's parser grammer has prompts which do not match prompt handlers.").
+                    With("Not handled", string.Join(", ", remaining)).
+                    With("Not in grammer", string.Join(", ", missing));
         }
 
         #endregion
@@ -144,57 +168,74 @@ namespace Blackboard.Parser {
 
         /// <summary>Pushes a new node or stack item onto the stack.</summary>
         /// <param name="value">The value to push.</param>
-        private void push(object value) => this.stack.AddLast(value);
+        private void push(StackItem value) => this.stack.AddLast(value);
 
         /// <summary>Pops one or more values off the stack of nodes.</summary>
         /// <param name="count">The number of nodes to pop.</param>
         /// <returns>The popped nodes in the order oldest to newest.</returns>
         private INode[] popNode(int count = 1) {
             INode[] nodes = new INode[count];
-            for (int i = 0; i < count; i++) {
-                nodes[count-1-i] = this.stack.Last.Value as INode;
-                this.stack.RemoveLast();
-            }
+            for (int i = 0; i < count; i++)
+                nodes[count-1-i] = this.pop<NodeItem>().Node;
             return nodes;
         }
 
         /// <summary>Pops off whatever is on the top of the stack.</summary>
         /// <returns>The value which was on top of the stack.</returns>
-        private object pop() {
-            object value = this.stack.Last.Value;
+        private StackItem pop() {
+            StackItem item = this.stack.Last.Value;
             this.stack.RemoveLast();
-            return value;
+            return item;
         }
 
-        /// <summary>Gets the scope upto the last name in the given identifier.</summary>
-        /// <param name="id">The identifier to get the scope from.</param>
-        /// <param name="createMissing">Indicates that if a group doesn't exist, it should be added.</param>
-        /// <returns>The scope or null if that pass doesn't exist or exists not as a namespace group.</returns>
-        private INamespace scope(Identifier id, bool createMissing) {
-            INamespace scope = this.driver.Nodes;
-            for (int i = 0; i < id.Count - 1; i++) {
-                string name = id[i];
-                INamed node = scope.Find(name);
-                if (node is null) {
-                    if (createMissing) scope = new Group(name, scope);
-                    else return null;
-                } else if (node is INamespace subscope) scope = subscope;
-                else return null;
+        /// <summary>Pops off whatever is on the top of the stack.</summary>
+        /// <typeparam name="T">The type of the object expected to be popped off the stack.</typeparam>
+        /// <returns>The value which was on top of the stack.</returns>
+        private T pop<T>() where T : StackItem {
+            StackItem item = this.pop();
+            return item is T result ? result :
+                throw Exception.UnexpectedItemOnTheStack(item.ToString(), typeof(T).FullName);
+        }
+
+        /// <summary>This determines the object at the given identifier and receiver.</summary>
+        /// <remarks>This will check all the scopes for a match if the receiver is null.</remarks>
+        /// <param name="id">The identifier to follow.</param>
+        /// <returns>The object pointed to by this identifier.</returns>
+        private object followIdentifier(Identifier id) {
+            string text = id.Id;
+            if (id.Receiver is null) {
+                foreach (Namespace scope in this.scopeStack) {
+                    if (scope.ContainsKey(text)) return scope[text];
+                }
+
+                throw new Exception("Identifier not found in any scope.").
+                    With("Identifier", id).
+                    With("Loaction", id.Location);
             }
-            return scope;
+
+            if (id.Receiver is not Namespace space)
+                throw new Exception("The receiver for the identifier is not a namespace.").
+                    With("Identifier", text).
+                    With("Loaction", id.Location).
+                    With("Receiver", id.Receiver);
+
+            if (!space.ContainsKey(text))
+                throw new Exception("The receiver namespace does not contain the identifier.").
+                    With("Identifier", text).
+                    With("Loaction", id.Location).
+                    With("Receiver", id.Receiver);
+
+            // Read object off of namespace at this id.
+            return space[text];
         }
 
-        /// <summary>Finds the node at the given id.</summary>
-        /// <param name="id">The identifier to find the node for.</param>
-        /// <returns>The found node or null if not found.</returns>
-        private INode find(Identifier id) => this.scope(id, false)?.Find(id[^1]);
-        
+        /*
         /// <summary>Creates a new input value node or trigger.</summary>
         /// <param name="loc">The location this assignment was written at.</param>
         /// <param name="typeText">The type of the input node to create.</param>
         /// <param name="id">The identifier of the input node to create.</param>
         /// <param name="node">This is the value to initialize the input node with, may be null to use a default value.</param>
-        private void createInputValue(PP.Scanner.Location loc, string typeText, Identifier id, INode node) {
+        private void createInputValue(PP.Scanner.Location loc, string typeText, Identifier id, INode value) {
             INamespace scope = this.scope(id, true);
             if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
                     "so it can not be used as a scope for an assigned input variable at " + loc + ".");
@@ -204,13 +245,15 @@ namespace Blackboard.Parser {
                     "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
             
             INode _ =
-                typeText == "bool" ?   new InputValue<bool>(  name, scope, Cast.AsBoolValue(   node)) :
-                typeText == "int"?     new InputValue<int>(   name, scope, Cast.AsIntValue(    node)) :
-                typeText == "double"?  new InputValue<double>(name, scope, Cast.AsDoubleValue( node)) :
-                typeText == "trigger"? new InputTrigger(      name, scope, Cast.AsTriggerValue(node)) :
+                typeText == "bool" ?   new InputValue<bool>(  name, scope, Cast.AsBoolValue(   value)) :
+                typeText == "int"?     new InputValue<int>(   name, scope, Cast.AsIntValue(    value)) :
+                typeText == "double"?  new InputValue<double>(name, scope, Cast.AsDoubleValue( value)) :
+                typeText == "trigger"? new InputTrigger(      name, scope, Cast.AsTriggerValue(value)) :
                 throw new Exception("Unknown type: " + typeText);
         }
+        */
 
+        /*
         /// <summary>Defines an output value node or a constant value.</summary>
         /// <param name="loc">The location this defition was written at.</param>
         /// <param name="typeText">The type of the value to define.</param>
@@ -243,7 +286,9 @@ namespace Blackboard.Parser {
                         " with " + Cast.TypeName(node) + " at " + id.Location + ".");
             }
         }
+        */
 
+        /*
         /// <summary>This will try to provoke a trigger.</summary>
         /// <param name="loc">The location this provoke was written at.</param>
         /// <param name="id">The identifier of the value to provoke.</param>
@@ -255,52 +300,121 @@ namespace Blackboard.Parser {
                 throw new Exception("May only provoke an input trigger. " + id + " is not an input trigger at " + loc + ".");
             trigger.Trigger();
         }
+        */
 
         #endregion
         #region Handlers...
 
         /// <summary>This is called before each statement to prepare and clean up the parser.</summary>
         /// <param name="args">The token information from the parser.</param>
-        private void handleClean(PP.ParseTree.PromptArgs args) {
+        private void handleClear(PP.ParseTree.PromptArgs args) {
             args.Tokens.Clear();
-            this.stack.Clear(); // Should be already clear.
+            this.stack.Clear();
+            this.reduceNodes = false;
+        }
 
-            this.isDefine = false;
-            this.typeText = undefinedType;
+        /// <summary>This is called when a new typed input is started.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleStartNewTypedInput(PP.ParseTree.PromptArgs args) {
+            this.reduceNodes = true;
         }
 
         /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputNoAssign(PP.ParseTree.PromptArgs args) {
-            PP.Scanner.Location loc = args.Tokens[^1].End;
-            Identifier id = this.pop() as Identifier;
-            this.createInputValue(loc, this.typeText, id, null);
+            Identifier id = this.pop<Identifier>();
+            TypeItem typeItem = this.pop<TypeItem>();
+
+            // Unless the identifier has a receiver, add the new input node to the current namespace scope.
+            object receiver = id.Receiver ?? this.scopeStack.First.Value;
+            if (receiver is not Namespace)
+                throw new Exception("The receiver for a new input node must be a namespace.").
+                     With("Receiver",   id.Receiver).
+                     With("Identifier", id.Id).
+                     With("Location",   id.Location);
+
+            Namespace scope = receiver as Namespace;
+            if (scope.ContainsKey(id.Id))
+                throw new Exception("Can not create new input node. Identifier already exists in the receiver.").
+                     With("Receiver",   id.Receiver).
+                     With("Identifier", id.Id).
+                     With("Location",   id.Location);
+
+            Type t = typeItem.Type;
+            scope[id.Id] =
+                t == Type.Bool    ? new InputValue<Bool>() :
+                t == Type.Int     ? new InputValue<Int>() :
+                t == Type.Double  ? new InputValue<Double>() :
+                t == Type.String  ? new InputValue<String>() :
+                t == Type.Trigger ? new InputTrigger() :
+                throw new Exception("Unsupported type for new input").With("Type", t);
+
+            // Push the type back onto the stack for the next assignment.
+            this.push(typeItem);
         }
 
         /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputWithAssign(PP.ParseTree.PromptArgs args) {
-            PP.Scanner.Location loc = args.Tokens[^1].End;
-            INode right = this.popNode().First();
-            Identifier id = this.pop() as Identifier;
-            this.createInputValue(loc, this.typeText, id, right);
+            NodeItem valueItem = this.pop<NodeItem>();
+            Identifier id = this.pop<Identifier>();
+            TypeItem typeItem = this.pop<TypeItem>();
+
+            // Unless the identifier has a receiver, add the new input node to the current namespace scope.
+            object receiver = id.Receiver ?? this.scopeStack.First.Value;
+            if (receiver is not Namespace)
+                throw new Exception("The receiver for a new input node must be a namespace.").
+                     With("Receiver",   id.Receiver).
+                     With("Identifier", id.Id).
+                     With("Location",   id.Location);
+
+            Namespace scope = receiver as Namespace;
+            if (scope.ContainsKey(id.Id))
+                throw new Exception("Can not create new input node. Identifier already exists in the receiver.").
+                     With("Receiver",   id.Receiver).
+                     With("Identifier", id.Id).
+                     With("Location",   id.Location);
+
+            Type t = typeItem.Type;
+            INode value = t.Implicit(valueItem.Node);
+            if (value is null)
+                throw new Exception("The new input node can not be assigned the value given to it.").
+                     With("Value",      valueItem.Node).
+                     With("Type",       t).
+                     With("Receiver",   id.Receiver).
+                     With("Identifier", id.Id).
+                     With("Location",   id.Location);
+
+            scope[id.Id] =
+                t == Type.Bool    ? new InputValue<Bool>(  (value as IValue<Bool>  ).Value) :
+                t == Type.Int     ? new InputValue<Int>(   (value as IValue<Int>   ).Value) :
+                t == Type.Double  ? new InputValue<Double>((value as IValue<Double>).Value) :
+                t == Type.String  ? new InputValue<String>((value as IValue<String>).Value) :
+                t == Type.Trigger ? new InputTrigger(      (value as ITrigger      ).Provoked) :
+                throw new Exception("Unsupported type for new input").With("Type", t);
+
+            // Push the type back onto the stack for the next assignment.
+            this.push(typeItem);
         }
 
+        /*
         /// <summary>This creates a new input node and assigns it with an initial value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewVarInputWithAssign(PP.ParseTree.PromptArgs args) {
             PP.Scanner.Location loc = args.Tokens[^1].End;
             INode right = this.popNode().First();
-            Identifier id = this.pop() as Identifier;
+            Identifier id = this.pop<Identifier>();
             this.createInputValue(loc, Cast.TypeName(right), id, right);
         }
+        */
 
+        /*
         /// <summary>This assigns several existing input nodes with a new value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleAssignExisting(PP.ParseTree.PromptArgs args) {
             INode right = this.popNode().First();
             while (this.stack.Count > 0) {
-                Identifier id = this.pop() as Identifier;
+                Identifier id = this.pop<Identifier>();
                 INode left = this.find(id);
                 if (left is null) throw new Exception("Unknown input variable " + id + " at " + id.Location + ".");
                 else if (left is IValueInput<bool>   leftBool)    leftBool.   SetValue(Cast.AsBoolValue(   right));
@@ -310,17 +424,15 @@ namespace Blackboard.Parser {
                 else throw new Exception("Unable to assign to " + Cast.TypeName(left) + " at " + id.Location + ".");
             }
         }
+        */
 
-        private void handleStartDefine(PP.ParseTree.PromptArgs args) {
-            this.isDefine = true;
-        }
-
+        /*
         /// <summary>This handles defining a new typed output node.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleTypeDefine(PP.ParseTree.PromptArgs args) {
             PP.Scanner.Location loc = args.Tokens[^1].End;
             INode right = this.popNode().First();
-            Identifier id = this.pop() as Identifier;
+            Identifier id = this.pop<Identifier>();
             this.defineValue(loc, this.typeText, id, right);
         }
 
@@ -329,7 +441,7 @@ namespace Blackboard.Parser {
         private void handleVarDefine(PP.ParseTree.PromptArgs args) {
             PP.Scanner.Location loc = args.Tokens[^1].End;
             INode right = this.popNode().First();
-            Identifier id = this.pop() as Identifier;
+            Identifier id = this.pop<Identifier>();
             this.defineValue(loc, Cast.TypeName(right), id, right);
         }
 
@@ -337,7 +449,7 @@ namespace Blackboard.Parser {
         /// <param name="args">The token information from the parser.</param>
         private void handlePullTrigger(PP.ParseTree.PromptArgs args) {
             PP.Scanner.Location loc = args.Tokens[^1].End;
-            Identifier id = this.pop() as Identifier;
+            Identifier id = this.pop<Identifier>();
             this.provokeTrigger(loc, id);
         }
 
@@ -345,122 +457,192 @@ namespace Blackboard.Parser {
         /// <param name="args">The token information from the parser.</param>
         private void handleConditionalPullTrigger(PP.ParseTree.PromptArgs args) {
             PP.Scanner.Location loc = args.Tokens[^1].End;
-            Identifier id = this.pop() as Identifier;
+            Identifier id = this.pop<Identifier>();
             INode node = this.popNode().First();
             if (node is not IValue<bool> boolNode)
                 throw new Exception("May only conditionally provoke the trigger " + id + " with a bool or trigger at " + loc + ".");
             if (boolNode.Value) this.provokeTrigger(loc, id);
         }
+        */
 
+        /*
         /// <summary>This handles setting the value type.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleSetType(PP.ParseTree.PromptArgs args) =>
             this.typeText = args.Tokens[^1].Text;
+        */
+
+        /// <summary>This handles performing a type cast of a node.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleCast(PP.ParseTree.PromptArgs args) {
+        }
+
+        /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleMemberAccess(PP.ParseTree.PromptArgs args) {
+            PP.Tokenizer.Token token = args.Tokens[^1];
+            PP.Scanner.Location loc = token.End;
+            string text = token.Text;
+            Identifier left = this.pop<Identifier>();
+
+            string id = left.Id;
+            object receiver = null;
+            if (left.Receiver is null) {
+                foreach (Namespace scope in this.scopeStack) {
+                    if (scope.ContainsKey(id)) {
+                        receiver = scope[id];
+                        break;
+                    }
+                }
+                if (receiver is null)
+                    throw new Exception("Identifier not found in any scope.").
+                        With("Identifier", id).
+                        With("Loaction", left.Location);
+            } else {
+                if (left.Receiver is not Namespace scope)
+                    throw new Exception("The receiver for the identifier is not a namespace.").
+                        With("Identifier", id).
+                        With("Loaction", left.Location).
+                        With("Receiver", left.Receiver);
+                if (!scope.ContainsKey(id))
+                    throw new Exception("The receiver namespace does not contain the identifier.").
+                        With("Identifier", id).
+                        With("Loaction", left.Location).
+                        With("Receiver", left.Receiver);
+                receiver = scope[id];
+            }
+
+            this.push(new Identifier(loc, receiver, text));
+        }
 
         /// <summary>This handles preparing for a method call.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleStartCall(PP.ParseTree.PromptArgs args) {
-            PP.Scanner.Location loc = args.Tokens[^1].End;
-            Identifier id = this.pop() as Identifier;
-            this.stack.AddLast(new Call(id, loc));
+            Identifier id = this.pop<Identifier>();
+            object obj = this.followIdentifier(id);
+            if (obj is not FuncGroup func)
+                throw new Exception("Identifier was not for a function.").
+                    With("Found", obj).
+                    With("Identifier", id).
+                    With("Loaction", id.Location).
+                    With("Receiver", id.Receiver);
+            this.push(new Call(id.Location, func, id.Id));
+        }
+
+        /// <summary>This handles adding another argument to the call item.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleAddArg(PP.ParseTree.PromptArgs args) {
+            NodeItem funcArg = this.pop<NodeItem>();
+            Call call = this.pop<Call>();
+            call.Arguments.Add(funcArg.Node);
+            this.push(call);
         }
 
         /// <summary>This handles the end of a method call and creates the node for the method.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleEndCall(PP.ParseTree.PromptArgs args) {
-            PP.Scanner.Location loc = args.Tokens[^1].End;
-            Call call;
-            LinkedList<INode> inputs = new();
-            while (true) {
-                object obj = this.stack.Last.Value;
-                this.stack.RemoveLast();
-                if (obj is INode node) inputs.AddFirst(node);
-                else if (obj is Call callObj) {
-                    call = callObj;
-                    break;
-                } else throw new Exception("Expected a node or a call but got " + obj + " at " + loc+ ".");
-            }
-
-            // NOTE: Currently functions can't be namespaced, part of types, and there are no classes yet,
-            //       so simply do a lookup of the function in the dictionary of functions.
-            string name = call.Identifier.ToString();
-            INode funcNode = this.funcs.Build(name, inputs);
-            this.push(Cast.IsConstant(inputs) ? Cast.ToLiteral(funcNode) : funcNode);
+            Call call = this.pop<Call>();
+            INode[] funcArgs = call.Arguments.ToArray();
+            INode node = call.Func.Build(funcArgs);
+            if (funcArgs.IsConstant()) node = node.ToLiteral();
+            this.push(new NodeItem(call.Location, node));
         }
 
         /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handlePushId(PP.ParseTree.PromptArgs args) {
-            PP.Scanner.Location loc = args.Tokens[^1].End;
-            Identifier id = this.pop() as Identifier;
-            INode node = this.driver.Find(id);
-            if (node is null)
-                throw new Exception("Identifier " + id + " at " + loc + " is unknown.");
-            if (this.isDefine) this.push(node);
-            else {
-                INode literal = Cast.ToLiteral(node);
-                if (literal is not null) this.push(literal);
-                else throw new Exception("The identifier " + id + " can not be used in assignment at " + loc + ".");
-            }
+            PP.Tokenizer.Token token = args.Tokens[^1];
+            PP.Scanner.Location loc = token.End;
+            string text = token.Text;
+            this.push(new Identifier(loc, null, text));
         }
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handlePushBool(PP.ParseTree.PromptArgs args) {
-            string text = args.Tokens[^1].Text;
+            PP.Tokenizer.Token token = args.Tokens[^1];
+            PP.Scanner.Location loc = token.End;
+            string text = token.Text;
             try {
                 bool value = bool.Parse(text);
-                this.push(Literal.Bool(value));
+                this.push(new NodeItem(loc, Literal.Bool(value)));
             } catch (S.Exception ex) {
-                throw new Exception("Failed to parse \"" + text + "\" as a bool.", ex);
+                throw new Exception("Failed to parse a bool.", ex).
+                    With("Text", text).
+                    With("Location", loc);
             }
         }
 
         /// <summary>This handles pushing an int literal value onto the stack.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handlePushInt(PP.ParseTree.PromptArgs args) {
-            string text = args.Tokens[^1].Text;
+            PP.Tokenizer.Token token = args.Tokens[^1];
+            PP.Scanner.Location loc = token.End;
+            string text = token.Text;
             try {
                 int value = int.Parse(text);
-                this.push(Literal.Int(value));
+                this.push(new NodeItem(loc, Literal.Int(value)));
             } catch (S.Exception ex) {
-                throw new Exception("Failed to parse \""+text+"\" as a int.", ex);
+                throw new Exception("Failed to parse a decimal int.", ex).
+                    With("Text", text).
+                    With("Location", loc);
             }
         }
 
         /// <summary>This handles pushing a hexadecimal int literal value onto the stack.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handlePushHex(PP.ParseTree.PromptArgs args) {
-            string text = args.Tokens[^1].Text[2..];
+            PP.Tokenizer.Token token = args.Tokens[^1];
+            PP.Scanner.Location loc = token.End;
+            string text = token.Text[2..];
             try {
                 int value = int.Parse(text, NumberStyles.HexNumber);
-                this.push(Literal.Int(value));
+                this.push(new NodeItem(loc, Literal.Int(value)));
             } catch (S.Exception ex) {
-                throw new Exception("Failed to parse \""+text+"\" as a hex int.", ex);
+                throw new Exception("Failed to parse a hex int.", ex).
+                    With("Text", text).
+                    With("Location", loc);
             }
         }
 
         /// <summary>This handles pushing a double literal value onto the stack.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handlePushDouble(PP.ParseTree.PromptArgs args) {
-            string text = args.Tokens[^1].Text;
+            PP.Tokenizer.Token token = args.Tokens[^1];
+            PP.Scanner.Location loc = token.End;
+            string text = token.Text;
             try {
                 double value = double.Parse(text);
-                this.push(Literal.Double(value));
+                this.push(new NodeItem(loc, Literal.Double(value)));
             } catch (S.Exception ex) {
-                throw new Exception("Failed to parse \""+text+"\" as a double.", ex);
+                throw new Exception("Failed to parse a double.", ex).
+                    With("Text", text).
+                    With("Location", loc);
             }
         }
 
-        /// <summary>This handles an identifier item being added.</summary>
+        /// <summary>This handles pushing a string literal value onto the stack.</summary>
         /// <param name="args">The token information from the parser.</param>
-        private void handleStartId(PP.ParseTree.PromptArgs args) =>
-            this.stack.AddLast(new Identifier(args.Tokens[^1].Start, args.Tokens[^1].Text ));
+        private void handlePushString(PP.ParseTree.PromptArgs args) {
+            PP.Tokenizer.Token token = args.Tokens[^1];
+            PP.Scanner.Location loc = token.End;
+            string text = token.Text[1..^2];
+            this.push(new NodeItem(loc, Literal.String(text)));
+        }
 
-        /// <summary>This handles an identifier being added to the existing identifier.</summary>
+        /// <summary>This handles pushing a type onto the stack.</summary>
         /// <param name="args">The token information from the parser.</param>
-        private void handleAddId(PP.ParseTree.PromptArgs args) =>
-            (this.stack.Last.Value as Identifier).Add(args.Tokens[^1].Text);
+        private void handlePushType(PP.ParseTree.PromptArgs args) {
+            PP.Tokenizer.Token token = args.Tokens[^1];
+            PP.Scanner.Location loc = token.End;
+            string text = token.Text;
+            Type t = Type.FromName(text);
+            if (t is null)
+                throw new Exception("Unrecognized type name.").
+                    With("Text", text).
+                    With("Location", loc);
+            this.push(new TypeItem(loc, t));
+        }
 
         #endregion
     }

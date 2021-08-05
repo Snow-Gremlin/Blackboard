@@ -59,6 +59,30 @@ namespace BlackboardTests {
             Assert.AreEqual(exp, (node as IValue<String>).Value.Value);
         }
 
+        /// <summary>Checks the boolean value of this node.</summary>
+        /// <param name="node">This is the boolean node to check the type of.</param>
+        /// <param name="exp">The expected boolean value.</param>
+        static public void CheckValue(this Driver driver, bool exp, params string[] names) =>
+            Assert.AreEqual(exp, driver.GetBool(names));
+
+        /// <summary>Checks the integer value of this node.</summary>
+        /// <param name="node">This is the integer node to check the type of.</param>
+        /// <param name="exp">The expected integer value.</param>
+        static public void CheckValue(this Driver driver, int exp, params string[] names) =>
+            Assert.AreEqual(exp, driver.GetInt(names));
+
+        /// <summary>Checks the double value of this node.</summary>
+        /// <param name="node">This is the double node to check the type of.</param>
+        /// <param name="exp">The expected double value.</param>
+        static public void CheckValue(this Driver driver, double exp, params string[] names) =>
+            Assert.AreEqual(exp, driver.GetDouble(names));
+
+        /// <summary>Checks the string value of this node.</summary>
+        /// <param name="node">This is the string node to check the type of.</param>
+        /// <param name="exp">The expected string value.</param>
+        static public void CheckValue(this Driver driver, string exp, params string[] names) =>
+            Assert.AreEqual(exp, driver.GetString(names));
+
         /// <summary>Runs the driver evaluation and checks that evaluation performed as expected.</summary>
         /// <param name="driver">The driver to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>

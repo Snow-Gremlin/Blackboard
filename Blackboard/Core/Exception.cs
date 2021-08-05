@@ -23,6 +23,15 @@
 
         #region Predefined...
 
+        /// <summary>An exception for when popping off the parser stack and the item was not what was expected.</summary>
+        /// <param name="stackInfo">Information for the item which was popped off the stack.</param>
+        /// <param name="expected">Information for what was expected.</param>
+        /// <returns>The new exception.</returns>
+        static public Exception UnexpectedItemOnTheStack(string stackInfo, string expected) =>
+            new Exception("Unexpected item type on the stack.").
+                With("Found", stackInfo).
+                With("Expected", expected);
+
         /// <summary>An exception for a function which was defined with an unknown type.</summary>
         /// <param name="type">The type which is unknown.</param>
         /// <param name="typeIndex">The index of the type.</param>

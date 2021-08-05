@@ -5,14 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Parser\**" />
-    <EmbeddedResource Remove="Parser\**" />
-    <None Remove="Parser\**" />
+    <None Remove="Core\Cast.txt" />
+    <None Remove="Core\Nodes\Cast.txt" />
+    <None Remove="Parser\Parser.lang" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Core\Cast.txt" />
-    <None Remove="Core\Nodes\Cast.txt" />
+    <EmbeddedResource Include="Parser\Parser.lang" />
   </ItemGroup>
 
   <ItemGroup>

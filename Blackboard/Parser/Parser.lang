@@ -9,36 +9,36 @@
 
 # Doubles
 (Start): '.' => (Decimal);
-(Int): '.' => (Decimal): '0'..'9' => (Double-Dec): '0'..'9' => (Double-Dec) => [Double];
-(Int): 'eE' => (Double-Exp-Start): '-' => (Double-Exp-Neg): '0'..'9' => (Double-Exp);
-(Double-Dec): 'eE' => (Double-Exp-Start): '0'..'9' => (Double-Exp): '0'..'9' => (Double-Exp) => [Double];
+(Int): '.' => (Decimal): '0'..'9' => (DoubleDec): '0'..'9' => (DoubleDec) => [Double];
+(Int): 'eE' => (DoubleExpStart): '-' => (DoubleExpNeg): '0'..'9' => (DoubleExp);
+(DoubleDec): 'eE' => (DoubleExpStart): '0'..'9' => (DoubleExp): '0'..'9' => (DoubleExp) => [Double];
 
 # Hexadecimals
-(Zero): 'x' => (Hex-Start): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
+(Zero): 'x' => (HexStart): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
 
 # Identifiers
 (Start): 'a'..'z', 'A'..'Z', '_$' => (Identifier): '0'..'9', 'a'..'z', 'A'..'Z', '_' => [Identifier];
 
 # Strings
-(Start): '"' => (String-Body): '"' => [String];
-(String-Body): '\\' => (Escaped);
-(Escaped): 'x' => (Ascii-0): '0'..'9', 'a'..'f', 'A'..'F' =>
-                  (Ascii-1): '0'..'9', 'a'..'f', 'A'..'F' => (String-Body);
-(Escaped): 'u' => (Unicode-0): '0'..'9', 'a'..'f', 'A'..'F' =>
-                  (Unicode-1): '0'..'9', 'a'..'f', 'A'..'F' =>
-                  (Unicode-2): '0'..'9', 'a'..'f', 'A'..'F' =>
-                  (Unicode-3): '0'..'9', 'a'..'f', 'A'..'F' => (String-Body);
-(Escaped): * => (String-Body);
+(Start): '"' => (StringBody): '"' => [String];
+(StringBody): '\\' => (Escaped);
+(Escaped): 'x' => (Ascii_0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                  (Ascii_1): '0'..'9', 'a'..'f', 'A'..'F' => (StringBody);
+(Escaped): 'u' => (Unicode_0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                  (Unicode_1): '0'..'9', 'a'..'f', 'A'..'F' =>
+                  (Unicode_2): '0'..'9', 'a'..'f', 'A'..'F' =>
+                  (Unicode_3): '0'..'9', 'a'..'f', 'A'..'F' => (StringBody);
+(Escaped): * => (StringBody);
 
 # Symbols
-(Start): '&' => [And]: '&' => [Logical-And];
-(Start): '|' => [Or]: '|' => [Logical-Or];
+(Start): '&' => [And]: '&' => [LogicalAnd];
+(Start): '|' => [Or]: '|' => [LogicalOr];
 (Start): '+' => [Pos];
 (Start): '-' => [Neg]: '>' => [Trigger];
 (Start): '/' => [Div];
 (Start): '*' => [Mul]: '*' => [Power];
 (Start): '%' => [Mod]: '%' => [Remainder];
-(Start): '^' => [Xor]: '^' => [Logical-Xor];
+(Start): '^' => [Xor]: '^' => [LogicalXor];
 (Start): '~' => [Invert];
 (Start): '?' => [Test];
 (Start): ':' => [Else]: '=' => [Define];
@@ -46,25 +46,25 @@
 (Start): ',' => [Comma];
 (Start): '.' => [Dot];
 
-(Start): '(' => [Par-Open];
-(Start): ')' => [Par-Close];
-(Start): '[' => [Sqr-Open];
-(Start): ']' => [Sqr-Close];
-(Start): '{' => [Curl-Open];
-(Start): '}' => [Curl-Close];
+(Start): '(' => [ParOpen];
+(Start): ')' => [ParClose];
+(Start): '[' => [SqrOpen];
+(Start): ']' => [SqrClose];
+(Start): '{' => [CurlOpen];
+(Start): '}' => [CurlClose];
 
 (Start): '=' => [Assign]:  '=' => [Equal];
-(Start): '>' => [Greater]: '=' => [Greater-Equal];
-(Start): '<' => [Less]:    '=' => [Less-Equal];
-(Start): '!' => [Not]:     '=' => [Not-Equal];
-(Greater): '>' => [Shift-Right];
-(Less):    '<' => [Shift-Left];
+(Start): '>' => [Greater]: '=' => [GreaterEqual];
+(Start): '<' => [Less]:    '=' => [LessEqual];
+(Start): '!' => [Not]:     '=' => [NotEqual];
+(Greater): '>' => [ShiftRight];
+(Less):    '<' => [ShiftLeft];
 
 # Comments
-(Div): '/' => (Comment-Single): !'\n' => (Comment-Single) => ^[Comment];
-(Div): '*' => (Comment-Multiple): '*' => (Comment-Multiple-End): '/' => (Comment-End) => ^[Comment];
-(Comment-Multiple): * => (Comment-Multiple);
-(Comment-Multiple-End): * => (Comment-Multiple);
+(Div): '/' => (CommentSingle): !'\n' => (CommentSingle) => ^[Comment];
+(Div): '*' => (CommentMultiple): '*' => (CommentMultipleEnd): '/' => (CommentEnd) => ^[Comment];
+(CommentMultiple): * => (CommentMultiple);
+(CommentMultipleEnd): * => (CommentMultiple);
 
 # Whitespace
 (Start): ' \t\n' => (Whitespace): ' \t\n' => ^[Whitespace];
@@ -73,175 +73,167 @@
 [Identifier] = 'true', 'false' => [Bool];
 [Identifier] = 'namespace' => [Namespace];
 
-[Identifier] = 'in'      => [Declare-In];
-[Identifier] = 'get'     => [Declare-Get];
-[Identifier] = 'const'   => [Declare-Const];
-[Identifier] = 'counter' => [Declare-Counter];
-[Identifier] = 'latch'   => [Declare-Latch];
-[Identifier] = 'toggle'  => [Declare-Toggle];
+[Identifier] = 'in'      => [DeclareIn];
+[Identifier] = 'get'     => [DeclareGet];
+[Identifier] = 'const'   => [DeclareConst];
+[Identifier] = 'counter' => [DeclareCounter];
+[Identifier] = 'latch'   => [DeclareLatch];
+[Identifier] = 'toggle'  => [DeclareToggle];
 
-[Identifier] = 'bool'    => [Type-Bool];
-[Identifier] = 'int'     => [Type-Int];
-[Identifier] = 'double'  => [Type-Double];
-[Identifier] = 'string'  => [Type-String];
-[Identifier] = 'trigger' => [Type-Trigger];
+[Identifier] = 'bool'    => [TypeBool];
+[Identifier] = 'int'     => [TypeInt];
+[Identifier] = 'double'  => [TypeDouble];
+[Identifier] = 'string'  => [TypeString];
+[Identifier] = 'trigger' => [TypeTrigger];
 
 # Reserved Identifiers (Keeping options open for future versions)
 [Identifier] = 'byte', 'char', 'enum', 'float', 'int8', 'int16', 'int32', 'int64',
                'list', 'long', 'map', 'set', 'short', 'struct', 'type', 'uint',
-               'uint8', 'uint16', 'uint32', 'uint64', 'ulong', 'ushort', 'var' => [Reserved-Types];
+               'uint8', 'uint16', 'uint32', 'uint64', 'ulong', 'ushort', 'var' => [ReservedTypes];
 
 [Identifier] = 'internal', 'global', 'local',
-               'private', 'protected', 'public', 'static' => [Reserved-Scoping];
+               'private', 'protected', 'public', 'static' => [ReservedScoping];
 
 [Identifier] = 'abstract', 'class', 'def', 'define', 'func', 'interface', 'operator',
-               'override', 'typedef', 'void', 'virtual' => [Reserved-Definitions];
+               'override', 'typedef', 'void', 'virtual' => [ReservedDefinitions];
 
 [Identifier] = 'as', 'break', 'catch', 'case', 'continue', 'default', 'else',
                'finally', 'go', 'if', 'import', 'intersect', 'is', 'out', 'return', 'select',
-               'switch', 'then', 'try', 'typeof', 'union', 'using', 'when', 'yield' => [Reserved-Constructs];
+               'switch', 'then', 'try', 'typeof', 'union', 'using', 'when', 'yield' => [ReservedConstructs];
 
 [Identifier] = 'complex', 'do', 'dynamic', 'for', 'foreach', 'goto',
-               'label', 'null', 'readonly', 'sealed', 'until', 'while' => [Reserved-Unsupported];
+               'label', 'null', 'readonly', 'sealed', 'until', 'while' => [ReservedUnsupported];
 
 #==========================================================
 # Grammar Rules
 
 > <Code> := _
-    | {Clean} <Statement> <Code>;
+    | {clear} <Statement> [End] <Code>;
 
 <Statement> := _
-    | <Namespace>
-    | <New-Typed-Input>
-    | <New-Var-Input>
-#    | <Assign-Existing>
-#    | <Define-Typed-Rule>
-#    | <Define-Var-Rule>
-#    | <Pull-Trigger>
+#    | <Namespace>
+    | <NewTypedInput>
+#    | <NewVarInput>
+#    | <AssignExisting>
+#    | <DefineTypedRule>
+#    | <DefineVarRule>
+#    | <PullTrigger>
     ;
+   
+#----------------------------------------------------------
+
+###<Namespace> := [Namespace] <CreateNamespacedId> {pushNamespace} [CurlOpen] <Code> [CurlClose] {popNamespace};
 
 #----------------------------------------------------------
 
-<Namespace> := [Namespace] <Create-Namespaced-Id> {Push-Namespace} [Curl-Open] <Code> [Curl-Close] {Pop-Namespace};
-    | [Namespace] <Create-Namespaced-Id> [End];
+<NewTypedInput> := [DeclareIn] <AnyBaseType> {startNewTypedInput} <NewTypedInputPart> <NewTypedInputTail>;
+
+<NewTypedInputTail> := _
+    | [Comma] <NewTypedInputPart> <NewTypedInputTail>;
+
+<NewTypedInputPart> := [Identifier] {pushId} {newTypeInputNoAssign}
+    | [Identifier] {pushId} [Assign] <Conditional> {newTypeInputWithAssign};
 
 #----------------------------------------------------------
 
-<New-Typed-Input> := [Declare-In] <Any-Type> <New-Typed-Input-Part> <New-Typed-Input-Tail> [End];
-
-<New-Typed-Input-Tail> := _
-    | [Comma] <New-Typed-Input-Part> <New-Typed-Input-Tail>;
-
-<New-Typed-Input-Part> := <Create-Namespaced-Id> {New-Type-Input-No-Assign}
-    | <Create-Namespaced-Id> [Assign] <Conditional> {New-Type-Input-With-Assign};
-
-#----------------------------------------------------------
-
-<New-Var-Input> := [Declare-In] <New-Var-Input-Part> <New-Var-Input-Tail> [End];
-
-<New-Var-Input-Tail> := _
-    | [Comma] <New-Var-Input-Part> <New-Var-Input-Tail>;
-
-<New-Var-Input-Part> := <Create-Namespaced-Id> [Assign] <Conditional> {New-Var-Input-With-Assign};
-
-#----------------------------------------------------------
-
-###<Assign-Existing> := <Id> <Assign-Existing-More> [Assign] <Conditional> {Assign-Existing};
+###<NewVarInput> := [DeclareIn] <NewVarInputPart> <NewVarInputTail> [End];
 ###
-###<Assign-Existing-More> := _
-###    | [Assign] <Id> <Assign-Existing-More>;
+###<NewVarInputTail> := _
+###    | [Comma] <NewVarInputPart> <NewVarInputTail>;
 ###
-###<Define-Typed-Rule> := {Start-Define} [Type] {Set-Type} <Id> [Define] <Conditional> {Type-Define};
-###
-###<Define-Var-Rule> := {Start-Define} <Id> [Define] <Conditional> {Var-Define};
-###
-###<Pull-Trigger> := [Trigger] <Id> {Pull-Trigger}
-###    | <Conditional> [Trigger] <Id> {Conditional-Pull-Trigger};
+###<NewVarInputPart> := [Identifier] [Assign] <Conditional> {newVarInputWithAssign};
 
 #----------------------------------------------------------
 
-<Create-Namespaced-Id> := [Identifier] {Create-Id-Start} <Create-Namespaced-Id-Tail>;
-
-<Create-Namespaced-Id-Tail> := _
-    | [Dot] [Identifier] {Member-Create} <Create-Namespaced-Id-Tail>;
+###<AssignExisting> := <Id> <AssignExistingMore> [Assign] <Conditional> {assignExisting};
+###
+###<AssignExistingMore> := _
+###    | [Assign] <Id> <AssignExistingMore>;
+###
+###<DefineTypedRule> := {startDefine} [Type] {setType} <Id> [Define] <Conditional> {typeDefine};
+###
+###<DefineVarRule> := {startDefine} <Id> [Define] <Conditional> {varDefine};
+###
+###<PullTrigger> := [Trigger] <Id> {pullTrigger}
+###    | <Conditional> [Trigger] <Id> {conditionalPullTrigger};
     
 #==========================================================
 
-<Conditional> := <Logical-Or>
-    | <Conditional> [Test] <Conditional> [Else] <Conditional> {Trinary};
+<Conditional> := <LogicalOr>
+    | <Conditional> [Test] <Conditional> [Else] <Conditional> {trinary};
 
-<Logical-Or> := <Logical-Xor>
-    | <Logical-Or> [Logical-Or] <Logical-Xor> {Logical-Or};
+<LogicalOr> := <LogicalXor>
+    | <LogicalOr> [LogicalOr] <LogicalXor> {logicalOr};
     
-<Logical-Xor> := <Logical-And>
-    | <Logical-Xor> [Logical-Xor] <Logical-And> {Logical-Xor};
+<LogicalXor> := <LogicalAnd>
+    | <LogicalXor> [LogicalXor] <LogicalAnd> {logicalXor};
 
-<Logical-And> := <Equality>
-    | <Logical-And> [Logical-And] <Equality> {Logical-And};
+<LogicalAnd> := <Equality>
+    | <LogicalAnd> [LogicalAnd] <Equality> {logicalAnd};
 
 <Equality> := <Relational>
-    | <Equality> [Equal]     <Relational> {Equal}
-    | <Equality> [Not-Equal] <Relational> {Not-Equal};
+    | <Equality> [Equal]    <Relational> {equal}
+    | <Equality> [NotEqual] <Relational> {notEqual};
 
-<Relational> := <Bitwise-Or>
-    | <Relational> [Greater]       <Bitwise-Or> {Greater}
-    | <Relational> [Less]          <Bitwise-Or> {Less}
-    | <Relational> [Greater-Equal] <Bitwise-Or> {Greater-Equal}
-    | <Relational> [Less-Equal]    <Bitwise-Or> {Less-Equal};
+<Relational> := <BitwiseOr>
+    | <Relational> [Greater]      <BitwiseOr> {greater}
+    | <Relational> [Less]         <BitwiseOr> {less}
+    | <Relational> [GreaterEqual] <BitwiseOr> {greaterEqual}
+    | <Relational> [LessEqual]    <BitwiseOr> {lessEqual};
 
-<Bitwise-Or> := <Bitwise-Xor>
-    | <Bitwise-Or> [Or] <Bitwise-Xor> {Or};
+<BitwiseOr> := <BitwiseXor>
+    | <BitwiseOr> [Or] <BitwiseXor> {or};
     
-<Bitwise-Xor> := <Bitwise-And>
-    | <Bitwise-Xor> [Xor] <Bitwise-And> {Xor};
+<BitwiseXor> := <BitwiseAnd>
+    | <BitwiseXor> [Xor] <BitwiseAnd> {xor};
 
-<Bitwise-And> := <Bitwise-Shift>
-    | <Bitwise-And> [And] <Bitwise-Shift> {And};
+<BitwiseAnd> := <BitwiseShift>
+    | <BitwiseAnd> [And] <BitwiseShift> {and};
 
-<Bitwise-Shift> := <Additive>
-    | <Bitwise-Shift> [Shift-Right] <Additive> {Shift-Right}
-    | <Bitwise-Shift> [Shift-Left]  <Additive> {Shift-Left};
+<BitwiseShift> := <Additive>
+    | <BitwiseShift> [ShiftRight] <Additive> {shiftRight}
+    | <BitwiseShift> [ShiftLeft]  <Additive> {shiftLeft};
 
 <Additive> := <Multiplicative>
-    | <Additive> [Pos] <Multiplicative> {Sum}
-    | <Additive> [Neg] <Multiplicative> {Subtract};
+    | <Additive> [Pos] <Multiplicative> {sum}
+    | <Additive> [Neg] <Multiplicative> {subtract};
 
 <Multiplicative> := <Unary>
-    | <Multiplicative> [Mul]       <Exponent> {Multiply}
-    | <Multiplicative> [Div]       <Exponent> {Divide}
-    | <Multiplicative> [Mod]       <Exponent> {Modulo}
-    | <Multiplicative> [Remainder] <Exponent> {Remainder};
+    | <Multiplicative> [Mul]       <Exponent> {multiply}
+    | <Multiplicative> [Div]       <Exponent> {divide}
+    | <Multiplicative> [Mod]       <Exponent> {modulo}
+    | <Multiplicative> [Remainder] <Exponent> {remainder};
 
 <Exponent> := <Unary>
-    | <Exponent> [Power] <Unary> {Power};
+    | <Exponent> [Power] <Unary> {power};
 
 <Unary> := <Expression>
-    | [Neg]    <Expression> {Negate}
-    | [Not]    <Expression> {Not}
+    | [Neg]    <Expression> {negate}
+    | [Not]    <Expression> {not}
     | [Pos]    <Expression>
-    | [Invert] <Expression> {Invert}
-    | [Par-Open] <Any-Type> [Par-Close] <Expression> {Cast};
+    | [Invert] <Expression> {invert}
+    | [ParOpen] <AnyBaseType> [ParClose] <Expression> {cast};
 
 <Expression> := <Value>
-    | [Par-Open] <Conditional> [Par-Close]
-    | <Expression> [Par-Open] {Start-Args} <Args> [Par-Close] {Call}
-    | <Expression> [Dot] <Value> {Member-Access};
+    | [ParOpen] <Conditional> [ParClose]
+    | <Expression> [Dot] [Identifier] {memberAccess}
+    | <Expression> [ParOpen] {startCall} <Args> [ParClose] {endCall};
 
 <Args> := _
-    | <Conditional> {Add-Arg} <Args-Tail>;
+    | <Conditional> {addArg} <ArgsTail>;
 
-<Args-Tail> := _
-    | [Comma] <Conditional> {Add-Arg} <Args-Tail>;
+<ArgsTail> := _
+    | [Comma] <Conditional> {addArg} <ArgsTail>;
 
-<Value> := [Identifier] {Push-Id}
-    | [Bool] {Push-Bool}
-    | [Int] {Push-Int}
-    | [Hex] {Push-Hex}
-    | [Double] {Push-Double}
-    | [String] {Push-String};
+<Value> := [Identifier] {pushId}
+    | [Bool]   {pushBool}
+    | [Int]    {pushInt}
+    | [Hex]    {pushHex}
+    | [Double] {pushDouble}
+    | [String] {pushString};
 
-<Any-Type> := [Type-Bool] {Push-Type}
-    | [Type-Int] {Push-Type}
-    | [Type-Double] {Push-Type}
-    | [Type-String] {Push-Type}
-    | [Type-Trigger] {Push-Type};
+<AnyBaseType> := [TypeBool] {pushType}
+    | [TypeInt]     {pushType}
+    | [TypeDouble]  {pushType}
+    | [TypeString]  {pushType}
+    | [TypeTrigger] {pushType};

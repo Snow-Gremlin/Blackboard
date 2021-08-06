@@ -8,10 +8,23 @@ namespace BlackboardTests.ParserTests {
 
     [TestClass]
     public class ParserTests {
-        
+
         //static private void checkException(S.Action hndl, string exp) =>
         //  Assert.AreEqual(Assert.ThrowsException<Exception>(hndl).Message, exp);
 
+        [TestMethod]
+        public void TestBasicParses_Input() {
+            Driver driver = new();
+            Parser parser = new(driver);
+            parser.Read(
+                "in int A = 2, B = 3;",
+                "in bool C = true;");
+            driver.CheckValue(2, "A");
+            driver.CheckValue(3, "B");
+            driver.CheckValue(true, "C");
+        }
+
+        /*
         [TestMethod]
         public void TestBasicParses_IntIntSum() {
             Driver driver = new();
@@ -36,6 +49,7 @@ namespace BlackboardTests.ParserTests {
             driver.CheckValue(1, "B");
             driver.CheckValue(8, "C");
         }
+        */
 
         /*
         [TestMethod]

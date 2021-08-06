@@ -73,6 +73,8 @@ namespace Blackboard.Parser {
         private void initPrompts() {
             this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>() {
                 { "clear",              this.handleClear },
+                { "pushNamespace",      this.handlePushNamespace },
+                { "popNamespace",       this.handlePopNamespace },
                 { "startNewTypedInput", this.handleStartNewTypedInput },
 
                 { "newTypeInputNoAssign",   this.handleNewTypeInputNoAssign },
@@ -193,40 +195,17 @@ namespace Blackboard.Parser {
         /// <returns>The value which was on top of the stack.</returns>
         private T pop<T>() where T : StackItem {
             StackItem item = this.pop();
-            return item is T result ? result :
-                throw Exception.UnexpectedItemOnTheStack(item.ToString(), typeof(T).FullName);
-        }
+            if (item is not T && item is Identifier) {
+                
+                // TODO:: Unwrap an Identifier.
 
-        /// <summary>This determines the object at the given identifier and receiver.</summary>
-        /// <remarks>This will check all the scopes for a match if the receiver is null.</remarks>
-        /// <param name="id">The identifier to follow.</param>
-        /// <returns>The object pointed to by this identifier.</returns>
-        private object followIdentifier(Identifier id) {
-            string text = id.Id;
-            if (id.Receiver is null) {
-                foreach (Namespace scope in this.scopeStack) {
-                    if (scope.ContainsKey(text)) return scope[text];
-                }
 
-                throw new Exception("Identifier not found in any scope.").
-                    With("Identifier", id).
-                    With("Loaction", id.Location);
+
             }
 
-            if (id.Receiver is not Namespace space)
-                throw new Exception("The receiver for the identifier is not a namespace.").
-                    With("Identifier", text).
-                    With("Loaction", id.Location).
-                    With("Receiver", id.Receiver);
 
-            if (!space.ContainsKey(text))
-                throw new Exception("The receiver namespace does not contain the identifier.").
-                    With("Identifier", text).
-                    With("Loaction", id.Location).
-                    With("Receiver", id.Receiver);
-
-            // Read object off of namespace at this id.
-            return space[text];
+            return item is T result ? result :
+                throw Exception.UnexpectedItemOnTheStack(item.ToString(), typeof(T).FullName);
         }
 
         /*
@@ -311,6 +290,20 @@ namespace Blackboard.Parser {
             args.Tokens.Clear();
             this.stack.Clear();
             this.reduceNodes = false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handlePushNamespace(PP.ParseTree.PromptArgs args) {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handlePopNamespace(PP.ParseTree.PromptArgs args) {
         }
 
         /// <summary>This is called when a new typed input is started.</summary>
@@ -475,6 +468,12 @@ namespace Blackboard.Parser {
         /// <summary>This handles performing a type cast of a node.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleCast(PP.ParseTree.PromptArgs args) {
+            NodeItem right = this.pop<NodeItem>();
+            Identifier left = this.pop<Identifier>();
+
+
+
+
         }
 
         /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>
@@ -482,50 +481,31 @@ namespace Blackboard.Parser {
         private void handleMemberAccess(PP.ParseTree.PromptArgs args) {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
-            string text = token.Text;
+            string id = token.Text;
             Identifier left = this.pop<Identifier>();
 
-            string id = left.Id;
-            object receiver = null;
-            if (left.Receiver is null) {
-                foreach (Namespace scope in this.scopeStack) {
-                    if (scope.ContainsKey(id)) {
-                        receiver = scope[id];
-                        break;
-                    }
-                }
-                if (receiver is null)
-                    throw new Exception("Identifier not found in any scope.").
-                        With("Identifier", id).
-                        With("Loaction", left.Location);
-            } else {
-                if (left.Receiver is not Namespace scope)
-                    throw new Exception("The receiver for the identifier is not a namespace.").
-                        With("Identifier", id).
-                        With("Loaction", left.Location).
-                        With("Receiver", left.Receiver);
-                if (!scope.ContainsKey(id))
-                    throw new Exception("The receiver namespace does not contain the identifier.").
-                        With("Identifier", id).
-                        With("Loaction", left.Location).
-                        With("Receiver", left.Receiver);
-                receiver = scope[id];
-            }
+            if (left.Value is not Namespace scope)
+                throw new Exception("The receiver for the identifier is not a namespace.").
+                    With("Receiver", left.Id).
+                    With("Identifier", id).
+                    With("Loaction", left.Location);
 
-            this.push(new Identifier(loc, receiver, text));
+            object value = scope.ContainsKey(id) ? scope[id] : null;
+            this.push(new Identifier(loc, left.Id + "." + id, value));
         }
 
         /// <summary>This handles preparing for a method call.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleStartCall(PP.ParseTree.PromptArgs args) {
             Identifier id = this.pop<Identifier>();
-            object obj = this.followIdentifier(id);
+            object obj = id.Value;
+
             if (obj is not FuncGroup func)
                 throw new Exception("Identifier was not for a function.").
                     With("Found", obj).
-                    With("Identifier", id).
-                    With("Loaction", id.Location).
-                    With("Receiver", id.Receiver);
+                    With("Identifier", id.Id).
+                    With("Loaction", id.Location);
+
             this.push(new Call(id.Location, func, id.Id));
         }
 
@@ -554,7 +534,15 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
-            this.push(new Identifier(loc, null, text));
+
+            foreach (Namespace scope in this.scopeStack) {
+                if (scope.ContainsKey(text)) {
+                    this.push(new Identifier(loc, text, scope[text]));
+                    return;
+                }
+            }
+
+            this.push(new Identifier(loc, text, null));
         }
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>

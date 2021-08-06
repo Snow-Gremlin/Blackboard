@@ -4,7 +4,7 @@ using PetiteParser.Scanner;
 namespace Blackboard.Parser.StackItems {
 
     /// <summary>The stack item for storing a node.</summary>
-    sealed public class NodeItem: StackItem {
+    sealed internal class NodeItem: StackItem {
 
         /// <summary>The node being stored.</summary>
         public readonly INode Node;

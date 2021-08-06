@@ -111,7 +111,7 @@
     | {clear} <Statement> [End] <Code>;
 
 <Statement> := _
-#    | <Namespace>
+    | <Namespace>
     | <NewTypedInput>
 #    | <NewVarInput>
 #    | <AssignExisting>
@@ -122,7 +122,7 @@
    
 #----------------------------------------------------------
 
-###<Namespace> := [Namespace] <CreateNamespacedId> {pushNamespace} [CurlOpen] <Code> [CurlClose] {popNamespace};
+<Namespace> := [Namespace] [Identifier] {pushNamespace} [CurlOpen] <Code> [CurlClose] {popNamespace};
 
 #----------------------------------------------------------
 

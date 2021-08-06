@@ -4,7 +4,7 @@ using PetiteParser.Scanner;
 namespace Blackboard.Parser.StackItems {
 
     /// <summary>The stack item for storing a type.</summary>
-    sealed public class TypeItem: StackItem {
+    sealed internal class TypeItem: StackItem {
 
         /// <summary>The type being stored.</summary>
         public readonly Type Type;

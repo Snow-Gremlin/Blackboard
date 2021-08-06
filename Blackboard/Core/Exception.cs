@@ -17,7 +17,7 @@
         /// <param name="value">The value for the additional data.</param>
         /// <returns>This exception so that these calls can be chained.</returns>
         public Exception With(string key, object value) {
-            this.Data.Add(key, value);
+            this.Data.Add(key, value?.ToString() ?? "null");
             return this;
         }
 

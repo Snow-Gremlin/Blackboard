@@ -3,7 +3,7 @@
 namespace Blackboard.Parser.StackItems {
 
     /// <summary>The base class for all stack items.</summary>
-    public abstract class StackItem {
+    internal abstract class StackItem {
 
         /// <summary>The location for this stack item.</summary>
         public readonly Location Location;

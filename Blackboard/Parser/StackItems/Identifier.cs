@@ -2,22 +2,22 @@
 
 namespace Blackboard.Parser.StackItems {
 
-    /// <summary>The stack item for an identifier.</summary>
-    sealed public class Identifier: StackItem {
+    /// <summary>The stack item for a stored identifier.</summary>
+    sealed internal class Identifier: StackItem {
 
-        /// <summary>The receiver object, usually a namespace.</summary>
-        public readonly object Receiver;
-
-        /// <summary>The identifier to apply to the receiver.</summary>
+        /// <summary>The identifier to apply to a receiver or scope.</summary>
         public readonly string Id;
+
+        /// <summary>The value found at this identifier or null if nothing found.</summary>
+        public readonly object Value;
 
         /// <summary>Creates a new identifier.</summary>
         /// <param name="loc">The location of the id.</param>
-        /// <param name="receiver">The receiver object for the id.</param>
         /// <param name="id">The identifier to apply to the receiver.</param>
-        public Identifier(Location loc, object receiver, string id): base(loc) {
-            this.Receiver = receiver;
+        /// <param name="value">The value found at this identifier or null.</param>
+        public Identifier(Location loc, string id, object value): base(loc) {
             this.Id = id;
+            this.Value = value;
         }
 
         /// <summary>The string for this stack item.</summary>

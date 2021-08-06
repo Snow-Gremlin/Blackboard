@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Blackboard.Parser.StackItems {
 
     /// <summary>A stack item for a method call.</summary>
-    sealed public class Call: StackItem {
+    sealed internal class Call: StackItem {
 
         /// <summary>This is the function group to call.</summary>
         public readonly FuncGroup Func;

@@ -24,8 +24,10 @@ namespace Blackboard.Core {
         public object Find(IEnumerable<string> names) {
             object cur = this;
             foreach (string name in names) {
-                if (cur is Namespace scope) cur = scope[name];
-                else return null;
+                if (cur is Namespace scope) {
+                    if (!scope.ContainsKey(name)) return null;
+                    cur = scope[name];
+                } else return null;
             }
             return cur;
         }

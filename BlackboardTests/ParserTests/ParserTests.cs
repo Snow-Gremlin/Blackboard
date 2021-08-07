@@ -18,10 +18,15 @@ namespace BlackboardTests.ParserTests {
             Parser parser = new(driver);
             parser.Read(
                 "in int A = 2, B = 3;",
-                "in bool C = true;");
+                "in bool C = true;",
+                "",
+                "namespace D {",
+                "   in double E = 3.14;",
+                "}");
             driver.CheckValue(2, "A");
             driver.CheckValue(3, "B");
             driver.CheckValue(true, "C");
+            driver.CheckValue(3.14, "D", "E");
         }
 
         /*

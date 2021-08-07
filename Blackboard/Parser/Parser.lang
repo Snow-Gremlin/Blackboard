@@ -108,10 +108,10 @@
 # Grammar Rules
 
 > <Code> := _
+    | {clear} [Namespace] [Identifier] {pushNamespace} [CurlOpen] <Code> [CurlClose] {popNamespace} <Code>
     | {clear} <Statement> [End] <Code>;
 
 <Statement> := _
-    | <Namespace>
     | <NewTypedInput>
 #    | <NewVarInput>
 #    | <AssignExisting>
@@ -119,10 +119,6 @@
 #    | <DefineVarRule>
 #    | <PullTrigger>
     ;
-   
-#----------------------------------------------------------
-
-<Namespace> := [Namespace] [Identifier] {pushNamespace} [CurlOpen] <Code> [CurlClose] {popNamespace};
 
 #----------------------------------------------------------
 
@@ -220,10 +216,10 @@
     | <Expression> [ParOpen] {startCall} <Args> [ParClose] {endCall};
 
 <Args> := _
-    | <Conditional> {addArg} <ArgsTail>;
+    | <Conditional> <ArgsTail>;
 
 <ArgsTail> := _
-    | [Comma] <Conditional> {addArg} <ArgsTail>;
+    | [Comma] <Conditional> <ArgsTail>;
 
 <Value> := [Identifier] {pushId}
     | [Bool]   {pushBool}

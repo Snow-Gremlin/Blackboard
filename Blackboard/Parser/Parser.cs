@@ -3,7 +3,6 @@ using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Data.Caps;
-using Blackboard.Parser.StackItems;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -91,7 +90,6 @@ namespace Blackboard.Parser {
                 { "cast",         this.handleCast },
                 { "memberAccess", this.handleMemberAccess },
                 { "startCall",    this.handleStartCall },
-                { "addArg",       this.handleAddArg },
                 { "endCall",      this.handleEndCall },
                 { "pushId",       this.handlePushId },
                 { "pushBool",     this.handlePushBool },
@@ -147,7 +145,7 @@ namespace Blackboard.Parser {
                 }
 
                 if (inputs.IsConstant()) node = node.ToLiteral();
-                this.push(new NodeItem(loc, node));
+                this.push(loc, node);
             };
         }
     
@@ -168,9 +166,20 @@ namespace Blackboard.Parser {
         #endregion
         #region Helpers...
 
-        /// <summary>Pushes a new node or stack item onto the stack.</summary>
+        /// <summary>Pushes a stack item onto the stack.</summary>
         /// <param name="value">The value to push.</param>
         private void push(StackItem value) => this.stack.AddLast(value);
+
+        /// <summary>Pushes a new stack item onto the stack.</summary>
+        /// <param name="loc">The location of the stack item.</param>
+        /// <param name="value">The value from the stack,  or null.</param>
+        private void push(PP.Scanner.Location loc, object value) => this.push(new StackItem(loc, value));
+
+        /// <summary>Pushes a new stack item onto the stack.</summary>
+        /// <param name="loc">The location of the stack item.</param>
+        /// <param name="id">The optional identifier for the value or empty.</param>
+        /// <param name="value">The value from the stack, the value found at this identifier, or null.</param>
+        private void push(PP.Scanner.Location loc, string id, object value) => this.push(new StackItem(loc, id, value));
 
         /// <summary>Pops one or more values off the stack of nodes.</summary>
         /// <param name="count">The number of nodes to pop.</param>
@@ -178,7 +187,7 @@ namespace Blackboard.Parser {
         private INode[] popNode(int count = 1) {
             INode[] nodes = new INode[count];
             for (int i = 0; i < count; i++)
-                nodes[count-1-i] = this.pop<NodeItem>().Node;
+                nodes[count-1-i] = this.popValueAs<INode>();
             return nodes;
         }
 
@@ -190,23 +199,10 @@ namespace Blackboard.Parser {
             return item;
         }
 
-        /// <summary>Pops off whatever is on the top of the stack.</summary>
-        /// <typeparam name="T">The type of the object expected to be popped off the stack.</typeparam>
+        /// <summary>Pops off whatever is on the top of the stack and returns the type-cast value.</summary>
+        /// <typeparam name="T">The type of the value expected to be popped off the stack.</typeparam>
         /// <returns>The value which was on top of the stack.</returns>
-        private T pop<T>() where T : StackItem {
-            StackItem item = this.pop();
-            if (item is not T && item is Identifier) {
-                
-                // TODO:: Unwrap an Identifier.
-
-
-
-            }
-
-
-            return item is T result ? result :
-                throw Exception.UnexpectedItemOnTheStack(item.ToString(), typeof(T).FullName);
-        }
+        private T popValueAs<T>() => this.pop().ValueAs<T>();
 
         /*
         /// <summary>Creates a new input value node or trigger.</summary>
@@ -292,18 +288,34 @@ namespace Blackboard.Parser {
             this.reduceNodes = false;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <summary>This is called when the namespace has openned.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handlePushNamespace(PP.ParseTree.PromptArgs args) {
+            PP.Tokenizer.Token token = args.Tokens[^1];
+            PP.Scanner.Location loc = token.End;
+            string text = token.Text;
+
+            Namespace scope = this.scopeStack.First.Value;
+            if (scope.Contains(text)) {
+                object obj = scope[text];
+                if (obj is not Namespace nextScope)
+                    throw new Exception("Can not open namespace. Another non-namespace exists by that name.").
+                         With("Identifier", text).
+                         With("Location", loc);
+                scope = nextScope;
+            } else {
+                Namespace nextScope = new();
+                scope[text] = nextScope;
+                scope = nextScope;
+            }
+
+            this.scopeStack.AddFirst(scope);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <summary>This is called when the namespace had closed.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handlePopNamespace(PP.ParseTree.PromptArgs args) {
+            this.scopeStack.RemoveFirst();
         }
 
         /// <summary>This is called when a new typed input is started.</summary>
@@ -315,32 +327,27 @@ namespace Blackboard.Parser {
         /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputNoAssign(PP.ParseTree.PromptArgs args) {
-            Identifier id = this.pop<Identifier>();
-            TypeItem typeItem = this.pop<TypeItem>();
+            StackItem idItem   = this.pop();
+            StackItem typeItem = this.pop();
+
+            if (idItem.Value is not null)
+                throw new Exception("Can not create new input node. Identifier already exists in the receiver.").
+                     With("Identifier", idItem);
+            if (!idItem.HasId)
+                throw new Exception("Can not create new input node with no Id.").
+                     With("Identifier", idItem);
 
             // Unless the identifier has a receiver, add the new input node to the current namespace scope.
-            object receiver = id.Receiver ?? this.scopeStack.First.Value;
-            if (receiver is not Namespace)
-                throw new Exception("The receiver for a new input node must be a namespace.").
-                     With("Receiver",   id.Receiver).
-                     With("Identifier", id.Id).
-                     With("Location",   id.Location);
-
-            Namespace scope = receiver as Namespace;
-            if (scope.ContainsKey(id.Id))
-                throw new Exception("Can not create new input node. Identifier already exists in the receiver.").
-                     With("Receiver",   id.Receiver).
-                     With("Identifier", id.Id).
-                     With("Location",   id.Location);
-
-            Type t = typeItem.Type;
-            scope[id.Id] =
+            Namespace scope = this.scopeStack.First.Value;
+            Type t = typeItem.ValueAs<Type>();
+            scope[idItem.Id] =
                 t == Type.Bool    ? new InputValue<Bool>() :
                 t == Type.Int     ? new InputValue<Int>() :
                 t == Type.Double  ? new InputValue<Double>() :
                 t == Type.String  ? new InputValue<String>() :
                 t == Type.Trigger ? new InputTrigger() :
-                throw new Exception("Unsupported type for new input").With("Type", t);
+                throw new Exception("Unsupported type for new input").
+                    With("Type", typeItem);
 
             // Push the type back onto the stack for the next assignment.
             this.push(typeItem);
@@ -349,42 +356,35 @@ namespace Blackboard.Parser {
         /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputWithAssign(PP.ParseTree.PromptArgs args) {
-            NodeItem valueItem = this.pop<NodeItem>();
-            Identifier id = this.pop<Identifier>();
-            TypeItem typeItem = this.pop<TypeItem>();
+            StackItem valueItem = this.pop();
+            StackItem idItem    = this.pop();
+            StackItem typeItem  = this.pop();
+
+            if (idItem.Value is not null)
+                throw new Exception("Can not create new input node. Identifier already exists in the receiver.").
+                     With("Identifier", idItem);
+            if (!idItem.HasId)
+                throw new Exception("Can not create new input node with no Id.").
+                     With("Identifier", idItem);
 
             // Unless the identifier has a receiver, add the new input node to the current namespace scope.
-            object receiver = id.Receiver ?? this.scopeStack.First.Value;
-            if (receiver is not Namespace)
-                throw new Exception("The receiver for a new input node must be a namespace.").
-                     With("Receiver",   id.Receiver).
-                     With("Identifier", id.Id).
-                     With("Location",   id.Location);
-
-            Namespace scope = receiver as Namespace;
-            if (scope.ContainsKey(id.Id))
-                throw new Exception("Can not create new input node. Identifier already exists in the receiver.").
-                     With("Receiver",   id.Receiver).
-                     With("Identifier", id.Id).
-                     With("Location",   id.Location);
-
-            Type t = typeItem.Type;
-            INode value = t.Implicit(valueItem.Node);
+            Namespace scope = this.scopeStack.First.Value;
+            Type t = typeItem.ValueAs<Type>();
+            INode value = t.Implicit(valueItem.ValueAs<INode>());
             if (value is null)
                 throw new Exception("The new input node can not be assigned the value given to it.").
-                     With("Value",      valueItem.Node).
-                     With("Type",       t).
-                     With("Receiver",   id.Receiver).
-                     With("Identifier", id.Id).
-                     With("Location",   id.Location);
+                     With("Value",      valueItem).
+                     With("Type",       typeItem).
+                     With("Identifier", idItem);
 
-            scope[id.Id] =
+            scope[idItem.Id] =
                 t == Type.Bool    ? new InputValue<Bool>(  (value as IValue<Bool>  ).Value) :
                 t == Type.Int     ? new InputValue<Int>(   (value as IValue<Int>   ).Value) :
                 t == Type.Double  ? new InputValue<Double>((value as IValue<Double>).Value) :
                 t == Type.String  ? new InputValue<String>((value as IValue<String>).Value) :
                 t == Type.Trigger ? new InputTrigger(      (value as ITrigger      ).Provoked) :
-                throw new Exception("Unsupported type for new input").With("Type", t);
+                throw new Exception("Unsupported type for new input").
+                    With("Type", typeItem);
 
             // Push the type back onto the stack for the next assignment.
             this.push(typeItem);
@@ -468,11 +468,10 @@ namespace Blackboard.Parser {
         /// <summary>This handles performing a type cast of a node.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleCast(PP.ParseTree.PromptArgs args) {
-            NodeItem right = this.pop<NodeItem>();
-            Identifier left = this.pop<Identifier>();
+            //NodeItem right = this.pop<NodeItem>();
+            //Identifier left = this.pop<Identifier>();
 
-
-
+            // TODO: IMPLEMENT
 
         }
 
@@ -482,50 +481,51 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string id = token.Text;
-            Identifier left = this.pop<Identifier>();
+            StackItem left = this.pop();
 
-            if (left.Value is not Namespace scope)
+            if (!left.ValueIs<Namespace>())
                 throw new Exception("The receiver for the identifier is not a namespace.").
-                    With("Receiver", left.Id).
+                    With("Stack Item", left).
                     With("Identifier", id).
-                    With("Loaction", left.Location);
+                    With("Loaction", loc);
 
+            Namespace scope = left.ValueAs<Namespace>();
             object value = scope.ContainsKey(id) ? scope[id] : null;
-            this.push(new Identifier(loc, left.Id + "." + id, value));
+            this.push(loc, left.Id + "." + id, value);
         }
 
         /// <summary>This handles preparing for a method call.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleStartCall(PP.ParseTree.PromptArgs args) {
-            Identifier id = this.pop<Identifier>();
-            object obj = id.Value;
-
-            if (obj is not FuncGroup func)
-                throw new Exception("Identifier was not for a function.").
-                    With("Found", obj).
-                    With("Identifier", id.Id).
-                    With("Loaction", id.Location);
-
-            this.push(new Call(id.Location, func, id.Id));
-        }
-
-        /// <summary>This handles adding another argument to the call item.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleAddArg(PP.ParseTree.PromptArgs args) {
-            NodeItem funcArg = this.pop<NodeItem>();
-            Call call = this.pop<Call>();
-            call.Arguments.Add(funcArg.Node);
-            this.push(call);
+            StackItem item = this.pop();
+            if (!item.ValueIs<FuncGroup>())
+                throw new Exception("Identifier was not a function.").
+                    With("Stack Item", item);
+            this.push(item);
         }
 
         /// <summary>This handles the end of a method call and creates the node for the method.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleEndCall(PP.ParseTree.PromptArgs args) {
-            Call call = this.pop<Call>();
-            INode[] funcArgs = call.Arguments.ToArray();
-            INode node = call.Func.Build(funcArgs);
+            List<INode> funcArgs = new List<INode>();
+            StackItem callItem;
+            while (true) {
+                StackItem item = this.pop();
+                if (item.ValueIs<FuncGroup>()) {
+                    callItem = item;
+                    break;
+                }
+                funcArgs.Add(item.ValueAs<INode>());
+            }
+
+            FuncGroup func = callItem.ValueAs<FuncGroup>();
+            INode node = func.Build(funcArgs.ToArray());
+            if (node is null)
+                throw new Exception("Failed to find a function that can accept the given argument types.").
+                    With("Function", callItem);
+
             if (funcArgs.IsConstant()) node = node.ToLiteral();
-            this.push(new NodeItem(call.Location, node));
+            this.push(callItem.Location, node);
         }
 
         /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
@@ -535,14 +535,20 @@ namespace Blackboard.Parser {
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
 
+            object value = null;
             foreach (Namespace scope in this.scopeStack) {
                 if (scope.ContainsKey(text)) {
-                    this.push(new Identifier(loc, text, scope[text]));
-                    return;
+                    value =  scope[text];
+                    if (this.reduceNodes && value is INode node)
+                        value = node.ToLiteral();
+                    break;
                 }
             }
 
-            this.push(new Identifier(loc, text, null));
+            // If the value is not found in the scopes, that is fine, set it as null,
+            // it is likely about to be used for creating a new identifier or
+            // will be caught when attempted to be used.
+            this.push(loc, text, value);
         }
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>
@@ -553,7 +559,7 @@ namespace Blackboard.Parser {
             string text = token.Text;
             try {
                 bool value = bool.Parse(text);
-                this.push(new NodeItem(loc, Literal.Bool(value)));
+                this.push(loc, Literal.Bool(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a bool.", ex).
                     With("Text", text).
@@ -569,7 +575,7 @@ namespace Blackboard.Parser {
             string text = token.Text;
             try {
                 int value = int.Parse(text);
-                this.push(new NodeItem(loc, Literal.Int(value)));
+                this.push(loc, Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a decimal int.", ex).
                     With("Text", text).
@@ -585,7 +591,7 @@ namespace Blackboard.Parser {
             string text = token.Text[2..];
             try {
                 int value = int.Parse(text, NumberStyles.HexNumber);
-                this.push(new NodeItem(loc, Literal.Int(value)));
+                this.push(loc, Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a hex int.", ex).
                     With("Text", text).
@@ -601,7 +607,7 @@ namespace Blackboard.Parser {
             string text = token.Text;
             try {
                 double value = double.Parse(text);
-                this.push(new NodeItem(loc, Literal.Double(value)));
+                this.push(loc, Literal.Double(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a double.", ex).
                     With("Text", text).
@@ -615,7 +621,7 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text[1..^2];
-            this.push(new NodeItem(loc, Literal.String(text)));
+            this.push(loc, Literal.String(text));
         }
 
         /// <summary>This handles pushing a type onto the stack.</summary>
@@ -629,7 +635,7 @@ namespace Blackboard.Parser {
                 throw new Exception("Unrecognized type name.").
                     With("Text", text).
                     With("Location", loc);
-            this.push(new TypeItem(loc, t));
+            this.push(loc, t);
         }
 
         #endregion

@@ -17,8 +17,11 @@
         /// <param name="value">The value for the additional data.</param>
         /// <returns>This exception so that these calls can be chained.</returns>
         public Exception With(string key, object value) {
-            this.Data.Add(key, value?.ToString() ?? "null");
-            return this;
+            string strVal = value?.ToString() ?? "null";
+            // TODO: Figure out a better way to make this show up in unit-tests.
+            //this.Data.Add(key, strVal);
+            //return this;
+            return new Exception(this.Message + " [" + key + ": " + strVal + "]");
         }
 
         #region Predefined...

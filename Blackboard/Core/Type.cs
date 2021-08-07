@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
@@ -172,7 +173,8 @@ namespace Blackboard.Core {
         /// <summary>Performs an implicit cast of the given node into this type.</summary>
         /// <param name="node">The node to implicitly cast.</param>
         /// <returns>The node cast into this type or null if the cast is not posible.</returns>
-        public INode Implicit(INode node) => cast(true, node, TypeOf(node), this);
+        public INode Implicit(INode node) =>
+            cast(true, node, TypeOf(node), this);
 
         /// <summary>Performs an explicit cast of the given node into this type.</summary>
         /// <param name="node">The node to explicitly cast.</param>
@@ -183,7 +185,8 @@ namespace Blackboard.Core {
         /// <summary>Performs an explicit cast of the given node into this type.</summary>
         /// <param name="node">The node to explicitly cast.</param>
         /// <returns>The node cast into this type or null if the cast is not posible.</returns>
-        public INode Explicit(INode node) => cast(false, node, TypeOf(node), this);
+        public INode Explicit(INode node) =>
+            cast(false, node, TypeOf(node), this);
 
         /// <summary>Performs a cast of the given node into the destination type.</summary>
         /// <param name="imp">True for implicitly cast, false for explicitly cast.</param>

@@ -507,7 +507,7 @@ namespace Blackboard.Parser {
         /// <summary>This handles the end of a method call and creates the node for the method.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleEndCall(PP.ParseTree.PromptArgs args) {
-            List<INode> funcArgs = new();
+            LinkedList<INode> funcArgs = new();
             StackItem callItem;
             while (true) {
                 StackItem item = this.pop();
@@ -515,14 +515,15 @@ namespace Blackboard.Parser {
                     callItem = item;
                     break;
                 }
-                funcArgs.Add(item.ValueAs<INode>());
+                funcArgs.AddFirst(item.ValueAs<INode>());
             }
 
             FuncGroup func = callItem.ValueAs<FuncGroup>();
             INode node = func.Build(funcArgs.ToArray());
             if (node is null)
                 throw new Exception("Failed to find a function that can accept the given argument types.").
-                    With("Function", callItem);
+                    With("Function", callItem).
+                    With("Args", string.Join(", ", funcArgs.TypeNames()));
 
             if (funcArgs.IsConstant()) node = node.ToLiteral();
             this.push(callItem.Location, node);

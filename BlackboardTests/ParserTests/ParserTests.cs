@@ -59,9 +59,11 @@ namespace BlackboardTests.ParserTests {
             Parser parser = new(driver);
             parser.Read(
                 "in double A = 3.0 + 0.07 * 2;",
-                "in double B = floor(A);");
+                "in double B = floor(A), C = round(A), D = round(A, 1);");
             driver.CheckValue(3.14, "A");
             driver.CheckValue(3.0,  "B");
+            driver.CheckValue(3.0,  "C");
+            driver.CheckValue(3.1,  "D");
         }
 
         /*

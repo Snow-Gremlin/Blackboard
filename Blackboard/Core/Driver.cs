@@ -351,6 +351,14 @@ namespace Blackboard.Core {
         #endregion
         #region Value Getters...
 
+        /// <summary>Gets the type of the value or trigger at te given node.</summary>
+        /// <param name="names">The name of the node to get the type of.</param>
+        /// <returns>The type of the node or null if doesn't exist or not a node type.</returns>
+        public Type GetType(IEnumerable<string> names) {
+            object obj = this.Global.Find(names);
+            return obj is null ? null : Type.FromType(obj.GetType());
+        }
+
         /// <summary>Gets the value of from an named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>

@@ -398,14 +398,23 @@ namespace Blackboard.Core {
             this.GetValue<T>(names as IEnumerable<string>);
 
         /// <summary>Gets the value of from an named node.</summary>
+        /// <remarks>This will throw an exception if no node by that name exists or the found node is the incorrect type.</remarks>
         /// <typeparam name="T">The type of value to read.</typeparam>
         /// <param name="name">The name of the node to read the value from.</param>
-        /// <returns>
-        /// The value from the node or the default value if the node
-        /// by that name doesn't exists and the found node is the incorrect type.
-        /// </returns>
-        public T GetValue<T>(IEnumerable<string> names) where T : IData =>
-            this.Global.Find(names) is IValue<T> node ? node.Value : default;
+        /// <returns>The value from the node.</returns>
+        public T GetValue<T>(IEnumerable<string> names) where T : IData {
+            object obj = this.Global.Find(names);
+            if (obj is null)
+                throw new Exception("No value found by the name \"" + string.Join(".", names) + "\".");
+
+            if (obj is not IValue<T> node) {
+                Type t =  Type.FromType(obj.GetType());
+                string typeStr = t is not null ? t.ToString() : obj.GetType().ToString();
+                throw new Exception("May not get \"" + string.Join(".", names) + "\" of type " + typeStr + " as a " + Type.FromType<IValue<T>>() + ".");
+            }
+
+            return node.Value;
+        }
 
         #endregion
 

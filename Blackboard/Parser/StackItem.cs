@@ -52,7 +52,7 @@ namespace Blackboard.Parser {
         /// <summary>The string for this stack item.</summary>
         /// <returns>The stack item's string.</returns>
         public override string ToString() {
-            string id = this.HasId ? "": this.Id + ", ";
+            string id = this.HasId ? this.Id + ", " : "";
             string value = this.Value?.ToString() ?? "null";
             return "StackItem(" + id + value + ", " + this.Location + ")";
         }

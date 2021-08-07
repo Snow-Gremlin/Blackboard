@@ -29,6 +29,41 @@ namespace BlackboardTests.ParserTests {
             driver.CheckValue(3.14, "D", "E");
         }
 
+        [TestMethod]
+        public void TestBasicParses_DoubleLiteral() {
+            Driver driver = new();
+            Parser parser = new(driver);
+            parser.Read(
+                "in double A = 3.0;",
+                "in double B = 0.003;",
+                "in double C = .003;",
+                "in double D = 3.0e-3;",
+                "in double E = 3e-3;",
+                "in double F = .3e-2;",
+                "in double G = 0.3e-2;",
+                "in double H = 3;",
+                "in double I = 0;");
+            driver.CheckValue(3.0,   "A");
+            driver.CheckValue(0.003, "B");
+            driver.CheckValue(0.003, "C");
+            driver.CheckValue(0.003, "E");
+            driver.CheckValue(0.003, "F");
+            driver.CheckValue(0.003, "G");
+            driver.CheckValue(3.0,   "H");
+            driver.CheckValue(0.0,   "I");
+        }
+
+        [TestMethod]
+        public void TestBasicParses_LiteralMath() {
+            Driver driver = new();
+            Parser parser = new(driver);
+            parser.Read(
+                "in double A = 3.0 + 0.07 * 2;",
+                "in double B = floor(A);");
+            driver.CheckValue(3.14, "A");
+            driver.CheckValue(3.0,  "B");
+        }
+
         /*
         [TestMethod]
         public void TestBasicParses_IntIntSum() {

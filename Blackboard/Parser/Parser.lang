@@ -9,6 +9,7 @@
 
 # Doubles
 (Start): '.' => (Decimal);
+(Zero): '.' => (Decimal);
 (Int): '.' => (Decimal): '0'..'9' => (DoubleDec): '0'..'9' => (DoubleDec) => [Double];
 (Int): 'eE' => (DoubleExpStart): '-' => (DoubleExpNeg): '0'..'9' => (DoubleExp);
 (DoubleDec): 'eE' => (DoubleExpStart): '0'..'9' => (DoubleExp): '0'..'9' => (DoubleExp) => [Double];
@@ -194,7 +195,7 @@
     | <Additive> [Pos] <Multiplicative> {sum}
     | <Additive> [Neg] <Multiplicative> {subtract};
 
-<Multiplicative> := <Unary>
+<Multiplicative> := <Exponent>
     | <Multiplicative> [Mul]       <Exponent> {multiply}
     | <Multiplicative> [Div]       <Exponent> {divide}
     | <Multiplicative> [Mod]       <Exponent> {modulo}

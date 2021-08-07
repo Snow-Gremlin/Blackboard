@@ -59,29 +59,36 @@ namespace BlackboardTests {
             Assert.AreEqual(exp, (node as IValue<String>).Value.Value);
         }
 
+        /// <summary>Gets the message for the CheckValues assertions.</summary>
+        /// <param name="type">The type of the value being checked.</param>
+        /// <param name="names">The name of the variable to look up.</param>
+        /// <returns>The message to show in the assertion.</returns>
+        static private string checkValueMsg(string type, params string[] names) =>
+            "Checking the " + type + " value of \""+string.Join(".", names)+"\".";
+
         /// <summary>Checks the boolean value of this node.</summary>
-        /// <param name="node">This is the boolean node to check the type of.</param>
+        /// <param name="driver">This is the driver to check the type of.</param>
         /// <param name="exp">The expected boolean value.</param>
         static public void CheckValue(this Driver driver, bool exp, params string[] names) =>
-            Assert.AreEqual(exp, driver.GetBool(names));
+            Assert.AreEqual(exp, driver.GetBool(names), checkValueMsg("bool", names));
 
         /// <summary>Checks the integer value of this node.</summary>
-        /// <param name="node">This is the integer node to check the type of.</param>
+        /// <param name="driver">This is the driver to check the type of.</param>
         /// <param name="exp">The expected integer value.</param>
         static public void CheckValue(this Driver driver, int exp, params string[] names) =>
-            Assert.AreEqual(exp, driver.GetInt(names));
+            Assert.AreEqual(exp, driver.GetInt(names), checkValueMsg("int", names));
 
         /// <summary>Checks the double value of this node.</summary>
-        /// <param name="node">This is the double node to check the type of.</param>
+        /// <param name="driver">This is the driver to check the type of.</param>
         /// <param name="exp">The expected double value.</param>
         static public void CheckValue(this Driver driver, double exp, params string[] names) =>
-            Assert.AreEqual(exp, driver.GetDouble(names));
+            Assert.AreEqual(exp, driver.GetDouble(names), checkValueMsg("double", names));
 
         /// <summary>Checks the string value of this node.</summary>
-        /// <param name="node">This is the string node to check the type of.</param>
+        /// <param name="driver">This is the driver to check the type of.</param>
         /// <param name="exp">The expected string value.</param>
         static public void CheckValue(this Driver driver, string exp, params string[] names) =>
-            Assert.AreEqual(exp, driver.GetString(names));
+            Assert.AreEqual(exp, driver.GetString(names), checkValueMsg("string", names));
 
         /// <summary>Runs the driver evaluation and checks that evaluation performed as expected.</summary>
         /// <param name="driver">The driver to evaluate.</param>

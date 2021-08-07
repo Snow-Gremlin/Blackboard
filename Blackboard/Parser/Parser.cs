@@ -507,7 +507,7 @@ namespace Blackboard.Parser {
         /// <summary>This handles the end of a method call and creates the node for the method.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleEndCall(PP.ParseTree.PromptArgs args) {
-            List<INode> funcArgs = new List<INode>();
+            List<INode> funcArgs = new();
             StackItem callItem;
             while (true) {
                 StackItem item = this.pop();

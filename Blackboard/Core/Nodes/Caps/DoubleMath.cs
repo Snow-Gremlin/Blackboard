@@ -105,10 +105,10 @@ namespace Blackboard.Core.Nodes.Caps {
             new Function<IValue<T>>((value) => new DoubleMath<T>(funcName, func, value));
 
         /// <summary>The name of the function for this mathmatics.</summary>
-        private string funcName;
+        private readonly string funcName;
 
         /// <summary>The function to perform on this node's value.</summary>
-        private S.Func<double, double> func;
+        private readonly S.Func<double, double> func;
 
         /// <summary>Creates a double mathmatical function value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
@@ -117,6 +117,7 @@ namespace Blackboard.Core.Nodes.Caps {
             base(source, value) {
             this.funcName = funcName;
             this.func = func;
+            this.UpdateValue();
         }
 
         /// <summary>The result of the double mathmatical function the parent's value during evaluation.</summary>

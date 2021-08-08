@@ -110,7 +110,7 @@ E := D || (A && B);
 ```
 
 
-## Groups
+## Namespace
 
 TODO:
 

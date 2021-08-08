@@ -19,7 +19,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
         public Unary(IValue<T1> source = null, TResult value = default) : base(value) {
-            this.Parent = source;
+            this.SetParent(ref this.source, source);
             this.UpdateValue();
         }
 

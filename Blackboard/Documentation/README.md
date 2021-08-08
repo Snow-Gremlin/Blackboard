@@ -52,13 +52,13 @@ group N.M {
 - Need to make it not apply until later
 - Need to add uint, int64, uint64, and bytes
 - Need to add counters, latch, and triggers
-- Add Log and Ln
 - Come up with a way to specify which nodes need to be persisted (inputs, counters, toggles, etc?)
 - Add persistends which also keeps track of deltas to recover if crashed before save
+- Add substring ([x], [x..], [..y], [x..y], [x..^y]), pad methods, format
+- Add isNAN, isInf, etc methods.
 
 ## Ideas
 
-- Concatinate, Format, etc for strings
 - Allow for translations and large dictionaries
 - *Enum*: One and only one value at a time. The values are custom and defined using ints.
   - `enum{1..10} S1;`

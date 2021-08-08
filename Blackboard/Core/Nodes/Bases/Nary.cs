@@ -26,7 +26,7 @@ namespace Blackboard.Core.Nodes.Bases {
         public Nary(IEnumerable<IValue<TIn>> parents = null, TResult value = default) : base(value) {
             this.sources = new List<IValue<TIn>>();
             this.AddParents(parents);
-            this.UpdateValue();
+            // UpdateValue already called by AddParents.
         }
 
         /// <summary>This adds parents to this node.</summary>

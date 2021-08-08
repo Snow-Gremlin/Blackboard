@@ -2,34 +2,78 @@
 
 > (Start);
 
-# Integers
-(Start): '0' => (Zero): '0'..'9' => (Int);
-(Start): '1'..'9' => (Int): '0'..'9' => [Int];
-(Zero) => [Int];
+# Binary
+(Start): '0' => (Zero);
+(Zero): '01' => (PossibleBin);
+(Start): '1' => (PossibleBin): '01' => (PossibleBin);
+(Zero):        ^'b' => [Bin];
+(PossibleBin): ^'b' => [Bin];
 
-# Doubles
-(Start): '.' => (Decimal);
-(Zero): '.' => (Decimal);
-(Int): '.' => (Decimal): '0'..'9' => (DoubleDec): '0'..'9' => (DoubleDec) => [Double];
-(Int): 'eE' => (DoubleExpStart): '-' => (DoubleExpNeg): '0'..'9' => (DoubleExp);
-(DoubleDec): 'eE' => (DoubleExpStart): '0'..'9' => (DoubleExp): '0'..'9' => (DoubleExp) => [Double];
+# Octal
+(Start):       '2'..'7' => (PossibleOct): '0'..'7' => (PossibleOct);
+(Zero):        '2'..'7' => (PossibleOct);
+(PossibleBin): '2'..'7' => (PossibleOct);
+(Zero):        ^'o' => [Oct];
+(PossibleBin): ^'o' => [Oct];
+(PossibleOct): ^'o' => [Oct];
+
+# Integers (Decimal)
+(Start): '89' => (Int): '0'..'9' => (Int);
+(Zero):  '89' => (Int);
+(PossibleBin): '2'..'9' => (Int);
+(PossibleOct): '89' => (Int);
+
+(Zero)        => [Int];
+(PossibleBin) => [Int];
+(PossibleOct) => [Int];
+(Int)         => [Int];
+(Zero):        ^'d' => [Int];
+(PossibleBin): ^'d' => [Int];
+(PossibleOct): ^'d' => [Int];
+(Int):         ^'d' => (Dec) => [Int];
 
 # Hexadecimals
 (Zero): 'x' => (HexStart): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
+
+# Doubles
+(Start):       '.' => (Decimal);
+(Zero):        '.' => (Decimal);
+(PossibleBin): '.' => (Decimal);
+(PossibleOct): '.' => (Decimal);
+(Int):         '.' => (Decimal);
+(Decimal): '0'..'9' => (DoubleDec): '0'..'9' => (DoubleDec) => [Double];
+
+(Zero):        'eE' => (DoubleExpStart);
+(Int):         'eE' => (DoubleExpStart);
+(PossibleBin): 'eE' => (DoubleExpStart);
+(PossibleOct): 'eE' => (DoubleExpStart);
+(DoubleDec):   'eE' => (DoubleExpStart);
+(DoubleExpStart): '-' => (DoubleExpNeg): '0'..'9' => (DoubleExp);
+(DoubleExpStart): '0'..'9' => (DoubleExp): '0'..'9' => (DoubleExp) => [Double];
 
 # Identifiers
 (Start): 'a'..'z', 'A'..'Z', '_$' => (Identifier): '0'..'9', 'a'..'z', 'A'..'Z', '_' => [Identifier];
 
 # Strings
-(Start): '"' => (StringBody): '"' => [String];
-(StringBody): '\\' => (Escaped);
-(Escaped): 'x' => (Ascii_0): '0'..'9', 'a'..'f', 'A'..'F' =>
-                  (Ascii_1): '0'..'9', 'a'..'f', 'A'..'F' => (StringBody);
-(Escaped): 'u' => (Unicode_0): '0'..'9', 'a'..'f', 'A'..'F' =>
-                  (Unicode_1): '0'..'9', 'a'..'f', 'A'..'F' =>
-                  (Unicode_2): '0'..'9', 'a'..'f', 'A'..'F' =>
-                  (Unicode_3): '0'..'9', 'a'..'f', 'A'..'F' => (StringBody);
-(Escaped): * => (StringBody);
+(Start): ^"'" => (String1Body): ^"'" => [String];
+(String1Body): '\\' => (Escaped1);
+(Escaped1): 'x' => (Ascii1_0):   '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Ascii1_1):   '0'..'9', 'a'..'f', 'A'..'F' => (String1Body);
+(Escaped1): 'u' => (Unicode1_0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode1_1): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode1_2): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode1_3): '0'..'9', 'a'..'f', 'A'..'F' => (String1Body);
+(String1Body): * => (String1Body);
+
+(Start): ^'"' => (String2Body): ^'"' => [String];
+(String2Body): '\\' => (Escaped2);
+(Escaped2): 'x' => (Ascii2_0):   '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Ascii2_1):   '0'..'9', 'a'..'f', 'A'..'F' => (String2Body);
+(Escaped2): 'u' => (Unicode2_0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode2_1): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode2_2): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode2_3): '0'..'9', 'a'..'f', 'A'..'F' => (String2Body);
+(String2Body): * => (String2Body);
 
 # Symbols
 (Start): '&' => [And]: '&' => [LogicalAnd];
@@ -77,6 +121,7 @@
 [Identifier] = 'in'      => [DeclareIn];
 [Identifier] = 'get'     => [DeclareGet];
 [Identifier] = 'const'   => [DeclareConst];
+[Identifier] = 'define'  => [DeclareDefine];
 [Identifier] = 'counter' => [DeclareCounter];
 [Identifier] = 'latch'   => [DeclareLatch];
 [Identifier] = 'toggle'  => [DeclareToggle];
@@ -95,7 +140,7 @@
 [Identifier] = 'internal', 'global', 'local',
                'private', 'protected', 'public', 'static' => [ReservedScoping];
 
-[Identifier] = 'abstract', 'class', 'def', 'define', 'func', 'interface', 'operator',
+[Identifier] = 'abstract', 'class', 'def', 'func', 'interface', 'operator',
                'override', 'typedef', 'void', 'virtual' => [ReservedDefinitions];
 
 [Identifier] = 'as', 'break', 'catch', 'case', 'continue', 'default', 'else',
@@ -224,6 +269,8 @@
 
 <Value> := [Identifier] {pushId}
     | [Bool]   {pushBool}
+    | [Bin]    {pushBin}
+    | [Oct]    {pushOct}
     | [Int]    {pushInt}
     | [Hex]    {pushHex}
     | [Double] {pushDouble}

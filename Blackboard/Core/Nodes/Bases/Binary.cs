@@ -25,8 +25,8 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
         public Binary(IValue<T1> source1 = null, IValue<T2> source2 = null, TResult value = default) : base(value) {
-            this.Parent1 = source1;
-            this.Parent2 = source2;
+            this.SetParent(ref this.source1, source1);
+            this.SetParent(ref this.source2, source2);
             this.UpdateValue();
         }
 

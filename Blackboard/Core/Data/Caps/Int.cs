@@ -34,14 +34,16 @@ namespace Blackboard.Core.Data.Caps {
         public Int Div(Int other) => new(this.Value / other.Value);
 
         /// <summary>Gets the modulo of this value and the other value.</summary>
+        /// <remarks>The result will have the same sign as this value.</remarks>
         /// <param name="other">The value to mod this value with.</param>
         /// <returns>The modulo of this value and the other value.</returns>
         public Int Mod(Int other) => new(this.Value % other.Value);
 
         /// <summary>Gets the remainder of this value divided by the other value.</summary>
+        /// <remarks>This is identical to modulo for integers.</remarks>
         /// <param name="other">The value to divide this value with.</param>
         /// <returns>The remainder of this value divided the other value.</returns>
-        public Int Rem(Int other) => new(this.Value - this.Value % other.Value);
+        public Int Rem(Int other) => new(this.Value % other.Value);
 
         /// <summary>Gets the product of this value and the other value.</summary>
         /// <param name="other">The value to multiply this value with.</param>

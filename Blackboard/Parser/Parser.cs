@@ -93,6 +93,8 @@ namespace Blackboard.Parser {
                 { "endCall",      this.handleEndCall },
                 { "pushId",       this.handlePushId },
                 { "pushBool",     this.handlePushBool },
+                { "pushBin",      this.handlePushBin },
+                { "pushOct",      this.handlePushOct },
                 { "pushInt",      this.handlePushInt },
                 { "pushHex",      this.handlePushHex },
                 { "pushDouble",   this.handlePushDouble },
@@ -567,8 +569,40 @@ namespace Blackboard.Parser {
                     With("Location", loc);
             }
         }
+   
+        /// <summary>This handles pushing a binary int literal value onto the stack.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handlePushBin(PP.ParseTree.PromptArgs args) {
+            PP.Tokenizer.Token token = args.Tokens[^1];
+            PP.Scanner.Location loc = token.End;
+            string text = token.Text;
+            try {
+                int value = S.Convert.ToInt32(text, 2);
+                this.push(loc, Literal.Int(value));
+            } catch (S.Exception ex) {
+                throw new Exception("Failed to parse a binary int.", ex).
+                    With("Text", text).
+                    With("Location", loc);
+            }
+        }
 
-        /// <summary>This handles pushing an int literal value onto the stack.</summary>
+        /// <summary>This handles pushing an ocatal int literal value onto the stack.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handlePushOct(PP.ParseTree.PromptArgs args) {
+            PP.Tokenizer.Token token = args.Tokens[^1];
+            PP.Scanner.Location loc = token.End;
+            string text = token.Text;
+            try {
+                int value = S.Convert.ToInt32(text, 8);
+                this.push(loc, Literal.Int(value));
+            } catch (S.Exception ex) {
+                throw new Exception("Failed to parse an octal int.", ex).
+                    With("Text", text).
+                    With("Location", loc);
+            }
+        }
+
+        /// <summary>This handles pushing a decimal int literal value onto the stack.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handlePushInt(PP.ParseTree.PromptArgs args) {
             PP.Tokenizer.Token token = args.Tokens[^1];
@@ -621,7 +655,8 @@ namespace Blackboard.Parser {
         private void handlePushString(PP.ParseTree.PromptArgs args) {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
-            string text = token.Text[1..^2];
+            string text = token.Text;
+            // TODO: Need to handle decoding escaped sequences.
             this.push(loc, Literal.String(text));
         }
 

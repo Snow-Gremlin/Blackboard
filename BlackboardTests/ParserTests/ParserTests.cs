@@ -42,7 +42,11 @@ namespace BlackboardTests.ParserTests {
                 "in double F = .3e-2;",
                 "in double G = 0.3e-2;",
                 "in double H = 3;",
-                "in double I = 0;");
+                "in double I = 0;",
+                "in double J = 0.0;",
+                "in double K = 1.0;",
+                "in double L = 0e-5;",
+                "in double M = 28.0;");
             driver.CheckValue(3.0,   "A");
             driver.CheckValue(0.003, "B");
             driver.CheckValue(0.003, "C");
@@ -51,6 +55,10 @@ namespace BlackboardTests.ParserTests {
             driver.CheckValue(0.003, "G");
             driver.CheckValue(3.0,   "H");
             driver.CheckValue(0.0,   "I");
+            driver.CheckValue(0.0,   "J");
+            driver.CheckValue(1.0,   "K");
+            driver.CheckValue(0.0,   "L");
+            driver.CheckValue(28.0,  "M");
         }
 
         [TestMethod]
@@ -59,11 +67,45 @@ namespace BlackboardTests.ParserTests {
             Parser parser = new(driver);
             parser.Read(
                 "in double A = 3.0 + 0.07 * 2;",
-                "in double B = floor(A), C = round(A), D = round(A, 1);");
-            driver.CheckValue(3.14, "A");
-            driver.CheckValue(3.0,  "B");
-            driver.CheckValue(3.0,  "C");
-            driver.CheckValue(3.1,  "D");
+                "in double B = floor(A), C = round(A), D = round(A, 1);",
+                "in double E = (B ** C) / 2;",
+                "in double F = -E + -3;");
+            driver.CheckValue(  3.14, "A");
+            driver.CheckValue(  3.0,  "B");
+            driver.CheckValue(  3.0,  "C");
+            driver.CheckValue(  3.1,  "D");
+            driver.CheckValue( 13.5,  "E");
+            driver.CheckValue(-16.5,  "F");
+        }
+
+        [TestMethod]
+        public void TestBasicParses_ModRemAndStrings() {
+            // See: https://docs.microsoft.com/en-us/dotnet/api/system.math.ieeeremainder?view=net-5.0
+            Driver driver = new();
+            Parser parser = new(driver);
+            parser.Read(
+                "in string A = (  3.0 %%  2.0) + ', ' + (  3.0 %  2.0);",
+                "in string B = (  4.0 %%  2.0) + ', ' + (  4.0 %  2.0);",
+                "in string C = ( 10.0 %%  3.0) + ', ' + ( 10.0 %  3.0);",
+                "in string D = ( 11.0 %%  3.0) + ', ' + ( 11.0 %  3.0);",
+                "in string E = ( 27.0 %%  4.0) + ', ' + ( 27.0 %  4.0);",
+                "in string F = ( 28.0 %%  5.0) + ', ' + ( 28.0 %  5.0);",
+                "in string G = ( 17.8 %%  4.0) + ', ' + ( 17.8 %  4.0);",
+                "in string H = ( 17.8 %%  4.1) + ', ' + ( 17.8 %  4.1);",
+                "in string I = (-16.3 %%  4.1) + ', ' + (-16.3 %  4.1);",
+                "in string J = ( 17.8 %% -4.1) + ', ' + ( 17.8 % -4.1);",
+                "in string K = (-17.8 %% -4.1) + ', ' + (-17.8 % -4.1);");
+            driver.CheckValue("-1, 1", "A");
+            driver.CheckValue("0, 0",  "B");
+            driver.CheckValue("1, 1",  "C");
+            driver.CheckValue("-1, 2", "D");
+            driver.CheckValue("-1, 3", "E");
+            driver.CheckValue("-2, 3", "F");
+            driver.CheckValue("1.8, 1.8",   "G");
+            driver.CheckValue("1.4000000000000021, 1.4000000000000021",   "H");
+            driver.CheckValue("0.09999999999999787, -4.000000000000002",  "I");
+            driver.CheckValue("1.4000000000000021, 1.4000000000000021",   "J");
+            driver.CheckValue("-1.4000000000000021, -1.4000000000000021", "K");
         }
 
         /*

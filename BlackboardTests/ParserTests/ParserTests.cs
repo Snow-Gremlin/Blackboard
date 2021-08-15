@@ -101,7 +101,7 @@ namespace BlackboardTests.ParserTests {
             driver.CheckValue("-1, 2", "D");
             driver.CheckValue("-1, 3", "E");
             driver.CheckValue("-2, 3", "F");
-            driver.CheckValue("1.8, 1.8",   "G");
+            driver.CheckValue("1.8000000000000007, 1.8000000000000007",   "G");
             driver.CheckValue("1.4000000000000021, 1.4000000000000021",   "H");
             driver.CheckValue("0.09999999999999787, -4.000000000000002",  "I");
             driver.CheckValue("1.4000000000000021, 1.4000000000000021",   "J");

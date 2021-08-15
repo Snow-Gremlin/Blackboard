@@ -37,12 +37,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <remarks>The result will have the same sign as this value.</remarks>
         /// <param name="other">The value to mod this value with.</param>
         /// <returns>The modulo of this value and the other value.</returns>
-        public Double Mod(Double other) //=> new(this.Value % other.Value);
-            {
-            double val = this.Value % other.Value;
-            S.Console.WriteLine(this.Value+" % "+other.Value+" => "+val);
-            return new(val);
-        }
+        public Double Mod(Double other) => new(this.Value % other.Value);
 
         /// <summary>Gets the remainder of this value divided by the other value.</summary>
         /// <remarks>This is the IEEE 754 specification of remainder.</remarks>

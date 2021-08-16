@@ -46,11 +46,15 @@ namespace BlackboardTests.ParserTests {
                 "",
                 "namespace D {",
                 "   in E = 3.14;",
+                "   in var F = 0, G = 0.0, H = false;",
                 "}");
-            driver.CheckValue(2, "A");
-            driver.CheckValue(3, "B");
-            driver.CheckValue(true, "C");
-            driver.CheckValue(3.14, "D", "E");
+            driver.CheckValue(2,     "A");
+            driver.CheckValue(3,     "B");
+            driver.CheckValue(true,  "C");
+            driver.CheckValue(3.14,  "D", "E");
+            driver.CheckValue(0,     "D", "F");
+            driver.CheckValue(0.0,   "D", "G");
+            driver.CheckValue(false, "D", "H");
         }
 
         [TestMethod]

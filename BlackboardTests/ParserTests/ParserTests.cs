@@ -13,7 +13,7 @@ namespace BlackboardTests.ParserTests {
         //  Assert.AreEqual(Assert.ThrowsException<Exception>(hndl).Message, exp);
 
         [TestMethod]
-        public void TestBasicParses_Input() {
+        public void TestBasicParses_TypedInput() {
             Driver driver = new();
             Parser parser = new(driver);
             parser.Read(
@@ -22,6 +22,30 @@ namespace BlackboardTests.ParserTests {
                 "",
                 "namespace D {",
                 "   in double E = 3.14;",
+                "   in int F, G;",
+                "   in bool H;",
+                "   in double I;",
+                "}");
+            driver.CheckValue(2,     "A");
+            driver.CheckValue(3,     "B");
+            driver.CheckValue(true,  "C");
+            driver.CheckValue(3.14,  "D", "E");
+            driver.CheckValue(0,     "D", "F");
+            driver.CheckValue(0,     "D", "G");
+            driver.CheckValue(false, "D", "H");
+            driver.CheckValue(0.0,   "D", "I");
+        }
+
+        [TestMethod]
+        public void TestBasicParses_VarInput() {
+            Driver driver = new();
+            Parser parser = new(driver);
+            parser.Read(
+                "in A = 2, B = 3;",
+                "in C = true;",
+                "",
+                "namespace D {",
+                "   in E = 3.14;",
                 "}");
             driver.CheckValue(2, "A");
             driver.CheckValue(3, "B");

@@ -14,6 +14,9 @@ namespace Blackboard.Core {
     /// </summary>
     public class Driver {
 
+        /// <summary>The namespace for all the operators.</summary>
+        public const string OperatorNamespace = "$operators";
+
         /// <summary>The input nodes which have been modified.</summary>
         private List<INode> touched;
 
@@ -25,14 +28,14 @@ namespace Blackboard.Core {
             this.addOperators();
             this.addFunctions();
             this.addConstants();
-        }
+        } 
 
         #region Built-in Functions and Constants...
 
         /// <summary>This adds all the operators used by the language.</summary>
         private void addOperators() {
             Namespace operators = new();
-            this.Global["operators"] = operators;
+            this.Global[OperatorNamespace] = operators;
             void add(string name, params IFunction[] funcs) =>
                 operators[name] = new FuncGroup(funcs);
 

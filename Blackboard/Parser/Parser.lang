@@ -159,7 +159,7 @@
 
 <Statement> := _
     | <NewTypedInput>
-#    | <NewVarInput>
+    | <NewVarInput>
 #    | <AssignExisting>
 #    | <DefineTypedRule>
 #    | <DefineVarRule>
@@ -168,7 +168,7 @@
 
 #----------------------------------------------------------
 
-<NewTypedInput> := [DeclareIn] <AnyBaseType> {startNewTypedInput} <NewTypedInputPart> <NewTypedInputTail>;
+<NewTypedInput> := [DeclareIn] <AnyBaseType> {startNewInput} <NewTypedInputPart> <NewTypedInputTail>;
 
 <NewTypedInputTail> := _
     | [Comma] <NewTypedInputPart> <NewTypedInputTail>;
@@ -178,12 +178,12 @@
 
 #----------------------------------------------------------
 
-###<NewVarInput> := [DeclareIn] <NewVarInputPart> <NewVarInputTail> [End];
-###
-###<NewVarInputTail> := _
-###    | [Comma] <NewVarInputPart> <NewVarInputTail>;
-###
-###<NewVarInputPart> := [Identifier] [Assign] <Conditional> {newVarInputWithAssign};
+<NewVarInput> := [DeclareIn] {startNewInput} <NewVarInputPart> <NewVarInputTail>;
+
+<NewVarInputTail> := _
+    | [Comma] <NewVarInputPart> <NewVarInputTail>;
+
+<NewVarInputPart> := [Identifier] {pushId} [Assign] <Conditional> {newVarInputWithAssign};
 
 #----------------------------------------------------------
 

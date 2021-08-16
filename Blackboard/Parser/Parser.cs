@@ -71,14 +71,14 @@ namespace Blackboard.Parser {
         /// <summary>Initializes the prompts and operators for this parser.</summary>
         private void initPrompts() {
             this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>() {
-                { "clear",              this.handleClear },
-                { "pushNamespace",      this.handlePushNamespace },
-                { "popNamespace",       this.handlePopNamespace },
-                { "startNewTypedInput", this.handleStartNewTypedInput },
+                { "clear",         this.handleClear },
+                { "pushNamespace", this.handlePushNamespace },
+                { "popNamespace",  this.handlePopNamespace },
+                { "startNewInput", this.handleStartNewInput },
 
                 { "newTypeInputNoAssign",   this.handleNewTypeInputNoAssign },
                 { "newTypeInputWithAssign", this.handleNewTypeInputWithAssign },
-                //{ "newVarInputWithAssign",  this.handleNewVarInputWithAssign },
+                { "newVarInputWithAssign",  this.handleNewVarInputWithAssign },
                 //{ "assignExisting",         this.handleAssignExisting },
 
                 //{ "startDefine",            this.handleStartDefine },
@@ -133,7 +133,7 @@ namespace Blackboard.Parser {
         /// <param name="count">The number of values to pop off the stack for this function.</param>
         /// <param name="name">The name of the prompt to add to.</param>
         private void addProcess(int count, string name) {
-            FuncGroup op = this.driver.Global.Find("operators", name) as FuncGroup;
+            FuncGroup op = this.driver.Global.Find(Driver.OperatorNamespace, name) as FuncGroup;
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 PP.Scanner.Location loc = args.Tokens[^1].End;
                 INode[] inputs = this.popNode(count);
@@ -320,9 +320,9 @@ namespace Blackboard.Parser {
             this.scopeStack.RemoveFirst();
         }
 
-        /// <summary>This is called when a new typed input is started.</summary>
+        /// <summary>This is called when a new typed or var input is started.</summary>
         /// <param name="args">The token information from the parser.</param>
-        private void handleStartNewTypedInput(PP.ParseTree.PromptArgs args) {
+        private void handleStartNewInput(PP.ParseTree.PromptArgs args) {
             this.reduceNodes = true;
         }
 
@@ -366,11 +366,9 @@ namespace Blackboard.Parser {
                 throw new Exception("Can not create new input node. Identifier already exists in the receiver.").
                      With("Identifier", idItem);
             if (!idItem.HasId)
-                throw new Exception("Can not create new input node with no Id.").
+                throw new Exception("Can not create new input node with no Identifier.").
                      With("Identifier", idItem);
 
-            // Unless the identifier has a receiver, add the new input node to the current namespace scope.
-            Namespace scope = this.scopeStack.First.Value;
             Type t = typeItem.ValueAs<Type>();
             INode value = t.Implicit(valueItem.ValueAs<INode>());
             if (value is null)
@@ -379,6 +377,8 @@ namespace Blackboard.Parser {
                      With("Type",       typeItem).
                      With("Identifier", idItem);
 
+            // Unless the identifier has a receiver, add the new input node to the current namespace scope.
+            Namespace scope = this.scopeStack.First.Value;
             scope[idItem.Id] =
                 t == Type.Bool    ? new InputValue<Bool>(  (value as IValue<Bool>  ).Value) :
                 t == Type.Int     ? new InputValue<Int>(   (value as IValue<Int>   ).Value) :
@@ -392,16 +392,34 @@ namespace Blackboard.Parser {
             this.push(typeItem);
         }
 
-        /*
         /// <summary>This creates a new input node and assigns it with an initial value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewVarInputWithAssign(PP.ParseTree.PromptArgs args) {
-            PP.Scanner.Location loc = args.Tokens[^1].End;
-            INode right = this.popNode().First();
-            Identifier id = this.pop<Identifier>();
-            this.createInputValue(loc, Cast.TypeName(right), id, right);
+            StackItem valueItem = this.pop();
+            StackItem idItem    = this.pop();
+
+            if (idItem.Value is not null)
+                throw new Exception("Can not create new input node. Identifier already exists in the receiver.").
+                     With("Identifier", idItem);
+            if (!idItem.HasId)
+                throw new Exception("Can not create new input node with no Identifier.").
+                     With("Identifier", idItem);
+
+            // Pull the type from the value that is going to be assigned.
+            INode value = valueItem.ValueAs<INode>();
+            Type t = Type.TypeOf(value);
+
+            // Unless the identifier has a receiver, add the new input node to the current namespace scope.
+            Namespace scope = this.scopeStack.First.Value;
+            scope[idItem.Id] =
+                t == Type.Bool    ? new InputValue<Bool>(  (value as IValue<Bool>  ).Value) :
+                t == Type.Int     ? new InputValue<Int>(   (value as IValue<Int>   ).Value) :
+                t == Type.Double  ? new InputValue<Double>((value as IValue<Double>).Value) :
+                t == Type.String  ? new InputValue<String>((value as IValue<String>).Value) :
+                t == Type.Trigger ? new InputTrigger(      (value as ITrigger      ).Provoked) :
+                throw new Exception("Unsupported type from assignment for new input").
+                    With("Type", t);
         }
-        */
 
         /*
         /// <summary>This assigns several existing input nodes with a new value.</summary>

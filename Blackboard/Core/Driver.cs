@@ -28,7 +28,7 @@ namespace Blackboard.Core {
             this.addOperators();
             this.addFunctions();
             this.addConstants();
-        } 
+        }
 
         #region Built-in Functions and Constants...
 

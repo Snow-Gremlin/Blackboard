@@ -15,7 +15,7 @@ namespace BlackboardTests.CoreTests {
         [TestMethod]
         public void TestFunctionsOr() {
             Driver driver = new();
-            FuncGroup group = driver.Global.Find("operators", "or") as FuncGroup;
+            FuncGroup group = driver.Global.Find(Driver.OperatorNamespace, "or") as FuncGroup;
 
             InputTrigger       tNode = new();
             InputValue<Bool>   bNode = new();
@@ -57,7 +57,7 @@ namespace BlackboardTests.CoreTests {
         [TestMethod]
         public void TestFunctionsSum() {
             Driver driver = new();
-            FuncGroup group = driver.Global.Find("operators", "sum") as FuncGroup;
+            FuncGroup group = driver.Global.Find(Driver.OperatorNamespace, "sum") as FuncGroup;
 
             InputValue<Bool>   bNode = new();
             InputValue<Int>    iNode = new();

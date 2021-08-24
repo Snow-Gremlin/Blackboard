@@ -14,7 +14,7 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<IValue<Bool>, IValue<T>, IValue<T>>((test, left, right) => new Select<T>(test, left, right));
+            new Function<IValue<Bool>, IValue<T>, IValue<T>, Select<T>>((test, left, right) => new Select<T>(test, left, right));
 
         /// <summary>Creates a selection value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

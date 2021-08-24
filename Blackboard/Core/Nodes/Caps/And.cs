@@ -11,7 +11,8 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class And: Nary<Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new FunctionN<IValue<Bool>>((values) => new And(values));
+        static public readonly IFunction Factory =
+            new FunctionN<IValue<Bool>, And>((values) => new And(values));
 
         /// <summary>Creates a boolean AND value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

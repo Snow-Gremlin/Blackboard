@@ -102,7 +102,7 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <param name="funcName">The display name for this function.</param>
         /// <param name="func">The function to perform for this node.</param>
         static public IFunction Factory(string funcName, S.Func<double, double> func) =>
-            new Function<IValue<T>>((value) => new DoubleMath<T>(funcName, func, value));
+            new Function<IValue<T>, DoubleMath<T>>((value) => new DoubleMath<T>(funcName, func, value));
 
         /// <summary>The name of the function for this mathmatics.</summary>
         private readonly string funcName;

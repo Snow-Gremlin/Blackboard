@@ -161,7 +161,7 @@
 <Statement> := _
     | <NewTypedInput>
     | <NewVarInput>
-#    | <AssignExisting>
+    | <Declaration>
 #    | <DefineTypedRule>
 #    | <DefineVarRule>
 #    | <PullTrigger>
@@ -169,31 +169,26 @@
 
 #----------------------------------------------------------
 
-<NewTypedInput> := [DeclareIn] <AnyBaseType> {startNewInput} <NewTypedInputPart> <NewTypedInputTail>;
+<NewTypedInput> := [DeclareIn] <RootType> {reduceNodes} <NewTypedInputPart> <NewTypedInputTail>;
 
 <NewTypedInputTail> := _
     | [Comma] <NewTypedInputPart> <NewTypedInputTail>;
 
 <NewTypedInputPart> := [Identifier] {pushId} {newTypeInputNoAssign}
-    | [Identifier] {pushId} [Assign] <Conditional> {newTypeInputWithAssign};
+    | [Identifier] {pushId} [Assign] <Declaration> {newTypeInputWithAssign};
 
 #----------------------------------------------------------
 
-<NewVarInput> := [DeclareIn] {startNewInput} <NewVarInputPart> <NewVarInputTail>
-    | [DeclareIn] [Var] {startNewInput} <NewVarInputPart> <NewVarInputTail>;
+<NewVarInput> := [DeclareIn] {reduceNodes} <NewVarInputPart> <NewVarInputTail>
+    | [DeclareIn] [Var] {reduceNodes} <NewVarInputPart> <NewVarInputTail>;
 
 <NewVarInputTail> := _
     | [Comma] <NewVarInputPart> <NewVarInputTail>;
 
-<NewVarInputPart> := [Identifier] {pushId} [Assign] <Conditional> {newVarInputWithAssign};
-
+<NewVarInputPart> := [Identifier] {pushId} [Assign] <Declaration> {newVarInputWithAssign};
+    
 #----------------------------------------------------------
 
-###<AssignExisting> := <Id> <AssignExistingMore> [Assign] <Conditional> {assignExisting};
-###
-###<AssignExistingMore> := _
-###    | [Assign] <Id> <AssignExistingMore>;
-###
 ###<DefineTypedRule> := {startDefine} [Type] {setType} <Id> [Define] <Conditional> {typeDefine};
 ###
 ###<DefineVarRule> := {startDefine} <Id> [Define] <Conditional> {varDefine};
@@ -202,6 +197,9 @@
 ###    | <Conditional> [Trigger] <Id> {conditionalPullTrigger};
     
 #==========================================================
+
+<Declaration> := <Conditional>
+    | <Declaration> [Assign] {reduceNodes} <Conditional> {assignment};
 
 <Conditional> := <LogicalOr>
     | <Conditional> [Test] <Conditional> [Else] <Conditional> {trinary};
@@ -256,12 +254,14 @@
     | [Not]    <Expression> {not}
     | [Pos]    <Expression>
     | [Invert] <Expression> {invert}
-    | [ParOpen] <AnyBaseType> [ParClose] <Expression> {cast};
+    | [ParOpen] <RootType> [ParClose] <Expression> {cast};
 
 <Expression> := <Value>
     | [ParOpen] <Conditional> [ParClose]
     | <Expression> [Dot] [Identifier] {memberAccess}
-    | <Expression> [ParOpen] {startCall} <Args> [ParClose] {endCall};
+    | <Expression> <Call>;
+
+<Call> := [ParOpen] {startCall} <Args> [ParClose] {endCall};
 
 <Args> := _
     | <Conditional> <ArgsTail>;
@@ -278,7 +278,7 @@
     | [Double] {pushDouble}
     | [String] {pushString};
 
-<AnyBaseType> := [TypeBool] {pushType}
+<RootType> := [TypeBool] {pushType}
     | [TypeInt]     {pushType}
     | [TypeDouble]  {pushType}
     | [TypeString]  {pushType}

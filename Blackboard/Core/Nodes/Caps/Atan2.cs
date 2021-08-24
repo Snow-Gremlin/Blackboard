@@ -11,7 +11,8 @@ namespace Blackboard.Core.Nodes.Caps {
         where T : IFloatingPoint<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new Function<IValue<T>, IValue<T>>((input1, input2) => new Atan2<T>(input1, input2));
+        static public readonly IFunction Factory =
+            new Function<IValue<T>, IValue<T>, Atan2<T>>((input1, input2) => new Atan2<T>(input1, input2));
 
         /// <summary>Creates an atan2 value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

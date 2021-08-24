@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Core.Functions {
 
@@ -15,13 +16,13 @@ namespace Blackboard.Core.Functions {
         public FuncGroup(IEnumerable<IFunction> funcs) : base(funcs) { }
 
         /// <summary>Finds and returns the best matching function in this collection.</summary>
-        /// <param name="nodes">The input to match against the function signatures with.</param>
+        /// <param name="types">The input types to match against the function signatures with.</param>
         /// <returns>The best matching function or null if none match.</returns>
-        public IFunction Find(params INode[] nodes) {
+        public IFunction Find(params Type[] types) {
             FuncMatch minMatch = null;
             IFunction minFunc = null;
             foreach (IFunction func in this) {
-                FuncMatch match = func.Match(nodes);
+                FuncMatch match = func.Match(types);
                 if (!match.IsMatch) continue;
 
                 if (minMatch is null) {
@@ -39,8 +40,13 @@ namespace Blackboard.Core.Functions {
         }
 
         /// <summary>Builds and returns the function object.</summary>
+        /// <param name="types">The types of the parameters being passed into the function.</param>
+        /// <returns>The new node from the function or null.</returns>
+        public Type Returns(params Type[] types) => this.Find(types)?.Returns(types);
+
+        /// <summary>Builds and returns the function object.</summary>
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new node from the function or null.</returns>
-        public INode Build(params INode[] nodes) => this.Find(nodes)?.Build(nodes);
+        public INode Build(params INode[] nodes) => this.Find(nodes.Select(Type.TypeOf).ToArray())?.Build(nodes);
     }
 }

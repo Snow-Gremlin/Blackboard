@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<IValue<Bool>, IValue<Bool>>((left, right) => new Implies(left, right));
+            new Function<IValue<Bool>, IValue<Bool>, Implies>((left, right) => new Implies(left, right));
 
         /// <summary>Creates an implied value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

@@ -12,7 +12,8 @@ namespace Blackboard.Core.Nodes.Caps {
         where T : IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new FunctionN<IValue<T>>((inputs) => new Max<T>(inputs));
+        static public readonly IFunction Factory =
+            new FunctionN<IValue<T>, Max<T>>((inputs) => new Max<T>(inputs));
 
         /// <summary>Creates a maximum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

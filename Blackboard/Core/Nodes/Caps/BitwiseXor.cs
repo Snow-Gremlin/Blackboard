@@ -13,7 +13,8 @@ namespace Blackboard.Core.Nodes.Caps {
         where T : IBitwise<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new FunctionN<IValue<T>>((values) => new BitwiseXor<T>(values));
+        static public readonly IFunction Factory =
+            new FunctionN<IValue<T>, BitwiseXor<T>>((values) => new BitwiseXor<T>(values));
 
         /// <summary>Creates a bitwise Exclusive OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

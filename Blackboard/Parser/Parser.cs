@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using PP = PetiteParser;
 using S = System;
+using Blackboard.Parser.Actors;
 
 namespace Blackboard.Parser {
 
@@ -74,12 +75,11 @@ namespace Blackboard.Parser {
                 { "clear",         this.handleClear },
                 { "pushNamespace", this.handlePushNamespace },
                 { "popNamespace",  this.handlePopNamespace },
-                { "startNewInput", this.handleStartNewInput },
+                { "reduceNodes",   this.handleReduceNodes },
 
                 { "newTypeInputNoAssign",   this.handleNewTypeInputNoAssign },
                 { "newTypeInputWithAssign", this.handleNewTypeInputWithAssign },
                 { "newVarInputWithAssign",  this.handleNewVarInputWithAssign },
-                //{ "assignExisting",         this.handleAssignExisting },
 
                 //{ "startDefine",            this.handleStartDefine },
                 //{ "typeDefine",             this.handleTypeDefine },
@@ -87,6 +87,7 @@ namespace Blackboard.Parser {
                 //{ "pullTrigger",            this.handlePullTrigger },
                 //{ "conditionalPullTrigger", this.handleConditionalPullTrigger },
 
+                { "assignment",   this.handleAssignment },
                 { "cast",         this.handleCast },
                 { "memberAccess", this.handleMemberAccess },
                 { "startCall",    this.handleStartCall },
@@ -136,18 +137,9 @@ namespace Blackboard.Parser {
             FuncGroup op = this.driver.Global.Find(Driver.OperatorNamespace, name) as FuncGroup;
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 PP.Scanner.Location loc = args.Tokens[^1].End;
-                INode[] inputs = this.popNode(count);
-                INode node = op.Build(inputs);
-                
-                if (node is null) {
-                    throw new Exception("The operator can not be called with given input.").
-                        With("Operation", name).
-                        With("Inputs", string.Join(", ", inputs.TypeNames())).
-                        With("Location", loc.ToString());
-                }
-
-                if (inputs.IsConstant()) node = node.ToLiteral();
-                this.push(loc, node);
+                IActor[] inputs = this.pop<IActor>(count);
+                IActor actor = new Operator(op, name, loc, inputs);
+                this.push(loc, actor);
             };
         }
     
@@ -183,14 +175,15 @@ namespace Blackboard.Parser {
         /// <param name="value">The value from the stack, the value found at this identifier, or null.</param>
         private void push(PP.Scanner.Location loc, string id, object value) => this.push(new StackItem(loc, id, value));
 
-        /// <summary>Pops one or more values off the stack of nodes.</summary>
-        /// <param name="count">The number of nodes to pop.</param>
-        /// <returns>The popped nodes in the order oldest to newest.</returns>
-        private INode[] popNode(int count = 1) {
-            INode[] nodes = new INode[count];
+        /// <summary>Pops one or more items off the stack.</summary>
+        /// <typeparam name="T">The types of the items to read as.</typeparam>
+        /// <param name="count">The number of items to pop.</param>
+        /// <returns>The popped items in the order oldest to newest.</returns>
+        private T[] pop<T>(int count = 1) {
+            T[] items = new T[count];
             for (int i = 0; i < count; i++)
-                nodes[count-1-i] = this.popValueAs<INode>();
-            return nodes;
+                items[count-1-i] = this.popValueAs<T>();
+            return items;
         }
 
         /// <summary>Pops off whatever is on the top of the stack.</summary>
@@ -205,79 +198,6 @@ namespace Blackboard.Parser {
         /// <typeparam name="T">The type of the value expected to be popped off the stack.</typeparam>
         /// <returns>The value which was on top of the stack.</returns>
         private T popValueAs<T>() => this.pop().ValueAs<T>();
-
-        /*
-        /// <summary>Creates a new input value node or trigger.</summary>
-        /// <param name="loc">The location this assignment was written at.</param>
-        /// <param name="typeText">The type of the input node to create.</param>
-        /// <param name="id">The identifier of the input node to create.</param>
-        /// <param name="node">This is the value to initialize the input node with, may be null to use a default value.</param>
-        private void createInputValue(PP.Scanner.Location loc, string typeText, Identifier id, INode value) {
-            INamespace scope = this.scope(id, true);
-            if (scope is null) throw new Exception("The group in " + id + " is not an identifier group "+
-                    "so it can not be used as a scope for an assigned input variable at " + loc + ".");
-
-            string name = id[^1];
-            if (scope.Exists(name)) throw new Exception("Can not assign a new " + typeText+ " input. "+
-                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
-            
-            INode _ =
-                typeText == "bool" ?   new InputValue<bool>(  name, scope, Cast.AsBoolValue(   value)) :
-                typeText == "int"?     new InputValue<int>(   name, scope, Cast.AsIntValue(    value)) :
-                typeText == "double"?  new InputValue<double>(name, scope, Cast.AsDoubleValue( value)) :
-                typeText == "trigger"? new InputTrigger(      name, scope, Cast.AsTriggerValue(value)) :
-                throw new Exception("Unknown type: " + typeText);
-        }
-        */
-
-        /*
-        /// <summary>Defines an output value node or a constant value.</summary>
-        /// <param name="loc">The location this defition was written at.</param>
-        /// <param name="typeText">The type of the value to define.</param>
-        /// <param name="id">The identifier of the value to create.</param>
-        /// <param name="node">The node to define the value with.</param>
-        private void defineValue(PP.Scanner.Location loc, string typeText, Identifier id, INode node) {
-            INamespace scope = this.scope(id, true);
-            if (scope is null) throw new Exception("The top group in " + id + " is not an identifier group "+
-                    "so it can not be used as a scope for a typed definition at " + loc + ".");
-
-            string name = id[^1];
-            if (scope.Exists(name)) throw new Exception("Can not define a new " + typeText+ " node. "+
-                    "An identifier already exists by the name " + name + " in " + scope + " at " + loc + ".");
-
-            // If right is constant or literal create a const node instead of an output node.
-            if (Cast.IsConstant(node)) {
-                INode _ =
-                    typeText == "bool"   ? new Const<bool>(  name, scope, Cast.AsBoolValue(  node)) :
-                    typeText == "int"    ? new Const<int>(   name, scope, Cast.AsIntValue(   node)) :
-                    typeText == "double" ? new Const<double>(name, scope, Cast.AsDoubleValue(node)) :
-                    throw new Exception("Unable to define " + id + " of constant type " + typeText +
-                        " with " + Cast.TypeName(node) + " at " + id.Location + ".");
-            } else {
-                INode _ =
-                    typeText == "bool"    ? new OutputValue<bool>(  Cast.As<IValue<bool>>(  node), name, scope) :
-                    typeText == "int"     ? new OutputValue<int>(   Cast.As<IValue<int>>(   node), name, scope) :
-                    typeText == "double"  ? new OutputValue<double>(Cast.As<IValue<double>>(node), name, scope) :
-                    typeText == "trigger" ? new OutputTrigger(      Cast.As<ITrigger>(      node), name, scope) :
-                    throw new Exception("Unable to define " + id + " of type " + typeText +
-                        " with " + Cast.TypeName(node) + " at " + id.Location + ".");
-            }
-        }
-        */
-
-        /*
-        /// <summary>This will try to provoke a trigger.</summary>
-        /// <param name="loc">The location this provoke was written at.</param>
-        /// <param name="id">The identifier of the value to provoke.</param>
-        private void provokeTrigger(PP.Scanner.Location loc, Identifier id) {
-            INode node = this.find(id);
-            if (node is null)
-                throw new Exception("No trigger by the name " + id + " was found at " + loc + ".");
-            if (node is not ITriggerInput trigger)
-                throw new Exception("May only provoke an input trigger. " + id + " is not an input trigger at " + loc + ".");
-            trigger.Trigger();
-        }
-        */
 
         #endregion
         #region Handlers...
@@ -320,9 +240,9 @@ namespace Blackboard.Parser {
             this.scopeStack.RemoveFirst();
         }
 
-        /// <summary>This is called when a new typed or var input is started.</summary>
+        /// <summary>This is called when the parser should start reducing the value to a literal instead of creating nodes.</summary>
         /// <param name="args">The token information from the parser.</param>
-        private void handleStartNewInput(PP.ParseTree.PromptArgs args) {
+        private void handleReduceNodes(PP.ParseTree.PromptArgs args) {
             this.reduceNodes = true;
         }
 
@@ -484,6 +404,17 @@ namespace Blackboard.Parser {
         private void handleSetType(PP.ParseTree.PromptArgs args) =>
             this.typeText = args.Tokens[^1].Text;
         */
+
+
+        /// <summary>This handles assigning the left value to the right value.</summary>
+        /// <param name="args">The token information from the parser.</param>
+        private void handleAssignment(PP.ParseTree.PromptArgs args) {
+
+
+            // TODO: IMPLEMENT
+
+
+        }
 
         /// <summary>This handles performing a type cast of a node.</summary>
         /// <param name="args">The token information from the parser.</param>

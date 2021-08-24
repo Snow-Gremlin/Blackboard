@@ -11,7 +11,8 @@ namespace Blackboard.Core.Nodes.Caps {
         where T : IFloatingPoint<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new Function<IValue<T>, IValue<Int>>((input1, input2) => new Round<T>(input1, input2));
+        static public readonly IFunction Factory =
+            new Function<IValue<T>, IValue<Int>, Round<T>>((input1, input2) => new Round<T>(input1, input2));
 
         /// <summary>Creates a rounded value node.</summary>
         /// <param name="source1">This is the value parent for the source value.</param>

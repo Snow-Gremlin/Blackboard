@@ -10,7 +10,8 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class InputTrigger: TriggerNode, ITriggerInput {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new Function(() => new InputTrigger());
+        static public readonly IFunction Factory =
+            new Function<InputTrigger>(() => new InputTrigger());
 
         /// <summary>Creates a new input trigger.</summary>
         /// <param name="provoked">The initial provoked state of the trigger.</param>

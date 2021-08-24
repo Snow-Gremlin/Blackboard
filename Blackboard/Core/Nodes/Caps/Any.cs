@@ -9,7 +9,8 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class Any: Multitrigger {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new FunctionN<ITrigger>((values) => new Any(values));
+        static public readonly IFunction Factory =
+            new FunctionN<ITrigger, Any>((values) => new Any(values));
 
         /// <summary>Creates an any trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

@@ -17,7 +17,7 @@ namespace Blackboard.Core.Nodes.Caps {
         /// This is used for things like String where all types can implicit cast to a string.
         /// </param>
         static public IFunction Factory(bool needOneNoCast = false) => 
-            new FunctionN<IValue<T>>((inputs) => new Sum<T>(inputs), needOneNoCast: needOneNoCast);
+            new FunctionN<IValue<T>, Sum<T>>((inputs) => new Sum<T>(inputs), needOneNoCast: needOneNoCast);
 
         /// <summary>Creates a sum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

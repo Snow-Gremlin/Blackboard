@@ -11,7 +11,8 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class Or: Nary<Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new FunctionN<IValue<Bool>>((inputs) => new Or(inputs));
+        static public readonly IFunction Factory =
+            new FunctionN<IValue<Bool>, Or>((inputs) => new Or(inputs));
 
         /// <summary>Creates a boolean OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

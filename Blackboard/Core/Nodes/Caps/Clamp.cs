@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<IValue<T>, IValue<T>, IValue<T>>((value1, value2, value3) => new Clamp<T>(value1, value2, value3));
+            new Function<IValue<T>, IValue<T>, IValue<T>, Clamp<T>>((value1, value2, value3) => new Clamp<T>(value1, value2, value3));
 
         /// <summary>Creates a clamped value node.</summary>
         /// <param name="source1">This is the value parent that is clamped.</param>

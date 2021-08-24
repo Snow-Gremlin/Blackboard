@@ -13,7 +13,7 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<IValue<T>, IValue<T>>((left, right) => new LessThan<T>(left, right));
+            new Function<IValue<T>, IValue<T>, LessThan<T>>((left, right) => new LessThan<T>(left, right));
 
         /// <summary>Creates a less than value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

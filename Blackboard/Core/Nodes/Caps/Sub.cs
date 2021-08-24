@@ -10,7 +10,8 @@ namespace Blackboard.Core.Nodes.Caps {
         where T : IArithmetic<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new Function<IValue<T>, IValue<T>>((left, right) => new Sub<T>(left, right));
+        static public readonly IFunction Factory =
+            new Function<IValue<T>, IValue<T>, Sub<T>>((left, right) => new Sub<T>(left, right));
 
         /// <summary>Creates a subtraction value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>

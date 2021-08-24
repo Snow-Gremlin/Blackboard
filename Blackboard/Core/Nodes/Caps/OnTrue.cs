@@ -10,7 +10,8 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class OnTrue: TriggerNode {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new Function<IValue<Bool>>((input) => new OnTrue(input));
+        static public readonly IFunction Factory =
+            new Function<IValue<Bool>, OnTrue>((input) => new OnTrue(input));
 
         /// <summary>This is the parent node to read from.</summary>
         private IValue<Bool> source;

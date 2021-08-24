@@ -130,14 +130,20 @@ namespace Blackboard.Core {
             this.exps = new();
         }
 
-        /// <summary>This determines the implicit and inheritence math.</summary>
-        /// <param name="t">The type to try castig to.</param>
+        /// <summary>This determines the implicit and inheritence match.</summary>
+        /// <param name="node">The node to try castig from.</param>
         /// <returns>The result of the match.</returns>
         static public TypeMatch Match<T>(INode node) where T : INode =>
-            FromType<T>().Match(TypeOf(node));
+            Match<T>(TypeOf(node));
 
         /// <summary>This determines the implicit and inheritence match.</summary>
-        /// <param name="t">The type to try castig to.</param>
+        /// <param name="t">The type to try castig from.</param>
+        /// <returns>The result of the match.</returns>
+        static public TypeMatch Match<T>(Type t) where T : INode =>
+            FromType<T>().Match(t);
+
+        /// <summary>This determines the implicit and inheritence match.</summary>
+        /// <param name="t">The type to try castig from.</param>
         /// <returns>The result of the match.</returns>
         public TypeMatch Match(Type t) {
             int steps;

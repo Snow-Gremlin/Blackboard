@@ -16,7 +16,8 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class BoolAsTrigger: Node, ITrigger {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new Function<IValue<Bool>>((value) => new BoolAsTrigger(value));
+        static public readonly IFunction Factory =
+            new Function<IValue<Bool>, BoolAsTrigger>((value) => new BoolAsTrigger(value));
 
         /// <summary>This is the parent node to read from.</summary>
         private IValue<Bool> source;

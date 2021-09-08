@@ -138,7 +138,14 @@ namespace Blackboard.Parser {
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 PP.Scanner.Location loc = args.Tokens[^1].End;
                 IActor[] inputs = this.pop<IActor>(count);
-                IActor actor = new Operator(op, name, loc, inputs);
+                Type[] types = inputs.Select((arg) => arg.Returns()).ToArray();
+                IFunction func = op.Find(types);
+                if (func is null)
+                    throw new Exception("No operator found which acceptsthe the input types.").
+                        With("Operator name", name).
+                        With("Inputs", string.Join(", ", types.Select((t) => t.ToString()))).
+                        With("Location", loc.ToString());
+                IActor actor = new Operator(func, name, loc, inputs);
                 this.push(loc, actor);
             };
         }

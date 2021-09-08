@@ -42,7 +42,7 @@ namespace Blackboard.Core.Functions {
         /// <summary>Builds and returns the function object.</summary>
         /// <param name="types">The types of the parameters being passed into the function.</param>
         /// <returns>The new node from the function or null.</returns>
-        public Type Returns(params Type[] types) => this.Find(types)?.Returns(types);
+        public Type Returns(params Type[] types) => this.Find(types)?.Returns();
 
         /// <summary>Builds and returns the function object.</summary>
         /// <param name="nodes">The nodes as parameters to the function.</param>

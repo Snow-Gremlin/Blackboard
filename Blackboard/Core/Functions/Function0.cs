@@ -23,10 +23,8 @@ namespace Blackboard.Core.Functions {
         public FuncMatch Match(Type[] types) => types.Length != 0 ? FuncMatch.NoMatch : FuncMatch.Create(false);
 
         /// <summary>Returns the type that would be return if built.</summary>
-        /// <remarks>Before this is called, Match must have been possible.</remarks>
-        /// <param name="types">The types passing into the function as parameters.</param>
         /// <returns>The type which would be returned.</returns>
-        public Type Returns(Type[] types) => Type.FromType<TReturn>();
+        public Type Returns() => Type.FromType<TReturn>();
 
         /// <summary>Builds and returns the function object.</summary>
         /// <remarks>Before this is called, Match must have been possible.</remarks>

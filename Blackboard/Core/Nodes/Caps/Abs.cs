@@ -11,12 +11,12 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<IValue<T>, Abs<T>>((value) => new Abs<T>(value));
+            new Function<IValueAdopter<T>, Abs<T>>((value) => new Abs<T>(value));
 
         /// <summary>Creates an absolute value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Abs(IValue<T> source = null, T value = default) :
+        public Abs(IValueAdopter<T> source = null, T value = default) :
             base(source, value) { }
 
         /// <summary>This will get the absolute value of the parent's value on evaluation.</summary>

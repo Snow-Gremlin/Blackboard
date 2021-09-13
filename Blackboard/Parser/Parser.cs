@@ -29,24 +29,24 @@ namespace Blackboard.Parser {
         static private readonly PP.Parser.Parser BaseParser;
 
         private Driver driver;
-        private LinkedList<StackItem> stack;
+        private LinkedList<IActor> stack;
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
         private LinkedList<Namespace> scopeStack;
-        private bool reduceNodes;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="driver">The driver to modify.</param>
         public Parser(Driver driver) {
             this.driver  = driver;
-            this.stack   = new LinkedList<StackItem>();
+            this.stack   = new LinkedList<IActor>();
             this.prompts = null;
             this.scopeStack = new LinkedList<Namespace>();
             this.scopeStack.AddFirst(this.driver.Global);
-            this.reduceNodes = false;
 
             this.initPrompts();
             this.validatePrompts();
         }
+
+        #region Read Methods...
 
         /// <summary>Reads the given lines of input Blackline code.</summary>
         /// <param name="input">The input code to parse.</param>
@@ -67,6 +67,7 @@ namespace Blackboard.Parser {
         private void read(PP.ParseTree.ITreeNode node) =>
             node.Process(this.prompts);
 
+        #endregion
         #region Prompts Setup...
 
         /// <summary>Initializes the prompts and operators for this parser.</summary>
@@ -145,13 +146,13 @@ namespace Blackboard.Parser {
                         With("Operator name", name).
                         With("Inputs", string.Join(", ", types.Select((t) => t.ToString()))).
                         With("Location", loc.ToString());
-                IActor actor = new Operator(func, name, loc, inputs);
-                this.push(loc, actor);
+                this.push(new Operator(func, name, loc, inputs));
             };
         }
     
         /// <summary>Validates that all prompts in the grammar are handled.</summary>
         private void validatePrompts() {
+            // TODO: Move most of this over to PetiteParser.
             HashSet<string> remaining = new(BaseParser.Grammar.Prompts.Select((prompt) => prompt.Name));
             HashSet<string> missing = new();
             foreach (string name in this.prompts.Keys) {
@@ -165,56 +166,40 @@ namespace Blackboard.Parser {
         }
 
         #endregion
-        #region Helpers...
+        #region Stack Helpers...
 
-        /// <summary>Pushes a stack item onto the stack.</summary>
-        /// <param name="value">The value to push.</param>
-        private void push(StackItem value) => this.stack.AddLast(value);
+        /// <summary>Pushes an actor onto the stack.</summary>
+        /// <param name="actor">The actor to push.</param>
+        private void push(IActor actor) => this.stack.AddLast(actor);
 
-        /// <summary>Pushes a new stack item onto the stack.</summary>
-        /// <param name="loc">The location of the stack item.</param>
-        /// <param name="value">The value from the stack,  or null.</param>
-        private void push(PP.Scanner.Location loc, object value) => this.push(new StackItem(loc, value));
-
-        /// <summary>Pushes a new stack item onto the stack.</summary>
-        /// <param name="loc">The location of the stack item.</param>
-        /// <param name="id">The optional identifier for the value or empty.</param>
-        /// <param name="value">The value from the stack, the value found at this identifier, or null.</param>
-        private void push(PP.Scanner.Location loc, string id, object value) => this.push(new StackItem(loc, id, value));
-
-        /// <summary>Pops one or more items off the stack.</summary>
-        /// <typeparam name="T">The types of the items to read as.</typeparam>
-        /// <param name="count">The number of items to pop.</param>
-        /// <returns>The popped items in the order oldest to newest.</returns>
-        private T[] pop<T>(int count = 1) {
+        /// <summary>Pops one or more actor off the stack.</summary>
+        /// <typeparam name="T">The types of the actor to read as.</typeparam>
+        /// <param name="count">The number of actors to pop.</param>
+        /// <returns>The popped actors in the order oldest to newest.</returns>
+        private T[] pop<T>(int count = 1)
+            where T: class, IActor {
             T[] items = new T[count];
             for (int i = 0; i < count; i++)
-                items[count-1-i] = this.popValueAs<T>();
+                items[count-1-i] = this.pop() as T;
             return items;
         }
 
-        /// <summary>Pops off whatever is on the top of the stack.</summary>
-        /// <returns>The value which was on top of the stack.</returns>
-        private StackItem pop() {
-            StackItem item = this.stack.Last.Value;
+        /// <summary>Pops off an actor is on the top of the stack.</summary>
+        /// <returns>The actor which was on top of the stack.</returns>
+        private IActor pop() {
+            IActor item = this.stack.Last.Value;
             this.stack.RemoveLast();
             return item;
         }
 
-        /// <summary>Pops off whatever is on the top of the stack and returns the type-cast value.</summary>
-        /// <typeparam name="T">The type of the value expected to be popped off the stack.</typeparam>
-        /// <returns>The value which was on top of the stack.</returns>
-        private T popValueAs<T>() => this.pop().ValueAs<T>();
-
         #endregion
-        #region Handlers...
+        #region Prompt Handlers...
 
         /// <summary>This is called before each statement to prepare and clean up the parser.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleClear(PP.ParseTree.PromptArgs args) {
             args.Tokens.Clear();
             this.stack.Clear();
-            this.reduceNodes = false;
         }
 
         /// <summary>This is called when the namespace has openned.</summary>
@@ -250,14 +235,14 @@ namespace Blackboard.Parser {
         /// <summary>This is called when the parser should start reducing the value to a literal instead of creating nodes.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleReduceNodes(PP.ParseTree.PromptArgs args) {
-            this.reduceNodes = true;
+            //this.reduceNodes = true;
         }
 
         /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputNoAssign(PP.ParseTree.PromptArgs args) {
-            StackItem idItem   = this.pop();
-            StackItem typeItem = this.pop();
+            IActor idItem   = this.pop();
+            IActor typeItem = this.pop();
 
             if (idItem.Value is not null)
                 throw new Exception("Can not create new input node. Identifier already exists in the receiver.").

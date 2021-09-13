@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
@@ -13,24 +14,24 @@ namespace Blackboard.Core.Nodes.Caps {
     /// a trigger (e.g. `Trigger && (10 > 3)`). However this trigger will only act provoked, i.e. update its children,
     /// when the boolean changes value. This means that you can get an update from this trigger when it is not provoked.
     /// </remarks>
-    sealed public class BoolAsTrigger: Node, ITrigger {
+    sealed public class BoolAsTrigger: EvalAdopter, ITrigger, IDataNode {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<IValue<Bool>, BoolAsTrigger>((value) => new BoolAsTrigger(value));
+            new Function<IValueAdopter<Bool>, BoolAsTrigger>((value) => new BoolAsTrigger(value));
 
         /// <summary>This is the parent node to read from.</summary>
-        private IValue<Bool> source;
+        private IValueAdopter<Bool> source;
 
         /// <summary>Creates a new bool value to trigger conversion.</summary>
-        public BoolAsTrigger(IValue<Bool> source = null, bool provoked = default) {
+        public BoolAsTrigger(IValueAdopter<Bool> source = null, bool provoked = default) {
             this.Provoked = provoked;
             this.Parent = source;
             this.updateTrigger();
         }
 
         /// <summary>The parent node to get the source value from.</summary>
-        public IValue<Bool> Parent {
+        public IValueAdopter<Bool> Parent {
             get => this.source;
             set {
                 this.SetParent(ref this.source, value);
@@ -45,12 +46,22 @@ namespace Blackboard.Core.Nodes.Caps {
             }
         }
 
+        /// <summary>This gets the data being stored in this node.</summary>
+        /// <remarks>This returns the data from the souce boolean value or null if not set.</remarks>
+        /// <returns>The data being stored.</returns>
+        public IData Data { get => this.source?.Data; }
+
+        /// <summary>Determines if the node is constant or if all of it's parents are constant.</summary>
+        /// <remarks>This returns if the source boolean value is constent or not.</remarks>
+        /// <returns>True if constant, false otherwise.</returns>
+        public bool IsConstant => this.source?.IsConstant ?? false;
+
         /// <summary>Converts this node to a literal.</summary>
         /// <returns>
         /// Returns a bool literal or null, normally a trigger can not be a literal
         /// but in this case it just passes through the literal for the source.
         /// </returns>
-        public override INode ToLiteral() => this.source?.ToLiteral();
+        public IConstant ToConstant() => this.source?.ToConstant();
 
         /// <summary>
         /// Indicates if this trigger should be treated as if it had been fired during
@@ -79,11 +90,11 @@ namespace Blackboard.Core.Nodes.Caps {
         /// The set of all the children if the value changed during update.
         /// If the value hasn't changed then no children are returned.
         /// </returns>
-        sealed public override IEnumerable<INode> Eval() =>
-            this.updateTrigger() ? this.Children : Enumerable.Empty<INode>();
+        sealed public override IEnumerable<IEvaluatable> Eval() =>
+            this.updateTrigger() ? this.Children.OfType<IEvaluatable>() : Enumerable.Empty<IEvaluatable>();
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "BoolAsTrigger("+NodeString(this.source)+")";
+        public override string ToString() => "BoolAsTrigger("+INode.NodeString(this.source)+")";
     }
 }

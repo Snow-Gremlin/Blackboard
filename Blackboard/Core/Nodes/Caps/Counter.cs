@@ -10,19 +10,19 @@ namespace Blackboard.Core.Nodes.Caps {
         where T : IArithmetic<T>, IComparable<T>, new() {
 
         /// <summary>This is the parent to increment the counter.</summary>
-        private ITrigger increment;
+        private ITriggerAdopter increment;
 
         /// <summary>This is the parent to decrement the counter.</summary>
-        private ITrigger decrement;
+        private ITriggerAdopter decrement;
 
         /// <summary>This is the parent reset the counter to the reset value.</summary>
-        private ITrigger reset;
+        private ITriggerAdopter reset;
 
         /// <summary>The value to step during an increment or decrement.</summary>
-        private IValue<T> delta;
+        private IValueAdopter<T> delta;
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
-        private IValue<T> resetValue;
+        private IValueAdopter<T> resetValue;
 
         /// <summary>Creates a new node for counting events.</summary>
         /// <param name="increment">The initial parent to trigger an increment.</param>
@@ -31,8 +31,8 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <param name="delta">The initial parent for the step value.</param>
         /// <param name="resetValue">The initial reset value parent.</param>
         /// <param name="value">The initial value for this counter.</param>
-        public Counter(ITrigger increment = null, ITrigger decrement = null, ITrigger reset = null,
-            IValue<T> delta = null, IValue<T> resetValue = null, T value = default) : base(value) {
+        public Counter(ITriggerAdopter increment = null, ITriggerAdopter decrement = null, ITriggerAdopter reset = null,
+            IValueAdopter<T> delta = null, IValueAdopter<T> resetValue = null, T value = default) : base(value) {
             this.Increment = increment;
             this.Decrement = decrement;
             this.Reset = reset;
@@ -41,33 +41,33 @@ namespace Blackboard.Core.Nodes.Caps {
         }
 
         /// <summary>This is the parent to increment the counter.</summary>
-        public ITrigger Increment {
+        public ITriggerAdopter Increment {
             get => this.increment;
             set => this.SetParent(ref this.increment, value);
         }
 
         /// <summary>This is the parent to decrement the counter.</summary>
-        public ITrigger Decrement {
+        public ITriggerAdopter Decrement {
             get => this.decrement;
             set => this.SetParent(ref this.decrement, value);
         }
 
         /// <summary>This is the parent reset the toggle to false.</summary>
-        public ITrigger Reset {
+        public ITriggerAdopter Reset {
             get => this.reset;
             set => this.SetParent(ref this.reset, value);
         }
 
         /// <summary>The value to step during an increment or decrement.</summary>
         /// <remarks>If this parent is null then the counter will increment and decrement by one.</remarks>
-        public IValue<T> Delta {
+        public IValueAdopter<T> Delta {
             get => this.delta;
             set => this.SetParent(ref this.delta, value);
         }
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
-        public IValue<T> ResetValue {
+        public IValueAdopter<T> ResetValue {
             get => this.resetValue;
             set => this.SetParent(ref this.resetValue, value);
         }
@@ -97,7 +97,10 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
         public override string ToString() =>
-            "Counter<"+this.Value+">("+NodeString(this.increment)+", "+NodeString(this.decrement)+", "+
-                NodeString(this.reset)+", "+NodeString(this.delta)+", "+NodeString(this.resetValue)+")";
+            "Counter<"+this.Value+">("+INode.NodeString(this.increment)+
+            ", "+INode.NodeString(this.decrement)+
+            ", "+INode.NodeString(this.reset)+
+            ", "+INode.NodeString(this.delta)+
+            ", "+INode.NodeString(this.resetValue)+")";
     }
 }

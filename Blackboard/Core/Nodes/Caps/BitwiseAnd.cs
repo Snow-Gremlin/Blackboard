@@ -14,17 +14,17 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new FunctionN<IValue<T>, BitwiseAnd<T>>((values) => new BitwiseAnd<T>(values));
+            new FunctionN<IValueAdopter<T>, BitwiseAnd<T>>((values) => new BitwiseAnd<T>(values));
 
         /// <summary>Creates a bitwise AND value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public BitwiseAnd(params IValue<T>[] parents) :
+        public BitwiseAnd(params IValueAdopter<T>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a bitwise AND value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public BitwiseAnd(IEnumerable<IValue<T>> parents = null, T value = default) :
+        public BitwiseAnd(IEnumerable<IValueAdopter<T>> parents = null, T value = default) :
             base(parents, value) { }
 
         /// <summary>Gets the bitwise AND of all the parent's booleans.</summary>

@@ -102,7 +102,7 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <param name="funcName">The display name for this function.</param>
         /// <param name="func">The function to perform for this node.</param>
         static public IFunction Factory(string funcName, S.Func<double, double> func) =>
-            new Function<IValue<T>, DoubleMath<T>>((value) => new DoubleMath<T>(funcName, func, value));
+            new Function<IValueAdopter<T>, DoubleMath<T>>((value) => new DoubleMath<T>(funcName, func, value));
 
         /// <summary>The name of the function for this mathmatics.</summary>
         private readonly string funcName;
@@ -113,7 +113,7 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <summary>Creates a double mathmatical function value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public DoubleMath(string funcName, S.Func<double, double> func, IValue<T> source = null, T value = default) :
+        public DoubleMath(string funcName, S.Func<double, double> func, IValueAdopter<T> source = null, T value = default) :
             base(source, value) {
             this.funcName = funcName;
             this.func = func;

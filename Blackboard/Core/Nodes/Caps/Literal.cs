@@ -47,7 +47,7 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>Converts this node to a literal.</summary>
         /// <returns>This returns this literal itself.</returns>
-        public override INode ToLiteral() => this;
+        public override IConstant ToConstant() => this;
 
         /// <summary>This sets the literal value.</summary>
         /// <param name="value">The value to set.</param>

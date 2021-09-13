@@ -12,17 +12,17 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new FunctionN<IValue<Bool>, And>((values) => new And(values));
+            new FunctionN<IValueAdopter<Bool>, And>((values) => new And(values));
 
         /// <summary>Creates a boolean AND value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public And(params IValue<Bool>[] parents) :
+        public And(params IValueAdopter<Bool>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a boolean AND value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public And(IEnumerable<IValue<Bool>> parents = null, Bool value = default) :
+        public And(IEnumerable<IValueAdopter<Bool>> parents = null, Bool value = default) :
             base(parents, value) { }
 
         /// <summary>Gets the AND of all the parent's booleans.</summary>

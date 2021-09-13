@@ -14,17 +14,17 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new FunctionN<IValue<T>, BitwiseXor<T>>((values) => new BitwiseXor<T>(values));
+            new FunctionN<IValueAdopter<T>, BitwiseXor<T>>((values) => new BitwiseXor<T>(values));
 
         /// <summary>Creates a bitwise Exclusive OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public BitwiseXor(params IValue<T>[] parents) :
+        public BitwiseXor(params IValueAdopter<T>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a bitwise Exclusive OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public BitwiseXor(IEnumerable<IValue<T>> parents = null, T value = default) :
+        public BitwiseXor(IEnumerable<IValueAdopter<T>> parents = null, T value = default) :
             base(parents, value) { }
 
         /// <summary>Gets the bitwise Exclusive OR of all the parent's booleans.</summary>

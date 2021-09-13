@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>A base node for a node which has a value.</summary>
     /// <typeparam name="T">The type of the value being held.</typeparam>
-    public abstract class ValueNode<T>: Node, IValue<T>
+    public abstract class ValueNode<T>: EvalAdopter, IValue<T>
         where T : IComparable<T>, new() {
 
         /// <summary>Creates a new value node.</summary>
@@ -17,9 +17,26 @@ namespace Blackboard.Core.Nodes.Bases {
             this.Value = value ?? new();
         }
 
-        /// <summary>Converts this node to a literal.</summary>
-        /// <returns>A literal of this node.</returns>
-        public override INode ToLiteral() => new Literal<T>(this.Value);
+        /// <summary>Determines if the node is constant or if all of it's parents are constant.</summary>
+        /// <returns>True if constant, false otherwise.</returns>
+        public bool IsConstant {
+            get {
+                if (this is IConstant) return true;
+                if (this is IInput) return false;
+                foreach (INode parent in this.Parents) {
+                    if (parent is not IConstant) return false;
+                }
+                return true;
+            }
+        }
+
+        /// <summary>Converts this node to a constant.</summary>
+        /// <returns>A consant of this node.</returns>
+        public virtual IConstant ToConstant() => new Literal<T>(this.Value);
+
+        /// <summary>This gets the data being stored in this node.</summary>
+        /// <returns>The data being stored.</returns>
+        public IData Data { get => this.Value; }
 
         /// <summary>The value being held by this node.</summary>
         public T Value { get; private set; }
@@ -46,7 +63,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// The set of all the children if the value changed during update.
         /// If the value hasn't changed then no children are returned.
         /// </returns>
-        sealed public override IEnumerable<INode> Eval() =>
-            this.UpdateValue() ? this.Children : Enumerable.Empty<INode>();
+        sealed public override IEnumerable<IEvaluatable> Eval() =>
+            this.UpdateValue() ? this.Children.OfType<IEvaluatable>() : Enumerable.Empty<IEvaluatable>();
     }
 }

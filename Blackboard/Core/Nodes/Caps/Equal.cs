@@ -13,13 +13,13 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<IValue<T>, IValue<T>, Equal<T>>((left, right) => new Equal<T>(left, right));
+            new Function<IValueAdopter<T>, IValueAdopter<T>, Equal<T>>((left, right) => new Equal<T>(left, right));
 
         /// <summary>Creates an equal value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Equal(IValue<T> source1 = null, IValue<T> source2 = null, Bool value = default) :
+        public Equal(IValueAdopter<T> source1 = null, IValueAdopter<T> source2 = null, Bool value = default) :
             base(source1, source2, value) { }
 
         /// <summary>Determine if the parent's values are equal during evaluation.</summary>

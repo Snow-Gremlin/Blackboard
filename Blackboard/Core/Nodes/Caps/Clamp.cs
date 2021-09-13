@@ -11,15 +11,16 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<IValue<T>, IValue<T>, IValue<T>, Clamp<T>>((value1, value2, value3) => new Clamp<T>(value1, value2, value3));
+            new Function<IValueAdopter<T>, IValueAdopter<T>, IValueAdopter<T>, Clamp<T>>(
+                (value1, value2, value3) => new Clamp<T>(value1, value2, value3));
 
         /// <summary>Creates a clamped value node.</summary>
         /// <param name="source1">This is the value parent that is clamped.</param>
         /// <param name="source2">This is the minimum value parent for the lower edge of the clamp.</param>
         /// <param name="source3">This is the maximum value parent for the upper edge of the clamp.</param>
         /// <param name="value">The default value for this node.</param>
-        public Clamp(IValue<T> source1 = null, IValue<T> source2 = null,
-            IValue<T> source3 = null, T value = default) :
+        public Clamp(IValueAdopter<T> source1 = null, IValueAdopter<T> source2 = null,
+            IValueAdopter<T> source3 = null, T value = default) :
             base(source1, source2, source3, value) { }
 
         /// <summary>Selects the value to return during evaluation.</summary>

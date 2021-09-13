@@ -12,19 +12,19 @@ namespace Blackboard.Core.Nodes.Bases {
         where TResult : IComparable<TResult>, new() {
 
         /// <summary>This is the parent node to read from.</summary>
-        private IValue<T1> source;
+        private IValueAdopter<T1> source;
 
         /// <summary>Creates a unary value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Unary(IValue<T1> source = null, TResult value = default) : base(value) {
+        public Unary(IValueAdopter<T1> source = null, TResult value = default) : base(value) {
             this.SetParent(ref this.source, source);
             this.UpdateValue();
         }
 
         /// <summary>The parent node to get the source value from.</summary>
-        public IValue<T1> Parent {
+        public IValueAdopter<T1> Parent {
             get => this.source;
             set {
                 this.SetParent(ref this.source, value);
@@ -55,6 +55,6 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "("+NodeString(this.source)+")";
+        public override string ToString() => "("+INode.NodeString(this.source)+")";
     }
 }

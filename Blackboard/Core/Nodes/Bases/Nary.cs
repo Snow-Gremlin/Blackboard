@@ -12,19 +12,19 @@ namespace Blackboard.Core.Nodes.Bases {
         where TResult : IComparable<TResult>, new() {
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
-        private List<IValue<TIn>> sources;
+        private List<IValueAdopter<TIn>> sources;
 
         /// <summary>Creates a N-ary value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Nary(params IValue<TIn>[] parents) :
-            this(parents as IEnumerable<IValue<TIn>>) { }
+        public Nary(params IValueAdopter<TIn>[] parents) :
+            this(parents as IEnumerable<IValueAdopter<TIn>>) { }
 
         /// <summary>Creates a N-ary value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public Nary(IEnumerable<IValue<TIn>> parents = null, TResult value = default) : base(value) {
-            this.sources = new List<IValue<TIn>>();
+        public Nary(IEnumerable<IValueAdopter<TIn>> parents = null, TResult value = default) : base(value) {
+            this.sources = new List<IValueAdopter<TIn>>();
             this.AddParents(parents);
             // UpdateValue already called by AddParents.
         }
@@ -32,15 +32,15 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>This adds parents to this node.</summary>
         /// <remarks>The value is updated after these parents are added.</remarks>
         /// <param name="parents">The set of parents to add.</param>
-        public void AddParents(params IValue<TIn>[] parents) =>
-            this.AddParents(parents as IEnumerable<IValue<TIn>>);
+        public void AddParents(params IValueAdopter<TIn>[] parents) =>
+            this.AddParents(parents as IEnumerable<IValueAdopter<TIn>>);
 
         /// <summary>This adds parents to this node.</summary>
         /// <remarks>The value is updated after these parents are added.</remarks>
         /// <param name="parents">The set of parents to add.</param>
-        public void AddParents(IEnumerable<IValue<TIn>> parents) {
+        public void AddParents(IEnumerable<IValueAdopter<TIn>> parents) {
             this.sources.AddRange(parents);
-            foreach (IValue<TIn> parent in parents)
+            foreach (IValueAdopter<TIn> parent in parents)
                 parent.AddChildren(this);
             this.UpdateValue();
         }
@@ -49,16 +49,16 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <remarks>The value is updated after these parents are removed.</remarks>
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
-        public bool RemoveParents(params IValue<TIn>[] parents) =>
-            this.RemoveParents(parents as IEnumerable<IValue<TIn>>);
+        public bool RemoveParents(params IValueAdopter<TIn>[] parents) =>
+            this.RemoveParents(parents as IEnumerable<IValueAdopter<TIn>>);
 
         /// <summary>This removes the given parents from this node.</summary>
         /// <remarks>The value is updated after these parents are removed.</remarks>
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
-        public bool RemoveParents(IEnumerable<IValue<TIn>> parents) {
+        public bool RemoveParents(IEnumerable<IValueAdopter<TIn>> parents) {
             bool anyRemoved = false;
-            foreach (IValue<TIn> parent in parents) {
+            foreach (IValueAdopter<TIn> parent in parents) {
                 if (this.sources.Remove(parent)) {
                     parent.RemoveChildren(this);
                     anyRemoved = true;
@@ -84,6 +84,6 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "("+NodeString(this.sources)+")";
+        public override string ToString() => "("+INode.NodeString(this.sources)+")";
     }
 }

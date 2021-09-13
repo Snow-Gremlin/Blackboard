@@ -14,24 +14,24 @@ namespace Blackboard.Core.Nodes.Bases {
         where TResult : IComparable<TResult>, new() {
 
         /// <summary>This is the first parent node to read from.</summary>
-        private IValue<T1> source1;
+        private IValueAdopter<T1> source1;
 
         /// <summary>This is the second parent node to read from.</summary>
-        private IValue<T2> source2;
+        private IValueAdopter<T2> source2;
 
         /// <summary>Creates a binary value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Binary(IValue<T1> source1 = null, IValue<T2> source2 = null, TResult value = default) : base(value) {
+        public Binary(IValueAdopter<T1> source1 = null, IValueAdopter<T2> source2 = null, TResult value = default) : base(value) {
             this.SetParent(ref this.source1, source1);
             this.SetParent(ref this.source2, source2);
             this.UpdateValue();
         }
 
         /// <summary>The first parent node to get the first source value from.</summary>
-        public IValue<T1> Parent1 {
+        public IValueAdopter<T1> Parent1 {
             get => this.source1;
             set {
                 this.SetParent(ref this.source1, value);
@@ -40,7 +40,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The second parent node to get the second source value from.</summary>
-        public IValue<T2> Parent2 {
+        public IValueAdopter<T2> Parent2 {
             get => this.source2;
             set {
                 this.SetParent(ref this.source2, value);
@@ -74,6 +74,6 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
         public override string ToString() =>
-            "("+NodeString(this.source1)+", "+NodeString(this.source2)+")";
+            "("+INode.NodeString(this.source1)+", "+INode.NodeString(this.source2)+")";
     }
 }

@@ -16,13 +16,13 @@ namespace Blackboard.Core.Nodes.Bases {
         where TResult : IComparable<TResult>, new() {
 
         /// <summary>This is the first parent node to read from.</summary>
-        private IValue<T1> source1;
+        private IValueAdopter<T1> source1;
 
         /// <summary>This is the second parent node to read from.</summary>
-        private IValue<T2> source2;
+        private IValueAdopter<T2> source2;
 
         /// <summary>This is the third parent node to read from.</summary>
-        private IValue<T3> source3;
+        private IValueAdopter<T3> source3;
 
         /// <summary>Creates a ternary value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
@@ -30,8 +30,8 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="source3">This is the third parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Ternary(IValue<T1> source1 = null, IValue<T2> source2 = null,
-            IValue<T3> source3 = null, TResult value = default) : base(value) {
+        public Ternary(IValueAdopter<T1> source1 = null, IValueAdopter<T2> source2 = null,
+            IValueAdopter<T3> source3 = null, TResult value = default) : base(value) {
             this.SetParent(ref this.source1, source1);
             this.SetParent(ref this.source2, source2);
             this.SetParent(ref this.source3, source3);
@@ -39,7 +39,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The first parent node to get the first source value from.</summary>
-        public IValue<T1> Parent1 {
+        public IValueAdopter<T1> Parent1 {
             get => this.source1;
             set {
                 this.SetParent(ref this.source1, value);
@@ -48,7 +48,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The second parent node to get the second source value from.</summary>
-        public IValue<T2> Parent2 {
+        public IValueAdopter<T2> Parent2 {
             get => this.source2;
             set {
                 this.SetParent(ref this.source2, value);
@@ -57,7 +57,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The third parent node to get the third source value from.</summary>
-        public IValue<T3> Parent3 {
+        public IValueAdopter<T3> Parent3 {
             get => this.source3;
             set {
                 this.SetParent(ref this.source3, value);
@@ -93,6 +93,8 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
         public override string ToString() =>
-            "("+NodeString(this.source1)+", "+NodeString(this.source2)+", "+NodeString(this.source3)+")";
+            "("+INode.NodeString(this.source1)+
+            ", "+INode.NodeString(this.source2)+
+            ", "+INode.NodeString(this.source3)+")";
     }
 }

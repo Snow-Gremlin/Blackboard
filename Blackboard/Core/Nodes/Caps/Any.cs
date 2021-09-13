@@ -10,16 +10,16 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new FunctionN<ITrigger, Any>((values) => new Any(values));
+            new FunctionN<ITriggerAdopter, Any>((values) => new Any(values));
 
         /// <summary>Creates an any trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Any(params ITrigger[] parents) :
+        public Any(params ITriggerAdopter[] parents) :
             base(parents) { }
 
         /// <summary>Creates an any trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Any(IEnumerable<ITrigger> parents = null) :
+        public Any(IEnumerable<ITriggerAdopter> parents = null) :
             base(parents) { }
 
         /// <summary>Checks if any of the parents are provoked during evaluation.</summary>

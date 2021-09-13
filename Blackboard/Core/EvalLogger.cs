@@ -35,7 +35,7 @@ namespace Blackboard.Core {
 
         /// <summary>This is called when a node is evaluated.</summary>
         /// <param name="node">The node about to be evaluated.</param>
-        virtual public void Eval(INode node) =>
+        virtual public void Eval(IEvaluatable node) =>
             this.Log("  Eval("+node.Depth+"): "+node);
 
         /// <summary>This is called when a node has been evaluated.</summary>

@@ -18,11 +18,11 @@ namespace Blackboard.Core {
         public const string OperatorNamespace = "$operators";
 
         /// <summary>The input nodes which have been modified.</summary>
-        private List<INode> touched;
+        private List<IEvaluatable> touched;
 
         /// <summary>Creates a new driver.</summary>
         public Driver() {
-            this.touched = new List<INode>();
+            this.touched = new List<IEvaluatable>();
             this.Global = new Namespace();
 
             this.addOperators();
@@ -438,18 +438,18 @@ namespace Blackboard.Core {
         /// <summary>Updates and propogates the changes from the given inputs through the blackboard nodes.</summary>
         /// <param name="logger">An optional logger for debugging this evaluation.</param>
         public void Evaluate(EvalLogger logger = null) {
-            LinkedList<INode> pending = new();
+            LinkedList<IEvaluatable> pending = new();
             LinkedList<ITrigger> needsReset = new();
-            pending.SortInsertUnique(this.touched);
+            pending.SortInsertUniqueEvaluatable(this.touched);
             this.touched.Clear();
             logger?.StartEval(pending);
 
             while (pending.Count > 0) {
-                INode node = pending.TakeFirst();
+                IEvaluatable node = pending.TakeFirst();
                 logger?.Eval(node);
                 IEnumerable<INode> children = node.Eval();
                 logger?.EvalResult(children);
-                pending.SortInsertUnique(children);
+                pending.SortInsertUniqueEvaluatable(children);
                 if (node is ITrigger trigger)
                     needsReset.AddLast(trigger);
             }

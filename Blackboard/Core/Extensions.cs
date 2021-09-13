@@ -85,8 +85,8 @@ namespace Blackboard.Core {
         /// <summary>This determines if all the given nodes are constant.</summary>
         /// <param name="nodes">The nodes to check if constant.</param>
         /// <returns>True if all nodes are constant, false otherwise.</returns>
-        static public bool IsConstant(this IEnumerable<INode> nodes) =>
-            nodes.All((node) => node.IsConstant());
+        static public bool IsConstant(this IEnumerable<IDataNode> nodes) =>
+            nodes.All((node) => node.IsConstant);
 
         /// <summary>The string of the type names for all the given name.</summary>
         /// <param name="nodes">The nodes to get the string type for.</param>
@@ -110,9 +110,9 @@ namespace Blackboard.Core {
         /// <summary>Gets the maximum depth from the given nodes.</summary>
         /// <param name="nodes">The nodes to get the maximum depth from.</param>
         /// <returns>The maximum found depth.</returns>
-        static public int MaxDepth(this IEnumerable<INode> nodes) {
+        static public int MaxDepth(this IEnumerable<IEvaluatable> nodes) {
             int depth = 0;
-            foreach (INode node in nodes)
+            foreach (IEvaluatable node in nodes)
                 depth = Math.Max(depth, node.Depth);
             return depth;
         }
@@ -128,19 +128,23 @@ namespace Blackboard.Core {
             return value;
         }
 
-        /// <summary>This sort inserts unique values into the given linked list.</summary>
+        /// <summary>This sort inserts unique evaluatable nodes into the given linked list.</summary>
+        /// <typeparam name="T">The type of evaulatable node being worked with.</typeparam>
         /// <param name="list">The list of values to sort insert into.</param>
         /// <param name="nodes">The set of nodes to insert.</param>
-        static public void SortInsertUnique(this LinkedList<INode> list, params INode[] nodes) =>
-            list.SortInsertUnique(nodes as IEnumerable<INode>);
+        static public void SortInsertUniqueEvaluatable<T>(this LinkedList<T> list, params T[] nodes)
+            where T : IEvaluatable =>
+            list.SortInsertUniqueEvaluatable(nodes as IEnumerable<T>);
 
-        /// <summary>This sort inserts unique values into the given linked list.</summary>
+        /// <summary>This sort inserts unique evaluatable nodes into the given linked list.</summary>
+        /// <typeparam name="T">The type of evaulatable node being worked with.</typeparam>
         /// <param name="list">The list of values to sort insert into.</param>
         /// <param name="nodes">The set of nodes to insert.</param>
-        static public void SortInsertUnique(this LinkedList<INode> list, IEnumerable<INode> nodes) {
-            foreach (INode node in nodes) {
+        static public void SortInsertUniqueEvaluatable<T>(this LinkedList<T> list, IEnumerable<T> nodes)
+            where T : IEvaluatable {
+            foreach (T node in nodes) {
                 bool addToEnd = true;
-                for (LinkedListNode<INode> pend = list.First; pend is not null; pend = pend.Next) {
+                for (LinkedListNode<T> pend = list.First; pend is not null; pend = pend.Next) {
                     if (ReferenceEquals(node, pend.Value)) {
                         addToEnd = false;
                         break;

@@ -11,15 +11,16 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<IValue<T>, IValue<T>, IValue<T>, Lerp<T>>((input1, input2, input3) => new Lerp<T>(input1, input2, input3));
+            new Function<IValueAdopter<T>, IValueAdopter<T>, IValueAdopter<T>, Lerp<T>>(
+                (input1, input2, input3) => new Lerp<T>(input1, input2, input3));
 
         /// <summary>Creates a linear interpolation value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="source3">This is the third parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Lerp(IValue<T> source1 = null, IValue<T> source2 = null,
-            IValue<T> source3 = null, T value = default) :
+        public Lerp(IValueAdopter<T> source1 = null, IValueAdopter<T> source2 = null,
+            IValueAdopter<T> source3 = null, T value = default) :
             base(source1, source2, source3, value) { }
 
         /// <summary>Selects the value to return during evaluation.</summary>

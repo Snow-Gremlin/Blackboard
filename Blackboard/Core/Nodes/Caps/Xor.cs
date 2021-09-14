@@ -13,17 +13,17 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new FunctionN<IValue<Bool>, Xor>((inputs) => new Xor(inputs));
+            new FunctionN<IValueAdopter<Bool>, Xor>((inputs) => new Xor(inputs));
 
         /// <summary>Creates a boolean Exclusive OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Xor(params IValue<Bool>[] parents) :
+        public Xor(params IValueAdopter<Bool>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a boolean Exclusive OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public Xor(IEnumerable<IValue<Bool>> parents = null, Bool value = default) :
+        public Xor(IEnumerable<IValueAdopter<Bool>> parents = null, Bool value = default) :
             base(parents, value) { }
 
         /// <summary>Gets the Exclusive OR of all the parent's booleans.</summary>

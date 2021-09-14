@@ -447,7 +447,7 @@ namespace Blackboard.Core {
             while (pending.Count > 0) {
                 IEvaluatable node = pending.TakeFirst();
                 logger?.Eval(node);
-                IEnumerable<INode> children = node.Eval();
+                IEnumerable<IEvaluatable> children = node.Eval();
                 logger?.EvalResult(children);
                 pending.SortInsertUniqueEvaluatable(children);
                 if (node is ITrigger trigger)

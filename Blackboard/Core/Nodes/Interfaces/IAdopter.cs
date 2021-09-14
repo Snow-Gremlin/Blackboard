@@ -3,7 +3,7 @@
 namespace Blackboard.Core.Nodes.Interfaces {
 
     /// <summary>This means the nodes can have children added and removed from it.</summary>
-    public interface IAdopter {
+    public interface IAdopter: INode {
 
         /// <summary>Adds children nodes onto this node.</summary>
         /// <remarks>This will always check for loops.</remarks>

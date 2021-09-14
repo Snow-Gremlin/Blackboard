@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Bases {
         static public void UpdateDepths(LinkedList<IEvaluatable> pending) {
             while (pending.Count > 0) {
                 IEvaluatable node = pending.TakeFirst();
-                int depth = node.Parents.MaxDepth() + 1;
+                int depth = node.Parents.OfType<IEvaluatable>().MaxDepth() + 1;
                 if ((node.Depth != depth) && (node is EvalAdopter)) {
                     (node as EvalAdopter).Depth = depth;
                     pending.SortInsertUniqueEvaluatable(node.Children.OfType<IEvaluatable>());

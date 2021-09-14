@@ -11,12 +11,12 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<IValue<T>, Neg<T>>((input) => new Neg<T>(input));
+            new Function<IValueAdopter<T>, Neg<T>>((input) => new Neg<T>(input));
 
         /// <summary>Creates a negated value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Neg(IValue<T> source = null, T value = default) :
+        public Neg(IValueAdopter<T> source = null, T value = default) :
             base(source, value) { }
 
         /// <summary>Gets the negated value of the parent during evaluation.</summary>

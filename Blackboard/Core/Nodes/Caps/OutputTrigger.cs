@@ -9,16 +9,16 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class OutputTrigger: TriggerNode, ITriggerOutput {
 
         /// <summary>The parent source to listen to.</summary>
-        private ITrigger source;
+        private ITriggerAdopter source;
 
         /// <summary>Creates a new output trigger.</summary>
         /// <param name="source">The initial source trigger to listen to.</param>
-        public OutputTrigger(ITrigger source = null) {
+        public OutputTrigger(ITriggerAdopter source = null) {
             this.Parent = source;
         }
 
         /// <summary>The parent trigger node to listen to.</summary>
-        public ITrigger Parent {
+        public ITriggerAdopter Parent {
             get => this.source;
             set => this.SetParent(ref this.source, value);
         }

@@ -13,17 +13,17 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new FunctionN<IValue<T>, Max<T>>((inputs) => new Max<T>(inputs));
+            new FunctionN<IValueAdopter<T>, Max<T>>((inputs) => new Max<T>(inputs));
 
         /// <summary>Creates a maximum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Max(params IValue<T>[] parents) :
+        public Max(params IValueAdopter<T>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a maximum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public Max(IEnumerable<IValue<T>> parents = null, T value = default) :
+        public Max(IEnumerable<IValueAdopter<T>> parents = null, T value = default) :
             base(parents, value) { }
 
         /// <summary>Updates this node's value to the maximum value during evaluation.</summary>

@@ -10,12 +10,12 @@ namespace Blackboard.Core.Nodes.Caps {
     sealed public class Not: Unary<Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFunction Factory = new Function<IValue<Bool>, Not>((input) => new Not(input));
+        static public readonly IFunction Factory = new Function<IValueAdopter<Bool>, Not>((input) => new Not(input));
 
         /// <summary>Creates a boolean NOT value node.</summary>edrgs
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Not(IValue<Bool> source = null, Bool value = default) :
+        public Not(IValueAdopter<Bool> source = null, Bool value = default) :
             base(source, value) { }
 
         /// <summary>Gets the boolean NOT of the given parent during evaluation.</summary>

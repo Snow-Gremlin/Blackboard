@@ -31,6 +31,12 @@ namespace Blackboard.Core {
         /// <summary>The string value type.</summary>
         static public readonly Type String;
 
+        /// <summary>The namespace value type.</summary>
+        static public readonly Type Namespace;
+
+        /// <summary>The function group value type.</summary>
+        static public readonly Type Function;
+
         /// <summary>The integer counter type which is an extension of the integer value type.</summary>
         static public readonly Type CounterInt;
 
@@ -63,6 +69,8 @@ namespace Blackboard.Core {
                 yield return Toggler;
                 yield return CounterDouble;
                 yield return CounterInt;
+                yield return Namespace;
+                yield return Function;
                 yield return String;
                 yield return Double;
                 yield return Int;
@@ -251,6 +259,8 @@ namespace Blackboard.Core {
             Int           = new Type("int",            typeof(IValue<Int>),     Node);
             Double        = new Type("double",         typeof(IValue<Double>),  Node);
             String        = new Type("string",         typeof(IValue<String>),  Node);
+            Namespace     = new Type("Namespace",      typeof(Namespace),       Node);
+            Function      = new Type("Function",       typeof(FuncGroup),       Node);
             CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int);
             CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double);
             Toggler       = new Type("toggler",        typeof(Toggler),         Bool);
@@ -259,14 +269,14 @@ namespace Blackboard.Core {
             LatchDouble   = new Type("latch-double",   typeof(Latch<Double>),   Double);
             LatchString   = new Type("latch-string",   typeof(Latch<String>),   String);
 
-            addCast<IValue<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
-            addCast<IValue<Bool>>(Bool.imps, String,  (input) => new Implicit<Bool, String>(input));
+            addCast<IValueAdopter<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
+            addCast<IValueAdopter<Bool>>(Bool.imps, String,  (input) => new Implicit<Bool, String>(input));
 
-            addCast<IValue<Int>>(Int.imps, Double, (input) => new Implicit<Int, Double>(input));
-            addCast<IValue<Int>>(Int.imps, String, (input) => new Implicit<Int, String>(input));
+            addCast<IValueAdopter<Int>>(Int.imps, Double, (input) => new Implicit<Int, Double>(input));
+            addCast<IValueAdopter<Int>>(Int.imps, String, (input) => new Implicit<Int, String>(input));
 
-            addCast<IValue<Double>>(Double.exps, Int,    (input) => new Explicit<Double, Int>(input));
-            addCast<IValue<Double>>(Double.imps, String, (input) => new Implicit<Double, String>(input));
+            addCast<IValueAdopter<Double>>(Double.exps, Int,    (input) => new Explicit<Double, Int>(input));
+            addCast<IValueAdopter<Double>>(Double.imps, String, (input) => new Implicit<Double, String>(input));
         }
     }
 }

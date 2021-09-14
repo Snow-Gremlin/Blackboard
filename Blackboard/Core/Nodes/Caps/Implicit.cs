@@ -12,12 +12,12 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<IValue<T1>, Implicit<T1, T2>>((value) => new Implicit<T1, T2>(value));
+            new Function<IValueAdopter<T1>, Implicit<T1, T2>>((value) => new Implicit<T1, T2>(value));
 
         /// <summary>Creates a node implicit cast.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Implicit(IValue<T1> source = null, T2 value = default) :
+        public Implicit(IValueAdopter<T1> source = null, T2 value = default) :
             base(source, value) { }
 
         /// <summary>Gets the value to cast from the parent during evaluation.</summary>

@@ -13,17 +13,17 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new FunctionN<IValue<T>, Min<T>>((inputs) => new Min<T>(inputs));
+            new FunctionN<IValueAdopter<T>, Min<T>>((inputs) => new Min<T>(inputs));
 
         /// <summary>Creates a minimum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Min(params IValue<T>[] parents) :
+        public Min(params IValueAdopter<T>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a minimum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public Min(IEnumerable<IValue<T>> parents = null, T value = default) :
+        public Min(IEnumerable<IValueAdopter<T>> parents = null, T value = default) :
             base(parents, value) { }
 
         /// <summary>Updates this node's value to the minimum value during evaluation.</summary>

@@ -10,48 +10,48 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new FunctionN<INode, OnChange>((inputs) => new OnChange(inputs), false);
+            new FunctionN<IAdopter, OnChange>((inputs) => new OnChange(inputs), false);
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
-        private List<INode> sources;
+        private List<IAdopter> sources;
 
         /// <summary>Creates an on change trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public OnChange(params INode[] parents) :
-            this(parents as IEnumerable<INode>) { }
+        public OnChange(params IAdopter[] parents) :
+            this(parents as IEnumerable<IAdopter>) { }
 
         /// <summary>Creates an on change trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public OnChange(IEnumerable<INode> parents = null) {
-            this.sources = new List<INode>();
+        public OnChange(IEnumerable<IAdopter> parents = null) {
+            this.sources = new List<IAdopter>();
             this.AddParents(parents);
         }
  
         /// <summary>This adds parents to this node.</summary>
         /// <param name="parents">The set of parents to add.</param>
-        public void AddParents(params INode[] parents) =>
-            this.AddParents(parents as IEnumerable<INode>);
+        public void AddParents(params IAdopter[] parents) =>
+            this.AddParents(parents as IEnumerable<IAdopter>);
 
         /// <summary>This adds parents to this node.</summary>
         /// <param name="parents">The set of parents to add.</param>
-        public void AddParents(IEnumerable<INode> parents) {
+        public void AddParents(IEnumerable<IAdopter> parents) {
             this.sources.AddRange(parents);
-            foreach (INode parent in parents)
+            foreach (IAdopter parent in parents)
                 parent.AddChildren(this);
         }
 
         /// <summary>This removes the given parents from this node.</summary>
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
-        public bool RemoveParents(params INode[] parents) =>
-            this.RemoveParents(parents as IEnumerable<INode>);
+        public bool RemoveParents(params IAdopter[] parents) =>
+            this.RemoveParents(parents as IEnumerable<IAdopter>);
 
         /// <summary>This removes the given parents from this node.</summary>
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
-        public bool RemoveParents(IEnumerable<INode> parents) {
+        public bool RemoveParents(IEnumerable<IAdopter> parents) {
             bool anyRemoved = false;
-            foreach (INode parent in parents) {
+            foreach (IAdopter parent in parents) {
                 if (this.sources.Remove(parent)) {
                     parent.RemoveChildren(this);
                     anyRemoved = true;
@@ -69,6 +69,6 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "OnChange("+NodeString(this.sources)+")";
+        public override string ToString() => "OnChange("+INode.NodeString(this.sources)+")";
     }
 }

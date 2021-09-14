@@ -1,11 +1,12 @@
 ﻿using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using Blackboard.Core.Functions;
 using System.Linq;
 
-namespace Blackboard.Core.Functions {
+namespace Blackboard.Core.Nodes.Caps {
 
     /// <summary>A collection of function signatures. Typically these should all have the same name.</summary>
-    public class FuncGroup: List<IFunction> {
+    public class FuncGroup: List<IFunction>, INode {
 
         /// <summary>Creates a new function collection.</summary>
         /// <param name="funcs">The functions to initially add.</param>
@@ -14,6 +15,12 @@ namespace Blackboard.Core.Functions {
         /// <summary>Creates a new function collection.</summary>
         /// <param name="funcs">The functions to initially add.</param>
         public FuncGroup(IEnumerable<IFunction> funcs) : base(funcs) { }
+
+        /// <summary>The set of parent nodes to this node in the graph.</summary>
+        public IEnumerable<INode> Parents => Enumerable.Empty<INode>();
+
+        /// <summary>The set of children nodes to this node in the graph.</summary>
+        public IEnumerable<INode> Children => Enumerable.Empty<INode>();
 
         /// <summary>Finds and returns the best matching function in this collection.</summary>
         /// <param name="types">The input types to match against the function signatures with.</param>

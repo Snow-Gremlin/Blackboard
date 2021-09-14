@@ -13,27 +13,27 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new Function<ITrigger, IValue<T>, Latch<T>>((left, right) => new Latch<T>(left, right));
+            new Function<ITriggerAdopter, IValueAdopter<T>, Latch<T>>((left, right) => new Latch<T>(left, right));
 
         /// <summary>This is the first parent node to read from.</summary>
-        private ITrigger source1;
+        private ITriggerAdopter source1;
 
         /// <summary>This is the second parent node to read from.</summary>
-        private IValue<T> source2;
+        private IValueAdopter<T> source2;
 
         /// <summary>Creates a latching value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="source1">This is the parent that indicates the value should be set.</param>
         /// <param name="source2">This is the parent to get the value from when the other is provoked.</param>
         /// <param name="value">The default value for this node.</param>
-        public Latch(ITrigger source1 = null, IValue<T> source2 = null, T value = default) : base(value) {
+        public Latch(ITriggerAdopter source1 = null, IValueAdopter<T> source2 = null, T value = default) : base(value) {
             this.Parent1 = source1;
             this.Parent2 = source2;
             this.UpdateValue();
         }
 
         /// <summary>The parent node to indicate when the value should be set to the other parent.</summary>
-        public ITrigger Parent1 {
+        public ITriggerAdopter Parent1 {
             get => this.source1;
             set {
                 this.SetParent(ref this.source1, value);
@@ -42,7 +42,7 @@ namespace Blackboard.Core.Nodes.Caps {
         }
 
         /// <summary>The parent node to get the source value from if the other parent is provoked.</summary>
-        public IValue<T> Parent2 {
+        public IValueAdopter<T> Parent2 {
             get => this.source2;
             set {
                 this.SetParent(ref this.source2, value);
@@ -70,6 +70,6 @@ namespace Blackboard.Core.Nodes.Caps {
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
         public override string ToString() => "Latch<"+this.Value+">("+
-            NodeString(this.source1)+", "+NodeString(this.source2)+")";
+            INode.NodeString(this.source1)+", "+INode.NodeString(this.source2)+")";
     }
 }

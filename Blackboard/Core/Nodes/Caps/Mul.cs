@@ -13,17 +13,17 @@ namespace Blackboard.Core.Nodes.Caps {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFunction Factory =
-            new FunctionN<IValue<T>, Mul<T>>((inputs) => new Mul<T>(inputs));
+            new FunctionN<IValueAdopter<T>, Mul<T>>((inputs) => new Mul<T>(inputs));
 
         /// <summary>Creates a product value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Mul(params IValue<T>[] parents) :
+        public Mul(params IValueAdopter<T>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a product value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public Mul(IEnumerable<IValue<T>> parents = null, T value = default) :
+        public Mul(IEnumerable<IValueAdopter<T>> parents = null, T value = default) :
             base(parents, value) { }
 
         /// <summary>Gets the product of the parent values during evaluation.</summary>

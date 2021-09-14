@@ -31,18 +31,18 @@ namespace Blackboard.Core.Nodes.Caps {
         where T : IComparable<T>, new() {
 
         /// <summary>The parent source to listen to.</summary>
-        private IValue<T> source;
+        private IValueAdopter<T> source;
 
         /// <summary>Creates a new output value node.</summary>
         /// <param name="source">The initial source to get the value from.</param>
         /// <param name="value">The initial value for this node.</param>
-        public OutputValue(IValue<T> source = null, T value = default) : base(value) {
+        public OutputValue(IValueAdopter<T> source = null, T value = default) : base(value) {
             this.Parent = source;
             this.UpdateValue();
         }
 
         /// <summary>The parent node to get the value from.</summary>
-        public IValue<T> Parent {
+        public IValueAdopter<T> Parent {
             get => this.source;
             set {
                 this.SetParent(ref this.source, value);

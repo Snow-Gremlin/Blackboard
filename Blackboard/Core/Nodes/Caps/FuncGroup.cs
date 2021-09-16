@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Blackboard.Core.Nodes.Caps {
 
-    /// <summary>A collection of function signatures. Typically these should all have the same name.</summary>
+    /// <summary>A collection of function signatures.</summary>
     public class FuncGroup: List<IFunction>, INode {
 
         /// <summary>Creates a new function collection.</summary>

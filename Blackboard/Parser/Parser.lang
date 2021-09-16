@@ -169,7 +169,7 @@
 
 #----------------------------------------------------------
 
-<NewTypedInput> := [DeclareIn] <RootType> {reduceNodes} <NewTypedInputPart> <NewTypedInputTail>;
+<NewTypedInput> := [DeclareIn] <RootType> <NewTypedInputPart> <NewTypedInputTail>;
 
 <NewTypedInputTail> := _
     | [Comma] <NewTypedInputPart> <NewTypedInputTail>;
@@ -179,8 +179,8 @@
 
 #----------------------------------------------------------
 
-<NewVarInput> := [DeclareIn] {reduceNodes} <NewVarInputPart> <NewVarInputTail>
-    | [DeclareIn] [Var] {reduceNodes} <NewVarInputPart> <NewVarInputTail>;
+<NewVarInput> := [DeclareIn] <NewVarInputPart> <NewVarInputTail>
+    | [DeclareIn] [Var] <NewVarInputPart> <NewVarInputTail>;
 
 <NewVarInputTail> := _
     | [Comma] <NewVarInputPart> <NewVarInputTail>;
@@ -199,7 +199,7 @@
 #==========================================================
 
 <Declaration> := <Conditional>
-    | <Declaration> [Assign] {reduceNodes} <Conditional> {assignment};
+    | <Declaration> [Assign] <Conditional> {assignment};
 
 <Conditional> := <LogicalOr>
     | <Conditional> [Test] <Conditional> [Else] <Conditional> {trinary};

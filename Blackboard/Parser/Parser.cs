@@ -76,7 +76,6 @@ namespace Blackboard.Parser {
                 { "clear",         this.handleClear },
                 { "pushNamespace", this.handlePushNamespace },
                 { "popNamespace",  this.handlePopNamespace },
-                { "reduceNodes",   this.handleReduceNodes },
 
                 { "newTypeInputNoAssign",   this.handleNewTypeInputNoAssign },
                 { "newTypeInputWithAssign", this.handleNewTypeInputWithAssign },
@@ -176,13 +175,17 @@ namespace Blackboard.Parser {
         /// <typeparam name="T">The types of the actor to read as.</typeparam>
         /// <param name="count">The number of actors to pop.</param>
         /// <returns>The popped actors in the order oldest to newest.</returns>
-        private T[] pop<T>(int count = 1)
-            where T: class, IActor {
+        private T[] pop<T>(int count) where T: class, IActor {
             T[] items = new T[count];
             for (int i = 0; i < count; i++)
                 items[count-1-i] = this.pop() as T;
             return items;
         }
+
+        /// <summary>Pops one actor off the stack.</summary>
+        /// <typeparam name="T">The types of the actor to read as.</typeparam>
+        /// <returns>The actor which was on top of the stack.</returns>
+        private T pop<T>() where T : class, IActor => this.pop() as T;
 
         /// <summary>Pops off an actor is on the top of the stack.</summary>
         /// <returns>The actor which was on top of the stack.</returns>
@@ -210,7 +213,7 @@ namespace Blackboard.Parser {
             string text = token.Text;
 
             Namespace scope = this.scopeStack.First.Value;
-            if (scope.Contains(text)) {
+            if (scope.ContainsField(text)) {
                 object obj = scope[text];
                 if (obj is not Namespace nextScope)
                     throw new Exception("Can not open namespace. Another non-namespace exists by that name.").
@@ -232,39 +235,26 @@ namespace Blackboard.Parser {
             this.scopeStack.RemoveFirst();
         }
 
-        /// <summary>This is called when the parser should start reducing the value to a literal instead of creating nodes.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleReduceNodes(PP.ParseTree.PromptArgs args) {
-            //this.reduceNodes = true;
-        }
-
         /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputNoAssign(PP.ParseTree.PromptArgs args) {
-            IActor idItem   = this.pop();
-            IActor typeItem = this.pop();
+            Identifier  idActor   = this.pop<Identifier>();
+            Stash<Type> typeActor = this.pop<Stash<Type>>();
 
-            if (idItem.Value is not null)
-                throw new Exception("Can not create new input node. Identifier already exists in the receiver.").
-                     With("Identifier", idItem);
-            if (!idItem.HasId)
-                throw new Exception("Can not create new input node with no Id.").
-                     With("Identifier", idItem);
-
-            // Unless the identifier has a receiver, add the new input node to the current namespace scope.
-            Namespace scope = this.scopeStack.First.Value;
-            Type t = typeItem.ValueAs<Type>();
-            scope[idItem.Id] =
+            Type t = typeActor.Value;
+            INode newNode =
                 t == Type.Bool    ? new InputValue<Bool>() :
                 t == Type.Int     ? new InputValue<Int>() :
                 t == Type.Double  ? new InputValue<Double>() :
                 t == Type.String  ? new InputValue<String>() :
                 t == Type.Trigger ? new InputTrigger() :
                 throw new Exception("Unsupported type for new input").
-                    With("Type", typeItem);
+                    With("Type", t);
+
+            idActor.Assign(newNode, true);
 
             // Push the type back onto the stack for the next assignment.
-            this.push(typeItem);
+            this.push(typeActor);
         }
 
         /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>

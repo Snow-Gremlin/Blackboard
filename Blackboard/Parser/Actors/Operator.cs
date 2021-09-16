@@ -49,7 +49,7 @@ namespace Blackboard.Parser.Actors {
         /// <returns>The node value of this actor.</returns>
         public INode Evaluate() {
             INode[] inputs = this.Arguments.Select((arg) => arg.Evaluate()).ToArray();
-            INode node = this.build(inputs).ToLiteral();
+            INode node = (this.build(inputs) as IDataNode)?.ToConstant();
             return node is not null ? node :
                 throw new Exception("Unable to evaluate an operator into a constant.").
                     With("Operation", Name).

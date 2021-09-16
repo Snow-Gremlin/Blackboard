@@ -4,7 +4,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Parser.Actors {
 
     /// <summary>An actor which contains an existing node.</summary>
-    sealed internal class Node {
+    sealed internal class Node: IActor {
 
         /// <summary>Creates a new node actor.</summary>
         /// <param name="node">The existing node to store.</param>

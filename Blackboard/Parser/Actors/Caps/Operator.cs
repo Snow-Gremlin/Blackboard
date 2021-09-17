@@ -3,18 +3,19 @@ using Blackboard.Core.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Linq;
 using PP = PetiteParser;
+using Blackboard.Parser.Actors.Interfaces;
 
-namespace Blackboard.Parser.Actors {
+namespace Blackboard.Parser.Actors.Caps {
 
     /// <summary>This is an actor for performing an operation on some inputs.</summary>
-    sealed internal class Operator: IActor {
+    sealed internal class Operator: INodeBuilder {
 
         /// <summary>Creates a new operator actor.</summary>
         /// <param name="func">The function for the operator.</param>
         /// <param name="name">The name of the operator.</param>
         /// <param name="loc">The location this operator was defind in the code.</param>
         /// <param name="arguments">The input arguments for this operator.</param>
-        public Operator(IFunction func, string name, PP.Scanner.Location loc, IActor[] arguments) {
+        public Operator(IFunction func, string name, PP.Scanner.Location loc, INodeBuilder[] arguments) {
             this.Function = func;
             this.Name = name;
             this.Location = loc;
@@ -28,10 +29,21 @@ namespace Blackboard.Parser.Actors {
         public string Name;
 
         /// <summary>The location this operator was defind in the code.</summary>
-        public PP.Scanner.Location Location;
+        public PP.Scanner.Location Location { get; private set; }
 
         /// <summary>The input arguments for this operator.</summary>
-        public IActor[] Arguments;
+        public INodeBuilder[] Arguments;
+
+        /// <summary>Prepare will check, optimize, and simplify the actor as much as possible.</summary>
+        /// <returns>
+        /// This is the actor to replace this one with,
+        /// if this actor is returned then it should not be replaced.
+        /// if null then this actor should be removed.
+        /// </returns>
+        public IActor Prepare() {
+            // TODO: Impelment
+            throw new System.NotImplementedException();
+         }
 
         /// <summary>This will build the node for this operator with the given input.</summary>
         /// <param name="inputs">The input nodes to give as parameters into the operator.</param>
@@ -59,8 +71,8 @@ namespace Blackboard.Parser.Actors {
 
         /// <summary>Creates and writes a node to Blackboard.</summary>
         /// <returns>The node value of this actor.</returns>
-        public INode BuildNode() {
-            INode[] inputs = this.Arguments.Select((arg) => arg.BuildNode()).ToArray();
+        public INode Build() {
+            INode[] inputs = this.Arguments.Select((arg) => arg.Build()).ToArray();
             return this.build(inputs);
         }
 

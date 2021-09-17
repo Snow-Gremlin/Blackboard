@@ -238,8 +238,8 @@ namespace Blackboard.Parser {
         /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputNoAssign(PP.ParseTree.PromptArgs args) {
-            Identifier  idActor   = this.pop<Identifier>();
-            Stash<Type> typeActor = this.pop<Stash<Type>>();
+            IAssignable targetActor = this.pop<IAssignable>();
+            Stash<Type> typeActor   = this.pop<Stash<Type>>();
 
             Type t = typeActor.Value;
             INode newNode =
@@ -251,7 +251,7 @@ namespace Blackboard.Parser {
                 throw new Exception("Unsupported type for new input").
                     With("Type", t);
 
-            idActor.Assign(newNode, true);
+            targetActor.Assign(newNode, true);
 
             // Push the type back onto the stack for the next assignment.
             this.push(typeActor);
@@ -261,8 +261,8 @@ namespace Blackboard.Parser {
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputWithAssign(PP.ParseTree.PromptArgs args) {
             StackItem valueItem = this.pop();
-            StackItem idItem    = this.pop();
-            StackItem typeItem  = this.pop();
+            IAssignable targetActor = this.pop<IAssignable>();
+            Stash<Type> typeItem    = this.pop<Stash<Type>>();
 
             if (idItem.Value is not null)
                 throw new Exception("Can not create new input node. Identifier already exists in the receiver.").

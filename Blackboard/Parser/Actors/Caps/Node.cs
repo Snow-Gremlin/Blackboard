@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Interfaces;
 
-namespace Blackboard.Parser.Actors {
+namespace Blackboard.Parser.Actors.Caps {
 
     /// <summary>An actor which contains an existing node.</summary>
     sealed internal class Node: IActor {

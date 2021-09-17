@@ -3,7 +3,7 @@ using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Interfaces;
 using Caps = Blackboard.Core.Nodes.Caps;
 
-namespace Blackboard.Parser.Actors {
+namespace Blackboard.Parser.Actors.Caps {
 
     /// <summary>Is an actor for creating a new literal node.</summary>
     /// <typeparam name="T">The type of of the value in the actor.</typeparam>

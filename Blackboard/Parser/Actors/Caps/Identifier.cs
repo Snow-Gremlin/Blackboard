@@ -1,12 +1,12 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
+using Blackboard.Parser.Actors.Interfaces;
 
-namespace Blackboard.Parser.Actors {
+namespace Blackboard.Parser.Actors.Caps {
 
     /// <summary>An action for storing an identifier to be created, accesses, etc.</summary>
-    sealed internal class Identifier: IActor {
+    sealed internal class Identifier: IActor, IAssignable {
         private INode node;
 
         /// <summary>Creates a new identifier action.</summary>

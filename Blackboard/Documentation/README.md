@@ -42,30 +42,3 @@ group N.M {
     C := 5;
 }
 ```
-
-## Todo
-
-- Need to handle receivers in definition.
-- Add temp/local value which exists only in a single parse, used for assigning to not recalculate the same value
-- Add multiple assignment (x=y=1)
-- Add a way to read values out of a parse, get/out/return/yield
-- Need to make it not apply until later
-- Need to add uint, int64, uint64, and bytes
-- Need to add counters, latch, and triggers
-- Come up with a way to specify which nodes need to be persisted (inputs, counters, toggles, etc?)
-- Add persistends which also keeps track of deltas to recover if crashed before save
-- Add substring ([x], [x..], [..y], [x..y], [x..^y]), pad methods, format
-- Add isNAN, isInf, etc methods.
-
-## Ideas
-
-- Allow for translations and large dictionaries
-- *Enum*: One and only one value at a time. The values are custom and defined using ints.
-  - `enum{1..10} S1;`
-  - `enum{1, 2, 3} S2;`
-  - `enum{apple, banana, orange} S3;`
-- *Sets*: Unique collection which can be added to or removed from. Sets stay sourced.
-  Add and remove are kicked off by triggers. The set can be of type integers, doubles, bool, or enum.
-  Additionally they may have max, min, average, sum, product, etc.
-- *List*: Are like sets but not sorted and allow more than one duplicate.
-  They have push, pop, queue, dequeue, get index, set index, sort, max, min, average, sum, product, etc.

@@ -34,16 +34,25 @@ namespace Blackboard.Parser.Actors.Caps {
         /// <summary>The input arguments for this operator.</summary>
         public INodeBuilder[] Arguments;
 
-        /// <summary>Prepare will check, optimize, and simplify the actor as much as possible.</summary>
+        #region Prepare Methods...
+
+        /// <summary>Prepare will check and simplify the actor as much as possible.</summary>
         /// <returns>
         /// This is the actor to replace this one with,
         /// if this actor is returned then it should not be replaced.
         /// if null then this actor should be removed.
         /// </returns>
         public IActor Prepare() {
+            this.Arguments = this.Arguments.Select((arg) => arg.Prepare() as INodeBuilder).NotNull().ToArray();
+           
+            //
             // TODO: Impelment
-            throw new System.NotImplementedException();
-         }
+            //
+
+            return this;
+        }
+
+        #endregion
 
         /// <summary>This will build the node for this operator with the given input.</summary>
         /// <param name="inputs">The input nodes to give as parameters into the operator.</param>
@@ -54,25 +63,25 @@ namespace Blackboard.Parser.Actors.Caps {
                 throw new Exception("The operator can not be called with given input.").
                     With("Operation", Name).
                     With("Inputs", string.Join(", ", inputs.TypeNames())).
-                    With("Location", Location.ToString());
+                    With("Location", this.Location.ToString());
         }
 
         /// <summary>Reduces this actor to a literal of the value without writing any nodes.</summary>
         /// <returns>The node value of this actor.</returns>
         public INode Evaluate() {
-            INode[] inputs = this.Arguments.Select((arg) => arg.Evaluate()).ToArray();
+            INode[] inputs = this.Arguments.Select((arg) => arg.Evaluate()).NotNull().ToArray();
             INode node = (this.build(inputs) as IDataNode)?.ToConstant();
             return node is not null ? node :
                 throw new Exception("Unable to evaluate an operator into a constant.").
                     With("Operation", Name).
                     With("Inputs", string.Join(", ", inputs.TypeNames())).
-                    With("Location", Location.ToString());
+                    With("Location", this.Location.ToString());
         }
 
         /// <summary>Creates and writes a node to Blackboard.</summary>
         /// <returns>The node value of this actor.</returns>
         public INode Build() {
-            INode[] inputs = this.Arguments.Select((arg) => arg.Build()).ToArray();
+            INode[] inputs = this.Arguments.Select((arg) => arg.Build()).NotNull().ToArray();
             return this.build(inputs);
         }
 

@@ -9,7 +9,8 @@ using System.Linq;
 using System.Reflection;
 using PP = PetiteParser;
 using S = System;
-using Blackboard.Parser.Actors;
+using Blackboard.Parser.Prepers;
+using Blackboard.Parser.Performers;
 
 namespace Blackboard.Parser {
 
@@ -29,18 +30,22 @@ namespace Blackboard.Parser {
         static private readonly PP.Parser.Parser BaseParser;
 
         private Driver driver;
-        private LinkedList<IActor> stack;
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
         private LinkedList<Namespace> scopeStack;
+        private LinkedList<object> stashStack;
+        private LinkedList<IPreper> stack;
+        private LinkedList<IPerformer> pending;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="driver">The driver to modify.</param>
         public Parser(Driver driver) {
             this.driver  = driver;
-            this.stack   = new LinkedList<IActor>();
             this.prompts = null;
             this.scopeStack = new LinkedList<Namespace>();
             this.scopeStack.AddFirst(this.driver.Global);
+            this.stashStack = new LinkedList<object>();
+            this.stack = new LinkedList<IPreper>();
+            this.pending = new LinkedList<IPerformer>();
 
             this.initPrompts();
             this.validatePrompts();
@@ -137,15 +142,8 @@ namespace Blackboard.Parser {
             FuncGroup op = this.driver.Global.Find(Driver.OperatorNamespace, name) as FuncGroup;
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 PP.Scanner.Location loc = args.Tokens[^1].End;
-                IActor[] inputs = this.pop<IActor>(count);
-                Type[] types = inputs.Select((arg) => arg.Returns()).ToArray();
-                IFunction func = op.Find(types);
-                if (func is null)
-                    throw new Exception("No operator found which acceptsthe the input types.").
-                        With("Operator name", name).
-                        With("Inputs", string.Join(", ", types.Select((t) => t.ToString()))).
-                        With("Location", loc.ToString());
-                this.push(new Operator(func, name, loc, inputs));
+                IPreper[] inputs = this.pop<IPreper>(count);
+                this.push(new FunctionPrep(op, name, loc, inputs));
             };
         }
     
@@ -167,32 +165,41 @@ namespace Blackboard.Parser {
         #endregion
         #region Stack Helpers...
 
-        /// <summary>Pushes an actor onto the stack.</summary>
-        /// <param name="actor">The actor to push.</param>
-        private void push(IActor actor) => this.stack.AddLast(actor);
+        /// <summary>Pushes a preper onto the stack.</summary>
+        /// <param name="preper">The preper to push.</param>
+        private void push(IPreper preper) => this.stack.AddLast(preper);
 
-        /// <summary>Pops one or more actor off the stack.</summary>
-        /// <typeparam name="T">The types of the actor to read as.</typeparam>
-        /// <param name="count">The number of actors to pop.</param>
-        /// <returns>The popped actors in the order oldest to newest.</returns>
-        private T[] pop<T>(int count) where T: class, IActor {
+        /// <summary>Pops off a preper is on the top of the stack.</summary>
+        /// <typeparam name="T">The type of the preper to read as.</typeparam>
+        /// <returns>The preper which was on top of the stack.</returns>
+        private T pop<T>() where T : class, IPreper {
+            IPreper item = this.stack.Last.Value;
+            this.stack.RemoveLast();
+            return item as T;
+        }
+
+        /// <summary>Pops one or more preper off the stack.</summary>
+        /// <typeparam name="T">The types of the prepers to read.</typeparam>
+        /// <param name="count">The number of prepers to pop.</param>
+        /// <returns>The popped prepers in the order oldest to newest.</returns>
+        private T[] pop<T>(int count) where T: class, IPreper {
             T[] items = new T[count];
             for (int i = 0; i < count; i++)
-                items[count-1-i] = this.pop() as T;
+                items[count-1-i] = this.pop<T>();
             return items;
         }
 
-        /// <summary>Pops one actor off the stack.</summary>
-        /// <typeparam name="T">The types of the actor to read as.</typeparam>
-        /// <returns>The actor which was on top of the stack.</returns>
-        private T pop<T>() where T : class, IActor => this.pop() as T;
+        /// <summary>Pushes an object onto the stash stack.</summary>
+        /// <param name="value">The value to push.</param>
+        private void stashPush(object value) => this.stashStack.AddLast(value);
 
-        /// <summary>Pops off an actor is on the top of the stack.</summary>
-        /// <returns>The actor which was on top of the stack.</returns>
-        private IActor pop() {
-            IActor item = this.stack.Last.Value;
-            this.stack.RemoveLast();
-            return item;
+        /// <summary>Pops off an object is on the top of the stash stack.</summary>
+        /// <typeparam name="T">The type of the object to read as.</typeparam>
+        /// <returns>The object which was on top of the stash stack.</returns>
+        private T stashPop<T>() where T : class {
+            object value = this.stashStack.Last.Value;
+            this.stashStack.RemoveLast();
+            return value as T;
         }
 
         #endregion

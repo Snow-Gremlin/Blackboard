@@ -43,7 +43,7 @@
     The sorting of inputs is to help improve the speed of the "find existing" optimization
 - [ ] Unary (i.e. not, negate) optimization to remove duplicates (e.g. `!!x` is just `x`)
 - [ ] Logic reduction (e.g. `A&B | C&B` is `(A|C)& B`)
-- [ ] Math equation reduction
+- [ ] Math equation reduction (e.g. `sum(sum(A, B), C)` is `sum(A, B, C)`)
 - [ ] Find existing N-ary nodes to use instead of using another new node
       (e.g. `X := A + B + 3` and `Y := A + C + B` could share the `A + B` node.
       Using `z` as the `A + B` node, not a named variable, then `X := z + 3` and `Y := z + C`)

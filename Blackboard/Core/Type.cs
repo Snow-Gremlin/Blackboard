@@ -120,6 +120,9 @@ namespace Blackboard.Core {
         /// <remarks>This is only null for Node type since it doesn't inherit from anything.</remarks>
         public readonly Type BaseType;
 
+        /// <summary>The underlying IData type for this node, or null if no data.</summary>
+        public readonly S.Type DataType;
+
         /// <summary>This is a dictionary of other types to an implicit cast.</summary>
         private Dictionary<Type, Caster> imps;
 
@@ -130,12 +133,20 @@ namespace Blackboard.Core {
         /// <param name="name">The name of the type.</param>
         /// <param name="realType">The C# type for this type.</param>
         /// <param name="baseType">The base type this type inherits from.</param>
-        private Type(string name, S.Type realType, Type baseType) {
+        /// <param name="dataType">The IData type underlying this type.</param>
+        private Type(string name, S.Type realType, Type baseType, S.Type dataType) {
             this.Name = name;
             this.RealType = realType;
             this.BaseType = baseType;
+            this.DataType = dataType;
             this.imps = new();
             this.exps = new();
+
+            if ((dataType is not null) == realType.IsAssignableTo(typeof(IDataNode)))
+                throw new Exception("A node type with a data type must implement IDataNode and vice versa.").
+                    With("Name", name).
+                    With("Real Type", realType).
+                    With("Data Type", dataType);
         }
 
         /// <summary>This determines the implicit and inheritence match.</summary>
@@ -218,6 +229,13 @@ namespace Blackboard.Core {
             return null;
         }
 
+        /// <summary>Indicates if this type has a data type underlying it.</summary>
+        /// <remarks>
+        /// Any node which has a data type should be a literal or able to be converted
+        /// into a constant value, and extend IDataNode.
+        /// </remarks>
+        public bool HasData => this.DataType is not null;
+
         /// <summary>Checks the equality of these two types.</summary>
         /// <param name="left">The left type in the equality.</param>
         /// <param name="right">The right type in the equality.</param>
@@ -253,21 +271,21 @@ namespace Blackboard.Core {
 
         /// <summary>Initializes the types before they are used.</summary>
         static Type() {
-            Node          = new Type("node",           typeof(INode),           null);
-            Trigger       = new Type("trigger",        typeof(ITrigger),        Node);
-            Bool          = new Type("bool",           typeof(IValue<Bool>),    Node);
-            Int           = new Type("int",            typeof(IValue<Int>),     Node);
-            Double        = new Type("double",         typeof(IValue<Double>),  Node);
-            String        = new Type("string",         typeof(IValue<String>),  Node);
-            Namespace     = new Type("Namespace",      typeof(Namespace),       Node);
-            Function      = new Type("Function",       typeof(FuncGroup),       Node);
-            CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int);
-            CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double);
-            Toggler       = new Type("toggler",        typeof(Toggler),         Bool);
-            LatchBool     = new Type("latch-bool",     typeof(Latch<Bool>),     Bool);
-            LatchInt      = new Type("latch-int",      typeof(Latch<Int>),      Int);
-            LatchDouble   = new Type("latch-double",   typeof(Latch<Double>),   Double);
-            LatchString   = new Type("latch-string",   typeof(Latch<String>),   String);
+            Node          = new Type("node",           typeof(INode),           null,   null);
+            Trigger       = new Type("trigger",        typeof(ITrigger),        Node,   null);
+            Bool          = new Type("bool",           typeof(IValue<Bool>),    Node,   typeof(Bool));
+            Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int));
+            Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double));
+            String        = new Type("string",         typeof(IValue<String>),  Node,   typeof(String));
+            Namespace     = new Type("Namespace",      typeof(Namespace),       Node,   null);
+            Function      = new Type("Function",       typeof(FuncGroup),       Node,   null);
+            CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int));
+            CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double));
+            Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool));
+            LatchBool     = new Type("latch-bool",     typeof(Latch<Bool>),     Bool,   typeof(Bool));
+            LatchInt      = new Type("latch-int",      typeof(Latch<Int>),      Int,    typeof(Int));
+            LatchDouble   = new Type("latch-double",   typeof(Latch<Double>),   Double, typeof(Double));
+            LatchString   = new Type("latch-string",   typeof(Latch<String>),   String, typeof(String));
 
             addCast<IValueAdopter<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
             addCast<IValueAdopter<Bool>>(Bool.imps, String,  (input) => new Implicit<Bool, String>(input));

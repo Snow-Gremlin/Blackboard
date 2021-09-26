@@ -88,11 +88,18 @@ namespace Blackboard.Core {
         static public bool IsConstant(this IEnumerable<IDataNode> nodes) =>
             nodes.All((node) => node.IsConstant);
 
-        /// <summary>The string of the type names for all the given name.</summary>
+        /// <summary>The types names for all the given nodes.</summary>
+        /// <param name="nodes">The nodes to get the types for.</param>
+        /// <returns>The types of the given nodes.</returns>
+        static public IEnumerable<Type> Types(this IEnumerable<INode> nodes) =>
+            nodes.Select((node) => Type.TypeOf(node));
+
+        /// <summary>The strings for all the given values.</summary>
+        /// <typeparam name="T">The types of values to stringify.</typeparam>
         /// <param name="nodes">The nodes to get the string type for.</param>
-        /// <returns>The strings for the types of the given nodes.</returns>
-        static public IEnumerable<string> TypeNames(this IEnumerable<INode> nodes) =>
-            nodes.Select((node) => Type.TypeOf(node).ToString());
+        /// <returns>The strings for the given values.</returns>
+        static public IEnumerable<string> Strings<T>(this IEnumerable<T> values) =>
+            values.Select((v) => v?.ToString() ?? "null");
 
         /// <summary>Determines if any of values exists in both lists.</summary>
         /// <typeparam name="T">The types of values to find.</typeparam>

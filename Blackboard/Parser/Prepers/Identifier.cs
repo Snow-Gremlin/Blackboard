@@ -1,19 +1,20 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
 
-namespace Blackboard.Parser.Actors {
+namespace Blackboard.Parser.Prepers {
 
     /// <summary>An action for storing an identifier to be created, accesses, etc.</summary>
-    sealed internal class Identifier: IActor, PrepareOptions {
+    sealed internal class Identifier: IPreper  {
 
         /// <summary>Creates a new identifier action.</summary>
         /// <param name="location">The location this identifier was defined.</param>
         /// <param name="scopes">The scope stack that existed when this identifier was created.</param>
         /// <param name="receiver">The receiver this identifier is part of.</param>
         /// <param name="name">The name of this identifier.</param>
-        public Identifier(Location location, Namespace[] scopes, INodeBuilder receiver, string name) {
+        public Identifier(Location location, Namespace[] scopes, IPreper receiver, string name) {
             this.Location = location;
             this.Scopes = scopes;
             this.Receiver = receiver;
@@ -24,7 +25,7 @@ namespace Blackboard.Parser.Actors {
         public Namespace[] Scopes;
 
         /// <summary>The receiver object to read this identifier from.</summary>
-        public INodeBuilder Receiver;
+        public IPreper Receiver;
 
         /// <summary>The name of the identifier to read.</summary>
         public string Name;
@@ -47,14 +48,31 @@ namespace Blackboard.Parser.Actors {
         }
 
         /// <summary>Finds the node in the current receiver after evaluating the receiver.</summary>
+        /// <param name="formula">This is the complete set of performers being prepared.</param>
+        /// <param name="option">The option for preparing this preper.</param>
         /// <returns>The found node in the receiver or null.</returns>
-        private INode resolveInReceiver() {
-            INode receiverNode = this.Receiver.Evaluate();
-            if (receiverNode is not IFieldReader receiver)
+        private INode resolveInReceiver(Formula formula, Options option) {
+            IPerformer receiver = this.Receiver.Prepare(formula, option);
+
+            if (receiver.Returns().IsAssignableTo(typeof(IFieldReader)))
                 throw new Exception("Node can not be used as receiver, so it can not be used with an identifier.").
                     With("Identifier", this.Name).
-                    With("Attempted Receiver", receiverNode).
+                    With("Attempted Receiver", receiver).
                     With("Locacation", this.Location.ToString());
+
+
+            if (receiver is Node receiverNode) {
+
+                // TODO: IMPLEMENT
+
+            } else if (receiver is VirtualRef receiverRef) {
+
+                // TODO: IMPLEMENT
+
+            }
+
+
+
 
             INode node = receiver.ReadField(this.Name);
             return node is not null ? node :
@@ -64,16 +82,22 @@ namespace Blackboard.Parser.Actors {
                     With("Locacation", this.Location.ToString());
         }
 
-        /// <summary>Prepare will check and simplify the actor as much as possible.</summary>
+        /// <summary>This will check and prepare the node as much as possible.</summary>
+        /// <param name="formula">This is the complete set of performers being prepared.</param>
+        /// <param name="option">The option for preparing this preper.</param>
         /// <returns>
-        /// This is the actor to replace this one with,
-        /// if this actor is returned then it should not be replaced.
-        /// if null then this actor should be removed.
+        /// This is the performer to replace this preper with,
+        /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IActor Prepare() {
+        public IPerformer Prepare(Formula formula, Options option) {
+
+
             INode node = this.Receiver is null ? this.resolveInScope() : this.resolveInReceiver();
             return new Node(this.Location, node);
+
+
         }
+
 
         /// <summary>This will attempt to write this node to the given receiver or to the top of the stack.</summary>
         /// <param name="node">The node to assign to this receiver as this identifier.</param>

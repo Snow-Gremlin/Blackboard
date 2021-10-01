@@ -39,12 +39,13 @@ namespace Blackboard.Parser.Performers {
 
         /// <summary>Determines the type of the value which will be returned.</summary>
         /// <returns>The returned value type.</returns>
-        public Type Returns() => this.Func.Returns();
+        public System.Type Returns() => this.Func.Returns();
 
         /// <summary>This will build or evaluate the actor and apply it to Blackboard.</summary>
+        /// <param name="formula">This is the complete set of performers being prepared.</param>
         /// <returns>This is the newly created node or null.</returns>
-        public INode Perform() {
-            INode[] inputs = this.Arguments.Select((arg) => arg.Perform()).NotNull().ToArray();
+        public INode Perform(Formula formula) {
+            INode[] inputs = this.Arguments.Select((arg) => arg.Perform(formula)).NotNull().ToArray();
             INode node = this.Func.Build(inputs);
             if (this.Evaluate) node = (node as IDataNode)?.ToConstant();
             return node is not null ? node :

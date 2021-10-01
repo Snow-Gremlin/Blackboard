@@ -14,12 +14,12 @@ namespace Blackboard.Parser.Prepers {
         /// At the end of prepare the performs for building the nodes should be valid
         /// such that no errors will occur when they perform.
         /// </remarks>
-        /// <param name="virtualNodes">This is the list to add virtual nodes to.</param>
+        /// <param name="formula">This is the complete set of performers being prepared.</param>
         /// <param name="option">The option for preparing this preper.</param>
         /// <returns>
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(VirtualNodeSet virtualNodes, Options option);
+        public IPerformer Prepare(Formula formula, Options option);
     }
 }

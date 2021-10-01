@@ -41,7 +41,7 @@ namespace Blackboard.Core.Functions {
 
         /// <summary>Returns the type that would be return if built.</summary>
         /// <returns>The type which would be returned.</returns>
-        public Type Returns() => Type.FromType<TReturn>();
+        public S.Type Returns() => typeof(TReturn);
 
         /// <summary>Builds and returns the function object.</summary>
         /// <remarks>Before this is called, Match must have been possible.</remarks>

@@ -35,14 +35,14 @@ namespace Blackboard.Parser.Prepers {
         public IPreper[] Arguments;
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
-        /// <param name="virtualNodes">This is the list to add virtual nodes to.</param>
+        /// <param name="formula">This is the complete set of performers being prepared.</param>
         /// <param name="option">The option for preparing this preper.</param>
         /// <returns>
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(VirtualNodeSet virtualNodes, Options option) {
-            IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(virtualNodes, option)).NotNull().ToArray();
+        public IPerformer Prepare(Formula formula, Options option) {
+            IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(formula, option)).NotNull().ToArray();
             Type[] types = inputs.Select((arg) => arg.Returns()).ToArray();
 
             IFunction func = this.Functions.Find(types);
@@ -52,7 +52,7 @@ namespace Blackboard.Parser.Prepers {
                     With("Inputs", string.Join(", ", types.Select((t) => t.ToString()))).
                     With("Location", this.Location.ToString());
 
-            Function performer = new Function(func, this.Name, this.Location, inputs);
+            Function performer = new(func, this.Name, this.Location, inputs);
 
             if (option == Options.Create) return performer;
 

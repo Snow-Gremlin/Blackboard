@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Functions {
 
@@ -13,7 +12,7 @@ namespace Blackboard.Core.Functions {
 
         /// <summary>Returns the type that would be return if built.</summary>
         /// <returns>The type which would be returned.</returns>
-        Type Returns();
+        System.Type Returns();
 
         /// <summary>Builds and returns the function object.</summary>
         /// <remarks>Before this is called, Match must have been possible.</remarks>

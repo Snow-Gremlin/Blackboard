@@ -15,7 +15,7 @@ using Blackboard.Parser.Performers;
 namespace Blackboard.Parser {
 
     /// <summary>This will parse the Blackboard language into actions and nodes to apply to the driver.</summary>
-    public class Parser {
+    sealed public class Parser {
 
         /// <summary>The resource file for the Blackboard language definition.</summary>
         private const string resourceName = "Blackboard.Parser.Parser.lang";
@@ -29,36 +29,37 @@ namespace Blackboard.Parser {
         /// <summary>The Blackboard language base parser lazy singleton.</summary>
         static private readonly PP.Parser.Parser BaseParser;
 
-        private Driver driver;
-        private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
-        private LinkedList<Namespace> scopeStack;
-        private LinkedList<object> stashStack;
-        private LinkedList<IPreper> stack;
-        private LinkedList<IPerformer> pending;
+        private readonly Driver driver;
+        private readonly Formula formula;
+        private readonly Dictionary<string, PP.ParseTree.PromptHandle> prompts;
+
+        private readonly LinkedList<object> stash;
+        private readonly LinkedList<IPreper> stack;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="driver">The driver to modify.</param>
         public Parser(Driver driver) {
-            this.driver  = driver;
+            this.driver = driver;
+            this.formula = new Formula(driver);
             this.prompts = null;
-            this.scopeStack = new LinkedList<Namespace>();
-            this.scopeStack.AddFirst(this.driver.Global);
-            this.stashStack = new LinkedList<object>();
+
+            this.stash = new LinkedList<object>();
             this.stack = new LinkedList<IPreper>();
-            this.pending = new LinkedList<IPerformer>();
 
             this.initPrompts();
             this.validatePrompts();
         }
 
-        #region Read Methods...
+        #region Formula Methods...
 
         /// <summary>Reads the given lines of input Blackline code.</summary>
+        /// <remarks>The commands of this input will be added to formula if valid.</remarks>
         /// <param name="input">The input code to parse.</param>
         public void Read(params string[] input) =>
             this.Read(input as IEnumerable<string>);
 
         /// <summary>Reads the given lines of input Blackline code.</summary>
+        /// <remarks>The commands of this input will be added to formula if valid.</remarks>
         /// <param name="input">The input code to parse.</param>
         public void Read(IEnumerable<string> input, string name = "Unnamed") {
             PP.Parser.Result result = BaseParser.Parse(new PP.Scanner.Default(input, name));
@@ -71,6 +72,12 @@ namespace Blackboard.Parser {
         /// <param name="node">The parsed tree root node to read from.</param>
         private void read(PP.ParseTree.ITreeNode node) =>
             node.Process(this.prompts);
+
+        /// <summary>This will dispose of all pending actions.</summary>
+        public void Discard() => this.formula.Reset();
+
+        /// <summary>This will perform and apply all pending action to Blackboard.</summary>
+        public void Commit() => this.formula.Perform();
 
         #endregion
         #region Prompts Setup...
@@ -209,6 +216,7 @@ namespace Blackboard.Parser {
         /// <param name="args">The token information from the parser.</param>
         private void handleClear(PP.ParseTree.PromptArgs args) {
             args.Tokens.Clear();
+            this.stash.Clear();
             this.stack.Clear();
         }
 

@@ -36,6 +36,5 @@ Any help is welcome. This project needs help with:
 - Need to add Unit-tests and functional tests
 - Need to flesh out the [Design Documentation](https://github.com/Grant-Nelson/BlackboardCSharp/blob/main/Blackboard/Documentation/Design.md)
 - Need to grammar check and spell check code comments
-- The [TODO.md](https://github.com/Grant-Nelson/BlackboardCSharp/blob/main/Blackboard/Documentation/TODO.md) should be turned into Github Issues
 
 Currenty the parser is being finished. After that the API for consuming Blackboard will be started.

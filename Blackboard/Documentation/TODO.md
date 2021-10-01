@@ -1,36 +1,5 @@
 ﻿# TODO
 
-## Language definition
-
-- [x] Need to handle receivers in definitions
-- [x] Add multiple assignment (e.g. `x=y=1`)
-- [x] Add a way to read values out of a parse, get/out/return/yield
-- [x] Need to make the parser not apply until later (using actions) per line
-- [ ] Need to make the parser not apply several lines. This will require a special action which
-      makes nodes not created yet from one line able to be referenced in a following line.
-- [ ] Reduce literals (e.g. `12 + 3*2` is `18`)
-- [ ] Add temp/local value which exists only in a single parse,
-      used for assigning to not recalculate the same value
-- [ ] Add string pad, substring, and format methods
-- [ ] Add isNAN, isInf, etc methods
-
-## Logic Types
-
-- [ ] Make it possible to create counters, latches, and toggles of different types
-- [ ] Add methods to modify the value of a counter, latch, and toggles during evaluation
-      (e.g. `counterA.value = 10;`)
-- [ ] Add methods to set the increment, decrement, and reset values of a counter.
-      This will require the language to allow field nodes which specify how an assignment/define
-      is to be set. It must be able to indicate if it can define or assign only.
-      (e.g. `counterA.reset := 30;`)
-
-## More Base Value Types
-
-- [ ] Add uint
-- [ ] Add int64
-- [ ] Add uint64
-- [ ] Add bytes
-- [ ] Add float
 
 ## Node optimizations
 

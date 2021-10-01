@@ -38,4 +38,4 @@ Any help is welcome. This project needs help with:
 - Need to grammar check and spell check code comments
 - The [TODO.md](https://github.com/Grant-Nelson/BlackboardCSharp/blob/main/Blackboard/Documentation/TODO.md) should be turned into Github Issues
 
-Currenty the parser is being finished. After that the API for consuming Blackboard will be started.
+Currenty the parser is being finished and is in a broken state. After that the API for consuming Blackboard will be started.

@@ -37,4 +37,4 @@ Any help is welcome. This project needs help with:
 - Need to flesh out the [Design Documentation](https://github.com/Grant-Nelson/BlackboardCSharp/blob/main/Blackboard/Documentation/Design.md)
 - Need to grammar check and spell check code comments
 
-Currenty the parser is being finished. After that the API for consuming Blackboard will be started.
+Currenty the parser is being finished and is in a broken state. After that the API for consuming Blackboard will be started.

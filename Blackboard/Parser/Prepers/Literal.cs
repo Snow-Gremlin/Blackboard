@@ -34,7 +34,7 @@ namespace Blackboard.Parser.Prepers {
         /// </returns>
         public IPerformer Prepare(Formula formula, Options option) =>
             option == Options.Create || option == Options.Evaluate ?
-            new Node(this.Location, new Caps.Literal<T>(this.Value)) :
+            new NodeRef(this.Location, new Caps.Literal<T>(this.Value)) :
             throw new Exception("Invalid option for a literal preper.").
                 With("Option", option).
                 With("Value", this.Value).

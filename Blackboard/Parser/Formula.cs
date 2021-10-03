@@ -18,9 +18,9 @@ namespace Blackboard.Parser {
 
         private readonly LinkedList<Namespace> scopes;
         private readonly LinkedList<IPerformer> pending;
-        private readonly List<VirtualNode> virtualNodes;
+        private readonly List<NodeHold> nodes;
 
-        // TODO: Add a collection of nodes which can not be gotten because they are pending removal.
+        // TODO: Add a collection of nodes which can NOT be gotten because they are pending removal.
 
         /// <summary>Creates a new formula to store pending changes to the given driver.</summary>
         /// <param name="driver">The driver this formula will change.</param>
@@ -28,7 +28,7 @@ namespace Blackboard.Parser {
             this.Driver = driver;
             this.scopes = new LinkedList<Namespace>();
             this.pending = new LinkedList<IPerformer>();
-            this.virtualNodes = new List<VirtualNode>();
+            this.nodes = new List<NodeHold>();
 
             // Call reset to prepare the formula.
             this.Reset();

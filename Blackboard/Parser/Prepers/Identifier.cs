@@ -65,7 +65,7 @@ namespace Blackboard.Parser.Prepers {
 
                 // TODO: IMPLEMENT
 
-            } else if (receiver is VirtualRef receiverRef) {
+            } else if (receiver is NodeRef receiverRef) {
 
                 // TODO: IMPLEMENT
 

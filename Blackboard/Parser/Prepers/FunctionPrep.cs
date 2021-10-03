@@ -43,7 +43,7 @@ namespace Blackboard.Parser.Prepers {
         /// </returns>
         public IPerformer Prepare(Formula formula, Options option) {
             IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(formula, option)).NotNull().ToArray();
-            Type[] types = inputs.Select((arg) => arg.Returns()).ToArray();
+            Type[] types = inputs.Select((arg) => Type.FromType(arg.Returns())).ToArray();
 
             IFunction func = this.Functions.Find(types);
             if (func is null)
@@ -57,7 +57,7 @@ namespace Blackboard.Parser.Prepers {
             if (option == Options.Create) return performer;
 
             if (option == Options.Evaluate) {
-                if (!performer.Returns().HasData)
+                if (!Type.FromType(performer.Returns()).HasData)
                     throw new Exception("Unable to evaluate the function into a constant.").
                         With("Name", this.Name).
                         With("Inputs", string.Join(", ", types.Strings())).

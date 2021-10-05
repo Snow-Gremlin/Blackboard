@@ -35,30 +35,30 @@ namespace Blackboard.Parser.Prepers {
 
         /// <summary>Finds the node in by the given identifier in the scopes stack.</summary>
         /// <returns>The found node in the scope or null.</returns>
-        private INode resolveInScope() {
+        private IPerformer resolveInScope() {
             for (int i = this.Scopes.Length-1; i >= 0; --i) {
                 Namespace scope = this.Scopes[i];
                 INode node = scope.ReadField(this.Name);
                 if (node is not null) return node;
             }
 
-            throw new Exception("Not identifier found in the scope stack.").
+            throw new Exception("No identifier found in the scope stack.").
                 With("Identifier", this.Name).
-                With("Locacation", this.Location.ToString());
+                With("Locacation", this.Location);
         }
 
         /// <summary>Finds the node in the current receiver after evaluating the receiver.</summary>
         /// <param name="formula">This is the complete set of performers being prepared.</param>
         /// <param name="option">The option for preparing this preper.</param>
         /// <returns>The found node in the receiver or null.</returns>
-        private INode resolveInReceiver(Formula formula, Options option) {
+        private IPerformer resolveInReceiver(Formula formula, Options option) {
             IPerformer receiver = this.Receiver.Prepare(formula, option);
 
             if (receiver.Returns().IsAssignableTo(typeof(IFieldReader)))
                 throw new Exception("Node can not be used as receiver, so it can not be used with an identifier.").
                     With("Identifier", this.Name).
                     With("Attempted Receiver", receiver).
-                    With("Locacation", this.Location.ToString());
+                    With("Locacation", this.Location);
 
 
             if (receiver is Node receiverNode) {
@@ -79,7 +79,7 @@ namespace Blackboard.Parser.Prepers {
                 throw new Exception("Not identifier found in the receiver.").
                     With("Identifier", this.Name).
                     With("Receiver", receiver).
-                    With("Locacation", this.Location.ToString());
+                    With("Locacation", this.Location);
         }
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
@@ -89,16 +89,10 @@ namespace Blackboard.Parser.Prepers {
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, Options option) {
+        public IPerformer Prepare(Formula formula, Options option) =>
+            this.Receiver is null ? this.resolveInScope() : this.resolveInReceiver();
 
-
-            INode node = this.Receiver is null ? this.resolveInScope() : this.resolveInReceiver();
-            return new Node(this.Location, node);
-
-
-        }
-
-
+        /*
         /// <summary>This will attempt to write this node to the given receiver or to the top of the stack.</summary>
         /// <param name="node">The node to assign to this receiver as this identifier.</param>
         /// <param name="mustCreate">Indicates that the value must be created and does not exist yet.</param>
@@ -112,7 +106,7 @@ namespace Blackboard.Parser.Prepers {
                         With("Identifier", this.Name).
                         With("Attempted Receiver", receiverNode).
                         With("Node", node).
-                        With("Locacation", this.Location.ToString());
+                        With("Locacation", this.Location);
 
                 receiver = receiverNode as IFieldWriter;
             }
@@ -122,9 +116,10 @@ namespace Blackboard.Parser.Prepers {
                     With("Identifier", this.Name).
                     With("Attempted Receiver", receiver).
                     With("Node", node).
-                    With("Locacation", this.Location.ToString());
+                    With("Locacation", this.Location);
 
             receiver.WriteField(this.Name, node);
         }
+        */
     }
 }

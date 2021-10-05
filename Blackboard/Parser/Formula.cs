@@ -2,6 +2,7 @@
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Parser.Performers;
 using System.Collections.Generic;
+using PetiteParser.Scanner;
 
 namespace Blackboard.Parser {
 
@@ -16,9 +17,9 @@ namespace Blackboard.Parser {
         /// <summary>The driver for the Blackboard to apply this formula to.</summary>
         public readonly Driver Driver;
 
-        private readonly LinkedList<Namespace> scopes;
+        private readonly LinkedList<IWrappedNode> scopes;
         private readonly LinkedList<IPerformer> pending;
-        private readonly List<NodeHold> nodes;
+        private IWrappedNode global;
 
         // TODO: Add a collection of nodes which can NOT be gotten because they are pending removal.
 
@@ -26,9 +27,8 @@ namespace Blackboard.Parser {
         /// <param name="driver">The driver this formula will change.</param>
         public Formula(Driver driver) {
             this.Driver = driver;
-            this.scopes = new LinkedList<Namespace>();
+            this.scopes = new LinkedList<IWrappedNode>();
             this.pending = new LinkedList<IPerformer>();
-            this.nodes = new List<NodeHold>();
 
             // Call reset to prepare the formula.
             this.Reset();
@@ -50,9 +50,15 @@ namespace Blackboard.Parser {
         public void Reset() {
             this.pending.Clear();
             this.scopes.Clear();
-            this.scopes.AddFirst(this.Driver.Global);
+            this.global = new RealNode(this.Driver.Global);
+            this.scopes.AddFirst(this.global);
         }
 
+        /// <summary>Gets the current top of the scope stack.</summary>
+        public IWrappedNode CurrentScope => this.scopes.First.Value;
 
+        /// <summary>Pushes a new node onto he scope.</summary>
+        /// <param name="node">The node to push on the scope.</param>
+        public void PushScope(IWrappedNode node) => this.scopes.AddFirst(node);
     }
 }

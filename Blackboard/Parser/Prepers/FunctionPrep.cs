@@ -50,7 +50,7 @@ namespace Blackboard.Parser.Prepers {
                 throw new Exception("No function found which acceptsthe the input types.").
                     With("Name", this.Name).
                     With("Inputs", string.Join(", ", types.Select((t) => t.ToString()))).
-                    With("Location", this.Location.ToString());
+                    With("Location", this.Location);
 
             Function performer = new(func, this.Name, this.Location, inputs);
 
@@ -61,7 +61,7 @@ namespace Blackboard.Parser.Prepers {
                     throw new Exception("Unable to evaluate the function into a constant.").
                         With("Name", this.Name).
                         With("Inputs", string.Join(", ", types.Strings())).
-                        With("Location", this.Location.ToString());
+                        With("Location", this.Location);
                 performer.Evaluate = true;
                 return performer;
             }
@@ -70,7 +70,7 @@ namespace Blackboard.Parser.Prepers {
                 With("Option", option).
                 With("Name", this.Name).
                 With("Inputs", string.Join(", ", types.Strings())).
-                With("Location", this.Location.ToString());
+                With("Location", this.Location);
         }
     }
 }

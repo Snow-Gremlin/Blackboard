@@ -31,7 +31,7 @@ namespace Blackboard.Parser {
 
         private readonly Driver driver;
         private readonly Formula formula;
-        private readonly Dictionary<string, PP.ParseTree.PromptHandle> prompts;
+        private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
         private readonly LinkedList<object> stash;
         private readonly LinkedList<IPreper> stack;
@@ -198,14 +198,14 @@ namespace Blackboard.Parser {
 
         /// <summary>Pushes an object onto the stash stack.</summary>
         /// <param name="value">The value to push.</param>
-        private void stashPush(object value) => this.stashStack.AddLast(value);
+        private void stashPush(object value) => this.stash.AddLast(value);
 
         /// <summary>Pops off an object is on the top of the stash stack.</summary>
         /// <typeparam name="T">The type of the object to read as.</typeparam>
         /// <returns>The object which was on top of the stash stack.</returns>
         private T stashPop<T>() where T : class {
-            object value = this.stashStack.Last.Value;
-            this.stashStack.RemoveLast();
+            object value = this.stash.Last.Value;
+            this.stash.RemoveLast();
             return value as T;
         }
 
@@ -225,23 +225,25 @@ namespace Blackboard.Parser {
         private void handlePushNamespace(PP.ParseTree.PromptArgs args) {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
-            string text = token.Text;
+            string name = token.Text;
 
-            Namespace scope = this.scopeStack.First.Value;
-            if (scope.ContainsField(text)) {
-                object obj = scope[text];
-                if (obj is not Namespace nextScope)
+            IWrappedNode scope = this.formula.CurrentScope;
+            IWrappedNode next = scope.ReadField(name);
+            if (next is not null) {
+                if (next.Type.IsAssignableTo(typeof(Namespace)))
                     throw new Exception("Can not open namespace. Another non-namespace exists by that name.").
-                         With("Identifier", text).
+                         With("Identifier", name).
                          With("Location", loc);
-                scope = nextScope;
+                scope = next;
             } else {
-                Namespace nextScope = new();
-                scope[text] = nextScope;
+                VirtualNode nextScope = new(name, typeof(Namespace), scope);
+                scope.
+
+
                 scope = nextScope;
             }
 
-            this.scopeStack.AddFirst(scope);
+            this.formula.PushScope(scope);
         }
 
         /// <summary>This is called when the namespace had closed.</summary>

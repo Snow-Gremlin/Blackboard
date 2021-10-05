@@ -49,12 +49,12 @@ namespace Blackboard.Parser.Performers {
             INode node = this.Func.Build(inputs);
             if (this.Evaluate) node = (node as IDataNode)?.ToConstant();
             return node is not null ? node :
-                // This expection should never be hit if the preper is working as expected.
+                // This exception should never be hit if the preper is working as expected.
                 throw new Exception("The function can not be called with given input.").
                     With("Name", this.Name).
                     With("Evaluate", this.Evaluate).
                     With("Inputs", string.Join(", ", inputs.Types().Strings())).
-                    With("Location", this.Location.ToString());
+                    With("Location", this.Location);
         }
     }
 }

@@ -3,6 +3,7 @@ using Blackboard.Core.Nodes.Caps;
 using Blackboard.Parser.Performers;
 using System.Collections.Generic;
 using PetiteParser.Scanner;
+using System.Linq;
 
 namespace Blackboard.Parser {
 
@@ -57,8 +58,14 @@ namespace Blackboard.Parser {
         /// <summary>Gets the current top of the scope stack.</summary>
         public IWrappedNode CurrentScope => this.scopes.First.Value;
 
-        /// <summary>Pushes a new node onto he scope.</summary>
-        /// <param name="node">The node to push on the scope.</param>
+        /// <summary>Gets a copy of the current scopes.</summary>
+        public IWrappedNode[] Scopes => this.scopes.ToArray();
+
+        /// <summary>Pushes a new node onto the scope.</summary>
+        /// <param name="node">The node to pussh on the scope.</param>
         public void PushScope(IWrappedNode node) => this.scopes.AddFirst(node);
+
+        /// <summary>Pops a top node from the scope.</summary>
+        public void PopScope() => this.scopes.RemoveFirst();
     }
 }

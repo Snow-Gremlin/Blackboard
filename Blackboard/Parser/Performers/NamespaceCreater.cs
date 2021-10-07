@@ -48,9 +48,6 @@ namespace Blackboard.Parser.Performers {
 
             Namespace space = new();
             this.VirtualNode.Node = space;
-            writer.WriteField(name, space);
-
-            // TODO: Rework based on changes to Virtual and real node.
             return space;
         }
     }

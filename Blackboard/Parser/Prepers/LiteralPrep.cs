@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
@@ -6,15 +7,30 @@ using Caps = Blackboard.Core.Nodes.Caps;
 
 namespace Blackboard.Parser.Prepers {
 
+    /// <summary>These are factories for easily making literals.</summary>
+    static internal class LiteralPrep {
+        static public LiteralPrep<Bool> Bool(Location loc, bool value) =>
+            new LiteralPrep<Bool>(loc, new Bool(value));
+
+        static public LiteralPrep<Int> Int(Location loc, int value) =>
+            new LiteralPrep<Int>(loc, new Int(value));
+
+        static public LiteralPrep<Double> Double(Location loc, double value) =>
+            new LiteralPrep<Double>(loc, new Double(value));
+
+        static public LiteralPrep<String> String(Location loc, string value) =>
+            new LiteralPrep<String>(loc, new String(value));
+    }
+
     /// <summary>This is a preper for creating a new literal node.</summary>
     /// <typeparam name="T">The type of the value in the literal.</typeparam>
-    sealed internal class Literal<T>: IPreper
+    sealed internal class LiteralPrep<T>: IPreper
         where T : IComparable<T>, new() {
 
         /// <summary>Creates a new literal preper for the given value.</summary>
         /// <param name="loc">The location this literal was defined at.</param>
         /// <param name="value">The value to assign to the literal.</param>
-        public Literal(Location loc, T value) {
+        public LiteralPrep(Location loc, T value) {
             this.Location = loc;
             this.Value = value;
         }

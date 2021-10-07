@@ -14,7 +14,7 @@ namespace Blackboard.Parser.Prepers {
         /// <param name="scopes">The scope stack that existed when this identifier was created.</param>
         /// <param name="receiver">The receiver this identifier is part of.</param>
         /// <param name="name">The name of this identifier.</param>
-        public Identifier(Location location, Namespace[] scopes, IPreper receiver, string name) {
+        public Identifier(Location location, IWrappedNode[] scopes, IPreper receiver, string name) {
             this.Location = location;
             this.Scopes = scopes;
             this.Receiver = receiver;
@@ -22,7 +22,7 @@ namespace Blackboard.Parser.Prepers {
         }
 
         /// <summary>The scope stack that existed when this identifier was created.</summary>
-        public Namespace[] Scopes;
+        public IWrappedNode[] Scopes;
 
         /// <summary>The receiver object to read this identifier from.</summary>
         public IPreper Receiver;

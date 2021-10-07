@@ -49,14 +49,16 @@ namespace Blackboard.Parser {
         /// <summary>Indicates if this node is an IFieldWriter.</summary>
         public bool FieldWriter => this.Node is IFieldWriter;
 
-        /// <summary>Writes the given node to this node.</summary>
+        /// <summary>Tries to write the given node to this node.</summary>
         /// <remarks>This node may no longer be virtual.</remarks>
         /// <param name="name">The name to write to.</param>
         /// <param name="node">The node to write</param>
         public void WriteField(string name, IWrappedNode node) {
-
-            // TODO: Finish
-
+            if (this.Node is IFieldWriter receiver) {
+                INode n = node.Node;
+                if (n is null) this.children[name] = node;
+                else receiver.WriteField(name, n);
+            }
         }
     }
 }

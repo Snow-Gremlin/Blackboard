@@ -81,6 +81,7 @@ namespace Blackboard.Parser {
                         With("Node", value.GetType());
 
                 this.node = value;
+                this.Receiver.WriteField(this.Name, this);
             }
         }
 
@@ -110,14 +111,11 @@ namespace Blackboard.Parser {
         /// <summary>Indicates if this node is an IFieldWriter.</summary>
         public bool FieldWriter => this.Type.IsAssignableTo(typeof(IFieldWriter));
 
-        /// <summary>Writes the given node to this node.</summary>
+        /// <summary>Tries to write the given node to this node.</summary>
         /// <remarks>This node may no longer be virtual.</remarks>
         /// <param name="name">The name to write to.</param>
         /// <param name="node">The node to write</param>
-        public void WriteField(string name, IWrappedNode node) {
-
-            // TODO: Finish
-
-        }
+        public void WriteField(string name, IWrappedNode node) =>
+            this.children[name] = node;
     }
 }

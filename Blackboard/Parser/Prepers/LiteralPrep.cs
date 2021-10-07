@@ -7,17 +7,34 @@ using Caps = Blackboard.Core.Nodes.Caps;
 
 namespace Blackboard.Parser.Prepers {
 
-    /// <summary>These are factories for easily making literals.</summary>
+    /// <summary>These are factories for easily making literal prepers.</summary>
     static internal class LiteralPrep {
+
+        /// <summary>Creates a boolean literal preper.</summary>
+        /// <param name="loc">The location this literal was defined at.</param>
+        /// <param name="value">The boolean value for the literal.</param>
+        /// <returns>The newly created literal preper.</returns>
         static public LiteralPrep<Bool> Bool(Location loc, bool value) =>
             new LiteralPrep<Bool>(loc, new Bool(value));
 
+        /// <summary>Creates a integer literal preper.</summary>
+        /// <param name="loc">The location this literal was defined at.</param>
+        /// <param name="value">The integer value for the literal.</param>
+        /// <returns>The newly created literal preper.</returns>
         static public LiteralPrep<Int> Int(Location loc, int value) =>
             new LiteralPrep<Int>(loc, new Int(value));
 
+        /// <summary>Creates a double literal preper.</summary>
+        /// <param name="loc">The location this literal was defined at.</param>
+        /// <param name="value">The double value for the literal.</param>
+        /// <returns>The newly created literal preper.</returns>
         static public LiteralPrep<Double> Double(Location loc, double value) =>
             new LiteralPrep<Double>(loc, new Double(value));
 
+        /// <summary>Creates a string literal preper.</summary>
+        /// <param name="loc">The location this literal was defined at.</param>
+        /// <param name="value">The string value for the literal.</param>
+        /// <returns>The newly created literal preper.</returns>
         static public LiteralPrep<String> String(Location loc, string value) =>
             new LiteralPrep<String>(loc, new String(value));
     }

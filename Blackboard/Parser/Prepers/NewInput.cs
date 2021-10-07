@@ -8,10 +8,10 @@ namespace Blackboard.Parser.Prepers {
     sealed internal class NewInput: IPreper {
 
         public Type Type;
-        public Identifier Identifier;
+        public IdPrep Identifier;
         public IPreper Value;
 
-        public NewInput(Location loc, Type t, Identifier id, IPreper value) {
+        public NewInput(Location loc, Type t, IdPrep id, IPreper value) {
             this.Location = loc;
             this.Type = t;
             this.Identifier = id;

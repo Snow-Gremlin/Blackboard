@@ -11,6 +11,8 @@ using PP = PetiteParser;
 using S = System;
 using Blackboard.Parser.Prepers;
 using Blackboard.Parser.Performers;
+using System.Text.RegularExpressions;
+using System.Text;
 
 namespace Blackboard.Parser {
 
@@ -252,7 +254,7 @@ namespace Blackboard.Parser {
         /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputNoAssign(PP.ParseTree.PromptArgs args) {
-            Identifier target = this.pop<Identifier>();
+            IdPrep target = this.pop<IdPrep>();
             Type t = this.stashPop<Type>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
@@ -266,7 +268,7 @@ namespace Blackboard.Parser {
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputWithAssign(PP.ParseTree.PromptArgs args) {
             IPreper value = this.pop<IPreper>();
-            Identifier target = this.pop<Identifier>();
+            IdPrep target = this.pop<IdPrep>();
             Type t = this.stashPop<Type>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
@@ -280,7 +282,7 @@ namespace Blackboard.Parser {
         /// <param name="args">The token information from the parser.</param>
         private void handleNewVarInputWithAssign(PP.ParseTree.PromptArgs args) {
             IPreper value = this.pop<IPreper>();
-            Identifier target = this.pop<Identifier>();
+            IdPrep target = this.pop<IdPrep>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
             this.push(new NewInput(loc, null, target, value));
@@ -379,7 +381,7 @@ namespace Blackboard.Parser {
             string name = token.Text;
             IPreper receiver = this.pop<IPreper>();
             
-            this.push(new Identifier(loc, this.formula.Scopes, receiver, name));
+            this.push(new IdPrep(loc, this.formula.Scopes, receiver, name));
         }
 
         /// <summary>This handles preparing for a method call.</summary>
@@ -423,22 +425,9 @@ namespace Blackboard.Parser {
         private void handlePushId(PP.ParseTree.PromptArgs args) {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
-            string text = token.Text;
+            string name = token.Text;
 
-            object value = null;
-            foreach (Namespace scope in this.scopeStack) {
-                if (scope.ContainsKey(text)) {
-                    value =  scope[text];
-                    if (this.reduceNodes && value is INode node)
-                        value = node.ToLiteral();
-                    break;
-                }
-            }
-
-            // If the value is not found in the scopes, that is fine, set it as null,
-            // it is likely about to be used for creating a new identifier or
-            // will be caught when attempted to be used.
-            this.push(loc, text, value);
+            this.push(new IdPrep(loc, this.formula.Scopes, null, name));
         }
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>
@@ -447,6 +436,7 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
+
             try {
                 bool value = bool.Parse(text);
                 this.push(LiteralPrep.Bool(loc, value));
@@ -463,6 +453,7 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
+
             try {
                 int value = S.Convert.ToInt32(text, 2);
                 this.push(LiteralPrep.Int(loc, value));
@@ -479,6 +470,7 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
+
             try {
                 int value = S.Convert.ToInt32(text, 8);
                 this.push(LiteralPrep.Int(loc, value));
@@ -495,6 +487,7 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
+
             try {
                 int value = int.Parse(text);
                 this.push(LiteralPrep.Int(loc, value));
@@ -511,6 +504,7 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text[2..];
+
             try {
                 int value = int.Parse(text, NumberStyles.HexNumber);
                 this.push(LiteralPrep.Int(loc, value));
@@ -527,6 +521,7 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
+
             try {
                 double value = double.Parse(text);
                 this.push(LiteralPrep.Double(loc, value));
@@ -544,8 +539,14 @@ namespace Blackboard.Parser {
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
 
-            // TODO: Need to handle decoding escaped sequences.
-            this.push(LiteralPrep.String(loc, text));
+            try {
+                string value = PP.Misc.Text.Unescape(text);
+                this.push(LiteralPrep.String(loc, value));
+            } catch (S.Exception ex) {
+                throw new Exception("Failed to decode escaped sequences.", ex).
+                    With("Text", text).
+                    With("Location", loc);
+            }
         }
 
         /// <summary>This handles pushing a type onto the stack.</summary>

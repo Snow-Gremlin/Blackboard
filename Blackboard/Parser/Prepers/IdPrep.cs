@@ -6,16 +6,16 @@ using PetiteParser.Scanner;
 
 namespace Blackboard.Parser.Prepers {
 
-    /// <summary>An action for storing an identifier to be created, accesses, etc.</summary>
-    sealed internal class Identifier: IPreper  {
+    /// <summary>A preper for storing an identifier to be created, accesses, etc.</summary>
+    sealed internal class IdPrep: IPreper  {
 
-        /// <summary>Creates a new identifier action.</summary>
-        /// <param name="location">The location this identifier was defined.</param>
+        /// <summary>Creates a new identifier preper.</summary>
+        /// <param name="loc">The location this identifier was defined.</param>
         /// <param name="scopes">The scope stack that existed when this identifier was created.</param>
         /// <param name="receiver">The receiver this identifier is part of.</param>
         /// <param name="name">The name of this identifier.</param>
-        public Identifier(Location location, IWrappedNode[] scopes, IPreper receiver, string name) {
-            this.Location = location;
+        public IdPrep(Location loc, IWrappedNode[] scopes, IPreper receiver, string name) {
+            this.Location = loc;
             this.Scopes = scopes;
             this.Receiver = receiver;
             this.Name = name;
@@ -121,5 +121,17 @@ namespace Blackboard.Parser.Prepers {
             receiver.WriteField(this.Name, node);
         }
         */
+
+        /**
+            object value = null;
+            foreach (Namespace scope in this.scopeStack) {
+                if (scope.ContainsKey(text)) {
+                    value =  scope[text];
+                    if (this.reduceNodes && value is INode node)
+                        value = node.ToLiteral();
+                    break;
+                }
+            }
+         */
     }
 }

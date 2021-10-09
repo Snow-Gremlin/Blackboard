@@ -25,7 +25,7 @@ namespace Blackboard.Parser.Performers {
         /// <summary>Determines the type of the value which will be returned.</summary>
         /// <remarks>This may not be set until after Prepare is called.</remarks>
         /// <returns>The returned value type.</returns>
-        public System.Type Returns() => this.VirtualNode.Type;
+        public System.Type ReturnType => this.VirtualNode.Type;
 
         /// <summary>This will perform the actions that need to be run.</summary>
         /// <param name="formula">This is the complete set of performers being prepared.</param>

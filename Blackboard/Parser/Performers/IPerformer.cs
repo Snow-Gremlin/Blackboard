@@ -1,5 +1,4 @@
-﻿using Blackboard.Core;
-using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Nodes.Interfaces;
 using PetiteParser.Scanner;
 
 namespace Blackboard.Parser.Performers {
@@ -13,7 +12,7 @@ namespace Blackboard.Parser.Performers {
         /// <summary>Determines the type of the value which will be returned.</summary>
         /// <remarks>This may not be set until after Prepare is called.</remarks>
         /// <returns>The returned value type.</returns>
-        public System.Type Returns();
+        public System.Type ReturnType { get; }
 
         /// <summary>This will perform the actions that need to be run.</summary>
         /// <remarks>

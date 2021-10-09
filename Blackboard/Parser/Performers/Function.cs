@@ -39,7 +39,7 @@ namespace Blackboard.Parser.Performers {
 
         /// <summary>Determines the type of the value which will be returned.</summary>
         /// <returns>The returned value type.</returns>
-        public System.Type Returns() => this.Func.Returns();
+        public System.Type ReturnType => this.Func.Returns();
 
         /// <summary>This will build or evaluate the actor and apply it to Blackboard.</summary>
         /// <param name="formula">This is the complete set of performers being prepared.</param>

@@ -381,7 +381,7 @@ namespace Blackboard.Parser {
             string name = token.Text;
             IPreper receiver = this.pop<IPreper>();
             
-            this.push(new IdPrep(loc, this.formula.Scopes, receiver, name));
+            this.push(new IdPrep(loc, receiver, name));
         }
 
         /// <summary>This handles preparing for a method call.</summary>
@@ -427,7 +427,7 @@ namespace Blackboard.Parser {
             PP.Scanner.Location loc = token.End;
             string name = token.Text;
 
-            this.push(new IdPrep(loc, this.formula.Scopes, null, name));
+            this.push(new IdPrep(loc, this.formula.Scopes, name));
         }
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>

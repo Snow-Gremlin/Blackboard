@@ -141,8 +141,8 @@ namespace Blackboard.Core {
             this.imps = new();
             this.exps = new();
 
-            if ((dataType is not null) == realType.IsAssignableTo(typeof(IDataNode)))
-                throw new Exception("A node type with a data type must implement IDataNode and vice versa.").
+            if ((dataType is null) == realType.IsAssignableTo(typeof(IDataNode)))
+                throw new Exception("A node type with a non-null dataType must have a realType which implements IDataNode and vice versa.").
                     With("Name", name).
                     With("Real Type", realType).
                     With("Data Type", dataType);

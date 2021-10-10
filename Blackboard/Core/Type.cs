@@ -143,7 +143,7 @@ namespace Blackboard.Core {
             this.exps = new();
 
             if ((dataType is null) == realType.IsAssignableTo(typeof(IDataNode)))
-                throw Exception.TypeDefinitionInvalid(name, realType, dataType);
+                throw Exceptions.TypeDefinitionInvalid(name, realType, dataType);
         }
 
         /// <summary>This determines the implicit and inheritence match.</summary>
@@ -268,17 +268,17 @@ namespace Blackboard.Core {
 
         /// <summary>Initializes the types before they are used.</summary>
         static Type() {
-            Node          = new Type("node", typeof(INode), null, null);
-            Trigger       = new Type("trigger", typeof(ITrigger), Node, null);
-            Bool          = new Type("bool", typeof(IValue<Bool>), Node, typeof(Bool));
-            Int           = new Type("int", typeof(IValue<Int>), Node, typeof(Int));
-            Double        = new Type("double", typeof(IValue<Double>), Node, typeof(Double));
-            String        = new Type("string", typeof(IValue<String>), Node, typeof(String));
-            Namespace     = new Type("Namespace", typeof(Namespace), Node, null);
-            Function      = new Type("Function", typeof(FuncGroup), Node, null);
-            CounterInt    = new Type("counter-int", typeof(Counter<Int>), Int, typeof(Int));
+            Node          = new Type("node",           typeof(INode),           null,   null);
+            Trigger       = new Type("trigger",        typeof(ITrigger),        Node,   null);
+            Bool          = new Type("bool",           typeof(IValue<Bool>),    Node,   typeof(Bool));
+            Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int));
+            Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double));
+            String        = new Type("string",         typeof(IValue<String>),  Node,   typeof(String));
+            Namespace     = new Type("Namespace",      typeof(Namespace),       Node,   null);
+            Function      = new Type("Function",       typeof(FuncGroup),       Node,   null);
+            CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int));
             CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double));
-            Toggler       = new Type("toggler", typeof(Toggler), Bool, typeof(Bool));
+            Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool));
 
             addCast<IValueAdopter<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
             addCast<IValueAdopter<Bool>>(Bool.imps, String, (input) => new Implicit<Bool, String>(input));

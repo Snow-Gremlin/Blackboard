@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class Implies: Binary<Bool, Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new Function<IValueAdopter<Bool>, IValueAdopter<Bool>, Implies>((left, right) => new Implies(left, right));
 
         /// <summary>Creates an implied value node.</summary>

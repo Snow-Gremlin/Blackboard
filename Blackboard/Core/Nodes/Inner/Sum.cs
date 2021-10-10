@@ -16,7 +16,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// Indicates that at least one argument must not be a cast.
         /// This is used for things like String where all types can implicit cast to a string.
         /// </param>
-        static public IFuncGroup Factory(bool needOneNoCast = false) => 
+        static public IFuncDef Factory(bool needOneNoCast = false) => 
             new FunctionN<IValueAdopter<T>, Sum<T>>((inputs) => new Sum<T>(inputs), needOneNoCast: needOneNoCast);
 
         /// <summary>Creates a sum value node.</summary>

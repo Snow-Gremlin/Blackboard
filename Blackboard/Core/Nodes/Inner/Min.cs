@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Inner {
         where T : IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new FunctionN<IValueAdopter<T>, Min<T>>((inputs) => new Min<T>(inputs));
 
         /// <summary>Creates a minimum value node.</summary>

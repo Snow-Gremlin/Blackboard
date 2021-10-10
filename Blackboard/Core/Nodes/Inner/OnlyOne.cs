@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class OnlyOne: Multitrigger {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new FunctionN<ITriggerAdopter, OnlyOne>((inputs) => new OnlyOne(inputs));
 
         /// <summary>Creates a one and only one trigger node.</summary>

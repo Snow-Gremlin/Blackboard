@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Inner {
         where T2 : IExplicit<T1, T2>, IComparable<T2>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new Function<IValueAdopter<T1>, Explicit<T1, T2>>((value) => new Explicit<T1, T2>(value));
 
         /// <summary>Creates a node explicit cast.</summary>

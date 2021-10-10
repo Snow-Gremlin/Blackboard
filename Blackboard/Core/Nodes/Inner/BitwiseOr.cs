@@ -13,7 +13,7 @@ namespace Blackboard.Core.Nodes.Inner {
         where T : IBitwise<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new FunctionN<IValueAdopter<T>, BitwiseOr<T>>((values) => new BitwiseOr<T>(values));
 
         /// <summary>Creates a bitwise OR value node.</summary>

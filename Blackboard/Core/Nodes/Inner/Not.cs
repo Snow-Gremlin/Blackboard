@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class Not: Unary<Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory = new Function<IValueAdopter<Bool>, Not>((input) => new Not(input));
+        static public readonly IFuncDef Factory = new Function<IValueAdopter<Bool>, Not>((input) => new Not(input));
 
         /// <summary>Creates a boolean NOT value node.</summary>edrgs
         /// <param name="source">This is the single parent for the source value.</param>

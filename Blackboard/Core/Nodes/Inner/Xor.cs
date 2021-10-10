@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class Xor: Nary<Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new FunctionN<IValueAdopter<Bool>, Xor>((inputs) => new Xor(inputs));
 
         /// <summary>Creates a boolean Exclusive OR value node.</summary>

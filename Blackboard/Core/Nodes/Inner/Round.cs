@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Inner {
         where T : IFloatingPoint<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new Function<IValueAdopter<T>, IValueAdopter<Int>, Round<T>>((input1, input2) => new Round<T>(input1, input2));
 
         /// <summary>Creates a rounded value node.</summary>

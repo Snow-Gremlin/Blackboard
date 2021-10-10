@@ -38,7 +38,7 @@ namespace Blackboard.Core.Nodes.Inner {
         where T : IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory = new Function<Literal<T>>(() => new Literal<T>());
+        static public readonly IFuncDef Factory = new Function<Literal<T>>(() => new Literal<T>());
 
         /// <summary>Creates a new literal value node.</summary>
         /// <param name="value">The initial value of the node.</param>

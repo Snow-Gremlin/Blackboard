@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
@@ -7,6 +8,11 @@ namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>This is a boolean value which can be toggled by triggers.</summary>
     sealed public class Toggler: ValueNode<Bool> {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        /// <remarks>This will not initialize a reset or resetValue sources which can be set later.</remarks>
+        static public readonly IFuncDef Factory =
+            new Function<ITriggerAdopter, Toggler>((ITriggerAdopter toggle) => new Toggler(toggle));
 
         /// <summary>This is the parent to toggle the value.</summary>
         private ITriggerAdopter toggle;

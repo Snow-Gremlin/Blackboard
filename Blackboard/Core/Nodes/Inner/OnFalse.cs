@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class OnFalse: TriggerNode {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new Function<IValueAdopter<Bool>, OnFalse>((input) => new OnFalse(input));
 
         /// <summary>This is the parent node to read from.</summary>

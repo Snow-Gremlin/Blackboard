@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class OnChange: TriggerNode {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new FunctionN<IAdopter, OnChange>((inputs) => new OnChange(inputs), false);
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>

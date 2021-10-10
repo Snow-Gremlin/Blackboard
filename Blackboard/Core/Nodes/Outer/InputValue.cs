@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,8 @@ namespace Blackboard.Core.Nodes.Outer {
         where T : IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory = new Function<InputValue<T>>(() => new InputValue<T>());
+        static public readonly IFuncDef Factory =
+            new Function<InputValue<T>>(() => new InputValue<T>());
 
         /// <summary>Creates a new input value node.</summary>
         /// <param name="value">The initial value for this node.</param>

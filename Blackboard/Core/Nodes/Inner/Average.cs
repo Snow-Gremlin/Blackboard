@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class Average: Nary<Double, Double> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new FunctionN<IValueAdopter<Double>, Average>((values) => new Average(values));
 
         /// <summary>Creates an average value node.</summary>

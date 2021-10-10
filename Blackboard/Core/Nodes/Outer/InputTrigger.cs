@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Outer {
     sealed public class InputTrigger: TriggerNode, ITriggerInput {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new Function<InputTrigger>(() => new InputTrigger());
 
         /// <summary>Creates a new input trigger.</summary>

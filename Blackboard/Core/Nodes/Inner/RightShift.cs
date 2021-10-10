@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Inner {
         where T : IBitwise<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new Function<IValueAdopter<T>, IValueAdopter<T>, RightShift<T>>((left, right) => new RightShift<T>(left, right));
 
         /// <summary>Creates a right shift value node.</summary>

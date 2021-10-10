@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
@@ -8,6 +9,11 @@ namespace Blackboard.Core.Nodes.Outer {
     /// <summary>Provides a node which can be used to count trigger events.</summary>
     sealed public class Counter<T>: ValueNode<T>
         where T : IArithmetic<T>, IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        /// <remarks>This will not initialize any sources except increment, the others can be set later.</remarks>
+        static public readonly IFuncDef Factory =
+            new Function<ITriggerAdopter, Counter<T>>((ITriggerAdopter increment) => new Counter<T>(increment));
 
         /// <summary>This is the parent to increment the counter.</summary>
         private ITriggerAdopter increment;
@@ -93,7 +99,7 @@ namespace Blackboard.Core.Nodes.Outer {
             if (this.reset?.Provoked     ?? false) value = this.resetValue is null ? new() : this.resetValue.Value;
             return this.SetNodeValue(value);
         }
-        
+
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
         public override string ToString() =>

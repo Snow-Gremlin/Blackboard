@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Inner {
         where T : IFloatingPoint<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new Function<IValueAdopter<T>, IValueAdopter<T>, IValueAdopter<T>, Lerp<T>>(
                 (input1, input2, input3) => new Lerp<T>(input1, input2, input3));
 

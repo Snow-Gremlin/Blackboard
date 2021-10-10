@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using S = System;
@@ -29,6 +30,10 @@ namespace Blackboard.Core.Nodes.Outer {
     /// <typeparam name="T">The type of the value to hold.</typeparam>
     sealed public class OutputValue<T>: ValueNode<T>, IValueOutput<T, OutputValueEventArgs<T>>
         where T : IComparable<T>, new() {
+
+        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
+        static public readonly IFuncDef Factory =
+            new Function<IValueAdopter<T>, OutputValue<T>>((IValueAdopter<T> source) => new OutputValue<T>(source));
 
         /// <summary>The parent source to listen to.</summary>
         private IValueAdopter<T> source;

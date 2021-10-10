@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Inner {
         where T : IBitwise<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new Function<IValueAdopter<T>, BitwiseNot<T>>((value) => new BitwiseNot<T>(value));
 
         /// <summary>Creates a bitwise NOT value node.</summary>

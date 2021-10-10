@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Inner {
         where T : IArithmetic<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new Function<IValueAdopter<T>, IValueAdopter<T>, Mod<T>>((left, right) => new Mod<T>(left, right));
 
         /// <summary>Creates a modulo value node.</summary>

@@ -4,7 +4,7 @@ using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
-namespace Blackboard.Core.Nodes.Outer {
+namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This is a latching value node.</summary>
     /// <typeparam name="T">The type of the value for this node.</typeparam>
@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Outer {
         where T : IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new Function<ITriggerAdopter, IValueAdopter<T>, Latch<T>>((left, right) => new Latch<T>(left, right));
 
         /// <summary>This is the first parent node to read from.</summary>

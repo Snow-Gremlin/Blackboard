@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class And: Nary<Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncGroup Factory =
+        static public readonly IFuncDef Factory =
             new FunctionN<IValueAdopter<Bool>, And>((values) => new And(values));
 
         /// <summary>Creates a boolean AND value node.</summary>

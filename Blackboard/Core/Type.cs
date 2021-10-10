@@ -281,12 +281,12 @@ namespace Blackboard.Core {
             Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool));
 
             addCast<IValueAdopter<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
-            addCast<IValueAdopter<Bool>>(Bool.imps, String, (input) => new Implicit<Bool, String>(input));
+            addCast<IValueAdopter<Bool>>(Bool.imps, String,  (input) => new Implicit<Bool, String>(input));
 
             addCast<IValueAdopter<Int>>(Int.imps, Double, (input) => new Implicit<Int, Double>(input));
             addCast<IValueAdopter<Int>>(Int.imps, String, (input) => new Implicit<Int, String>(input));
 
-            addCast<IValueAdopter<Double>>(Double.exps, Int, (input) => new Explicit<Double, Int>(input));
+            addCast<IValueAdopter<Double>>(Double.exps, Int,    (input) => new Explicit<Double, Int>(input));
             addCast<IValueAdopter<Double>>(Double.imps, String, (input) => new Implicit<Double, String>(input));
         }
     }

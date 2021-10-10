@@ -40,7 +40,7 @@ namespace Blackboard.Parser.Performers {
                     With("Location", this.Location).
                     With("Receiver", this.VirtualNode.Receiver);
 
-            if (receiver is not IFieldWriter writer)
+            if (receiver is not IFieldWriter)
                 throw new Exception("Receiver for new namespace was not an IFieldWriter.").
                     With("Name", name).
                     With("Location", this.Location).

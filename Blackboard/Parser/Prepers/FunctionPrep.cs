@@ -1,26 +1,28 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Functions;
+using Blackboard.Core.Nodes.Functions;
+using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
 using System.Linq;
 
 namespace Blackboard.Parser.Prepers {
 
-    /// <summary>This is an preper for performing an operation on some inputs.</summary>
+    /// <summary>This is an preper for performing a function on some inputs.</summary>
     sealed internal class FunctionPrep: IPreper {
 
         /// <summary>Creates a new function preper.</summary>
-        /// <param name="id">The identifier of the function to call.</param>
         /// <param name="loc">The location this function was defind in the code.</param>
+        /// <param name="source">The source of the function to call.</param>
         /// <param name="arguments">The input arguments for this function.</param>
-        public FunctionPrep(Location loc, IdPrep id, IPreper[] arguments) {
-            this.Identifier = id;
+        public FunctionPrep(Location loc, IPreper source, IPreper[] arguments) {
             this.Location = loc;
+            this.Source = source;
             this.Arguments = arguments;
         }
 
-        /// <summary>The identifier of the function to call.</summary>
-        public IdPrep Identifier;
+        /// <summary>The source of the function to call.</summary>
+        public IPreper Source;
 
         /// <summary>The location this function was called in the code.</summary>
         public Location Location { get; private set; }
@@ -36,28 +38,39 @@ namespace Blackboard.Parser.Prepers {
         /// if null then no performer is used by parent for this node.
         /// </returns>
         public IPerformer Prepare(Formula formula, Options option) {
-            
+            IPerformer sperf = this.Source.Prepare(formula, option);
+            if (sperf is not NodeRef nodeRef)
+                throw new Exception("Expected the identifier to return a NodeRef performer for a function name").
+                    With("Source", this.Source).
+                    With("Location", this.Location);
+
+            // Check that the id node already exists and is a FuncGroup since
+            // we don't have a method for virtualizing single function instances yet.
+            // To make this work, individual function definitions need to be nodes which
+            // can be children to the function group and looked up with the parameter types.
+            if (nodeRef.WrappedNode.Virtual || nodeRef.WrappedNode.Node is not FuncGroup funcGroup)
+                throw new Exception("Currenty all functions must be already defined prior to a function performer being created.").
+                    With("Wrapped Node", nodeRef).
+                    With("Source", this.Source).
+                    With("Location", this.Location);
+
             IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(formula, option)).NotNull().ToArray();
-            Type[] types = inputs.Select((arg) => Type.FromType(arg.Returns())).ToArray();
+            Type[] types = inputs.Select((arg) => Type.FromType(arg.ReturnType)).ToArray();
 
-
-            // TODO: Implement
-
-            IFunction func = this.Functions.Find(types);
+            IFuncGroup func = funcGroup.Find(types);
             if (func is null)
-                throw new Exception("No function found which acceptsthe the input types.").
-                    With("Identifier", this.Identifier).
+                throw new Exception("No function found which accepts the the input types.").
+                    With("Source", this.Source).
                     With("Inputs", string.Join(", ", types.Select((t) => t.ToString()))).
                     With("Location", this.Location);
 
-            Function performer = new(func, this.Name, this.Location, inputs);
+            Function performer = new(func, this.Location, inputs);
 
             if (option == Options.Create) return performer;
-
             if (option == Options.Evaluate) {
-                if (!Type.FromType(performer.Returns()).HasData)
+                if (performer.ReturnType is not IDataNode)
                     throw new Exception("Unable to evaluate the function into a constant.").
-                        With("Identifier", this.Identifier).
+                        With("Source", this.Source).
                         With("Inputs", string.Join(", ", types.Strings())).
                         With("Location", this.Location);
                 performer.Evaluate = true;
@@ -66,7 +79,7 @@ namespace Blackboard.Parser.Prepers {
 
             throw new Exception("Invalid option for a function preper.").
                 With("Option", option).
-                With("Identifier", this.Identifier).
+                With("Source", this.Source).
                 With("Inputs", string.Join(", ", types.Strings())).
                 With("Location", this.Location);
         }

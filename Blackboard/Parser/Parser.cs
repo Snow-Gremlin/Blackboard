@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Functions;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Data.Caps;
@@ -152,7 +152,7 @@ namespace Blackboard.Parser {
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 PP.Scanner.Location loc = args.Tokens[^1].End;
                 IPreper[] inputs = this.pop<IPreper>(count);
-                this.push(new FunctionPrep(op, name, loc, inputs));
+                this.push(new FunctionPrep(loc, new NoPrep(loc, op), inputs));
             };
         }
     
@@ -388,36 +388,25 @@ namespace Blackboard.Parser {
         /// <param name="args">The token information from the parser.</param>
         private void handleStartCall(PP.ParseTree.PromptArgs args) {
             IPreper item = this.pop<IPreper>();
-
-            if (!item.ValueIs<FuncGroup>())
-                throw new Exception("Identifier was not a function.").
-                    With("Stack Item", item);
-            this.push(new FunctionPrep(???));
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            this.push(new FuncPlaceholder(loc, item));
         }
 
         /// <summary>This handles the end of a method call and creates the node for the method.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleEndCall(PP.ParseTree.PromptArgs args) {
             LinkedList<IPreper> funcArgs = new();
-            IPreper callItem;
+            FuncPlaceholder placeholder;
             while (true) {
                 IPreper item = this.pop<IPreper>();
-                if (item.ValueIs<FuncGroup>()) {
-                    callItem = item;
+                if (item is FuncPlaceholder) {
+                    placeholder = item as FuncPlaceholder;
                     break;
                 }
                 funcArgs.AddFirst(item);
             }
 
-            FuncGroup func = callItem.ValueAs<FuncGroup>();
-            INode node = func.Build(funcArgs.ToArray());
-            if (node is null)
-                throw new Exception("Failed to find a function that can accept the given argument types.").
-                    With("Function", callItem).
-                    With("Args", string.Join(", ", funcArgs.TypeNames()));
-
-            if (funcArgs.IsConstant()) node = node.ToLiteral();
-            this.push(callItem.Location, node);
+            this.push(new FunctionPrep(placeholder.Location, placeholder.Source, funcArgs.ToArray()));
         }
 
         /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>

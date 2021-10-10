@@ -28,9 +28,11 @@ namespace Blackboard.Parser.Prepers {
             this.Scopes = null;
             this.Receiver = receiver;
             this.Name = name;
+            this.CreationType = null;
         }
 
         /// <summary>The scope stack that existed when this identifier was created.</summary>
+        /// <remarks>The first item is the newest scope and the last is the global scope.</remarks>
         public IWrappedNode[] Scopes;
 
         /// <summary>The receiver object to read this identifier from.</summary>
@@ -40,14 +42,41 @@ namespace Blackboard.Parser.Prepers {
         /// <summary>The name of the identifier to read.</summary>
         public string Name;
 
+        /// <summary>The type to use if when creating this Id. This must be set prior to preparing/creating.</summary>
+        public System.Type CreationType;
+
         /// <summary>The location this actor was defind in the code being parsed.</summary>
         public Location Location { get; private set; }
 
+        /// <summary>Creates a new virtual node for this identifier.</summary>
+        /// <param name="recRef">The receiver to create this id into.</param>
+        /// <returns>The newly created virtual node.</returns>
+        private IPerformer createNode(IWrappedNode recRef) {
+            IWrappedNode existing = recRef.ReadField(this.Name);
+            if (existing is not null)
+                throw new Exception("May not create a node which already exists.").
+                    With("Identifier", this.Name).
+                    With("Attempted Receiver", recRef).
+                    With("Excisting", existing).
+                    With("Locacation", this.Location);
+
+            if (this.CreationType is null)
+                throw new Exception("May not create a node without a creation type set.").
+                    With("Identifier", this.Name).
+                    With("Attempted Receiver", recRef).
+                    With("Locacation", this.Location);
+
+            VirtualNode node = new(this.Name, this.CreationType, recRef);
+            return new NodeRef(this.Location, node, false);
+        }
+
         /// <summary>Finds the node in by the given identifier in the scopes stack.</summary>
-        /// <param name="formula">This is the complete set of performers being prepared.</param>
         /// <param name="option">The option for preparing this preper. Will only be either create or evaluate.</param>
         /// <returns>The found node in the scope or null.</returns>
-        private IPerformer resolveInScope(Formula formula, Options option) {
+        private IPerformer resolveInScope(Options option) {
+            if (option == Options.Define)
+                return this.createNode(this.Scopes[0]);
+
             for (int i = this.Scopes.Length-1; i >= 0; --i) {
                 IWrappedNode scope = this.Scopes[i];
                 IWrappedNode node = scope.ReadField(this.Name);
@@ -79,6 +108,9 @@ namespace Blackboard.Parser.Prepers {
                     With("Receiver", receiver).
                     With("Locacation", this.Location);
 
+            if (option == Options.Define)
+                return this.createNode(recRef.WrappedNode);
+
             IWrappedNode node = recRef.WrappedNode.ReadField(this.Name);
             return node is not null ?
                 new NodeRef(this.Location, node, option == Options.Evaluate) :
@@ -95,20 +127,7 @@ namespace Blackboard.Parser.Prepers {
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, Options option) {
-            if (option == Options.Evaluate || option == Options.Create) {
-                bool evaluate = option == Options.Evaluate;
-                return this.Receiver is null ?
-                    this.resolveInScope(formula, option) :
-                    this.resolveInReceiver(formula, option);
-            }
-
-            // TODO: Prepare Assignment?
-
-            throw new Exception("Unexpected option for resolving an identifier in a scope.").
-                With("Identifier", this.Name).
-                With("Locacation", this.Location).
-                With("Option", option);
-        }
+        public IPerformer Prepare(Formula formula, Options option) =>
+            this.Receiver is null ? this.resolveInScope(option) : this.resolveInReceiver(formula, option);
     }
 }

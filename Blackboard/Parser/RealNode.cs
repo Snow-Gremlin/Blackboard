@@ -50,7 +50,7 @@ namespace Blackboard.Parser {
         public bool FieldWriter => this.Node is IFieldWriter;
 
         /// <summary>Tries to write the given node to this node.</summary>
-        /// <remarks>This node may no longer be virtual.</remarks>
+        /// <remarks>This node may be virtual or nots.</remarks>
         /// <param name="name">The name to write to.</param>
         /// <param name="node">The node to write</param>
         public void WriteField(string name, IWrappedNode node) {

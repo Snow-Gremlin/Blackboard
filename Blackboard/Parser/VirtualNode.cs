@@ -39,6 +39,9 @@ namespace Blackboard.Parser {
             this.Receiver = receiver;
             this.node = null;
             this.children = new Dictionary<string, IWrappedNode>();
+
+            // Add this node to the receiver.
+            receiver.WriteField(this.Name, this);
         }
 
         /// <summary>The type of this node.</summary>
@@ -112,7 +115,7 @@ namespace Blackboard.Parser {
         public bool FieldWriter => this.Type.IsAssignableTo(typeof(IFieldWriter));
 
         /// <summary>Tries to write the given node to this node.</summary>
-        /// <remarks>This node may no longer be virtual.</remarks>
+        /// <remarks>This node may be virtual or nots.</remarks>
         /// <param name="name">The name to write to.</param>
         /// <param name="node">The node to write</param>
         public void WriteField(string name, IWrappedNode node) =>

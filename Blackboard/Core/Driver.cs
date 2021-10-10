@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Functions;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -36,7 +36,7 @@ namespace Blackboard.Core {
         private void addOperators() {
             Namespace operators = new();
             this.Global[OperatorNamespace] = operators;
-            void add(string name, params IFunction[] funcs) =>
+            void add(string name, params IFuncGroup[] funcs) =>
                 operators[name] = new FuncGroup(funcs);
 
             add("and",
@@ -141,7 +141,7 @@ namespace Blackboard.Core {
 
         /// <summary>This adds all global initial methods for Blackboard.</summary>
         private void addFunctions() {
-            void add(string name, params IFunction[] funcs) =>
+            void add(string name, params IFuncGroup[] funcs) =>
                 this.Global[name] = new FuncGroup(funcs);
 
             add("abs",

@@ -1,8 +1,6 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Nodes.Caps;
 using Blackboard.Parser.Performers;
 using System.Collections.Generic;
-using PetiteParser.Scanner;
 using System.Linq;
 
 namespace Blackboard.Parser {

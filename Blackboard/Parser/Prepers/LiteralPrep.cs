@@ -14,29 +14,25 @@ namespace Blackboard.Parser.Prepers {
         /// <param name="loc">The location this literal was defined at.</param>
         /// <param name="value">The boolean value for the literal.</param>
         /// <returns>The newly created literal preper.</returns>
-        static public LiteralPrep<Bool> Bool(Location loc, bool value) =>
-            new LiteralPrep<Bool>(loc, new Bool(value));
+        static public LiteralPrep<Bool> Bool(Location loc, bool value) => new(loc, new Bool(value));
 
         /// <summary>Creates a integer literal preper.</summary>
         /// <param name="loc">The location this literal was defined at.</param>
         /// <param name="value">The integer value for the literal.</param>
         /// <returns>The newly created literal preper.</returns>
-        static public LiteralPrep<Int> Int(Location loc, int value) =>
-            new LiteralPrep<Int>(loc, new Int(value));
+        static public LiteralPrep<Int> Int(Location loc, int value) => new(loc, new Int(value));
 
         /// <summary>Creates a double literal preper.</summary>
         /// <param name="loc">The location this literal was defined at.</param>
         /// <param name="value">The double value for the literal.</param>
         /// <returns>The newly created literal preper.</returns>
-        static public LiteralPrep<Double> Double(Location loc, double value) =>
-            new LiteralPrep<Double>(loc, new Double(value));
+        static public LiteralPrep<Double> Double(Location loc, double value) => new(loc, new Double(value));
 
         /// <summary>Creates a string literal preper.</summary>
         /// <param name="loc">The location this literal was defined at.</param>
         /// <param name="value">The string value for the literal.</param>
         /// <returns>The newly created literal preper.</returns>
-        static public LiteralPrep<String> String(Location loc, string value) =>
-            new LiteralPrep<String>(loc, new String(value));
+        static public LiteralPrep<String> String(Location loc, string value) => new(loc, new String(value));
     }
 
     /// <summary>This is a preper for creating a new literal node.</summary>

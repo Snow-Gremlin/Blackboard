@@ -67,11 +67,12 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="children">The children to add.</param>
         /// <param name="checkedForLoops">Indicates if loops in the graph should be checked for.</param>
         public void AddChildren(IEnumerable<INode> children, bool checkedForLoops = true) {
+            children = children.NotNull();
             if (checkedForLoops && INode.CanReachAny(this, children))
                 throw Exceptions.NodeLoopDetected();
             LinkedList<IEvaluatable> needsDepthUpdate = new();
             foreach (EvalAdopter child in children) {
-                if (child is not null && !this.children.Contains(child)) {
+                if (!this.children.Contains(child)) {
                     this.children.Add(child);
                     needsDepthUpdate.SortInsertUniqueEvaluatable(child);
                 }
@@ -87,14 +88,13 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Removes all the given children from this node if they exist.</summary>
         /// <param name="children">The children to remove.</param>
         public void RemoveChildren(IEnumerable<INode> children) {
+            children = children.NotNull();
             LinkedList<IEvaluatable> needsDepthUpdate = new();
             foreach (EvalAdopter child in children) {
-                if (child is not null) {
-                    int index = this.children.IndexOf(child);
-                    if (index >= 0) {
-                        this.children.RemoveAt(index);
-                        needsDepthUpdate.SortInsertUniqueEvaluatable(child);
-                    }
+                int index = this.children.IndexOf(child);
+                if (index >= 0) {
+                    this.children.RemoveAt(index);
+                    needsDepthUpdate.SortInsertUniqueEvaluatable(child);
                 }
             }
             UpdateDepths(needsDepthUpdate);

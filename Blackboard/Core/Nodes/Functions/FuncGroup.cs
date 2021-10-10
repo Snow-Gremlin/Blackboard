@@ -41,11 +41,11 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <param name="children">The children to add.</param>
         /// <param name="checkedForLoops">Indicates if loops in the graph should be checked for.</param>
         public void AddChildren(IEnumerable<INode> children, bool checkedForLoops = true) {
-            if (checkedForLoops && INode.CanReachAny(this, children))
+            IEnumerable<IFuncDef> newDefs = children.NotNull().OfType<IFuncDef>();
+            if (checkedForLoops && INode.CanReachAny(this, newDefs))
                 throw Exceptions.NodeLoopDetected();
-            foreach (INode child in children) {
-                if (child is not null && child is IFuncDef def && !this.defs.Contains(def))
-                    this.defs.Add(def);
+            foreach (IFuncDef def in newDefs) {
+                if (!this.defs.Contains(def)) this.defs.Add(def);
             }
         }
 
@@ -57,11 +57,10 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>Removes all the given children from this node if they exist.</summary>
         /// <param name="children">The children to remove.</param>
         public void RemoveChildren(IEnumerable<INode> children) {
-            foreach (INode child in children) {
-                if (child is not null && child is IFuncDef def) {
-                    int index = this.defs.IndexOf(def);
-                    if (index >= 0) this.defs.RemoveAt(index);
-                }
+            IEnumerable<IFuncDef> newDefs = children.NotNull().OfType<IFuncDef>();
+            foreach (IFuncDef def in newDefs) {
+                int index = this.defs.IndexOf(def);
+                if (index >= 0) this.defs.RemoveAt(index);
             }
         }
 

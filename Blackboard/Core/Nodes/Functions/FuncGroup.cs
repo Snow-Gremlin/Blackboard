@@ -11,25 +11,25 @@ namespace Blackboard.Core.Nodes.Functions {
         /// The children functions of this group.
         /// These should be function definitions.
         /// </summary>
-        private List<IFuncDef> children;
+        private List<IFuncDef> defs;
 
         /// <summary>Creates a new function collection.</summary>
         /// <param name="defs">The function definitions to initially add.</param>
         public FuncGroup(params IFuncDef[] defs) {
-            this.children = new List<IFuncDef>(defs);
+            this.defs = new List<IFuncDef>(defs);
         }
 
         /// <summary>Creates a new function collection.</summary>
         /// <param name="defs">The function definitions to initially add.</param>
         public FuncGroup(IEnumerable<IFuncDef> defs) {
-            this.children = new List<IFuncDef>(defs);
+            this.defs = new List<IFuncDef>(defs);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public IEnumerable<INode> Parents => Enumerable.Empty<INode>();
 
         /// <summary>The set of children nodes to this node in the graph.</summary>
-        public IEnumerable<INode> Children => this.children;
+        public IEnumerable<INode> Children => this.defs;
 
         /// <summary>Adds children nodes onto this node.</summary>
         /// <remarks>This will always check for loops.</remarks>
@@ -43,9 +43,9 @@ namespace Blackboard.Core.Nodes.Functions {
         public void AddChildren(IEnumerable<INode> children, bool checkedForLoops = true) {
             if (checkedForLoops && INode.CanReachAny(this, children))
                 throw Exceptions.NodeLoopDetected();
-            foreach (IFuncDef child in children) {
-                if (child is not null && !this.children.Contains(child))
-                    this.children.Add(child);
+            foreach (INode child in children) {
+                if (child is not null && child is IFuncDef def && !this.defs.Contains(def))
+                    this.defs.Add(def);
             }
         }
 
@@ -57,10 +57,10 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>Removes all the given children from this node if they exist.</summary>
         /// <param name="children">The children to remove.</param>
         public void RemoveChildren(IEnumerable<INode> children) {
-            foreach (IFuncDef child in children) {
-                if (child is not null) {
-                    int index = this.children.IndexOf(child);
-                    if (index >= 0) this.children.RemoveAt(index);
+            foreach (INode child in children) {
+                if (child is not null && child is IFuncDef def) {
+                    int index = this.defs.IndexOf(def);
+                    if (index >= 0) this.defs.RemoveAt(index);
                 }
             }
         }
@@ -71,7 +71,7 @@ namespace Blackboard.Core.Nodes.Functions {
         public IFuncDef Find(params Type[] types) {
             FuncMatch minMatch = null;
             IFuncDef minFunc = null;
-            foreach (IFuncDef func in this.children) {
+            foreach (IFuncDef func in this.defs) {
                 FuncMatch match = func.Match(types);
                 if (!match.IsMatch) continue;
 

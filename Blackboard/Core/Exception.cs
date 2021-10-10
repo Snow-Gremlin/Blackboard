@@ -1,6 +1,4 @@
-﻿using S = System;
-
-namespace Blackboard.Core {
+﻿namespace Blackboard.Core {
 
     /// <summary>The exceptions for the core of blackboard.</summary>
     public class Exception: System.Exception {
@@ -12,7 +10,7 @@ namespace Blackboard.Core {
         /// <summary>Creates a new exception.</summary>
         /// <param name="message">The message for this exception.</param>
         /// <param name="inner">The inner exception to this exception.</param>
-        public Exception(string message, S.Exception inner) : base(message, inner) { }
+        public Exception(string message, System.Exception inner) : base(message, inner) { }
 
         /// <summary>Adds additional key value pair of data to this exception.</summary>
         /// <param name="key">The key for the additional data.</param>

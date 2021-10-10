@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core;
-using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
 
 namespace Blackboard.Parser.Prepers {
@@ -15,11 +14,11 @@ namespace Blackboard.Parser.Prepers {
             this.Source = source;
         }
 
+        /// <summary>The location this function was called in the code.</summary>
+        public Location Location;
+
         /// <summary>The source of the function to call.</summary>
         public IPreper Source;
-
-        /// <summary>The location this function was called in the code.</summary>
-        public Location Location { get; private set; }
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
         /// <param name="formula">This is the complete set of performers being prepared.</param>
@@ -28,7 +27,7 @@ namespace Blackboard.Parser.Prepers {
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, Options option) =>
+        public Performers.Performer Prepare(Formula formula, Options option) =>
             throw new Exception("Function placeholder should never be prepared.").
                 With("Source", this.Source).
                 With("Location", this.Location);

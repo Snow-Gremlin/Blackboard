@@ -67,7 +67,7 @@ namespace Blackboard.Parser.Prepers {
                     With("Locacation", this.Location);
 
             VirtualNode node = new(this.Name, this.CreationType, recRef);
-            return new NodeRef(this.Location, node, false);
+            return new WrappedNodeReader(this.Location, node, false);
         }
 
         /// <summary>Finds the node in by the given identifier in the scopes stack.</summary>
@@ -81,7 +81,7 @@ namespace Blackboard.Parser.Prepers {
                 IWrappedNode scope = this.Scopes[i];
                 IWrappedNode node = scope.ReadField(this.Name);
                 if (node is not null)
-                    return new NodeRef(this.Location, node, option == Options.Evaluate);
+                    return new WrappedNodeReader(this.Location, node, option == Options.Evaluate);
             }
 
             throw new Exception("No identifier found in the scope stack.").
@@ -102,7 +102,7 @@ namespace Blackboard.Parser.Prepers {
                     With("Attempted Receiver", receiver).
                     With("Locacation", this.Location);
 
-            if (receiver is not NodeRef recRef)
+            if (receiver is not WrappedNodeReader recRef)
                 throw new Exception("Not identifier found in the receiver.").
                     With("Identifier", this.Name).
                     With("Receiver", receiver).
@@ -113,7 +113,7 @@ namespace Blackboard.Parser.Prepers {
 
             IWrappedNode node = recRef.WrappedNode.ReadField(this.Name);
             return node is not null ?
-                new NodeRef(this.Location, node, option == Options.Evaluate) :
+                new WrappedNodeReader(this.Location, node, option == Options.Evaluate) :
                 throw new Exception("Not identifier found in the receiver.").
                     With("Identifier", this.Name).
                     With("Receiver", receiver).

@@ -11,7 +11,6 @@ using System.Reflection;
 using PP = PetiteParser;
 using S = System;
 using Blackboard.Parser.Prepers;
-using Blackboard.Parser.Performers;
 using System.Text.RegularExpressions;
 using System.Text;
 
@@ -153,7 +152,7 @@ namespace Blackboard.Parser {
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 PP.Scanner.Location loc = args.Tokens[^1].End;
                 IPreper[] inputs = this.pop<IPreper>(count);
-                this.push(new FunctionPrep(loc, new NoPrep(loc, op), inputs));
+                this.push(new FuncPrep(loc, new NoPrep(loc, op), inputs));
             };
         }
     
@@ -407,7 +406,7 @@ namespace Blackboard.Parser {
                 funcArgs.AddFirst(item);
             }
 
-            this.push(new FunctionPrep(placeholder.Location, placeholder.Source, funcArgs.ToArray()));
+            this.push(new FuncPrep(placeholder.Location, placeholder.Source, funcArgs.ToArray()));
         }
 
         /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>

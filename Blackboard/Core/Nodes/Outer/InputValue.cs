@@ -15,6 +15,10 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = new Function<InputValue<T>>(() => new InputValue<T>());
 
+        /// <summary>This is a factory function for creating new instances of this node easily with an initial value from the given node.</summary>
+        static public readonly IFuncDef FactoryWithInitialValue =
+            new Function<IValue<T>, InputValue<T>>((IValue<T> node) => new InputValue<T>(node.Value));
+
         /// <summary>Creates a new input value node.</summary>
         /// <param name="value">The initial value for this node.</param>
         public InputValue(T value = default) :

@@ -3,11 +3,9 @@ using S = System;
 
 namespace Blackboard.Core {
 
-    // TODO: Check for unused exceptions.
-
     /// <summary>A collection of predefined exceptions.</summary>
     static internal class Exceptions {
-        #region Core...
+        // TODO: Check for unused exceptions.
 
         /// <summary>An exception for a function which was defined with an unknown type.</summary>
         /// <param name="typeName">The type which is unknown.</param>
@@ -63,19 +61,5 @@ namespace Blackboard.Core {
                 With("Names", string.Join(".", names)).
                 With("Value Type", valueType).
                 With("Requested Type", requestedType);
-
-        #endregion
-        #region Parser...
-
-        /// <summary>An exception for when popping off the parser stack and the item was not what was expected.</summary>
-        /// <param name="stackInfo">Information for the item which was popped off the stack.</param>
-        /// <param name="expected">Information for what was expected.</param>
-        /// <returns>The new exception.</returns>
-        static public Exception UnexpectedItemOnTheStack(string stackInfo, string expected) =>
-            new Exception("Unexpected item type on the stack.").
-                With("Found", stackInfo).
-                With("Expected", expected);
-
-        #endregion
     }
 }

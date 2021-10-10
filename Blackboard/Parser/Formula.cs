@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core;
-using Blackboard.Parser.Performers;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,7 +16,7 @@ namespace Blackboard.Parser {
         public readonly Driver Driver;
 
         private readonly LinkedList<IWrappedNode> scopes;
-        private readonly LinkedList<IPerformer> pending;
+        private readonly LinkedList<Performer> pending;
         private IWrappedNode global;
 
         // TODO: Add a collection of nodes which can NOT be gotten because they are pending removal.
@@ -27,7 +26,7 @@ namespace Blackboard.Parser {
         public Formula(Driver driver) {
             this.Driver = driver;
             this.scopes = new LinkedList<IWrappedNode>();
-            this.pending = new LinkedList<IPerformer>();
+            this.pending = new LinkedList<Performer>();
 
             // Call reset to prepare the formula.
             this.Reset();
@@ -35,13 +34,13 @@ namespace Blackboard.Parser {
 
         /// <summary>Adds a pending performer into this formula.</summary>
         /// <param name="performer">The performer to add.</param>
-        public void Add(IPerformer performer) =>
+        public void Add(Performer performer) =>
             this.pending.AddLast(performer);
 
         /// <summary>Performs all pending actions then resets the formula.</summary>
         public void Perform() {
-            foreach (IPerformer performer in this.pending)
-                performer.Perform(this);
+            // Run each performer by calling it, the returned nodes can be discarded because any kept nodes should be written to Blackboard.
+            foreach (Performer performer in this.pending) performer();
             this.Reset();
         }
 

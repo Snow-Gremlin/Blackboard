@@ -1,30 +1,29 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
 using System.Linq;
 
 namespace Blackboard.Parser.Prepers {
 
     /// <summary>This is an preper for performing a function on some inputs.</summary>
-    sealed internal class FunctionPrep: IPreper {
+    sealed internal class FuncPrep: IPreper {
 
         /// <summary>Creates a new function preper.</summary>
         /// <param name="loc">The location this function was defind in the code.</param>
         /// <param name="source">The source of the function to call.</param>
         /// <param name="arguments">The input arguments for this function.</param>
-        public FunctionPrep(Location loc, IPreper source, IPreper[] arguments) {
+        public FuncPrep(Location loc, IPreper source, IPreper[] arguments) {
             this.Location = loc;
             this.Source = source;
             this.Arguments = arguments;
         }
 
+        /// <summary>The location this function was called in the code.</summary>
+        public Location Location;
+
         /// <summary>The source of the function to call.</summary>
         public IPreper Source;
-
-        /// <summary>The location this function was called in the code.</summary>
-        public Location Location { get; private set; }
 
         /// <summary>The input arguments for this function.</summary>
         public IPreper[] Arguments;
@@ -36,9 +35,9 @@ namespace Blackboard.Parser.Prepers {
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, Options option) {
+        public Performers.Performer Prepare(Formula formula, Options option) {
             IPerformer sperf = this.Source.Prepare(formula, option);
-            if (sperf is not NodeRef nodeRef)
+            if (sperf is not WrappedNodeReader nodeRef)
                 throw new Exception("Expected the identifier to return a NodeRef performer for a function name").
                     With("Source", this.Source).
                     With("Location", this.Location);

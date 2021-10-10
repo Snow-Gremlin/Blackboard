@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Blackboard.Core;
-using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Data.Caps;
 
 namespace Blackboard.Parser.Performers {
@@ -17,7 +17,7 @@ namespace Blackboard.Parser.Performers {
 
         public IPerformer Value;
 
-        public InputCreater(Location loc, Type t, VirtualNode node, string name, IPerformer value = null) {
+        public InputCreater(Location loc, Type t, VirtualNode node, IPerformer value = null) {
             this.Location = loc;
             this.Type = t;
             this.VirtualNode = node;

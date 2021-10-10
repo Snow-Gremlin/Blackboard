@@ -1,10 +1,11 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Functions;
-using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using S = System;
+using Blackboard.Core.Nodes.Inner;
 
 namespace Blackboard.Core {
 
@@ -36,8 +37,8 @@ namespace Blackboard.Core {
         private void addOperators() {
             Namespace operators = new();
             this.Global[OperatorNamespace] = operators;
-            void add(string name, params IFuncGroup[] funcs) =>
-                operators[name] = new FuncGroup(funcs);
+            void add(string name, params IFuncDef[] defs) =>
+                operators[name] = new FuncGroup(defs);
 
             add("and",
                 And.Factory,
@@ -141,8 +142,8 @@ namespace Blackboard.Core {
 
         /// <summary>This adds all global initial methods for Blackboard.</summary>
         private void addFunctions() {
-            void add(string name, params IFuncGroup[] funcs) =>
-                this.Global[name] = new FuncGroup(funcs);
+            void add(string name, params IFuncDef[] defs) =>
+                this.Global[name] = new FuncGroup(defs);
 
             add("abs",
                 Abs<Int>.Factory,
@@ -415,16 +416,11 @@ namespace Blackboard.Core {
         /// <returns>The value from the node.</returns>
         public T GetValue<T>(IEnumerable<string> names) where T : IData {
             object obj = this.Global.Find(names);
-            if (obj is null)
-                throw new Exception("No value found by the name \"" + string.Join(".", names) + "\".");
-
-            if (obj is not IValue<T> node) {
-                Type t =  Type.FromType(obj.GetType());
-                string typeStr = t is not null ? t.ToString() : obj.GetType().ToString();
-                throw new Exception("May not get \"" + string.Join(".", names) + "\" of type " + typeStr + " as a " + Type.FromType<IValue<T>>() + ".");
-            }
-
-            return node.Value;
+            return obj is null ?
+                    throw Exceptions.NoValueFoundByNames(names) :
+                obj is not IValue<T> node ?
+                    throw Exceptions.UnableToCastValueAsRequested(names, obj.GetType(), typeof(T)) :
+                node.Value;
         }
 
         #endregion

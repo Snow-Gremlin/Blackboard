@@ -47,7 +47,12 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>Writes or overwrites a new field to this node.</summary>
         /// <param name="name">The name of the field to write.</param>
         /// <param name="node">The node to write to the field.</param>
-        public void WriteField(string name, INode node) => this.fields[name] = node;
+        /// <param name="checkedForLoops">Indicates if loops in the graph should be checked for.</param>
+        public void WriteField(string name, INode node, bool checkedForLoops = true) {
+            if (checkedForLoops && INode.CanReachAny(this, node))
+                throw Exceptions.NodeLoopDetected();
+            this.fields[name] = node;
+        }
 
         /// <summary>Remove a field from this node by name if it exists.</summary>
         /// <param name="name">The name of the fields to remove.</param>

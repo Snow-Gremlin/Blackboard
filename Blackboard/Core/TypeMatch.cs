@@ -4,7 +4,7 @@ namespace Blackboard.Core {
 
     /// <summary>This is a match for a single type.</summary>
     /// <remarks>This is used for choosing the most specific method for a function.</remarks>
-    sealed public class TypeMatch : S.IComparable<TypeMatch> {
+    sealed public class TypeMatch: S.IComparable<TypeMatch> {
 
         /// <summary>Indicates there was no match for this type.</summary>
         static public readonly TypeMatch NoMatch = new(false, false, 0);

@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Functions {
     /// <summary>This is the factory for a node which has a single parent as the source of the value.</summary>
     /// <typeparam name="T">The type of the parent's value for this node.</typeparam>
     /// <typeparam name="TReturn">The type of this function will return.</typeparam>
-    public class Function<T, TReturn>: FuncDef<TReturn>
+    sealed public class Function<T, TReturn>: FuncDef<TReturn>
         where T : class, INode
         where TReturn : class, INode {
 
@@ -24,7 +24,7 @@ namespace Blackboard.Core.Nodes.Functions {
             this.hndl = hndl;
             this.needOneNoCast = needOneNoCast;
 
-            if (Type.FromType<T>() is null) throw Exception.UnknownFunctionParamType(typeof(T), "T1");
+            if (Type.FromType<T>() is null) throw Exceptions.UnknownFunctionParamType<T>("T1");
         }
 
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>

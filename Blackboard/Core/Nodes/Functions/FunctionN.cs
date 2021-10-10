@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Functions {
     /// <summary>This is the factory for a node which has abritrary parents as the source of the value.</summary>
     /// <typeparam name="Tn">The type of the parents' values for this node.</typeparam>
     /// <typeparam name="TReturn">The type of this function will return.</typeparam>
-    public class FunctionN<Tn, TReturn>: FuncDef<TReturn>
+    sealed public class FunctionN<Tn, TReturn>: FuncDef<TReturn>
         where Tn : class, INode
         where TReturn : class, INode {
 
@@ -36,7 +36,7 @@ namespace Blackboard.Core.Nodes.Functions {
             this.passOne = passOne;
             this.min = min;
 
-            if (Type.FromType<Tn>() is null) throw Exception.UnknownFunctionParamType(typeof(Tn), "Tn");
+            if (Type.FromType<Tn>() is null) throw Exceptions.UnknownFunctionParamType<Tn>("Tn");
         }
 
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>

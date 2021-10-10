@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Functions;
-using Blackboard.Core.Nodes.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
@@ -57,7 +56,7 @@ namespace Blackboard.Parser.Prepers {
             IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(formula, option)).NotNull().ToArray();
             Type[] types = inputs.Select((arg) => Type.FromType(arg.ReturnType)).ToArray();
 
-            IFuncGroup func = funcGroup.Find(types);
+            IFuncDef func = funcGroup.Find(types);
             if (func is null)
                 throw new Exception("No function found which accepts the the input types.").
                     With("Source", this.Source).

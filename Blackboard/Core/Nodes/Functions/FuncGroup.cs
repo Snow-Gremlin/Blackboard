@@ -5,7 +5,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Functions {
 
     /// <summary>A collection of function signatures.</summary>
-    public class FuncGroup: IFuncGroup, IAdopter {
+    sealed public class FuncGroup: IFuncGroup, IAdopter {
 
         /// <summary>
         /// The children functions of this group.
@@ -42,7 +42,7 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <param name="checkedForLoops">Indicates if loops in the graph should be checked for.</param>
         public void AddChildren(IEnumerable<INode> children, bool checkedForLoops = true) {
             if (checkedForLoops && INode.CanReachAny(this, children))
-                throw Exception.NodeLoopDetected();
+                throw Exceptions.NodeLoopDetected();
             foreach (IFuncDef child in children) {
                 if (child is not null && !this.children.Contains(child))
                     this.children.Add(child);

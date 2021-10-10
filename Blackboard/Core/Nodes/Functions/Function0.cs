@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Functions {
 
     /// <summary>This is the factory for a node which has no parents as the source of the value.</summary>
     /// <typeparam name="TReturn">The type of this function will return.</typeparam>
-    public class Function<TReturn>: FuncDef<TReturn>
+    sealed public class Function<TReturn>: FuncDef<TReturn>
         where TReturn : class, INode {
 
         /// <summary>The factory for creating the node.</summary>

@@ -1,9 +1,9 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
-using Caps = Blackboard.Core.Nodes.Caps;
 
 namespace Blackboard.Parser.Prepers {
 
@@ -63,7 +63,7 @@ namespace Blackboard.Parser.Prepers {
         /// </returns>
         public IPerformer Prepare(Formula formula, Options option) =>
             option == Options.Create || option == Options.Evaluate ?
-            new NodeHold(this.Location, new Caps.Literal<T>(this.Value)) :
+            new NodeHold(this.Location, new Literal<T>(this.Value)) :
             throw new Exception("Invalid option for a literal preper.").
                 With("Option", option).
                 With("Value", this.Value).

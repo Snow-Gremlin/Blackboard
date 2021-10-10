@@ -1,12 +1,12 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Nodes.Inner {
+namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>These are factories for easily making literals.</summary>
     static public class Literal {

@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Nodes.Interfaces;
 using PetiteParser.Scanner;
 

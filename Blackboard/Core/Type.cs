@@ -1,7 +1,8 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Nodes.Functions;
-using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using S = System;
 
@@ -107,7 +108,7 @@ namespace Blackboard.Core {
                 if (type.IsAssignableTo(t.RealType)) return t;
             }
             return null;
-        } 
+        }
 
         /// <summary>The display name of the type.</summary>
         public readonly string Name;
@@ -142,10 +143,7 @@ namespace Blackboard.Core {
             this.exps = new();
 
             if ((dataType is null) == realType.IsAssignableTo(typeof(IDataNode)))
-                throw new Exception("A node type with a non-null dataType must have a realType which implements IDataNode and vice versa.").
-                    With("Name", name).
-                    With("Real Type", realType).
-                    With("Data Type", dataType);
+                throw Exception.TypeDefinitionInvalid(name, realType, dataType);
         }
 
         /// <summary>This determines the implicit and inheritence match.</summary>
@@ -251,7 +249,7 @@ namespace Blackboard.Core {
         /// <param name="obj">The object to check.</param>
         /// <returns>True if they are equal, false otherwise.</returns>
         public override bool Equals(object obj) => ReferenceEquals(this, obj);
-        
+
         /// <summary>Gets the hash code for this type.</summary>
         /// <returns>The type's name hash code.</returns>
         public override int GetHashCode() => this.Name.GetHashCode();
@@ -265,34 +263,30 @@ namespace Blackboard.Core {
         /// <param name="dict">Either the implicit or explicit dictionar for the type being added to.</param>
         /// <param name="dest">The destination type to cast to.</param>
         /// <param name="func">The function for performing the cast.</param>
-        static private void addCast<T>(Dictionary<Type, Caster> dict, Type dest, S.Func<T, INode> func) where T: INode =>
+        static private void addCast<T>(Dictionary<Type, Caster> dict, Type dest, S.Func<T, INode> func) where T : INode =>
             dict[dest] = (INode input) => input is T value ? func(value) : null;
 
         /// <summary>Initializes the types before they are used.</summary>
         static Type() {
-            Node          = new Type("node",           typeof(INode),           null,   null);
-            Trigger       = new Type("trigger",        typeof(ITrigger),        Node,   null);
-            Bool          = new Type("bool",           typeof(IValue<Bool>),    Node,   typeof(Bool));
-            Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int));
-            Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double));
-            String        = new Type("string",         typeof(IValue<String>),  Node,   typeof(String));
-            Namespace     = new Type("Namespace",      typeof(Namespace),       Node,   null);
-            Function      = new Type("Function",       typeof(FuncGroup),       Node,   null);
-            CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int));
+            Node          = new Type("node", typeof(INode), null, null);
+            Trigger       = new Type("trigger", typeof(ITrigger), Node, null);
+            Bool          = new Type("bool", typeof(IValue<Bool>), Node, typeof(Bool));
+            Int           = new Type("int", typeof(IValue<Int>), Node, typeof(Int));
+            Double        = new Type("double", typeof(IValue<Double>), Node, typeof(Double));
+            String        = new Type("string", typeof(IValue<String>), Node, typeof(String));
+            Namespace     = new Type("Namespace", typeof(Namespace), Node, null);
+            Function      = new Type("Function", typeof(FuncGroup), Node, null);
+            CounterInt    = new Type("counter-int", typeof(Counter<Int>), Int, typeof(Int));
             CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double));
-            Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool));
-            LatchBool     = new Type("latch-bool",     typeof(Latch<Bool>),     Bool,   typeof(Bool));
-            LatchInt      = new Type("latch-int",      typeof(Latch<Int>),      Int,    typeof(Int));
-            LatchDouble   = new Type("latch-double",   typeof(Latch<Double>),   Double, typeof(Double));
-            LatchString   = new Type("latch-string",   typeof(Latch<String>),   String, typeof(String));
+            Toggler       = new Type("toggler", typeof(Toggler), Bool, typeof(Bool));
 
             addCast<IValueAdopter<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
-            addCast<IValueAdopter<Bool>>(Bool.imps, String,  (input) => new Implicit<Bool, String>(input));
+            addCast<IValueAdopter<Bool>>(Bool.imps, String, (input) => new Implicit<Bool, String>(input));
 
             addCast<IValueAdopter<Int>>(Int.imps, Double, (input) => new Implicit<Int, Double>(input));
             addCast<IValueAdopter<Int>>(Int.imps, String, (input) => new Implicit<Int, String>(input));
 
-            addCast<IValueAdopter<Double>>(Double.exps, Int,    (input) => new Explicit<Double, Int>(input));
+            addCast<IValueAdopter<Double>>(Double.exps, Int, (input) => new Explicit<Double, Int>(input));
             addCast<IValueAdopter<Double>>(Double.imps, String, (input) => new Implicit<Double, String>(input));
         }
     }

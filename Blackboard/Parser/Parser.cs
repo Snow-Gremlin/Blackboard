@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Functions;
-using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Data.Caps;
 using System.Collections.Generic;

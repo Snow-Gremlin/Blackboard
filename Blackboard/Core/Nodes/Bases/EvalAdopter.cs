@@ -68,7 +68,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="checkedForLoops">Indicates if loops in the graph should be checked for.</param>
         public void AddChildren(IEnumerable<INode> children, bool checkedForLoops = true) {
             if (checkedForLoops && INode.CanReachAny(this, children))
-                throw Exception.NodeLoopDetected();
+                throw Exceptions.NodeLoopDetected();
             LinkedList<IEvaluatable> needsDepthUpdate = new();
             foreach (EvalAdopter child in children) {
                 if (child is not null && !this.children.Contains(child)) {

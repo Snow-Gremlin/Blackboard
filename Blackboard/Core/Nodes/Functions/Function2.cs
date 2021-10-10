@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Functions {
     /// <typeparam name="T1">The type of the first parent's value for this node.</typeparam>
     /// <typeparam name="T2">The type of the second parent's value for this node.</typeparam>
     /// <typeparam name="TReturn">The type of this function will return.</typeparam>
-    public class Function<T1, T2, TReturn>: FuncDef<TReturn>
+    sealed public class Function<T1, T2, TReturn>: FuncDef<TReturn>
         where T1 : class, INode
         where T2 : class, INode
         where TReturn : class, INode {
@@ -26,8 +26,8 @@ namespace Blackboard.Core.Nodes.Functions {
             this.hndl = hndl;
             this.needOneNoCast = needOneNoCast;
 
-            if (Type.FromType<T1>() is null) throw Exception.UnknownFunctionParamType(typeof(T1), "T1");
-            if (Type.FromType<T2>() is null) throw Exception.UnknownFunctionParamType(typeof(T2), "T2");
+            if (Type.FromType<T1>() is null) throw Exceptions.UnknownFunctionParamType<T1>("T1");
+            if (Type.FromType<T2>() is null) throw Exceptions.UnknownFunctionParamType<T2>("T2");
         }
 
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>

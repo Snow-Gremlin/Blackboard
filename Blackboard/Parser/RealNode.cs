@@ -1,5 +1,7 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using S = System;
 
 namespace Blackboard.Parser {
 
@@ -13,11 +15,11 @@ namespace Blackboard.Parser {
         /// <param name="node"></param>
         public RealNode(INode node) {
             this.Node = node;
-            this.children = new Dictionary<string, IWrappedNode>();
+            this.children = new();
         }
 
         /// <summary>The type of this node.</summary>
-        public System.Type Type => this.Node.GetType();
+        public S.Type Type => this.Node.GetType();
 
         /// <summary>Indicates if this node is currently pending or already has a real node.</summary>
         public bool Virtual => false;
@@ -26,7 +28,7 @@ namespace Blackboard.Parser {
         public INode Node { get; private set; }
 
         /// <summary>Indicates if this node is an IFieldReader.</summary>
-        public bool FieldReader => this.Node is IFieldReader;
+        public bool IsFieldReader => this.Node is IFieldReader;
 
         /// <summary>Reads a node from the field reader being represented.</summary>
         /// <param name="name">The name of the node to look up.</param>
@@ -47,18 +49,44 @@ namespace Blackboard.Parser {
         }
 
         /// <summary>Indicates if this node is an IFieldWriter.</summary>
-        public bool FieldWriter => this.Node is IFieldWriter;
+        public bool IsFieldWriter => this.Node is IFieldWriter;
 
-        /// <summary>Tries to write the given node to this node.</summary>
-        /// <remarks>This node may be virtual or nots.</remarks>
-        /// <param name="name">The name to write to.</param>
-        /// <param name="node">The node to write</param>
-        public void WriteField(string name, IWrappedNode node) {
-            if (this.Node is IFieldWriter receiver) {
-                INode n = node.Node;
-                if (n is null) this.children[name] = node;
-                else receiver.WriteField(name, n);
+        /// <summary>Tries to create a new node and add it to the node.</summary>
+        /// <param name="name">The name of the field to add.</param>
+        /// <param name="type">The type of the field to add.</param>
+        /// <returns>The new virtual node for this node.</returns>
+        public VirtualNode CreateField(string name, S.Type type) {
+            if (!this.IsFieldWriter)
+                throw new Exception("May not write a field to a node which is not a field writer").
+                    With("Receiver", this.Node).
+                    With("Name", name).
+                    With("Type", type);
+
+            if (this.ReadField(name) is not null)
+                throw new Exception("A field by that name already exists in the field writer").
+                    With("Receiver", this.Node).
+                    With("Name", name).
+                    With("Type", type);
+
+            VirtualNode node = new(name, type, this);
+            this.children[name] = node;
+            return node;
+        }
+
+        /// <summary>Indicates if this node is a function group.</summary>
+        public bool IsFuncGroup => this.Node is IFuncGroup;
+
+        /// <summary>Finds a function definition for the given types.</summary>
+        /// <param name="types">The input types to fidn the definition for.</param>
+        /// <returns>The function definition node or null if not found.</returns>
+        public IWrappedNode FindFuncDef(params Type[] types) {
+            if (this.Node is IFuncGroup receiver) {
+                IFuncDef funcDef = receiver.Find(types);
+                // Until the language has a way to define new function definitions,
+                // the found function doesn't need to be held onto locally.
+                return new RealNode(funcDef);
             }
+            return null;
         }
     }
 }

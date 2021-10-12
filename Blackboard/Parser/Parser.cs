@@ -105,7 +105,7 @@ namespace Blackboard.Parser {
                 { "cast",         this.handleCast },
                 { "memberAccess", this.handleMemberAccess },
                 { "startCall",    this.handleStartCall },
-                { "endCall",      this.handleEndCall },
+                { "addArg",       this.handleAddArg },
                 { "pushId",       this.handlePushId },
                 { "pushBool",     this.handlePushBool },
                 { "pushBin",      this.handlePushBin },
@@ -389,24 +389,16 @@ namespace Blackboard.Parser {
         private void handleStartCall(PP.ParseTree.PromptArgs args) {
             IPreper item = this.pop<IPreper>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
-            this.push(new FuncPlaceholder(loc, item));
+            this.push(new FuncPrep(loc, item));
         }
 
         /// <summary>This handles the end of a method call and creates the node for the method.</summary>
         /// <param name="args">The token information from the parser.</param>
-        private void handleEndCall(PP.ParseTree.PromptArgs args) {
-            LinkedList<IPreper> funcArgs = new();
-            FuncPlaceholder placeholder;
-            while (true) {
-                IPreper item = this.pop<IPreper>();
-                if (item is FuncPlaceholder) {
-                    placeholder = item as FuncPlaceholder;
-                    break;
-                }
-                funcArgs.AddFirst(item);
-            }
-
-            this.push(new FuncPrep(placeholder.Location, placeholder.Source, funcArgs.ToArray()));
+        private void handleAddArg(PP.ParseTree.PromptArgs args) {
+            IPreper arg = this.pop<IPreper>();
+            FuncPrep func = this.pop<FuncPrep>();
+            func.Arguments.Add(arg);
+            this.push(func);
         }
 
         /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>

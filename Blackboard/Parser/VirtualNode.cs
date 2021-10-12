@@ -39,9 +39,6 @@ namespace Blackboard.Parser {
             this.Receiver = receiver;
             this.node = null;
             this.children = new Dictionary<string, IWrappedNode>();
-
-            // Add this node to the receiver.
-            receiver.WriteField(this.Name, this);
         }
 
         /// <summary>The type of this node.</summary>
@@ -55,17 +52,22 @@ namespace Blackboard.Parser {
         public INode Node {
             get => this.node;
             set {
+                // These exception should never be hit if the prepers is working as expected.
                 if (value.GetType() != this.Type)
-                    // This exception should never be hit if the prepers is working as expected.
                     throw new Exception("The virtual node resolved an uexpected type of node.").
                         With("Name", this.Name).
                         With("Type", this.Type).
                         With("Node", value.GetType());
                 
-                // Check that receiver has been resolved.
                 if (this.Receiver.Virtual)
                     throw new Exception("The receiver for a virtual node must be resolved prior to the child node.").
-                        With("Receiver", this.Receiver.ToString()).
+                        With("Receiver", this.Receiver).
+                        With("Name", this.Name).
+                        With("Type", this.Type);
+
+                if (this.Receiver is not IFieldWriter receiver)
+                    throw new Exception("The receiver for a virtual node must be a field writer.").
+                        With("Receiver", this.Receiver).
                         With("Name", this.Name).
                         With("Type", this.Type);
 
@@ -73,29 +75,29 @@ namespace Blackboard.Parser {
                 if (child is null)
                     throw new Exception("The receiver does not contain a child by the virtual node's name when being resolved.").
                         With("Name", this.Name).
-                        With("Receiver", this.Receiver.ToString()).
+                        With("Receiver", this.Receiver).
                         With("Node", value.GetType());
 
                 if (!ReferenceEquals(child, value))
                     throw new Exception("The virtual node was being resolved with a node which does not match the receiver's child of that name.").
                         With("Name", this.Name).
-                        With("Receiver", this.Receiver.ToString()).
+                        With("Receiver", this.Receiver).
                         With("Child", child.GetType()).
                         With("Node", value.GetType());
 
                 this.node = value;
-                this.Receiver.WriteField(this.Name, this);
+                receiver.WriteField(this.Name, value);
             }
         }
 
         /// <summary>Indicates if this node is an IFieldReader.</summary>
-        public bool FieldReader => this.Type.IsAssignableTo(typeof(IFieldReader));
+        public bool IsFieldReader => this.Type.IsAssignableTo(typeof(IFieldReader));
 
         /// <summary>Reads a node from the field reader being represented.</summary>
         /// <param name="name">The name of the node to look up.</param>
         /// <returns>The node read from this field reader or null.</returns>
         public IWrappedNode ReadField(string name) {
-            if (this.FieldReader) {
+            if (this.IsFieldReader) {
                 if (this.children.TryGetValue(name, out IWrappedNode child))
                     return child;
 
@@ -112,13 +114,44 @@ namespace Blackboard.Parser {
         }
 
         /// <summary>Indicates if this node is an IFieldWriter.</summary>
-        public bool FieldWriter => this.Type.IsAssignableTo(typeof(IFieldWriter));
+        public bool IsFieldWriter => this.Type.IsAssignableTo(typeof(IFieldWriter));
 
-        /// <summary>Tries to write the given node to this node.</summary>
-        /// <remarks>This node may be virtual or nots.</remarks>
-        /// <param name="name">The name to write to.</param>
-        /// <param name="node">The node to write</param>
-        public void WriteField(string name, IWrappedNode node) =>
+        /// <summary>Tries to create a new node and add it to the node.</summary>
+        /// <param name="name">The name of the field to add.</param>
+        /// <param name="type">The type of the field to add.</param>
+        /// <returns>The new virtual node for this node.</returns>
+        public VirtualNode CreateField(string name, S.Type type) {
+            if (!this.IsFieldWriter)
+                throw new Exception("May not write a field to a node which is not a field writer").
+                    With("Receiver", this.Node).
+                    With("Name", name).
+                    With("Type", type);
+
+            if (this.ReadField(name) is not null)
+                throw new Exception("A field by that name already exists in the field writer").
+                    With("Receiver", this.Node).
+                    With("Name", name).
+                    With("Type", type);
+
+            VirtualNode node = new(name, type, this);
             this.children[name] = node;
+            return node;
+        }
+
+        /// <summary>Indicates if this node is a function group.</summary>
+        public bool IsFuncGroup => this.Node is IFuncGroup;
+
+        /// <summary>Finds a function definition for the given types.</summary>
+        /// <param name="types">The input types to fidn the definition for.</param>
+        /// <returns>The function definition node or null if not found.</returns>
+        public IWrappedNode FindFuncDef(params Type[] types) {
+            if (this.Node is IFuncGroup receiver) {
+                IFuncDef funcDef = receiver.Find(types);
+                // Until the language has a way to define new function definitions,
+                // the found function doesn't need to be held onto locally.
+                return new RealNode(funcDef);
+            }
+            return null;
+        }
     }
 }

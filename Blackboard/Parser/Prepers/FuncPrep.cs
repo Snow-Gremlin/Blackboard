@@ -2,6 +2,7 @@
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using PetiteParser.Scanner;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Blackboard.Parser.Prepers {
@@ -13,10 +14,10 @@ namespace Blackboard.Parser.Prepers {
         /// <param name="loc">The location this function was defind in the code.</param>
         /// <param name="source">The source of the function to call.</param>
         /// <param name="arguments">The input arguments for this function.</param>
-        public FuncPrep(Location loc, IPreper source, IPreper[] arguments) {
+        public FuncPrep(Location loc, IPreper source, params IPreper[] arguments) {
             this.Location = loc;
             this.Source = source;
-            this.Arguments = arguments;
+            this.Arguments = new(arguments);
         }
 
         /// <summary>The location this function was called in the code.</summary>
@@ -26,17 +27,17 @@ namespace Blackboard.Parser.Prepers {
         public IPreper Source;
 
         /// <summary>The input arguments for this function.</summary>
-        public IPreper[] Arguments;
+        public List<IPreper> Arguments;
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
         /// <param name="formula">This is the complete set of performers being prepared.</param>
-        /// <param name="option">The option for preparing this preper.</param>
+        /// <param name="evaluate">True to evaluate to a constant, false otherwise.</param>
         /// <returns>
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public Performers.Performer Prepare(Formula formula, Options option) {
-            IPerformer sperf = this.Source.Prepare(formula, option);
+        public Performer Prepare(Formula formula, bool evaluate) {
+            Performer source = this.Source.Prepare(formula, evaluate);
             if (sperf is not WrappedNodeReader nodeRef)
                 throw new Exception("Expected the identifier to return a NodeRef performer for a function name").
                     With("Source", this.Source).

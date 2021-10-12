@@ -7,15 +7,16 @@ namespace Blackboard.Parser.Prepers {
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
         /// <remarks>
-        /// The returned performer for building the nodes should be valid
+        /// The returned performer for building the nodes must be valid
         /// such that no errors will occur when they perform.
         /// </remarks>
         /// <param name="formula">This is the complete set of performers being prepared.</param>
-        /// <param name="option">The option for preparing this preper.</param>
-        /// <returns>
-        /// This is the performer to replace this preper with,
-        /// if null then no performer is used by parent for this node.
-        /// </returns>
-        public Performers.Performer Prepare(Formula formula, Options option);
+        /// <param name="evaluate">
+        /// True to reduce the nodes to constants without writting them to Blackboard.
+        /// False to create the nodes and look up Ids when running.
+        /// </param>
+        /// <returns>The performer which will create the nodes for this preper.</returns>
+        /// <summary>Gets the performers for to build with.</summary>
+        public Performer Prepare(Formula formula, bool evaluate);
     }
 }

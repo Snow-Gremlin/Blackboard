@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Parser.Performers;
+using Blackboard.Parser.Performer;
 using PetiteParser.Scanner;
 
 namespace Blackboard.Parser.Prepers {

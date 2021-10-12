@@ -46,26 +46,10 @@ namespace Blackboard.Core {
         /// <summary>The toggler type which is an extension of the boolean value type.</summary>
         static public readonly Type Toggler;
 
-        /// <summary>The boolean latch which is an extension of the boolean value type.</summary>
-        static public readonly Type LatchBool;
-
-        /// <summary>The integer latch which is an extension of the integer value type.</summary>
-        static public readonly Type LatchInt;
-
-        /// <summary>The double latch which is an extension of the double value type.</summary>
-        static public readonly Type LatchDouble;
-
-        /// <summary>The string latch which is an extension of the string value type.</summary>
-        static public readonly Type LatchString;
-
         /// <summary>Gets all the types.</summary>
         /// <remarks>These must be ordered by inheriting object before the object that was inherited.</remarks>
         static public IEnumerable<Type> AllTypes {
             get {
-                yield return LatchString;
-                yield return LatchDouble;
-                yield return LatchInt;
-                yield return LatchBool;
                 yield return Toggler;
                 yield return CounterDouble;
                 yield return CounterInt;

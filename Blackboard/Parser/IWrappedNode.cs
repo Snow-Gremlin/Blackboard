@@ -1,17 +1,21 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core;
+using Blackboard.Core.Nodes.Interfaces;
+using S = System;
 
 namespace Blackboard.Parser {
 
     /// <summary>
     /// This is the interface for a container for working with either a real or a virtual node.
-    /// Since virtual nodes have to be named in order for other lines to access them this
-    /// containes methods for looking up named children as if this is a receiver eventhough it could
-    /// also be a leaf, such as an input or output node.
     /// </summary>
+    /// <remarks>
+    /// Since virtual nodes have to be named in order for other lines to access them this
+    /// containes methods for looking up named children as if this is a receiver eventhough
+    /// it could also be a leaf, such as an input or output node.
+    /// </remarks>
     internal interface IWrappedNode {
 
         /// <summary>The type of this node.</summary>
-        public System.Type Type { get; }
+        public S.Type Type { get; }
 
         /// <summary>Indicates if this node is currently pending or already has a real node.</summary>
         public bool Virtual { get; }
@@ -20,23 +24,30 @@ namespace Blackboard.Parser {
         public INode Node { get; }
 
         /// <summary>Indicates if this node is an IFieldReader.</summary>
-        public bool FieldReader { get; }
+        public bool IsFieldReader { get; }
 
         /// <summary>Reads a node from the field reader being represented.</summary>
+        /// <remarks>This node must be a field reader.</remarks>
         /// <param name="name">The name of the node to look up.</param>
-        /// <returns>
-        /// The node read from this field reader.
-        /// Returns null if doesn't exist or this isn't a field reader.
-        /// </returns>
+        /// <returns>The node read from this field reader or null if doesn't exist.</returns>
         public IWrappedNode ReadField(string name);
 
         /// <summary>Indicates if this node is an IFieldWriter.</summary>
-        public bool FieldWriter { get; }
+        public bool IsFieldWriter { get; }
 
-        /// <summary>Tries to write the given node to this node.</summary>
-        /// <remarks>This node may be virtual or nots.</remarks>
-        /// <param name="name">The name to write to.</param>
-        /// <param name="node">The node to write</param>
-        public void WriteField(string name, IWrappedNode node);
+        /// <summary>Tries to create a new node and add it to the node.</summary>
+        /// <remarks>This node must be a field writer and may not contain this field already.</remarks>
+        /// <param name="name">The name of the field to add.</param>
+        /// <param name="type">The type of the field to add.</param>
+        /// <returns>The new virtual node for this node.</returns>
+        public VirtualNode CreateField(string name, S.Type type);
+
+        /// <summary>Indicates if this node is a function group.</summary>
+        public bool IsFuncGroup { get; }
+
+        /// <summary>Finds a function definition for the given types.</summary>
+        /// <param name="types">The input types to fidn the definition for.</param>
+        /// <returns>The function definition node or null if not found.</returns>
+        public IWrappedNode FindFuncDef(params Type[] types);
     }
 }

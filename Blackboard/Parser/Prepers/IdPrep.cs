@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
 
 namespace Blackboard.Parser.Prepers {
@@ -31,6 +30,9 @@ namespace Blackboard.Parser.Prepers {
             this.CreationType = null;
         }
 
+        /// <summary>The location this identifier was defind in the code being parsed.</summary>
+        public Location Location;
+
         /// <summary>The scope stack that existed when this identifier was created.</summary>
         /// <remarks>The first item is the newest scope and the last is the global scope.</remarks>
         public IWrappedNode[] Scopes;
@@ -42,16 +44,10 @@ namespace Blackboard.Parser.Prepers {
         /// <summary>The name of the identifier to read.</summary>
         public string Name;
 
-        /// <summary>The type to use if when creating this Id. This must be set prior to preparing/creating.</summary>
-        public System.Type CreationType;
-
-        /// <summary>The location this actor was defind in the code being parsed.</summary>
-        public Location Location { get; private set; }
-
         /// <summary>Creates a new virtual node for this identifier.</summary>
         /// <param name="recRef">The receiver to create this id into.</param>
         /// <returns>The newly created virtual node.</returns>
-        private IPerformer createNode(IWrappedNode recRef) {
+        private Performer createNode(IWrappedNode recRef) {
             IWrappedNode existing = recRef.ReadField(this.Name);
             if (existing is not null)
                 throw new Exception("May not create a node which already exists.").
@@ -73,7 +69,7 @@ namespace Blackboard.Parser.Prepers {
         /// <summary>Finds the node in by the given identifier in the scopes stack.</summary>
         /// <param name="option">The option for preparing this preper. Will only be either create or evaluate.</param>
         /// <returns>The found node in the scope or null.</returns>
-        private IPerformer resolveInScope(Options option) {
+        private Performer resolveInScope(Options option) {
             if (option == Options.Define)
                 return this.createNode(this.Scopes[0]);
 
@@ -93,8 +89,8 @@ namespace Blackboard.Parser.Prepers {
         /// <param name="formula">This is the complete set of performers being prepared.</param>
         /// <param name="option">The option for preparing this preper. Will only be either create or evaluate.</param>
         /// <returns>The found node in the receiver or null.</returns>
-        private IPerformer resolveInReceiver(Formula formula, Options option) {
-            IPerformer receiver = this.Receiver.Prepare(formula, option);
+        private Performer resolveInReceiver(Formula formula, Options option) {
+            Performer receiver = this.Receiver.Prepare(formula, option);
 
             if (receiver.ReturnType.IsAssignableTo(typeof(IFieldReader)))
                 throw new Exception("Node can not be used as receiver, so it can not be used with an identifier.").
@@ -127,7 +123,7 @@ namespace Blackboard.Parser.Prepers {
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, Options option) =>
+        public Performer Prepare(Formula formula, Options option) =>
             this.Receiver is null ? this.resolveInScope(option) : this.resolveInReceiver(formula, option);
     }
 }

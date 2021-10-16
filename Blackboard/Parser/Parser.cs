@@ -13,6 +13,7 @@ using S = System;
 using Blackboard.Parser.Prepers;
 using System.Text.RegularExpressions;
 using System.Text;
+using Blackboard.Parser.Performers;
 
 namespace Blackboard.Parser {
 
@@ -148,11 +149,11 @@ namespace Blackboard.Parser {
         /// <param name="count">The number of values to pop off the stack for this function.</param>
         /// <param name="name">The name of the prompt to add to.</param>
         private void addProcess(int count, string name) {
-            FuncGroup op = this.driver.Global.Find(Driver.OperatorNamespace, name) as FuncGroup;
+            INode funcGroup = this.driver.Global.Find(Driver.OperatorNamespace, name);
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 PP.Scanner.Location loc = args.Tokens[^1].End;
                 IPreper[] inputs = this.pop<IPreper>(count);
-                this.push(new FuncPrep(loc, new NoPrep(loc, op), inputs));
+                this.push(new FuncPrep(loc, new NoPrep(funcGroup), inputs));
             };
         }
     
@@ -238,9 +239,10 @@ namespace Blackboard.Parser {
                          With("Location", loc);
                 scope = next;
             } else {
-                VirtualNode nextScope = new(name, typeof(Namespace), scope);
-                scope.WriteField(name, nextScope);
+                // Create a new virtual namespace and a performer to construct the new namespace if this formula is run.
+                VirtualNode nextScope = scope.CreateField(name, typeof(Namespace));
                 scope = nextScope;
+                this.formula.Add(new VirtualNodeWriter(nextScope, new NodeHold(new Namespace())));
             }
 
             this.formula.PushScope(scope);
@@ -272,7 +274,16 @@ namespace Blackboard.Parser {
             Type t = this.stashPop<Type>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
+            VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
+
+            TODO: FINISH
+            /*
+            this.formula..CreateField(target.Name )
             this.push(new NewInput(loc, t, target, value));
+            this.formula.Add(new VirtualNodeWriter(nextScope, new NodeHold(new Namespace())));
+            */
+
+
 
             // Push the type back onto the stack for the next assignment.
             this.stashPush(t);
@@ -420,7 +431,7 @@ namespace Blackboard.Parser {
 
             try {
                 bool value = bool.Parse(text);
-                this.push(LiteralPrep.Bool(loc, value));
+                this.push(LiteralPrep.Bool(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a bool.", ex).
                     With("Text", text).
@@ -437,7 +448,7 @@ namespace Blackboard.Parser {
 
             try {
                 int value = S.Convert.ToInt32(text, 2);
-                this.push(LiteralPrep.Int(loc, value));
+                this.push(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a binary int.", ex).
                     With("Text", text).
@@ -454,7 +465,7 @@ namespace Blackboard.Parser {
 
             try {
                 int value = S.Convert.ToInt32(text, 8);
-                this.push(LiteralPrep.Int(loc, value));
+                this.push(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse an octal int.", ex).
                     With("Text", text).
@@ -471,7 +482,7 @@ namespace Blackboard.Parser {
 
             try {
                 int value = int.Parse(text);
-                this.push(LiteralPrep.Int(loc, value));
+                this.push(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a decimal int.", ex).
                     With("Text", text).
@@ -488,7 +499,7 @@ namespace Blackboard.Parser {
 
             try {
                 int value = int.Parse(text, NumberStyles.HexNumber);
-                this.push(LiteralPrep.Int(loc, value));
+                this.push(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a hex int.", ex).
                     With("Text", text).
@@ -505,7 +516,7 @@ namespace Blackboard.Parser {
 
             try {
                 double value = double.Parse(text);
-                this.push(LiteralPrep.Double(loc, value));
+                this.push(LiteralPrep.Double(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a double.", ex).
                     With("Text", text).
@@ -522,7 +533,7 @@ namespace Blackboard.Parser {
 
             try {
                 string value = PP.Misc.Text.Unescape(text);
-                this.push(LiteralPrep.String(loc, value));
+                this.push(LiteralPrep.String(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to decode escaped sequences.", ex).
                     With("Text", text).

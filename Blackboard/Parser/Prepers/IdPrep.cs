@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
 
 namespace Blackboard.Parser.Prepers {
@@ -27,7 +28,6 @@ namespace Blackboard.Parser.Prepers {
             this.Scopes = null;
             this.Receiver = receiver;
             this.Name = name;
-            this.CreationType = null;
         }
 
         /// <summary>The location this identifier was defind in the code being parsed.</summary>
@@ -44,40 +44,13 @@ namespace Blackboard.Parser.Prepers {
         /// <summary>The name of the identifier to read.</summary>
         public string Name;
 
-        /// <summary>Creates a new virtual node for this identifier.</summary>
-        /// <param name="recRef">The receiver to create this id into.</param>
-        /// <returns>The newly created virtual node.</returns>
-        private Performer createNode(IWrappedNode recRef) {
-            IWrappedNode existing = recRef.ReadField(this.Name);
-            if (existing is not null)
-                throw new Exception("May not create a node which already exists.").
-                    With("Identifier", this.Name).
-                    With("Attempted Receiver", recRef).
-                    With("Excisting", existing).
-                    With("Locacation", this.Location);
-
-            if (this.CreationType is null)
-                throw new Exception("May not create a node without a creation type set.").
-                    With("Identifier", this.Name).
-                    With("Attempted Receiver", recRef).
-                    With("Locacation", this.Location);
-
-            VirtualNode node = new(this.Name, this.CreationType, recRef);
-            return new WrappedNodeReader(this.Location, node, false);
-        }
-
         /// <summary>Finds the node in by the given identifier in the scopes stack.</summary>
-        /// <param name="option">The option for preparing this preper. Will only be either create or evaluate.</param>
         /// <returns>The found node in the scope or null.</returns>
-        private Performer resolveInScope(Options option) {
-            if (option == Options.Define)
-                return this.createNode(this.Scopes[0]);
-
+        private IPerformer resolveInScope() {
             for (int i = this.Scopes.Length-1; i >= 0; --i) {
                 IWrappedNode scope = this.Scopes[i];
                 IWrappedNode node = scope.ReadField(this.Name);
-                if (node is not null)
-                    return new WrappedNodeReader(this.Location, node, option == Options.Evaluate);
+                if (node is not null) return new WrappedNodeReader(node);
             }
 
             throw new Exception("No identifier found in the scope stack.").
@@ -87,30 +60,29 @@ namespace Blackboard.Parser.Prepers {
 
         /// <summary>Finds the node in the current receiver after evaluating the receiver.</summary>
         /// <param name="formula">This is the complete set of performers being prepared.</param>
-        /// <param name="option">The option for preparing this preper. Will only be either create or evaluate.</param>
+        /// <param name="evaluate">
+        /// True to reduce the nodes to constants without writting them to Blackboard.
+        /// False to create the nodes and look up Ids when running.
+        /// </param>
         /// <returns>The found node in the receiver or null.</returns>
-        private Performer resolveInReceiver(Formula formula, Options option) {
-            Performer receiver = this.Receiver.Prepare(formula, option);
+        private IPerformer resolveInReceiver(Formula formula, bool evaluate) {
+            IPerformer receiver = this.Receiver.Prepare(formula, evaluate);
 
-            if (receiver.ReturnType.IsAssignableTo(typeof(IFieldReader)))
+            if (receiver.Type.IsAssignableTo(typeof(IFieldReader)))
                 throw new Exception("Node can not be used as receiver, so it can not be used with an identifier.").
                     With("Identifier", this.Name).
                     With("Attempted Receiver", receiver).
                     With("Locacation", this.Location);
 
             if (receiver is not WrappedNodeReader recRef)
-                throw new Exception("Not identifier found in the receiver.").
+                throw new Exception("Receiver is not a wrapped node so it can not be read from.").
                     With("Identifier", this.Name).
                     With("Receiver", receiver).
                     With("Locacation", this.Location);
 
-            if (option == Options.Define)
-                return this.createNode(recRef.WrappedNode);
-
             IWrappedNode node = recRef.WrappedNode.ReadField(this.Name);
-            return node is not null ?
-                new WrappedNodeReader(this.Location, node, option == Options.Evaluate) :
-                throw new Exception("Not identifier found in the receiver.").
+            return node is not null ? new WrappedNodeReader(node) :
+                throw new Exception("Identifier not found in the receiver.").
                     With("Identifier", this.Name).
                     With("Receiver", receiver).
                     With("Locacation", this.Location);
@@ -118,12 +90,46 @@ namespace Blackboard.Parser.Prepers {
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
         /// <param name="formula">This is the complete set of performers being prepared.</param>
-        /// <param name="option">The option for preparing this preper.</param>
+        /// <param name="evaluate">
+        /// True to reduce the nodes to constants without writting them to Blackboard.
+        /// False to create the nodes and look up Ids when running.
+        /// </param>
         /// <returns>
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public Performer Prepare(Formula formula, Options option) =>
-            this.Receiver is null ? this.resolveInScope(option) : this.resolveInReceiver(formula, option);
+        public IPerformer Prepare(Formula formula, bool evaluate = false) {
+            IPerformer value = this.Receiver is null ? this.resolveInScope() : this.resolveInReceiver(formula, evaluate);
+            return evaluate ? new Evaluator(value) : value;
+        }
+
+        /// <summary>Creates new virtual node for this identifier.</summary>
+        /// <remarks>The identifier can not exist on the top of scope or in the receiver.</remarks>
+        /// <param name="formula">The formula being worked on.</param>
+        /// <param name="creationType">The type of the node to create for this identifier.</param>
+        /// <returns>The virtual node for the new node for this identifier.</returns>
+        public VirtualNode CreateNode(Formula formula, System.Type creationType) {
+            if (this.Receiver is null) {
+                // No receiver so create the node at the top of the scope.
+                return formula.CurrentScope.CreateField(this.Name, creationType);
+            }
+
+            // There is a receiver so create the node on the receiver's node.
+            IPerformer receiver = this.Receiver.Prepare(formula, false);
+
+            if (receiver.Type.IsAssignableTo(typeof(IFieldReader)))
+                throw new Exception("Node can not be used as receiver, so it can not be used with an identifier.").
+                    With("Identifier", this.Name).
+                    With("Attempted Receiver", receiver).
+                    With("Locacation", this.Location);
+
+            if (receiver is not WrappedNodeReader recRef)
+                throw new Exception("Receiver is not a wrapped node so it can not be written to.").
+                    With("Identifier", this.Name).
+                    With("Receiver", receiver).
+                    With("Locacation", this.Location);
+
+            return recRef.WrappedNode.CreateField(this.Name, creationType);
+        }
     }
 }

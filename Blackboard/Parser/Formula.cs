@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core;
+using Blackboard.Parser.Performers;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,7 +17,7 @@ namespace Blackboard.Parser {
         public readonly Driver Driver;
 
         private readonly LinkedList<IWrappedNode> scopes;
-        private readonly LinkedList<Performer> pending;
+        private readonly LinkedList<IPerformer> pending;
         private IWrappedNode global;
 
         // TODO: Add a collection of nodes which can NOT be gotten because they are pending removal.
@@ -26,7 +27,7 @@ namespace Blackboard.Parser {
         public Formula(Driver driver) {
             this.Driver = driver;
             this.scopes = new LinkedList<IWrappedNode>();
-            this.pending = new LinkedList<Performer>();
+            this.pending = new LinkedList<IPerformer>();
 
             // Call reset to prepare the formula.
             this.Reset();
@@ -34,13 +35,13 @@ namespace Blackboard.Parser {
 
         /// <summary>Adds a pending performer into this formula.</summary>
         /// <param name="performer">The performer to add.</param>
-        public void Add(Performer performer) =>
+        public void Add(IPerformer performer) =>
             this.pending.AddLast(performer);
 
         /// <summary>Performs all pending actions then resets the formula.</summary>
         public void Perform() {
             // Run each performer by calling it, the returned nodes can be discarded because any kept nodes should be written to Blackboard.
-            foreach (Performer performer in this.pending) performer();
+            foreach (IPerformer performer in this.pending) performer.Perform();
             this.Reset();
         }
 
@@ -51,6 +52,9 @@ namespace Blackboard.Parser {
             this.global = new RealNode(this.Driver.Global);
             this.scopes.AddFirst(this.global);
         }
+
+        /// <summary>The global </summary>
+        public IWrappedNode Global => this.global;
 
         /// <summary>Gets the current top of the scope stack.</summary>
         public IWrappedNode CurrentScope => this.scopes.First.Value;

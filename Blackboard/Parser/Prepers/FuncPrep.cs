@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,51 +37,52 @@ namespace Blackboard.Parser.Prepers {
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public Performer Prepare(Formula formula, bool evaluate) {
-            Performer source = this.Source.Prepare(formula, evaluate);
-            if (sperf is not WrappedNodeReader nodeRef)
+        public IPerformer Prepare(Formula formula, bool evaluate = false) {
+            IPerformer source = this.Source.Prepare(formula, evaluate);
+            if (source is not WrappedNodeReader nodeRef)
                 throw new Exception("Expected the identifier to return a NodeRef performer for a function name").
                     With("Source", this.Source).
                     With("Location", this.Location);
 
-            // Check that the id node already exists and is a FuncGroup since
-            // we don't have a method for virtualizing single function instances yet.
-            // To make this work, individual function definitions need to be nodes which
-            // can be children to the function group and looked up with the parameter types.
-            if (nodeRef.WrappedNode.Virtual || nodeRef.WrappedNode.Node is not FuncGroup funcGroup)
-                throw new Exception("Currenty all functions must be already defined prior to a function performer being created.").
+            if (nodeRef.WrappedNode.Virtual)
+                throw new Exception("Function must be already defined prior to a function performer being called.").
                     With("Wrapped Node", nodeRef).
                     With("Source", this.Source).
                     With("Location", this.Location);
 
-            IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(formula, option)).NotNull().ToArray();
-            Type[] types = inputs.Select((arg) => Type.FromType(arg.ReturnType)).ToArray();
+            IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(formula, evaluate)).NotNull().ToArray();
+            Type[] types = inputs.Select((arg) => Type.FromType(arg.Type)).ToArray();
 
-            IFuncDef func = funcGroup.Find(types);
-            if (func is null)
-                throw new Exception("No function found which accepts the the input types.").
-                    With("Source", this.Source).
-                    With("Inputs", string.Join(", ", types.Select((t) => t.ToString()))).
-                    With("Location", this.Location);
-
-            Function performer = new(func, this.Location, inputs);
-
-            if (option == Options.Create) return performer;
-            if (option == Options.Evaluate) {
-                if (performer.ReturnType is not IDataNode)
-                    throw new Exception("Unable to evaluate the function into a constant.").
+            IFuncDef func;
+            if (nodeRef.WrappedNode.Node is FuncGroup funcGroup) {
+                func = funcGroup.Find(types);
+                if (func is null)
+                    throw new Exception("No function found which accepts the the input types.").
                         With("Source", this.Source).
                         With("Inputs", string.Join(", ", types.Strings())).
                         With("Location", this.Location);
-                performer.Evaluate = true;
-                return performer;
-            }
+            } else if (nodeRef.WrappedNode.Node is IFuncDef funcDef) {
+                func = funcDef;
+                if (func.Match(types).IsMatch)
+                    throw new Exception("Function defenition from source does not match types.").
+                        With("Function", func).
+                        With("Source", this.Source).
+                        With("Inputs", string.Join(", ", types.Strings())).
+                        With("Location", this.Location);
+            } else throw new Exception("Function source must be either a function group or defenition.").
+                    With("Wrapped Node", nodeRef).
+                    With("Source", this.Source).
+                    With("Inputs", string.Join(", ", types.Strings())).
+                    With("Location", this.Location);
 
-            throw new Exception("Invalid option for a function preper.").
-                With("Option", option).
-                With("Source", this.Source).
-                With("Inputs", string.Join(", ", types.Strings())).
-                With("Location", this.Location);
+            Function performer = new(func, inputs);
+            return !evaluate ? performer :
+                performer.Type is IDataNode ? new Evaluator(performer) :
+                throw new Exception("Unable to evaluate the function into a constant.").
+                    With("Function", func).
+                    With("Source", this.Source).
+                    With("Inputs", string.Join(", ", types.Strings())).
+                    With("Location", this.Location);
         }
     }
 }

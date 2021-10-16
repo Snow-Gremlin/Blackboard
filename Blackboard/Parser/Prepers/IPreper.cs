@@ -1,4 +1,4 @@
-﻿using PetiteParser.Scanner;
+﻿using Blackboard.Parser.Performers;
 
 namespace Blackboard.Parser.Prepers {
 
@@ -17,6 +17,6 @@ namespace Blackboard.Parser.Prepers {
         /// </param>
         /// <returns>The performer which will create the nodes for this preper.</returns>
         /// <summary>Gets the performers for to build with.</summary>
-        public Performer Prepare(Formula formula, bool evaluate);
+        public IPerformer Prepare(Formula formula, bool evaluate = false);
     }
 }

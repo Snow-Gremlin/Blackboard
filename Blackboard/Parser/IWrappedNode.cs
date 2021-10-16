@@ -41,13 +41,5 @@ namespace Blackboard.Parser {
         /// <param name="type">The type of the field to add.</param>
         /// <returns>The new virtual node for this node.</returns>
         public VirtualNode CreateField(string name, S.Type type);
-
-        /// <summary>Indicates if this node is a function group.</summary>
-        public bool IsFuncGroup { get; }
-
-        /// <summary>Finds a function definition for the given types.</summary>
-        /// <param name="types">The input types to fidn the definition for.</param>
-        /// <returns>The function definition node or null if not found.</returns>
-        public IWrappedNode FindFuncDef(params Type[] types);
     }
 }

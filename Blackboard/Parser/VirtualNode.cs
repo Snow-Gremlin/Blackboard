@@ -137,21 +137,5 @@ namespace Blackboard.Parser {
             this.children[name] = node;
             return node;
         }
-
-        /// <summary>Indicates if this node is a function group.</summary>
-        public bool IsFuncGroup => this.Node is IFuncGroup;
-
-        /// <summary>Finds a function definition for the given types.</summary>
-        /// <param name="types">The input types to fidn the definition for.</param>
-        /// <returns>The function definition node or null if not found.</returns>
-        public IWrappedNode FindFuncDef(params Type[] types) {
-            if (this.Node is IFuncGroup receiver) {
-                IFuncDef funcDef = receiver.Find(types);
-                // Until the language has a way to define new function definitions,
-                // the found function doesn't need to be held onto locally.
-                return new RealNode(funcDef);
-            }
-            return null;
-        }
     }
 }

@@ -116,20 +116,17 @@ namespace Blackboard.Parser.Prepers {
 
             // There is a receiver so create the node on the receiver's node.
             IPerformer receiver = this.Receiver.Prepare(formula, false);
-
-            if (receiver.Type.IsAssignableTo(typeof(IFieldReader)))
+            return !receiver.Type.IsAssignableTo(typeof(IFieldReader)) ?
                 throw new Exception("Node can not be used as receiver, so it can not be used with an identifier.").
                     With("Identifier", this.Name).
                     With("Attempted Receiver", receiver).
-                    With("Locacation", this.Location);
-
-            if (receiver is not WrappedNodeReader recRef)
+                    With("Locacation", this.Location) :
+                receiver is not WrappedNodeReader recRef ?
                 throw new Exception("Receiver is not a wrapped node so it can not be written to.").
                     With("Identifier", this.Name).
                     With("Receiver", receiver).
-                    With("Locacation", this.Location);
-
-            return recRef.WrappedNode.CreateField(this.Name, creationType);
+                    With("Locacation", this.Location) :
+                recRef.WrappedNode.CreateField(this.Name, creationType);
         }
     }
 }

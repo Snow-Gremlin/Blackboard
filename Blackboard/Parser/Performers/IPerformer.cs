@@ -3,7 +3,7 @@ using S = System;
 
 namespace Blackboard.Parser.Performers {
 
-    /// <summary>The interfaces for all performers.</summary>
+    /// <summary>The interface for all performers.</summary>
     internal interface IPerformer {
 
         /// <summary>Gets the type of the node which will be returned.</summary>

@@ -260,7 +260,18 @@ namespace Blackboard.Parser {
             Type t = this.stashPop<Type>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
-            this.push(new NewInput(loc, t, target, null));
+            VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
+            IFuncDef inputFactory =
+                t == Type.Bool    ? InputValue<Bool>.Factory :
+                t == Type.Int     ? InputValue<Int>.Factory :
+                t == Type.Double  ? InputValue<Double>.Factory :
+                t == Type.String  ? InputValue<String>.Factory :
+                t == Type.Trigger ? InputTrigger.Factory :
+                throw new Exception("Unsupported type for new input").
+                    With("Type", t);
+
+            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory)).Prepare(formula);
+            this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
 
             // Push the type back onto the stack for the next assignment.
             this.stashPush(t);
@@ -275,15 +286,24 @@ namespace Blackboard.Parser {
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
             VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
+            IPerformer valuePerf = value.Prepare(formula, true);
+            IFuncDef inputFactory =
+                t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
+                t == Type.Int     ? InputValue<Int>.FactoryWithInitialValue :
+                t == Type.Double  ? InputValue<Double>.FactoryWithInitialValue :
+                t == Type.String  ? InputValue<String>.FactoryWithInitialValue :
+                t == Type.Trigger ? InputTrigger.FactoryWithInitialValue :
+                throw new Exception("Unsupported type for new input").
+                    With("Type", t);
 
-            TODO: FINISH
-            /*
-            this.formula..CreateField(target.Name )
-            this.push(new NewInput(loc, t, target, value));
-            this.formula.Add(new VirtualNodeWriter(nextScope, new NodeHold(new Namespace())));
-            */
+            Type valueType = Type.FromType(valuePerf.Type);
+            if (!valueType.Match(t).IsMatch)
+                throw new Exception("May not assign the value to that type of input.").
+                    With("Input Type", t).
+                    With("Value Type", valueType);
 
-
+            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(formula);
+            this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
 
             // Push the type back onto the stack for the next assignment.
             this.stashPush(t);
@@ -296,7 +316,20 @@ namespace Blackboard.Parser {
             IdPrep target = this.pop<IdPrep>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
-            this.push(new NewInput(loc, null, target, value));
+            IPerformer valuePerf = value.Prepare(formula, true);
+            Type t = Type.FromType(valuePerf.Type);
+            VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
+            IFuncDef inputFactory =
+                t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
+                t == Type.Int     ? InputValue<Int>.FactoryWithInitialValue :
+                t == Type.Double  ? InputValue<Double>.FactoryWithInitialValue :
+                t == Type.String  ? InputValue<String>.FactoryWithInitialValue :
+                t == Type.Trigger ? InputTrigger.FactoryWithInitialValue :
+                throw new Exception("Unsupported type for new input").
+                    With("Type", t);
+
+            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(formula);
+            this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
         }
 
         /*

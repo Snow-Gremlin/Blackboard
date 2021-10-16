@@ -18,7 +18,7 @@ namespace BlackboardTests {
         /// <summary>Checks the depth of the node.</summary>
         /// <param name="node">The node to check the depth of.</param>
         /// <param name="exp">This is the expected depth.</param>
-        static public void CheckDepth(this INode node, int exp) =>
+        static public void CheckDepth(this IEvaluatable node, int exp) =>
             Assert.AreEqual(exp, node.Depth);
 
         /// <summary>Checks the list of parents of a node.</summary>

@@ -161,7 +161,7 @@ namespace Blackboard.Core {
 
             // Check if implicit casts exist.
             // Add an initial penalty for using an implicit cast instead of inheritance.
-            steps = 0;
+            steps = 1;
             do {
                 if (t.imps.ContainsKey(this)) return TypeMatch.Cast(steps);
                 t = t.BaseType;

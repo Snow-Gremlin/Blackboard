@@ -18,7 +18,6 @@ namespace Blackboard.Parser {
 
         private readonly LinkedList<IWrappedNode> scopes;
         private readonly LinkedList<IPerformer> pending;
-        private IWrappedNode global;
 
         // TODO: Add a collection of nodes which can NOT be gotten because they are pending removal.
 
@@ -49,12 +48,12 @@ namespace Blackboard.Parser {
         public void Reset() {
             this.pending.Clear();
             this.scopes.Clear();
-            this.global = new RealNode(this.Driver.Global);
-            this.scopes.AddFirst(this.global);
+            this.Global = new RealNode(this.Driver.Global);
+            this.scopes.AddFirst(this.Global);
         }
 
-        /// <summary>The global </summary>
-        public IWrappedNode Global => this.global;
+        /// <summary>The global node prewrapped so that virtual nodes can be added to it.</summary>
+        public IWrappedNode Global { get; private set; }
 
         /// <summary>Gets the current top of the scope stack.</summary>
         public IWrappedNode CurrentScope => this.scopes.First.Value;

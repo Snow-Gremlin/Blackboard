@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Inner;
+using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Nodes.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -31,14 +32,10 @@ namespace BlackboardTests.CoreTests {
             checkTypeOf(new Counter<Int>(),       Type.CounterInt);
             checkTypeOf(new Counter<Double>(),    Type.CounterDouble);
             checkTypeOf(new Toggler(),            Type.Toggler);
-            checkTypeOf(new Latch<Bool>(),        Type.LatchBool);
-            checkTypeOf(new Latch<Int>(),         Type.LatchInt);
-            checkTypeOf(new Latch<Double>(),      Type.LatchDouble);
-            checkTypeOf(new Latch<String>(),      Type.LatchString);
         }
 
         [TestMethod]
-        public void TestCastBool() {
+        public void TestCastBoolInput() {
             InputValue<Bool> node = new();
             checkCast(Type.Node,          node, "Inherit(1)", "Input<bool>", "Input<bool>");
             checkCast(Type.Trigger,       node, "Cast(0)", "BoolAsTrigger(Input<bool>)", "null");
@@ -49,32 +46,24 @@ namespace BlackboardTests.CoreTests {
             checkCast(Type.CounterInt,    node, "None", "null", "null");
             checkCast(Type.CounterDouble, node, "None", "null", "null");
             checkCast(Type.Toggler,       node, "None", "null", "null");
-            checkCast(Type.LatchBool,     node, "None", "null", "null");
-            checkCast(Type.LatchInt,      node, "None", "null", "null");
-            checkCast(Type.LatchDouble,   node, "None", "null", "null");
-            checkCast(Type.LatchString,   node, "None", "null", "null");
         }
         
         [TestMethod]
-        public void TestCastInt() {
+        public void TestCastIntLatch() {
             Latch<Int> node = new();
-            checkCast(Type.Node,          node, "Inherit(2)", "Latch<int>(null, null)", "Latch<int>(null, null)");
+            checkCast(Type.Node,          node, "Inherit(1)", "Latch<int>(null, null)", "Latch<int>(null, null)");
             checkCast(Type.Trigger,       node, "None", "null", "null");
             checkCast(Type.Bool,          node, "None", "null", "null");
-            checkCast(Type.Int,           node, "Inherit(1)", "Latch<int>(null, null)", "Latch<int>(null, null)");
+            checkCast(Type.Int,           node, "Inherit(0)", "Latch<int>(null, null)", "Latch<int>(null, null)");
             checkCast(Type.Double,        node, "Cast(1)", "Implicit<double>(Latch<int>(null, null))", "null");
             checkCast(Type.String,        node, "Cast(1)", "Implicit<string>(Latch<int>(null, null))", "null");
             checkCast(Type.CounterInt,    node, "None", "null", "null");
             checkCast(Type.CounterDouble, node, "None", "null", "null");
             checkCast(Type.Toggler,       node, "None", "null", "null");
-            checkCast(Type.LatchBool,     node, "None", "null", "null");
-            checkCast(Type.LatchInt,      node, "Inherit(0)", "Latch<int>(null, null)", "Latch<int>(null, null)");
-            checkCast(Type.LatchDouble,   node, "None", "null", "null");
-            checkCast(Type.LatchString,   node, "None", "null", "null");
         }
         
         [TestMethod]
-        public void TestCastDouble() {
+        public void TestCastDoubleCounter() {
             Counter<Double> node = new();
             checkCast(Type.Node,          node, "Inherit(2)", "Counter<double>(null, null, null, null, null)", "Counter<double>(null, null, null, null, null)");
             checkCast(Type.Trigger,       node, "None", "null", "null");
@@ -85,10 +74,6 @@ namespace BlackboardTests.CoreTests {
             checkCast(Type.CounterInt,    node, "None", "null", "null");
             checkCast(Type.CounterDouble, node, "Inherit(0)", "Counter<double>(null, null, null, null, null)", "Counter<double>(null, null, null, null, null)");
             checkCast(Type.Toggler,       node, "None", "null", "null");
-            checkCast(Type.LatchBool,     node, "None", "null", "null");
-            checkCast(Type.LatchInt,      node, "None", "null", "null");
-            checkCast(Type.LatchDouble,   node, "None", "null", "null");
-            checkCast(Type.LatchString,   node, "None", "null", "null");
         }
     }
 }

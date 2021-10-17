@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Nodes.Inner {
@@ -11,6 +11,9 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <typeparam name="T">The type of input for the two value providing parents.</typeparam>
     sealed public class Select<T>: Ternary<Bool, T, T, T>
         where T : IComparable<T>, new() {
+
+        // TODO: Determine if it is possible to select between two triggers (i.e. pick the trigger to listen too.
+        //       Also namespace, funcGroups, funcDefs, where it uses one of two but must also match the same interface.
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =

@@ -48,6 +48,19 @@ namespace Blackboard.Core.Nodes.Functions {
             return FuncMatch.Create(this.needOneNoCast, types.Select(t.Match));
         }
 
+        /// <summary>This will implicity cast the given parameter,</summary>
+        /// <param name="t">The type to get the cast from.</param>
+        /// <param name="node">The node to cast.</param>
+        /// <returns>The resulting parameter in the expected type.</returns>
+        static private Tn castParam(Type t, INode node) {
+            INode cast = t.Implicit(node);
+            return cast is Tn result ? result :
+                throw new Exception("Error casting parameter").
+                    With("Type", typeof(Tn)).
+                    With("Implicit", t).
+                    With("Result", cast);
+        }
+
         /// <summary>Builds and returns the function object.</summary>
         /// <remarks>Before this is called, Match must have been possible.</remarks>
         /// <param name="nodes">The nodes as parameters to the function.</param>
@@ -55,7 +68,7 @@ namespace Blackboard.Core.Nodes.Functions {
         public override INode Build(INode[] nodes) {
             Type t = Type.FromType<Tn>();
             return this.passOne && nodes.Length == 1 ? t.Implicit(nodes[0]) :
-                this.hndl(nodes.Select((node) => t.Implicit(node) as Tn).ToArray());
+                this.hndl(nodes.Select((node) => castParam(t, node)).ToArray());
         }
     }
 }

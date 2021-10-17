@@ -30,6 +30,69 @@ namespace Blackboard.Parser.Prepers {
         /// <summary>The input arguments for this function.</summary>
         public List<IPreper> Arguments;
 
+        /// <summary>Prepares the source node for the function definition from the given source preper.</summary>
+        /// <remarks>
+        /// Currently there can't be any virtual functions since there is no way to define a new function in
+        /// the language at this time. When there is a virtual node reader for a group will have to 
+        /// be able to check a virtual function definition exists on that group and get it with the types
+        /// as a wrapped node reader containing the function definition into the function performer.
+        /// The performer will also need to take in a performer BUT the type returned needs to be the return type
+        /// of the function not the type of the wrapped function definition.
+        /// </remarks>
+        /// <param name="formula">This is the complete set of performers being prepared.</param>
+        /// <param name="evaluate">True to evaluate to a constant, false otherwise.</param>
+        /// <returns>The source node to get the function definition from.</returns>
+        private INode prepareSource(Formula formula, bool evaluate) {
+            IPerformer source = this.Source.Prepare(formula, evaluate);
+            
+            // Wrapped nodes are usually from methods called in the input code by name.
+            if (source is WrappedNodeReader nodeRef) {
+                return !nodeRef.WrappedNode.Virtual ? nodeRef.WrappedNode.Node :
+                    throw new Exception("Function must be already defined prior to a function performer being called.").
+                        With("Wrapped Node", nodeRef).
+                        With("Source", this.Source).
+                        With("Location", this.Location);
+            }
+            
+            // Held nodes are usually from operators being called or when specific factories are being used.
+            return source is NodeHold nodeHold ? nodeHold.Node :
+                throw new Exception("Expected the identifier to return a wrapped node reader or node holder for a function name").
+                    With("Source Performer", source).
+                    With("Source Preper", this.Source).
+                    With("Location", this.Location);
+        }
+
+        /// <summary>Prepares the function definition that will be called by the performer.</summary>
+        /// <param name="sourceNode">The source node to get the function from.</param>
+        /// <param name="types">The input types used to determine the correct definition from a group.</param>
+        /// <returns>The function definition that the preformer will call.</returns>
+        private IFuncDef prepareFuncDef(INode sourceNode, Type[] types) {
+            // Groups are usually when a function or operator is called and
+            // the correct definition has to be looked up for the given input types.
+            if (sourceNode is FuncGroup funcGroup) {
+                IFuncDef func = funcGroup.Find(types);
+                return func is not null ? func :
+                    throw new Exception("No function found which accepts the the input types.").
+                        With("Source", this.Source).
+                        With("Inputs", string.Join(", ", types.Strings())).
+                        With("Location", this.Location);
+            }
+
+            // Definitions are ususally when a specific factory is being used.
+            return sourceNode is IFuncDef funcDef ?
+                funcDef.Match(types).IsMatch ? funcDef :
+                    throw new Exception("Function definition from source does not match types.").
+                        With("Function", funcDef).
+                        With("Source", this.Source).
+                        With("Inputs", string.Join(", ", types.Strings())).
+                        With("Location", this.Location) :
+                throw new Exception("Function source must be either a function group or definition.").
+                    With("Node", sourceNode).
+                    With("Source", this.Source).
+                    With("Inputs", string.Join(", ", types.Strings())).
+                    With("Location", this.Location);
+        }
+
         /// <summary>This will check and prepare the node as much as possible.</summary>
         /// <param name="formula">This is the complete set of performers being prepared.</param>
         /// <param name="evaluate">True to evaluate to a constant, false otherwise.</param>
@@ -38,46 +101,14 @@ namespace Blackboard.Parser.Prepers {
         /// if null then no performer is used by parent for this node.
         /// </returns>
         public IPerformer Prepare(Formula formula, bool evaluate = false) {
-            IPerformer source = this.Source.Prepare(formula, evaluate);
-            if (source is not WrappedNodeReader nodeRef)
-                throw new Exception("Expected the identifier to return a NodeRef performer for a function name").
-                    With("Source", this.Source).
-                    With("Location", this.Location);
-
-            if (nodeRef.WrappedNode.Virtual)
-                throw new Exception("Function must be already defined prior to a function performer being called.").
-                    With("Wrapped Node", nodeRef).
-                    With("Source", this.Source).
-                    With("Location", this.Location);
-
+            INode sourceNode = this.prepareSource(formula, evaluate);
             IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(formula, evaluate)).NotNull().ToArray();
             Type[] types = inputs.Select((arg) => Type.FromType(arg.Type)).ToArray();
-
-            IFuncDef func;
-            if (nodeRef.WrappedNode.Node is FuncGroup funcGroup) {
-                func = funcGroup.Find(types);
-                if (func is null)
-                    throw new Exception("No function found which accepts the the input types.").
-                        With("Source", this.Source).
-                        With("Inputs", string.Join(", ", types.Strings())).
-                        With("Location", this.Location);
-            } else if (nodeRef.WrappedNode.Node is IFuncDef funcDef) {
-                func = funcDef;
-                if (func.Match(types).IsMatch)
-                    throw new Exception("Function defenition from source does not match types.").
-                        With("Function", func).
-                        With("Source", this.Source).
-                        With("Inputs", string.Join(", ", types.Strings())).
-                        With("Location", this.Location);
-            } else throw new Exception("Function source must be either a function group or defenition.").
-                    With("Wrapped Node", nodeRef).
-                    With("Source", this.Source).
-                    With("Inputs", string.Join(", ", types.Strings())).
-                    With("Location", this.Location);
+            IFuncDef func = this.prepareFuncDef(sourceNode, types);
 
             Function performer = new(func, inputs);
             return !evaluate ? performer :
-                performer.Type is IDataNode ? new Evaluator(performer) :
+                performer.Type.IsAssignableTo(typeof(IConstantable)) ? new Evaluator(performer) :
                 throw new Exception("Unable to evaluate the function into a constant.").
                     With("Function", func).
                     With("Source", this.Source).

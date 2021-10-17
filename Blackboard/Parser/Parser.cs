@@ -297,7 +297,7 @@ namespace Blackboard.Parser {
                     With("Type", t);
 
             Type valueType = Type.FromType(valuePerf.Type);
-            if (!valueType.Match(t).IsMatch)
+            if (!t.Match(valueType).IsMatch)
                 throw new Exception("May not assign the value to that type of input.").
                     With("Input Type", t).
                     With("Value Type", valueType);

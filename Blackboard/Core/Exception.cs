@@ -21,7 +21,7 @@
             // TODO: Figure out a better way to make this show up in unit-tests.
             //this.Data.Add(key, strVal);
             //return this;
-            return new Exception(this.Message + " [" + key + ": " + strVal + "]");
+            return new Exception(this.Message + "\n[" + key + ": " + strVal + "]");
         }
     }
 }

@@ -12,6 +12,7 @@ namespace Blackboard.Parser.Performers {
         /// <summary>Creates a new evaluator.</summary>
         /// <param name="value">The performer to get the node to evaluate.</param>
         public Evaluator(IPerformer value) {
+            // TODO: Need to add a passthough for already constant values.
             this.Value = value;
         }
 
@@ -25,6 +26,6 @@ namespace Blackboard.Parser.Performers {
         /// If this does throw an exception the prepers should be fixed to prevent this.
         /// </remarks>
         /// <returns>This is the newly created node or null.</returns>
-        public INode Perform() => (this.Value.Perform() as IDataNode)?.ToConstant();
+        public INode Perform() => (this.Value.Perform() as IConstantable)?.ToConstant();
     }
 }

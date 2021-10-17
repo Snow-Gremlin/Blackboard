@@ -53,7 +53,7 @@ namespace Blackboard.Parser {
             get => this.node;
             set {
                 // These exceptions should never be hit if the prepers is working as expected.
-                if (value.GetType() != this.Type)
+                if (!value.GetType().IsAssignableTo(this.Type))
                     throw new Exception("The virtual node resolved an uexpected type of node.").
                         With("Name", this.Name).
                         With("Type", this.Type).
@@ -65,8 +65,8 @@ namespace Blackboard.Parser {
                         With("Name", this.Name).
                         With("Type", this.Type);
 
-                if (this.Receiver is not IFieldWriter receiver)
-                    throw new Exception("The receiver for a virtual node must be a field writer.").
+                if (!this.Receiver.IsFieldReader || !this.Receiver.IsFieldWriter)
+                    throw new Exception("The receiver for a virtual node must be a field reader/writer.").
                         With("Receiver", this.Receiver).
                         With("Name", this.Name).
                         With("Type", this.Type);
@@ -78,7 +78,7 @@ namespace Blackboard.Parser {
                         With("Receiver", this.Receiver).
                         With("Node", value.GetType());
 
-                if (!ReferenceEquals(child, value))
+                if (!ReferenceEquals(child, this))
                     throw new Exception("The virtual node was being resolved with a node which does not match the receiver's child of that name.").
                         With("Name", this.Name).
                         With("Receiver", this.Receiver).
@@ -86,6 +86,7 @@ namespace Blackboard.Parser {
                         With("Node", value.GetType());
 
                 this.node = value;
+                IFieldWriter receiver = this.Receiver.Node as IFieldWriter;
                 receiver.WriteField(this.Name, value);
             }
         }

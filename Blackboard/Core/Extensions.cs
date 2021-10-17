@@ -85,7 +85,7 @@ namespace Blackboard.Core {
         /// <summary>This determines if all the given nodes are constant.</summary>
         /// <param name="nodes">The nodes to check if constant.</param>
         /// <returns>True if all nodes are constant, false otherwise.</returns>
-        static public bool IsConstant(this IEnumerable<IDataNode> nodes) =>
+        static public bool IsConstant(this IEnumerable<IConstantable> nodes) =>
             nodes.All((node) => node.IsConstant);
 
         /// <summary>The types names for all the given nodes.</summary>

@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,6 +16,9 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Indicates if this trigger has been fired during a current evaluation.</summary>
         public bool Provoked { get; protected set; }
 
+        /// <summary>This always returns false because triggers aren't constant but can be converted to one.</summary>
+        public bool IsConstant => false;
+
         /// <summary>Resets the trigger at the end of the evaluation.</summary>
         public void Reset() => this.Provoked = false;
 
@@ -28,5 +32,9 @@ namespace Blackboard.Core.Nodes.Bases {
             this.Provoked = this.UpdateTrigger();
             return this.Provoked ? this.Children.OfType<IEvaluatable>() : Enumerable.Empty<IEvaluatable>();
         }
+
+        /// <summary>Converts this node to a boolean literal.</summary>
+        /// <returns>A boolean literal carrying the provoked condition.</returns>
+        public IConstant ToConstant() => Literal.Bool(this.Provoked);
     }
 }

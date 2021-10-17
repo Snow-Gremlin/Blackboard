@@ -35,7 +35,15 @@ namespace Blackboard.Core {
         static public readonly Type Namespace;
 
         /// <summary>The function group value type.</summary>
-        static public readonly Type Function;
+        /// <remarks>
+        /// A function group contains several function definitions
+        /// and can select a definition based on parameter type.
+        /// </remarks>
+        static public readonly Type FuncGroup;
+
+        /// <summary>The function definition value type.</summary>
+        /// <remarks>A function definition is a single implementation with specific parameter types.</remarks>
+        static public readonly Type FuncDef;
 
         /// <summary>The integer counter type which is an extension of the integer value type.</summary>
         static public readonly Type CounterInt;
@@ -46,15 +54,32 @@ namespace Blackboard.Core {
         /// <summary>The toggler type which is an extension of the boolean value type.</summary>
         static public readonly Type Toggler;
 
+        /// <summary>The boolean latch which is an extension of the boolean value type.</summary>
+        static public readonly Type LatchBool;
+
+        /// <summary>The integer latch which is an extension of the integer value type.</summary>
+        static public readonly Type LatchInt;
+
+        /// <summary>The double latch which is an extension of the double value type.</summary>
+        static public readonly Type LatchDouble;
+
+        /// <summary>The string latch which is an extension of the string value type.</summary>
+        static public readonly Type LatchString;
+
         /// <summary>Gets all the types.</summary>
         /// <remarks>These must be ordered by inheriting object before the object that was inherited.</remarks>
         static public IEnumerable<Type> AllTypes {
             get {
+                yield return LatchString;
+                yield return LatchDouble;
+                yield return LatchInt;
+                yield return LatchBool;
                 yield return Toggler;
                 yield return CounterDouble;
                 yield return CounterInt;
                 yield return Namespace;
-                yield return Function;
+                yield return FuncDef;
+                yield return FuncGroup;
                 yield return String;
                 yield return Double;
                 yield return Int;
@@ -161,7 +186,7 @@ namespace Blackboard.Core {
 
             // Check if implicit casts exist.
             // Add an initial penalty for using an implicit cast instead of inheritance.
-            steps = 1;
+            steps = 0;
             do {
                 if (t.imps.ContainsKey(this)) return TypeMatch.Cast(steps);
                 t = t.BaseType;
@@ -258,11 +283,16 @@ namespace Blackboard.Core {
             Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int));
             Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double));
             String        = new Type("string",         typeof(IValue<String>),  Node,   typeof(String));
-            Namespace     = new Type("Namespace",      typeof(Namespace),       Node,   null);
-            Function      = new Type("Function",       typeof(FuncGroup),       Node,   null);
+            Namespace     = new Type("namespace",      typeof(Namespace),       Node,   null);
+            FuncGroup     = new Type("function-group", typeof(FuncGroup),       Node,   null);
+            FuncDef       = new Type("function-def",   typeof(IFuncDef),        Node,   null);
             CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int));
             CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double));
             Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool));
+            LatchBool     = new Type("latch-bool",     typeof(Latch<Bool>),     Bool,   typeof(Bool));
+            LatchInt      = new Type("latch-int",      typeof(Latch<Int>),      Int,    typeof(Int));
+            LatchDouble   = new Type("latch-double",   typeof(Latch<Double>),   Double, typeof(Double));
+            LatchString   = new Type("latch-string",   typeof(Latch<String>),   String, typeof(String));
 
             addCast<IValueAdopter<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
             addCast<IValueAdopter<Bool>>(Bool.imps, String,  (input) => new Implicit<Bool, String>(input));
@@ -272,6 +302,8 @@ namespace Blackboard.Core {
 
             addCast<IValueAdopter<Double>>(Double.exps, Int,    (input) => new Explicit<Double, Int>(input));
             addCast<IValueAdopter<Double>>(Double.imps, String, (input) => new Implicit<Double, String>(input));
+
+            addCast<IFuncDef>(FuncDef.imps, FuncGroup, (input) => new FuncGroup(input));
         }
     }
 }

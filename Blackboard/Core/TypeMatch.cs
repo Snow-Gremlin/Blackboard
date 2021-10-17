@@ -41,7 +41,11 @@ namespace Blackboard.Core {
         /// <summary>Compares this match with another match.</summary>
         /// <remarks>This does not compare IsMatch since it is assumed only matching types will be compared.</remarks>
         /// <param name="other">The other match to compare with.</param>
-        /// <returns>-1 if match if this is less than the other, 0 if they match, 1 if this is greater than the other.</returns>
+        /// <returns>
+        /// -1 if match if this is less than the other,
+        ///  0 if they match,
+        ///  1 if this is greater than the other.
+        /// </returns>
         public int CompareTo(TypeMatch other) {
             int cmp = this.NeedsCast.CompareTo(other.NeedsCast);
             if (cmp == 0) cmp = this.Steps.CompareTo(other.Steps);

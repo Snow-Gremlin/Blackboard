@@ -4,6 +4,7 @@ using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
+using System.Linq;
 using S = System;
 
 namespace Blackboard.Core {
@@ -67,24 +68,11 @@ namespace Blackboard.Core {
         static public readonly Type LatchString;
 
         /// <summary>Gets all the types.</summary>
-        /// <remarks>These must be ordered by inheriting object before the object that was inherited.</remarks>
+        /// <remarks>These are ordered by inheriting object before the object that was inherited.</remarks>
         static public IEnumerable<Type> AllTypes {
             get {
-                yield return LatchString;
-                yield return LatchDouble;
-                yield return LatchInt;
-                yield return LatchBool;
-                yield return Toggler;
-                yield return CounterDouble;
-                yield return CounterInt;
-                yield return Namespace;
-                yield return FuncDef;
-                yield return FuncGroup;
-                yield return String;
-                yield return Double;
-                yield return Int;
-                yield return Bool;
-                yield return Trigger;
+                foreach (Type decendent in Node.AllInheritors)
+                    yield return decendent;
                 yield return Node;
             }
         }
@@ -92,14 +80,10 @@ namespace Blackboard.Core {
         /// <summary>Finds the type given the type name.</summary>
         /// <param name="name">The name of the type to get.</param>
         /// <returns>The type for the given name or null if name isn't found.</returns>
-        static public Type FromName(string name) {
-            foreach (Type t in AllTypes) {
-                if (t.Name == name) return t;
-            }
-            return null;
-        }
+        static public Type FromName(string name) =>
+            AllTypes.Where((t) => t.Name == name).FirstOrDefault();
 
-        /// <summary>This gets the type given a node.</summary>
+        /// <summary>This gets the type given a node.</summary>s
         /// <param name="node">The node to get the type of.</param>
         /// <returns>The type for the given node or null if not found.</returns>
         static public Type TypeOf(INode node) => FromType(node.GetType());
@@ -113,10 +97,13 @@ namespace Blackboard.Core {
         /// <param name="type">The C# type to get this type of.</param>
         /// <returns>The type for the given C# type or null if not found.</returns>
         static public Type FromType(S.Type type) {
-            foreach (Type t in AllTypes) {
-                if (type.IsAssignableTo(t.RealType)) return t;
+            if (!type.IsAssignableTo(Node.RealType)) return null;
+            Type current = Node;
+            while (true) {
+                Type next = current.Inheritors.FirstAssignable(type);
+                if (next is null) return current;
+                current = next;
             }
-            return null;
         }
 
         /// <summary>The display name of the type.</summary>
@@ -131,6 +118,9 @@ namespace Blackboard.Core {
 
         /// <summary>The underlying IData type for this node, or null if no data.</summary>
         public readonly S.Type DataType;
+
+        /// <summary>The types with base type of this type.</summary>
+        private List<Type> inheritors;
 
         /// <summary>This is a dictionary of other types to an implicit cast.</summary>
         private Dictionary<Type, Caster> imps;
@@ -150,9 +140,11 @@ namespace Blackboard.Core {
             this.DataType = dataType;
             this.imps = new();
             this.exps = new();
+            this.inheritors = new();
 
             if ((dataType is null) == realType.IsAssignableTo(typeof(IDataNode)))
                 throw Exceptions.TypeDefinitionInvalid(name, realType, dataType);
+            if (baseType is not null) baseType.inheritors.Add(this);
         }
 
         /// <summary>This determines the implicit and inheritence match.</summary>
@@ -193,6 +185,20 @@ namespace Blackboard.Core {
                 steps++;
             } while (t is not null);
             return TypeMatch.NoMatch;
+        }
+
+        /// <summary>The types with base type of this type.</summary>
+        public IReadOnlyCollection<Type> Inheritors => this.inheritors.AsReadOnly();
+
+        /// <summary>Gets the depth first collection of all types which inherit from this type.</summary>
+        public IEnumerable<Type> AllInheritors {
+            get {
+                foreach (Type inheritor in this.inheritors) {
+                    foreach (Type decendent in inheritor.AllInheritors)
+                        yield return decendent;
+                    yield return inheritor;
+                }
+            }
         }
 
         /// <summary>Performs an implicit cast of the given node into this type.</summary>

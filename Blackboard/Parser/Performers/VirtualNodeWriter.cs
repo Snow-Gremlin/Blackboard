@@ -9,7 +9,7 @@ namespace Blackboard.Parser.Performers {
         /// <summary>The Virtual node to write to.</summary>
         public readonly VirtualNode VirtualNode;
 
-        /// <summary>The value to evaluate and set.</summary>
+        /// <summary>The value to set.</summary>
         public readonly IPerformer Value;
 
         /// <summary>Creates a new virtual node writer.</summary>

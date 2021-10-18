@@ -60,13 +60,13 @@ namespace Blackboard.Parser.Prepers {
 
         /// <summary>Finds the node in the current receiver after evaluating the receiver.</summary>
         /// <param name="formula">This is the complete set of performers being prepared.</param>
-        /// <param name="evaluate">
+        /// <param name="reduce">
         /// True to reduce the nodes to constants without writting them to Blackboard.
         /// False to create the nodes and look up Ids when running.
         /// </param>
         /// <returns>The found node in the receiver or null.</returns>
-        private IPerformer resolveInReceiver(Formula formula, bool evaluate) {
-            IPerformer receiver = this.Receiver.Prepare(formula, evaluate);
+        private IPerformer resolveInReceiver(Formula formula, bool reduce) {
+            IPerformer receiver = this.Receiver.Prepare(formula, reduce);
 
             if (receiver.Type.IsAssignableTo(typeof(IFieldReader)))
                 throw new Exception("Node can not be used as receiver, so it can not be used with an identifier.").
@@ -90,18 +90,16 @@ namespace Blackboard.Parser.Prepers {
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
         /// <param name="formula">This is the complete set of performers being prepared.</param>
-        /// <param name="evaluate">
+        /// <param name="reduce">
         /// True to reduce the nodes to constants without writting them to Blackboard.
-        /// False to create the nodes and look up Ids when running.
+        /// False to create the nodes and look up identifiers when running.
         /// </param>
         /// <returns>
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, bool evaluate = false) {
-            IPerformer value = this.Receiver is null ? this.resolveInScope() : this.resolveInReceiver(formula, evaluate);
-            return evaluate ? new Evaluator(value) : value;
-        }
+        public IPerformer Prepare(Formula formula, bool reduce = false) =>
+            Reducer.Wrap(this.Receiver is null ? this.resolveInScope() : this.resolveInReceiver(formula, reduce), reduce);
 
         /// <summary>Creates new virtual node for this identifier.</summary>
         /// <remarks>The identifier can not exist on the top of scope or in the receiver.</remarks>

@@ -40,10 +40,10 @@ namespace Blackboard.Parser.Prepers {
         /// of the function not the type of the wrapped function definition.
         /// </remarks>
         /// <param name="formula">This is the complete set of performers being prepared.</param>
-        /// <param name="evaluate">True to evaluate to a constant, false otherwise.</param>
+        /// <param name="reduce">True to reduce to a constant, false otherwise.</param>
         /// <returns>The source node to get the function definition from.</returns>
-        private INode prepareSource(Formula formula, bool evaluate) {
-            IPerformer source = this.Source.Prepare(formula, evaluate);
+        private INode prepareSource(Formula formula, bool reduce) {
+            IPerformer source = this.Source.Prepare(formula, reduce);
             
             // Wrapped nodes are usually from methods called in the input code by name.
             if (source is WrappedNodeReader nodeRef) {
@@ -95,25 +95,19 @@ namespace Blackboard.Parser.Prepers {
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
         /// <param name="formula">This is the complete set of performers being prepared.</param>
-        /// <param name="evaluate">True to evaluate to a constant, false otherwise.</param>
+        /// <param name="reduce">True to reduce to a constant, false otherwise.</param>
         /// <returns>
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, bool evaluate = false) {
-            INode sourceNode = this.prepareSource(formula, evaluate);
-            IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(formula, evaluate)).NotNull().ToArray();
+        public IPerformer Prepare(Formula formula, bool reduce = false) {
+            INode sourceNode = this.prepareSource(formula, reduce);
+            
+            IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(formula, reduce)).NotNull().ToArray();
             Type[] types = inputs.Select((arg) => Type.FromType(arg.Type)).ToArray();
+            
             IFuncDef func = this.prepareFuncDef(sourceNode, types);
-
-            Function performer = new(func, inputs);
-            return !evaluate ? performer :
-                performer.Type.IsAssignableTo(typeof(IConstantable)) ? new Evaluator(performer) :
-                throw new Exception("Unable to evaluate the function into a constant.").
-                    With("Function", func).
-                    With("Source", this.Source).
-                    With("Inputs", string.Join(", ", types.Strings())).
-                    With("Location", this.Location);
+            return Reducer.Wrap(new Function(func, inputs), reduce);
         }
     }
 }

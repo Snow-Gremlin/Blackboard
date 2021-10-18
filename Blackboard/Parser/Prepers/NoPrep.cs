@@ -23,8 +23,9 @@ namespace Blackboard.Parser.Prepers {
 
         /// <summary>Does no preperation and just returns the held performer.</summary>
         /// <param name="formula">Not Used.</param>
-        /// <param name="evaluate">Not Used.</param>
+        /// <param name="reduce">Indicates if the returned node should be reduced or not.</param>
         /// <returns>The performer being held.</returns>
-        public IPerformer Prepare(Formula formula, bool evaluate = false) => this.Performer;
+        public IPerformer Prepare(Formula formula, bool reduce = false) =>
+            Reducer.Wrap(this.Performer, reduce);
     }
 }

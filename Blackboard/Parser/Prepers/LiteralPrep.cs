@@ -45,11 +45,11 @@ namespace Blackboard.Parser.Prepers {
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
         /// <param name="formula">TNot Used</param>
-        /// <param name="evaluate">Not Used</param>
+        /// <param name="reduce">Not used since a literal already is a constant.</param>
         /// <returns>
         /// This is the performer to replace this preper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, bool evaluate = false) => new NodeHold(new Literal<T>(this.Value));
+        public IPerformer Prepare(Formula formula, bool reduce = false) => new NodeHold(new Literal<T>(this.Value));
     }
 }

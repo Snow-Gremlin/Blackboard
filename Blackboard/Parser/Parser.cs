@@ -333,24 +333,6 @@ namespace Blackboard.Parser {
         }
 
         /*
-        /// <summary>This assigns several existing input nodes with a new value.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleAssignExisting(PP.ParseTree.PromptArgs args) {
-            INode right = this.popNode().First();
-            while (this.stack.Count > 0) {
-                Identifier id = this.pop<Identifier>();
-                INode left = this.find(id);
-                if (left is null) throw new Exception("Unknown input variable " + id + " at " + id.Location + ".");
-                else if (left is IValueInput<bool>   leftBool)    leftBool.   SetValue(Cast.AsBoolValue(   right));
-                else if (left is IValueInput<int>    leftInt)     leftInt.    SetValue(Cast.AsIntValue(    right));
-                else if (left is IValueInput<double> leftDouble)  leftDouble. SetValue(Cast.AsDoubleValue( right));
-                else if (left is ITriggerInput       leftTrigger) leftTrigger.Trigger( Cast.AsTriggerValue(right));
-                else throw new Exception("Unable to assign to " + Cast.TypeName(left) + " at " + id.Location + ".");
-            }
-        }
-        */
-
-        /*
         /// <summary>This handles defining a new typed output node.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleTypeDefine(PP.ParseTree.PromptArgs args) {
@@ -400,9 +382,50 @@ namespace Blackboard.Parser {
         /// <summary>This handles assigning the left value to the right value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleAssignment(PP.ParseTree.PromptArgs args) {
+            IPrepper value = this.pop<IPrepper>();
+            IPrepper target = this.pop<IPrepper>();
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+
+            IPerformer valuePerf = value.Prepare(formula, true);
+            IPerformer targetPerf = target.Prepare(formula, true);
+
+            Type t = Type.FromType(valuePerf.Type);
+            VirtualNode virtualInput = 
+            IFuncDef inputFactory =
+                t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
+                t == Type.Int     ? InputValue<Int>.FactoryWithInitialValue :
+                t == Type.Double  ? InputValue<Double>.FactoryWithInitialValue :
+                t == Type.String  ? InputValue<String>.FactoryWithInitialValue :
+                t == Type.Trigger ? InputTrigger.FactoryWithInitialValue :
+                throw new Exception("Unsupported type for new input").
+                    With("Type", t);
+
+            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(formula);
+            this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
+
 
 
             // TODO: IMPLEMENT
+
+
+
+            /*
+            /// <summary>This assigns several existing input nodes with a new value.</summary>
+            /// <param name="args">The token information from the parser.</param>
+            private void handleAssignExisting(PP.ParseTree.PromptArgs args) {
+                INode right = this.popNode().First();
+                while (this.stack.Count > 0) {
+                    Identifier id = this.pop<Identifier>();
+                    INode left = this.find(id);
+                    if (left is null) throw new Exception("Unknown input variable " + id + " at " + id.Location + ".");
+                    else if (left is IValueInput<bool>   leftBool)    leftBool.   SetValue(Cast.AsBoolValue(   right));
+                    else if (left is IValueInput<int>    leftInt)     leftInt.    SetValue(Cast.AsIntValue(    right));
+                    else if (left is IValueInput<double> leftDouble)  leftDouble. SetValue(Cast.AsDoubleValue( right));
+                    else if (left is ITriggerInput       leftTrigger) leftTrigger.Trigger( Cast.AsTriggerValue(right));
+                    else throw new Exception("Unable to assign to " + Cast.TypeName(left) + " at " + id.Location + ".");
+                }
+            }
+            */
 
 
         }

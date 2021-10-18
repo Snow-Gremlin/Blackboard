@@ -29,6 +29,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>This adds parents to this node.</summary>
         /// <param name="parents">The set of parents to add.</param>
         public void AddParents(IEnumerable<ITriggerAdopter> parents) {
+            parents = parents.NotNull();
             this.sources.AddRange(parents);
             foreach (ITriggerAdopter parent in parents)
                 parent.AddChildren(this);

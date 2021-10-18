@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Functions;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Nodes.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

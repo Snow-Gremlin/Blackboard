@@ -22,6 +22,13 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// <param name="root">The root to start checking from.</param>
         /// <param name="targets">The target nodes to try to reach.</param>
         /// <returns>True if any of the targets can be reached, false otherwise.</returns>
+        static public bool CanReachAny(INode root, params INode[] targets) =>
+            CanReachAny(root, targets as IEnumerable<INode>);
+
+        /// <summary>This will check if from the given root node any of the given target nodes can be reachable.</summary>
+        /// <param name="root">The root to start checking from.</param>
+        /// <param name="targets">The target nodes to try to reach.</param>
+        /// <returns>True if any of the targets can be reached, false otherwise.</returns>
         static public bool CanReachAny(INode root, IEnumerable<INode> targets) {
             List<INode> touched = new();
             Queue<INode> pending = new();

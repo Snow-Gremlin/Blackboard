@@ -39,6 +39,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <remarks>The value is updated after these parents are added.</remarks>
         /// <param name="parents">The set of parents to add.</param>
         public void AddParents(IEnumerable<IValueAdopter<TIn>> parents) {
+            parents = parents.NotNull();
             this.sources.AddRange(parents);
             foreach (IValueAdopter<TIn> parent in parents)
                 parent.AddChildren(this);

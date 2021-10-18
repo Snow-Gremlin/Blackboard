@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Nodes.Caps;
 using Blackboard.Parser.Performers;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Parser {
 
@@ -16,19 +16,17 @@ namespace Blackboard.Parser {
         /// <summary>The driver for the Blackboard to apply this formula to.</summary>
         public readonly Driver Driver;
 
-        private readonly LinkedList<Namespace> scopes;
+        private readonly LinkedList<IWrappedNode> scopes;
         private readonly LinkedList<IPerformer> pending;
-        private readonly List<VirtualNode> virtualNodes;
 
-        // TODO: Add a collection of nodes which can not be gotten because they are pending removal.
+        // TODO: Add a collection of nodes which can NOT be gotten because they are pending removal.
 
         /// <summary>Creates a new formula to store pending changes to the given driver.</summary>
         /// <param name="driver">The driver this formula will change.</param>
         public Formula(Driver driver) {
             this.Driver = driver;
-            this.scopes = new LinkedList<Namespace>();
+            this.scopes = new LinkedList<IWrappedNode>();
             this.pending = new LinkedList<IPerformer>();
-            this.virtualNodes = new List<VirtualNode>();
 
             // Call reset to prepare the formula.
             this.Reset();
@@ -41,8 +39,8 @@ namespace Blackboard.Parser {
 
         /// <summary>Performs all pending actions then resets the formula.</summary>
         public void Perform() {
-            foreach (IPerformer performer in this.pending)
-                performer.Perform(this);
+            // Run each performer by calling it, the returned nodes can be discarded because any kept nodes should be written to Blackboard.
+            foreach (IPerformer performer in this.pending) performer.Perform();
             this.Reset();
         }
 
@@ -50,9 +48,24 @@ namespace Blackboard.Parser {
         public void Reset() {
             this.pending.Clear();
             this.scopes.Clear();
-            this.scopes.AddFirst(this.Driver.Global);
+            this.Global = new RealNode(this.Driver.Global);
+            this.scopes.AddFirst(this.Global);
         }
 
+        /// <summary>The global node prewrapped so that virtual nodes can be added to it.</summary>
+        public IWrappedNode Global { get; private set; }
 
+        /// <summary>Gets the current top of the scope stack.</summary>
+        public IWrappedNode CurrentScope => this.scopes.First.Value;
+
+        /// <summary>Gets a copy of the current scopes.</summary>
+        public IWrappedNode[] Scopes => this.scopes.ToArray();
+
+        /// <summary>Pushes a new node onto the scope.</summary>
+        /// <param name="node">The node to pussh on the scope.</param>
+        public void PushScope(IWrappedNode node) => this.scopes.AddFirst(node);
+
+        /// <summary>Pops a top node from the scope.</summary>
+        public void PopScope() => this.scopes.RemoveFirst();
     }
 }

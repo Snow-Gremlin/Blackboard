@@ -1,8 +1,10 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Functions;
-using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Functions;
+using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
+using System.Linq;
 using S = System;
 
 namespace Blackboard.Core {
@@ -34,7 +36,15 @@ namespace Blackboard.Core {
         static public readonly Type Namespace;
 
         /// <summary>The function group value type.</summary>
-        static public readonly Type Function;
+        /// <remarks>
+        /// A function group contains several function definitions
+        /// and can select a definition based on parameter type.
+        /// </remarks>
+        static public readonly Type FuncGroup;
+
+        /// <summary>The function definition value type.</summary>
+        /// <remarks>A function definition is a single implementation with specific parameter types.</remarks>
+        static public readonly Type FuncDef;
 
         /// <summary>The integer counter type which is an extension of the integer value type.</summary>
         static public readonly Type CounterInt;
@@ -58,23 +68,11 @@ namespace Blackboard.Core {
         static public readonly Type LatchString;
 
         /// <summary>Gets all the types.</summary>
-        /// <remarks>These must be ordered by inheriting object before the object that was inherited.</remarks>
+        /// <remarks>These are ordered by inheriting object before the object that was inherited.</remarks>
         static public IEnumerable<Type> AllTypes {
             get {
-                yield return LatchString;
-                yield return LatchDouble;
-                yield return LatchInt;
-                yield return LatchBool;
-                yield return Toggler;
-                yield return CounterDouble;
-                yield return CounterInt;
-                yield return Namespace;
-                yield return Function;
-                yield return String;
-                yield return Double;
-                yield return Int;
-                yield return Bool;
-                yield return Trigger;
+                foreach (Type decendent in Node.AllInheritors)
+                    yield return decendent;
                 yield return Node;
             }
         }
@@ -82,14 +80,10 @@ namespace Blackboard.Core {
         /// <summary>Finds the type given the type name.</summary>
         /// <param name="name">The name of the type to get.</param>
         /// <returns>The type for the given name or null if name isn't found.</returns>
-        static public Type FromName(string name) {
-            foreach (Type t in AllTypes) {
-                if (t.Name == name) return t;
-            }
-            return null;
-        }
+        static public Type FromName(string name) =>
+            AllTypes.Where((t) => t.Name == name).FirstOrDefault();
 
-        /// <summary>This gets the type given a node.</summary>
+        /// <summary>This gets the type given a node.</summary>s
         /// <param name="node">The node to get the type of.</param>
         /// <returns>The type for the given node or null if not found.</returns>
         static public Type TypeOf(INode node) => FromType(node.GetType());
@@ -103,11 +97,14 @@ namespace Blackboard.Core {
         /// <param name="type">The C# type to get this type of.</param>
         /// <returns>The type for the given C# type or null if not found.</returns>
         static public Type FromType(S.Type type) {
-            foreach (Type t in AllTypes) {
-                if (type.IsAssignableTo(t.RealType)) return t;
+            if (!type.IsAssignableTo(Node.RealType)) return null;
+            Type current = Node;
+            while (true) {
+                Type next = current.Inheritors.FirstAssignable(type);
+                if (next is null) return current;
+                current = next;
             }
-            return null;
-        } 
+        }
 
         /// <summary>The display name of the type.</summary>
         public readonly string Name;
@@ -121,6 +118,9 @@ namespace Blackboard.Core {
 
         /// <summary>The underlying IData type for this node, or null if no data.</summary>
         public readonly S.Type DataType;
+
+        /// <summary>The types with base type of this type.</summary>
+        private List<Type> inheritors;
 
         /// <summary>This is a dictionary of other types to an implicit cast.</summary>
         private Dictionary<Type, Caster> imps;
@@ -140,12 +140,11 @@ namespace Blackboard.Core {
             this.DataType = dataType;
             this.imps = new();
             this.exps = new();
+            this.inheritors = new();
 
-            if ((dataType is not null) == realType.IsAssignableTo(typeof(IDataNode)))
-                throw new Exception("A node type with a data type must implement IDataNode and vice versa.").
-                    With("Name", name).
-                    With("Real Type", realType).
-                    With("Data Type", dataType);
+            if ((dataType is null) == realType.IsAssignableTo(typeof(IDataNode)))
+                throw Exceptions.TypeDefinitionInvalid(name, realType, dataType);
+            if (baseType is not null) baseType.inheritors.Add(this);
         }
 
         /// <summary>This determines the implicit and inheritence match.</summary>
@@ -186,6 +185,20 @@ namespace Blackboard.Core {
                 steps++;
             } while (t is not null);
             return TypeMatch.NoMatch;
+        }
+
+        /// <summary>The types with base type of this type.</summary>
+        public IReadOnlyCollection<Type> Inheritors => this.inheritors.AsReadOnly();
+
+        /// <summary>Gets the depth first collection of all types which inherit from this type.</summary>
+        public IEnumerable<Type> AllInheritors {
+            get {
+                foreach (Type inheritor in this.inheritors) {
+                    foreach (Type decendent in inheritor.AllInheritors)
+                        yield return decendent;
+                    yield return inheritor;
+                }
+            }
         }
 
         /// <summary>Performs an implicit cast of the given node into this type.</summary>
@@ -251,7 +264,7 @@ namespace Blackboard.Core {
         /// <param name="obj">The object to check.</param>
         /// <returns>True if they are equal, false otherwise.</returns>
         public override bool Equals(object obj) => ReferenceEquals(this, obj);
-        
+
         /// <summary>Gets the hash code for this type.</summary>
         /// <returns>The type's name hash code.</returns>
         public override int GetHashCode() => this.Name.GetHashCode();
@@ -265,7 +278,7 @@ namespace Blackboard.Core {
         /// <param name="dict">Either the implicit or explicit dictionar for the type being added to.</param>
         /// <param name="dest">The destination type to cast to.</param>
         /// <param name="func">The function for performing the cast.</param>
-        static private void addCast<T>(Dictionary<Type, Caster> dict, Type dest, S.Func<T, INode> func) where T: INode =>
+        static private void addCast<T>(Dictionary<Type, Caster> dict, Type dest, S.Func<T, INode> func) where T : INode =>
             dict[dest] = (INode input) => input is T value ? func(value) : null;
 
         /// <summary>Initializes the types before they are used.</summary>
@@ -276,8 +289,9 @@ namespace Blackboard.Core {
             Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int));
             Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double));
             String        = new Type("string",         typeof(IValue<String>),  Node,   typeof(String));
-            Namespace     = new Type("Namespace",      typeof(Namespace),       Node,   null);
-            Function      = new Type("Function",       typeof(FuncGroup),       Node,   null);
+            Namespace     = new Type("namespace",      typeof(Namespace),       Node,   null);
+            FuncGroup     = new Type("function-group", typeof(FuncGroup),       Node,   null);
+            FuncDef       = new Type("function-def",   typeof(IFuncDef),        Node,   null);
             CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int));
             CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double));
             Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool));
@@ -294,6 +308,8 @@ namespace Blackboard.Core {
 
             addCast<IValueAdopter<Double>>(Double.exps, Int,    (input) => new Explicit<Double, Int>(input));
             addCast<IValueAdopter<Double>>(Double.imps, String, (input) => new Implicit<Double, String>(input));
+
+            addCast<IFuncDef>(FuncDef.imps, FuncGroup, (input) => new FuncGroup(input));
         }
     }
 }

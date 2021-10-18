@@ -1,11 +1,12 @@
 ﻿using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>A base node for any trigger node.</summary>
-    public abstract class TriggerNode: EvalAdopter, ITrigger, IEvaluatable {
+    public abstract class TriggerNode: EvalAdopter, ITriggerAdopter {
 
         /// <summary>Creates a new trigger node.</summary>
         public TriggerNode(bool provoked = false) {
@@ -28,5 +29,12 @@ namespace Blackboard.Core.Nodes.Bases {
             this.Provoked = this.UpdateTrigger();
             return this.Provoked ? this.Children.OfType<IEvaluatable>() : Enumerable.Empty<IEvaluatable>();
         }
+
+        /// <summary>This always returns false because triggers aren't constant but can be converted to one.</summary>
+        public virtual bool IsConstant => false;
+
+        /// <summary>Converts this node to a constant trigger.</summary>
+        /// <returns>The constant trigger carrying the provoked condition.</returns>
+        public virtual IConstant ToConstant() => new ConstTrigger(this.Provoked);
     }
 }

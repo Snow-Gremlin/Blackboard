@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Functions;
-using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Functions;
+using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Data.Caps;
 using System.Collections.Generic;
@@ -9,7 +10,9 @@ using System.Linq;
 using System.Reflection;
 using PP = PetiteParser;
 using S = System;
-using Blackboard.Parser.Prepers;
+using Blackboard.Parser.Preppers;
+using System.Text.RegularExpressions;
+using System.Text;
 using Blackboard.Parser.Performers;
 
 namespace Blackboard.Parser {
@@ -31,10 +34,10 @@ namespace Blackboard.Parser {
 
         private readonly Driver driver;
         private readonly Formula formula;
-        private readonly Dictionary<string, PP.ParseTree.PromptHandle> prompts;
+        private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
         private readonly LinkedList<object> stash;
-        private readonly LinkedList<IPreper> stack;
+        private readonly LinkedList<IPrepper> stack;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="driver">The driver to modify.</param>
@@ -44,7 +47,7 @@ namespace Blackboard.Parser {
             this.prompts = null;
 
             this.stash = new LinkedList<object>();
-            this.stack = new LinkedList<IPreper>();
+            this.stack = new LinkedList<IPrepper>();
 
             this.initPrompts();
             this.validatePrompts();
@@ -103,7 +106,7 @@ namespace Blackboard.Parser {
                 { "cast",         this.handleCast },
                 { "memberAccess", this.handleMemberAccess },
                 { "startCall",    this.handleStartCall },
-                { "endCall",      this.handleEndCall },
+                { "addArg",       this.handleAddArg },
                 { "pushId",       this.handlePushId },
                 { "pushBool",     this.handlePushBool },
                 { "pushBin",      this.handlePushBin },
@@ -146,11 +149,11 @@ namespace Blackboard.Parser {
         /// <param name="count">The number of values to pop off the stack for this function.</param>
         /// <param name="name">The name of the prompt to add to.</param>
         private void addProcess(int count, string name) {
-            FuncGroup op = this.driver.Global.Find(Driver.OperatorNamespace, name) as FuncGroup;
+            INode funcGroup = this.driver.Global.Find(Driver.OperatorNamespace, name);
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 PP.Scanner.Location loc = args.Tokens[^1].End;
-                IPreper[] inputs = this.pop<IPreper>(count);
-                this.push(new FunctionPrep(op, name, loc, inputs));
+                IPrepper[] inputs = this.pop<IPrepper>(count);
+                this.push(new FuncPrep(loc, new NoPrep(funcGroup), inputs));
             };
         }
     
@@ -172,24 +175,24 @@ namespace Blackboard.Parser {
         #endregion
         #region Stack Helpers...
 
-        /// <summary>Pushes a preper onto the stack.</summary>
-        /// <param name="preper">The preper to push.</param>
-        private void push(IPreper preper) => this.stack.AddLast(preper);
+        /// <summary>Pushes a prepper onto the stack.</summary>
+        /// <param name="prepper">The prepper to push.</param>
+        private void push(IPrepper prepper) => this.stack.AddLast(prepper);
 
-        /// <summary>Pops off a preper is on the top of the stack.</summary>
-        /// <typeparam name="T">The type of the preper to read as.</typeparam>
-        /// <returns>The preper which was on top of the stack.</returns>
-        private T pop<T>() where T : class, IPreper {
-            IPreper item = this.stack.Last.Value;
+        /// <summary>Pops off a prepper is on the top of the stack.</summary>
+        /// <typeparam name="T">The type of the prepper to read as.</typeparam>
+        /// <returns>The prepper which was on top of the stack.</returns>
+        private T pop<T>() where T : class, IPrepper {
+            IPrepper item = this.stack.Last.Value;
             this.stack.RemoveLast();
             return item as T;
         }
 
-        /// <summary>Pops one or more preper off the stack.</summary>
-        /// <typeparam name="T">The types of the prepers to read.</typeparam>
-        /// <param name="count">The number of prepers to pop.</param>
-        /// <returns>The popped prepers in the order oldest to newest.</returns>
-        private T[] pop<T>(int count) where T: class, IPreper {
+        /// <summary>Pops one or more prepper off the stack.</summary>
+        /// <typeparam name="T">The types of the preppers to read.</typeparam>
+        /// <param name="count">The number of preppers to pop.</param>
+        /// <returns>The popped preppers in the order oldest to newest.</returns>
+        private T[] pop<T>(int count) where T: class, IPrepper {
             T[] items = new T[count];
             for (int i = 0; i < count; i++)
                 items[count-1-i] = this.pop<T>();
@@ -198,14 +201,14 @@ namespace Blackboard.Parser {
 
         /// <summary>Pushes an object onto the stash stack.</summary>
         /// <param name="value">The value to push.</param>
-        private void stashPush(object value) => this.stashStack.AddLast(value);
+        private void stashPush(object value) => this.stash.AddLast(value);
 
         /// <summary>Pops off an object is on the top of the stash stack.</summary>
         /// <typeparam name="T">The type of the object to read as.</typeparam>
         /// <returns>The object which was on top of the stash stack.</returns>
         private T stashPop<T>() where T : class {
-            object value = this.stashStack.Last.Value;
-            this.stashStack.RemoveLast();
+            object value = this.stash.Last.Value;
+            this.stash.RemoveLast();
             return value as T;
         }
 
@@ -225,117 +228,108 @@ namespace Blackboard.Parser {
         private void handlePushNamespace(PP.ParseTree.PromptArgs args) {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
-            string text = token.Text;
+            string name = token.Text;
 
-            Namespace scope = this.scopeStack.First.Value;
-            if (scope.ContainsField(text)) {
-                object obj = scope[text];
-                if (obj is not Namespace nextScope)
+            IWrappedNode scope = this.formula.CurrentScope;
+            IWrappedNode next = scope.ReadField(name);
+            if (next is not null) {
+                if (next.Type.IsAssignableTo(typeof(Namespace)))
                     throw new Exception("Can not open namespace. Another non-namespace exists by that name.").
-                         With("Identifier", text).
+                         With("Identifier", name).
                          With("Location", loc);
-                scope = nextScope;
+                scope = next;
             } else {
-                Namespace nextScope = new();
-                scope[text] = nextScope;
+                // Create a new virtual namespace and a performer to construct the new namespace if this formula is run.
+                VirtualNode nextScope = scope.CreateField(name, typeof(Namespace));
                 scope = nextScope;
+                this.formula.Add(new VirtualNodeWriter(nextScope, new NodeHold(new Namespace())));
             }
 
-            this.scopeStack.AddFirst(scope);
+            this.formula.PushScope(scope);
         }
 
         /// <summary>This is called when the namespace had closed.</summary>
         /// <param name="args">The token information from the parser.</param>
-        private void handlePopNamespace(PP.ParseTree.PromptArgs args) {
-            this.scopeStack.RemoveFirst();
-        }
+        private void handlePopNamespace(PP.ParseTree.PromptArgs args) =>
+            this.formula.PopScope();
 
         /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputNoAssign(PP.ParseTree.PromptArgs args) {
-            IAssignable targetActor = this.pop<IAssignable>();
-            Stash<Type> typeActor   = this.pop<Stash<Type>>();
+            IdPrep target = this.pop<IdPrep>();
+            Type t = this.stashPop<Type>();
+            PP.Scanner.Location loc = args.Tokens[^1].End;
 
-            Type t = typeActor.Value;
-            INode newNode =
-                t == Type.Bool    ? new InputValue<Bool>() :
-                t == Type.Int     ? new InputValue<Int>() :
-                t == Type.Double  ? new InputValue<Double>() :
-                t == Type.String  ? new InputValue<String>() :
-                t == Type.Trigger ? new InputTrigger() :
+            VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
+            IFuncDef inputFactory =
+                t == Type.Bool    ? InputValue<Bool>.Factory :
+                t == Type.Int     ? InputValue<Int>.Factory :
+                t == Type.Double  ? InputValue<Double>.Factory :
+                t == Type.String  ? InputValue<String>.Factory :
+                t == Type.Trigger ? InputTrigger.Factory :
                 throw new Exception("Unsupported type for new input").
                     With("Type", t);
 
-            targetActor.Assign(newNode, true);
+            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory)).Prepare(formula);
+            this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
 
             // Push the type back onto the stack for the next assignment.
-            this.push(typeActor);
+            this.stashPush(t);
         }
 
         /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputWithAssign(PP.ParseTree.PromptArgs args) {
-            StackItem valueItem = this.pop();
-            IAssignable targetActor = this.pop<IAssignable>();
-            Stash<Type> typeItem    = this.pop<Stash<Type>>();
+            IPrepper value = this.pop<IPrepper>();
+            IdPrep target = this.pop<IdPrep>();
+            Type t = this.stashPop<Type>();
+            PP.Scanner.Location loc = args.Tokens[^1].End;
 
-            if (idItem.Value is not null)
-                throw new Exception("Can not create new input node. Identifier already exists in the receiver.").
-                     With("Identifier", idItem);
-            if (!idItem.HasId)
-                throw new Exception("Can not create new input node with no Identifier.").
-                     With("Identifier", idItem);
-
-            Type t = typeItem.ValueAs<Type>();
-            INode value = t.Implicit(valueItem.ValueAs<INode>());
-            if (value is null)
-                throw new Exception("The new input node can not be assigned the value given to it.").
-                     With("Value",      valueItem).
-                     With("Type",       typeItem).
-                     With("Identifier", idItem);
-
-            // Unless the identifier has a receiver, add the new input node to the current namespace scope.
-            Namespace scope = this.scopeStack.First.Value;
-            scope[idItem.Id] =
-                t == Type.Bool    ? new InputValue<Bool>(  (value as IValue<Bool>  ).Value) :
-                t == Type.Int     ? new InputValue<Int>(   (value as IValue<Int>   ).Value) :
-                t == Type.Double  ? new InputValue<Double>((value as IValue<Double>).Value) :
-                t == Type.String  ? new InputValue<String>((value as IValue<String>).Value) :
-                t == Type.Trigger ? new InputTrigger(      (value as ITrigger      ).Provoked) :
+            VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
+            IPerformer valuePerf = value.Prepare(formula, true);
+            IFuncDef inputFactory =
+                t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
+                t == Type.Int     ? InputValue<Int>.FactoryWithInitialValue :
+                t == Type.Double  ? InputValue<Double>.FactoryWithInitialValue :
+                t == Type.String  ? InputValue<String>.FactoryWithInitialValue :
+                t == Type.Trigger ? InputTrigger.FactoryWithInitialValue :
                 throw new Exception("Unsupported type for new input").
-                    With("Type", typeItem);
+                    With("Type", t);
+
+            Type valueType = Type.FromType(valuePerf.Type);
+            if (!t.Match(valueType).IsMatch)
+                throw new Exception("May not assign the value to that type of input.").
+                    With("Input Type", t).
+                    With("Value Type", valueType);
+
+            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(formula);
+            this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
 
             // Push the type back onto the stack for the next assignment.
-            this.push(typeItem);
+            this.stashPush(t);
         }
 
         /// <summary>This creates a new input node and assigns it with an initial value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewVarInputWithAssign(PP.ParseTree.PromptArgs args) {
-            StackItem valueItem = this.pop();
-            StackItem idItem    = this.pop();
+            IPrepper value = this.pop<IPrepper>();
+            IdPrep target = this.pop<IdPrep>();
+            PP.Scanner.Location loc = args.Tokens[^1].End;
 
-            if (idItem.Value is not null)
-                throw new Exception("Can not create new input node. Identifier already exists in the receiver.").
-                     With("Identifier", idItem);
-            if (!idItem.HasId)
-                throw new Exception("Can not create new input node with no Identifier.").
-                     With("Identifier", idItem);
-
-            // Pull the type from the value that is going to be assigned.
-            INode value = valueItem.ValueAs<INode>();
-            Type t = Type.TypeOf(value);
-
-            // Unless the identifier has a receiver, add the new input node to the current namespace scope.
-            Namespace scope = this.scopeStack.First.Value;
-            scope[idItem.Id] =
-                t == Type.Bool    ? new InputValue<Bool>(  (value as IValue<Bool>  ).Value) :
-                t == Type.Int     ? new InputValue<Int>(   (value as IValue<Int>   ).Value) :
-                t == Type.Double  ? new InputValue<Double>((value as IValue<Double>).Value) :
-                t == Type.String  ? new InputValue<String>((value as IValue<String>).Value) :
-                t == Type.Trigger ? new InputTrigger(      (value as ITrigger      ).Provoked) :
-                throw new Exception("Unsupported type from assignment for new input").
+            IPerformer valuePerf = value.Prepare(formula, true);
+            Type t = Type.FromType(valuePerf.Type);
+            VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
+            IFuncDef inputFactory =
+                t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
+                t == Type.Int     ? InputValue<Int>.FactoryWithInitialValue :
+                t == Type.Double  ? InputValue<Double>.FactoryWithInitialValue :
+                t == Type.String  ? InputValue<String>.FactoryWithInitialValue :
+                t == Type.Trigger ? InputTrigger.FactoryWithInitialValue :
+                throw new Exception("Unsupported type for new input").
                     With("Type", t);
+
+            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(formula);
+            this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
         }
 
         /*
@@ -428,53 +422,27 @@ namespace Blackboard.Parser {
         private void handleMemberAccess(PP.ParseTree.PromptArgs args) {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
-            string id = token.Text;
-            StackItem left = this.pop();
-
-            if (!left.ValueIs<Namespace>())
-                throw new Exception("The receiver for the identifier is not a namespace.").
-                    With("Stack Item", left).
-                    With("Identifier", id).
-                    With("Loaction", loc);
-
-            Namespace scope = left.ValueAs<Namespace>();
-            object value = scope.ContainsKey(id) ? scope[id] : null;
-            this.push(loc, left.Id + "." + id, value);
+            string name = token.Text;
+            IPrepper receiver = this.pop<IPrepper>();
+            
+            this.push(new IdPrep(loc, receiver, name));
         }
 
         /// <summary>This handles preparing for a method call.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleStartCall(PP.ParseTree.PromptArgs args) {
-            StackItem item = this.pop();
-            if (!item.ValueIs<FuncGroup>())
-                throw new Exception("Identifier was not a function.").
-                    With("Stack Item", item);
-            this.push(item);
+            IPrepper item = this.pop<IPrepper>();
+            PP.Scanner.Location loc = args.Tokens[^1].End;
+            this.push(new FuncPrep(loc, item));
         }
 
         /// <summary>This handles the end of a method call and creates the node for the method.</summary>
         /// <param name="args">The token information from the parser.</param>
-        private void handleEndCall(PP.ParseTree.PromptArgs args) {
-            LinkedList<INode> funcArgs = new();
-            StackItem callItem;
-            while (true) {
-                StackItem item = this.pop();
-                if (item.ValueIs<FuncGroup>()) {
-                    callItem = item;
-                    break;
-                }
-                funcArgs.AddFirst(item.ValueAs<INode>());
-            }
-
-            FuncGroup func = callItem.ValueAs<FuncGroup>();
-            INode node = func.Build(funcArgs.ToArray());
-            if (node is null)
-                throw new Exception("Failed to find a function that can accept the given argument types.").
-                    With("Function", callItem).
-                    With("Args", string.Join(", ", funcArgs.TypeNames()));
-
-            if (funcArgs.IsConstant()) node = node.ToLiteral();
-            this.push(callItem.Location, node);
+        private void handleAddArg(PP.ParseTree.PromptArgs args) {
+            IPrepper arg = this.pop<IPrepper>();
+            FuncPrep func = this.pop<FuncPrep>();
+            func.Arguments.Add(arg);
+            this.push(func);
         }
 
         /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
@@ -482,22 +450,9 @@ namespace Blackboard.Parser {
         private void handlePushId(PP.ParseTree.PromptArgs args) {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
-            string text = token.Text;
+            string name = token.Text;
 
-            object value = null;
-            foreach (Namespace scope in this.scopeStack) {
-                if (scope.ContainsKey(text)) {
-                    value =  scope[text];
-                    if (this.reduceNodes && value is INode node)
-                        value = node.ToLiteral();
-                    break;
-                }
-            }
-
-            // If the value is not found in the scopes, that is fine, set it as null,
-            // it is likely about to be used for creating a new identifier or
-            // will be caught when attempted to be used.
-            this.push(loc, text, value);
+            this.push(new IdPrep(loc, this.formula.Scopes, name));
         }
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>
@@ -506,9 +461,10 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
+
             try {
                 bool value = bool.Parse(text);
-                this.push(loc, Literal.Bool(value));
+                this.push(LiteralPrep.Bool(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a bool.", ex).
                     With("Text", text).
@@ -522,9 +478,10 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
+
             try {
                 int value = S.Convert.ToInt32(text, 2);
-                this.push(loc, Literal.Int(value));
+                this.push(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a binary int.", ex).
                     With("Text", text).
@@ -538,9 +495,10 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
+
             try {
                 int value = S.Convert.ToInt32(text, 8);
-                this.push(loc, Literal.Int(value));
+                this.push(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse an octal int.", ex).
                     With("Text", text).
@@ -554,9 +512,10 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
+
             try {
                 int value = int.Parse(text);
-                this.push(loc, Literal.Int(value));
+                this.push(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a decimal int.", ex).
                     With("Text", text).
@@ -570,9 +529,10 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text[2..];
+
             try {
                 int value = int.Parse(text, NumberStyles.HexNumber);
-                this.push(loc, Literal.Int(value));
+                this.push(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a hex int.", ex).
                     With("Text", text).
@@ -586,9 +546,10 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
+
             try {
                 double value = double.Parse(text);
-                this.push(loc, Literal.Double(value));
+                this.push(LiteralPrep.Double(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a double.", ex).
                     With("Text", text).
@@ -602,8 +563,15 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
-            // TODO: Need to handle decoding escaped sequences.
-            this.push(loc, Literal.String(text));
+
+            try {
+                string value = PP.Misc.Text.Unescape(text);
+                this.push(LiteralPrep.String(value));
+            } catch (S.Exception ex) {
+                throw new Exception("Failed to decode escaped sequences.", ex).
+                    With("Text", text).
+                    With("Location", loc);
+            }
         }
 
         /// <summary>This handles pushing a type onto the stack.</summary>
@@ -612,12 +580,14 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string text = token.Text;
+            
             Type t = Type.FromName(text);
             if (t is null)
                 throw new Exception("Unrecognized type name.").
                     With("Text", text).
                     With("Location", loc);
-            this.push(loc, t);
+
+            this.stashPush(t);
         }
 
         #endregion

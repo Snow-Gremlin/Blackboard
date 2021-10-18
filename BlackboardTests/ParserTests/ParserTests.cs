@@ -26,6 +26,8 @@ namespace BlackboardTests.ParserTests {
                 "   in bool H;",
                 "   in double I;",
                 "}");
+            parser.Commit();
+
             driver.CheckValue(2,     "A");
             driver.CheckValue(3,     "B");
             driver.CheckValue(true,  "C");
@@ -48,6 +50,8 @@ namespace BlackboardTests.ParserTests {
                 "   in E = 3.14;",
                 "   in var F = 0, G = 0.0, H = false;",
                 "}");
+            parser.Commit();
+
             driver.CheckValue(2,     "A");
             driver.CheckValue(3,     "B");
             driver.CheckValue(true,  "C");
@@ -75,6 +79,8 @@ namespace BlackboardTests.ParserTests {
                 "in double K = 1.0;",
                 "in double L = 0e-5;",
                 "in double M = 28.0;");
+            parser.Commit();
+
             driver.CheckValue(3.0,   "A");
             driver.CheckValue(0.003, "B");
             driver.CheckValue(0.003, "C");
@@ -98,6 +104,8 @@ namespace BlackboardTests.ParserTests {
                 "in double B = floor(A), C = round(A), D = round(A, 1);",
                 "in double E = (B ** C) / 2;",
                 "in double F = -E + -3;");
+            parser.Commit();
+
             driver.CheckValue(  3.14, "A");
             driver.CheckValue(  3.0,  "B");
             driver.CheckValue(  3.0,  "C");
@@ -123,6 +131,8 @@ namespace BlackboardTests.ParserTests {
                 "in string I = (-16.3 %%  4.1) + ', ' + (-16.3 %  4.1);",
                 "in string J = ( 17.8 %% -4.1) + ', ' + ( 17.8 % -4.1);",
                 "in string K = (-17.8 %% -4.1) + ', ' + (-17.8 % -4.1);");
+            parser.Commit();
+
             driver.CheckValue("-1, 1", "A");
             driver.CheckValue("0, 0",  "B");
             driver.CheckValue("1, 1",  "C");

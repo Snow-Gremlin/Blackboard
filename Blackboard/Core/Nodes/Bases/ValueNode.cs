@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Nodes.Caps;
+using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>A base node for a node which has a value.</summary>
     /// <typeparam name="T">The type of the value being held.</typeparam>
-    public abstract class ValueNode<T>: EvalAdopter, IValue<T>
+    public abstract class ValueNode<T>: EvalAdopter, IValueAdopter<T>, IValue<T>
         where T : IComparable<T>, new() {
 
         /// <summary>Creates a new value node.</summary>

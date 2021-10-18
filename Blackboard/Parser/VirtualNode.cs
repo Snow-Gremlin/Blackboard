@@ -52,7 +52,7 @@ namespace Blackboard.Parser {
         public INode Node {
             get => this.node;
             set {
-                // These exceptions should never be hit if the prepers is working as expected.
+                // These exceptions should never be hit if the preppers is working as expected.
                 if (!value.GetType().IsAssignableTo(this.Type))
                     throw new Exception("The virtual node resolved an uexpected type of node.").
                         With("Name", this.Name).

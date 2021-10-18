@@ -12,7 +12,7 @@ namespace Blackboard.Parser.Performers {
         /// <summary>This will perform the actions that need to be run.</summary>
         /// <remarks>
         /// This should not throw an exception if prepared correctly.
-        /// If this does throw an exception the prepers should be fixed to prevent this.
+        /// If this does throw an exception the preppers should be fixed to prevent this.
         /// </remarks>
         /// <returns>This is the newly created node or null.</returns>
         public INode Perform();

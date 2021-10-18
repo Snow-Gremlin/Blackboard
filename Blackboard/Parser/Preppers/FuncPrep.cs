@@ -6,16 +6,16 @@ using PetiteParser.Scanner;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Parser.Prepers {
+namespace Blackboard.Parser.Preppers {
 
-    /// <summary>This is an preper for performing a function on some inputs.</summary>
-    sealed internal class FuncPrep: IPreper {
+    /// <summary>This is an prepper for performing a function on some inputs.</summary>
+    sealed internal class FuncPrep: IPrepper {
 
-        /// <summary>Creates a new function preper.</summary>
+        /// <summary>Creates a new function prepper.</summary>
         /// <param name="loc">The location this function was defind in the code.</param>
         /// <param name="source">The source of the function to call.</param>
         /// <param name="arguments">The input arguments for this function.</param>
-        public FuncPrep(Location loc, IPreper source, params IPreper[] arguments) {
+        public FuncPrep(Location loc, IPrepper source, params IPrepper[] arguments) {
             this.Location = loc;
             this.Source = source;
             this.Arguments = new(arguments);
@@ -25,12 +25,12 @@ namespace Blackboard.Parser.Prepers {
         public Location Location;
 
         /// <summary>The source of the function to call.</summary>
-        public IPreper Source;
+        public IPrepper Source;
 
         /// <summary>The input arguments for this function.</summary>
-        public List<IPreper> Arguments;
+        public List<IPrepper> Arguments;
 
-        /// <summary>Prepares the source node for the function definition from the given source preper.</summary>
+        /// <summary>Prepares the source node for the function definition from the given source prepper.</summary>
         /// <remarks>
         /// Currently there can't be any virtual functions since there is no way to define a new function in
         /// the language at this time. When there is a virtual node reader for a group will have to 
@@ -58,7 +58,7 @@ namespace Blackboard.Parser.Prepers {
             return source is NodeHold nodeHold ? nodeHold.Node :
                 throw new Exception("Expected the identifier to return a wrapped node reader or node holder for a function name").
                     With("Source Performer", source).
-                    With("Source Preper", this.Source).
+                    With("Source Prepper", this.Source).
                     With("Location", this.Location);
         }
 
@@ -97,7 +97,7 @@ namespace Blackboard.Parser.Prepers {
         /// <param name="formula">This is the complete set of performers being prepared.</param>
         /// <param name="reduce">True to reduce to a constant, false otherwise.</param>
         /// <returns>
-        /// This is the performer to replace this preper with,
+        /// This is the performer to replace this prepper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
         public IPerformer Prepare(Formula formula, bool reduce = false) {

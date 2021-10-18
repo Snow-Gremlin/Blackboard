@@ -10,7 +10,7 @@ using System.Linq;
 using System.Reflection;
 using PP = PetiteParser;
 using S = System;
-using Blackboard.Parser.Prepers;
+using Blackboard.Parser.Preppers;
 using System.Text.RegularExpressions;
 using System.Text;
 using Blackboard.Parser.Performers;
@@ -37,7 +37,7 @@ namespace Blackboard.Parser {
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
         private readonly LinkedList<object> stash;
-        private readonly LinkedList<IPreper> stack;
+        private readonly LinkedList<IPrepper> stack;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="driver">The driver to modify.</param>
@@ -47,7 +47,7 @@ namespace Blackboard.Parser {
             this.prompts = null;
 
             this.stash = new LinkedList<object>();
-            this.stack = new LinkedList<IPreper>();
+            this.stack = new LinkedList<IPrepper>();
 
             this.initPrompts();
             this.validatePrompts();
@@ -152,7 +152,7 @@ namespace Blackboard.Parser {
             INode funcGroup = this.driver.Global.Find(Driver.OperatorNamespace, name);
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 PP.Scanner.Location loc = args.Tokens[^1].End;
-                IPreper[] inputs = this.pop<IPreper>(count);
+                IPrepper[] inputs = this.pop<IPrepper>(count);
                 this.push(new FuncPrep(loc, new NoPrep(funcGroup), inputs));
             };
         }
@@ -175,24 +175,24 @@ namespace Blackboard.Parser {
         #endregion
         #region Stack Helpers...
 
-        /// <summary>Pushes a preper onto the stack.</summary>
-        /// <param name="preper">The preper to push.</param>
-        private void push(IPreper preper) => this.stack.AddLast(preper);
+        /// <summary>Pushes a prepper onto the stack.</summary>
+        /// <param name="prepper">The prepper to push.</param>
+        private void push(IPrepper prepper) => this.stack.AddLast(prepper);
 
-        /// <summary>Pops off a preper is on the top of the stack.</summary>
-        /// <typeparam name="T">The type of the preper to read as.</typeparam>
-        /// <returns>The preper which was on top of the stack.</returns>
-        private T pop<T>() where T : class, IPreper {
-            IPreper item = this.stack.Last.Value;
+        /// <summary>Pops off a prepper is on the top of the stack.</summary>
+        /// <typeparam name="T">The type of the prepper to read as.</typeparam>
+        /// <returns>The prepper which was on top of the stack.</returns>
+        private T pop<T>() where T : class, IPrepper {
+            IPrepper item = this.stack.Last.Value;
             this.stack.RemoveLast();
             return item as T;
         }
 
-        /// <summary>Pops one or more preper off the stack.</summary>
-        /// <typeparam name="T">The types of the prepers to read.</typeparam>
-        /// <param name="count">The number of prepers to pop.</param>
-        /// <returns>The popped prepers in the order oldest to newest.</returns>
-        private T[] pop<T>(int count) where T: class, IPreper {
+        /// <summary>Pops one or more prepper off the stack.</summary>
+        /// <typeparam name="T">The types of the preppers to read.</typeparam>
+        /// <param name="count">The number of preppers to pop.</param>
+        /// <returns>The popped preppers in the order oldest to newest.</returns>
+        private T[] pop<T>(int count) where T: class, IPrepper {
             T[] items = new T[count];
             for (int i = 0; i < count; i++)
                 items[count-1-i] = this.pop<T>();
@@ -280,7 +280,7 @@ namespace Blackboard.Parser {
         /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewTypeInputWithAssign(PP.ParseTree.PromptArgs args) {
-            IPreper value = this.pop<IPreper>();
+            IPrepper value = this.pop<IPrepper>();
             IdPrep target = this.pop<IdPrep>();
             Type t = this.stashPop<Type>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
@@ -312,7 +312,7 @@ namespace Blackboard.Parser {
         /// <summary>This creates a new input node and assigns it with an initial value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleNewVarInputWithAssign(PP.ParseTree.PromptArgs args) {
-            IPreper value = this.pop<IPreper>();
+            IPrepper value = this.pop<IPrepper>();
             IdPrep target = this.pop<IdPrep>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
@@ -423,7 +423,7 @@ namespace Blackboard.Parser {
             PP.Tokenizer.Token token = args.Tokens[^1];
             PP.Scanner.Location loc = token.End;
             string name = token.Text;
-            IPreper receiver = this.pop<IPreper>();
+            IPrepper receiver = this.pop<IPrepper>();
             
             this.push(new IdPrep(loc, receiver, name));
         }
@@ -431,7 +431,7 @@ namespace Blackboard.Parser {
         /// <summary>This handles preparing for a method call.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleStartCall(PP.ParseTree.PromptArgs args) {
-            IPreper item = this.pop<IPreper>();
+            IPrepper item = this.pop<IPrepper>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
             this.push(new FuncPrep(loc, item));
         }
@@ -439,7 +439,7 @@ namespace Blackboard.Parser {
         /// <summary>This handles the end of a method call and creates the node for the method.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleAddArg(PP.ParseTree.PromptArgs args) {
-            IPreper arg = this.pop<IPreper>();
+            IPrepper arg = this.pop<IPrepper>();
             FuncPrep func = this.pop<FuncPrep>();
             func.Arguments.Add(arg);
             this.push(func);

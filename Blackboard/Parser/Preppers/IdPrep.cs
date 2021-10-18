@@ -3,12 +3,12 @@ using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
 
-namespace Blackboard.Parser.Prepers {
+namespace Blackboard.Parser.Preppers {
 
-    /// <summary>A preper for storing an identifier to be created, assigned, or accessed.</summary>
-    sealed internal class IdPrep: IPreper {
+    /// <summary>A prepper for storing an identifier to be created, assigned, or accessed.</summary>
+    sealed internal class IdPrep: IPrepper {
 
-        /// <summary>Creates a new identifier preper without a receiver.</summary>
+        /// <summary>Creates a new identifier prepper without a receiver.</summary>
         /// <param name="loc">The location this identifier was defined.</param>
         /// <param name="scopes">The scope stack that existed when this identifier was created.</param>
         /// <param name="name">The name of this identifier.</param>
@@ -19,11 +19,11 @@ namespace Blackboard.Parser.Prepers {
             this.Name = name;
         }
 
-        /// <summary>Creates a new identifier preper with a receiver.</summary>
+        /// <summary>Creates a new identifier prepper with a receiver.</summary>
         /// <param name="loc">The location this identifier was defined.</param>
         /// <param name="receiver">The receiver this identifier is part of.</param>
         /// <param name="name">The name of this identifier.</param>
-        public IdPrep(Location loc, IPreper receiver, string name) {
+        public IdPrep(Location loc, IPrepper receiver, string name) {
             this.Location = loc;
             this.Scopes = null;
             this.Receiver = receiver;
@@ -39,7 +39,7 @@ namespace Blackboard.Parser.Prepers {
 
         /// <summary>The receiver object to read this identifier from.</summary>
         /// <remarks>If this is null then the scopes must not be null and vice versa.</remarks>
-        public IPreper Receiver;
+        public IPrepper Receiver;
 
         /// <summary>The name of the identifier to read.</summary>
         public string Name;
@@ -95,7 +95,7 @@ namespace Blackboard.Parser.Prepers {
         /// False to create the nodes and look up identifiers when running.
         /// </param>
         /// <returns>
-        /// This is the performer to replace this preper with,
+        /// This is the performer to replace this prepper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
         public IPerformer Prepare(Formula formula, bool reduce = false) =>

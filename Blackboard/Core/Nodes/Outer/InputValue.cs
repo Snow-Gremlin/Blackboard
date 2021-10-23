@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Data.Interfaces;
+﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
@@ -10,14 +11,29 @@ namespace Blackboard.Core.Nodes.Outer {
     /// <summary>A node for user inputted values.</summary>
     /// <typeparam name="T">The type of the value to hold.</typeparam>
     sealed public class InputValue<T>: ValueNode<T>, IValueInput<T>
-        where T : IComparable<T>, new() {
+        where T : IData, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = new Function<InputValue<T>>(() => new InputValue<T>());
 
-        /// <summary>This is a factory function for creating new instances of this node easily with an initial value from the given node.</summary>
+        /// <summary>
+        /// This is a factory function for creating new instances
+        /// of this node easily with an initial value from the given node.
+        /// </summary>
         static public readonly IFuncDef FactoryWithInitialValue =
             new Function<IValue<T>, InputValue<T>>((IValue<T> node) => new InputValue<T>(node.Value));
+
+        /// <summary>
+        /// This is a function to assign a value to the input node.
+        /// This will return the input node on success, or null if value could not be cast.
+        /// </summary>
+        static public readonly IFuncDef Assign =
+            new Function<InputValue<T>, IDataNode, InputValue<T>>((InputValue<T> input, IDataNode node) => {
+                T value = node.Data.ImplicitCastTo<T>();
+                if (value is null) return null;
+                input.SetValue(value);
+                return input;
+            });
 
         /// <summary>Creates a new input value node.</summary>
         /// <param name="value">The initial value for this node.</param>

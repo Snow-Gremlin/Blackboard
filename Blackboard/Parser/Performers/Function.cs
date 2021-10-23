@@ -35,5 +35,10 @@ namespace Blackboard.Parser.Performers {
             INode[] input = this.Args.Select((arg) => arg.Perform()).NotNull().ToArray();
             return this.Func.Build(input);
         }
+
+        /// <summary>Gets the performer debug string.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public override string ToString() => "Function("+this.Func+", "+
+            ", [" + string.Join(", ", this.Args.Select((IPerformer perf) => perf.ToString())) + "])";
     }
 }

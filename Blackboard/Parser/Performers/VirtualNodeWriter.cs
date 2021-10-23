@@ -34,5 +34,9 @@ namespace Blackboard.Parser.Performers {
             this.VirtualNode.Node = node;
             return node;
         }
+
+        /// <summary>Gets the performer debug string.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public override string ToString() => "VirtualNodeWriter("+this.VirtualNode+", "+this.Value+")";
     }
 }

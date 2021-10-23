@@ -36,5 +36,9 @@ namespace Blackboard.Parser.Performers {
         /// </remarks>
         /// <returns>This is the newly created node or null.</returns>
         public INode Perform() => (this.Value.Perform() as IConstantable)?.ToConstant();
+
+        /// <summary>Gets the performer debug string.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public override string ToString() => "Reducer("+this.Value+")";
     }
 }

@@ -20,9 +20,9 @@ namespace Blackboard.Core.Data.Caps {
         public int CompareTo(Bool other) => this.Value.CompareTo(other.Value);
         public static bool operator ==(Bool left, Bool right) => left.CompareTo(right) == 0;
         public static bool operator !=(Bool left, Bool right) => left.CompareTo(right) != 0;
-        public static bool operator <(Bool left, Bool right) => left.CompareTo(right) < 0;
+        public static bool operator < (Bool left, Bool right) => left.CompareTo(right) <  0;
         public static bool operator <=(Bool left, Bool right) => left.CompareTo(right) <= 0;
-        public static bool operator >(Bool left, Bool right) => left.CompareTo(right) > 0;
+        public static bool operator > (Bool left, Bool right) => left.CompareTo(right) >  0;
         public static bool operator >=(Bool left, Bool right) => left.CompareTo(right) >= 0;
 
         /// <summary>Checks if the given object is equal to this data type.</summary>

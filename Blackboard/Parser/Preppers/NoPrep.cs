@@ -27,5 +27,9 @@ namespace Blackboard.Parser.Preppers {
         /// <returns>The performer being held.</returns>
         public IPerformer Prepare(Formula formula, bool reduce = false) =>
             Reducer.Wrap(this.Performer, reduce);
+
+        /// <summary>Gets the prepper debug string.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public override string ToString() => "NoPrep("+this.Performer+")";
     }
 }

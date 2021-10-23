@@ -146,6 +146,24 @@ namespace BlackboardTests.ParserTests {
             driver.CheckValue("-1.4000000000000021, -1.4000000000000021", "K");
         }
 
+        [TestMethod]
+        public void TestBasicParses_Assignment() {
+            Driver driver = new();
+            Parser parser = new(driver);
+            parser.Read(
+                "in int A = 2, B = 5;",
+                "in int C = A = 8;",
+                "B = A = 14;",
+                "A = 6;");
+            parser.Commit();
+
+            driver.CheckValue( 6, "A");
+            driver.CheckValue(14, "B");
+            driver.CheckValue( 8, "C");
+        }
+
+        // TODO: Test assigning to different namespaces than stack using scope
+
         /*
         [TestMethod]
         public void TestBasicParses_IntIntSum() {

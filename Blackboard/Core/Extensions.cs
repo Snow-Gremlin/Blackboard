@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Data.Interfaces;
+﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,35 @@ namespace Blackboard.Core {
 
     /// <summary>The set of extensions for the nodes of the blackboard.</summary>
     static public class Extensions {
+        #region General...
+
+        /// <summary>Filters any null values out of the given enumerable.</summary>
+        /// <typeparam name="T">The type of the values to check.</typeparam>
+        /// <param name="input">The input to get all the values from.</param>
+        /// <returns>The input values without any null values.</returns>
+        static public IEnumerable<T> NotNull<T>(this IEnumerable<T> input)
+            where T : class =>
+            from value in input where value is not null select value;
+
+        /// <summary>The strings for all the given values.</summary>
+        /// <typeparam name="T">The types of values to stringify.</typeparam>
+        /// <param name="values">The values to get the string for.</param>
+        /// <param name="nullStr">The string to return if the value is null.</param>
+        /// <returns>The strings for the given values.</returns>
+        static public IEnumerable<string> Strings<T>(this IEnumerable<T> values, string nullStr = "null") =>
+            from v in values select v?.ToString() ?? nullStr;
+
+        /// <summary>Determines if any of values exists in both lists.</summary>
+        /// <typeparam name="T">The types of values to find.</typeparam>
+        /// <param name="a">The first input set of values to check within.</param>
+        /// <param name="b">The second input set of values to check against.</param>
+        /// <param name="comparer">The type of comparer to use, if null the default comparer will be used.</param>
+        /// <returns>True if any value is contained in both, false otherwise.</returns>
+        static public bool ContainsAny<T>(this IEnumerable<T> a, IEnumerable<T> b, IEqualityComparer<T> comparer = null) =>
+            a.Any((value) => b.Contains(value, comparer));
+
+        #endregion
+        #region List...
 
         /// <summary>Adds only unique values into the given list.</summary>
         /// <typeparam name="T">The type of values in the list.</typeparam>
@@ -46,76 +76,6 @@ namespace Blackboard.Core {
             }
             return result;
         }
-
-        /// <summary>Filters any null values out of the given enumerable.</summary>
-        /// <typeparam name="T">The type of the values to check.</typeparam>
-        /// <param name="input">The input to get all the values from.</param>
-        /// <returns>The input values without any null values.</returns>
-        static public IEnumerable<T> NotNull<T>(this IEnumerable<T> input)
-            where T : class =>
-            from value in input where value is not null select value;
-
-        /// <summary>The values from the given input values.</summary>
-        /// <typeparam name="T">The type of the values to get.</typeparam>
-        /// <param name="nodes">The set of nodes to get all the values from.</param>
-        /// <returns>The values from the given non-null nodes.</returns>
-        static public IEnumerable<T> Values<T>(this IEnumerable<IValue<T>> nodes)
-            where T : IData =>
-            from node in nodes select node is not null ? node.Value : default;
-
-        /// <summary>The triggers from the given input nodes.</summary>
-        /// <param name="nodes">The set of nodes to get all the triggers from.</param>
-        /// <returns>The triggers from the given non-null nodes.</returns>
-        static public IEnumerable<bool> Triggers(this IEnumerable<ITrigger> nodes) =>
-            from node in nodes select node?.Provoked ?? false;
-
-        /// <summary>This determines if all the given nodes are constant.</summary>
-        /// <param name="nodes">The nodes to check if constant.</param>
-        /// <returns>True if all nodes are constant, false otherwise.</returns>
-        static public bool IsConstant(this IEnumerable<IConstantable> nodes) =>
-            nodes.All((node) => node?.IsConstant ?? false);
-
-        /// <summary>The type nodes for all the given nodes.</summary>
-        /// <param name="nodes">The nodes to get the types for.</param>
-        /// <returns>The types of the given nodes.</returns>
-        static public IEnumerable<Type> Types(this IEnumerable<INode> nodes) =>
-            from node in nodes select Type.TypeOf(node);
-
-        /// <summary>The real types for all the given node types.</summary>
-        /// <param name="types">The node types to get the real types for.</param>
-        /// <returns>The real type for all the given types.</returns>
-        static public IEnumerable<S.Type> RealTypes(this IEnumerable<Type> types) =>
-            from t in types select t?.RealType ?? null;
-
-        /// <summary>This returns the first type from the given list which the given source is assignable to.</summary>
-        /// <param name="types">The types to check if the source assignable to.</param>
-        /// <param name="source">The source type find the first assignable to type.</param>
-        /// <returns>The first type the souce is assignable to or null if not found.</returns>
-        static public Type FirstAssignable(this IEnumerable<Type> types, S.Type source) =>
-            types.FirstOrDefault((t) => source.IsAssignableTo(t.RealType));
-
-        /// <summary>The strings for all the given values.</summary>
-        /// <typeparam name="T">The types of values to stringify.</typeparam>
-        /// <param name="values">The values to get the string for.</param>
-        /// <param name="nullStr">The string to return if the value is null.</param>
-        /// <returns>The strings for the given values.</returns>
-        static public IEnumerable<string> Strings<T>(this IEnumerable<T> values, string nullStr = "null") =>
-            from v in values select v?.ToString() ?? nullStr;
-
-        /// <summary>Determines if any of values exists in both lists.</summary>
-        /// <typeparam name="T">The types of values to find.</typeparam>
-        /// <param name="a">The first input set of values to check within.</param>
-        /// <param name="b">The second input set of values to check against.</param>
-        /// <param name="comparer">The type of comparer to use, if null the default comparer will be used.</param>
-        /// <returns>True if any value is contained in both, false otherwise.</returns>
-        static public bool ContainsAny<T>(this IEnumerable<T> a, IEnumerable<T> b, IEqualityComparer<T> comparer = null) =>
-            a.Any((value) => b.Contains(value, comparer));
-
-        /// <summary>Gets the maximum depth from the given nodes.</summary>
-        /// <param name="nodes">The nodes to get the maximum depth from.</param>
-        /// <returns>The maximum found depth.</returns>
-        static public int MaxDepth(this IEnumerable<IEvaluatable> nodes) =>
-            nodes.Select((node) => node.Depth).Aggregate(0, S.Math.Max);
 
         /// <summary>Gets and removes the first value from the given linked list.</summary>
         /// <typeparam name="T">The type of the values in the list.</typeparam>
@@ -158,5 +118,75 @@ namespace Blackboard.Core {
                 if (addToEnd) list.AddLast(node);
             }
         }
+
+        #endregion
+        #region Data...
+
+        /// <summary>Performs an implicit cast from the given data value into the given type.</summary>
+        /// <remarks>The types should be matched prior to being used in this method.</remarks>
+        /// <typeparam name="T">The type to cast the value into.</typeparam>
+        /// <param name="value">The value to cast into that type.</param>
+        /// <returns>The new data value in the given type or default if unable to cast implicitly.</returns>
+        static public T ImplicitCastTo<T>(this IData value) where T: IData =>
+            value is T      v2 ? v2 :
+            value is Bool   v3 ? v3 is IImplicit<Bool,   T> c3 ? c3.CastFrom(v3) : default :
+            value is Double v4 ? v4 is IImplicit<Double, T> c4 ? c4.CastFrom(v4) : default :
+            value is Int    v5 ? v5 is IImplicit<Int,    T> c5 ? c5.CastFrom(v5) : default :
+            value is String v6 ? v6 is IImplicit<String, T> c6 ? c6.CastFrom(v6) : default :
+            throw new Exception("Unexpected value type in implicit cast").
+                With("Value Type", value.GetType());
+
+        /// <summary>The values from the given input values.</summary>
+        /// <typeparam name="T">The type of the values to get.</typeparam>
+        /// <param name="nodes">The set of nodes to get all the values from.</param>
+        /// <returns>The values from the given non-null nodes.</returns>
+        static public IEnumerable<T> Values<T>(this IEnumerable<IValue<T>> nodes)
+            where T : IData =>
+            from node in nodes select node is not null ? node.Value : default;
+
+        #endregion
+        #region Nodes...
+
+        /// <summary>The triggers from the given input nodes.</summary>
+        /// <param name="nodes">The set of nodes to get all the triggers from.</param>
+        /// <returns>The triggers from the given non-null nodes.</returns>
+        static public IEnumerable<bool> Triggers(this IEnumerable<ITrigger> nodes) =>
+            from node in nodes select node?.Provoked ?? false;
+
+        /// <summary>This determines if all the given nodes are constant.</summary>
+        /// <param name="nodes">The nodes to check if constant.</param>
+        /// <returns>True if all nodes are constant, false otherwise.</returns>
+        static public bool IsConstant(this IEnumerable<IConstantable> nodes) =>
+            nodes.All((node) => node?.IsConstant ?? false);
+
+        /// <summary>Gets the maximum depth from the given nodes.</summary>
+        /// <param name="nodes">The nodes to get the maximum depth from.</param>
+        /// <returns>The maximum found depth.</returns>
+        static public int MaxDepth(this IEnumerable<IEvaluatable> nodes) =>
+            nodes.Select((node) => node.Depth).Aggregate(0, S.Math.Max);
+
+        #endregion
+        #region Types...
+
+        /// <summary>The type nodes for all the given nodes.</summary>
+        /// <param name="nodes">The nodes to get the types for.</param>
+        /// <returns>The types of the given nodes.</returns>
+        static public IEnumerable<Type> Types(this IEnumerable<INode> nodes) =>
+            from node in nodes select Type.TypeOf(node);
+
+        /// <summary>The real types for all the given node types.</summary>
+        /// <param name="types">The node types to get the real types for.</param>
+        /// <returns>The real type for all the given types.</returns>
+        static public IEnumerable<S.Type> RealTypes(this IEnumerable<Type> types) =>
+            from t in types select t?.RealType ?? null;
+
+        /// <summary>This returns the first type from the given list which the given source is assignable to.</summary>
+        /// <param name="types">The types to check if the source assignable to.</param>
+        /// <param name="source">The source type find the first assignable to type.</param>
+        /// <returns>The first type the souce is assignable to or null if not found.</returns>
+        static public Type FirstAssignable(this IEnumerable<Type> types, S.Type source) =>
+            types.FirstOrDefault((t) => source.IsAssignableTo(t.RealType));
+
+        #endregion
     }
 }

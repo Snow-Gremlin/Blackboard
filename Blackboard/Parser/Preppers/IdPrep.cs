@@ -2,6 +2,7 @@
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Parser.Performers;
 using PetiteParser.Scanner;
+using System.Linq;
 
 namespace Blackboard.Parser.Preppers {
 
@@ -126,5 +127,11 @@ namespace Blackboard.Parser.Preppers {
                     With("Locacation", this.Location) :
                 recRef.WrappedNode.CreateField(this.Name, creationType);
         }
+
+        /// <summary>Gets the prepper debug string.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public override string ToString() => "IdPrep(["+this.Location+"], "+this.Name+
+            (this.Receiver is not null ? " => "+this.Receiver+")" :
+            ", [" + string.Join(", ", this.Scopes.Select((IWrappedNode scope) => scope.ToString())) + "])");
     }
 }

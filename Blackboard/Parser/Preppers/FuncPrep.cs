@@ -109,5 +109,10 @@ namespace Blackboard.Parser.Preppers {
             IFuncDef func = this.prepareFuncDef(sourceNode, types);
             return Reducer.Wrap(new Function(func, inputs), reduce);
         }
+
+        /// <summary>Gets the prepper debug string.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public override string ToString() => "FuncPrep(["+this.Location+"], "+this.Source+
+            ", [" + string.Join(", ", this.Arguments.Select((IPrepper prep) => prep.ToString())) + "])";
     }
 }

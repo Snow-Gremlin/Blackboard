@@ -1,19 +1,15 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Nodes.Functions;
-using Blackboard.Core.Nodes.Outer;
-using Blackboard.Core.Nodes.Inner;
-using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
+using Blackboard.Parser.Performers;
+using Blackboard.Parser.Preppers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using PP = PetiteParser;
 using S = System;
-using Blackboard.Parser.Preppers;
-using System.Text.RegularExpressions;
-using System.Text;
-using Blackboard.Parser.Performers;
 
 namespace Blackboard.Parser {
 
@@ -73,8 +69,13 @@ namespace Blackboard.Parser {
 
         /// <summary>Reads the given parse tree root for an input Blackline code.</summary>
         /// <param name="node">The parsed tree root node to read from.</param>
-        private void read(PP.ParseTree.ITreeNode node) =>
-            node.Process(this.prompts);
+        private void read(PP.ParseTree.ITreeNode node) {
+            try {
+                node.Process(this.prompts);
+            } catch(S.Exception ex) {
+                throw new Exception("Error occurred while parsing input code.", ex);
+            }
+        }
 
         /// <summary>This will dispose of all pending actions.</summary>
         public void Discard() => this.formula.Reset();
@@ -267,7 +268,7 @@ namespace Blackboard.Parser {
                 t == Type.Double  ? InputValue<Double>.Factory :
                 t == Type.String  ? InputValue<String>.Factory :
                 t == Type.Trigger ? InputTrigger.Factory :
-                throw new Exception("Unsupported type for new input").
+                throw new Exception("Unsupported type for new typed input").
                     With("Type", t);
 
             IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory)).Prepare(formula);
@@ -293,7 +294,7 @@ namespace Blackboard.Parser {
                 t == Type.Double  ? InputValue<Double>.FactoryWithInitialValue :
                 t == Type.String  ? InputValue<String>.FactoryWithInitialValue :
                 t == Type.Trigger ? InputTrigger.FactoryWithInitialValue :
-                throw new Exception("Unsupported type for new input").
+                throw new Exception("Unsupported type for new typed input with assignment").
                     With("Type", t);
 
             Type valueType = Type.FromType(valuePerf.Type);
@@ -371,70 +372,62 @@ namespace Blackboard.Parser {
         }
         */
 
-        /*
-        /// <summary>This handles setting the value type.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleSetType(PP.ParseTree.PromptArgs args) =>
-            this.typeText = args.Tokens[^1].Text;
-        */
-
-
         /// <summary>This handles assigning the left value to the right value.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleAssignment(PP.ParseTree.PromptArgs args) {
-            IPrepper value = this.pop<IPrepper>();
+            IPrepper value  = this.pop<IPrepper>();
             IPrepper target = this.pop<IPrepper>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
-            IPerformer valuePerf = value.Prepare(formula, true);
-            IPerformer targetPerf = target.Prepare(formula, true);
+            S.Console.WriteLine("Value(1):  "+value);
+            S.Console.WriteLine("Target(1): "+target);
 
-            Type t = Type.FromType(valuePerf.Type);
-            VirtualNode virtualInput = 
-            IFuncDef inputFactory =
-                t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
-                t == Type.Int     ? InputValue<Int>.FactoryWithInitialValue :
-                t == Type.Double  ? InputValue<Double>.FactoryWithInitialValue :
-                t == Type.String  ? InputValue<String>.FactoryWithInitialValue :
-                t == Type.Trigger ? InputTrigger.FactoryWithInitialValue :
-                throw new Exception("Unsupported type for new input").
-                    With("Type", t);
+            IPerformer valuePerf  = value.Prepare(formula, false);
+            IPerformer targetPerf = target.Prepare(formula, false);
 
-            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(formula);
-            this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
+            S.Console.WriteLine("Value(2):  "+valuePerf);
+            S.Console.WriteLine("Target(2): "+targetPerf);
 
+            // Check if the value is an input, this may have to change if we allow assignments to non-input fields.
+            if (targetPerf is not WrappedNodeReader targetReader)
+                throw new Exception("The target of an assignment must be a wrapped node.").
+                    With("Target", targetPerf);
+            IWrappedNode wrappedTarget = targetReader.WrappedNode;
+            if (!wrappedTarget.Type.IsAssignableTo(typeof(IInput)))
+                throw new Exception("The target of an assignment must be an input node.").
+                    With("Type", wrappedTarget.Type).
+                    With("Target", wrappedTarget);
 
+            // Check if the base types match. Don't need to check that the type is
+            // a data type or trigger since only those can be reduced to constents.
+            Type valueType  = Type.FromType(wrappedTarget.Type);
+            Type targetType = Type.FromType(targetPerf.Type);
+            if (!valueType.Match(targetType).IsMatch)
+                throw new Exception("The value of an assignment must match base types.").
+                    With("Target", targetPerf).
+                    With("Value", valuePerf);
 
-            // TODO: IMPLEMENT
+            IFuncDef assignFunc =
+                targetType == Type.Bool    ? InputValue<Bool>.Assign :
+                targetType == Type.Int     ? InputValue<Int>.Assign :
+                targetType == Type.Double  ? InputValue<Double>.Assign :
+                targetType == Type.String  ? InputValue<String>.Assign :
+                targetType == Type.Trigger ? InputTrigger.Assign :
+                throw new Exception("Unsupported type for assignment").
+                    With("Type", targetType);
 
+            NoPrep valuePrep = new(valuePerf);
+            this.formula.Add(new FuncPrep(loc, new NoPrep(assignFunc), valuePrep).Prepare(formula));
 
-
-            /*
-            /// <summary>This assigns several existing input nodes with a new value.</summary>
-            /// <param name="args">The token information from the parser.</param>
-            private void handleAssignExisting(PP.ParseTree.PromptArgs args) {
-                INode right = this.popNode().First();
-                while (this.stack.Count > 0) {
-                    Identifier id = this.pop<Identifier>();
-                    INode left = this.find(id);
-                    if (left is null) throw new Exception("Unknown input variable " + id + " at " + id.Location + ".");
-                    else if (left is IValueInput<bool>   leftBool)    leftBool.   SetValue(Cast.AsBoolValue(   right));
-                    else if (left is IValueInput<int>    leftInt)     leftInt.    SetValue(Cast.AsIntValue(    right));
-                    else if (left is IValueInput<double> leftDouble)  leftDouble. SetValue(Cast.AsDoubleValue( right));
-                    else if (left is ITriggerInput       leftTrigger) leftTrigger.Trigger( Cast.AsTriggerValue(right));
-                    else throw new Exception("Unable to assign to " + Cast.TypeName(left) + " at " + id.Location + ".");
-                }
-            }
-            */
-
-
+            // Push the value back onto the stack for any following assignments.
+            this.push(valuePrep);
         }
 
         /// <summary>This handles performing a type cast of a node.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleCast(PP.ParseTree.PromptArgs args) {
-            //NodeItem right = this.pop<NodeItem>();
-            //Identifier left = this.pop<Identifier>();
+            //IPrepper value = this.pop<IPrepper>();
+            //Type t = this.stashPop<Type>();
 
             // TODO: IMPLEMENT
 

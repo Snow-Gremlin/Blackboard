@@ -50,6 +50,11 @@ namespace Blackboard.Parser.Preppers {
         /// This is the performer to replace this prepper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, bool reduce = false) => new NodeHold(new Literal<T>(this.Value));
+        public IPerformer Prepare(Formula formula, bool reduce = false) =>
+            new NodeHold(new Literal<T>(this.Value));
+
+        /// <summary>Gets the prepper debug string.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public override string ToString() => "LiteralPrep("+this.Value+")";
     }
 }

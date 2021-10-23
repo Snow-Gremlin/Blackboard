@@ -72,5 +72,9 @@ namespace Blackboard.Parser {
             this.children[name] = node;
             return node;
         }
+
+        /// <summary>Gets the real node debug string.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public override string ToString() => "RealNode("+this.Node+")";
     }
 }

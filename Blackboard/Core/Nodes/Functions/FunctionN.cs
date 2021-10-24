@@ -70,5 +70,9 @@ namespace Blackboard.Core.Nodes.Functions {
             return this.passOne && nodes.Length == 1 ? t.Implicit(nodes[0]) :
                 this.hndl(nodes.Select((node) => castParam(t, node)).ToArray());
         }
+
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
+        public override string ToString() => "FuncDef<"+typeof(Tn)+"...> => "+typeof(TReturn);
     }
 }

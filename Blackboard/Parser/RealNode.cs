@@ -75,6 +75,13 @@ namespace Blackboard.Parser {
 
         /// <summary>Gets the real node debug string.</summary>
         /// <returns>A human readable debug string.</returns>
-        public override string ToString() => "RealNode("+this.Node+")";
+        public override string ToString() {
+            const string indent = "  ";
+            string tail = this.children.Count <= 0 ? "" :
+                "[\n" + indent + string.Join("\n" + indent,
+                    this.children.SelectFromPairs((string name, IWrappedNode node) => name + ": " + node)
+                ) + "\n]";
+            return "RealNode(" + this.Node + ")" + tail;
+        }
     }
 }

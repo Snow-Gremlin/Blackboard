@@ -387,6 +387,7 @@ namespace Blackboard.Parser {
 
             S.Console.WriteLine("Value(2):  "+valuePerf);
             S.Console.WriteLine("Target(2): "+targetPerf);
+            S.Console.WriteLine("Global: "+this.formula.Global.ToString());
 
             // Check if the value is an input, this may have to change if we allow assignments to non-input fields.
             if (targetPerf is not WrappedNodeReader targetReader)

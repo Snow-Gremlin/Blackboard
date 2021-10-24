@@ -50,5 +50,9 @@ namespace Blackboard.Core.Nodes.Functions {
             T3 node3 = Type.Implicit<T3>(nodes[2]);
             return this.hndl(node1, node2, node3);
         }
+
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
+        public override string ToString() => "FuncDef<"+typeof(T1)+", "+typeof(T2)+", "+typeof(T3)+"> => "+typeof(TReturn);
     }
 }

@@ -24,7 +24,7 @@ namespace Blackboard.Core {
         /// <summary>Creates a new driver.</summary>
         public Driver() {
             this.touched = new List<IEvaluatable>();
-            this.Global = new Namespace();
+            this.Global = new Namespace("Global");
 
             this.addOperators();
             this.addFunctions();
@@ -427,6 +427,13 @@ namespace Blackboard.Core {
 
         /// <summary>The base set of named nodes to access the total node structure.</summary>
         public Namespace Global { get; }
+
+        /// <summary>Gets a string showing the whole driver from the global.</summary>
+        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
+        /// <param name="showChildren">Indicates if child namespaces should be shown or not.</param>
+        /// <returns>The full debug string for this driver.</returns>
+        public string GlobalString(bool showFuncs = true, bool showChildren = true) =>
+            "Global:" + this.Global.NamespaceString(showFuncs, showChildren);
 
         /// <summary>This indicates if any changes are pending evaluation.</summary>
         public bool HasPending => this.touched.Count > 0;

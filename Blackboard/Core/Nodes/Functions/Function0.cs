@@ -29,5 +29,9 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new function.</returns>
         public override INode Build(INode[] nodes) => this.hndl();
+
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
+        public override string ToString() => "FuncDef => "+typeof(TReturn);
     }
 }

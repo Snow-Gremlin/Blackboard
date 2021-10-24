@@ -91,5 +91,15 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new node from the function or null.</returns>
         public INode Build(params INode[] nodes) => this.Find(nodes.Select(Type.TypeOf).ToArray())?.Build(nodes);
+
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
+        public override string ToString() {
+            const string indent = "  ";
+            if (this.defs.Count <= 0) return "FuncGroup[]";
+            List<string> parts = new();
+            foreach (IFuncDef def in this.defs) parts.Add(INode.NodeString(def).Trim().Replace("\n", "\n"+indent));
+            return "FuncGroup[\n"+indent+string.Join(",\n"+indent, parts)+"\n]";
+        }
     }
 }

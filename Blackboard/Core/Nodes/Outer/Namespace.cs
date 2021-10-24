@@ -16,12 +16,28 @@ namespace Blackboard.Core.Nodes.Outer {
         private SortedDictionary<string, INode> fields;
 
         /// <summary>Creates a new namespace.</summary>
-        public Namespace() {
+        /// <param name="name">The initial name for the namespace in the parent.</param>
+        public Namespace(string name = "") {
+            this.Name   = name;
+            this.Parent = null;
             this.fields = new SortedDictionary<string, INode>();
         }
 
+        /// <summary>The name of the namespace in the parent.</summary>
+        public string Name { get; private set; }
+
+        /// <summary>Gets the full name of this namespace among its parents.</summary>
+        public string FullName => (this.Parent is not null ? this.Parent.FullName+"." : "")+this.Name;
+
+        /// <summary>The parent namespace for this namespace</summary>
+        public Namespace Parent { get; private set; }
+
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<INode> Parents => Enumerable.Empty<INode>();
+        public IEnumerable<INode> Parents {
+            get {
+                if (this.Parent is not null) yield return this.Parent;
+            }
+        }
 
         /// <summary>The set of children nodes to this node in the graph.</summary>
         public IEnumerable<INode> Children => this.fields.Values;
@@ -49,15 +65,32 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <param name="node">The node to write to the field.</param>
         /// <param name="checkedForLoops">Indicates if loops in the graph should be checked for.</param>
         public void WriteField(string name, INode node, bool checkedForLoops = true) {
+            if (node is null)
+                throw new Exception("May not write a null node to a namespace.").
+                    With("Name", name).
+                    With("Namespace", this);
+            if (this.fields.ContainsKey(name))
+                throw new Exception("A node by the given name already exists in the namespace.").
+                    With("Name", name).
+                    With("Node", node).
+                    With("Namespace", this);
             if (checkedForLoops && INode.CanReachAny(this, node))
                 throw Exceptions.NodeLoopDetected();
             this.fields[name] = node;
+            if (node is Namespace child) {
+                child.Name = name;
+                child.Parent = this;
+            }
         }
 
         /// <summary>Remove a field from this node by name if it exists.</summary>
         /// <param name="name">The name of the fields to remove.</param>
         /// <returns>True if the field wwas removed, false otherwise.</returns>
-        public bool RemoveField(string name) => this.fields.Remove(name);
+        public bool RemoveField(string name) {
+            if (!this.fields.ContainsKey(name)) return false;
+            if (this.fields[name] is Namespace child) child.Parent = null;
+            return this.fields.Remove(name);
+        }
 
         /// <summary>Finds the node at the given path.</summary>
         /// <param name="names">The names to the node to find.</param>
@@ -77,6 +110,29 @@ namespace Blackboard.Core.Nodes.Outer {
                 } else return null;
             }
             return cur;
+        }
+
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
+        public override string ToString() => this.FullName;
+
+        /// <summary>Gets a string showing the whole namespace.</summary>
+        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
+        /// <param name="showChildren">Indicates if child namespaces should be shown or not.</param>
+        /// <returns>The full debug string for this node.</returns>
+        public string NamespaceString(bool showFuncs = true, bool showChildren = true) {
+            const string indent = "  ";
+            string fieldStr = string.Join(",\n" + indent,
+                this.fields.SelectFromPairs((string name, INode node) => {
+                    string value = node switch {
+                        Namespace child        => showChildren ? child.NamespaceString(showFuncs) : null,
+                        IFuncGroup or IFuncDef => showFuncs    ? INode.NodeString(node)           : null,
+                        _                      => INode.NodeString(node),
+                    };
+                    return (value is null) ? null : name + ": " + value;
+                }).NotNull().Indent(indent));
+            return string.IsNullOrEmpty(fieldStr) ? "Namespace[]" :
+                "Namespace[\n" + indent + fieldStr + "\n]";
         }
     }
 }

@@ -141,6 +141,13 @@ namespace Blackboard.Parser {
 
         /// <summary>Gets the virtual node debug string.</summary>
         /// <returns>A human readable debug string.</returns>
-        public override string ToString() => "VirtualNode("+(this.Virtual ? this.Type : this.Node)+")";
+        public override string ToString() {
+            const string indent = "  ";
+            string tail = this.children.Count <= 0 ? "" :
+                "[\n" + indent + string.Join("\n" + indent,
+                    this.children.SelectFromPairs((string name, IWrappedNode node) => name + ": " + node)
+                ) + "\n]";
+            return "VirtualNode("+(this.Virtual ? this.Type : this.Node)+")"+tail;
+        }
     }
 }

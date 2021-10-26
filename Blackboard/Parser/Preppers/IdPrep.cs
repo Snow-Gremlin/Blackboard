@@ -69,7 +69,7 @@ namespace Blackboard.Parser.Preppers {
         private IPerformer resolveInReceiver(Formula formula, bool reduce) {
             IPerformer receiver = this.Receiver.Prepare(formula, reduce);
 
-            if (receiver.Type.IsAssignableTo(typeof(IFieldReader)))
+            if (!receiver.Type.IsAssignableTo(typeof(IFieldReader)))
                 throw new Exception("Node can not be used as receiver, so it can not be used with an identifier.").
                     With("Identifier", this.Name).
                     With("Attempted Receiver", receiver).
@@ -116,7 +116,7 @@ namespace Blackboard.Parser.Preppers {
             // There is a receiver so create the node on the receiver's node.
             IPerformer receiver = this.Receiver.Prepare(formula, false);
             return !receiver.Type.IsAssignableTo(typeof(IFieldReader)) ?
-                throw new Exception("Node can not be used as receiver, so it can not be used with an identifier.").
+                throw new Exception("Node can not be used as receiver, so it can not be used when creating a node with an identifier.").
                     With("Identifier", this.Name).
                     With("Attempted Receiver", receiver).
                     With("Locacation", this.Location) :

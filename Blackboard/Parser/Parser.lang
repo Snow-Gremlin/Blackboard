@@ -36,7 +36,6 @@
 (Zero): 'x' => (HexStart): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
 
 # Doubles
-(Start):       '.' => (Decimal);
 (Zero):        '.' => (Decimal);
 (PossibleBin): '.' => (Decimal);
 (PossibleOct): '.' => (Decimal);

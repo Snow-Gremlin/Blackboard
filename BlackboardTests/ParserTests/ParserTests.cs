@@ -68,31 +68,28 @@ namespace BlackboardTests.ParserTests {
             parser.Read(
                 "in double A = 3.0;",
                 "in double B = 0.003;",
-                "in double C = .003;",
-                "in double D = 3.0e-3;",
-                "in double E = 3e-3;",
-                "in double F = .3e-2;",
-                "in double G = 0.3e-2;",
-                "in double H = 3;",
-                "in double I = 0;",
-                "in double J = 0.0;",
-                "in double K = 1.0;",
-                "in double L = 0e-5;",
-                "in double M = 28.0;");
+                "in double C = 3.0e-3;",
+                "in double D = 3e-3;",
+                "in double E = 0.3e-2;",
+                "in double F = 3;",
+                "in double G = 0;",
+                "in double H = 0.0;",
+                "in double I = 1.0;",
+                "in double J = 0e-5;",
+                "in double K = 28.0;");
             parser.Commit();
 
             driver.CheckValue(3.0,   "A");
             driver.CheckValue(0.003, "B");
             driver.CheckValue(0.003, "C");
+            driver.CheckValue(0.003, "D");
             driver.CheckValue(0.003, "E");
-            driver.CheckValue(0.003, "F");
-            driver.CheckValue(0.003, "G");
-            driver.CheckValue(3.0,   "H");
-            driver.CheckValue(0.0,   "I");
+            driver.CheckValue(3.0,   "F");
+            driver.CheckValue(0.0,   "G");
+            driver.CheckValue(0.0,   "H");
+            driver.CheckValue(1.0,   "I");
             driver.CheckValue(0.0,   "J");
-            driver.CheckValue(1.0,   "K");
-            driver.CheckValue(0.0,   "L");
-            driver.CheckValue(28.0,  "M");
+            driver.CheckValue(28.0,  "K");
         }
 
         [TestMethod]
@@ -162,7 +159,36 @@ namespace BlackboardTests.ParserTests {
             driver.CheckValue( 8, "C");
         }
 
-        // TODO: Test assigning to different namespaces than stack using scope
+        [TestMethod]
+        public void TestBasicParses_NamespaceAssignment() {
+            Driver driver = new();
+            Parser parser = new(driver);
+            parser.Read(
+                "namespace X {",
+                "   in int a = 2;",
+                "   in int b = 3;",
+                "   in int c = 4;",
+                "   namespace Y {",
+                "      in int d = 5;",
+                "      in int e = 6;",
+                "      in int f = 7;",
+                "      c = 444;",
+                "      f = 777;",
+                "   }",
+                "   Y.e = 666;",
+                "   b = 333;",
+                "}",
+                "X.Y.d = 555;",
+                "X.a = 222;");
+            parser.Commit();
+
+            driver.CheckValue(222, "X", "a");
+            driver.CheckValue(333, "X", "b");
+            driver.CheckValue(444, "X", "c");
+            driver.CheckValue(555, "X", "Y", "d");
+            driver.CheckValue(666, "X", "Y", "e");
+            driver.CheckValue(777, "X", "Y", "f");
+        }
 
         /*
         [TestMethod]

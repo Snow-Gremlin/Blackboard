@@ -54,6 +54,13 @@ namespace Blackboard.Core {
         static public IEnumerable<string> Indent(this IEnumerable<string> parts, string indent) =>
             from p in parts select p.Replace("\n", "\n" + indent);
 
+        /// <summary>This is short hand to make joining strings into one.</summary>
+        /// <param name="parts">The strings to join together into one.</param>
+        /// <param name="seperator">The separator to put between the parts.</param>
+        /// <returns>The string from the joined parts.</returns>
+        static public string Join(this IEnumerable<string> parts, string seperator = "") =>
+            string.Join(seperator, parts);
+
         #endregion
         #region List...
 

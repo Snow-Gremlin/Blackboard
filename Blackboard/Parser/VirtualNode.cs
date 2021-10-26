@@ -143,11 +143,19 @@ namespace Blackboard.Parser {
         /// <returns>A human readable debug string.</returns>
         public override string ToString() {
             const string indent = "  ";
-            string tail = this.children.Count <= 0 ? "" :
-                "[\n" + indent + string.Join("\n" + indent,
-                    this.children.SelectFromPairs((string name, IWrappedNode node) => name + ": " + node)
-                ) + "\n]";
-            return "VirtualNode("+(this.Virtual ? this.Type : this.Node)+")"+tail;
+            string head = this.ToSimpleString();
+            if (this.children.Count <= 0) return head +"[]";
+            string tail = this.children.SelectFromPairs((string name, IWrappedNode node) => name + ": " + node).Join("\n" + indent);
+            return head + "[\n" + indent + tail + "\n]";
+        }
+
+        /// <summary>Gets the virtual node as a simple string without any children.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public string ToSimpleString() {
+            string body = this.Virtual ?
+                this.Type.ToString().Replace("Blackboard.Core.", "") :
+                INode.NodeString(this.Node);
+            return "VirtualNode(" + body + ")";
         }
     }
 }

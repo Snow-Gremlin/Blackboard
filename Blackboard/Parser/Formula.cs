@@ -1,7 +1,9 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Nodes.Outer;
 using Blackboard.Parser.Performers;
 using System.Collections.Generic;
 using System.Linq;
+using S = System;
 
 namespace Blackboard.Parser {
 
@@ -24,8 +26,8 @@ namespace Blackboard.Parser {
         /// <summary>Creates a new formula to store pending changes to the given driver.</summary>
         /// <param name="driver">The driver this formula will change.</param>
         public Formula(Driver driver) {
-            this.Driver = driver;
-            this.scopes = new LinkedList<IWrappedNode>();
+            this.Driver  = driver;
+            this.scopes  = new LinkedList<IWrappedNode>();
             this.pending = new LinkedList<IPerformer>();
 
             // Call reset to prepare the formula.
@@ -40,7 +42,11 @@ namespace Blackboard.Parser {
         /// <summary>Performs all pending actions then resets the formula.</summary>
         public void Perform() {
             // Run each performer by calling it, the returned nodes can be discarded because any kept nodes should be written to Blackboard.
-            foreach (IPerformer performer in this.pending) performer.Perform();
+            foreach (IPerformer performer in this.pending) {
+                //S.Console.WriteLine("Perform: " + performer); // TODO: Setup Log for this
+                performer.Perform();
+                //S.Console.WriteLine(this.FunctionString(showPending: false)); // TODO: Setup Log for this
+            }
             this.Reset();
         }
 
@@ -63,9 +69,33 @@ namespace Blackboard.Parser {
 
         /// <summary>Pushes a new node onto the scope.</summary>
         /// <param name="node">The node to pussh on the scope.</param>
-        public void PushScope(IWrappedNode node) => this.scopes.AddFirst(node);
+        public void PushScope(IWrappedNode node) {
+            if (!node.Type.IsAssignableTo(typeof(Namespace)))
+                throw new Exception("May only push Namespaces onto the scope").
+                    With("Node Type", node.Type);
+
+            this.scopes.AddFirst(node);
+        }
 
         /// <summary>Pops a top node from the scope.</summary>
         public void PopScope() => this.scopes.RemoveFirst();
+
+        /// <summary>Gets the formula debug string.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public override string ToString() => this.FunctionString();
+
+        /// <summary>Gets the formula debug string.</summary>
+        /// <param name="showGlobal">Indicates that the namespaces starting from the global should be returned.</param>
+        /// <param name="showScope">Indicates that the scope stack should be returned.</param>
+        /// <param name="showPending">Indicates that pending performers should be returned.</param>
+        /// <returns>A human readable debug string.</returns>
+        public string FunctionString(bool showGlobal = true, bool showScope = true, bool showPending = true) {
+            const string indent = "  ";
+            List<string> parts = new();
+            if (showGlobal)  parts.Add("Global: "+this.Global.ToString());
+            if (showScope)   parts.Add("Scope: [" + this.scopes.Select((scope) => scope.ToSimpleString()).Join(", ") + "]");
+            if (showPending) parts.Add("Pending: [\n" + indent + this.pending.Strings().Indent(indent).Join(",\n" + indent) + "]");
+            return parts.Join("\n");
+        }
     }
 }

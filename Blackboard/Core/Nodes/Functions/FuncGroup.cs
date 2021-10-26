@@ -99,7 +99,7 @@ namespace Blackboard.Core.Nodes.Functions {
             if (this.defs.Count <= 0) return "FuncGroup[]";
             List<string> parts = new();
             foreach (IFuncDef def in this.defs) parts.Add(INode.NodeString(def).Trim().Replace("\n", "\n"+indent));
-            return "FuncGroup[\n"+indent+string.Join(",\n"+indent, parts)+"\n]";
+            return "FuncGroup[\n" + indent + parts.Join(",\n" + indent) + "\n]";
         }
     }
 }

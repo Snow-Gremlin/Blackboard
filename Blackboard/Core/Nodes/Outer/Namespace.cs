@@ -1,7 +1,6 @@
 ﻿using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Blackboard.Core.Nodes.Outer {
 
@@ -25,9 +24,6 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>The name of the namespace in the parent.</summary>
         public string Name { get; private set; }
-
-        /// <summary>Gets the full name of this namespace among its parents.</summary>
-        public string FullName => (this.Parent is not null ? this.Parent.FullName+"." : "")+this.Name;
 
         /// <summary>The parent namespace for this namespace</summary>
         public Namespace Parent { get; private set; }
@@ -114,7 +110,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => this.FullName;
+        public override string ToString() => (this.Parent is not null ? this.Parent.ToString()+"." : "")+this.Name;
 
         /// <summary>Gets a string showing the whole namespace.</summary>
         /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
@@ -122,7 +118,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <returns>The full debug string for this node.</returns>
         public string NamespaceString(bool showFuncs = true, bool showChildren = true) {
             const string indent = "  ";
-            string fieldStr = string.Join(",\n" + indent,
+            string fieldStr =
                 this.fields.SelectFromPairs((string name, INode node) => {
                     string value = node switch {
                         Namespace child        => showChildren ? child.NamespaceString(showFuncs) : null,
@@ -130,7 +126,7 @@ namespace Blackboard.Core.Nodes.Outer {
                         _                      => INode.NodeString(node),
                     };
                     return (value is null) ? null : name + ": " + value;
-                }).NotNull().Indent(indent));
+                }).NotNull().Indent(indent).Join(",\n" + indent);
             return string.IsNullOrEmpty(fieldStr) ? "Namespace[]" :
                 "Namespace[\n" + indent + fieldStr + "\n]";
         }

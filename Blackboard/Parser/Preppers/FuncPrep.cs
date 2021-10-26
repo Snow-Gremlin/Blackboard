@@ -84,7 +84,7 @@ namespace Blackboard.Parser.Preppers {
                     throw new Exception("Function definition from source does not match types.").
                         With("Function", funcDef).
                         With("Source", this.Source).
-                        With("Inputs", string.Join(", ", types.Strings())).
+                        With("Inputs", "["+types.Strings().Join(", ")+"]").
                         With("Location", this.Location) :
                 throw new Exception("Function source must be either a function group or definition.").
                     With("Node", sourceNode).

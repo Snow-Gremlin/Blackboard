@@ -41,5 +41,13 @@ namespace Blackboard.Parser {
         /// <param name="type">The type of the field to add.</param>
         /// <returns>The new virtual node for this node.</returns>
         public VirtualNode CreateField(string name, S.Type type);
+
+        /// <summary>Gets the virtual node debug string.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public string ToString();
+
+        /// <summary>Gets the virtual node as a simple string without any children.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public string ToSimpleString();
     }
 }

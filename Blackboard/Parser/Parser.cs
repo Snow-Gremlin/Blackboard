@@ -83,6 +83,10 @@ namespace Blackboard.Parser {
         /// <summary>This will perform and apply all pending action to Blackboard.</summary>
         public void Commit() => this.formula.Perform();
 
+        /// <summary>Gets the debug string of the uncommited parse state.</summary>
+        /// <returns>A human readable debug string.</returns>
+        public string FormulaToString() => this.formula.ToString();
+
         #endregion
         #region Prompts Setup...
 
@@ -261,7 +265,6 @@ namespace Blackboard.Parser {
             Type t = this.stashPop<Type>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
-            VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
             IFuncDef inputFactory =
                 t == Type.Bool    ? InputValue<Bool>.Factory :
                 t == Type.Int     ? InputValue<Int>.Factory :
@@ -271,6 +274,7 @@ namespace Blackboard.Parser {
                 throw new Exception("Unsupported type for new typed input").
                     With("Type", t);
 
+            VirtualNode virtualInput = target.CreateNode(formula, inputFactory.ReturnType);
             IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory)).Prepare(formula);
             this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
 
@@ -286,7 +290,6 @@ namespace Blackboard.Parser {
             Type t = this.stashPop<Type>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
-            VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
             IPerformer valuePerf = value.Prepare(formula, true);
             IFuncDef inputFactory =
                 t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
@@ -297,6 +300,7 @@ namespace Blackboard.Parser {
                 throw new Exception("Unsupported type for new typed input with assignment").
                     With("Type", t);
 
+            VirtualNode virtualInput = target.CreateNode(formula, inputFactory.ReturnType);
             Type valueType = Type.FromType(valuePerf.Type);
             if (!t.Match(valueType).IsMatch)
                 throw new Exception("May not assign the value to that type of input.").
@@ -319,7 +323,6 @@ namespace Blackboard.Parser {
 
             IPerformer valuePerf = value.Prepare(formula, true);
             Type t = Type.FromType(valuePerf.Type);
-            VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
             IFuncDef inputFactory =
                 t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
                 t == Type.Int     ? InputValue<Int>.FactoryWithInitialValue :
@@ -329,6 +332,7 @@ namespace Blackboard.Parser {
                 throw new Exception("Unsupported type for new input").
                     With("Type", t);
 
+            VirtualNode virtualInput = target.CreateNode(formula, inputFactory.ReturnType);
             IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(formula);
             this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
         }
@@ -379,32 +383,28 @@ namespace Blackboard.Parser {
             IPrepper target = this.pop<IPrepper>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
-            S.Console.WriteLine("Value(1):  "+value);
-            S.Console.WriteLine("Target(1): "+target);
-
             IPerformer valuePerf  = value.Prepare(formula, false);
             IPerformer targetPerf = target.Prepare(formula, false);
-
-            S.Console.WriteLine("Value(2):  "+valuePerf);
-            S.Console.WriteLine("Target(2): "+targetPerf);
-            S.Console.WriteLine("Global: "+this.formula.Global.ToString());
 
             // Check if the value is an input, this may have to change if we allow assignments to non-input fields.
             if (targetPerf is not WrappedNodeReader targetReader)
                 throw new Exception("The target of an assignment must be a wrapped node.").
+                    With("Location", loc).
                     With("Target", targetPerf);
             IWrappedNode wrappedTarget = targetReader.WrappedNode;
             if (!wrappedTarget.Type.IsAssignableTo(typeof(IInput)))
                 throw new Exception("The target of an assignment must be an input node.").
+                    With("Location", loc).
                     With("Type", wrappedTarget.Type).
                     With("Target", wrappedTarget);
 
             // Check if the base types match. Don't need to check that the type is
             // a data type or trigger since only those can be reduced to constents.
-            Type valueType  = Type.FromType(wrappedTarget.Type);
+            Type valueType  = Type.FromType(valuePerf.Type);
             Type targetType = Type.FromType(targetPerf.Type);
             if (!valueType.Match(targetType).IsMatch)
                 throw new Exception("The value of an assignment must match base types.").
+                    With("Location", loc).
                     With("Target", targetPerf).
                     With("Value", valuePerf);
 
@@ -415,10 +415,11 @@ namespace Blackboard.Parser {
                 targetType == Type.String  ? InputValue<String>.Assign :
                 targetType == Type.Trigger ? InputTrigger.Assign :
                 throw new Exception("Unsupported type for assignment").
+                    With("Location", loc).
                     With("Type", targetType);
 
-            NoPrep valuePrep = new(valuePerf);
-            this.formula.Add(new FuncPrep(loc, new NoPrep(assignFunc), valuePrep).Prepare(formula));
+            NoPrep valuePrep = new(valuePerf), targetPrep = new(targetPerf), funcPrep = new(assignFunc);
+            this.formula.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(formula));
 
             // Push the value back onto the stack for any following assignments.
             this.push(valuePrep);

@@ -38,7 +38,7 @@ namespace Blackboard.Parser.Performers {
 
         /// <summary>Gets the performer debug string.</summary>
         /// <returns>A human readable debug string.</returns>
-        public override string ToString() => "Function("+this.Func+", "+
-            ", [" + string.Join(", ", this.Args.Select((IPerformer perf) => perf.ToString())) + "])";
+        public override string ToString() => ("Function("+this.Func+", "+
+            ", [" + this.Args.Select((IPerformer perf) => perf.ToString()).Join(", ") + "])").Replace("Blackboard.Core.", "");
     }
 }

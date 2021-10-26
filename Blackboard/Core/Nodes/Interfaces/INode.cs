@@ -16,7 +16,7 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// <param name="nodes">The set of nodes which may contain nulls.</param>
         /// <returns>The string for the given nodes.</returns>
         static public string NodeString(IEnumerable<INode> nodes) =>
-            string.Join(", ", nodes.Select((INode node) => NodeString(node)));
+            nodes.Select((INode node) => NodeString(node)).Join(", ");
 
         /// <summary>This will check if from the given root node any of the given target nodes can be reachable.</summary>
         /// <param name="root">The root to start checking from.</param>

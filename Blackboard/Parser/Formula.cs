@@ -45,7 +45,7 @@ namespace Blackboard.Parser {
             foreach (IPerformer performer in this.pending) {
                 //S.Console.WriteLine("Perform: " + performer); // TODO: Setup Log for this
                 performer.Perform();
-                //S.Console.WriteLine(this.FunctionString(showPending: false)); // TODO: Setup Log for this
+                //S.Console.WriteLine(this.FormulaString(showPending: false)); // TODO: Setup Log for this
             }
             this.Reset();
         }
@@ -82,14 +82,14 @@ namespace Blackboard.Parser {
 
         /// <summary>Gets the formula debug string.</summary>
         /// <returns>A human readable debug string.</returns>
-        public override string ToString() => this.FunctionString();
+        public override string ToString() => this.FormulaString();
 
         /// <summary>Gets the formula debug string.</summary>
         /// <param name="showGlobal">Indicates that the namespaces starting from the global should be returned.</param>
         /// <param name="showScope">Indicates that the scope stack should be returned.</param>
         /// <param name="showPending">Indicates that pending performers should be returned.</param>
         /// <returns>A human readable debug string.</returns>
-        public string FunctionString(bool showGlobal = true, bool showScope = true, bool showPending = true) {
+        public string FormulaString(bool showGlobal = true, bool showScope = true, bool showPending = true) {
             const string indent = "  ";
             List<string> parts = new();
             if (showGlobal)  parts.Add("Global: "+this.Global.ToString());

@@ -101,9 +101,8 @@ namespace Blackboard.Parser {
                 { "newTypeInputWithAssign", this.handleNewTypeInputWithAssign },
                 { "newVarInputWithAssign",  this.handleNewVarInputWithAssign },
 
-                //{ "startDefine",            this.handleStartDefine },
-                //{ "typeDefine",             this.handleTypeDefine },
-                //{ "varDefine",              this.handleVarDefine },
+                { "typeDefine",             this.handleTypeDefine },
+                { "varDefine",              this.handleVarDefine },
                 //{ "pullTrigger",            this.handlePullTrigger },
                 //{ "conditionalPullTrigger", this.handleConditionalPullTrigger },
 
@@ -272,6 +271,7 @@ namespace Blackboard.Parser {
                 t == Type.String  ? InputValue<String>.Factory :
                 t == Type.Trigger ? InputTrigger.Factory :
                 throw new Exception("Unsupported type for new typed input").
+                    With("Location", loc).
                     With("Type", t);
 
             VirtualNode virtualInput = target.CreateNode(formula, inputFactory.ReturnType);
@@ -304,6 +304,7 @@ namespace Blackboard.Parser {
             Type valueType = Type.FromType(valuePerf.Type);
             if (!t.Match(valueType).IsMatch)
                 throw new Exception("May not assign the value to that type of input.").
+                    With("Location", loc).
                     With("Input Type", t).
                     With("Value Type", valueType);
 
@@ -330,6 +331,7 @@ namespace Blackboard.Parser {
                 t == Type.String  ? InputValue<String>.FactoryWithInitialValue :
                 t == Type.Trigger ? InputTrigger.FactoryWithInitialValue :
                 throw new Exception("Unsupported type for new input").
+                    With("Location", loc).
                     With("Type", t);
 
             VirtualNode virtualInput = target.CreateNode(formula, inputFactory.ReturnType);
@@ -337,25 +339,46 @@ namespace Blackboard.Parser {
             this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
         }
 
-        /*
         /// <summary>This handles defining a new typed output node.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleTypeDefine(PP.ParseTree.PromptArgs args) {
+            IPrepper value = this.pop<IPrepper>();
+            IdPrep target = this.pop<IdPrep>();
+            Type t = this.stashPop<Type>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
-            INode right = this.popNode().First();
-            Identifier id = this.pop<Identifier>();
-            this.defineValue(loc, this.typeText, id, right);
+
+            IPerformer valuePerf = value.Prepare(formula, false);
+            Type valueType = Type.FromType(valuePerf.Type);
+            TypeMatch match = t.Match(valueType);
+            if (!match.IsMatch)
+                throw new Exception("May not define the value to that type of input.").
+                    With("Location", loc).
+                    With("Input Type", t).
+                    With("Value Type", valueType);
+
+            VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
+            if (match.NeedsCast) {
+                // TODO: Need to potentually add a cast node.
+            }
+            this.formula.Add(new VirtualNodeWriter(virtualInput, valuePerf));
+
+            // Push the type back onto the stack for the next definition.
+            this.stashPush(t);
         }
 
         /// <summary>This handles defining a new untyped output node.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleVarDefine(PP.ParseTree.PromptArgs args) {
+            IPrepper value = this.pop<IPrepper>();
+            IdPrep target = this.pop<IdPrep>();
             PP.Scanner.Location loc = args.Tokens[^1].End;
-            INode right = this.popNode().First();
-            Identifier id = this.pop<Identifier>();
-            this.defineValue(loc, Cast.TypeName(right), id, right);
+
+            IPerformer valuePerf = value.Prepare(formula, false);
+            VirtualNode virtualInput = target.CreateNode(formula, valuePerf.Type);
+            this.formula.Add(new VirtualNodeWriter(virtualInput, valuePerf));
         }
 
+        /*
         /// <summary>This handles when a trigger is provoked unconditionally.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handlePullTrigger(PP.ParseTree.PromptArgs args) {

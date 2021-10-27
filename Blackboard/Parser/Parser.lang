@@ -163,8 +163,8 @@
     | <NewTypedInput>
     | <NewVarInput>
     | <Declaration>
-#    | <DefineTypedRule>
-#    | <DefineVarRule>
+    | <DefineTypedRule>
+    | <DefineVarRule>
 #    | <PullTrigger>
     ;
 
@@ -190,10 +190,10 @@
     
 #----------------------------------------------------------
 
-###<DefineTypedRule> := {startDefine} [Type] {setType} <Id> [Define] <Conditional> {typeDefine};
-###
-###<DefineVarRule> := {startDefine} <Id> [Define] <Conditional> {varDefine};
-###
+<DefineTypedRule> := <RootType> [Identifier] {pushId} [Define] <Conditional> {typeDefine};
+
+<DefineVarRule> := [Identifier] {pushId} [Define] <Conditional> {varDefine};
+
 ###<PullTrigger> := [Trigger] <Id> {pullTrigger}
 ###    | <Conditional> [Trigger] <Id> {conditionalPullTrigger};
     

@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.IO;
 using S = System;
 
@@ -9,8 +10,15 @@ namespace BlackboardTests.ParserTests {
     [TestClass]
     public class ParserTests {
 
-        //static private void checkException(S.Action hndl, string exp) =>
-        //  Assert.AreEqual(Assert.ThrowsException<Exception>(hndl).Message, exp);
+        static private void checkException(S.Action hndl, params string[] exp) {
+            S.Exception ex = Assert.ThrowsException<Exception>(hndl);
+            List<string> messages = new();
+            while (ex != null) {
+                messages.Add(ex.Message);
+                ex = ex.InnerException;
+            }
+            Assert.AreEqual(exp.Join("\n"), messages.Join("\n"));
+        }
 
         [TestMethod]
         public void TestBasicParses_TypedInput() {
@@ -190,7 +198,18 @@ namespace BlackboardTests.ParserTests {
             driver.CheckValue(777, "X", "Y", "f");
         }
 
-        /*
+        [TestMethod]
+        public void TestBasicParses_DoubleToIntAssignError() {
+            Driver driver = new();
+            Parser parser = new(driver);
+            checkException(() => {
+                parser.Read("in int A = 3.14;");
+            }, "Error occurred while parsing input code.",
+               "May not assign the value to that type of input.",
+               "[Input Type: int]",
+               "[Value Type: double]");
+        }
+
         [TestMethod]
         public void TestBasicParses_IntIntSum() {
             Driver driver = new();
@@ -199,6 +218,8 @@ namespace BlackboardTests.ParserTests {
                 "in int A = 2;",
                 "in int B = 3;",
                 "int C := A + B;");
+            parser.Commit();
+
             driver.CheckValue(2, "A");
             driver.CheckValue(3, "B");
             driver.CheckValue(5, "C");
@@ -215,7 +236,6 @@ namespace BlackboardTests.ParserTests {
             driver.CheckValue(1, "B");
             driver.CheckValue(8, "C");
         }
-        */
 
         /*
         [TestMethod]
@@ -226,6 +246,8 @@ namespace BlackboardTests.ParserTests {
                 "in int A = 2;",
                 "in double B = 3.0;",
                 "double C := A + B;");
+            parser.Commit();
+
             checkValue(driver, "A", 2);
             checkValue(driver, "B", 3.0);
             checkValue(driver, "C", 5.0);
@@ -242,15 +264,7 @@ namespace BlackboardTests.ParserTests {
             checkValue(driver, "B", 1.23);
             checkValue(driver, "C", 8.23);
         }
-
-        [TestMethod]
-        public void TestBasicParses_DoubleToIntAssignError() {
-            Driver driver = new();
-            Parser parser = new(driver);
-            checkException(() => {
-                parser.Read("in int A = 3.14;");
-            }, "Can not assign a double to an int.");
-        }
+        */
 
         [TestMethod]
         public void TestBasicParses_IntIntCompare() {
@@ -261,18 +275,20 @@ namespace BlackboardTests.ParserTests {
                 "in B = 3;",
                 "maxA := 3;",
                 "C := A <= maxA && A > B ? 1 : 0;");
-            checkValue(driver, "A", 2);
-            checkValue(driver, "B", 3);
-            checkValue(driver, "C", 0);
+            parser.Commit();
 
-            driver.SetValue("A", 7);
-            driver.Evaluate();
-            checkValue(driver, "C", 0);
+            driver.CheckValue(2, "A");
+            driver.CheckValue(3, "B");
+            driver.CheckValue(0, "C");
 
-            driver.SetValue("A", 2);
-            driver.SetValue("B", -1);
+            driver.SetInt(7, "A");
             driver.Evaluate();
-            checkValue(driver, "C", 1);
+            driver.CheckValue(0, "C");
+
+            driver.SetInt(2, "A");
+            driver.SetInt(-1, "B");
+            driver.Evaluate();
+            driver.CheckValue(1, "C");
         }
 
         [TestMethod]
@@ -285,21 +301,24 @@ namespace BlackboardTests.ParserTests {
                 "int B := (A | 0x10) & 0x15;",
                 "int C := B << shift;",
                 "int D := ~C;");
-            checkValue(driver, "A", 0x0F);
-            checkValue(driver, "B", 0x15);
-            checkValue(driver, "C", 0x2A);
-            checkValue(driver, "D", -0x2B);
+            parser.Commit();
 
-            driver.SetValue("A", 0x44);
+            driver.CheckValue( 0x0F, "A");
+            driver.CheckValue( 0x15, "B");
+            driver.CheckValue( 0x2A, "C");
+            driver.CheckValue(-0x2B, "D");
+
+            driver.SetInt(0x44, "A");
             driver.Evaluate();
-            checkValue(driver, "B", 0x14);
-            checkValue(driver, "C", 0x28);
-            checkValue(driver, "D", -0x29);
+            driver.CheckValue( 0x14, "B");
+            driver.CheckValue( 0x28, "C");
+            driver.CheckValue(-0x29, "D");
         }
 
+        /*
         [TestMethod]
         public void TestBasicParses_SomeBooleanMath() {
-            Driver driver = new(new StringWriter());
+            Driver driver = new();
             Parser parser = new(driver);
             parser.Read(
                 "in int A = 0x03;",
@@ -308,12 +327,12 @@ namespace BlackboardTests.ParserTests {
                 "bool D := A & 0x04 != 0;",
                 "bool E := A & 0x08 != 0;",
                 "bool F := B & !C ^ (D | E);");
-            checkValue(driver, "A", 0x3);
-            checkValue(driver, "B", true);
-            checkValue(driver, "C", true);
-            checkValue(driver, "D", false);
-            checkValue(driver, "E", false);
-            checkValue(driver, "F", false);
+            driver.CheckValue("A", 0x3);
+            driver.CheckValue("B", true);
+            driver.CheckValue("C", true);
+            driver.CheckValue("D", false);
+            driver.CheckValue("E", false);
+            driver.CheckValue("F", false);
 
             driver.SetValue("A", 0x5);
             driver.Evalate();
@@ -331,7 +350,7 @@ namespace BlackboardTests.ParserTests {
                 "Eval(5): Or(Global.D, Global.E)",
                 "Eval(6): And(Global.B, Not(Global.C))",
                 "Eval(7): Xor(And(Global.B, Not(Global.C)), Or(Global.D, Global.E))");
-            checkValue(driver, "F", false);
+            driver.CheckValue("F", false);
 
             driver.Log = new StringWriter();
             driver.SetValue("A", 0x4);
@@ -347,7 +366,7 @@ namespace BlackboardTests.ParserTests {
                 "Eval(6): And(Global.B, Not(Global.C))",
                 "Eval(7): Xor(And(Global.B, Not(Global.C)), Or(Global.D, Global.E))",
                 "Eval(8): Global.F");
-            checkValue(driver, "F", true);
+            driver.CheckValue("F", true);
 
             driver.Log = new StringWriter();
             driver.SetValue("A", 0x8);
@@ -363,7 +382,7 @@ namespace BlackboardTests.ParserTests {
                 "Eval(4): Global.D",
                 "Eval(4): Global.E",
                 "Eval(5): Or(Global.D, Global.E)");
-            checkValue(driver, "F", true);
+            driver.CheckValue("F", true);
         }
         */
     }

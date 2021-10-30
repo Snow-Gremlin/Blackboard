@@ -315,7 +315,6 @@ namespace BlackboardTests.ParserTests {
             driver.CheckValue(-0x29, "D");
         }
 
-        /*
         [TestMethod]
         public void TestBasicParses_SomeBooleanMath() {
             Driver driver = new();
@@ -327,16 +326,17 @@ namespace BlackboardTests.ParserTests {
                 "bool D := A & 0x04 != 0;",
                 "bool E := A & 0x08 != 0;",
                 "bool F := B & !C ^ (D | E);");
-            driver.CheckValue("A", 0x3);
-            driver.CheckValue("B", true);
-            driver.CheckValue("C", true);
-            driver.CheckValue("D", false);
-            driver.CheckValue("E", false);
-            driver.CheckValue("F", false);
+            parser.Commit();
 
-            driver.SetValue("A", 0x5);
-            driver.Evalate();
-            checkLog(driver.Log as StringWriter,
+            driver.CheckValue(0x3, "A");
+            driver.CheckValue(true, "B");
+            driver.CheckValue(true, "C");
+            driver.CheckValue(false, "D");
+            driver.CheckValue(false, "E");
+            driver.CheckValue(false, "F");
+
+            driver.SetInt(0x5, "A");
+            driver.CheckEvaluate(
                 "Eval(1): Global.A",
                 "Eval(2): BitwiseAnd(Global.A, 1)",
                 "Eval(2): BitwiseAnd(Global.A, 2)",
@@ -350,12 +350,10 @@ namespace BlackboardTests.ParserTests {
                 "Eval(5): Or(Global.D, Global.E)",
                 "Eval(6): And(Global.B, Not(Global.C))",
                 "Eval(7): Xor(And(Global.B, Not(Global.C)), Or(Global.D, Global.E))");
-            driver.CheckValue("F", false);
+            driver.CheckValue(false, "F");
 
-            driver.Log = new StringWriter();
-            driver.SetValue("A", 0x4);
-            driver.Evalate();
-            checkLog(driver.Log as StringWriter,
+            driver.SetInt(0x4, "A");
+            driver.CheckEvaluate(
                 "Eval(1): Global.A",
                 "Eval(2): BitwiseAnd(Global.A, 1)",
                 "Eval(2): BitwiseAnd(Global.A, 2)",
@@ -366,12 +364,10 @@ namespace BlackboardTests.ParserTests {
                 "Eval(6): And(Global.B, Not(Global.C))",
                 "Eval(7): Xor(And(Global.B, Not(Global.C)), Or(Global.D, Global.E))",
                 "Eval(8): Global.F");
-            driver.CheckValue("F", true);
+            driver.CheckValue(true, "F");
 
-            driver.Log = new StringWriter();
-            driver.SetValue("A", 0x8);
-            driver.Evalate();
-            checkLog(driver.Log as StringWriter,
+            driver.SetInt(0x8, "A");
+            driver.CheckEvaluate(
                 "Eval(1): Global.A",
                 "Eval(2): BitwiseAnd(Global.A, 1)",
                 "Eval(2): BitwiseAnd(Global.A, 2)",
@@ -382,8 +378,7 @@ namespace BlackboardTests.ParserTests {
                 "Eval(4): Global.D",
                 "Eval(4): Global.E",
                 "Eval(5): Or(Global.D, Global.E)");
-            driver.CheckValue("F", true);
+            driver.CheckValue(true, "F");
         }
-        */
     }
 }

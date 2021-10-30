@@ -63,6 +63,6 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Literal=" + this.Value.ToString();
+        public override string ToString() => "Lit=" + this.Value.ToString();
     }
 }

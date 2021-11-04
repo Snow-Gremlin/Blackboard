@@ -3,14 +3,19 @@
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a boolean value such that it can be used in generics.</summary>
-    public struct Bool: IComparable<Bool> {
+    sealed public class Bool: IComparable<Bool> {
 
         /// <summary>The boolean value being stored.</summary>
         public readonly bool Value;
 
+        /// <summary>Creates a new default boolean value.</summary>
+        public Bool() {
+            this.Value = default;
+        }
+
         /// <summary>Creates a new boolean value.</summary>
         /// <param name="value">The boolean value to store.</param>
-        public Bool(bool value = false) {
+        public Bool(bool value) {
             this.Value = value;
         }
 

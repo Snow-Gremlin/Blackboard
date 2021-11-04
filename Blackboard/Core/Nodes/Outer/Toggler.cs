@@ -71,9 +71,14 @@ namespace Blackboard.Core.Nodes.Outer {
             return this.SetNodeValue(value);
         }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Toggler";
+
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Toggler("+INode.NodeString(this.toggle)+", "+
-            INode.NodeString(this.reset)+", "+INode.NodeString(this.resetValue)+")";
+        public override string ToString() => this.TypeName +
+            "("  + INode.NodeString(this.toggle) +
+            ", " + INode.NodeString(this.reset) +
+            ", " + INode.NodeString(this.resetValue) + ")";
     }
 }

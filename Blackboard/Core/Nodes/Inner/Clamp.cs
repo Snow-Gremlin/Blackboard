@@ -23,6 +23,9 @@ namespace Blackboard.Core.Nodes.Inner {
             IValueAdopter<T> source3 = null, T value = default) :
             base(source1, source2, source3, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Clamp";
+
         /// <summary>Selects the value to return during evaluation.</summary>
         /// <param name="value">
         /// The value from the first parent. This is the input value to clamp.
@@ -37,9 +40,5 @@ namespace Blackboard.Core.Nodes.Inner {
             value.CompareTo(min) < 0 ? min :
             value.CompareTo(max) > 0 ? max :
             value;
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Clamp"+base.ToString();
     }
 }

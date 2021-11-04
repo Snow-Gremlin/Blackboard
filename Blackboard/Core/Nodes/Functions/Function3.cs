@@ -51,8 +51,16 @@ namespace Blackboard.Core.Nodes.Functions {
             return this.hndl(node1, node2, node3);
         }
 
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "FuncDef<"+typeof(T1)+", "+typeof(T2)+", "+typeof(T3)+"> => "+typeof(TReturn);
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Function";
+
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        public override string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue) {
+            string name = string.IsNullOrEmpty(scopeName) ? this.TypeName : scopeName;
+            return name + "<" + Type.FromType<TReturn>() + ">(" + Type.FromType<T1>() + ", " + Type.FromType<T2>() + ", " + Type.FromType<T3>() + ")";
+        }
     }
 }

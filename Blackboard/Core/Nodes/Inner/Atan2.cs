@@ -21,14 +21,13 @@ namespace Blackboard.Core.Nodes.Inner {
         public Atan2(IValueAdopter<T> source1 = null, IValueAdopter<T> source2 = null, T value = default) :
             base(source1, source2, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Atan2";
+
         /// <summary>The atan2 of the parents' value during evaluation.</summary>
         /// <param name="value1">The Y value parent.</param>
         /// <param name="value2">The X value parent.</param>
         /// <returns>The atan2 value.</returns>
         protected override T OnEval(T value1, T value2) => value1.Atan2(value2);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Atan2"+base.ToString();
     }
 }

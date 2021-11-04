@@ -26,14 +26,13 @@ namespace Blackboard.Core.Nodes.Inner {
         public Max(IEnumerable<IValueAdopter<T>> parents = null, T value = default) :
             base(parents, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Max";
+
         /// <summary>Updates this node's value to the maximum value during evaluation.</summary>
         /// <param name="values">The parents' values to get the max of.</param>
         /// <returns>The maximum value from all the parents.</returns>
         protected override T OnEval(IEnumerable<T> values) =>
             values.Aggregate((T left, T right) => left.CompareTo(right) > 0 ? left : right);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Max"+base.ToString();
     }
 }

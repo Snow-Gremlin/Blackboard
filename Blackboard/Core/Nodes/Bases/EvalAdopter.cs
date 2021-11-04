@@ -29,6 +29,15 @@ namespace Blackboard.Core.Nodes.Bases {
             this.Depth = 0;
         }
 
+        /// <summary>This is the type name of the node without any type parameters.</summary>
+        public abstract string TypeName { get; }
+
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        public abstract string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue);
+
         /// <summary>The depth in the graph from the furthest input of this node.</summary>
         public int Depth { get; private set; }
 
@@ -99,5 +108,9 @@ namespace Blackboard.Core.Nodes.Bases {
             }
             UpdateDepths(needsDepthUpdate);
         }
+
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
+        public override string ToString() => this.PrettyString("", 0);
     }
 }

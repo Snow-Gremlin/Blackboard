@@ -19,13 +19,12 @@ namespace Blackboard.Core.Nodes.Inner {
         public Neg(IValueAdopter<T> source = null, T value = default) :
             base(source, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Neg";
+
         /// <summary>Gets the negated value of the parent during evaluation.</summary>
         /// <param name="value">The parent value to negate.</param>
         /// <returns>The negated parent value.</returns>
         protected override T OnEval(T value) => value.Neg();
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Neg"+base.ToString();
     }
 }

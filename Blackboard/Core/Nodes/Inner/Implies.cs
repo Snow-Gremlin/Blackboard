@@ -20,14 +20,13 @@ namespace Blackboard.Core.Nodes.Inner {
         public Implies(IValueAdopter<Bool> source1 = null, IValueAdopter<Bool> source2 = null, Bool value = default) :
             base(source1, source2, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Implies";
+
         /// <summary>Determines the boolean implies value of the two parents.</summary>
         /// <param name="value1">The first parent being implied</param>
         /// <param name="value2">The second parent implied.</param>
         /// <returns>The boolean implies value of the two given parents.</returns>
         protected override Bool OnEval(Bool value1, Bool value2) => new(!value1.Value || value2.Value);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Implies"+base.ToString();
     }
 }

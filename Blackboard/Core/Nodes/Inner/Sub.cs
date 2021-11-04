@@ -20,14 +20,13 @@ namespace Blackboard.Core.Nodes.Inner {
         public Sub(IValueAdopter<T> source1 = null, IValueAdopter<T> source2 = null, T value = default) :
             base(source1, source2, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Sub";
+
         /// <summary>Gets the difference of the parents during evaluation.</summary>
         /// <param name="value1">The first value to be subtracted from.</param>
         /// <param name="value2">The second value to subtract from the first.</param>
         /// <returns>The difference of the two values.</returns>
         protected override T OnEval(T value1, T value2) => value1.Sub(value2);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Sub"+base.ToString();
     }
 }

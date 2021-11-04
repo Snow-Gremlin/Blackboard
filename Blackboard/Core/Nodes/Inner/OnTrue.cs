@@ -39,8 +39,11 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <returns>True to trigger if the source value is true, false otherwise.</returns>
         protected override bool UpdateTrigger() => this.source.Value.Value;
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "OnTrue";
+
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "OnTrue("+INode.NodeString(this.source)+")";
+        public override string ToString() => this.TypeName + "(" + INode.NodeString(this.source) + ")";
     }
 }

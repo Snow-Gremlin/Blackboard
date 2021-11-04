@@ -4,15 +4,20 @@ using S = System;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for an IEEE 754 double value such that it can be used in generics.</summary>
-    public struct Double: IArithmetic<Double>, IComparable<Double>, IFloatingPoint<Double>,
+    sealed public class Double: IArithmetic<Double>, IComparable<Double>, IFloatingPoint<Double>,
         IImplicit<Int, Double> {
 
         /// <summary>The double value being stored.</summary>
         public readonly double Value;
 
+        /// <summary>Creates a new default double data value.</summary>
+        public Double() {
+            this.Value = default;
+        }
+
         /// <summary>Creates a new double data value.</summary>
         /// <param name="value">The double value to store.</param>
-        public Double(double value = 0.0) {
+        public Double(double value) {
             this.Value = value;
         }
 
@@ -107,9 +112,9 @@ namespace Blackboard.Core.Data.Caps {
         public int CompareTo(Double other) => this.Value.CompareTo(other.Value);
         public static bool operator ==(Double left, Double right) => left.CompareTo(right) == 0;
         public static bool operator !=(Double left, Double right) => left.CompareTo(right) != 0;
-        public static bool operator <(Double left, Double right) => left.CompareTo(right) < 0;
+        public static bool operator < (Double left, Double right) => left.CompareTo(right) <  0;
         public static bool operator <=(Double left, Double right) => left.CompareTo(right) <= 0;
-        public static bool operator >(Double left, Double right) => left.CompareTo(right) > 0;
+        public static bool operator > (Double left, Double right) => left.CompareTo(right) >  0;
         public static bool operator >=(Double left, Double right) => left.CompareTo(right) >= 0;
 
         /// <summary>Checks if the given object is equal to this data type.</summary>

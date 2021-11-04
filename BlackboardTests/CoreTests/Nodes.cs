@@ -19,15 +19,15 @@ namespace BlackboardTests.CoreTests {
             Or  or123  = new(and12, input3);
             Not not123 = new(or123);
 
-            and12 .CheckString("And(Input<bool>, Input<bool>)");
-            not123.CheckString("Not(Or(And(Input<bool>, Input<bool>), Input<bool>))");
+            and12 .CheckString("And(Input<bool>(False), Input<bool>(False))");
+            not123.CheckString("Not(Or(And(Input<bool>(False), Input<bool>(False)), Input<bool>(False)))");
 
             input1.CheckParents("");
             input2.CheckParents("");
             input3.CheckParents("");
-            and12 .CheckParents("Input<bool>, Input<bool>");
-            or123 .CheckParents("And(Input<bool>, Input<bool>), Input<bool>");
-            not123.CheckParents("Or(And(Input<bool>, Input<bool>), Input<bool>)");
+            and12 .CheckParents("Input<bool>(False), Input<bool>(False)");
+            or123 .CheckParents("And(Input<bool>(False), Input<bool>(False)), Input<bool>(False)");
+            not123.CheckParents("Or(And(Input<bool>(False), Input<bool>(False)), Input<bool>(False))");
 
             input1.CheckDepth(0);
             input2.CheckDepth(0);
@@ -61,11 +61,11 @@ namespace BlackboardTests.CoreTests {
             drv.SetBool(true, "Three");
             drv.CheckEvaluate(
                 "Start(Pending: 2)",
-                "  Eval(0): Input<bool>",
-                "  Eval(0): Input<bool>",
-                "  Eval(1): And(Input<bool>, Input<bool>)",
-                "  Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
-                "  Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))",
+                "  Eval(0): Input<bool>(True)",
+                "  Eval(0): Input<bool>(True)",
+                "  Eval(1): And(Input<bool>(True), Input<bool>(False))",
+                "  Eval(2): Or(And(Input<bool>(True), Input<bool>(False)), Input<bool>(True))",
+                "  Eval(3): Not(Or(And(Input<bool>(True), Input<bool>(False)), Input<bool>(True)))",
                 "End(Provoked: 0)");
             input1.CheckValue(true);
             input2.CheckValue(false);
@@ -77,9 +77,9 @@ namespace BlackboardTests.CoreTests {
             drv.SetBool(false, "Three");
             drv.CheckEvaluate(
                 "Start(Pending: 1)",
-                "  Eval(0): Input<bool>",
-                "  Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
-                "  Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))",
+                "  Eval(0): Input<bool>(False)",
+                "  Eval(2): Or(And(Input<bool>(True), Input<bool>(False)), Input<bool>(False))",
+                "  Eval(3): Not(Or(And(Input<bool>(True), Input<bool>(False)), Input<bool>(False)))",
                 "End(Provoked: 0)");
             input1.CheckValue(true);
             input2.CheckValue(false);
@@ -91,10 +91,10 @@ namespace BlackboardTests.CoreTests {
             drv.SetBool(true, "Two");
             drv.CheckEvaluate(
                 "Start(Pending: 1)",
-                "  Eval(0): Input<bool>",
-                "  Eval(1): And(Input<bool>, Input<bool>)",
-                "  Eval(2): Or(And(Input<bool>, Input<bool>), Input<bool>)",
-                "  Eval(3): Not(Or(And(Input<bool>, Input<bool>), Input<bool>))",
+                "  Eval(0): Input<bool>(True)",
+                "  Eval(1): And(Input<bool>(True), Input<bool>(True))",
+                "  Eval(2): Or(And(Input<bool>(True), Input<bool>(True)), Input<bool>(False))",
+                "  Eval(3): Not(Or(And(Input<bool>(True), Input<bool>(True)), Input<bool>(False)))",
                 "End(Provoked: 0)");
             input1.CheckValue(true);
             input2.CheckValue(true);

@@ -48,8 +48,11 @@ namespace Blackboard.Core.Nodes.Outer {
             return false;
         }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Output";
+
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Output<trigger>";
+        public override string ToString() => this.TypeName + "<trigger>";
     }
 }

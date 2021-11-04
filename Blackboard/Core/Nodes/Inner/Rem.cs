@@ -20,14 +20,13 @@ namespace Blackboard.Core.Nodes.Inner {
         public Rem(IValueAdopter<T> source1 = null, IValueAdopter<T> source2 = null, T value = default) :
             base(source1, source2, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Rem";
+
         /// <summary>Gets the first value remainder from a second value.</summary>
         /// <param name="value1">The first value to modulo.</param>
         /// <param name="value2">The second value to modulo.</param>
         /// <returns>The remainder, or the default if moduled by zero.</returns>
         protected override T OnEval(T value1, T value2) => value1.Rem(value2);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Rem"+base.ToString();
     }
 }

@@ -21,14 +21,13 @@ namespace Blackboard.Core.Nodes.Inner {
         public Round(IValueAdopter<T> source1 = null, IValueAdopter<Int> source2 = null, T value = default) :
             base(source1, source2, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Round";
+
         /// <summary>Rounds the parent's value during evaluation.</summary>
         /// <param name="value1">The value to round.</param>
         /// <param name="value2">The number of decimals to round to.</param>
         /// <returns>The rounded value.</returns>
         protected override T OnEval(T value1, Int value2) => value1.Round(value2);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Round"+base.ToString();
     }
 }

@@ -61,8 +61,11 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <returns>This always returns true.</returns>
         protected override bool UpdateValue() => true;
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Literal";
+
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Lit=" + this.Value.ToString();
+        public override string ToString() => this.TypeName + "<" + this.Value.TypeName + ">(" + this.Value.ValueString + ")";
     }
 }

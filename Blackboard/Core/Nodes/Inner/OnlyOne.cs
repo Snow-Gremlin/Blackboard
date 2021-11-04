@@ -22,6 +22,9 @@ namespace Blackboard.Core.Nodes.Inner {
         public OnlyOne(IEnumerable<ITriggerAdopter> parents = null) :
             base(parents) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "OnlyOne";
+
         /// <summary>Updates this trigger during evaluation.</summary>
         /// <param name="provoked">The parent triggers to check.</param>
         /// <returns>True if one and only one parent was provoked.</returns>
@@ -35,9 +38,5 @@ namespace Blackboard.Core.Nodes.Inner {
             }
             return foundProvoked;
         }
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "OnlyOne"+base.ToString();
     }
 }

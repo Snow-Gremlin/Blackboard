@@ -68,8 +68,11 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <returns>This always returns true so that any parent change will trigger this node.</returns>
         protected override bool UpdateTrigger() => true;
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "OnChange";
+
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "OnChange("+INode.NodeString(this.sources)+")";
+        public override string ToString() => this.TypeName + "(" + INode.NodeString(this.sources) + ")";
     }
 }

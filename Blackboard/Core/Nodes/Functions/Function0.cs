@@ -30,8 +30,16 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <returns>The new function.</returns>
         public override INode Build(INode[] nodes) => this.hndl();
 
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "FuncDef => "+typeof(TReturn);
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Function";
+
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        public override string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue) {
+            string name = string.IsNullOrEmpty(scopeName) ? this.TypeName : scopeName;
+            return name + "<" + Type.FromType<TReturn>() + ">()";
+        }
     }
 }

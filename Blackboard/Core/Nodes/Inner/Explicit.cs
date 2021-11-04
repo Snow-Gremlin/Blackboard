@@ -20,13 +20,12 @@ namespace Blackboard.Core.Nodes.Inner {
         public Explicit(IValueAdopter<T1> source = null, T2 value = default) :
             base(source, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Explicit";
+
         /// <summary>Gets the value to cast from the parent during evaluation.</summary>
         /// <param name="value">The parent value to cast.</param>
         /// <returns>The cast of the parent value.</returns>
         protected override T2 OnEval(T1 value) => this.Value.CastFrom(value);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Explicit<"+this.Value+">"+base.ToString();
     }
 }

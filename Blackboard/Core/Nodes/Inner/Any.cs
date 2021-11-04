@@ -22,6 +22,9 @@ namespace Blackboard.Core.Nodes.Inner {
         public Any(IEnumerable<ITriggerAdopter> parents = null) :
             base(parents) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Any";
+
         /// <summary>Checks if any of the parents are provoked during evaluation.</summary>
         /// <param name="provoked">The provoked values from the parents.</param>
         /// <returns>True if any of the parents are provoked, false otherwise.</returns>
@@ -31,9 +34,5 @@ namespace Blackboard.Core.Nodes.Inner {
             }
             return false;
         }
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Any"+base.ToString();
     }
 }

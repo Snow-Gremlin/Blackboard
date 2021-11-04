@@ -29,6 +29,9 @@ namespace Blackboard.Core.Nodes.Inner {
             IValueAdopter<T> source3 = null, T value = default) :
             base(source1, source2, source3, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Select";
+
         /// <summary>Selects the value to return during evaluation.</summary>
         /// <param name="value1">
         /// The parent to select with,
@@ -39,9 +42,5 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="value3">The value to return if the first parent is false.</param>
         /// <returns>The selected value to set to this node.</returns>
         protected override T OnEval(Bool value1, T value2, T value3) => value1.Value ? value2 : value3;
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Select"+base.ToString();
     }
 }

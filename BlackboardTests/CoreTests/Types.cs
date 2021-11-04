@@ -22,10 +22,10 @@ namespace BlackboardTests.CoreTests {
             string resultImplicit = toStr(t.Implicit(node));
             string resultExplicit = toStr(t.Explicit(node));
             if (resultMatch != expMatch || resultImplicit != expImplicit || resultExplicit != expExplicit) {
-                System.Console.WriteLine(resultMatch    + " =[" + (resultMatch    == expMatch    ? "X" : " ") + "]= " + expMatch);
-                System.Console.WriteLine(resultImplicit + " =[" + (resultImplicit == expImplicit ? "X" : " ") + "]= " + expImplicit);
-                System.Console.WriteLine(resultExplicit + " =[" + (resultExplicit == expExplicit ? "X" : " ") + "]= " + expExplicit);
-                Assert.Fail();
+                Assert.Fail(
+                    resultMatch    + " =[" + (resultMatch    == expMatch    ? "X" : " ") + "]= " + expMatch + "\n" +
+                    resultImplicit + " =[" + (resultImplicit == expImplicit ? "X" : " ") + "]= " + expImplicit + "\n" +
+                    resultExplicit + " =[" + (resultExplicit == expExplicit ? "X" : " ") + "]= " + expExplicit);
             }
         }
 
@@ -64,11 +64,11 @@ namespace BlackboardTests.CoreTests {
         public void TestCastBoolInput() {
             InputValue<Bool> node = new();
             checkInherit (Type.Node,          node, 1);
-            checkImplicit(Type.Trigger,       node, 0, "BoolAsTrigger(Input<bool>)");
+            checkImplicit(Type.Trigger,       node, 0, "BoolAsTrigger(Input<bool>(False))");
             checkInherit (Type.Bool,          node, 0);
             checkNoCast  (Type.Int,           node);
             checkNoCast  (Type.Double,        node);
-            checkImplicit(Type.String,        node, 0, "Implicit<string>(Input<bool>)");
+            checkImplicit(Type.String,        node, 0, "Implicit<string>(Input<bool>(False))");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);

@@ -52,10 +52,23 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <returns>The type which would be returned.</returns>
         public System.Type ReturnType => typeof(TReturn);
 
+        /// <summary>This is the type name of the node.</summary>
+        public abstract string TypeName { get; }
+
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        public abstract string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue);
+
         /// <summary>Builds and returns the function object.</summary>
         /// <remarks>Before this is called, Match must have been possible.</remarks>
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new function.</returns>
         public abstract INode Build(INode[] nodes);
+
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
+        public override string ToString() => this.PrettyString("", 0);
     }
 }

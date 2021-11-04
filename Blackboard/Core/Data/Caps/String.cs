@@ -3,16 +3,21 @@
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a string value such that it can be used in generics.</summary>
-    public struct String: IAdditive<String>, IComparable<String>,
+    sealed public class String: IAdditive<String>, IComparable<String>,
         IImplicit<Bool, String>, IImplicit<Int, String>, IImplicit<Double, String> {
 
         /// <summary>The string value being stored.</summary>
         public readonly string Value;
 
+        /// <summary>Creates a new default string data value.</summary>
+        public String() {
+            this.Value = "";
+        }
+
         /// <summary>Creates a new string data value.</summary>
         /// <param name="value">The string value to store.</param>
-        public String(string value = "") {
-            this.Value = value;
+        public String(string value) {
+            this.Value = value ?? "";
         }
 
         /// <summary>This will concatinate this string to the other string.</summary>
@@ -41,9 +46,9 @@ namespace Blackboard.Core.Data.Caps {
         public int CompareTo(String other) => string.Compare(this.Value, other.Value);
         public static bool operator ==(String left, String right) => left.CompareTo(right) == 0;
         public static bool operator !=(String left, String right) => left.CompareTo(right) != 0;
-        public static bool operator <(String left, String right) => left.CompareTo(right) < 0;
+        public static bool operator < (String left, String right) => left.CompareTo(right) <  0;
         public static bool operator <=(String left, String right) => left.CompareTo(right) <= 0;
-        public static bool operator >(String left, String right) => left.CompareTo(right) > 0;
+        public static bool operator > (String left, String right) => left.CompareTo(right) >  0;
         public static bool operator >=(String left, String right) => left.CompareTo(right) >= 0;
 
         /// <summary>Checks if the given object is equal to this data type.</summary>
@@ -59,7 +64,7 @@ namespace Blackboard.Core.Data.Caps {
         public string TypeName => Type.String.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value.ToString();
+        public string ValueString => this.Value;
 
         /// <summary>Gets the name of this data type.</summary>
         /// <returns>The name of the bool type.</returns>

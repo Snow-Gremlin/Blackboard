@@ -26,14 +26,13 @@ namespace Blackboard.Core.Nodes.Inner {
         public Xor(IEnumerable<IValueAdopter<Bool>> parents = null, Bool value = default) :
             base(parents, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Xor";
+
         /// <summary>Gets the Exclusive OR of all the parent's booleans.</summary>
         /// <param name="values">The parents to Exclusive OR together.</param>
         /// <returns>The Exclusive OR of all the given values.</returns>
         protected override Bool OnEval(IEnumerable<Bool> values) =>
             new(values.Select((b) => b.Value).Aggregate((left, right) => left ^ right));
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Xor"+base.ToString();
     }
 }

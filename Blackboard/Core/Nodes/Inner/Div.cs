@@ -20,14 +20,13 @@ namespace Blackboard.Core.Nodes.Inner {
         public Div(IValueAdopter<T> source1 = null, IValueAdopter<T> source2 = null, T value = default) :
             base(source1, source2, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Div";
+
         /// <summary>Gets the first value divided by a second value.</summary>
         /// <param name="value1">The first value to divide.</param>
         /// <param name="value2">The second value to divide.</param>
         /// <returns>The two values divided, or the default if divide by zero.</returns>
         protected override T OnEval(T value1, T value2) => value1.Div(value2);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Div"+base.ToString();
     }
 }

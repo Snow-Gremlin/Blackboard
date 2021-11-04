@@ -20,14 +20,13 @@ namespace Blackboard.Core.Nodes.Inner {
         public LeftShift(IValueAdopter<T> source1 = null, IValueAdopter<T> source2 = null, T value = default) :
             base(source1, source2, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "LeftShift";
+
         /// <summary>Left shifts the value during evaluation.</summary>
         /// <param name="value1">The value to left shift.</param>
         /// <param name="value2">The value to left shift the other value by.</param>
         /// <returns>The left shifted value for this node.</returns>
         protected override T OnEval(T value1, T value2) => value1.LeftShift(value2);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "LeftShift"+base.ToString();
     }
 }

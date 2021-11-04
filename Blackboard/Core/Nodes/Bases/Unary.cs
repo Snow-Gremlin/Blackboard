@@ -53,8 +53,16 @@ namespace Blackboard.Core.Nodes.Bases {
             return this.SetNodeValue(value);
         }
 
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "("+INode.NodeString(this.source)+")";
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        public override string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue) {
+            string name = string.IsNullOrEmpty(scopeName) ? this.TypeName : scopeName;
+            string tail = nodeDepth > 0 ?
+                INode.NodePrettyString(this.source, scopeName, nodeDepth-1) :
+                this.Value.ValueString;
+            return name + "<" + this.Value.TypeName + ">(" + tail + ")";
+        }
     }
 }

@@ -67,9 +67,12 @@ namespace Blackboard.Core.Nodes.Inner {
             return this.SetNodeValue(value);
         }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Latch";
+
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Latch<"+this.Value+">("+
-            INode.NodeString(this.source1)+", "+INode.NodeString(this.source2)+")";
+        public override string ToString() => this.TypeName + "<" + this.Value.TypeName + ">(" +
+            INode.NodeString(this.source1) + ", " + INode.NodeString(this.source2) + ")";
     }
 }

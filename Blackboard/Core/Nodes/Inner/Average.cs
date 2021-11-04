@@ -24,6 +24,9 @@ namespace Blackboard.Core.Nodes.Inner {
         public Average(IEnumerable<IValueAdopter<Double>> parents = null, Double value = default) :
             base(parents, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Average";
+
         /// <summary>Gets the average of all the parent's values.</summary>
         /// <param name="values">The parents to average together.</param>
         /// <returns>The average of all the given values.</returns>
@@ -36,9 +39,5 @@ namespace Blackboard.Core.Nodes.Inner {
             }
             return new(count <= 0 ? 0.0 : sum/count);
         }
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Average"+base.ToString();
     }
 }

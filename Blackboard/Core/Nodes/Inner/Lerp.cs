@@ -23,6 +23,9 @@ namespace Blackboard.Core.Nodes.Inner {
             IValueAdopter<T> source3 = null, T value = default) :
             base(source1, source2, source3, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Lerp";
+
         /// <summary>Selects the value to return during evaluation.</summary>
         /// <param name="value">
         /// The value from the first parent. This is the iterator value.
@@ -34,9 +37,5 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="max">The maximum value to return.</param>
         /// <returns>The lerp value to set to this node.</returns>
         protected override T OnEval(T value, T min, T max) => value.Lerp(min, max);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Lerp"+base.ToString();
     }
 }

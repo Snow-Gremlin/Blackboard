@@ -108,6 +108,9 @@ namespace Blackboard.Core.Nodes.Outer {
             return cur;
         }
 
+        /// <summary>This is the type name of the node.</summary>
+        public string TypeName => "Namespace";
+
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
         public override string ToString() => (this.Parent is not null ? this.Parent.ToString()+"." : "")+this.Name;
@@ -127,8 +130,8 @@ namespace Blackboard.Core.Nodes.Outer {
                     };
                     return (value is null) ? null : name + ": " + value;
                 }).NotNull().Indent(indent).Join(",\n" + indent);
-            return string.IsNullOrEmpty(fieldStr) ? "Namespace[]" :
-                "Namespace[\n" + indent + fieldStr + "\n]";
+            return string.IsNullOrEmpty(fieldStr) ? this.TypeName + "[]" :
+                this.TypeName + "[\n" + indent + fieldStr + "\n]";
         }
     }
 }

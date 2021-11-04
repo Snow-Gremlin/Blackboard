@@ -206,6 +206,7 @@ namespace BlackboardTests.ParserTests {
                 parser.Read("in int A = 3.14;");
             }, "Error occurred while parsing input code.",
                "May not assign the value to that type of input.",
+               "[Location: Unnamed:1, 15, 15]",
                "[Input Type: int]",
                "[Value Type: double]");
         }

@@ -120,13 +120,12 @@ namespace Blackboard.Core.Nodes.Inner {
             this.UpdateValue();
         }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => this.funcName;
+
         /// <summary>The result of the double mathmatical function the parent's value during evaluation.</summary>
         /// <param name="value">The value to ceiling.</param>
         /// <returns>The ceiling value.</returns>
         protected override T OnEval(T value) => this.func is null ? value : value.DoubleMath(this.func);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => this.funcName + base.ToString();
     }
 }

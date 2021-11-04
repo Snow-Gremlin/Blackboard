@@ -93,8 +93,19 @@ namespace Blackboard.Core.Nodes.Inner {
         sealed public override IEnumerable<IEvaluatable> Eval() =>
             this.updateTrigger() ? this.Children.OfType<IEvaluatable>() : Enumerable.Empty<IEvaluatable>();
 
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "BoolAsTrigger("+INode.NodeString(this.source)+")";
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "BoolAsTrigger";
+
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        public override string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue) {
+            string name = string.IsNullOrEmpty(scopeName) ? this.TypeName : scopeName;
+            string tail = nodeDepth > 0 ?
+                INode.NodePrettyString(this.source, scopeName, nodeDepth-1) :
+                this.Provoked.ToString();
+            return name + "(" + tail + ")";
+        }
     }
 }

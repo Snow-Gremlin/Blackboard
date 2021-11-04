@@ -92,14 +92,29 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <returns>The new node from the function or null.</returns>
         public INode Build(params INode[] nodes) => this.Find(nodes.Select(Type.TypeOf).ToArray())?.Build(nodes);
 
+        /// <summary>This is the type name of the node.</summary>
+        public string TypeName => "FuncGroup";
+
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        public string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue) {
+            string tail = "";
+            if (this.defs.Count > 0) {
+                if (nodeDepth > 0) {
+                    const string indent = "  ";
+                    List<string> parts = new();
+                    foreach (IFuncDef def in this.defs)
+                        parts.Add(INode.NodeString(def).Trim().Replace("\n", "\n"+indent));
+                    tail = "[\n" + indent + parts.Join(",\n" + indent) + "\n]";
+                } else tail = "...";
+            }
+            return this.TypeName + "[" + tail + "]";
+        }
+
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() {
-            const string indent = "  ";
-            if (this.defs.Count <= 0) return "FuncGroup[]";
-            List<string> parts = new();
-            foreach (IFuncDef def in this.defs) parts.Add(INode.NodeString(def).Trim().Replace("\n", "\n"+indent));
-            return "FuncGroup[\n" + indent + parts.Join(",\n" + indent) + "\n]";
-        }
+        public override string ToString() => this.PrettyString("", 0);
     }
 }

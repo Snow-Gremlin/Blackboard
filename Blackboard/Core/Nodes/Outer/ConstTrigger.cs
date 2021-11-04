@@ -32,8 +32,16 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <returns>True to trigger if the source value is true, false otherwise.</returns>
         protected override bool UpdateTrigger() => this.Provoked;
 
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "ConstTrigger("+this.Provoked+")";
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "ConstTrigger";
+
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        public override string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue) {
+            string name = string.IsNullOrEmpty(scopeName) ? this.TypeName : scopeName;
+            return name + "(" + this.Provoked + ")";
+        }
     }
 }

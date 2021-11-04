@@ -19,13 +19,12 @@ namespace Blackboard.Core.Nodes.Inner {
         public BitwiseNot(IValueAdopter<T> source = null, T value = default) :
             base(source, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "BitwiseNot";
+
         /// <summary>Gets the bitwise NOT of the given value.</summary>
         /// <param name="value">The value to get the bitwise NOT of.</param>
         /// <returns>The bitwise NOT of the given value.</returns>
         protected override T OnEval(T value) => value.BitwiseNot();
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "BitwiseNot"+base.ToString();
     }
 }

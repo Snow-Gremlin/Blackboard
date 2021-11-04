@@ -26,14 +26,13 @@ namespace Blackboard.Core.Nodes.Inner {
         public Mul(IEnumerable<IValueAdopter<T>> parents = null, T value = default) :
             base(parents, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Mul";
+
         /// <summary>Gets the product of the parent values during evaluation.</summary>
         /// <param name="values">All the parent values to multiply.</param>
         /// <returns>The product of the parent values.</returns>
         protected override T OnEval(IEnumerable<T> values) =>
             values.Aggregate((T left, T right) => left.Mul(right));
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Mul"+base.ToString();
     }
 }

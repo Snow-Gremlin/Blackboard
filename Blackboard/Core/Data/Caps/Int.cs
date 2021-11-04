@@ -4,15 +4,20 @@ using S = System;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a 32 bit signed integer value such that it can be used in generics.</summary>
-    public struct Int: IArithmetic<Int>, IComparable<Int>, IBitwise<Int>,
+    sealed public class Int: IArithmetic<Int>, IComparable<Int>, IBitwise<Int>,
         IExplicit<Double, Int> {
 
         /// <summary>The integer value being stored.</summary>
         public readonly int Value;
 
+        /// <summary>Creates a new default integer data value.</summary>
+        public Int() {
+            this.Value = default;
+        }
+
         /// <summary>Creates a new integer data value.</summary>
         /// <param name="value">The integer value to store.</param>
-        public Int(int value = 0) {
+        public Int(int value) {
             this.Value = value;
         }
 
@@ -105,9 +110,9 @@ namespace Blackboard.Core.Data.Caps {
         public int CompareTo(Int other) => this.Value.CompareTo(other.Value);
         public static bool operator ==(Int left, Int right) => left.CompareTo(right) == 0;
         public static bool operator !=(Int left, Int right) => left.CompareTo(right) != 0;
-        public static bool operator <(Int left, Int right) => left.CompareTo(right) < 0;
+        public static bool operator < (Int left, Int right) => left.CompareTo(right) <  0;
         public static bool operator <=(Int left, Int right) => left.CompareTo(right) <= 0;
-        public static bool operator >(Int left, Int right) => left.CompareTo(right) > 0;
+        public static bool operator > (Int left, Int right) => left.CompareTo(right) >  0;
         public static bool operator >=(Int left, Int right) => left.CompareTo(right) >= 0;
 
         /// <summary>Checks if the given object is equal to this data type.</summary>

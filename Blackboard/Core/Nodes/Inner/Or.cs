@@ -25,6 +25,9 @@ namespace Blackboard.Core.Nodes.Inner {
         public Or(IEnumerable<IValueAdopter<Bool>> parents = null, Bool value = default) :
             base(parents, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Or";
+
         /// <summary>Gets the OR of all the parent's booleans.</summary>
         /// <param name="values">The parents to OR together.</param>
         /// <returns>The OR of all the given values.</returns>
@@ -34,9 +37,5 @@ namespace Blackboard.Core.Nodes.Inner {
             }
             return new(false);
         }
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "Or"+base.ToString();
     }
 }

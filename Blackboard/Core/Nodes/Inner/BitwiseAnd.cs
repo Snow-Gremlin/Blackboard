@@ -27,14 +27,13 @@ namespace Blackboard.Core.Nodes.Inner {
         public BitwiseAnd(IEnumerable<IValueAdopter<T>> parents = null, T value = default) :
             base(parents, value) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "BitwiseAnd";
+
         /// <summary>Gets the bitwise AND of all the parent's booleans.</summary>
         /// <param name="values">The parents to bitwise AND together.</param>
         /// <returns>The bitwise AND of all the given values.</returns>
         protected override T OnEval(IEnumerable<T> values) =>
             values.Aggregate((left, right) => left.BitwiseAnd(right));
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => "BitwiseAnd"+base.ToString();
     }
 }

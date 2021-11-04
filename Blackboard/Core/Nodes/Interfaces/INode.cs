@@ -18,6 +18,22 @@ namespace Blackboard.Core.Nodes.Interfaces {
         static public string NodeString(IEnumerable<INode> nodes) =>
             nodes.Select((INode node) => NodeString(node)).Join(", ");
 
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="node">The node to get a string for.</param>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        static public string NodePrettyString(INode node, string scopeName = "", int nodeDepth = int.MaxValue) =>
+            node is null ? "null" : node.PrettyString(scopeName, nodeDepth);
+
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="nodes">The set of nodes which may contain nulls.</param>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        static public string NodePrettyString(IEnumerable<INode> nodes, string scopeName = "", int nodeDepth = int.MaxValue) =>
+            nodes.Select((INode node) => NodePrettyString(node, scopeName, nodeDepth)).Join(", ");
+
         /// <summary>This will check if from the given root node any of the given target nodes can be reachable.</summary>
         /// <param name="root">The root to start checking from.</param>
         /// <param name="targets">The target nodes to try to reach.</param>
@@ -44,6 +60,15 @@ namespace Blackboard.Core.Nodes.Interfaces {
             }
             return false;
         }
+
+        /// <summary>This is the type name of the node without any type parameters.</summary>
+        string TypeName { get; }
+
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue);
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         IEnumerable<INode> Parents { get; }

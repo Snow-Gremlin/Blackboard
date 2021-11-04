@@ -81,10 +81,10 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public override IEnumerable<INode> Parents {
             get {
-                if (this.increment is not null) yield return this.increment;
-                if (this.decrement is not null) yield return this.decrement;
-                if (this.reset is not null) yield return this.reset;
-                if (this.delta is not null) yield return this.delta;
+                if (this.increment  is not null) yield return this.increment;
+                if (this.decrement  is not null) yield return this.decrement;
+                if (this.reset      is not null) yield return this.reset;
+                if (this.delta      is not null) yield return this.delta;
                 if (this.resetValue is not null) yield return this.resetValue;
             }
         }
@@ -100,13 +100,19 @@ namespace Blackboard.Core.Nodes.Outer {
             return this.SetNodeValue(value);
         }
 
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() =>
-            "Counter<"+this.Value+">("+INode.NodeString(this.increment)+
-            ", "+INode.NodeString(this.decrement)+
-            ", "+INode.NodeString(this.reset)+
-            ", "+INode.NodeString(this.delta)+
-            ", "+INode.NodeString(this.resetValue)+")";
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Counter";
+
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        public override string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue) {
+            string name = string.IsNullOrEmpty(scopeName) ? this.TypeName : scopeName;
+            string tail = nodeDepth > 0 ?
+                INode.NodePrettyString(new INode[]{ this.increment, this.decrement, this.reset, this.delta, this.resetValue }, scopeName, nodeDepth-1) :
+                this.Value.ValueString;
+            return name + "<" + this.Value.TypeName + ">(" + tail + ")";
+        }
     }
 }

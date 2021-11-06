@@ -8,13 +8,11 @@ namespace Blackboard.Core {
         // TODO: Check for unused exceptions.
 
         /// <summary>An exception for a function which was defined with an unknown type.</summary>
-        /// <param name="typeName">The type which is unknown.</param>
-        /// <param name="typeIndex">The index of the type.</param>
+        /// <param name="typeIndex">The index in the argument types which is unknown.</param>
         /// <returns>The new exception.</returns>
-        static public Exception UnknownFunctionParamType<T>(string typeName) =>
+        static public Exception UnknownFunctionParamType(int typeIndex) =>
             new Exception("The type used to define a function is not known by the Blackboard type system.").
-                With("Type", typeof(T)).
-                With("Type name", typeName);
+                With("Type index", typeIndex);
 
         /// <summary>An exception for a node or group is being renames and it is invalid.</summary>
         /// <param name="name">The name which is invalid.</param>

@@ -13,39 +13,17 @@ namespace Blackboard.Core.Nodes.Functions {
         where Tn : class, INode
         where TReturn : class, INode {
 
-        /// <summary>Indicates that at least one argument must not be a cast.</summary>
-        readonly private bool needOneNoCast;
-
-        /// <summary>Indicates if there is only one argument for a new node, return the argument.</summary>
-        private readonly bool passOne;
-
-        /// <summary>The minimum required nodes for the new node's arguments.</summary>
-        private readonly int min;
-
         /// <summary>The factory for creating the node.</summary>
         private readonly S.Func<IEnumerable<Tn>, TReturn> hndl;
 
         /// <summary>Creates a new dual node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
-        /// <param name="needOneNoCast">Indicates that at least one argument must not be a cast.</param>
+        /// <param name="needsOneNoCast">Indicates that at least one argument must not be a cast.</param>
         /// <param name="passOne">Indicates if there is only one argument for a new node, return the argument.</param>
         /// <param name="min">The minimum number of required nodes.</param>
-        public FunctionN(S.Func<IEnumerable<Tn>, TReturn> hndl, bool needOneNoCast = false, bool passOne = true, int min = 1) {
+        public FunctionN(S.Func<IEnumerable<Tn>, TReturn> hndl, bool needsOneNoCast = false, bool passOne = true, int min = 1) :
+            base(min, int.MaxValue, needsOneNoCast, passOne, Type.FromType<Tn>()) {
             this.hndl = hndl;
-            this.needOneNoCast = needOneNoCast;
-            this.passOne = passOne;
-            this.min = min;
-
-            if (Type.FromType<Tn>() is null) throw Exceptions.UnknownFunctionParamType<Tn>("Tn");
-        }
-
-        /// <summary>Determines how closely matching the given nodes are for this match.</summary>
-        /// <param name="types">The input types to match against the function signatures with.</param>
-        /// <returns>The matching results for this function.</returns>
-        public override FuncMatch Match(Type[] types) {
-            if (types.Length < this.min) return FuncMatch.NoMatch;
-            Type t = Type.FromType<Tn>();
-            return FuncMatch.Create(this.needOneNoCast, types.Select(t.Match));
         }
 
         /// <summary>This will implicity cast the given parameter,</summary>
@@ -67,20 +45,15 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <returns>The new function.</returns>
         public override INode Build(INode[] nodes) {
             Type t = Type.FromType<Tn>();
-            return this.passOne && nodes.Length == 1 ? t.Implicit(nodes[0]) :
+            return this.PassthroughOne && nodes.Length == 1 ? t.Implicit(nodes[0]) :
                 this.hndl(nodes.Select((node) => castParam(t, node)).ToArray());
         }
 
-        /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Function";
-
         /// <summary>Creates a pretty string for this node.</summary>
-        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
         /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
         /// <returns>The pretty string for debugging and testing this node.</returns>
-        public override string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue) {
-            string name = string.IsNullOrEmpty(scopeName) ? this.TypeName : scopeName;
-            return name + "<" + Type.FromType<TReturn>() + ">(" + Type.FromType<Tn>() + "..." + ")";
-        }
+        public override string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) =>
+            this.TypeName + "<" + Type.FromType<TReturn>() + ">(" + Type.FromType<Tn>() + "..." + ")";
     }
 }

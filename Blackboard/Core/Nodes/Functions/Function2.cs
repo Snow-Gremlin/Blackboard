@@ -13,29 +13,16 @@ namespace Blackboard.Core.Nodes.Functions {
         where T2 : class, INode
         where TReturn : class, INode {
 
-        /// <summary>Indicates that at least one argument must not be a cast.</summary>
-        readonly private bool needOneNoCast;
-
         /// <summary>The factory for creating the node.</summary>
         readonly private S.Func<T1, T2, TReturn> hndl;
 
         /// <summary>Creates a new dual node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
-        /// <param name="needOneNoCast">Indicates that at least one argument must not be a cast.</param>
-        public Function(S.Func<T1, T2, TReturn> hndl, bool needOneNoCast = false) {
+        /// <param name="needsOneNoCast">Indicates that at least one argument must not be a cast.</param>
+        public Function(S.Func<T1, T2, TReturn> hndl, bool needsOneNoCast = false) :
+            base(needsOneNoCast, false, Type.FromType<T1>(), Type.FromType<T2>()) {
             this.hndl = hndl;
-            this.needOneNoCast = needOneNoCast;
-
-            if (Type.FromType<T1>() is null) throw Exceptions.UnknownFunctionParamType<T1>("T1");
-            if (Type.FromType<T2>() is null) throw Exceptions.UnknownFunctionParamType<T2>("T2");
         }
-
-        /// <summary>Determines how closely matching the given nodes are for this match.</summary>
-        /// <param name="types">The input types to match against the function signatures with.</param>
-        /// <returns>The matching results for this function.</returns>
-        public override FuncMatch Match(Type[] types) =>
-            types.Length != 2 ? FuncMatch.NoMatch :
-            FuncMatch.Create(this.needOneNoCast, Type.Match<T1>(types[0]), Type.Match<T2>(types[1]));
 
         /// <summary>Builds and returns the function object.</summary>
         /// <remarks>Before this is called, Match must have been possible.</remarks>
@@ -47,15 +34,11 @@ namespace Blackboard.Core.Nodes.Functions {
             return this.hndl(node1, node2);
         }
 
-        /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Function";
         /// <summary>Creates a pretty string for this node.</summary>
-        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
         /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
         /// <returns>The pretty string for debugging and testing this node.</returns>
-        public override string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue) {
-            string name = string.IsNullOrEmpty(scopeName) ? this.TypeName : scopeName;
-            return name + "<" + Type.FromType<TReturn>() + ">(" + Type.FromType<T1>() + ", " + Type.FromType<T2>() + ")";
-        }
+        public override string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) =>
+            this.TypeName + "<" + Type.FromType<TReturn>() + ">(" + Type.FromType<T1>() + ", " + Type.FromType<T2>() + ")";
     }
 }

@@ -115,23 +115,23 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <returns>The debug string for this node.</returns>
         public override string ToString() => (this.Parent is not null ? this.Parent.ToString()+"." : "")+this.Name;
 
-        /// <summary>Gets a string showing the whole namespace.</summary>
+        /// <summary>Creates a pretty string for this node.</summary>
         /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
-        /// <param name="showChildren">Indicates if child namespaces should be shown or not.</param>
-        /// <returns>The full debug string for this node.</returns>
-        public string NamespaceString(bool showFuncs = true, bool showChildren = true) {
-            const string indent = "  ";
-            string fieldStr =
-                this.fields.SelectFromPairs((string name, INode node) => {
-                    string value = node switch {
-                        Namespace child        => showChildren ? child.NamespaceString(showFuncs) : null,
-                        IFuncGroup or IFuncDef => showFuncs    ? INode.NodeString(node)           : null,
-                        _                      => INode.NodeString(node),
-                    };
-                    return (value is null) ? null : name + ": " + value;
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        public string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) {
+            string tail = "";
+            if (nodeDepth <= 0) tail = "...";
+            else {
+                const string indent = "  ";
+                string fieldStr = this.fields.SelectFromPairs((string name, INode node) => {
+                    return node is IFuncGroup or IFuncDef && !showFuncs ? null :
+                        name + ": " + INode.NodePrettyString(showFuncs, nodeDepth-1, node);
                 }).NotNull().Indent(indent).Join(",\n" + indent);
-            return string.IsNullOrEmpty(fieldStr) ? this.TypeName + "[]" :
-                this.TypeName + "[\n" + indent + fieldStr + "\n]";
+                
+                if (!string.IsNullOrEmpty(fieldStr)) tail = "\n" + indent + fieldStr + "\n";
+            }
+            return this.TypeName + "[" + tail + "]";
         }
     }
 }

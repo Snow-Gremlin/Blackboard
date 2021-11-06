@@ -106,6 +106,12 @@ namespace Blackboard.Core {
             }
         }
 
+        /// <summary>This determines the implicit and inheritence match.</summary>
+        /// <param name="input">This is the type to cast from.</param>
+        /// <param name="output">This is the type to cast too.</param>
+        /// <returns>The result of the match.</returns>
+        static public TypeMatch Match(Type input, Type output) => output.Match(input);
+
         /// <summary>The display name of the type.</summary>
         public readonly string Name;
 
@@ -148,19 +154,19 @@ namespace Blackboard.Core {
         }
 
         /// <summary>This determines the implicit and inheritence match.</summary>
-        /// <param name="node">The node to try castig from.</param>
+        /// <param name="node">The node to try casting from.</param>
         /// <returns>The result of the match.</returns>
         static public TypeMatch Match<T>(INode node) where T : INode =>
             Match<T>(TypeOf(node));
 
         /// <summary>This determines the implicit and inheritence match.</summary>
-        /// <param name="t">The type to try castig from.</param>
+        /// <param name="t">The type to try casting from.</param>
         /// <returns>The result of the match.</returns>
         static public TypeMatch Match<T>(Type t) where T : INode =>
             FromType<T>().Match(t);
 
         /// <summary>This determines the implicit and inheritence match.</summary>
-        /// <param name="t">The type to try castig from.</param>
+        /// <param name="t">The type to try casting from.</param>
         /// <returns>The result of the match.</returns>
         public TypeMatch Match(Type t) {
             int steps;

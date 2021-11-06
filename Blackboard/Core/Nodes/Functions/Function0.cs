@@ -14,15 +14,10 @@ namespace Blackboard.Core.Nodes.Functions {
 
         /// <summary>Creates a new singular node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
-        public Function(S.Func<TReturn> hndl) {
+        public Function(S.Func<TReturn> hndl) :
+            base(false, false) {
             this.hndl = hndl;
         }
-
-        /// <summary>Determines how closely matching the given nodes are for this match.</summary>
-        /// <param name="types">The input types to match against the function signatures with.</param>
-        /// <returns>The matching results for this function.</returns>
-        public override FuncMatch Match(Type[] types) =>
-            types.Length != 0 ? FuncMatch.NoMatch : FuncMatch.Create(false);
 
         /// <summary>Builds and returns the function object.</summary>
         /// <remarks>Before this is called, Match must have been possible.</remarks>
@@ -30,16 +25,11 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <returns>The new function.</returns>
         public override INode Build(INode[] nodes) => this.hndl();
 
-        /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Function";
-
         /// <summary>Creates a pretty string for this node.</summary>
-        /// <param name="scopeName">The name of this node from a parent namespace or empty for no name.</param>
+        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
         /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
         /// <returns>The pretty string for debugging and testing this node.</returns>
-        public override string PrettyString(string scopeName = "", int nodeDepth = int.MaxValue) {
-            string name = string.IsNullOrEmpty(scopeName) ? this.TypeName : scopeName;
-            return name + "<" + Type.FromType<TReturn>() + ">()";
-        }
+        public override string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) =>
+            this.TypeName + "<" + Type.FromType<TReturn>() + ">()";
     }
 }

@@ -58,8 +58,11 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Input";
 
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => this.TypeName + "<" + this.Value.TypeName + ">(" + this.Value.ValueString + ")";
+        /// <summary>Creates a pretty string for this node.</summary>
+        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
+        /// <returns>The pretty string for debugging and testing this node.</returns>
+        public override string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) =>
+            this.TypeName + "<" + this.Value.TypeName + ">(" + this.Value.ValueString + ")";
     }
 }

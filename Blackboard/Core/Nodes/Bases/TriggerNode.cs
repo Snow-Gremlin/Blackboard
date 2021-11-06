@@ -36,9 +36,5 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Converts this node to a constant trigger.</summary>
         /// <returns>The constant trigger carrying the provoked condition.</returns>
         public virtual IConstant ToConstant() => new ConstTrigger(this.Provoked);
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => this.PrettyString("", 0);
     }
 }

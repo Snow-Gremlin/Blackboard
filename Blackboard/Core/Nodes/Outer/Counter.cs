@@ -102,15 +102,5 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Counter";
-
-        /// <summary>Creates a pretty string for this node.</summary>
-        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
-        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
-        /// <returns>The pretty string for debugging and testing this node.</returns>
-        public override string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) {
-            string tail = nodeDepth <= 0 ? "" :
-                INode.NodePrettyString(showFuncs, nodeDepth-1, this.increment, this.decrement, this.reset, this.delta, this.resetValue);
-            return this.TypeName + "<" + this.Value.TypeName + ">[" + this.Value.ValueString + "](" + tail + ")";
-        }
     }
 }

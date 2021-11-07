@@ -24,7 +24,7 @@ namespace Blackboard.Core {
         /// <summary>Creates a new driver.</summary>
         public Driver() {
             this.touched = new List<IEvaluatable>();
-            this.Global = new Namespace("Global");
+            this.Global = new Namespace();
 
             this.addOperators();
             this.addFunctions();
@@ -430,10 +430,10 @@ namespace Blackboard.Core {
 
         /// <summary>Gets a string showing the whole driver from the global.</summary>
         /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
-        /// <param name="showChildren">Indicates if child namespaces should be shown or not.</param>
+        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
         /// <returns>The full debug string for this driver.</returns>
-        public string GlobalString(bool showFuncs = true, bool showChildren = true) =>
-            "Global:" + this.Global.NamespaceString(showFuncs, showChildren);
+        public string NamespaceString(bool showFuncs = true, int nodeDepth = int.MaxValue) =>
+            "Global:" + Stringifier.Deep(this.Global, showFuncs, nodeDepth);
 
         /// <summary>This indicates if any changes are pending evaluation.</summary>
         public bool HasPending => this.touched.Count > 0;

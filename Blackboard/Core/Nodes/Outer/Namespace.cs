@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Core.Nodes.Outer {
 
@@ -15,25 +16,15 @@ namespace Blackboard.Core.Nodes.Outer {
         private SortedDictionary<string, INode> fields;
 
         /// <summary>Creates a new namespace.</summary>
-        /// <param name="name">The initial name for the namespace in the parent.</param>
-        public Namespace(string name = "") {
-            this.Name   = name;
-            this.Parent = null;
+        public Namespace() {
             this.fields = new SortedDictionary<string, INode>();
         }
 
-        /// <summary>The name of the namespace in the parent.</summary>
-        public string Name { get; private set; }
-
-        /// <summary>The parent namespace for this namespace</summary>
-        public Namespace Parent { get; private set; }
+        /// <summary>This is the type name of the node.</summary>
+        public string TypeName => "Namespace";
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<INode> Parents {
-            get {
-                if (this.Parent is not null) yield return this.Parent;
-            }
-        }
+        public IEnumerable<INode> Parents => Enumerable.Empty<INode>();
 
         /// <summary>The set of children nodes to this node in the graph.</summary>
         public IEnumerable<INode> Children => this.fields.Values;
@@ -45,6 +36,12 @@ namespace Blackboard.Core.Nodes.Outer {
             get => this.ReadField(name);
             set => this.WriteField(name, value);
         }
+
+        /// <summary>Gets the name for the given field.</summary>
+        /// <param name="node">The node in the field to look up the name for.</param>
+        /// <returns>The name for the given field or null if not found.</returns>
+        public string NameOfField(INode node) =>
+            this.fields.FirstOrDefault((pair) => ReferenceEquals(pair.Value, node)).Key;
 
         /// <summary>Determines if the given field by name exists.</summary>
         /// <param name="name">The name of the field to look for.</param>
@@ -70,29 +67,20 @@ namespace Blackboard.Core.Nodes.Outer {
                     With("Name", name).
                     With("Node", node).
                     With("Namespace", this);
-            if (checkedForLoops && INode.CanReachAny(this, node))
+            if (checkedForLoops && this.CanReachAny(node))
                 throw Exceptions.NodeLoopDetected();
             this.fields[name] = node;
-            if (node is Namespace child) {
-                child.Name = name;
-                child.Parent = this;
-            }
         }
 
         /// <summary>Remove a field from this node by name if it exists.</summary>
         /// <param name="name">The name of the fields to remove.</param>
         /// <returns>True if the field wwas removed, false otherwise.</returns>
-        public bool RemoveField(string name) {
-            if (!this.fields.ContainsKey(name)) return false;
-            if (this.fields[name] is Namespace child) child.Parent = null;
-            return this.fields.Remove(name);
-        }
+        public bool RemoveField(string name) => this.fields.Remove(name);
 
         /// <summary>Finds the node at the given path.</summary>
         /// <param name="names">The names to the node to find.</param>
         /// <returns>The node at the end of the path or null.</returns>
-        public INode Find(params string[] names) =>
-            this.Find(names as IEnumerable<string>);
+        public INode Find(params string[] names) => this.Find(names as IEnumerable<string>);
 
         /// <summary>Finds the node at the given path.</summary>
         /// <param name="names">The names to the node to find.</param>
@@ -108,30 +96,8 @@ namespace Blackboard.Core.Nodes.Outer {
             return cur;
         }
 
-        /// <summary>This is the type name of the node.</summary>
-        public string TypeName => "Namespace";
-
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => (this.Parent is not null ? this.Parent.ToString()+"." : "")+this.Name;
-
-        /// <summary>Creates a pretty string for this node.</summary>
-        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
-        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
-        /// <returns>The pretty string for debugging and testing this node.</returns>
-        public string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) {
-            string tail = "";
-            if (nodeDepth <= 0) tail = "...";
-            else {
-                const string indent = "  ";
-                string fieldStr = this.fields.SelectFromPairs((string name, INode node) => {
-                    return node is IFuncGroup or IFuncDef && !showFuncs ? null :
-                        name + ": " + INode.NodePrettyString(showFuncs, nodeDepth-1, node);
-                }).NotNull().Indent(indent).Join(",\n" + indent);
-                
-                if (!string.IsNullOrEmpty(fieldStr)) tail = "\n" + indent + fieldStr + "\n";
-            }
-            return this.TypeName + "[" + tail + "]";
-        }
+        public override string ToString() => Stringifier.Simple(this);
     }
 }

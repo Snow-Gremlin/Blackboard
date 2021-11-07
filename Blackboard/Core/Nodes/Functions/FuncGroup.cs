@@ -42,11 +42,8 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <param name="checkedForLoops">Indicates if loops in the graph should be checked for.</param>
         public void AddChildren(IEnumerable<INode> children, bool checkedForLoops = true) {
             IEnumerable<IFuncDef> newDefs = children.NotNull().OfType<IFuncDef>();
-            if (checkedForLoops && INode.CanReachAny(this, newDefs))
-                throw Exceptions.NodeLoopDetected();
-            foreach (IFuncDef def in newDefs) {
-                if (!this.defs.Contains(def)) this.defs.Add(def);
-            }
+            if (checkedForLoops && this.CanReachAny(newDefs)) throw Exceptions.NodeLoopDetected();
+            this.defs.AddRange(newDefs.Where((IFuncDef def) => !this.defs.Contains(def)));
         }
 
         /// <summary>Removes all the given children from this node if they exist.</summary>
@@ -95,26 +92,8 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>This is the type name of the node.</summary>
         public string TypeName => "FuncGroup";
 
-        /// <summary>Creates a pretty string for this node.</summary>
-        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
-        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
-        /// <returns>The pretty string for debugging and testing this node.</returns>
-        public string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) {
-            string tail = "";
-            if (this.defs.Count > 0) {
-                if (showFuncs && nodeDepth > 0) {
-                    const string indent = "  ";
-                    List<string> parts = new();
-                    foreach (IFuncDef def in this.defs)
-                        parts.Add(INode.NodeString(def).Trim().Replace("\n", "\n"+indent));
-                    tail = "\n" + indent + parts.Join(",\n" + indent) + "\n";
-                } else tail = "...";
-            }
-            return this.TypeName + "[" + tail + "]";
-        }
-
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => this.PrettyString(true, 0);
+        public override string ToString() => Stringifier.Simple(this);
     }
 }

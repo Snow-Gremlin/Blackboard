@@ -35,6 +35,9 @@ namespace Blackboard.Core.Nodes.Outer {
             this.ResetValue = resetValue;
         }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Toggler";
+
         /// <summary>This is the parent to toggle the value.</summary>
         public ITriggerAdopter Toggle {
             get => this.toggle;
@@ -69,19 +72,6 @@ namespace Blackboard.Core.Nodes.Outer {
             if (this.toggle?.Provoked ?? false) value = new(!value.Value);
             if (this.reset?.Provoked ?? false) value = this.resetValue?.Value ?? new(false);
             return this.SetNodeValue(value);
-        }
-
-        /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Toggler";
-
-        /// <summary>Creates a pretty string for this node.</summary>
-        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
-        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
-        /// <returns>The pretty string for debugging and testing this node.</returns>
-        public override string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) {
-            string tail = nodeDepth <= 0 ? "" :
-                INode.NodePrettyString(showFuncs, nodeDepth-1, this.toggle, this.reset, this.resetValue);
-            return this.TypeName + "[" + this.Value.ValueString + "](" + tail + ")";
         }
     }
 }

@@ -32,6 +32,9 @@ namespace Blackboard.Core.Nodes.Outer {
         public InputTrigger(bool provoked = false) :
             base(provoked) { }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Input";
+
         /// <summary>Always returns no parents since inputs have no parent.</summary>
         public override IEnumerable<INode> Parents => Enumerable.Empty<INode>();
 
@@ -43,15 +46,5 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>This updates the trigger during the an evaluation.</summary>
         /// <returns>This returns the provoked value as it currently is.</returns>
         protected override bool UpdateTrigger() => this.Provoked;
-
-        /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Input";
-
-        /// <summary>Creates a pretty string for this node.</summary>
-        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
-        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
-        /// <returns>The pretty string for debugging and testing this node.</returns>
-        public override string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) =>
-            this.TypeName + "<trigger>(" + (this.Provoked ? "provoked" : "") + ")";
     }
 }

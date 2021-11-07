@@ -109,7 +109,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>This will get all the argument types.</summary>
         /// <remarks>This will repeat the last argument type until the iteration is stopped.</remarks>
-        private IEnumerable<Type> argTypeIterate {
+        private IEnumerable<Type> ArgTypeIterate {
             get {
                 int count = this.argTypes.Length;
                 if (count <= 0) yield break;
@@ -121,29 +121,43 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>
         /// <param name="types">The input types to match against the function signatures with.</param>
         /// <returns>The matching results for this function.</returns>
-        public virtual FuncMatch Match(Type[] types) {
-            if (types.Length < this.MinArgs) return FuncMatch.NoMatch;
-            if (types.Length > this.MaxArgs) return FuncMatch.NoMatch;
-            return FuncMatch.Create(this.NeedsOneNoCast, types.Zip(this.argTypeIterate, Type.Match));
+        public virtual FuncMatch Match(Type[] types) =>
+            types.Length < this.MinArgs ? FuncMatch.NoMatch :
+            types.Length > this.MaxArgs ? FuncMatch.NoMatch :
+            FuncMatch.Create(this.NeedsOneNoCast, types.Zip(this.ArgTypeIterate, Type.Match));
+
+        /// <summary>This will implicity cast the given parameter,</summary>
+        /// <param name="node">The node to cast.</param>
+        /// <param name="t">The type to get the cast to.</param>
+        /// <returns>The resulting parameter in the expected type.</returns>
+        static private INode castParam(INode node, Type t) {
+            INode cast = t.Implicit(node);
+            return cast is not null ? cast :
+                throw new Exception("Error casting parameter").
+                    With("Node", node).
+                    With("Implicit", t).
+                    With("Result", cast);
         }
+
+        /// <summary>Builds and returns the function node.</summary>
+        /// <remarks>Before this is called, Match must have been possible.</remarks>
+        /// <param name="nodes">The nodes as parameters to the function.</param>
+        /// <returns>The new function.</returns>
+        public virtual INode Build(INode[] nodes) {
+            return this.PassthroughOne && nodes.Length == 1 ? this.argTypes[0].Implicit(nodes[0]) :
+                this.PostCastBuild(nodes.Zip(this.ArgTypeIterate, castParam).ToArray());
+        }
+
+        /// <summary>Builds and return the function node with the given arguments already casted.</summary>
+        /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>
+        /// <returns>The resulting function node.</returns>
+        protected abstract INode PostCastBuild(INode[] nodes);
 
         /// <summary>This is the type name of the node.</summary>
         public string TypeName => "Function";
 
-        /// <summary>Creates a pretty string for this node.</summary>
-        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
-        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
-        /// <returns>The pretty string for debugging and testing this node.</returns>
-        public abstract string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue);
-
-        /// <summary>Builds and returns the function object.</summary>
-        /// <remarks>Before this is called, Match must have been possible.</remarks>
-        /// <param name="nodes">The nodes as parameters to the function.</param>
-        /// <returns>The new function.</returns>
-        public abstract INode Build(INode[] nodes);
-
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
-        public override string ToString() => this.PrettyString(true, 0);
+        public override string ToString() => Stringifier.Simple(this);
     }
 }

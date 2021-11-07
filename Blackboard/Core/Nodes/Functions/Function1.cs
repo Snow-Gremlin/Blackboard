@@ -22,20 +22,9 @@ namespace Blackboard.Core.Nodes.Functions {
             this.hndl = hndl;
         }
 
-        /// <summary>Builds and returns the function object.</summary>
-        /// <remarks>Before this is called, Match must have been possible.</remarks>
-        /// <param name="nodes">The nodes as parameters to the function.</param>
-        /// <returns>The new function.</returns>
-        public override INode Build(INode[] nodes) {
-            T node = Type.Implicit<T>(nodes[0]);
-            return this.hndl(node);
-        }
-
-        /// <summary>Creates a pretty string for this node.</summary>
-        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
-        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
-        /// <returns>The pretty string for debugging and testing this node.</returns>
-        public override string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) =>
-            this.TypeName + "<" + Type.FromType<TReturn>() + ">(" + Type.FromType<T>() + ")";
+        /// <summary>Builds and return the function node with the given arguments already casted.</summary>
+        /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>
+        /// <returns>The resulting function node.</returns>
+        protected override INode PostCastBuild(INode[] nodes) => this.hndl(nodes[0] as T);
     }
 }

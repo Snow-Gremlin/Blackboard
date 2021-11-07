@@ -26,34 +26,9 @@ namespace Blackboard.Core.Nodes.Functions {
             this.hndl = hndl;
         }
 
-        /// <summary>This will implicity cast the given parameter,</summary>
-        /// <param name="t">The type to get the cast from.</param>
-        /// <param name="node">The node to cast.</param>
-        /// <returns>The resulting parameter in the expected type.</returns>
-        static private Tn castParam(Type t, INode node) {
-            INode cast = t.Implicit(node);
-            return cast is Tn result ? result :
-                throw new Exception("Error casting parameter").
-                    With("Type", typeof(Tn)).
-                    With("Implicit", t).
-                    With("Result", cast);
-        }
-
-        /// <summary>Builds and returns the function object.</summary>
-        /// <remarks>Before this is called, Match must have been possible.</remarks>
-        /// <param name="nodes">The nodes as parameters to the function.</param>
-        /// <returns>The new function.</returns>
-        public override INode Build(INode[] nodes) {
-            Type t = Type.FromType<Tn>();
-            return this.PassthroughOne && nodes.Length == 1 ? t.Implicit(nodes[0]) :
-                this.hndl(nodes.Select((node) => castParam(t, node)).ToArray());
-        }
-
-        /// <summary>Creates a pretty string for this node.</summary>
-        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
-        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
-        /// <returns>The pretty string for debugging and testing this node.</returns>
-        public override string PrettyString(bool showFuncs = true, int nodeDepth = int.MaxValue) =>
-            this.TypeName + "<" + Type.FromType<TReturn>() + ">(" + Type.FromType<Tn>() + "..." + ")";
+        /// <summary>Builds and return the function node with the given arguments already casted.</summary>
+        /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>
+        /// <returns>The resulting function node.</returns>
+        protected override INode PostCastBuild(INode[] nodes) => this.hndl(nodes.Cast<Tn>());
     }
 }

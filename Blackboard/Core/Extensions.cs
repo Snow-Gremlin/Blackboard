@@ -36,17 +36,6 @@ namespace Blackboard.Core {
         static public bool ContainsAny<T>(this IEnumerable<T> a, IEnumerable<T> b, IEqualityComparer<T> comparer = null) =>
             a.Any((value) => b.Contains(value, comparer));
 
-        /// <summary>This merges key/value pairs into one resulting value.</summary>
-        /// <typeparam name="TKey">The type of the key in the input pair.</typeparam>
-        /// <typeparam name="TValue">The type of the value in the input pair.</typeparam>
-        /// <typeparam name="TResult">The retuened type.</typeparam>
-        /// <param name="pairs">The input key/value pairs.</param>
-        /// <param name="handle">This is the function to convert each key/value with.</param>
-        /// <returns>The result of the selected key/value pairs.</returns>
-        static public IEnumerable<TResult> SelectFromPairs<TKey, TValue, TResult>(this IEnumerable<KeyValuePair<TKey, TValue>> pairs, S.Func<TKey, TValue, TResult> handle) {
-            foreach (KeyValuePair<TKey, TValue> pair in pairs) yield return handle(pair.Key, pair.Value);
-        }
-
         /// <summary>This will indent all the lines in the given strings with the given indent.</summary>
         /// <param name="parts">The string to indent all the lines with.</param>
         /// <param name="indent">The indent to add to the front of each line.</param>

@@ -14,7 +14,7 @@ namespace BlackboardTests {
         /// <param name="node">The node to check the sting of.</param>
         /// <param name="exp">This is the expected string name.</param>
         static public void CheckString(this INode node, string exp) =>
-            Assert.AreEqual(exp, node.ToString());
+            Assert.AreEqual(exp, Stringifier.Shallow(node));
 
         /// <summary>Checks the depth of the node.</summary>
         /// <param name="node">The node to check the depth of.</param>

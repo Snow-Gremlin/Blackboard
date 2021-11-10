@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 using S = System;
 
 namespace Blackboard.Parser {
@@ -145,7 +146,7 @@ namespace Blackboard.Parser {
             const string indent = "  ";
             string head = this.ToSimpleString();
             if (this.children.Count <= 0) return head +"[]";
-            string tail = this.children.SelectFromPairs((string name, IWrappedNode node) => name + ": " + node).Join("\n" + indent);
+            string tail = this.children.Select(pair => pair.Key + ": " + pair.Value).Join("\n" + indent);
             return head + "[\n" + indent + tail + "\n]";
         }
 
@@ -154,7 +155,7 @@ namespace Blackboard.Parser {
         public string ToSimpleString() {
             string body = this.Virtual ?
                 this.Type.ToString().Replace("Blackboard.Core.", "") :
-                INode.NodeString(this.Node);
+                Stringifier.Simple(this.Node);
             return "VirtualNode(" + body + ")";
         }
     }

@@ -53,6 +53,9 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <returns>The node or null if not found.</returns>
         public INode ReadField(string name) => this.fields.ContainsKey(name) ? this.fields[name] : null;
 
+        /// <summary>Gets all the fields in this namespace with the name for each field.</summary>
+        public IEnumerable<KeyValuePair<string, INode>> Fields => this.fields;
+
         /// <summary>Writes or overwrites a new field to this node.</summary>
         /// <param name="name">The name of the field to write.</param>
         /// <param name="node">The node to write to the field.</param>

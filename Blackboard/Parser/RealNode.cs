@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 using S = System;
 
 namespace Blackboard.Parser {
@@ -79,12 +80,12 @@ namespace Blackboard.Parser {
             const string indent = "  ";
             string head = this.ToSimpleString();
             if (this.children.Count <= 0) return head +"[]";
-            string tail = this.children.SelectFromPairs((string name, IWrappedNode node) => name + ": " + node).Join("\n" + indent);
+            string tail = this.children.Select(pair => pair.Key + ": " + pair.Value).Join("\n" + indent);
             return head + "[\n" + indent + tail + "\n]";
         }
 
         /// <summary>Gets the real node as a simple string without any children.</summary>
         /// <returns>A human readable debug string.</returns>
-        public string ToSimpleString() => "RealNode(" + INode.NodeString(this.Node) + ")";
+        public string ToSimpleString() => "RealNode(" + Stringifier.Simple(this.Node) + ")";
     }
 }

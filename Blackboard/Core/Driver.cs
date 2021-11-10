@@ -429,11 +429,8 @@ namespace Blackboard.Core {
         public Namespace Global { get; }
 
         /// <summary>Gets a string showing the whole driver from the global.</summary>
-        /// <param name="showFuncs">Indicates if functions should be shown or not.</param>
-        /// <param name="nodeDepth">The depth of the nodes to get the string for.</param>
         /// <returns>The full debug string for this driver.</returns>
-        public string NamespaceString(bool showFuncs = true, int nodeDepth = int.MaxValue) =>
-            "Global:" + Stringifier.Deep(this.Global, showFuncs, nodeDepth);
+        public string NamespaceString() => "Global:" + Stringifier.Deep(this.Global);
 
         /// <summary>This indicates if any changes are pending evaluation.</summary>
         public bool HasPending => this.touched.Count > 0;

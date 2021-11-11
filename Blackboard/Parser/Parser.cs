@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Parser.Performers;
@@ -358,7 +359,18 @@ namespace Blackboard.Parser {
 
             VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
             if (match.NeedsCast) {
-                // TODO: Need to potentually add a cast node.
+                INode castGroup =
+                    t == Type.Bool    ? driver.Global.Find(Driver.OperatorNamespace, "castBool") :
+                    t == Type.Int     ? driver.Global.Find(Driver.OperatorNamespace, "castInt") :
+                    t == Type.Double  ? driver.Global.Find(Driver.OperatorNamespace, "castDouble") :
+                    t == Type.String  ? driver.Global.Find(Driver.OperatorNamespace, "castString") :
+                    t == Type.Trigger ? driver.Global.Find(Driver.OperatorNamespace, "castTrigger") :
+                    throw new Exception("Unsupported type for new definition cast").
+                        With("Location", loc).
+                        With("Type", t);
+
+                IFuncDef castFunc =(castGroup as IFuncGroup).Find(valueType);
+                valuePerf = new Function(castFunc, valuePerf);
             }
             this.formula.Add(new VirtualNodeWriter(virtualInput, valuePerf));
 

@@ -2,7 +2,6 @@
 using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.IO;
 using S = System;
 
 namespace BlackboardTests.ParserTests {
@@ -238,7 +237,6 @@ namespace BlackboardTests.ParserTests {
             driver.CheckValue(8, "C");
         }
 
-        /*
         [TestMethod]
         public void TestBasicParses_IntDoubleSum() {
             Driver driver = new();
@@ -249,23 +247,43 @@ namespace BlackboardTests.ParserTests {
                 "double C := A + B;");
             parser.Commit();
 
-            checkValue(driver, "A", 2);
-            checkValue(driver, "B", 3.0);
-            checkValue(driver, "C", 5.0);
+            driver.CheckValue(2,   "A");
+            driver.CheckValue(3.0, "B");
+            driver.CheckValue(5.0, "C");
 
-            driver.SetValue("A", 7);
+            driver.SetInt(7, "A");
             driver.Evaluate();
-            checkValue(driver, "A", 7);
-            checkValue(driver, "B", 3.0);
-            checkValue(driver, "C", 10.0);
+            driver.CheckValue( 7,   "A");
+            driver.CheckValue( 3.0, "B");
+            driver.CheckValue(10.0, "C");
 
-            driver.SetValue("B", 1.23);
+            driver.SetDouble(1.23, "B");
             driver.Evaluate();
-            checkValue(driver, "A", 7);
-            checkValue(driver, "B", 1.23);
-            checkValue(driver, "C", 8.23);
+            driver.CheckValue(7,    "A");
+            driver.CheckValue(1.23, "B");
+            driver.CheckValue(8.23, "C");
         }
-        */
+
+        [TestMethod]
+        public void TestBasicParses_IntDoubleImplicitCast() {
+            Driver driver = new();
+            Parser parser = new(driver);
+            parser.Read(
+                "in int A = 2;",
+                "double B := A;",
+                "string C := B;");
+            parser.Commit();
+
+            driver.CheckValue(2,   "A");
+            driver.CheckValue(2.0, "B");
+            driver.CheckValue("2", "C");
+
+            driver.SetInt(42, "A");
+            driver.Evaluate();
+            driver.CheckValue(42,   "A");
+            driver.CheckValue(42.0, "B");
+            driver.CheckValue("42", "C");
+        }
 
         [TestMethod]
         public void TestBasicParses_IntIntCompare() {

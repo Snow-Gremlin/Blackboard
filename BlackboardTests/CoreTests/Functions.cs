@@ -23,17 +23,17 @@ namespace BlackboardTests.CoreTests {
             InputValue<Int>    iNode = new();
             InputValue<Double> dNode = new();
 
-            checkNode(group.Build(tNode, tNode),        "Any<trigger>(Input<trigger>(), Input<trigger>())");
-            checkNode(group.Build(bNode, bNode),        "Or<bool>(Input<bool>[False](), Input<bool>[False]())");
-            checkNode(group.Build(bNode, bNode, bNode), "Or<bool>(Input<bool>[False](), Input<bool>[False](), Input<bool>[False]())");
-            checkNode(group.Build(bNode),               "Input<bool>[False]()");
+            checkNode(group.Build(tNode, tNode),        "Any<trigger>(Input<trigger>, Input<trigger>)");
+            checkNode(group.Build(bNode, bNode),        "Or<bool>(Input<bool>[False], Input<bool>[False])");
+            checkNode(group.Build(bNode, bNode, bNode), "Or<bool>(Input<bool>[False], Input<bool>[False], Input<bool>[False])");
+            checkNode(group.Build(bNode),               "Input<bool>[False]");
             checkNode(group.Build(),                    "null");
-            checkNode(group.Build(iNode, iNode),        "BitwiseOr<int>(Input<int>[0](), Input<int>[0]())");
+            checkNode(group.Build(iNode, iNode),        "BitwiseOr<int>(Input<int>[0], Input<int>[0])");
             checkNode(group.Build(dNode, dNode),        "null");
             checkNode(group.Build(iNode, bNode),        "null");
             checkNode(group.Build(bNode, iNode),        "null");
-            checkNode(group.Build(tNode, bNode),        "Any<trigger>(Input<trigger>(), BoolAsTrigger<bool>(Input<bool>[False]()))");
-            checkNode(group.Build(bNode, tNode),        "Any<trigger>(BoolAsTrigger<bool>(Input<bool>[False]()), Input<trigger>())");
+            checkNode(group.Build(tNode, bNode),        "Any<trigger>(Input<trigger>, BoolAsTrigger<bool>(Input<bool>[False]))");
+            checkNode(group.Build(bNode, tNode),        "Any<trigger>(BoolAsTrigger<bool>(Input<bool>[False]), Input<trigger>)");
         }
 
         [TestMethod]
@@ -46,12 +46,12 @@ namespace BlackboardTests.CoreTests {
             InputValue<Double> dNode = new();
 
             checkNode(group.Build(bNode, bNode),        "null");
-            checkNode(group.Build(iNode, iNode),        "Round<double>(Implicit<double>(Input<int>[0]()), Input<int>[0]())");
-            checkNode(group.Build(dNode, iNode),        "Round<double>(Input<double>[0](), Input<int>[0]())");
+            checkNode(group.Build(iNode, iNode),        "Round<double>(Implicit<double>(Input<int>[0]), Input<int>[0])");
+            checkNode(group.Build(dNode, iNode),        "Round<double>(Input<double>[0], Input<int>[0])");
             checkNode(group.Build(iNode, dNode),        "null");
             checkNode(group.Build(dNode, dNode),        "null");
-            checkNode(group.Build(iNode),               "Round<double>(Implicit<double>(Input<int>[0]()))");
-            checkNode(group.Build(dNode),               "Round<double>(Input<double>[0]())");
+            checkNode(group.Build(iNode),               "Round<double>(Implicit<double>(Input<int>[0]))");
+            checkNode(group.Build(dNode),               "Round<double>(Input<double>[0])");
             checkNode(group.Build(dNode, dNode, dNode), "null");
         }
 
@@ -67,14 +67,14 @@ namespace BlackboardTests.CoreTests {
 
             checkNode(group.Build(bNode, bNode), "null");
             checkNode(group.Build(bNode, iNode), "null");
-            checkNode(group.Build(iNode, iNode), "Sum<int>(Input<int>[0](), Input<int>[0]())");
-            checkNode(group.Build(dNode, iNode), "Sum<double>(Input<double>[0](), Implicit<double>(Input<int>[0]()))");
-            checkNode(group.Build(iNode, dNode), "Sum<double>(Implicit<double>(Input<int>[0]()), Input<double>[0]())");
-            checkNode(group.Build(dNode, dNode), "Sum<double>(Input<double>[0](), Input<double>[0]())");
-            checkNode(group.Build(sNode, sNode), "Sum<string>(Input<string>[](), Input<string>[]())");
-            checkNode(group.Build(bNode, sNode), "Sum<string>(Implicit<string>(Input<bool>[False]()), Input<string>[]())");
-            checkNode(group.Build(iNode, sNode), "Sum<string>(Implicit<string>(Input<int>[0]()), Input<string>[]())");
-            checkNode(group.Build(dNode, sNode), "Sum<string>(Implicit<string>(Input<double>[0]()), Input<string>[]())");
+            checkNode(group.Build(iNode, iNode), "Sum<int>(Input<int>[0], Input<int>[0])");
+            checkNode(group.Build(dNode, iNode), "Sum<double>(Input<double>[0], Implicit<double>(Input<int>[0]))");
+            checkNode(group.Build(iNode, dNode), "Sum<double>(Implicit<double>(Input<int>[0]), Input<double>[0])");
+            checkNode(group.Build(dNode, dNode), "Sum<double>(Input<double>[0], Input<double>[0])");
+            checkNode(group.Build(sNode, sNode), "Sum<string>(Input<string>[], Input<string>[])");
+            checkNode(group.Build(bNode, sNode), "Sum<string>(Implicit<string>(Input<bool>[False]), Input<string>[])");
+            checkNode(group.Build(iNode, sNode), "Sum<string>(Implicit<string>(Input<int>[0]), Input<string>[])");
+            checkNode(group.Build(dNode, sNode), "Sum<string>(Implicit<string>(Input<double>[0]), Input<string>[])");
         }
 
         [TestMethod]
@@ -86,12 +86,12 @@ namespace BlackboardTests.CoreTests {
             InputValue<Double> dNode = new();
 
             checkNode(group.Build(),                    "null");
-            checkNode(group.Build(iNode),               "Atan<double>(Implicit<double>(Input<int>[0]()))");
-            checkNode(group.Build(dNode),               "Atan<double>(Input<double>[0]())");
-            checkNode(group.Build(iNode, iNode),        "Atan2<double>(Implicit<double>(Input<int>[0]()), Implicit<double>(Input<int>[0]()))");
-            checkNode(group.Build(iNode, dNode),        "Atan2<double>(Implicit<double>(Input<int>[0]()), Input<double>[0]())");
-            checkNode(group.Build(dNode, iNode),        "Atan2<double>(Input<double>[0](), Implicit<double>(Input<int>[0]()))");
-            checkNode(group.Build(dNode, dNode),        "Atan2<double>(Input<double>[0](), Input<double>[0]())");
+            checkNode(group.Build(iNode),               "Atan<double>(Implicit<double>(Input<int>[0]))");
+            checkNode(group.Build(dNode),               "Atan<double>(Input<double>[0])");
+            checkNode(group.Build(iNode, iNode),        "Atan2<double>(Implicit<double>(Input<int>[0]), Implicit<double>(Input<int>[0]))");
+            checkNode(group.Build(iNode, dNode),        "Atan2<double>(Implicit<double>(Input<int>[0]), Input<double>[0])");
+            checkNode(group.Build(dNode, iNode),        "Atan2<double>(Input<double>[0], Implicit<double>(Input<int>[0]))");
+            checkNode(group.Build(dNode, dNode),        "Atan2<double>(Input<double>[0], Input<double>[0])");
             checkNode(group.Build(iNode, iNode, iNode), "null");
             checkNode(group.Build(dNode, dNode, dNode), "null");
         }

@@ -162,7 +162,7 @@ namespace Blackboard.Core {
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <returns>The stringfor the data value.</returns>
         private string nodeDataValue(INode node, int depth) =>
-            !this.ShowAllDataValues && ((depth > 0 && node.Parents.Any()) || !this.ShowLastDataValues) ? "" :
+            !this.ShowAllDataValues && ((depth > 1 && node.Parents.Any()) || !this.ShowLastDataValues) ? "" :
             node switch {
                 IDataNode => "[" + (node as IDataNode).Data.ValueString + "]",
                 ITrigger  => ((node as ITrigger).Provoked ? "[provoked]" : ""),
@@ -174,7 +174,7 @@ namespace Blackboard.Core {
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <returns>The string for the parents of the given node.</returns>
         private string parents(INode node, int depth) =>
-            !this.ShowParents || depth <= 0 ? "" :
+            !this.ShowParents || depth <= 1 || !node.Parents.Any() ? "" :
             node switch {
                 IFuncDef => "",
                 _        => "(" + this.stringNode(node.Parents, depth-1) + ")",
@@ -198,7 +198,7 @@ namespace Blackboard.Core {
         /// <returns>The string containing the tailing nodes.</returns>
         private string tailingNodes(IFuncGroup node, int depth) {
             if (!node.Children.Any()) return "";
-            if (!this.ShowFuncs || depth <= 0) return "{...}";
+            if (!this.ShowFuncs || depth <= 1) return "{...}";
 
             string tail = node.Children.Select(def =>
                 this.stringNode(def, depth-1).Trim().Replace("\n", "\n"+indent)).
@@ -213,7 +213,7 @@ namespace Blackboard.Core {
         /// <returns>The string containing the tailing nodes.</returns>
         private string tailingNodes(IFieldReader node, int depth) {
             if (!node.Fields.Any()) return "";
-            if (depth <= 0) return "{...}";
+            if (depth <= 1) return "{...}";
 
             string tail = node.Fields.Select(pair =>
                 pair.Value is IFuncGroup or IFuncDef && !this.ShowFuncs ? null :

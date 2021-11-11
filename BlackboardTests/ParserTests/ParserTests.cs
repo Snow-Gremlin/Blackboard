@@ -338,47 +338,47 @@ namespace BlackboardTests.ParserTests {
 
             driver.SetInt(0x5, "A");
             driver.CheckEvaluate(
-                "Eval(1): Global.A",
-                "Eval(2): BitwiseAnd(Global.A, 1)",
-                "Eval(2): BitwiseAnd(Global.A, 2)",
-                "Eval(2): BitwiseAnd(Global.A, 4)",
-                "Eval(2): BitwiseAnd(Global.A, 8)",
-                "Eval(3): NotEqual(BitwiseAnd(Global.A, 2), 0)",
-                "Eval(3): NotEqual(BitwiseAnd(Global.A, 4), 0)",
-                "Eval(4): Global.C",
-                "Eval(4): Global.D",
-                "Eval(5): Not(Global.C)",
-                "Eval(5): Or(Global.D, Global.E)",
-                "Eval(6): And(Global.B, Not(Global.C))",
-                "Eval(7): Xor(And(Global.B, Not(Global.C)), Or(Global.D, Global.E))");
+                "Start(Pending: 1)",
+                "  Eval(0): Input<int>[5]",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[5], Literal<int>[1])",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[5], Literal<int>[2])",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[5], Literal<int>[4])",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[5], Literal<int>[8])",
+                "  Eval(2): NotEqual<bool>(BitwiseAnd<int>(Input<int>[5], Literal<int>[2]), Literal<int>[0])",
+                "  Eval(2): NotEqual<bool>(BitwiseAnd<int>(Input<int>[5], Literal<int>[4]), Literal<int>[0])",
+                "  Eval(3): Not<bool>(NotEqual<bool>(BitwiseAnd<int>[0], Literal<int>[0]))",
+                "  Eval(3): Or<bool>(NotEqual<bool>(BitwiseAnd<int>[4], Literal<int>[0]), NotEqual<bool>(BitwiseAnd<int>[0], Literal<int>[0]))",
+                "  Eval(4): And<bool>(NotEqual<bool>(BitwiseAnd<int>[1], Literal<int>[0]), Not<bool>(NotEqual<bool>[False]))",
+                "  Eval(5): Xor<bool>(And<bool>(NotEqual<bool>[True], Not<bool>[True]), Or<bool>(NotEqual<bool>[True], NotEqual<bool>[False]))",
+                "End(Provoked: 0)");
             driver.CheckValue(false, "F");
 
             driver.SetInt(0x4, "A");
             driver.CheckEvaluate(
-                "Eval(1): Global.A",
-                "Eval(2): BitwiseAnd(Global.A, 1)",
-                "Eval(2): BitwiseAnd(Global.A, 2)",
-                "Eval(2): BitwiseAnd(Global.A, 4)",
-                "Eval(2): BitwiseAnd(Global.A, 8)",
-                "Eval(3): NotEqual(BitwiseAnd(Global.A, 1), 0)",
-                "Eval(4): Global.B",
-                "Eval(6): And(Global.B, Not(Global.C))",
-                "Eval(7): Xor(And(Global.B, Not(Global.C)), Or(Global.D, Global.E))",
-                "Eval(8): Global.F");
+                "Start(Pending: 1)",
+                "  Eval(0): Input<int>[4]",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[4], Literal<int>[1])",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[4], Literal<int>[2])",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[4], Literal<int>[4])",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[4], Literal<int>[8])",
+                "  Eval(2): NotEqual<bool>(BitwiseAnd<int>(Input<int>[4], Literal<int>[1]), Literal<int>[0])",
+                "  Eval(4): And<bool>(NotEqual<bool>(BitwiseAnd<int>[0], Literal<int>[0]), Not<bool>(NotEqual<bool>[False]))",
+                "  Eval(5): Xor<bool>(And<bool>(NotEqual<bool>[False], Not<bool>[True]), Or<bool>(NotEqual<bool>[True], NotEqual<bool>[False]))",
+                "End(Provoked: 0)");
             driver.CheckValue(true, "F");
 
             driver.SetInt(0x8, "A");
             driver.CheckEvaluate(
-                "Eval(1): Global.A",
-                "Eval(2): BitwiseAnd(Global.A, 1)",
-                "Eval(2): BitwiseAnd(Global.A, 2)",
-                "Eval(2): BitwiseAnd(Global.A, 4)",
-                "Eval(2): BitwiseAnd(Global.A, 8)",
-                "Eval(3): NotEqual(BitwiseAnd(Global.A, 4), 0)",
-                "Eval(3): NotEqual(BitwiseAnd(Global.A, 8), 0)",
-                "Eval(4): Global.D",
-                "Eval(4): Global.E",
-                "Eval(5): Or(Global.D, Global.E)");
+                "Start(Pending: 1)",
+                "  Eval(0): Input<int>[8]",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[8], Literal<int>[1])",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[8], Literal<int>[2])",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[8], Literal<int>[4])",
+                "  Eval(1): BitwiseAnd<int>(Input<int>[8], Literal<int>[8])",
+                "  Eval(2): NotEqual<bool>(BitwiseAnd<int>(Input<int>[8], Literal<int>[4]), Literal<int>[0])",
+                "  Eval(2): NotEqual<bool>(BitwiseAnd<int>(Input<int>[8], Literal<int>[8]), Literal<int>[0])",
+                "  Eval(3): Or<bool>(NotEqual<bool>(BitwiseAnd<int>[0], Literal<int>[0]), NotEqual<bool>(BitwiseAnd<int>[8], Literal<int>[0]))",
+                "End(Provoked: 0)");
             driver.CheckValue(true, "F");
         }
     }

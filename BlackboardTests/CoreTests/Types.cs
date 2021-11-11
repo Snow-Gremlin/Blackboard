@@ -11,16 +11,13 @@ namespace BlackboardTests.CoreTests {
     [TestClass]
     public class Types {
 
-        static private string toStr(INode node) => node is null ? "null" : node.ToString();
-
-        static private void checkTypeOf(INode node, Type exp) {
+        static private void checkTypeOf(INode node, Type exp) =>
             Assert.AreEqual(exp, Type.TypeOf(node));
-        }
 
         static private void checkCasts(Type t, INode node, string expMatch, string expImplicit, string expExplicit) {
             string resultMatch    = t.Match(Type.TypeOf(node)).ToString();
-            string resultImplicit = toStr(t.Implicit(node));
-            string resultExplicit = toStr(t.Explicit(node));
+            string resultImplicit = Stringifier.Shallow(t.Implicit(node));
+            string resultExplicit = Stringifier.Shallow(t.Explicit(node));
             if (resultMatch != expMatch || resultImplicit != expImplicit || resultExplicit != expExplicit) {
                 Assert.Fail(
                     resultMatch    + " =[" + (resultMatch    == expMatch    ? "X" : " ") + "]= " + expMatch + "\n" +
@@ -33,7 +30,7 @@ namespace BlackboardTests.CoreTests {
             checkCasts(t, node, "Cast("+steps+")", expImplicit, "null");
 
         static private void checkInherit(Type t, INode node, int steps) =>
-            checkCasts(t, node, "Inherit("+steps+")", node.ToString(), node.ToString());
+            checkCasts(t, node, "Inherit("+steps+")", Stringifier.Shallow(node), Stringifier.Shallow(node));
 
         static private void checkNoCast(Type t, INode node) =>
             checkCasts(t, node, "None", "null", "null");
@@ -64,11 +61,11 @@ namespace BlackboardTests.CoreTests {
         public void TestCastBoolInput() {
             InputValue<Bool> node = new();
             checkInherit (Type.Node,          node, 1);
-            checkImplicit(Type.Trigger,       node, 0, "BoolAsTrigger(Input<bool>(False))");
+            checkImplicit(Type.Trigger,       node, 0, "BoolAsTrigger<bool>(Input<bool>[False])");
             checkInherit (Type.Bool,          node, 0);
             checkNoCast  (Type.Int,           node);
             checkNoCast  (Type.Double,        node);
-            checkImplicit(Type.String,        node, 0, "Implicit<string>(Input<bool>(False))");
+            checkImplicit(Type.String,        node, 0, "Implicit<string>(Input<bool>[False])");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);
@@ -88,8 +85,8 @@ namespace BlackboardTests.CoreTests {
             checkNoCast  (Type.Trigger,       node);
             checkNoCast  (Type.Bool,          node);
             checkInherit (Type.Int,           node, 1);
-            checkImplicit(Type.Double,        node, 1, "Implicit<double>(Latch<int>(null, null))");
-            checkImplicit(Type.String,        node, 1, "Implicit<string>(Latch<int>(null, null))");
+            checkImplicit(Type.Double,        node, 1, "Implicit<double>(Latch<int>[0])");
+            checkImplicit(Type.String,        node, 1, "Implicit<string>(Latch<int>[0])");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);
@@ -108,9 +105,9 @@ namespace BlackboardTests.CoreTests {
             checkInherit (Type.Node,          node, 2);
             checkNoCast  (Type.Trigger,       node);
             checkNoCast  (Type.Bool,          node);
-            checkExplicit(Type.Int,           node, "Explicit<int>(Counter<double>(null, null, null, null, null))");
+            checkExplicit(Type.Int,           node, "Explicit<int>(Counter<double>[0])");
             checkInherit (Type.Double,        node, 1);
-            checkImplicit(Type.String,        node, 1, "Implicit<string>(Counter<double>(null, null, null, null, null))");
+            checkImplicit(Type.String,        node, 1, "Implicit<string>(Counter<double>[0])");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);

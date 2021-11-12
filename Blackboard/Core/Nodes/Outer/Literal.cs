@@ -57,7 +57,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>Always returns no parents since literals have no parent.</summary>
         public override IEnumerable<INode> Parents => Enumerable.Empty<INode>();
 
-        /// <summary>Updates thie value during evaluation.</summary>
+        /// <summary>Updates this value during evaluation.</summary>
         /// <returns>This always returns true.</returns>
         protected override bool UpdateValue() => true;
 

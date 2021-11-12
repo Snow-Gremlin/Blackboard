@@ -399,5 +399,21 @@ namespace BlackboardTests.ParserTests {
                 "End(Provoked: 0)");
             driver.CheckValue(true, "F");
         }
+
+        [TestMethod]
+        public void TestBasicParses_Trigger() {
+            Driver driver = new();
+            Parser parser = new(driver);
+            parser.Read(
+                "in trigger A;",
+                "in trigger B = true;",
+                "C := A | B;",
+                "D := !A & B;");
+            parser.Commit();
+
+            driver.Provoke("A");
+            driver.CheckEvaluate();
+
+        }
     }
 }

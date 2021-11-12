@@ -6,24 +6,24 @@ using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Inner {
 
-    /// <summary>Performs a trigger when the parent becomes true.</summary>
-    sealed public class OnTrue: TriggerNode {
+    /// <summary>Gets a boolean value for the inverse of the trigger.</summary>
+    sealed public class NotTrigger: ValueNode<Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new Function<IValueAdopter<Bool>, OnTrue>((input) => new OnTrue(input));
+            new Function<ITriggerAdopter, NotTrigger>((input) => new NotTrigger(input));
 
         /// <summary>This is the parent node to read from.</summary>
-        private IValueAdopter<Bool> source;
+        private ITriggerAdopter source;
 
         /// <summary>Creates a trigger node which triggers when the boolean goes from false to true.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        public OnTrue(IValueAdopter<Bool> source = null) {
+        public NotTrigger(ITriggerAdopter source = null) {
             this.Parent = source;
         }
 
         /// <summary>The parent node to get the source value from.</summary>
-        public IValueAdopter<Bool> Parent {
+        public ITriggerAdopter Parent {
             get => this.source;
             set => this.SetParent(ref this.source, value);
         }
@@ -35,11 +35,15 @@ namespace Blackboard.Core.Nodes.Inner {
             }
         }
 
-        /// <summary>This will update the trigger during evaluation.</summary>
-        /// <returns>True to trigger if the source value is true, false otherwise.</returns>
-        protected override bool UpdateTrigger() => this.source.Value.Value;
+        /// <summary>Updates this value during evaluation.</summary>
+        /// <returns>This always returns true.</returns>
+        protected override bool UpdateValue() {
+            if (this.source is null) return false;
+            bool value = !this.source.Provoked;
+            return this.SetNodeValue(new Bool(value));
+        }
 
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "OnTrue";
+        public override string TypeName => "NotTrigger";
     }
 }

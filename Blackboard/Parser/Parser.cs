@@ -22,12 +22,12 @@ namespace Blackboard.Parser {
 
         /// <summary>Prepares the parser's static variables before they are used.</summary>
         static Parser() {
-            BaseParser = PP.Loader.Loader.LoadParser(
+            baseParser = PP.Loader.Loader.LoadParser(
                 PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
         }
 
         /// <summary>The Blackboard language base parser lazy singleton.</summary>
-        static private readonly PP.Parser.Parser BaseParser;
+        static private readonly PP.Parser.Parser baseParser;
 
         private readonly Driver driver;
         private readonly Formula formula;
@@ -62,7 +62,7 @@ namespace Blackboard.Parser {
         /// <remarks>The commands of this input will be added to formula if valid.</remarks>
         /// <param name="input">The input code to parse.</param>
         public void Read(IEnumerable<string> input, string name = "Unnamed") {
-            PP.Parser.Result result = BaseParser.Parse(new PP.Scanner.Default(input, name));
+            PP.Parser.Result result = baseParser.Parse(new PP.Scanner.Default(input, name));
             if (result.Errors.Length > 0)
                 throw new Exception(string.Join('\n', result.Errors));
             this.read(result.Tree);
@@ -102,10 +102,10 @@ namespace Blackboard.Parser {
                 { "newTypeInputWithAssign", this.handleNewTypeInputWithAssign },
                 { "newVarInputWithAssign",  this.handleNewVarInputWithAssign },
 
-                { "typeDefine",             this.handleTypeDefine },
-                { "varDefine",              this.handleVarDefine },
-                //{ "pullTrigger",            this.handlePullTrigger },
-                //{ "conditionalPullTrigger", this.handleConditionalPullTrigger },
+                { "typeDefine",                this.handleTypeDefine },
+                { "varDefine",                 this.handleVarDefine },
+                { "provokeTrigger",            this.handleProvokeTrigger },
+                { "conditionalProvokeTrigger", this.handleConditionalProvokeTrigger },
 
                 { "assignment",   this.handleAssignment },
                 { "cast",         this.handleCast },
@@ -165,7 +165,7 @@ namespace Blackboard.Parser {
         /// <summary>Validates that all prompts in the grammar are handled.</summary>
         private void validatePrompts() {
             // TODO: Move most of this over to PetiteParser.
-            HashSet<string> remaining = new(BaseParser.Grammar.Prompts.Select((prompt) => prompt.Name));
+            HashSet<string> remaining = new(baseParser.Grammar.Prompts.Select((prompt) => prompt.Name));
             HashSet<string> missing = new();
             foreach (string name in this.prompts.Keys) {
                 if (remaining.Contains(name)) remaining.Remove(name);
@@ -340,7 +340,7 @@ namespace Blackboard.Parser {
             this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
         }
 
-        /// <summary>This handles defining a new typed output node.</summary>
+        /// <summary>This handles defining a new typed named node.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleTypeDefine(PP.ParseTree.PromptArgs args) {
             IPrepper value = this.pop<IPrepper>();
@@ -349,7 +349,7 @@ namespace Blackboard.Parser {
             PP.Scanner.Location loc = args.Tokens[^1].End;
 
             IPerformer valuePerf = value.Prepare(formula, false);
-            Type valueType = Type.FromType(valuePerf.Type);
+            Type valueType  = Type.FromType(valuePerf.Type);
             TypeMatch match = t.Match(valueType);
             if (!match.IsMatch)
                 throw new Exception("May not define the value to that type of input.").
@@ -369,7 +369,7 @@ namespace Blackboard.Parser {
                         With("Location", loc).
                         With("Type", t);
 
-                IFuncDef castFunc =(castGroup as IFuncGroup).Find(valueType);
+                IFuncDef castFunc = (castGroup as IFuncGroup).Find(valueType);
                 valuePerf = new Function(castFunc, valuePerf);
             }
             this.formula.Add(new VirtualNodeWriter(virtualInput, valuePerf));
@@ -378,38 +378,54 @@ namespace Blackboard.Parser {
             this.stashPush(t);
         }
 
-        /// <summary>This handles defining a new untyped output node.</summary>
+        /// <summary>This handles defining a new untyped named node.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleVarDefine(PP.ParseTree.PromptArgs args) {
             IPrepper value = this.pop<IPrepper>();
             IdPrep target = this.pop<IdPrep>();
-            PP.Scanner.Location loc = args.Tokens[^1].End;
 
-            IPerformer valuePerf = value.Prepare(formula, false);
+            IPerformer  valuePerf    = value.Prepare(formula, false);
             VirtualNode virtualInput = target.CreateNode(formula, valuePerf.Type);
             this.formula.Add(new VirtualNodeWriter(virtualInput, valuePerf));
         }
 
-        /*
         /// <summary>This handles when a trigger is provoked unconditionally.</summary>
         /// <param name="args">The token information from the parser.</param>
-        private void handlePullTrigger(PP.ParseTree.PromptArgs args) {
+        private void handleProvokeTrigger(PP.ParseTree.PromptArgs args) {
             PP.Scanner.Location loc = args.Tokens[^1].End;
-            Identifier id = this.pop<Identifier>();
-            this.provokeTrigger(loc, id);
+            IdPrep target = this.pop<IdPrep>();
+            IPerformer targetPerf = target.Prepare(formula, false);
+
+            NoPrep valuePrep = new(Literal.Bool(true)), targetPrep = new(targetPerf), funcPrep = new(InputTrigger.Assign);
+            this.formula.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(formula));
+
+            // Push the literal true onto the stack for any following trigger pulls.
+            this.push(valuePrep);
         }
 
         /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
         /// <param name="args">The token information from the parser.</param>
-        private void handleConditionalPullTrigger(PP.ParseTree.PromptArgs args) {
+        private void handleConditionalProvokeTrigger(PP.ParseTree.PromptArgs args) {
             PP.Scanner.Location loc = args.Tokens[^1].End;
-            Identifier id = this.pop<Identifier>();
-            INode node = this.popNode().First();
-            if (node is not IValue<bool> boolNode)
-                throw new Exception("May only conditionally provoke the trigger " + id + " with a bool or trigger at " + loc + ".");
-            if (boolNode.Value) this.provokeTrigger(loc, id);
+            IdPrep target  = this.pop<IdPrep>();
+            IPrepper value = this.pop<IPrepper>();
+
+            IPerformer valuePerf  = value.Prepare(formula, false);
+            IPerformer targetPerf = target.Prepare(formula, false);
+
+            Type valueType  = Type.FromType(valuePerf.Type);
+            TypeMatch match = Type.Trigger.Match(valueType);
+            if (!match.IsMatch)
+                throw new Exception("May only conditionally provoke a trigger with a bool or trigger.").
+                    With("Location", loc).
+                    With("Conditional Type", valueType);
+
+            NoPrep valuePrep = new(valuePerf), targetPrep = new(targetPerf), funcPrep = new(InputTrigger.Assign);
+            this.formula.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(formula));
+
+            // Push the condition onto the stack for any following trigger pulls.
+            this.push(valuePrep);
         }
-        */
 
         /// <summary>This handles assigning the left value to the right value.</summary>
         /// <param name="args">The token information from the parser.</param>

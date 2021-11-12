@@ -165,7 +165,7 @@
     | <Declaration>
     | <DefineTypedRule>
     | <DefineVarRule>
-#    | <PullTrigger>
+    | <ProvokeTrigger>
     ;
 
 #----------------------------------------------------------
@@ -194,9 +194,14 @@
 
 <DefineVarRule> := [Identifier] {pushId} [Define] <Conditional> {varDefine};
 
-###<PullTrigger> := [Trigger] <Id> {pullTrigger}
-###    | <Conditional> [Trigger] <Id> {conditionalPullTrigger};
-    
+#----------------------------------------------------------
+
+<ProvokeTrigger> := [Trigger] <Conditional> {provokeTrigger} <ProvokeTriggerTail>
+    | <Conditional> [Trigger] <Conditional> {conditionalProvokeTrigger} <ProvokeTriggerTail>;
+
+<ProvokeTriggerTail> := _
+    | [Trigger] <Conditional> {conditionalProvokeTrigger} <ProvokeTriggerTail>;
+
 #==========================================================
 
 <Declaration> := <Conditional>

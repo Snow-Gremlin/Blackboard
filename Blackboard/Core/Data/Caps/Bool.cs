@@ -5,6 +5,12 @@ namespace Blackboard.Core.Data.Caps {
     /// <summary>This is the data storage for a boolean value such that it can be used in generics.</summary>
     sealed public class Bool: IComparable<Bool> {
 
+        /// <summary>Gets a boolean value for true.</summary>
+        static public readonly Bool True = new(true);
+
+        /// <summary>Gets a boolean value for false.</summary>
+        static public readonly Bool False = new(false);
+
         /// <summary>The boolean value being stored.</summary>
         public readonly bool Value;
 

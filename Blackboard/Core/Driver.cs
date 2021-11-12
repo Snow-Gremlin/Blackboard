@@ -103,7 +103,8 @@ namespace Blackboard.Core {
                 Neg<Int>.Factory,
                 Neg<Double>.Factory);
             add("not",
-                Not.Factory);
+                Not.Factory,
+                NotTrigger.Factory);
             add("notEqual",
                 NotEqual<Bool>.Factory,
                 NotEqual<Int>.Factory,

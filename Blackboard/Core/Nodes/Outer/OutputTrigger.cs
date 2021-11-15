@@ -35,11 +35,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public event S.EventHandler OnProvoked;
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents {
-            get {
-                if (this.source is not null) yield return this.source;
-            }
-        }
+        public override IEnumerable<INode> Parents => INode.NotNull(this.source);
 
         /// <summary>This updates the trigger during the an evaluation.</summary>
         /// <returns>This returns the provoked value as it currently is.</returns>

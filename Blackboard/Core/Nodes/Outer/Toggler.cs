@@ -58,12 +58,7 @@ namespace Blackboard.Core.Nodes.Outer {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents {
-            get {
-                if (this.toggle is not null) yield return this.toggle;
-                if (this.reset is not null) yield return this.reset;
-            }
-        }
+        public override IEnumerable<INode> Parents => INode.NotNull(this.toggle, this.reset);
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>

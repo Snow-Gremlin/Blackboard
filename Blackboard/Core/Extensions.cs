@@ -19,14 +19,6 @@ namespace Blackboard.Core {
             where T : class =>
             from value in input where value is not null select value;
 
-        /// <summary>The strings for all the given values.</summary>
-        /// <typeparam name="T">The types of values to stringify.</typeparam>
-        /// <param name="values">The values to get the string for.</param>
-        /// <param name="nullStr">The string to return if the value is null.</param>
-        /// <returns>The strings for the given values.</returns>
-        static public IEnumerable<string> Strings<T>(this IEnumerable<T> values, string nullStr = "null") =>
-            from v in values select v?.ToString() ?? nullStr;
-
         /// <summary>Determines if any of values exists in both lists.</summary>
         /// <typeparam name="T">The types of values to find.</typeparam>
         /// <param name="a">The first input set of values to check within.</param>
@@ -35,6 +27,28 @@ namespace Blackboard.Core {
         /// <returns>True if any value is contained in both, false otherwise.</returns>
         static public bool ContainsAny<T>(this IEnumerable<T> a, IEnumerable<T> b, IEqualityComparer<T> comparer = null) =>
             a.Any((value) => b.Contains(value, comparer));
+
+        /// <summary>This will enumerate the given list then for each additional call it will return the last value.</summary>
+        /// <remarks>This will continue forever so you must provide another part of the enumerations to stop it, such as a zip.</remarks>
+        /// <typeparam name="T">The type of the list to enumerate.</typeparam>
+        /// <param name="values">The values to enumerate and then repeat the last of.</param>
+        /// <returns>The enumeration of the values and repeated last. If no input values then default is returned.</returns>
+        static public IEnumerable<T> RepeatLast<T>(this IEnumerable<T> values) {
+            T prev = default;
+            foreach (T value in values) {
+                prev = value;
+                yield return value;
+            }
+            while (true) yield return prev;
+        }
+
+        /// <summary>The strings for all the given values.</summary>
+        /// <typeparam name="T">The types of values to stringify.</typeparam>
+        /// <param name="values">The values to get the string for.</param>
+        /// <param name="nullStr">The string to return if the value is null.</param>
+        /// <returns>The strings for the given values.</returns>
+        static public IEnumerable<string> Strings<T>(this IEnumerable<T> values, string nullStr = "null") =>
+            from v in values select v?.ToString() ?? nullStr;
 
         /// <summary>This will indent all the lines in the given strings with the given indent.</summary>
         /// <param name="parts">The string to indent all the lines with.</param>

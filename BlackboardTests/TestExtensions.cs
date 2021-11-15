@@ -96,9 +96,29 @@ namespace BlackboardTests {
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckEvaluate(this Driver driver, params string[] lines) {
             EvalLogger logger = new();
+            logger.Stringifier.PreloadNames(driver);
             driver.Evaluate(logger);
             string exp = string.Join(S.Environment.NewLine, lines);
             Assert.AreEqual(exp, logger.ToString().Trim());
+        }
+
+        /// <summary>Checks the deep string for the given node using the names from the given driver.</summary>
+        /// <param name="driver">The driver to load the names for the nodes from.</param>
+        /// <param name="node">The node to get the deep string for.</param>
+        /// <param name="lines">The line to compare the node's string against.</param>
+        static public void CheckNodeString(this Driver driver, INode node, params string[] lines) {
+            string exp = string.Join(S.Environment.NewLine, lines);
+            Stringifier stringifier = Stringifier.Deep();
+            stringifier.PreloadNames(driver);
+            Assert.AreEqual(exp, stringifier.Stringify(node));
+        }
+
+        /// <summary>Checks the namespace string for the whole graph and compares against the given lines.</summary>
+        /// <param name="driver">The driver to compare against.</param>
+        /// <param name="lines">The expected lines of the returned string.</param>
+        static public void CheckGraphString(this Driver driver, params string[] lines) {
+            string exp = string.Join(S.Environment.NewLine, lines);
+            Assert.AreEqual(exp, Stringifier.GraphString(driver));
         }
 
         /// <summary>This measures the amount of time it takes to run the action several times.</summary>

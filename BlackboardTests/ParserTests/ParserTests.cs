@@ -239,13 +239,19 @@ namespace BlackboardTests.ParserTests {
 
         [TestMethod]
         public void TestBasicParses_IntDoubleSum() {
-            Driver driver = new();
+            Driver driver = new(addFuncs: false, addConsts: false);
             Parser parser = new(driver);
             parser.Read(
                 "in int A = 2;",
                 "in double B = 3.0;",
                 "double C := A + B;");
             parser.Commit();
+            driver.CheckGraphString(
+                "Global: Namespace{",
+                "  A: Input<int>[2],",
+                "  B: Input<double>[3],",
+                "  C: Sum<double>[5](Implicit<double>[2](A), B)",
+                "}");
 
             driver.CheckValue(2,   "A");
             driver.CheckValue(3.0, "B");
@@ -408,12 +414,40 @@ namespace BlackboardTests.ParserTests {
                 "in trigger A;",
                 "in trigger B = true;",
                 "C := A | B;",
-                "D := !A & B;");
+                "D := A & B;",
+                "E := 'C: ' + C + ', D: ' + D;");
             parser.Commit();
 
             driver.Provoke("A");
-            driver.CheckEvaluate();
-
+            driver.CheckEvaluate(
+                "Start(Pending: 1)",
+                "  Eval(0): Input<trigger>[provoked]",
+                "  Eval(1): Any<trigger>(Input<trigger>[provoked], Input<trigger>[provoked])",
+                "  Eval(1): All<trigger>(Input<trigger>[provoked], Input<trigger>[provoked])",
+                "End(Provoked: 3)");
         }
+
+        /*
+        [TestMethod]
+        public void TestBasicParses_ExplicitCasts() {
+            Driver driver = new();
+            Parser parser = new(driver);
+            parser.Read(
+                "in int A = 2;",
+                "double B := A;",
+                "string C := B;");
+            parser.Commit();
+
+            driver.CheckValue(2, "A");
+            driver.CheckValue(2.0, "B");
+            driver.CheckValue("2", "C");
+
+            driver.SetInt(42, "A");
+            driver.Evaluate();
+            driver.CheckValue(42, "A");
+            driver.CheckValue(42.0, "B");
+            driver.CheckValue("42", "C");
+        }
+        */
     }
 }

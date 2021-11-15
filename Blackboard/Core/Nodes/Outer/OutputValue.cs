@@ -62,11 +62,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public event S.EventHandler<OutputValueEventArgs<T>> OnChanged;
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents {
-            get {
-                if (this.source is not null) yield return this.source;
-            }
-        }
+        public override IEnumerable<INode> Parents => INode.NotNull(this.source);
 
         /// <summary>This will update the value.</summary>
         /// <returns>This will always return true.</returns>

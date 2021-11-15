@@ -55,7 +55,6 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Creates a new non-group function base.</summary>
         /// <remarks>By default no group is defined for this function.</remarks>
         protected FuncDef(int min, int max, bool needsOneNoCast, bool passOne, params Type[] argTypes) {
-            this.group = null;
             this.MinArgs = S.Math.Max(min, 0);
             this.MaxArgs = S.Math.Max(this.MinArgs, max);
             this.NeedsOneNoCast = needsOneNoCast;
@@ -68,23 +67,8 @@ namespace Blackboard.Core.Nodes.Bases {
             }
         }
 
-        /// <summary>Gets or sets the group this function belongs to.</summary>
-        public FuncGroup Group {
-            get => this.group;
-            set {
-                if (ReferenceEquals(this.group, value)) return;
-                this.group?.RemoveChildren(this);
-                this.group = value;
-                this.group?.AddChildren(this);
-            }
-        }
-
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<INode> Parents {
-            get {
-                if (this.Group is not null) yield return this.Group;
-            }
-        }
+        public IEnumerable<INode> Parents => Enumerable.Empty<INode>();
 
         /// <summary>The set of children nodes to this node in the graph.</summary>
         public IEnumerable<INode> Children => Enumerable.Empty<INode>();
@@ -107,24 +91,13 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <returns>The type which would be returned.</returns>
         public S.Type ReturnType => typeof(TReturn);
 
-        /// <summary>This will get all the argument types.</summary>
-        /// <remarks>This will repeat the last argument type until the iteration is stopped.</remarks>
-        private IEnumerable<Type> ArgTypeIterate {
-            get {
-                int count = this.argTypes.Length;
-                if (count <= 0) yield break;
-                foreach (Type argType in argTypes) yield return argType;
-                while (true) yield return this.argTypes[count-1];
-            }
-        }
-
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>
         /// <param name="types">The input types to match against the function signatures with.</param>
         /// <returns>The matching results for this function.</returns>
         public virtual FuncMatch Match(Type[] types) =>
             types.Length < this.MinArgs ? FuncMatch.NoMatch :
             types.Length > this.MaxArgs ? FuncMatch.NoMatch :
-            FuncMatch.Create(this.NeedsOneNoCast, types.Zip(this.ArgTypeIterate, Type.Match));
+            FuncMatch.Create(this.NeedsOneNoCast, types.Zip(this.argTypes.RepeatLast(), Type.Match));
 
         /// <summary>This will implicity cast the given parameter,</summary>
         /// <param name="node">The node to cast.</param>
@@ -145,7 +118,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <returns>The new function.</returns>
         public virtual INode Build(INode[] nodes) {
             return this.PassthroughOne && nodes.Length == 1 ? this.argTypes[0].Implicit(nodes[0]) :
-                this.PostCastBuild(nodes.Zip(this.ArgTypeIterate, castParam).ToArray());
+                this.PostCastBuild(nodes.Zip(this.argTypes.RepeatLast(), castParam).ToArray());
         }
 
         /// <summary>Builds and return the function node with the given arguments already casted.</summary>

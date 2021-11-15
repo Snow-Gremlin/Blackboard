@@ -11,9 +11,22 @@ namespace Blackboard.Core {
         /// <summary>The string buffer to write to.</summary>
         private StringWriter fout;
 
+        /// <summary>The stringifier for converting nodes to strings.</summary>
+        private Stringifier stringifier;
+
         /// <summary>Creates a new evaluation logger.</summary>
         public EvalLogger() {
             this.fout = new StringWriter();
+            this.stringifier = null;
+        }
+
+        /// <summary>The stringifier for converting nodes to strings.</summary>
+        public Stringifier Stringifier {
+            get {
+                this.stringifier ??= Stringifier.Shallow();
+                return this.stringifier;
+            }
+            set => this.stringifier = value;
         }
 
         /// <summary>Clears this logger.</summary>
@@ -36,7 +49,7 @@ namespace Blackboard.Core {
         /// <summary>This is called when a node is evaluated.</summary>
         /// <param name="node">The node about to be evaluated.</param>
         virtual public void Eval(IEvaluatable node) =>
-            this.Log("  Eval("+node.Depth+"): "+Stringifier.Shallow(node));
+            this.Log("  Eval("+node.Depth+"): "+this.Stringifier.Stringify(node));
 
         /// <summary>This is called when a node has been evaluated.</summary>
         /// <param name="children">The resulting children from the evaluation.</param>

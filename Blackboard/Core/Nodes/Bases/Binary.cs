@@ -49,12 +49,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents {
-            get {
-                if (this.source1 is not null) yield return this.source1;
-                if (this.source2 is not null) yield return this.source2;
-            }
-        }
+        public override IEnumerable<INode> Parents => INode.NotNull(this.source1, this.source2);
 
         /// <summary>This handles updating this node's value given the parents' values during evaluation.</summary>
         /// <remarks>This will not be called if any of the parents are null.</remarks>

@@ -107,6 +107,12 @@ namespace Blackboard.Parser.Preppers {
             Type[] types = inputs.Select((arg) => Type.FromType(arg.Type)).ToArray();
             
             IFuncDef func = this.prepareFuncDef(sourceNode, types);
+
+
+            //inputs.Zip(func.ArgumentTypes.RepeatLast()) // TODO: FINISH
+
+
+
             return Reducer.Wrap(new Function(func, inputs), reduce);
         }
 

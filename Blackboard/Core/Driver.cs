@@ -1,11 +1,11 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Functions;
-using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using S = System;
-using Blackboard.Core.Nodes.Inner;
 
 namespace Blackboard.Core {
 
@@ -22,13 +22,15 @@ namespace Blackboard.Core {
         private List<IEvaluatable> touched;
 
         /// <summary>Creates a new driver.</summary>
-        public Driver() {
+        /// <param name="addFuncs">Indicates that built-in functions should be added.</param>
+        /// <param name="addConsts">Indicates that constants should be added.</param>
+        public Driver(bool addFuncs = true, bool addConsts = true) {
             this.touched = new List<IEvaluatable>();
             this.Global = new Namespace();
 
             this.addOperators();
-            this.addFunctions();
-            this.addConstants();
+            if (addFuncs)  this.addFunctions();
+            if (addConsts) this.addConstants();
         }
 
         #region Built-in Functions and Constants...
@@ -103,8 +105,7 @@ namespace Blackboard.Core {
                 Neg<Int>.Factory,
                 Neg<Double>.Factory);
             add("not",
-                Not.Factory,
-                NotTrigger.Factory);
+                Not.Factory);
             add("notEqual",
                 NotEqual<Bool>.Factory,
                 NotEqual<Int>.Factory,
@@ -428,10 +429,6 @@ namespace Blackboard.Core {
 
         /// <summary>The base set of named nodes to access the total node structure.</summary>
         public Namespace Global { get; }
-
-        /// <summary>Gets a string showing the whole driver from the global.</summary>
-        /// <returns>The full debug string for this driver.</returns>
-        public string NamespaceString() => "Global:" + Stringifier.Deep(this.Global);
 
         /// <summary>This indicates if any changes are pending evaluation.</summary>
         public bool HasPending => this.touched.Count > 0;

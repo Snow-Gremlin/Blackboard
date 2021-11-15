@@ -40,11 +40,7 @@ namespace Blackboard.Core.Nodes.Inner {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents {
-            get {
-                if (this.source is not null) yield return this.source;
-            }
-        }
+        public override IEnumerable<INode> Parents => INode.NotNull(this.source);
 
         /// <summary>This gets the data being stored in this node.</summary>
         /// <remarks>This returns the data from the souce boolean value or null if not set.</remarks>

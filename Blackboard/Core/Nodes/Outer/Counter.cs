@@ -79,15 +79,8 @@ namespace Blackboard.Core.Nodes.Outer {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents {
-            get {
-                if (this.increment  is not null) yield return this.increment;
-                if (this.decrement  is not null) yield return this.decrement;
-                if (this.reset      is not null) yield return this.reset;
-                if (this.delta      is not null) yield return this.delta;
-                if (this.resetValue is not null) yield return this.resetValue;
-            }
-        }
+        public override IEnumerable<INode> Parents =>
+            INode.NotNull(this.increment, this.decrement, this.reset, this.delta, this.resetValue);
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>

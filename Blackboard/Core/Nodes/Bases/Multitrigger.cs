@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Bases {
     public abstract class Multitrigger: TriggerNode {
 
         /// <summary>This is the list of all the parent nodes to listen to.</summary>
-        protected List<ITriggerAdopter> sources;
+        protected List<ITriggerAdopter> Sources;
 
         /// <summary>Creates a multi-trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
@@ -17,7 +17,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Creates a multi-trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         public Multitrigger(IEnumerable<ITriggerAdopter> parents = null) {
-            this.sources = new List<ITriggerAdopter>();
+            this.Sources = new List<ITriggerAdopter>();
             this.AddParents(parents);
         }
 
@@ -30,7 +30,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="parents">The set of parents to add.</param>
         public void AddParents(IEnumerable<ITriggerAdopter> parents) {
             parents = parents.NotNull();
-            this.sources.AddRange(parents);
+            this.Sources.AddRange(parents);
             foreach (ITriggerAdopter parent in parents)
                 parent.AddChildren(this);
         }
@@ -47,7 +47,7 @@ namespace Blackboard.Core.Nodes.Bases {
         public bool RemoveParents(IEnumerable<ITriggerAdopter> parents) {
             bool anyRemoved = false;
             foreach (ITriggerAdopter parent in parents) {
-                if (this.sources.Remove(parent)) {
+                if (this.Sources.Remove(parent)) {
                     parent.RemoveChildren(this);
                     anyRemoved = true;
                 }
@@ -56,7 +56,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents => this.sources;
+        public override IEnumerable<INode> Parents => this.Sources;
 
         /// <summary>
         /// This handles updating this node's value given the
@@ -70,6 +70,6 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>This updates the trigger during evaluation.</summary>
         /// <returns>True if the value was provoked, false otherwise.</returns>
         protected override bool UpdateTrigger() =>
-            this.Provoked = this.OnEval(this.sources.NotNull().Triggers());
+            this.Provoked = this.OnEval(this.Sources.NotNull().Triggers());
     }
 }

@@ -93,6 +93,6 @@ namespace Blackboard.Core {
         /// <summary>Gets the string for the match.</summary>
         /// <returns>The match's string.</returns>
         public override string ToString() => this.IsMatch ?
-            "("+string.Join<TypeMatch>(", ", this.matches)+")" : "None";
+            "("+this.matches.Join(", ")+")" : "None";
     }
 }

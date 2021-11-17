@@ -1,9 +1,9 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Parser.Performers;
 using System.Collections.Generic;
 using System.Linq;
-using S = System;
 
 namespace Blackboard.Parser {
 
@@ -41,12 +41,7 @@ namespace Blackboard.Parser {
 
         /// <summary>Performs all pending actions then resets the formula.</summary>
         public void Perform() {
-            // Run each performer by calling it, the returned nodes can be discarded because any kept nodes should be written to Blackboard.
-            foreach (IPerformer performer in this.pending) {
-                //S.Console.WriteLine("Perform: " + performer); // TODO: Setup Log for this
-                performer.Perform();
-                //S.Console.WriteLine(this.FormulaString(showPending: false)); // TODO: Setup Log for this
-            }
+            this.Driver.Touch(this.pending.Select(perf => perf.Perform()).OfType<IEvaluatable>());
             this.Reset();
         }
 

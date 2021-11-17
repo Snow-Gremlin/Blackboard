@@ -354,6 +354,18 @@ namespace Blackboard.Core {
             this.touched.Add(input);
         }
 
+        /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
+        /// <param name="names">The name of trigger node to get the state from.</param>
+        /// <returns>True if a node by that name is found and it is provoked, false otherwise.</returns>
+        public bool Provoked(params string[] names) =>
+            this.Provoked(names as IEnumerable<string>);
+
+        /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
+        /// <param name="names">The name of trigger node to get the state from.</param>
+        /// <returns>True if a node by that name is found and it is provoked, false otherwise.</returns>
+        public bool Provoked(IEnumerable<string> names) =>
+            this.Global.Find(names) is ITrigger node && node.Provoked;
+
         #endregion
         #region Value Getters...
 
@@ -430,6 +442,10 @@ namespace Blackboard.Core {
         /// <summary>The base set of named nodes to access the total node structure.</summary>
         public Namespace Global { get; }
 
+        /// <summary>This touches the given nodes so that they are recalculated during evaluation.</summary>
+        /// <param name="nodes">The nodes to touch.</param>
+        public void Touch(IEnumerable<IEvaluatable> nodes) => this.touched.AddRange(nodes);
+
         /// <summary>This indicates if any changes are pending evaluation.</summary>
         public bool HasPending => this.touched.Count > 0;
 
@@ -446,7 +462,7 @@ namespace Blackboard.Core {
                 IEvaluatable node = pending.TakeFirst();
                 logger?.Eval(node);
                 IEnumerable<IEvaluatable> children = node.Eval();
-                logger?.EvalResult(children);
+                logger?.EvalResult(node, children);
                 pending.SortInsertUniqueEvaluatable(children);
                 if (node is ITrigger trigger)
                     needsReset.AddLast(trigger);

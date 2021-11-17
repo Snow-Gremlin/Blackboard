@@ -39,22 +39,23 @@ namespace Blackboard.Core {
         /// <summary>This is called when an evaluation is started.</summary>
         /// <param name="pending">The initial nodes pending evaluation.</param>
         virtual public void StartEval(IEnumerable<INode> pending) =>
-            this.Log("Start(Pending: "+pending.Count()+")");
+            this.Log("Start(Pending: " + pending.Count() + ")");
 
         /// <summary>This is called when an evaluation has ended.</summary>
         /// <param name="provoked">The triggers which where provoked during this evaluation.</param>
         virtual public void EndEval(IEnumerable<ITrigger> provoked) =>
-            this.Log("End(Provoked: "+provoked.Count()+")");
+            this.Log("End(Provoked: " + provoked.Count() + ")");
 
-        /// <summary>This is called when a node is evaluated.</summary>
+        /// <summary>This is called when a node is about to be evaluated.</summary>
         /// <param name="node">The node about to be evaluated.</param>
-        virtual public void Eval(IEvaluatable node) =>
-            this.Log("  Eval("+node.Depth+"): "+this.Stringifier.Stringify(node));
+        virtual public void Eval(IEvaluatable node) { }
 
         /// <summary>This is called when a node has been evaluated.</summary>
+        /// <param name="node">The node that was just evaluated.</param>
         /// <param name="children">The resulting children from the evaluation.</param>
         /// <remarks>By default this will not log anything.</remarks>
-        virtual public void EvalResult(IEnumerable<INode> children) { }
+        virtual public void EvalResult(IEvaluatable node, IEnumerable<INode> children) =>
+            this.Log("  Eval(" + node.Depth + "): " + this.Stringifier.Stringify(node));
 
         /// <summary>This will get the logs.</summary>
         /// <returns>The logs which have been written.</returns>

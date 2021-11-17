@@ -2,7 +2,7 @@
 
     /// <summary>The interface for an input trigger.</summary>
     /// <remarks>All inputs may be used as an output.</remarks>
-    public interface ITriggerInput: IInput, IEvaluatable {
+    public interface ITriggerInput: IInput, ITrigger, IEvaluatable {
 
         /// <summary>Provokes this trigger so that this node is provoked during the next evaluation.</summary>
         /// <param name="value">True will provoke, false will reset the trigger.</param>

@@ -19,15 +19,15 @@ namespace BlackboardTests.CoreTests {
             Or  or123  = new(and12, input3);
             Not not123 = new(or123);
 
-            and12 .CheckString("And<bool>(Input<bool>[False], Input<bool>[False])");
-            not123.CheckString("Not<bool>(Or<bool>(And<bool>[False], Input<bool>[False]))");
+            and12 .CheckString("And<bool>[False](Input<bool>, Input<bool>)");
+            not123.CheckString("Not<bool>[True](Or<bool>(And<bool>, Input<bool>))");
 
             input1.CheckParents("");
             input2.CheckParents("");
             input3.CheckParents("");
-            and12 .CheckParents("Input<bool>, Input<bool>");
-            or123 .CheckParents("And<bool>, Input<bool>");
-            not123.CheckParents("Or<bool>");
+            and12 .CheckParents("Input<bool>[False], Input<bool>[False]");
+            or123 .CheckParents("And<bool>[False], Input<bool>[False]");
+            not123.CheckParents("Or<bool>[False]");
 
             input1.CheckDepth(0);
             input2.CheckDepth(0);

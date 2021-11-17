@@ -74,7 +74,7 @@ namespace Blackboard.Parser.Preppers {
                 return func is not null ? func :
                     throw new Exception("No function found which accepts the the input types.").
                         With("Source", this.Source).
-                        With("Inputs", string.Join(", ", types.Strings())).
+                        With("Inputs", types.Join(", ")).
                         With("Location", this.Location);
             }
 
@@ -84,12 +84,12 @@ namespace Blackboard.Parser.Preppers {
                     throw new Exception("Function definition from source does not match types.").
                         With("Function", funcDef).
                         With("Source", this.Source).
-                        With("Inputs", "["+types.Strings().Join(", ")+"]").
+                        With("Inputs", "["+types.Join(", ")+"]").
                         With("Location", this.Location) :
                 throw new Exception("Function source must be either a function group or definition.").
                     With("Node", sourceNode).
                     With("Source", this.Source).
-                    With("Inputs", string.Join(", ", types.Strings())).
+                    With("Inputs", types.Join(", ")).
                     With("Location", this.Location);
         }
 
@@ -107,18 +107,12 @@ namespace Blackboard.Parser.Preppers {
             Type[] types = inputs.Select((arg) => Type.FromType(arg.Type)).ToArray();
             
             IFuncDef func = this.prepareFuncDef(sourceNode, types);
-
-
-            //inputs.Zip(func.ArgumentTypes.RepeatLast()) // TODO: FINISH
-
-
-
             return Reducer.Wrap(new Function(func, inputs), reduce);
         }
 
         /// <summary>Gets the prepper debug string.</summary>
         /// <returns>A human readable debug string.</returns>
-        public override string ToString() => "FuncPrep(["+this.Location+"], "+this.Source+
-            ", [" + string.Join(", ", this.Arguments.Select((IPrepper prep) => prep.ToString())) + "])";
+        public override string ToString() =>
+            "FuncPrep([" + this.Location + "], " + this.Source+ ", [" + this.Arguments.Join(", ") + "])";
     }
 }

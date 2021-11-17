@@ -254,7 +254,7 @@ namespace Blackboard.Core {
         static private string nodeDataType(IFuncDef node) {
             string inputTypes = "";
             if (node.ArgumentTypes.Count > 0) {
-                inputTypes = node.ArgumentTypes.Strings().Join(", ");
+                inputTypes = node.ArgumentTypes.Join(", ");
                 if (node.LastArgVariable) inputTypes += "...";
                 inputTypes += "|";
             }

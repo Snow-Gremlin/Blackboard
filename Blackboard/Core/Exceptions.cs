@@ -47,7 +47,7 @@ namespace Blackboard.Core {
         /// <returns>The new exception.</returns>
         static public Exception NoValueFoundByNames(IEnumerable<string> names) =>
             new Exception("No value found by the given name.").
-                With("Names", string.Join(".", names));
+                With("Names", names.Join("."));
 
         /// <summary>An exception for when a value can not be cast.</summary>
         /// <param name="names">The names of the found value.</param>
@@ -56,7 +56,7 @@ namespace Blackboard.Core {
         /// <returns>The new exception.</returns>
         static public Exception UnableToCastValueAsRequested(IEnumerable<string> names, S.Type valueType, S.Type requestedType) =>
             new Exception("May not cast the value with the given name into requested type.").
-                With("Names", string.Join(".", names)).
+                With("Names", names.Join(".")).
                 With("Value Type", valueType).
                 With("Requested Type", requestedType);
     }

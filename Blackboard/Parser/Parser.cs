@@ -64,7 +64,7 @@ namespace Blackboard.Parser {
         public void Read(IEnumerable<string> input, string name = "Unnamed") {
             PP.Parser.Result result = baseParser.Parse(new PP.Scanner.Default(input, name));
             if (result.Errors.Length > 0)
-                throw new Exception(string.Join('\n', result.Errors));
+                throw new Exception(result.Errors.Join("\n"));
             this.read(result.Tree);
         }
 
@@ -173,8 +173,8 @@ namespace Blackboard.Parser {
             }
             if (remaining.Count > 0 || missing.Count > 0)
                 throw new Exception("Blackboard's parser grammer has prompts which do not match prompt handlers.").
-                    With("Not handled", string.Join(", ", remaining)).
-                    With("Not in grammer", string.Join(", ", missing));
+                    With("Not handled", remaining.Join(", ")).
+                    With("Not in grammer", missing.Join(", "));
         }
 
         #endregion

@@ -58,14 +58,23 @@ namespace Blackboard.Core {
             from p in parts select p.Replace("\n", "\n" + indent);
 
         /// <summary>This is short hand to make joining strings into one.</summary>
+        /// <typeparam name="T">The types of values to stringify and join.</typeparam>
         /// <param name="parts">The strings to join together into one.</param>
         /// <param name="seperator">The separator to put between the parts.</param>
         /// <returns>The string from the joined parts.</returns>
-        static public string Join(this IEnumerable<string> parts, string seperator = "") =>
+        static public string Join<T>(this IEnumerable<T> parts, string seperator = "") =>
+            string.Join(seperator, parts);
+
+        /// <summary>This is short hand to make joining strings into one.</summary>
+        /// <typeparam name="T">The types of values to stringify and join.</typeparam>
+        /// <param name="parts">The strings to join together into one.</param>
+        /// <param name="seperator">The separator to put between the parts.</param>
+        /// <returns>The string from the joined parts.</returns>
+        static public string Join<T>(this IEnumerable<T> parts, char seperator) =>
             string.Join(seperator, parts);
 
         #endregion
-        #region List...
+        #region Specifics...
 
         /// <summary>Adds only unique values into the given list.</summary>
         /// <typeparam name="T">The type of values in the list.</typeparam>
@@ -146,6 +155,20 @@ namespace Blackboard.Core {
                 if (addToEnd) list.AddLast(node);
             }
         }
+
+        /// <summary>This will split and trim the string by the give separator. It will filter out empty strings.</summary>
+        /// <param name="src">The source string to split and trim.</param>
+        /// <param name="separator">The string to split the source on.</param>
+        /// <returns>All the trimmed parts which were not empty.</returns>
+        static public IEnumerable<string> SplitAndTrim(this string src, string separator) =>
+            src.Split(separator).Select(name => name.Trim()).Where(name => !string.IsNullOrEmpty(name));
+
+        /// <summary>This will split and trim the string by the give separator. It will filter out empty strings.</summary>
+        /// <param name="src">The source string to split and trim.</param>
+        /// <param name="separator">The character to split the source on.</param>
+        /// <returns>All the trimmed parts which were not empty.</returns>
+        static public IEnumerable<string> SplitAndTrim(this string src, char separator) =>
+            src.Split(separator).Select(name => name.Trim()).Where(name => !string.IsNullOrEmpty(name));
 
         #endregion
         #region Data...

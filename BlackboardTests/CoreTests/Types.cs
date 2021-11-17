@@ -61,11 +61,11 @@ namespace BlackboardTests.CoreTests {
         public void TestCastBoolInput() {
             InputValue<Bool> node = new();
             checkInherit (Type.Node,          node, 1);
-            checkImplicit(Type.Trigger,       node, 0, "BoolAsTrigger<bool>(Input<bool>[False])");
+            checkImplicit(Type.Trigger,       node, 0, "BoolAsTrigger<bool>[False](Input<bool>)");
             checkInherit (Type.Bool,          node, 0);
             checkNoCast  (Type.Int,           node);
             checkNoCast  (Type.Double,        node);
-            checkImplicit(Type.String,        node, 0, "Implicit<string>(Input<bool>[False])");
+            checkImplicit(Type.String,        node, 0, "Implicit<string>[False](Input<bool>)");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);
@@ -85,8 +85,8 @@ namespace BlackboardTests.CoreTests {
             checkNoCast  (Type.Trigger,       node);
             checkNoCast  (Type.Bool,          node);
             checkInherit (Type.Int,           node, 1);
-            checkImplicit(Type.Double,        node, 1, "Implicit<double>(Latch<int>[0])");
-            checkImplicit(Type.String,        node, 1, "Implicit<string>(Latch<int>[0])");
+            checkImplicit(Type.Double,        node, 1, "Implicit<double>[0](Latch<int>)");
+            checkImplicit(Type.String,        node, 1, "Implicit<string>[0](Latch<int>)");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);
@@ -105,9 +105,9 @@ namespace BlackboardTests.CoreTests {
             checkInherit (Type.Node,          node, 2);
             checkNoCast  (Type.Trigger,       node);
             checkNoCast  (Type.Bool,          node);
-            checkExplicit(Type.Int,           node, "Explicit<int>(Counter<double>[0])");
+            checkExplicit(Type.Int,           node, "Explicit<int>[0](Counter<double>)");
             checkInherit (Type.Double,        node, 1);
-            checkImplicit(Type.String,        node, 1, "Implicit<string>(Counter<double>[0])");
+            checkImplicit(Type.String,        node, 1, "Implicit<string>[0](Counter<double>)");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);

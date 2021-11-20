@@ -464,7 +464,7 @@ namespace Blackboard.Core {
                 IEnumerable<IEvaluatable> children = node.Eval();
                 logger?.EvalResult(node, children);
                 pending.SortInsertUniqueEvaluatable(children);
-                if (node is ITrigger trigger)
+                if (node is ITrigger trigger && trigger.Provoked)
                     needsReset.AddLast(trigger);
             }
 

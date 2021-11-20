@@ -457,7 +457,7 @@ namespace BlackboardTests.ParserTests {
 
             driver.Provoke("A");
             driver.CheckProvoked(true, "A");
-            driver.CheckProvoked(true, "B"); // created provoked
+            driver.CheckProvoked(true, "B"); // this was created provoked
             driver.CheckEvaluate(
                 "Start(Pending: 5)",
                 "  Eval(0): A: Input<trigger>[provoked]",
@@ -465,7 +465,7 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(1): C: Any<trigger>[provoked](A, B)",
                 "  Eval(1): D: All<trigger>[provoked](A, B)",
                 "  Eval(2): E: OnlyOne<trigger>(C, D)",
-                "End(Provoked: 5)");
+                "End(Provoked: 4)");
 
             driver.Provoke("A");
             driver.CheckProvoked(true, "A");
@@ -476,7 +476,7 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(1): C: Any<trigger>[provoked](A, B)",
                 "  Eval(1): D: All<trigger>(A, B)",
                 "  Eval(2): E: OnlyOne<trigger>[provoked](C, D)",
-                "End(Provoked: 4)");
+                "End(Provoked: 3)");
 
             driver.Provoke("B");
             driver.CheckProvoked(false, "A");
@@ -487,7 +487,7 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(1): C: Any<trigger>[provoked](A, B)",
                 "  Eval(1): D: All<trigger>(A, B)",
                 "  Eval(2): E: OnlyOne<trigger>[provoked](C, D)",
-                "End(Provoked: 4)");
+                "End(Provoked: 3)");
 
             driver.CheckProvoked(false, "A");
             driver.CheckProvoked(false, "B");
@@ -525,6 +525,63 @@ namespace BlackboardTests.ParserTests {
             driver.CheckValue( 42,    "B");
             driver.CheckValue("42.9", "C");
             driver.CheckValue( 42.9,  "D");
+        }
+
+        [TestMethod]
+        public void TestBasicParses_ProvokingTriggers() {
+            Driver driver = new();
+            Parser parser = new(driver);
+            parser.Read(
+                "in trigger A;",
+                "in trigger B;",
+                "C := A & B;",
+                "in D = 3;");
+            parser.Commit();
+            driver.CheckProvoked(false, "A");
+            driver.CheckProvoked(false, "B");
+            driver.CheckProvoked(false, "C");
+            driver.CheckValue(3, "D");
+            driver.CheckEvaluate(
+                "Start(Pending: 4)",
+                "  Eval(0): A: Input<trigger>", // Evaluates because they are new
+                "  Eval(0): B: Input<trigger>",
+                "  Eval(0): D: Input<int>[3]",
+                "  Eval(1): C: All<trigger>(A, B)",
+                "End(Provoked: 0)");
+
+            parser.Read(
+                "->A;",
+                "D = 5;");
+            parser.Commit();
+            driver.CheckProvoked(true, "A");
+            driver.CheckProvoked(false, "B");
+            driver.CheckProvoked(false, "C");
+            driver.CheckValue(5, "D");
+            driver.CheckEvaluate(
+                "Start(Pending: 2)",
+                "  Eval(0): A: Input<trigger>[provoked]",
+                "  Eval(0): D: Input<int>[5]",
+                "  Eval(1): C: All<trigger>(A, B)",
+                "End(Provoked: 1)");
+
+            parser.Read(
+                "D > 3 -> A;",
+                "A -> B;");
+            parser.Commit();
+            driver.CheckProvoked(true, "A");
+            driver.CheckProvoked(true, "B");
+            driver.CheckProvoked(false, "C");
+            driver.CheckValue(5, "D");
+            driver.CheckEvaluate(
+                "Start(Pending: 2)",
+                "  Eval(0): A: Input<trigger>[provoked]",
+                "  Eval(0): B: Input<trigger>[provoked]",
+                "  Eval(1): C: All<trigger>[provoked](A, B)",
+                "End(Provoked: 3)");
+
+
+
+
         }
     }
 }

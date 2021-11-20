@@ -165,31 +165,56 @@ namespace Blackboard.Core {
         static public TypeMatch Match<T>(Type t) where T : INode =>
             FromType<T>().Match(t);
 
-        /// <summary>This determines the implicit and inheritence match.</summary>
-        /// <param name="t">The type to try casting from.</param>
-        /// <returns>The result of the match.</returns>
-        public TypeMatch Match(Type t) {
-            int steps;
-
-            // Check if inheritance can be used.
-            // Find the closest inherited type so that the most specific match can be choosen.
+        /// <summary>
+        /// Checks if inheritance can be used for this given type.
+        /// Finds the closest inherited type so that the most specific match can be choosen.
+        /// </summary>
+        /// <param name="t">The type to check inheritance against.</param>
+        /// <returns>The inheritance match steps or -1 if no inheritance match.</returns>
+        private int inheritMatchSteps(Type t) {
+            int steps = -1;
             if (t.RealType.IsAssignableTo(this.RealType)) {
-                steps = -1;
                 do {
                     t = t.BaseType;
                     steps++;
                 } while (t is not null && t.RealType.IsAssignableTo(this.RealType));
-                return TypeMatch.Inherit(steps);
             }
+            return steps;
+        }
 
-            // Check if implicit casts exist.
-            // Add an initial penalty for using an implicit cast instead of inheritance.
-            steps = 0;
+        /// <summary> 
+        /// Checks if an implicit or explicit cast for the given type.
+        /// Adds an initial penalty for using an implicit cast instead of inheritance.
+        /// </summary>
+        /// <param name="exp">Indicates to check explicit, otherwise implicit.</param>
+        /// <param name="t">The type to check cast against.</param>
+        /// <returns>The implicit or explicit cast steps or -1 if no cast match.</returns>
+        private int castMatchSteps(bool exp, Type t) {
+            int steps = 0;
             do {
-                if (t.imps.ContainsKey(this)) return TypeMatch.Cast(steps);
+                Dictionary<Type, Caster> dict = exp ? t.exps : t.imps;
+                if (dict.ContainsKey(this)) return steps;
                 t = t.BaseType;
                 steps++;
             } while (t is not null);
+            return -1;
+        }
+
+        /// <summary>This determines the implicit and inheritence match.</summary>
+        /// <param name="t">The type to try casting from.</param>
+        /// <returns>The result of the match.</returns>
+        public TypeMatch Match(Type t, bool explicitCasts = false) {
+            int steps = this.inheritMatchSteps(t);
+            if (steps >= 0) return TypeMatch.Inherit(steps);
+
+            steps = this.castMatchSteps(false, t);
+            if (steps >= 0) return TypeMatch.Implicit(steps);
+
+            if (explicitCasts) {
+                steps = this.castMatchSteps(true, t);
+                if (steps >= 0) return TypeMatch.Explicit();
+            }
+
             return TypeMatch.NoMatch;
         }
 

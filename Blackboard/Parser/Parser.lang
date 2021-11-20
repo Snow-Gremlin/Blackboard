@@ -166,6 +166,7 @@
     | <DefineTypedRule>
     | <DefineVarRule>
     | <ProvokeTrigger>
+    # TODO: Add NewTypedOutput and NewVarOutput
     ;
 
 #----------------------------------------------------------

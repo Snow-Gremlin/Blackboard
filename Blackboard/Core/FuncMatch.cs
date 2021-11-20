@@ -32,7 +32,7 @@ namespace Blackboard.Core {
             if (length > 0 && needOneNoCast) {
                 bool hasOnlyCasts = true;
                 foreach (TypeMatch match in matches) {
-                    if (!match.NeedsCast) {
+                    if (!match.IsImplicit) {
                         hasOnlyCasts = false;
                         break;
                     }

@@ -1,8 +1,9 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Core.Nodes.Inner {
 
@@ -31,13 +32,11 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="values">The parents to average together.</param>
         /// <returns>The average of all the given values.</returns>
         protected override Double OnEval(IEnumerable<Double> values) {
-            int count = 0;
-            double sum = 0.0;
-            foreach (Double value in values) {
-                sum += value.Value;
-                count++;
-            }
-            return new(count <= 0 ? 0.0 : sum/count);
+            int count = values.Count();
+            if (count <= 0) return new(0.0);
+
+            double sum = values.Sum(v => v.Value);
+            return new(sum/count);
         }
     }
 }

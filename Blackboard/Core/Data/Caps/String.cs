@@ -28,17 +28,17 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Casts a boolean into a string for an implicit cast.</summary>
         /// <param name="value">The boolean value to cast.</param>
         /// <returns>The resulting string value.</returns>
-        public String CastFrom(Bool value) => new(value.Value.ToString());
+        public String CastFrom(Bool value) => new(value.ValueString);
 
         /// <summary>Casts an integer into a string for an implicit cast.</summary>
         /// <param name="value">The integer value to cast.</param>
         /// <returns>The resulting string value.</returns>
-        public String CastFrom(Int value) => new(value.Value.ToString());
+        public String CastFrom(Int value) => new(value.ValueString);
 
         /// <summary>Casts a double into a string for an implicit cast.</summary>
         /// <param name="value">The double value to cast.</param>
         /// <returns>The resulting string value.</returns>
-        public String CastFrom(Double value) => new(value.Value.ToString());
+        public String CastFrom(Double value) => new(value.ValueString);
 
         /// <summary>Compares two strings together.</summary>
         /// <param name="other">The other string to compare.</param>

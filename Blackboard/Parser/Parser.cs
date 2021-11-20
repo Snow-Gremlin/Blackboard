@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Parser.Performers;
@@ -93,35 +92,35 @@ namespace Blackboard.Parser {
 
         /// <summary>Initializes the prompts and operators for this parser.</summary>
         private void initPrompts() {
-            this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>() {
-                { "clear",         this.handleClear },
-                { "pushNamespace", this.handlePushNamespace },
-                { "popNamespace",  this.handlePopNamespace },
+            this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>();
 
-                { "newTypeInputNoAssign",   this.handleNewTypeInputNoAssign },
-                { "newTypeInputWithAssign", this.handleNewTypeInputWithAssign },
-                { "newVarInputWithAssign",  this.handleNewVarInputWithAssign },
+            this.addHandler("clear",         this.handleClear);
+            this.addHandler("pushNamespace", this.handlePushNamespace);
+            this.addHandler("popNamespace",  this.handlePopNamespace);
 
-                { "typeDefine",                this.handleTypeDefine },
-                { "varDefine",                 this.handleVarDefine },
-                { "provokeTrigger",            this.handleProvokeTrigger },
-                { "conditionalProvokeTrigger", this.handleConditionalProvokeTrigger },
+            this.addHandler("newTypeInputNoAssign",   this.handleNewTypeInputNoAssign);
+            this.addHandler("newTypeInputWithAssign", this.handleNewTypeInputWithAssign);
+            this.addHandler("newVarInputWithAssign",  this.handleNewVarInputWithAssign);
 
-                { "assignment",   this.handleAssignment },
-                { "cast",         this.handleCast },
-                { "memberAccess", this.handleMemberAccess },
-                { "startCall",    this.handleStartCall },
-                { "addArg",       this.handleAddArg },
-                { "pushId",       this.handlePushId },
-                { "pushBool",     this.handlePushBool },
-                { "pushBin",      this.handlePushBin },
-                { "pushOct",      this.handlePushOct },
-                { "pushInt",      this.handlePushInt },
-                { "pushHex",      this.handlePushHex },
-                { "pushDouble",   this.handlePushDouble },
-                { "pushString",   this.handlePushString },
-                { "pushType",     this.handlePushType },
-            };
+            this.addHandler("typeDefine",                this.handleTypeDefine);
+            this.addHandler("varDefine",                 this.handleVarDefine);
+            this.addHandler("provokeTrigger",            this.handleProvokeTrigger);
+            this.addHandler("conditionalProvokeTrigger", this.handleConditionalProvokeTrigger);
+
+            this.addHandler("assignment",   this.handleAssignment);
+            this.addHandler("cast",         this.handleCast);
+            this.addHandler("memberAccess", this.handleMemberAccess);
+            this.addHandler("startCall",    this.handleStartCall);
+            this.addHandler("addArg",       this.handleAddArg);
+            this.addHandler("pushId",       this.handlePushId);
+            this.addHandler("pushBool",     this.handlePushBool);
+            this.addHandler("pushBin",      this.handlePushBin);
+            this.addHandler("pushOct",      this.handlePushOct);
+            this.addHandler("pushInt",      this.handlePushInt);
+            this.addHandler("pushHex",      this.handlePushHex);
+            this.addHandler("pushDouble",   this.handlePushDouble);
+            this.addHandler("pushString",   this.handlePushString);
+            this.addHandler("pushType",     this.handlePushType);
 
             this.addProcess(3, "trinary");
             this.addProcess(2, "logicalOr");
@@ -150,18 +149,29 @@ namespace Blackboard.Parser {
             this.addProcess(1, "invert");
         }
 
+        /// <summary>This adds a handler for the given name.</summary>
+        /// <param name="name">This is the name of the prompt this handler is for.</param>
+        /// <param name="hndl">This is the handler to call on this prompt.</param>
+        private void addHandler(string name, PP.ParseTree.PromptHandle hndl) {
+            this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
+                //S.Console.WriteLine("Handle "+name); // TODO: REMOVE
+                hndl(args);
+            };
+        }
+
         /// <summary>This adds a prompt for an operator handler.</summary>
         /// <param name="count">The number of values to pop off the stack for this function.</param>
         /// <param name="name">The name of the prompt to add to.</param>
         private void addProcess(int count, string name) {
             INode funcGroup = this.driver.Global.Find(Driver.OperatorNamespace, name);
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
+                //S.Console.WriteLine("Process "+name); // TODO: REMOVE
                 PP.Scanner.Location loc = args.Tokens[^1].End;
                 IPrepper[] inputs = this.pop<IPrepper>(count);
                 this.push(new FuncPrep(loc, new NoPrep(funcGroup), inputs));
             };
         }
-    
+
         /// <summary>Validates that all prompts in the grammar are handled.</summary>
         private void validatePrompts() {
             // TODO: Move most of this over to PetiteParser.
@@ -358,7 +368,7 @@ namespace Blackboard.Parser {
                     With("Value Type", valueType);
 
             VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
-            if (match.NeedsCast) {
+            if (match.IsImplicit) {
                 INode castGroup =
                     t == Type.Bool    ? driver.Global.Find(Driver.OperatorNamespace, "castBool") :
                     t == Type.Int     ? driver.Global.Find(Driver.OperatorNamespace, "castInt") :
@@ -479,11 +489,36 @@ namespace Blackboard.Parser {
         /// <summary>This handles performing a type cast of a node.</summary>
         /// <param name="args">The token information from the parser.</param>
         private void handleCast(PP.ParseTree.PromptArgs args) {
-            //IPrepper value = this.pop<IPrepper>();
-            //Type t = this.stashPop<Type>();
+            IPrepper value = this.pop<IPrepper>();
+            Type t = this.stashPop<Type>();
+            PP.Scanner.Location loc = args.Tokens[^1].End;
 
-            // TODO: IMPLEMENT
+            IPerformer valuePerf = value.Prepare(formula, false);
+            Type valueType = Type.FromType(valuePerf.Type);
+            TypeMatch match = t.Match(valueType, true);
+            if (!match.IsMatch && !match.IsAnyCast)
+                throw new Exception("The value type can not be cast to the given type.").
+                    With("Location", loc).
+                    With("Target", t).
+                    With("Type", valueType).
+                    With("Value", valuePerf);
 
+            if (match.IsAnyCast) {
+                INode castGroup =
+                    t == Type.Bool    ? driver.Global.Find(Driver.OperatorNamespace, "castBool") :
+                    t == Type.Int     ? driver.Global.Find(Driver.OperatorNamespace, "castInt") :
+                    t == Type.Double  ? driver.Global.Find(Driver.OperatorNamespace, "castDouble") :
+                    t == Type.String  ? driver.Global.Find(Driver.OperatorNamespace, "castString") :
+                    t == Type.Trigger ? driver.Global.Find(Driver.OperatorNamespace, "castTrigger") :
+                    throw new Exception("Unsupported type for new definition cast").
+                        With("Location", loc).
+                        With("Type", t);
+
+                IFuncDef castFunc = (castGroup as IFuncGroup).Find(valueType);
+                valuePerf = new Function(castFunc, valuePerf);
+            }
+
+            this.push(new NoPrep(valuePerf));
         }
 
         /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>

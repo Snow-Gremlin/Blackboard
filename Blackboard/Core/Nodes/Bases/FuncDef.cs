@@ -14,9 +14,6 @@ namespace Blackboard.Core.Nodes.Bases {
     public abstract class FuncDef<TReturn>: IFuncDef
         where TReturn : class, INode {
 
-        /// <summary>The group this function belongs to.</summary>
-        private FuncGroup group;
-
         /// <summary>The minimum required nodes for the new node's arguments.</summary>
         /// <remarks>Must be less than or equal to the maximum arguments and zero or more.</remarks>
         public readonly int MinArgs;

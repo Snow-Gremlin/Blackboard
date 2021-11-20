@@ -112,7 +112,7 @@ namespace Blackboard.Core {
         /// <param name="indent">The string to indent with.</param>
         public Stringifier(
             bool showDataType        = true,
-            bool showAllDataValues   = true,
+            bool showAllDataValues   = false,
             bool showLastDataValues  = true,
             bool showFirstDataValues = true,
             bool showParents         = true,
@@ -174,7 +174,7 @@ namespace Blackboard.Core {
         /// <param name="name">The name to show for the node.</param>
         /// <param name="node">The node to give a name to.</param>
         public void SetNodeName(string name, INode node) =>
-            this.nodeNames.Add(node, name);
+            this.nodeNames[node] = name;
 
         /// <summary>Preloads the node name to use when outputting using the namespaces reachable from global.</summary>
         /// <param name="driver">The driver containing the global namespace to load.</param>

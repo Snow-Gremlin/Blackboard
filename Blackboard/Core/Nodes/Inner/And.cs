@@ -1,8 +1,9 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Core.Nodes.Inner {
 
@@ -31,11 +32,6 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Gets the AND of all the parent's booleans.</summary>
         /// <param name="values">The parents to AND together.</param>
         /// <returns>The AND of all the given values.</returns>
-        protected override Bool OnEval(IEnumerable<Bool> values) {
-            foreach (Bool value in values) {
-                if (!value.Value) return new(false);
-            }
-            return new(true);
-        }
+        protected override Bool OnEval(IEnumerable<Bool> values) => new(values.All(val => val.Value));
     }
 }

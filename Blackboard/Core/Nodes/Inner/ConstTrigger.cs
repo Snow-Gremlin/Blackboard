@@ -3,7 +3,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Nodes.Outer {
+namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>
     /// This node should only be used by the parser while reducing nodes.

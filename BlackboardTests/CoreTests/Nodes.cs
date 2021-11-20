@@ -52,7 +52,7 @@ namespace BlackboardTests.CoreTests {
             or123 .CheckValue(false);
             not123.CheckValue(true);
 
-            Driver drv = new();
+            Driver drv = new(addConsts: false);
             drv.Global["One"]   = input1;
             drv.Global["Two"]   = input2;
             drv.Global["Three"] = input3;
@@ -64,8 +64,8 @@ namespace BlackboardTests.CoreTests {
                 "  Eval(0): One: Input<bool>[True]",
                 "  Eval(0): Three: Input<bool>[True]",
                 "  Eval(1): And<bool>[False](One, Two)",
-                "  Eval(2): Or<bool>[False](And<bool>(One, Two), Three)",
-                "  Eval(3): Not<bool>[True](Or<bool>(And<bool>, Three))",
+                "  Eval(2): Or<bool>[True](And<bool>(One, Two), Three)",
+                "  Eval(3): Not<bool>[False](Or<bool>(And<bool>, Three))",
                 "End(Provoked: 0)");
             input1.CheckValue(true);
             input2.CheckValue(false);
@@ -78,8 +78,8 @@ namespace BlackboardTests.CoreTests {
             drv.CheckEvaluate(
                 "Start(Pending: 1)",
                 "  Eval(0): Three: Input<bool>[False]",
-                "  Eval(2): Or<bool>[True](And<bool>(One, Two), Three)",
-                "  Eval(3): Not<bool>[False](Or<bool>(And<bool>, Three))",
+                "  Eval(2): Or<bool>[False](And<bool>(One, Two), Three)",
+                "  Eval(3): Not<bool>[True](Or<bool>(And<bool>, Three))",
                 "End(Provoked: 0)");
             input1.CheckValue(true);
             input2.CheckValue(false);
@@ -92,9 +92,9 @@ namespace BlackboardTests.CoreTests {
             drv.CheckEvaluate(
                 "Start(Pending: 1)",
                 "  Eval(0): Two: Input<bool>[True]",
-                "  Eval(1): And<bool>[False](One, Two)",
-                "  Eval(2): Or<bool>[False](And<bool>(One, Two), Three)",
-                "  Eval(3): Not<bool>[True](Or<bool>(And<bool>, Three))",
+                "  Eval(1): And<bool>[True](One, Two)",
+                "  Eval(2): Or<bool>[True](And<bool>(One, Two), Three)",
+                "  Eval(3): Not<bool>[False](Or<bool>(And<bool>, Three))",
                 "End(Provoked: 0)");
             input1.CheckValue(true);
             input2.CheckValue(true);

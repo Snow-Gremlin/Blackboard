@@ -1,5 +1,5 @@
-﻿using Blackboard.Core.Nodes.Functions;
-using Blackboard.Core.Nodes.Bases;
+﻿using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;

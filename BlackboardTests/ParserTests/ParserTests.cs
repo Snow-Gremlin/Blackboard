@@ -250,7 +250,7 @@ namespace BlackboardTests.ParserTests {
                 "Global: Namespace{",
                 "  A: Input<int>[2],",
                 "  B: Input<double>[3],",
-                "  C: Sum<double>[5](Implicit<double>[2](A[2]), B[3])",
+                "  C: Sum<double>(Implicit<double>(A[2]), B[3])",
                 "}");
 
             driver.CheckValue(2,   "A");
@@ -498,23 +498,33 @@ namespace BlackboardTests.ParserTests {
 
         [TestMethod]
         public void TestBasicParses_ExplicitCasts() {
-            Driver driver = new();
+            Driver driver = new(addConsts: false);
             Parser parser = new(driver);
             parser.Read(
                 "in double A = 1.2;",
-                "B := (int)A;",
-                "C := (string)B;");
+                "B := (int)A;",     // Explicit
+                "C := (string)A;",  // Implicit
+                "D := (double)A;"); // Inheritance
             parser.Commit();
+            driver.CheckGraphString(
+                "Global: Namespace{",
+                "  A: Input<double>[1.2],",
+                "  B: Explicit<int>(D[1.2]),",
+                "  C: Implicit<string>(D[1.2]),",
+                "  D: Input<double>[1.2]",
+                "}");
 
-            driver.CheckValue(2, "A");
-            driver.CheckValue(2.0, "B");
-            driver.CheckValue("2", "C");
+            driver.CheckValue( 1.2,  "A");
+            driver.CheckValue( 1,    "B");
+            driver.CheckValue("1.2", "C");
+            driver.CheckValue( 1.2,  "D");
 
-            driver.SetInt(42, "A");
+            driver.SetDouble(42.9, "A");
             driver.Evaluate();
-            driver.CheckValue(42, "A");
-            driver.CheckValue(42.0, "B");
-            driver.CheckValue("42", "C");
+            driver.CheckValue( 42.9,  "A");
+            driver.CheckValue( 42,    "B");
+            driver.CheckValue("42.9", "C");
+            driver.CheckValue( 42.9,  "D");
         }
     }
 }

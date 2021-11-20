@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
@@ -55,12 +55,11 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>
-        protected override bool UpdateValue() {
-            if (this.source1 is null || this.source2 is null) return false;
-            if (!this.source1.Provoked) return false;
-            T value = this.source2.Value;
-            return this.SetNodeValue(value);
-        }
+        protected override bool UpdateValue() =>
+            this.source1 is not null &&
+            this.source2 is not null &&
+            this.source1.Provoked &&
+            this.SetNodeValue(this.source2.Value);
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Latch";

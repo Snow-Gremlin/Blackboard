@@ -15,19 +15,17 @@ namespace BlackboardTests.CoreTests {
             Assert.AreEqual(exp, Type.TypeOf(node));
 
         static private void checkCasts(Type t, INode node, string expMatch, string expImplicit, string expExplicit) {
-            string resultMatch    = t.Match(Type.TypeOf(node)).ToString();
+            string msg = "Checking if " + t + " matches " + node + ".";
+            string resultMatch    = t.Match(Type.TypeOf(node), true).ToString();
+            Assert.AreEqual(expMatch, resultMatch, msg);
             string resultImplicit = Stringifier.Shallow(t.Implicit(node));
+            Assert.AreEqual(expImplicit, resultImplicit, msg);
             string resultExplicit = Stringifier.Shallow(t.Explicit(node));
-            if (resultMatch != expMatch || resultImplicit != expImplicit || resultExplicit != expExplicit) {
-                Assert.Fail(
-                    resultMatch    + " =[" + (resultMatch    == expMatch    ? "X" : " ") + "]= " + expMatch + "\n" +
-                    resultImplicit + " =[" + (resultImplicit == expImplicit ? "X" : " ") + "]= " + expImplicit + "\n" +
-                    resultExplicit + " =[" + (resultExplicit == expExplicit ? "X" : " ") + "]= " + expExplicit);
-            }
+            Assert.AreEqual(expExplicit, resultExplicit, msg);
         }
 
         static private void checkImplicit(Type t, INode node, int steps, string expImplicit) =>
-            checkCasts(t, node, "Cast("+steps+")", expImplicit, "null");
+            checkCasts(t, node, "Implicit("+steps+")", expImplicit, "null");
 
         static private void checkInherit(Type t, INode node, int steps) =>
             checkCasts(t, node, "Inherit("+steps+")", Stringifier.Shallow(node), Stringifier.Shallow(node));
@@ -36,7 +34,7 @@ namespace BlackboardTests.CoreTests {
             checkCasts(t, node, "None", "null", "null");
 
         static private void checkExplicit(Type t, INode node, string expExplicit) =>
-            checkCasts(t, node, "None", "null", expExplicit);
+            checkCasts(t, node, "Explicit", "null", expExplicit);
 
         [TestMethod]
         public void TestTypeOf() {

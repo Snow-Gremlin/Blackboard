@@ -60,14 +60,14 @@ namespace Blackboard.Parser.Preppers {
         }
 
         /// <summary>Finds the node in the current receiver after evaluating the receiver.</summary>
-        /// <param name="formula">This is the complete set of performers being prepared.</param>
+        /// <param name="builder">This is the complete set of performers being prepared.</param>
         /// <param name="reduce">
         /// True to reduce the nodes to constants without writting them to Blackboard.
         /// False to create the nodes and look up Ids when running.
         /// </param>
         /// <returns>The found node in the receiver or null.</returns>
-        private IPerformer resolveInReceiver(Formula formula, bool reduce) {
-            IPerformer receiver = this.Receiver.Prepare(formula, reduce);
+        private IPerformer resolveInReceiver(FormulaBuilder builder, bool reduce) {
+            IPerformer receiver = this.Receiver.Prepare(builder, reduce);
 
             if (!receiver.Type.IsAssignableTo(typeof(IFieldReader)))
                 throw new Exception("Node can not be used as receiver, so it can not be used with an identifier.").
@@ -90,7 +90,7 @@ namespace Blackboard.Parser.Preppers {
         }
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
-        /// <param name="formula">This is the complete set of performers being prepared.</param>
+        /// <param name="builder">This is the complete set of performers being prepared.</param>
         /// <param name="reduce">
         /// True to reduce the nodes to constants without writting them to Blackboard.
         /// False to create the nodes and look up identifiers when running.
@@ -99,22 +99,22 @@ namespace Blackboard.Parser.Preppers {
         /// This is the performer to replace this prepper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, bool reduce = false) =>
-            Reducer.Wrap(this.Receiver is null ? this.resolveInScope() : this.resolveInReceiver(formula, reduce), reduce);
+        public IPerformer Prepare(FormulaBuilder builder, bool reduce = false) =>
+            Reducer.Wrap(this.Receiver is null ? this.resolveInScope() : this.resolveInReceiver(builder, reduce), reduce);
 
         /// <summary>Creates new virtual node for this identifier.</summary>
         /// <remarks>The identifier can not exist on the top of scope or in the receiver.</remarks>
-        /// <param name="formula">The formula being worked on.</param>
+        /// <param name="builder">The formula being worked on.</param>
         /// <param name="creationType">The type of the node to create for this identifier.</param>
         /// <returns>The virtual node for the new node for this identifier.</returns>
-        public VirtualNode CreateNode(Formula formula, System.Type creationType) {
+        public VirtualNode CreateNode(FormulaBuilder builder, System.Type creationType) {
             if (this.Receiver is null) {
                 // No receiver so create the node at the top of the scope.
-                return formula.CurrentScope.CreateField(this.Name, creationType);
+                return builder.CurrentScope.CreateField(this.Name, creationType);
             }
 
             // There is a receiver so create the node on the receiver's node.
-            IPerformer receiver = this.Receiver.Prepare(formula, false);
+            IPerformer receiver = this.Receiver.Prepare(builder, false);
             return !receiver.Type.IsAssignableTo(typeof(IFieldReader)) ?
                 throw new Exception("Node can not be used as receiver, so it can not be used when creating a node with an identifier.").
                     With("Identifier", this.Name).

@@ -39,11 +39,11 @@ namespace Blackboard.Parser.Preppers {
         /// The performer will also need to take in a performer BUT the type returned needs to be the return type
         /// of the function not the type of the wrapped function definition.
         /// </remarks>
-        /// <param name="formula">This is the complete set of performers being prepared.</param>
+        /// <param name="builder">This is the complete set of performers being prepared.</param>
         /// <param name="reduce">True to reduce to a constant, false otherwise.</param>
         /// <returns>The source node to get the function definition from.</returns>
-        private INode prepareSource(Formula formula, bool reduce) {
-            IPerformer source = this.Source.Prepare(formula, reduce);
+        private INode prepareSource(FormulaBuilder builder, bool reduce) {
+            IPerformer source = this.Source.Prepare(builder, reduce);
             
             // Wrapped nodes are usually from methods called in the input code by name.
             if (source is WrappedNodeReader nodeRef) {
@@ -94,16 +94,16 @@ namespace Blackboard.Parser.Preppers {
         }
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
-        /// <param name="formula">This is the complete set of performers being prepared.</param>
+        /// <param name="builder">This is the complete set of performers being prepared.</param>
         /// <param name="reduce">True to reduce to a constant, false otherwise.</param>
         /// <returns>
         /// This is the performer to replace this prepper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, bool reduce = false) {
-            INode sourceNode = this.prepareSource(formula, reduce);
+        public IPerformer Prepare(FormulaBuilder builder, bool reduce = false) {
+            INode sourceNode = this.prepareSource(builder, reduce);
             
-            IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(formula, reduce)).NotNull().ToArray();
+            IPerformer[] inputs = this.Arguments.Select((arg) => arg.Prepare(builder, reduce)).NotNull().ToArray();
             Type[] types = inputs.Select((arg) => Type.FromType(arg.Type)).ToArray();
             
             IFuncDef func = this.prepareFuncDef(sourceNode, types);

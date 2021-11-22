@@ -22,8 +22,7 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_TypedInput() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in int A = 2, B = 3;",
                 "in bool C = true;",
                 "",
@@ -33,7 +32,6 @@ namespace BlackboardTests.ParserTests {
                 "   in bool H;",
                 "   in double I;",
                 "}");
-            parser.Commit();
 
             driver.CheckValue(2,     "A");
             driver.CheckValue(3,     "B");
@@ -48,8 +46,7 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_VarInput() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in A = 2, B = 3;",
                 "in C = true;",
                 "",
@@ -57,7 +54,6 @@ namespace BlackboardTests.ParserTests {
                 "   in E = 3.14;",
                 "   in var F = 0, G = 0.0, H = false;",
                 "}");
-            parser.Commit();
 
             driver.CheckValue(2,     "A");
             driver.CheckValue(3,     "B");
@@ -71,8 +67,7 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_DoubleLiteral() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in double A = 3.0;",
                 "in double B = 0.003;",
                 "in double C = 3.0e-3;",
@@ -84,7 +79,6 @@ namespace BlackboardTests.ParserTests {
                 "in double I = 1.0;",
                 "in double J = 0e-5;",
                 "in double K = 28.0;");
-            parser.Commit();
 
             driver.CheckValue(3.0,   "A");
             driver.CheckValue(0.003, "B");
@@ -102,13 +96,11 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_LiteralMath() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in double A = 3.0 + 0.07 * 2;",
                 "in double B = floor(A), C = round(A), D = round(A, 1);",
                 "in double E = (B ** C) / 2;",
                 "in double F = -E + -3;");
-            parser.Commit();
 
             driver.CheckValue(  3.14, "A");
             driver.CheckValue(  3.0,  "B");
@@ -122,8 +114,7 @@ namespace BlackboardTests.ParserTests {
         public void TestBasicParses_ModRemAndStrings() {
             // See: https://docs.microsoft.com/en-us/dotnet/api/system.math.ieeeremainder?view=net-5.0
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in string A = (  3.0 %%  2.0) + ', ' + (  3.0 %  2.0);",
                 "in string B = (  4.0 %%  2.0) + ', ' + (  4.0 %  2.0);",
                 "in string C = ( 10.0 %%  3.0) + ', ' + ( 10.0 %  3.0);",
@@ -135,7 +126,6 @@ namespace BlackboardTests.ParserTests {
                 "in string I = (-16.3 %%  4.1) + ', ' + (-16.3 %  4.1);",
                 "in string J = ( 17.8 %% -4.1) + ', ' + ( 17.8 % -4.1);",
                 "in string K = (-17.8 %% -4.1) + ', ' + (-17.8 % -4.1);");
-            parser.Commit();
 
             driver.CheckValue("-1, 1", "A");
             driver.CheckValue("0, 0",  "B");
@@ -153,13 +143,11 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_Assignment() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in int A = 2, B = 5;",
                 "in int C = A = 8;",
                 "B = A = 14;",
                 "A = 6;");
-            parser.Commit();
 
             driver.CheckValue( 6, "A");
             driver.CheckValue(14, "B");
@@ -169,8 +157,7 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_NamespaceAssignment() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "namespace X {",
                 "   in int a = 2;",
                 "   in int b = 3;",
@@ -187,7 +174,6 @@ namespace BlackboardTests.ParserTests {
                 "}",
                 "X.Y.d = 555;",
                 "X.a = 222;");
-            parser.Commit();
 
             driver.CheckValue(222, "X", "a");
             driver.CheckValue(333, "X", "b");
@@ -201,9 +187,8 @@ namespace BlackboardTests.ParserTests {
         public void TestBasicParses_DoubleToIntAssignError() {
             Driver driver = new();
             Parser parser = new(driver);
-            checkException(() => {
-                parser.Read("in int A = 3.14;");
-            }, "Error occurred while parsing input code.",
+            checkException(() => parser.Read("in int A = 3.14;"),
+                "Error occurred while parsing input code.",
                "May not assign the value to that type of input.",
                "[Location: Unnamed:1, 15, 15]",
                "[Input Type: int]",
@@ -213,12 +198,10 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_IntIntSum() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in int A = 2;",
                 "in int B = 3;",
                 "int C := A + B;");
-            parser.Commit();
 
             driver.CheckValue(2, "A");
             driver.CheckValue(3, "B");
@@ -240,12 +223,10 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_IntDoubleSum() {
             Driver driver = new(addFuncs: false, addConsts: false);
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in int A = 2;",
                 "in double B = 3.0;",
                 "double C := A + B;");
-            parser.Commit();
             driver.CheckGraphString(
                 "Global: Namespace{",
                 "  A: Input<int>[2],",
@@ -273,12 +254,10 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_IntDoubleImplicitCast() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in int A = 2;",
                 "double B := A;",
                 "string C := B;");
-            parser.Commit();
 
             driver.CheckValue(2,   "A");
             driver.CheckValue(2.0, "B");
@@ -294,13 +273,11 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_IntIntCompare() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in A = 2;",
                 "in B = 3;",
                 "maxA := 3;",
                 "C := A <= maxA && A > B ? 1 : 0;");
-            parser.Commit();
 
             driver.CheckValue(2, "A");
             driver.CheckValue(3, "B");
@@ -319,14 +296,12 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_Bitwise() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in int A = 0x0F;",
                 "int shift := 1;",
                 "int B := (A | 0x10) & 0x15;",
                 "int C := B << shift;",
                 "int D := ~C;");
-            parser.Commit();
 
             driver.CheckValue( 0x0F, "A");
             driver.CheckValue( 0x15, "B");
@@ -343,15 +318,13 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_SomeBooleanMath() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in int A = 0x03;",
                 "bool B := A & 0x01 != 0;",
                 "bool C := A & 0x02 != 0;",
                 "bool D := A & 0x04 != 0;",
                 "bool E := A & 0x08 != 0;",
                 "bool F := B & !C ^ (D | E);");
-            parser.Commit();
 
             driver.CheckValue(0x3, "A");
             driver.CheckValue(true, "B");
@@ -446,14 +419,12 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_Trigger() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in trigger A;",
                 "in trigger B = true;",
                 "C := A | B;",
                 "D := A & B;",
                 "E := C ^ D;");
-            parser.Commit();
 
             driver.Provoke("A");
             driver.CheckProvoked(true, "A");
@@ -499,13 +470,11 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_ExplicitCasts() {
             Driver driver = new(addConsts: false);
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in double A = 1.2;",
                 "B := (int)A;",     // Explicit
                 "C := (string)A;",  // Implicit
                 "D := (double)A;"); // Inheritance
-            parser.Commit();
             driver.CheckGraphString(
                 "Global: Namespace{",
                 "  A: Input<double>[1.2],",
@@ -530,13 +499,11 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_ProvokingTriggers() {
             Driver driver = new();
-            Parser parser = new(driver);
-            parser.Read(
+            driver.ReadCommit(
                 "in trigger A;",
                 "in trigger B;",
                 "C := A & B;",
                 "in D = 3;");
-            parser.Commit();
             driver.CheckProvoked(false, "A");
             driver.CheckProvoked(false, "B");
             driver.CheckProvoked(false, "C");
@@ -549,10 +516,9 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(1): C: All<trigger>(A, B)",
                 "End(Provoked: 0)");
 
-            parser.Read(
+            driver.ReadCommit(
                 "->A;",
                 "D = 5;");
-            parser.Commit();
             driver.CheckProvoked(true, "A");
             driver.CheckProvoked(false, "B");
             driver.CheckProvoked(false, "C");
@@ -564,10 +530,9 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(1): C: All<trigger>(A, B)",
                 "End(Provoked: 1)");
 
-            parser.Read(
+            driver.ReadCommit(
                 "D > 3 -> A;",
                 "A -> B;");
-            parser.Commit();
             driver.CheckProvoked(true, "A");
             driver.CheckProvoked(true, "B");
             driver.CheckProvoked(false, "C");
@@ -579,9 +544,18 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(1): C: All<trigger>[provoked](A, B)",
                 "End(Provoked: 3)");
 
-
-
-
+            driver.ReadCommit(
+                "false -> A;",
+                "D < -1 -> B;");
+            driver.CheckProvoked(false, "A");
+            driver.CheckProvoked(false, "B");
+            driver.CheckProvoked(false, "C");
+            driver.CheckValue(5, "D");
+            driver.CheckEvaluate(
+                "Start(Pending: 2)",
+                "  Eval(0): A: Input<trigger>",
+                "  Eval(0): B: Input<trigger>",
+                "End(Provoked: 0)");
         }
     }
 }

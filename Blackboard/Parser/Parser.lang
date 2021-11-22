@@ -120,10 +120,10 @@
 [Identifier] = 'namespace' => [Namespace];
 [Identifier] = 'var' => [Var];
 
-[Identifier] = 'in'      => [DeclareIn];
-[Identifier] = 'get'     => [DeclareGet];
-[Identifier] = 'const'   => [DeclareConst];
-[Identifier] = 'define'  => [DeclareDefine];
+[Identifier] = 'in'     => [DeclareIn];
+[Identifier] = 'get'    => [DeclareGet];
+[Identifier] = 'define' => [DeclareDefine];
+
 [Identifier] = 'counter' => [DeclareCounter];
 [Identifier] = 'latch'   => [DeclareLatch];
 [Identifier] = 'toggle'  => [DeclareToggle];
@@ -142,7 +142,7 @@
 [Identifier] = 'internal', 'global', 'local',
                'private', 'protected', 'public', 'static' => [ReservedScoping];
 
-[Identifier] = 'abstract', 'class', 'def', 'func', 'interface', 'operator',
+[Identifier] = 'abstract', 'class', 'const', 'def', 'func', 'interface', 'operator',
                'override', 'typedef', 'void', 'virtual' => [ReservedDefinitions];
 
 [Identifier] = 'as', 'break', 'catch', 'case', 'continue', 'default', 'else',
@@ -166,8 +166,8 @@
     | <DefineTypedRule>
     | <DefineVarRule>
     | <ProvokeTrigger>
-    # TODO: Add NewTypedOutput and NewVarOutput
-    ;
+    | <GetTypedValue>
+    | <GetVarValue>;
 
 #----------------------------------------------------------
 
@@ -188,12 +188,14 @@
     | [Comma] <NewVarInputPart> <NewVarInputTail>;
 
 <NewVarInputPart> := [Identifier] {pushId} [Assign] <Declaration> {newVarInputWithAssign};
-    
+
 #----------------------------------------------------------
 
-<DefineTypedRule> := <RootType> [Identifier] {pushId} [Define] <Conditional> {typeDefine};
+<DefineTypedRule> := <RootType> [Identifier] {pushId} [Define] <Conditional> {typeDefine}
+    | [DeclareDefine] <RootType> [Identifier] {pushId} [Assign] <Conditional> {typeDefine};
 
-<DefineVarRule> := [Identifier] {pushId} [Define] <Conditional> {varDefine};
+<DefineVarRule> := [Identifier] {pushId} [Define] <Conditional> {varDefine}
+    | [DeclareDefine] [Identifier] {pushId} [Assign] <Conditional> {varDefine};
 
 #----------------------------------------------------------
 
@@ -202,6 +204,12 @@
 
 <ProvokeTriggerTail> := _
     | [Trigger] <Conditional> {conditionalProvokeTrigger} <ProvokeTriggerTail>;
+
+#----------------------------------------------------------
+
+<GetTypedValue> := [DeclareGet] <RootType> [Identifier] {pushId} [Assign] <Conditional> {typeGet};
+
+<GetVarValue> := [DeclareGet] [Identifier] {pushId} [Assign] <Conditional> {varGet};
 
 #==========================================================
 

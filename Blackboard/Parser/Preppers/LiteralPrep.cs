@@ -11,22 +11,22 @@ namespace Blackboard.Parser.Preppers {
         /// <summary>Creates a boolean literal prepper.</summary>
         /// <param name="value">The boolean value for the literal.</param>
         /// <returns>The newly created literal prepper.</returns>
-        static public LiteralPrep<Bool> Bool(bool value) => new(new Bool(value));
+        static public LiteralPrep<Bool> Bool(bool value) => new(new(value));
 
         /// <summary>Creates a integer literal prepper.</summary>
         /// <param name="value">The integer value for the literal.</param>
         /// <returns>The newly created literal prepper.</returns>
-        static public LiteralPrep<Int> Int(int value) => new(new Int(value));
+        static public LiteralPrep<Int> Int(int value) => new(new(value));
 
         /// <summary>Creates a double literal prepper.</summary>
         /// <param name="value">The double value for the literal.</param>
         /// <returns>The newly created literal prepper.</returns>
-        static public LiteralPrep<Double> Double(double value) => new(new Double(value));
+        static public LiteralPrep<Double> Double(double value) => new(new(value));
 
         /// <summary>Creates a string literal prepper.</summary>
         /// <param name="value">The string value for the literal.</param>
         /// <returns>The newly created literal prepper.</returns>
-        static public LiteralPrep<String> String(string value) => new(new String(value));
+        static public LiteralPrep<String> String(string value) => new(new(value));
     }
 
     /// <summary>This is a prepper for creating a new literal node.</summary>
@@ -44,13 +44,13 @@ namespace Blackboard.Parser.Preppers {
         public T Value;
 
         /// <summary>This will check and prepare the node as much as possible.</summary>
-        /// <param name="formula">TNot Used</param>
+        /// <param name="builder">TNot Used</param>
         /// <param name="reduce">Not used since a literal already is a constant.</param>
         /// <returns>
         /// This is the performer to replace this prepper with,
         /// if null then no performer is used by parent for this node.
         /// </returns>
-        public IPerformer Prepare(Formula formula, bool reduce = false) =>
+        public IPerformer Prepare(FormulaBuilder builder, bool reduce = false) =>
             new NodeHold(new Literal<T>(this.Value));
 
         /// <summary>Gets the prepper debug string.</summary>

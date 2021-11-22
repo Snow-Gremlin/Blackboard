@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using S = System;
@@ -9,6 +10,7 @@ namespace BlackboardTests {
 
     /// <summary>These are extensions to Blackboard objects for testing.</summary>
     static class TestExtensions {
+        #region Node...
 
         /// <summary>Checks the string of a node.</summary>
         /// <param name="node">The node to check the sting of.</param>
@@ -67,6 +69,9 @@ namespace BlackboardTests {
             Assert.IsInstanceOfType(node, typeof(ITrigger));
             Assert.AreEqual(exp, (node as ITrigger).Provoked);
         }
+
+        #endregion
+        #region Driver...
 
         /// <summary>Gets the message for the CheckValues assertions.</summary>
         /// <param name="type">The type of the value being checked.</param>
@@ -140,6 +145,18 @@ namespace BlackboardTests {
             Assert.AreEqual(exp, Stringifier.GraphString(driver));
         }
 
+        /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
+        /// <param name="driver">The driver to apply the parsed formula to.</param>
+        /// <param name="input">The lines of the code to read and commit.</param>
+        static public void ReadCommit(this Driver driver, params string[] input) {
+            Parser parser = new(driver);
+            Formula formula = parser.Read(input);
+            formula.Perform();
+        }
+
+        #endregion
+        #region Other...
+
         /// <summary>This measures the amount of time it takes to run the action several times.</summary>
         /// <param name="action">The action to run several times.</param>
         /// <param name="title">
@@ -174,5 +191,7 @@ namespace BlackboardTests {
             }
             return perOp.TotalMilliseconds;
         }
+
+        #endregion
     }
 }

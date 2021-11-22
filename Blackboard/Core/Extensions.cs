@@ -62,7 +62,7 @@ namespace Blackboard.Core {
         /// <param name="parts">The strings to join together into one.</param>
         /// <param name="seperator">The separator to put between the parts.</param>
         /// <returns>The string from the joined parts.</returns>
-        static public string Join<T>(this IEnumerable<T> parts, string seperator = "") =>
+        static public string Join<T>(this IEnumerable<T> parts, string seperator = null) =>
             string.Join(seperator, parts);
 
         /// <summary>This is short hand to make joining strings into one.</summary>

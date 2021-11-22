@@ -22,10 +22,10 @@ namespace Blackboard.Parser.Preppers {
         public IPerformer Performer;
 
         /// <summary>Does no preparation and just returns the held performer.</summary>
-        /// <param name="formula">Not Used.</param>
+        /// <param name="builder">Not Used.</param>
         /// <param name="reduce">Indicates if the returned node should be reduced or not.</param>
         /// <returns>The performer being held.</returns>
-        public IPerformer Prepare(Formula formula, bool reduce = false) =>
+        public IPerformer Prepare(FormulaBuilder builder, bool reduce = false) =>
             Reducer.Wrap(this.Performer, reduce);
 
         /// <summary>Gets the prepper debug string.</summary>

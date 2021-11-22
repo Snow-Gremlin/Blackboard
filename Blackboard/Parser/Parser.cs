@@ -29,21 +29,14 @@ namespace Blackboard.Parser {
         static private readonly PP.Parser.Parser baseParser;
 
         private readonly Driver driver;
-        private readonly Formula formula;
-        private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
-        private readonly LinkedList<object> stash;
-        private readonly LinkedList<IPrepper> stack;
+        private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="driver">The driver to modify.</param>
         public Parser(Driver driver) {
             this.driver = driver;
-            this.formula = new Formula(driver);
             this.prompts = null;
-
-            this.stash = new LinkedList<object>();
-            this.stack = new LinkedList<IPrepper>();
 
             this.initPrompts();
             this.validatePrompts();
@@ -54,38 +47,36 @@ namespace Blackboard.Parser {
         /// <summary>Reads the given lines of input Blackline code.</summary>
         /// <remarks>The commands of this input will be added to formula if valid.</remarks>
         /// <param name="input">The input code to parse.</param>
-        public void Read(params string[] input) =>
+        /// <returns>The formula for performing the parsed actions.</returns>
+        public Formula Read(params string[] input) =>
             this.Read(input as IEnumerable<string>);
 
         /// <summary>Reads the given lines of input Blackline code.</summary>
         /// <remarks>The commands of this input will be added to formula if valid.</remarks>
         /// <param name="input">The input code to parse.</param>
-        public void Read(IEnumerable<string> input, string name = "Unnamed") {
+        /// <returns>The formula for performing the parsed actions.</returns>
+        public Formula Read(IEnumerable<string> input, string name = "Unnamed") {
             PP.Parser.Result result = baseParser.Parse(new PP.Scanner.Default(input, name));
-            if (result.Errors.Length > 0)
-                throw new Exception(result.Errors.Join("\n"));
-            this.read(result.Tree);
+
+            // Check for parser errors.
+            if (result.Errors.Length > 0) throw new Exception(result.Errors.Join("\n"));
+
+            // process the resulting tree to build the formula.
+            return this.read(result.Tree);
         }
 
         /// <summary>Reads the given parse tree root for an input Blackline code.</summary>
         /// <param name="node">The parsed tree root node to read from.</param>
-        private void read(PP.ParseTree.ITreeNode node) {
+        /// <returns>The formula for performing the parsed actions.</returns>
+        private Formula read(PP.ParseTree.ITreeNode node) {
             try {
-                node.Process(this.prompts);
-            } catch(S.Exception ex) {
+                FormulaBuilder stacks = new(this.driver);
+                node.Process(this.prompts, stacks);
+                return stacks.ToFormula();
+            } catch (S.Exception ex) {
                 throw new Exception("Error occurred while parsing input code.", ex);
             }
         }
-
-        /// <summary>This will dispose of all pending actions.</summary>
-        public void Discard() => this.formula.Reset();
-
-        /// <summary>This will perform and apply all pending action to Blackboard.</summary>
-        public void Commit() => this.formula.Perform();
-
-        /// <summary>Gets the debug string of the uncommited parse state.</summary>
-        /// <returns>A human readable debug string.</returns>
-        public string FormulaToString() => this.formula.ToString();
 
         #endregion
         #region Prompts Setup...
@@ -94,33 +85,37 @@ namespace Blackboard.Parser {
         private void initPrompts() {
             this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>();
 
-            this.addHandler("clear",         this.handleClear);
-            this.addHandler("pushNamespace", this.handlePushNamespace);
-            this.addHandler("popNamespace",  this.handlePopNamespace);
+            this.addHandler("clear",         handleClear);
+            this.addHandler("pushNamespace", handlePushNamespace);
+            this.addHandler("popNamespace",  handlePopNamespace);
 
-            this.addHandler("newTypeInputNoAssign",   this.handleNewTypeInputNoAssign);
-            this.addHandler("newTypeInputWithAssign", this.handleNewTypeInputWithAssign);
-            this.addHandler("newVarInputWithAssign",  this.handleNewVarInputWithAssign);
+            this.addHandler("newTypeInputNoAssign",   handleNewTypeInputNoAssign);
+            this.addHandler("newTypeInputWithAssign", handleNewTypeInputWithAssign);
+            this.addHandler("newVarInputWithAssign",  handleNewVarInputWithAssign);
 
-            this.addHandler("typeDefine",                this.handleTypeDefine);
-            this.addHandler("varDefine",                 this.handleVarDefine);
-            this.addHandler("provokeTrigger",            this.handleProvokeTrigger);
-            this.addHandler("conditionalProvokeTrigger", this.handleConditionalProvokeTrigger);
+            this.addHandler("typeDefine", handleTypeDefine);
+            this.addHandler("varDefine",  handleVarDefine);
 
-            this.addHandler("assignment",   this.handleAssignment);
-            this.addHandler("cast",         this.handleCast);
-            this.addHandler("memberAccess", this.handleMemberAccess);
-            this.addHandler("startCall",    this.handleStartCall);
-            this.addHandler("addArg",       this.handleAddArg);
-            this.addHandler("pushId",       this.handlePushId);
-            this.addHandler("pushBool",     this.handlePushBool);
-            this.addHandler("pushBin",      this.handlePushBin);
-            this.addHandler("pushOct",      this.handlePushOct);
-            this.addHandler("pushInt",      this.handlePushInt);
-            this.addHandler("pushHex",      this.handlePushHex);
-            this.addHandler("pushDouble",   this.handlePushDouble);
-            this.addHandler("pushString",   this.handlePushString);
-            this.addHandler("pushType",     this.handlePushType);
+            this.addHandler("provokeTrigger",            handleProvokeTrigger);
+            this.addHandler("conditionalProvokeTrigger", handleConditionalProvokeTrigger);
+
+            this.addHandler("typeGet", handleTypeGet);
+            this.addHandler("varGet",  handleVarGet);
+
+            this.addHandler("assignment",   handleAssignment);
+            this.addHandler("cast",         handleCast);
+            this.addHandler("memberAccess", handleMemberAccess);
+            this.addHandler("startCall",    handleStartCall);
+            this.addHandler("addArg",       handleAddArg);
+            this.addHandler("pushId",       handlePushId);
+            this.addHandler("pushBool",     handlePushBool);
+            this.addHandler("pushBin",      handlePushBin);
+            this.addHandler("pushOct",      handlePushOct);
+            this.addHandler("pushInt",      handlePushInt);
+            this.addHandler("pushHex",      handlePushHex);
+            this.addHandler("pushDouble",   handlePushDouble);
+            this.addHandler("pushString",   handlePushString);
+            this.addHandler("pushType",     handlePushType);
 
             this.addProcess(3, "trinary");
             this.addProcess(2, "logicalOr");
@@ -152,12 +147,9 @@ namespace Blackboard.Parser {
         /// <summary>This adds a handler for the given name.</summary>
         /// <param name="name">This is the name of the prompt this handler is for.</param>
         /// <param name="hndl">This is the handler to call on this prompt.</param>
-        private void addHandler(string name, PP.ParseTree.PromptHandle hndl) {
-            this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
-                //S.Console.WriteLine("Handle "+name); // TODO: REMOVE
-                hndl(args);
-            };
-        }
+        private void addHandler(string name, S.Action<FormulaBuilder> hndl) =>
+            this.prompts[name] = (PP.ParseTree.PromptArgs args) =>
+                hndl(args as FormulaBuilder);
 
         /// <summary>This adds a prompt for an operator handler.</summary>
         /// <param name="count">The number of values to pop off the stack for this function.</param>
@@ -165,115 +157,68 @@ namespace Blackboard.Parser {
         private void addProcess(int count, string name) {
             INode funcGroup = this.driver.Global.Find(Driver.OperatorNamespace, name);
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
-                //S.Console.WriteLine("Process "+name); // TODO: REMOVE
-                PP.Scanner.Location loc = args.Tokens[^1].End;
-                IPrepper[] inputs = this.pop<IPrepper>(count);
-                this.push(new FuncPrep(loc, new NoPrep(funcGroup), inputs));
+                FormulaBuilder builder = args as FormulaBuilder;
+                PP.Scanner.Location loc = args.LastLocation;
+                IPrepper[] inputs = builder.PopPreppers(count);
+                builder.PushPrepper(new FuncPrep(loc, new NoPrep(funcGroup), inputs));
             };
         }
 
         /// <summary>Validates that all prompts in the grammar are handled.</summary>
         private void validatePrompts() {
-            // TODO: Move most of this over to PetiteParser.
-            HashSet<string> remaining = new(baseParser.Grammar.Prompts.Select((prompt) => prompt.Name));
-            HashSet<string> missing = new();
-            foreach (string name in this.prompts.Keys) {
-                if (remaining.Contains(name)) remaining.Remove(name);
-                else missing.Add(name);
-            }
-            if (remaining.Count > 0 || missing.Count > 0)
+            string[] unneeded = baseParser.UnneededPrompts(this.prompts);
+            string[] missing  = baseParser.MissingPrompts(this.prompts);
+            if (unneeded.Length > 0 || missing.Length > 0)
                 throw new Exception("Blackboard's parser grammer has prompts which do not match prompt handlers.").
-                    With("Not handled", remaining.Join(", ")).
+                    With("Not handled", unneeded.Join(", ")).
                     With("Not in grammer", missing.Join(", "));
-        }
-
-        #endregion
-        #region Stack Helpers...
-
-        /// <summary>Pushes a prepper onto the stack.</summary>
-        /// <param name="prepper">The prepper to push.</param>
-        private void push(IPrepper prepper) => this.stack.AddLast(prepper);
-
-        /// <summary>Pops off a prepper is on the top of the stack.</summary>
-        /// <typeparam name="T">The type of the prepper to read as.</typeparam>
-        /// <returns>The prepper which was on top of the stack.</returns>
-        private T pop<T>() where T : class, IPrepper {
-            IPrepper item = this.stack.Last.Value;
-            this.stack.RemoveLast();
-            return item as T;
-        }
-
-        /// <summary>Pops one or more prepper off the stack.</summary>
-        /// <typeparam name="T">The types of the preppers to read.</typeparam>
-        /// <param name="count">The number of preppers to pop.</param>
-        /// <returns>The popped preppers in the order oldest to newest.</returns>
-        private T[] pop<T>(int count) where T: class, IPrepper {
-            T[] items = new T[count];
-            for (int i = 0; i < count; i++)
-                items[count-1-i] = this.pop<T>();
-            return items;
-        }
-
-        /// <summary>Pushes an object onto the stash stack.</summary>
-        /// <param name="value">The value to push.</param>
-        private void stashPush(object value) => this.stash.AddLast(value);
-
-        /// <summary>Pops off an object is on the top of the stash stack.</summary>
-        /// <typeparam name="T">The type of the object to read as.</typeparam>
-        /// <returns>The object which was on top of the stash stack.</returns>
-        private T stashPop<T>() where T : class {
-            object value = this.stash.Last.Value;
-            this.stash.RemoveLast();
-            return value as T;
         }
 
         #endregion
         #region Prompt Handlers...
 
         /// <summary>This is called before each statement to prepare and clean up the parser.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleClear(PP.ParseTree.PromptArgs args) {
-            args.Tokens.Clear();
-            this.stash.Clear();
-            this.stack.Clear();
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleClear(FormulaBuilder builder) {
+            builder.Tokens.Clear();
+            builder.ClearStacks();
         }
 
         /// <summary>This is called when the namespace has openned.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handlePushNamespace(PP.ParseTree.PromptArgs args) {
-            PP.Tokenizer.Token token = args.Tokens[^1];
-            PP.Scanner.Location loc = token.End;
-            string name = token.Text;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handlePushNamespace(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            string name = builder.LastText;
+            IWrappedNode scope = builder.CurrentScope;
 
-            IWrappedNode scope = this.formula.CurrentScope;
+            // Check if the namespace already exists, even it if is just virtual.
             IWrappedNode next = scope.ReadField(name);
             if (next is not null) {
                 if (next.Type.IsAssignableTo(typeof(Namespace)))
                     throw new Exception("Can not open namespace. Another non-namespace exists by that name.").
                          With("Identifier", name).
                          With("Location", loc);
-                scope = next;
-            } else {
-                // Create a new virtual namespace and a performer to construct the new namespace if this formula is run.
-                VirtualNode nextScope = scope.CreateField(name, typeof(Namespace));
-                scope = nextScope;
-                this.formula.Add(new VirtualNodeWriter(nextScope, new NodeHold(new Namespace())));
+                builder.PushScope(next);
+                return;
             }
 
-            this.formula.PushScope(scope);
+            // Create a new virtual namespace and a performer to construct the new namespace if this formula is run.
+            VirtualNode nextScope = scope.CreateField(name, typeof(Namespace));
+            builder.Add(new VirtualNodeWriter(nextScope, new NodeHold(new Namespace())));
+            builder.PushScope(nextScope);
         }
 
         /// <summary>This is called when the namespace had closed.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handlePopNamespace(PP.ParseTree.PromptArgs args) =>
-            this.formula.PopScope();
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handlePopNamespace(FormulaBuilder builder) =>
+            builder.PopScope();
 
         /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleNewTypeInputNoAssign(PP.ParseTree.PromptArgs args) {
-            IdPrep target = this.pop<IdPrep>();
-            Type t = this.stashPop<Type>();
-            PP.Scanner.Location loc = args.Tokens[^1].End;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleNewTypeInputNoAssign(FormulaBuilder builder) {
+            IdPrep target = builder.PopPrepper<IdPrep>();
+            Type t = builder.PopType();
+            PP.Scanner.Location loc = builder.LastLocation;
 
             IFuncDef inputFactory =
                 t == Type.Bool    ? InputValue<Bool>.Factory :
@@ -285,23 +230,23 @@ namespace Blackboard.Parser {
                     With("Location", loc).
                     With("Type", t);
 
-            VirtualNode virtualInput = target.CreateNode(formula, inputFactory.ReturnType);
-            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory)).Prepare(formula);
-            this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
+            VirtualNode virtualInput = target.CreateNode(builder, inputFactory.ReturnType);
+            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory)).Prepare(builder);
+            builder.Add(new VirtualNodeWriter(virtualInput, inputPerf));
 
             // Push the type back onto the stack for the next assignment.
-            this.stashPush(t);
+            builder.PushType(t);
         }
 
         /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleNewTypeInputWithAssign(PP.ParseTree.PromptArgs args) {
-            IPrepper value = this.pop<IPrepper>();
-            IdPrep target = this.pop<IdPrep>();
-            Type t = this.stashPop<Type>();
-            PP.Scanner.Location loc = args.Tokens[^1].End;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleNewTypeInputWithAssign(FormulaBuilder builder) {
+            IPrepper value = builder.PopPrepper<IPrepper>();
+            IdPrep target = builder.PopPrepper<IdPrep>();
+            Type t = builder.PopType();
+            PP.Scanner.Location loc = builder.LastLocation;
 
-            IPerformer valuePerf = value.Prepare(formula, true);
+            IPerformer valuePerf = value.Prepare(builder, true);
             IFuncDef inputFactory =
                 t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
                 t == Type.Int     ? InputValue<Int>.FactoryWithInitialValue :
@@ -311,7 +256,7 @@ namespace Blackboard.Parser {
                 throw new Exception("Unsupported type for new typed input with assignment").
                     With("Type", t);
 
-            VirtualNode virtualInput = target.CreateNode(formula, inputFactory.ReturnType);
+            VirtualNode virtualInput = target.CreateNode(builder, inputFactory.ReturnType);
             Type valueType = Type.FromType(valuePerf.Type);
             if (!t.Match(valueType).IsMatch)
                 throw new Exception("May not assign the value to that type of input.").
@@ -319,21 +264,21 @@ namespace Blackboard.Parser {
                     With("Input Type", t).
                     With("Value Type", valueType);
 
-            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(formula);
-            this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
+            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(builder);
+            builder.Add(new VirtualNodeWriter(virtualInput, inputPerf));
 
             // Push the type back onto the stack for the next assignment.
-            this.stashPush(t);
+            builder.PushType(t);
         }
 
         /// <summary>This creates a new input node and assigns it with an initial value.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleNewVarInputWithAssign(PP.ParseTree.PromptArgs args) {
-            IPrepper value = this.pop<IPrepper>();
-            IdPrep target = this.pop<IdPrep>();
-            PP.Scanner.Location loc = args.Tokens[^1].End;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleNewVarInputWithAssign(FormulaBuilder builder) {
+            IPrepper value = builder.PopPrepper<IPrepper>();
+            IdPrep target = builder.PopPrepper<IdPrep>();
+            PP.Scanner.Location loc = builder.LastLocation;
 
-            IPerformer valuePerf = value.Prepare(formula, true);
+            IPerformer valuePerf = value.Prepare(builder, true);
             Type t = Type.FromType(valuePerf.Type);
             IFuncDef inputFactory =
                 t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
@@ -345,20 +290,20 @@ namespace Blackboard.Parser {
                     With("Location", loc).
                     With("Type", t);
 
-            VirtualNode virtualInput = target.CreateNode(formula, inputFactory.ReturnType);
-            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(formula);
-            this.formula.Add(new VirtualNodeWriter(virtualInput, inputPerf));
+            VirtualNode virtualInput = target.CreateNode(builder, inputFactory.ReturnType);
+            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(builder);
+            builder.Add(new VirtualNodeWriter(virtualInput, inputPerf));
         }
 
         /// <summary>This handles defining a new typed named node.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleTypeDefine(PP.ParseTree.PromptArgs args) {
-            IPrepper value = this.pop<IPrepper>();
-            IdPrep target = this.pop<IdPrep>();
-            Type t = this.stashPop<Type>();
-            PP.Scanner.Location loc = args.Tokens[^1].End;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleTypeDefine(FormulaBuilder builder) {
+            IPrepper value = builder.PopPrepper<IPrepper>();
+            IdPrep target = builder.PopPrepper<IdPrep>();
+            Type t = builder.PopType();
+            PP.Scanner.Location loc = builder.LastLocation;
 
-            IPerformer valuePerf = value.Prepare(formula, false);
+            IPerformer valuePerf = value.Prepare(builder, false);
             Type valueType  = Type.FromType(valuePerf.Type);
             TypeMatch match = t.Match(valueType);
             if (!match.IsMatch)
@@ -367,14 +312,15 @@ namespace Blackboard.Parser {
                     With("Input Type", t).
                     With("Value Type", valueType);
 
-            VirtualNode virtualInput = target.CreateNode(formula, t.RealType);
+            VirtualNode virtualInput = target.CreateNode(builder, t.RealType);
+            Namespace ops = builder.Driver.Global.Find(Driver.OperatorNamespace) as Namespace;
             if (match.IsImplicit) {
                 INode castGroup =
-                    t == Type.Bool    ? driver.Global.Find(Driver.OperatorNamespace, "castBool") :
-                    t == Type.Int     ? driver.Global.Find(Driver.OperatorNamespace, "castInt") :
-                    t == Type.Double  ? driver.Global.Find(Driver.OperatorNamespace, "castDouble") :
-                    t == Type.String  ? driver.Global.Find(Driver.OperatorNamespace, "castString") :
-                    t == Type.Trigger ? driver.Global.Find(Driver.OperatorNamespace, "castTrigger") :
+                    t == Type.Bool    ? ops.Find("castBool") :
+                    t == Type.Int     ? ops.Find("castInt") :
+                    t == Type.Double  ? ops.Find("castDouble") :
+                    t == Type.String  ? ops.Find("castString") :
+                    t == Type.Trigger ? ops.Find("castTrigger") :
                     throw new Exception("Unsupported type for new definition cast").
                         With("Location", loc).
                         With("Type", t);
@@ -382,46 +328,54 @@ namespace Blackboard.Parser {
                 IFuncDef castFunc = (castGroup as IFuncGroup).Find(valueType);
                 valuePerf = new Function(castFunc, valuePerf);
             }
-            this.formula.Add(new VirtualNodeWriter(virtualInput, valuePerf));
+            builder.Add(new VirtualNodeWriter(virtualInput, valuePerf));
 
             // Push the type back onto the stack for the next definition.
-            this.stashPush(t);
+            builder.PushType(t);
         }
 
         /// <summary>This handles defining a new untyped named node.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleVarDefine(PP.ParseTree.PromptArgs args) {
-            IPrepper value = this.pop<IPrepper>();
-            IdPrep target = this.pop<IdPrep>();
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleVarDefine(FormulaBuilder builder) {
+            IPrepper value = builder.PopPrepper<IPrepper>();
+            IdPrep target = builder.PopPrepper<IdPrep>();
 
-            IPerformer  valuePerf    = value.Prepare(formula, false);
-            VirtualNode virtualInput = target.CreateNode(formula, valuePerf.Type);
-            this.formula.Add(new VirtualNodeWriter(virtualInput, valuePerf));
+            IPerformer  valuePerf    = value.Prepare(builder, false);
+            VirtualNode virtualInput = target.CreateNode(builder, valuePerf.Type);
+            builder.Add(new VirtualNodeWriter(virtualInput, valuePerf));
         }
 
         /// <summary>This handles when a trigger is provoked unconditionally.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleProvokeTrigger(PP.ParseTree.PromptArgs args) {
-            PP.Scanner.Location loc = args.Tokens[^1].End;
-            IdPrep target = this.pop<IdPrep>();
-            IPerformer targetPerf = target.Prepare(formula, false);
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleProvokeTrigger(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            IdPrep target = builder.PopPrepper<IdPrep>();
+            IPerformer targetPerf = target.Prepare(builder, false);
 
             NoPrep valuePrep = new(Literal.Bool(true)), targetPrep = new(targetPerf), funcPrep = new(InputTrigger.Assign);
-            this.formula.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(formula));
+            builder.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(builder));
 
             // Push the literal true onto the stack for any following trigger pulls.
-            this.push(valuePrep);
+            builder.PushPrepper(valuePrep);
+        }
+
+        static private void handleTypeGet(FormulaBuilder builder) {
+            // TODO: Implement
+        }
+
+        static private void handleVarGet(FormulaBuilder builder) {
+            // TODO: Implement
         }
 
         /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleConditionalProvokeTrigger(PP.ParseTree.PromptArgs args) {
-            PP.Scanner.Location loc = args.Tokens[^1].End;
-            IdPrep target  = this.pop<IdPrep>();
-            IPrepper value = this.pop<IPrepper>();
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleConditionalProvokeTrigger(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            IdPrep target  = builder.PopPrepper<IdPrep>();
+            IPrepper value = builder.PopPrepper<IPrepper>();
 
-            IPerformer valuePerf  = value.Prepare(formula, false);
-            IPerformer targetPerf = target.Prepare(formula, false);
+            IPerformer valuePerf  = value.Prepare(builder, false);
+            IPerformer targetPerf = target.Prepare(builder, false);
 
             Type valueType  = Type.FromType(valuePerf.Type);
             TypeMatch match = Type.Trigger.Match(valueType);
@@ -431,21 +385,21 @@ namespace Blackboard.Parser {
                     With("Conditional Type", valueType);
 
             NoPrep valuePrep = new(valuePerf), targetPrep = new(targetPerf), funcPrep = new(InputTrigger.Assign);
-            this.formula.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(formula));
+            builder.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(builder));
 
             // Push the condition onto the stack for any following trigger pulls.
-            this.push(valuePrep);
+            builder.PushPrepper(valuePrep);
         }
 
         /// <summary>This handles assigning the left value to the right value.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleAssignment(PP.ParseTree.PromptArgs args) {
-            IPrepper value  = this.pop<IPrepper>();
-            IPrepper target = this.pop<IPrepper>();
-            PP.Scanner.Location loc = args.Tokens[^1].End;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleAssignment(FormulaBuilder builder) {
+            IPrepper value  = builder.PopPrepper<IPrepper>();
+            IPrepper target = builder.PopPrepper<IPrepper>();
+            PP.Scanner.Location loc = builder.LastLocation;
 
-            IPerformer valuePerf  = value.Prepare(formula, false);
-            IPerformer targetPerf = target.Prepare(formula, false);
+            IPerformer valuePerf  = value.Prepare(builder, false);
+            IPerformer targetPerf = target.Prepare(builder, false);
 
             // Check if the value is an input, this may have to change if we allow assignments to non-input fields.
             if (targetPerf is not WrappedNodeReader targetReader)
@@ -480,20 +434,20 @@ namespace Blackboard.Parser {
                     With("Type", targetType);
 
             NoPrep valuePrep = new(valuePerf), targetPrep = new(targetPerf), funcPrep = new(assignFunc);
-            this.formula.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(formula));
+            builder.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(builder));
 
             // Push the value back onto the stack for any following assignments.
-            this.push(valuePrep);
+            builder.PushPrepper(valuePrep);
         }
 
         /// <summary>This handles performing a type cast of a node.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleCast(PP.ParseTree.PromptArgs args) {
-            IPrepper value = this.pop<IPrepper>();
-            Type t = this.stashPop<Type>();
-            PP.Scanner.Location loc = args.Tokens[^1].End;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleCast(FormulaBuilder builder) {
+            IPrepper value = builder.PopPrepper<IPrepper>();
+            Type t = builder.PopType();
+            PP.Scanner.Location loc = builder.LastLocation;
 
-            IPerformer valuePerf = value.Prepare(formula, false);
+            IPerformer valuePerf = value.Prepare(builder, false);
             Type valueType = Type.FromType(valuePerf.Type);
             TypeMatch match = t.Match(valueType, true);
             if (!match.IsMatch && !match.IsAnyCast)
@@ -503,13 +457,14 @@ namespace Blackboard.Parser {
                     With("Type", valueType).
                     With("Value", valuePerf);
 
+            Namespace ops = builder.Driver.Global.Find(Driver.OperatorNamespace) as Namespace;
             if (match.IsAnyCast) {
                 INode castGroup =
-                    t == Type.Bool    ? driver.Global.Find(Driver.OperatorNamespace, "castBool") :
-                    t == Type.Int     ? driver.Global.Find(Driver.OperatorNamespace, "castInt") :
-                    t == Type.Double  ? driver.Global.Find(Driver.OperatorNamespace, "castDouble") :
-                    t == Type.String  ? driver.Global.Find(Driver.OperatorNamespace, "castString") :
-                    t == Type.Trigger ? driver.Global.Find(Driver.OperatorNamespace, "castTrigger") :
+                    t == Type.Bool    ? ops.Find("castBool") :
+                    t == Type.Int     ? ops.Find("castInt") :
+                    t == Type.Double  ? ops.Find("castDouble") :
+                    t == Type.String  ? ops.Find("castString") :
+                    t == Type.Trigger ? ops.Find("castTrigger") :
                     throw new Exception("Unsupported type for new definition cast").
                         With("Location", loc).
                         With("Type", t);
@@ -518,74 +473,70 @@ namespace Blackboard.Parser {
                 valuePerf = new Function(castFunc, valuePerf);
             }
 
-            this.push(new NoPrep(valuePerf));
+            builder.PushPrepper(new NoPrep(valuePerf));
         }
 
         /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleMemberAccess(PP.ParseTree.PromptArgs args) {
-            PP.Tokenizer.Token token = args.Tokens[^1];
-            PP.Scanner.Location loc = token.End;
-            string name = token.Text;
-            IPrepper receiver = this.pop<IPrepper>();
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleMemberAccess(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            string name = builder.LastText;
+            IPrepper receiver = builder.PopPrepper<IPrepper>();
             
-            this.push(new IdPrep(loc, receiver, name));
+            builder.PushPrepper(new IdPrep(loc, receiver, name));
         }
 
         /// <summary>This handles preparing for a method call.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleStartCall(PP.ParseTree.PromptArgs args) {
-            IPrepper item = this.pop<IPrepper>();
-            PP.Scanner.Location loc = args.Tokens[^1].End;
-            this.push(new FuncPrep(loc, item));
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleStartCall(FormulaBuilder builder) {
+            IPrepper item = builder.PopPrepper<IPrepper>();
+            PP.Scanner.Location loc = builder.LastLocation;
+            builder.PushPrepper(new FuncPrep(loc, item));
         }
 
         /// <summary>This handles the end of a method call and creates the node for the method.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handleAddArg(PP.ParseTree.PromptArgs args) {
-            IPrepper arg = this.pop<IPrepper>();
-            FuncPrep func = this.pop<FuncPrep>();
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleAddArg(FormulaBuilder builder) {
+            IPrepper arg = builder.PopPrepper<IPrepper>();
+            FuncPrep func = builder.PopPrepper<FuncPrep>();
             func.Arguments.Add(arg);
-            this.push(func);
+            builder.PushPrepper(func);
         }
 
         /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handlePushId(PP.ParseTree.PromptArgs args) {
-            PP.Tokenizer.Token token = args.Tokens[^1];
-            PP.Scanner.Location loc = token.End;
-            string name = token.Text;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handlePushId(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            string name = builder.LastText;
 
-            this.push(new IdPrep(loc, this.formula.Scopes, name));
+            builder.PushPrepper(new IdPrep(loc, builder.Scopes, name));
         }
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handlePushBool(PP.ParseTree.PromptArgs args) {
-            PP.Tokenizer.Token token = args.Tokens[^1];
-            PP.Scanner.Location loc = token.End;
-            string text = token.Text;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handlePushBool(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            string text = builder.LastText;
 
             try {
                 bool value = bool.Parse(text);
-                this.push(LiteralPrep.Bool(value));
+                builder.PushPrepper(LiteralPrep.Bool(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a bool.", ex).
                     With("Text", text).
                     With("Location", loc);
             }
         }
-   
+
         /// <summary>This handles pushing a binary int literal value onto the stack.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handlePushBin(PP.ParseTree.PromptArgs args) {
-            PP.Tokenizer.Token token = args.Tokens[^1];
-            PP.Scanner.Location loc = token.End;
-            string text = token.Text;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handlePushBin(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            string text = builder.LastText;
 
             try {
                 int value = S.Convert.ToInt32(text, 2);
-                this.push(LiteralPrep.Int(value));
+                builder.PushPrepper(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a binary int.", ex).
                     With("Text", text).
@@ -594,15 +545,14 @@ namespace Blackboard.Parser {
         }
 
         /// <summary>This handles pushing an ocatal int literal value onto the stack.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handlePushOct(PP.ParseTree.PromptArgs args) {
-            PP.Tokenizer.Token token = args.Tokens[^1];
-            PP.Scanner.Location loc = token.End;
-            string text = token.Text;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handlePushOct(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            string text = builder.LastText;
 
             try {
                 int value = S.Convert.ToInt32(text, 8);
-                this.push(LiteralPrep.Int(value));
+                builder.PushPrepper(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse an octal int.", ex).
                     With("Text", text).
@@ -611,15 +561,14 @@ namespace Blackboard.Parser {
         }
 
         /// <summary>This handles pushing a decimal int literal value onto the stack.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handlePushInt(PP.ParseTree.PromptArgs args) {
-            PP.Tokenizer.Token token = args.Tokens[^1];
-            PP.Scanner.Location loc = token.End;
-            string text = token.Text;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handlePushInt(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            string text = builder.LastText;
 
             try {
                 int value = int.Parse(text);
-                this.push(LiteralPrep.Int(value));
+                builder.PushPrepper(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a decimal int.", ex).
                     With("Text", text).
@@ -628,15 +577,14 @@ namespace Blackboard.Parser {
         }
 
         /// <summary>This handles pushing a hexadecimal int literal value onto the stack.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handlePushHex(PP.ParseTree.PromptArgs args) {
-            PP.Tokenizer.Token token = args.Tokens[^1];
-            PP.Scanner.Location loc = token.End;
-            string text = token.Text[2..];
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handlePushHex(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            string text = builder.LastText[2..];
 
             try {
                 int value = int.Parse(text, NumberStyles.HexNumber);
-                this.push(LiteralPrep.Int(value));
+                builder.PushPrepper(LiteralPrep.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a hex int.", ex).
                     With("Text", text).
@@ -645,15 +593,14 @@ namespace Blackboard.Parser {
         }
 
         /// <summary>This handles pushing a double literal value onto the stack.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handlePushDouble(PP.ParseTree.PromptArgs args) {
-            PP.Tokenizer.Token token = args.Tokens[^1];
-            PP.Scanner.Location loc = token.End;
-            string text = token.Text;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handlePushDouble(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            string text = builder.LastText;
 
             try {
                 double value = double.Parse(text);
-                this.push(LiteralPrep.Double(value));
+                builder.PushPrepper(LiteralPrep.Double(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a double.", ex).
                     With("Text", text).
@@ -662,15 +609,14 @@ namespace Blackboard.Parser {
         }
 
         /// <summary>This handles pushing a string literal value onto the stack.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handlePushString(PP.ParseTree.PromptArgs args) {
-            PP.Tokenizer.Token token = args.Tokens[^1];
-            PP.Scanner.Location loc = token.End;
-            string text = token.Text;
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handlePushString(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            string text = builder.LastText;
 
             try {
                 string value = PP.Misc.Text.Unescape(text);
-                this.push(LiteralPrep.String(value));
+                builder.PushPrepper(LiteralPrep.String(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to decode escaped sequences.", ex).
                     With("Text", text).
@@ -679,19 +625,18 @@ namespace Blackboard.Parser {
         }
 
         /// <summary>This handles pushing a type onto the stack.</summary>
-        /// <param name="args">The token information from the parser.</param>
-        private void handlePushType(PP.ParseTree.PromptArgs args) {
-            PP.Tokenizer.Token token = args.Tokens[^1];
-            PP.Scanner.Location loc = token.End;
-            string text = token.Text;
-            
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handlePushType(FormulaBuilder builder) {
+            PP.Scanner.Location loc = builder.LastLocation;
+            string text = builder.LastText;
+
             Type t = Type.FromName(text);
             if (t is null)
                 throw new Exception("Unrecognized type name.").
                     With("Text", text).
                     With("Location", loc);
 
-            this.stashPush(t);
+            builder.PushType(t);
         }
 
         #endregion

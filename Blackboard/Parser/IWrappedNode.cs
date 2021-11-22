@@ -14,6 +14,8 @@ namespace Blackboard.Parser {
     /// </remarks>
     internal interface IWrappedNode {
 
+        // TODO: Add a collection of nodes which can NOT be gotten because they are pending removal.
+
         /// <summary>The type of this node.</summary>
         public S.Type Type { get; }
 

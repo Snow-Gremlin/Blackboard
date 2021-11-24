@@ -14,24 +14,24 @@ namespace Blackboard.Core.Nodes.Inner {
     /// a trigger (e.g. `Trigger && (10 > 3)`). However this trigger will only act provoked, i.e. update its children,
     /// when the boolean changes value. This means that you can get an update from this trigger when it is not provoked.
     /// </remarks>
-    sealed public class BoolAsTrigger: EvalAdopter, ITriggerAdopter, IDataNode {
+    sealed public class BoolAsTrigger: Bases.Evaluatable, ITriggerAdopter, IDataNode {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new Function<IValueAdopter<Bool>, BoolAsTrigger>((value) => new BoolAsTrigger(value));
+            new Function<IValueParent<Bool>, BoolAsTrigger>((value) => new BoolAsTrigger(value));
 
         /// <summary>This is the parent node to read from.</summary>
-        private IValueAdopter<Bool> source;
+        private IValueParent<Bool> source;
 
         /// <summary>Creates a new bool value to trigger conversion.</summary>
-        public BoolAsTrigger(IValueAdopter<Bool> source = null, bool provoked = default) {
+        public BoolAsTrigger(IValueParent<Bool> source = null, bool provoked = default) {
             this.Provoked = provoked;
             this.Parent = source;
             this.updateTrigger();
         }
 
         /// <summary>The parent node to get the source value from.</summary>
-        public IValueAdopter<Bool> Parent {
+        public IValueParent<Bool> Parent {
             get => this.source;
             set {
                 this.SetParent(ref this.source, value);
@@ -40,12 +40,12 @@ namespace Blackboard.Core.Nodes.Inner {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents => INode.NotNull(this.source);
+        public override IEnumerable<IAdopter> Parents => INode.NotNull(this.source);
 
         /// <summary>This gets the data being stored in this node.</summary>
         /// <remarks>This returns the data from the souce boolean value or null if not set.</remarks>
         /// <returns>The data being stored.</returns>
-        public IData Data { get => this.source?.Data; }
+        public IData Data => this.source?.Data;
 
         /// <summary>Determines if the node is constant or if all of it's parents are constant.</summary>
         /// <remarks>This returns if the source boolean value is constent or not.</remarks>

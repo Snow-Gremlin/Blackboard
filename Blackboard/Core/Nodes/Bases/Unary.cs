@@ -12,19 +12,19 @@ namespace Blackboard.Core.Nodes.Bases {
         where TResult : IComparable<TResult>, new() {
 
         /// <summary>This is the parent node to read from.</summary>
-        private IValueAdopter<T1> source;
+        private IValueParent<T1> source;
 
         /// <summary>Creates a unary value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Unary(IValueAdopter<T1> source = null, TResult value = default) : base(value) {
+        public Unary(IValueParent<T1> source = null, TResult value = default) : base(value) {
             this.SetParent(ref this.source, source);
             this.UpdateValue();
         }
 
         /// <summary>The parent node to get the source value from.</summary>
-        public IValueAdopter<T1> Parent {
+        public IValueParent<T1> Parent {
             get => this.source;
             set {
                 this.SetParent(ref this.source, value);
@@ -33,7 +33,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents => INode.NotNull(this.source);
+        public override IEnumerable<IAdopter> Parents => INode.NotNull(this.source);
 
         /// <summary>This handles updating this node's value given the parent's value during evaluation.</summary>
         /// <remarks>This will not be called if the parent is null.</remarks>

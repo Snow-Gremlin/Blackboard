@@ -13,17 +13,17 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new FunctionN<IValueAdopter<T>, Min<T>>((inputs) => new Min<T>(inputs));
+            new FunctionN<IValueParent<T>, Min<T>>((inputs) => new Min<T>(inputs));
 
         /// <summary>Creates a minimum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Min(params IValueAdopter<T>[] parents) :
+        public Min(params IValueParent<T>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a minimum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public Min(IEnumerable<IValueAdopter<T>> parents = null, T value = default) :
+        public Min(IEnumerable<IValueParent<T>> parents = null, T value = default) :
             base(parents, value) { }
 
         /// <summary>This is the type name of the node.</summary>

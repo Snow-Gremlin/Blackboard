@@ -13,17 +13,17 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new FunctionN<IValueAdopter<T>, Max<T>>((inputs) => new Max<T>(inputs));
+            new FunctionN<IValueParent<T>, Max<T>>((inputs) => new Max<T>(inputs));
 
         /// <summary>Creates a maximum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Max(params IValueAdopter<T>[] parents) :
+        public Max(params IValueParent<T>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a maximum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public Max(IEnumerable<IValueAdopter<T>> parents = null, T value = default) :
+        public Max(IEnumerable<IValueParent<T>> parents = null, T value = default) :
             base(parents, value) { }
 
         /// <summary>This is the type name of the node.</summary>

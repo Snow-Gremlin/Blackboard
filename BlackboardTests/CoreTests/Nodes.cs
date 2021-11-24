@@ -19,6 +19,8 @@ namespace BlackboardTests.CoreTests {
             Or  or123  = new(and12, input3);
             Not not123 = new(or123);
 
+            not123.InstallAll();
+
             and12 .CheckString("And<bool>[False](Input<bool>, Input<bool>)");
             not123.CheckString("Not<bool>[True](Or<bool>(And<bool>, Input<bool>))");
 
@@ -45,6 +47,9 @@ namespace BlackboardTests.CoreTests {
             And and12  = new(input1, input2);
             Or  or123  = new(and12,  input3);
             Not not123 = new(or123);
+
+            not123.InstallAll();
+
             input1.CheckValue(false);
             input2.CheckValue(false);
             input3.CheckValue(false);
@@ -128,6 +133,8 @@ namespace BlackboardTests.CoreTests {
             bool high;
             OutputTrigger outTrig = new(over3);
             outTrig.OnProvoked += (object sender, S.EventArgs e) => high = true;
+
+            outTrig.InstallAll();
 
             void check(bool triggerA, bool triggerB, bool triggerC,
                 int expCount, bool expHigh, bool expToggle) {

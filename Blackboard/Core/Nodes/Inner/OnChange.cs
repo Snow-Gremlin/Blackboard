@@ -62,7 +62,7 @@ namespace Blackboard.Core.Nodes.Inner {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents => this.sources;
+        public override IEnumerable<IAdopter> Parents => this.sources;
 
         /// <summary>This updates the trigger during an evaluation.</summary>
         /// <returns>This always returns true so that any parent change will trigger this node.</returns>

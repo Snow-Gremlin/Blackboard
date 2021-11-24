@@ -5,7 +5,7 @@ namespace Blackboard.Core.Data.Interfaces {
 
     /// <summary>This indicates that this Blackboard data type is a floating point value.</summary>
     /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
-    public interface IFloatingPoint<T>: IData
+    public interface IFloatingPoint<T>: IArithmetic<T>
         where T : IData {
 
         /// <summary>This gets the linear interpolation between to points using this value as a factor.</summary>
@@ -19,19 +19,23 @@ namespace Blackboard.Core.Data.Interfaces {
         /// <returns>This value rounded to the given decimals.</returns>
         T Round(Int decimals);
 
-        /// <summary>This gets the Atan2 where this value is the Y input.</summary>
-        /// <param name="x">This is the X input value.</param>
-        /// <returns>The Atan2 of this and the other value.</returns>
-        T Atan2(T x);
-
-        /// <summary>This gets the logarithm of this value using the other value as the base.</summary>
-        /// <param name="newBase">The value to use as the base of the log.</param>
-        /// <returns>The result of the logarithm.</returns>
-        T Log(T newBase);
-
         /// <summary>This performs the given function on this value.</summary>
         /// <param name="func">The function to run on this value.</param>
         /// <returns>The resulting value from this value being used in the given function.</returns>
         T DoubleMath(S.Func<double, double> func);
+
+        /// <summary>This performs the given function on this value.</summary>
+        /// <param name="other">The value to use as the second input to the function.</param>
+        /// <param name="func">The function to run on this and the given value.</param>
+        /// <returns>The resulting value from this and the other value being used in the given function.</returns>
+        T DoubleMath(T other, S.Func<double, double, double> func);
+
+        /// <summary>Determines if this value is positive or negative infinity.</summary>
+        /// <returns>True if the number is either positive or negative infinity, false otherwise.</returns>
+        Bool IsInfinity();
+
+        /// <summary>Determines if this value is not a number.</summary>
+        /// <returns>True if the number is not a number, false otherwise.</returns>
+        Bool IsNAN();
     }
 }

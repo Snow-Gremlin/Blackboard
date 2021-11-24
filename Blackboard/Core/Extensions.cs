@@ -11,6 +11,22 @@ namespace Blackboard.Core {
     static public class Extensions {
         #region General...
 
+        /// <summary>Filters a sequence of values based on the inverse of the predicate.</summary>
+        /// <typeparam name="T">The type of values being filtered.</typeparam>
+        /// <param name="input">The values to filter.</param>
+        /// <param name="predicate">The predicate to filter if not passing.</param>
+        /// <returns>The filtered values.</returns>
+        static public IEnumerable<T> WhereNot<T>(this IEnumerable<T> input, S.Func<T, bool> predicate) =>
+            input.Where(value => !predicate(value));
+
+        /// <summary>Runs all the values on a the given predicate.</summary>
+        /// <typeparam name="T">The type of values being run.</typeparam>
+        /// <param name="input">The values to run.</param>
+        /// <param name="predicate">The predicate to run on each value.</param>
+        static public void Foreach<T>(this IEnumerable<T> input, S.Action<T> predicate) {
+            foreach (T value in input) predicate(value);
+        }
+
         /// <summary>Filters any null values out of the given enumerable.</summary>
         /// <typeparam name="T">The type of the values to check.</typeparam>
         /// <param name="input">The input to get all the values from.</param>
@@ -125,19 +141,19 @@ namespace Blackboard.Core {
             return value;
         }
 
-        /// <summary>This sort inserts unique evaluatable nodes into the given linked list.</summary>
+        /// <summary>This sort inserts unique nodes into the given linked list.</summary>
         /// <typeparam name="T">The type of evaulatable node being worked with.</typeparam>
         /// <param name="list">The list of values to sort insert into.</param>
         /// <param name="nodes">The set of nodes to insert.</param>
-        static public void SortInsertUniqueEvaluatable<T>(this LinkedList<T> list, params T[] nodes)
+        static public void SortInsertUnique<T>(this LinkedList<T> list, params T[] nodes)
             where T : IEvaluatable =>
-            list.SortInsertUniqueEvaluatable(nodes as IEnumerable<T>);
+            list.SortInsertUnique(nodes as IEnumerable<T>);
 
         /// <summary>This sort inserts unique evaluatable nodes into the given linked list.</summary>
         /// <typeparam name="T">The type of evaulatable node being worked with.</typeparam>
         /// <param name="list">The list of values to sort insert into.</param>
         /// <param name="nodes">The set of nodes to insert.</param>
-        static public void SortInsertUniqueEvaluatable<T>(this LinkedList<T> list, IEnumerable<T> nodes)
+        static public void SortInsertUnique<T>(this LinkedList<T> list, IEnumerable<T> nodes)
             where T : IEvaluatable {
             foreach (T node in nodes) {
                 bool addToEnd = true;
@@ -173,20 +189,6 @@ namespace Blackboard.Core {
         #endregion
         #region Data...
 
-        /// <summary>Performs an implicit cast from the given data value into the given type.</summary>
-        /// <remarks>The types should be matched prior to being used in this method.</remarks>
-        /// <typeparam name="T">The type to cast the value into.</typeparam>
-        /// <param name="value">The value to cast into that type.</param>
-        /// <returns>The new data value in the given type or default if unable to cast implicitly.</returns>
-        static public T ImplicitCastTo<T>(this IData value) where T: IData =>
-            value is T      v2 ? v2 :
-            value is Bool   v3 ? v3 is IImplicit<Bool,   T> c3 ? c3.CastFrom(v3) : default :
-            value is Double v4 ? v4 is IImplicit<Double, T> c4 ? c4.CastFrom(v4) : default :
-            value is Int    v5 ? v5 is IImplicit<Int,    T> c5 ? c5.CastFrom(v5) : default :
-            value is String v6 ? v6 is IImplicit<String, T> c6 ? c6.CastFrom(v6) : default :
-            throw new Exception("Unexpected value type in implicit cast").
-                With("Value Type", value.GetType());
-
         /// <summary>The values from the given input values.</summary>
         /// <typeparam name="T">The type of the values to get.</typeparam>
         /// <param name="nodes">The set of nodes to get all the values from.</param>
@@ -202,24 +204,27 @@ namespace Blackboard.Core {
         /// <param name="root">The root to start checking from.</param>
         /// <param name="targets">The target nodes to try to reach.</param>
         /// <returns>True if any of the targets can be reached, false otherwise.</returns>
-        static public bool CanReachAny(this INode root, params INode[] targets) =>
+        static public bool CanReachAny(this IChild root, params INode[] targets) =>
             root.CanReachAny(targets as IEnumerable<INode>);
 
         /// <summary>This will check if from the given root node any of the given target nodes can be reachable.</summary>
         /// <param name="root">The root to start checking from.</param>
         /// <param name="targets">The target nodes to try to reach.</param>
         /// <returns>True if any of the targets can be reached, false otherwise.</returns>
-        static public bool CanReachAny(this INode root, IEnumerable<INode> targets) {
-            List<INode> touched = new();
-            Queue<INode> pending = new();
+        static public bool CanReachAny(this IChild root, IEnumerable<INode> targets) {
+            if (root is null) return true;
+            HashSet<IChild> touched = new();
+            Queue<IChild> pending = new();
             pending.Enqueue(root);
+            touched.Add(root);
+
             while (pending.Count > 0) {
-                INode node = pending.Dequeue();
-                if (node is null) continue;
-                touched.Add(node);
+                IChild node = pending.Dequeue();
                 if (targets.Contains(node)) return true;
-                foreach (INode parent in node.Parents) {
-                    if (!touched.Contains(parent)) pending.Enqueue(parent);
+
+                foreach (IChild child in node.Parents.NotNull().OfType<IChild>().WhereNot(touched.Contains)) {
+                    pending.Enqueue(child);
+                    touched.Add(child);
                 }
             }
             return false;
@@ -234,8 +239,8 @@ namespace Blackboard.Core {
         /// <summary>This determines if all the given nodes are constant.</summary>
         /// <param name="nodes">The nodes to check if constant.</param>
         /// <returns>True if all nodes are constant, false otherwise.</returns>
-        static public bool IsConstant(this IEnumerable<IConstantable> nodes) =>
-            nodes.All((node) => node?.IsConstant ?? false);
+        static public bool IsConstant<T>(this IEnumerable<T> nodes) where T: INode =>
+            nodes.All(node => node is IConstant);
 
         /// <summary>Gets the maximum depth from the given nodes.</summary>
         /// <param name="nodes">The nodes to get the maximum depth from.</param>

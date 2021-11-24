@@ -26,7 +26,7 @@ namespace Blackboard.Core.Nodes.Inner {
         public override IConstant ToConstant() => this;
 
         /// <summary>Always returns no parents since constants have no parent.</summary>
-        public override IEnumerable<INode> Parents => Enumerable.Empty<INode>();
+        public override IEnumerable<IAdopter> Parents => Enumerable.Empty<IAdopter>();
 
         /// <summary>This will update the trigger during evaluation.</summary>
         /// <returns>True to trigger if the source value is true, false otherwise.</returns>

@@ -17,17 +17,17 @@ namespace Blackboard.Core.Nodes.Inner {
         /// This is used for things like String where all types can implicit cast to a string.
         /// </param>
         static public IFuncDef Factory(bool needsOneNoCast = false) => 
-            new FunctionN<IValueAdopter<T>, Sum<T>>((inputs) => new Sum<T>(inputs), needsOneNoCast);
+            new FunctionN<IValueParent<T>, Sum<T>>((inputs) => new Sum<T>(inputs), needsOneNoCast);
 
         /// <summary>Creates a sum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Sum(params IValueAdopter<T>[] parents) :
+        public Sum(params IValueParent<T>[] parents) :
             base(parents) { }
 
         /// <summary>Creates a sum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public Sum(IEnumerable<IValueAdopter<T>> parents = null, T value = default) :
+        public Sum(IEnumerable<IValueParent<T>> parents = null, T value = default) :
             base(parents, value) { }
 
         /// <summary>This is the type name of the node.</summary>

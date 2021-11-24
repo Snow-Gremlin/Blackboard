@@ -25,10 +25,10 @@ namespace Blackboard.Core.Nodes.Outer {
         private ITriggerAdopter reset;
 
         /// <summary>The value to step during an increment or decrement.</summary>
-        private IValueAdopter<T> delta;
+        private IValueParent<T> delta;
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
-        private IValueAdopter<T> resetValue;
+        private IValueParent<T> resetValue;
 
         /// <summary>Creates a new node for counting events.</summary>
         /// <param name="increment">The initial parent to trigger an increment.</param>
@@ -38,7 +38,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <param name="resetValue">The initial reset value parent.</param>
         /// <param name="value">The initial value for this counter.</param>
         public Counter(ITriggerAdopter increment = null, ITriggerAdopter decrement = null, ITriggerAdopter reset = null,
-            IValueAdopter<T> delta = null, IValueAdopter<T> resetValue = null, T value = default) : base(value) {
+            IValueParent<T> delta = null, IValueParent<T> resetValue = null, T value = default) : base(value) {
             this.Increment = increment;
             this.Decrement = decrement;
             this.Reset = reset;
@@ -66,21 +66,21 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>The value to step during an increment or decrement.</summary>
         /// <remarks>If this parent is null then the counter will increment and decrement by one.</remarks>
-        public IValueAdopter<T> Delta {
+        public IValueParent<T> Delta {
             get => this.delta;
             set => this.SetParent(ref this.delta, value);
         }
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
-        public IValueAdopter<T> ResetValue {
+        public IValueParent<T> ResetValue {
             get => this.resetValue;
             set => this.SetParent(ref this.resetValue, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents =>
-            INode.NotNull(this.increment, this.decrement, this.reset, this.delta, this.resetValue);
+        public override IEnumerable<IAdopter> Parents =>
+            INode.NotNull<IAdopter>(this.increment, this.decrement, this.reset, this.delta, this.resetValue);
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>

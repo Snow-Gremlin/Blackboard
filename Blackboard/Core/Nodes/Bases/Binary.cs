@@ -14,24 +14,24 @@ namespace Blackboard.Core.Nodes.Bases {
         where TResult : IComparable<TResult>, new() {
 
         /// <summary>This is the first parent node to read from.</summary>
-        private IValueAdopter<T1> source1;
+        private IValueParent<T1> source1;
 
         /// <summary>This is the second parent node to read from.</summary>
-        private IValueAdopter<T2> source2;
+        private IValueParent<T2> source2;
 
         /// <summary>Creates a binary value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Binary(IValueAdopter<T1> source1 = null, IValueAdopter<T2> source2 = null, TResult value = default) : base(value) {
+        public Binary(IValueParent<T1> source1 = null, IValueParent<T2> source2 = null, TResult value = default) : base(value) {
             this.SetParent(ref this.source1, source1);
             this.SetParent(ref this.source2, source2);
             this.UpdateValue();
         }
 
         /// <summary>The first parent node to get the first source value from.</summary>
-        public IValueAdopter<T1> Parent1 {
+        public IValueParent<T1> Parent1 {
             get => this.source1;
             set {
                 this.SetParent(ref this.source1, value);
@@ -40,7 +40,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The second parent node to get the second source value from.</summary>
-        public IValueAdopter<T2> Parent2 {
+        public IValueParent<T2> Parent2 {
             get => this.source2;
             set {
                 this.SetParent(ref this.source2, value);
@@ -49,7 +49,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents => INode.NotNull(this.source1, this.source2);
+        public override IEnumerable<IAdopter> Parents => INode.NotNull<IAdopter>(this.source1, this.source2);
 
         /// <summary>This handles updating this node's value given the parents' values during evaluation.</summary>
         /// <remarks>This will not be called if any of the parents are null.</remarks>

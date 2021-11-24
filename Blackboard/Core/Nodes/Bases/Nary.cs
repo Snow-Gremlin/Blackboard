@@ -12,19 +12,19 @@ namespace Blackboard.Core.Nodes.Bases {
         where TResult : IComparable<TResult>, new() {
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
-        private List<IValueAdopter<TIn>> sources;
+        private List<IValueParent<TIn>> sources;
 
         /// <summary>Creates a N-ary value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Nary(params IValueAdopter<TIn>[] parents) :
-            this(parents as IEnumerable<IValueAdopter<TIn>>) { }
+        public Nary(params IValueParent<TIn>[] parents) :
+            this(parents as IEnumerable<IValueParent<TIn>>) { }
 
         /// <summary>Creates a N-ary value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public Nary(IEnumerable<IValueAdopter<TIn>> parents = null, TResult value = default) : base(value) {
-            this.sources = new List<IValueAdopter<TIn>>();
+        public Nary(IEnumerable<IValueParent<TIn>> parents = null, TResult value = default) : base(value) {
+            this.sources = new List<IValueParent<TIn>>();
             this.AddParents(parents);
             // UpdateValue already called by AddParents.
         }
@@ -32,16 +32,16 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>This adds parents to this node.</summary>
         /// <remarks>The value is updated after these parents are added.</remarks>
         /// <param name="parents">The set of parents to add.</param>
-        public void AddParents(params IValueAdopter<TIn>[] parents) =>
-            this.AddParents(parents as IEnumerable<IValueAdopter<TIn>>);
+        public void AddParents(params IValueParent<TIn>[] parents) =>
+            this.AddParents(parents as IEnumerable<IValueParent<TIn>>);
 
         /// <summary>This adds parents to this node.</summary>
         /// <remarks>The value is updated after these parents are added.</remarks>
         /// <param name="parents">The set of parents to add.</param>
-        public void AddParents(IEnumerable<IValueAdopter<TIn>> parents) {
+        public void AddParents(IEnumerable<IValueParent<TIn>> parents) {
             parents = parents.NotNull();
             this.sources.AddRange(parents);
-            foreach (IValueAdopter<TIn> parent in parents)
+            foreach (IValueParent<TIn> parent in parents)
                 parent.AddChildren(this);
             this.UpdateValue();
         }
@@ -50,16 +50,16 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <remarks>The value is updated after these parents are removed.</remarks>
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
-        public bool RemoveParents(params IValueAdopter<TIn>[] parents) =>
-            this.RemoveParents(parents as IEnumerable<IValueAdopter<TIn>>);
+        public bool RemoveParents(params IValueParent<TIn>[] parents) =>
+            this.RemoveParents(parents as IEnumerable<IValueParent<TIn>>);
 
         /// <summary>This removes the given parents from this node.</summary>
         /// <remarks>The value is updated after these parents are removed.</remarks>
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
-        public bool RemoveParents(IEnumerable<IValueAdopter<TIn>> parents) {
+        public bool RemoveParents(IEnumerable<IValueParent<TIn>> parents) {
             bool anyRemoved = false;
-            foreach (IValueAdopter<TIn> parent in parents) {
+            foreach (IValueParent<TIn> parent in parents) {
                 if (this.sources.Remove(parent)) {
                     parent.RemoveChildren(this);
                     anyRemoved = true;
@@ -70,7 +70,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents => this.sources;
+        public override IEnumerable<IAdopter> Parents => this.sources;
 
         /// <summary>This handles updating this node's value given the parents' values during evaluation.</summary>
         /// <remarks>Any null parents are ignored.</remarks>

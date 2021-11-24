@@ -36,7 +36,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public override string TypeName => "Input";
 
         /// <summary>Always returns no parents since inputs have no parent.</summary>
-        public override IEnumerable<INode> Parents => Enumerable.Empty<INode>();
+        public override IEnumerable<IAdopter> Parents => Enumerable.Empty<IAdopter>();
 
         /// <summary>This is set this trigger to emit during the next evaluation.</summary>
         /// <param name="value">True will provoke, false will reset the trigger.</param>

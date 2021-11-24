@@ -8,8 +8,8 @@ namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>A base node for a node which has a value.</summary>
     /// <typeparam name="T">The type of the value being held.</typeparam>
-    public abstract class ValueNode<T>: EvalAdopter, IValueAdopter<T>, IValue<T>
-        where T : IData, IComparable<T>, new() {
+    public abstract class ValueNode<T>: Evaluatable, IValueParent<T>, IValue<T>
+        where T : IData, IComparable<T> {
 
         /// <summary>Creates a new value node.</summary>
         /// <param name="value">The initial value of the node.</param>
@@ -36,7 +36,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>This gets the data being stored in this node.</summary>
         /// <returns>The data being stored.</returns>
-        public IData Data { get => this.Value; }
+        public IData Data => this.Value;
 
         /// <summary>The value being held by this node.</summary>
         public T Value { get; private set; }

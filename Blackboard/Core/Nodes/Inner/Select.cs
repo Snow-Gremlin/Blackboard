@@ -17,7 +17,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new Function<IValueAdopter<Bool>, IValueAdopter<T>, IValueAdopter<T>, Select<T>>(
+            new Function<IValueParent<Bool>, IValueParent<T>, IValueParent<T>, Select<T>>(
                 (test, left, right) => new Select<T>(test, left, right));
 
         /// <summary>Creates a selection value node.</summary>
@@ -25,8 +25,8 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="source3">This is the third parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Select(IValueAdopter<Bool> source1 = null, IValueAdopter<T> source2 = null,
-            IValueAdopter<T> source3 = null, T value = default) :
+        public Select(IValueParent<Bool> source1 = null, IValueParent<T> source2 = null,
+            IValueParent<T> source3 = null, T value = default) :
             base(source1, source2, source3, value) { }
 
         /// <summary>This is the type name of the node.</summary>

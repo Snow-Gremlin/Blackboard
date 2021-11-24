@@ -1,5 +1,4 @@
-﻿using Blackboard.Core.Nodes.Functions;
-using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using S = System;
@@ -64,11 +63,8 @@ namespace Blackboard.Core.Nodes.Bases {
             }
         }
 
-        /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<INode> Parents => Enumerable.Empty<INode>();
-
-        /// <summary>The set of children nodes to this node in the graph.</summary>
-        public IEnumerable<INode> Children => Enumerable.Empty<INode>();
+        /// <summary>This is the type name of the node.</summary>
+        public string TypeName => "Function";
 
         /// <summary>The collection of argument types.</summary>
         /// <remarks>
@@ -103,7 +99,7 @@ namespace Blackboard.Core.Nodes.Bases {
         static private INode castParam(INode node, Type t) {
             INode cast = t.Implicit(node);
             return cast is not null ? cast :
-                throw new Exception("Error casting parameter").
+                throw new Exception("Error implicitly casting parameter").
                     With("Node", node).
                     With("Implicit", t).
                     With("Result", cast);
@@ -113,18 +109,14 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <remarks>Before this is called, Match must have been possible.</remarks>
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new function.</returns>
-        public virtual INode Build(INode[] nodes) {
-            return this.PassthroughOne && nodes.Length == 1 ? this.argTypes[0].Implicit(nodes[0]) :
+        public virtual INode Build(INode[] nodes) =>
+            this.PassthroughOne && nodes.Length == 1 ? this.argTypes[0].Implicit(nodes[0]) :
                 this.PostCastBuild(nodes.Zip(this.argTypes.RepeatLast(), castParam).ToArray());
-        }
 
         /// <summary>Builds and return the function node with the given arguments already casted.</summary>
         /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>
         /// <returns>The resulting function node.</returns>
         protected abstract INode PostCastBuild(INode[] nodes);
-
-        /// <summary>This is the type name of the node.</summary>
-        public string TypeName => "Function";
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>

@@ -40,7 +40,7 @@ namespace Blackboard.Core.Nodes.Outer {
             base(value) { }
 
         /// <summary>Always returns no parents since inputs have no parent.</summary>
-        public override IEnumerable<INode> Parents => Enumerable.Empty<INode>();
+        public override IEnumerable<IAdopter> Parents => Enumerable.Empty<IAdopter>();
 
         /// <summary>This sets the value of this node.</summary>
         /// <param name="value">The value to set.</param>

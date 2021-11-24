@@ -24,7 +24,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public string TypeName => "Namespace";
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<INode> Parents => Enumerable.Empty<INode>();
+        public IEnumerable<IAdopter> Parents => Enumerable.Empty<IAdopter>();
 
         /// <summary>The set of children nodes to this node in the graph.</summary>
         public IEnumerable<INode> Children => this.fields.Values;

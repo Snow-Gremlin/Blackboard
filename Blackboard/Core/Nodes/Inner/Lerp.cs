@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new Function<IValueAdopter<T>, IValueAdopter<T>, IValueAdopter<T>, Lerp<T>>(
+            new Function<IValueParent<T>, IValueParent<T>, IValueParent<T>, Lerp<T>>(
                 (input1, input2, input3) => new Lerp<T>(input1, input2, input3));
 
         /// <summary>Creates a linear interpolation value node.</summary>
@@ -19,8 +19,8 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="source3">This is the third parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Lerp(IValueAdopter<T> source1 = null, IValueAdopter<T> source2 = null,
-            IValueAdopter<T> source3 = null, T value = default) :
+        public Lerp(IValueParent<T> source1 = null, IValueParent<T> source2 = null,
+            IValueParent<T> source3 = null, T value = default) :
             base(source1, source2, source3, value) { }
 
         /// <summary>This is the type name of the node.</summary>

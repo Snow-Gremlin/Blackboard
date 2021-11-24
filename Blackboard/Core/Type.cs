@@ -9,10 +9,13 @@ using S = System;
 
 namespace Blackboard.Core {
 
-    using Caster = S.Func<INode, INode>;
-
     /// <summary>The types implemented for Blackboard.</summary>
     sealed public class Type {
+
+        /// <summary>This is a delegate for a casting method.</summary>
+        /// <param name="node">The node to cast.</param>
+        /// <returns>The resulting casted value.</returns>
+        private delegate INode Caster(INode node);
 
         /// <summary>The base type for all other types.</summary>
         static public readonly Type Node;
@@ -69,13 +72,7 @@ namespace Blackboard.Core {
 
         /// <summary>Gets all the types.</summary>
         /// <remarks>These are ordered by inheriting object before the object that was inherited.</remarks>
-        static public IEnumerable<Type> AllTypes {
-            get {
-                foreach (Type decendent in Node.AllInheritors)
-                    yield return decendent;
-                yield return Node;
-            }
-        }
+        static public IEnumerable<Type> AllTypes => Node.AllInheritors.Append(Node);
 
         /// <summary>Finds the type given the type name.</summary>
         /// <param name="name">The name of the type to get.</param>
@@ -331,14 +328,14 @@ namespace Blackboard.Core {
             LatchDouble   = new Type("latch-double",   typeof(Latch<Double>),   Double, typeof(Double));
             LatchString   = new Type("latch-string",   typeof(Latch<String>),   String, typeof(String));
 
-            addCast<IValueAdopter<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
-            addCast<IValueAdopter<Bool>>(Bool.imps, String,  (input) => new Implicit<Bool, String>(input));
+            addCast<IValueParent<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
+            addCast<IValueParent<Bool>>(Bool.imps, String,  (input) => new Implicit<Bool, String>(input));
 
-            addCast<IValueAdopter<Int>>(Int.imps, Double, (input) => new Implicit<Int, Double>(input));
-            addCast<IValueAdopter<Int>>(Int.imps, String, (input) => new Implicit<Int, String>(input));
+            addCast<IValueParent<Int>>(Int.imps, Double, (input) => new Implicit<Int, Double>(input));
+            addCast<IValueParent<Int>>(Int.imps, String, (input) => new Implicit<Int, String>(input));
 
-            addCast<IValueAdopter<Double>>(Double.exps, Int,    (input) => new Explicit<Double, Int>(input));
-            addCast<IValueAdopter<Double>>(Double.imps, String, (input) => new Implicit<Double, String>(input));
+            addCast<IValueParent<Double>>(Double.exps, Int,    (input) => new Explicit<Double, Int>(input));
+            addCast<IValueParent<Double>>(Double.imps, String, (input) => new Implicit<Double, String>(input));
 
             addCast<IFuncDef>(FuncDef.imps, FuncGroup, (input) => new FuncGroup(input));
         }

@@ -13,13 +13,13 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new Function<IValueAdopter<T>, IValueAdopter<T>, GreaterThan<T>>((left, right) => new GreaterThan<T>(left, right));
+            new Function<IValueParent<T>, IValueParent<T>, GreaterThan<T>>((left, right) => new GreaterThan<T>(left, right));
 
         /// <summary>Creates a greater than value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public GreaterThan(IValueAdopter<T> source1 = null, IValueAdopter<T> source2 = null, Bool value = default) :
+        public GreaterThan(IValueParent<T> source1 = null, IValueParent<T> source2 = null, Bool value = default) :
             base(source1, source2, value) { }
 
         /// <summary>This is the type name of the node.</summary>

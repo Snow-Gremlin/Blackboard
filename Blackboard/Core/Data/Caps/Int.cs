@@ -4,22 +4,29 @@ using S = System;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a 32 bit signed integer value such that it can be used in generics.</summary>
-    sealed public class Int: IArithmetic<Int>, IComparable<Int>, IBitwise<Int>,
+    public struct Int: IArithmetic<Int>, IComparable<Int>, IBitwise<Int>,
         IExplicit<Double, Int> {
+
+        /// <summary>Gets an integer value for zero. This is the same as default.</summary>
+        static public readonly Int Zero = new(0);
+
+        /// <summary>Gets an integer double value for one.</summary>
+        static public readonly Int One = new(1);
 
         /// <summary>The integer value being stored.</summary>
         public readonly int Value;
 
-        /// <summary>Creates a new default integer data value.</summary>
-        public Int() {
-            this.Value = default;
-        }
-
         /// <summary>Creates a new integer data value.</summary>
         /// <param name="value">The integer value to store.</param>
-        public Int(int value) {
-            this.Value = value;
-        }
+        public Int(int value) => this.Value = value;
+
+        /// <summary>Gets the name for the type of data.</summary>
+        public string TypeName => Type.Int.Name;
+
+        /// <summary>Get the value of the data as a string.</summary>
+        public string ValueString => this.Value.ToString();
+
+        #region Arithmetic Math...
 
         /// <summary>Gets the absolute value of this data value.</summary>
         /// <returns>The absolute value of this value.</returns>
@@ -44,12 +51,6 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The modulo of this value and the other value.</returns>
         public Int Mod(Int other) => new(this.Value % other.Value);
 
-        /// <summary>Gets the remainder of this value divided by the other value.</summary>
-        /// <remarks>This is identical to modulo for integers.</remarks>
-        /// <param name="other">The value to divide this value with.</param>
-        /// <returns>The remainder of this value divided the other value.</returns>
-        public Int Rem(Int other) => new(this.Value % other.Value);
-
         /// <summary>Gets the product of this value and the other value.</summary>
         /// <param name="other">The value to multiply this value with.</param>
         /// <returns>The product of this value and the other value.</returns>
@@ -65,10 +66,18 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The sum of the two data values.</returns>
         public Int Sum(Int other) => new(this.Value + other.Value);
 
-        /// <summary>Gets the power of this value to the other value.</summary>
-        /// <param name="other">The value to use as the exponent.</param>
-        /// <returns>The power of this value to the other value.</returns>
-        public Int Pow(Int other) => new((int)S.Math.Pow(this.Value, other.Value));
+        /// <summary>Gets this value clamped to the inclusive range of the given min and max.</summary>
+        /// <param name="min">The minimum allowed value.</param>
+        /// <param name="max">The maximum allowed value.</param>
+        /// <returns>The value clamped between the given values.</returns>
+        public Int Clamp(Int min, Int max) => new(S.Math.Clamp(this.Value, min.Value, max.Value));
+
+        /// <summary>Determines if the this value is negative.</summary>
+        /// <returns>True if below zero, false if zero or more.</returns>
+        public Bool IsNegative() => new(this.Value < 0);
+
+        #endregion
+        #region Bitwise Math...
 
         /// <summary>This gets the bitwise NOT of this data value.</summary>
         /// <returns>The bitwise NOT of this value.</returns>
@@ -99,15 +108,22 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The right shifted value.</returns>
         public Int RightShift(Int other) => new(this.Value >> other.Value);
 
+        #endregion
+        #region Casts...
+
         /// <summary>Casts a double into an int for an explicit cast.</summary>
         /// <param name="value">The double value to cast.</param>
         /// <returns>The resulting integer value.</returns>
         public Int CastFrom(Double value) => new((int)value.Value);
 
+        #endregion
+        #region Camparable...
+
         /// <summary>Compares two integers together.</summary>
         /// <param name="other">The other integer to compare.</param>
         /// <returns>The comparison result indicating which is greater than or equal.</returns>
         public int CompareTo(Int other) => this.Value.CompareTo(other.Value);
+
         public static bool operator ==(Int left, Int right) => left.CompareTo(right) == 0;
         public static bool operator !=(Int left, Int right) => left.CompareTo(right) != 0;
         public static bool operator < (Int left, Int right) => left.CompareTo(right) <  0;
@@ -120,15 +136,11 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>True if they are equal, otherwise false.</returns>
         public override bool Equals(object obj) => obj is Int other && this.Value == other.Value;
 
+        #endregion
+
         /// <summary>Gets the hash code of the stored value.</summary>
         /// <returns>The stored value's hash code.</returns>
         public override int GetHashCode() => this.Value.GetHashCode();
-
-        /// <summary>Gets the name for the type of data.</summary>
-        public string TypeName => Type.Int.Name;
-
-        /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value.ToString();
 
         /// <summary>Gets the name of this data type.</summary>
         /// <returns>The name of the bool type.</returns>

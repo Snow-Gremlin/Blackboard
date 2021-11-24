@@ -6,7 +6,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>A base node for any trigger node.</summary>
-    public abstract class TriggerNode: EvalAdopter, ITriggerAdopter {
+    public abstract class TriggerNode: Evaluatable, ITriggerAdopter {
 
         /// <summary>Creates a new trigger node.</summary>
         public TriggerNode(bool provoked = false) {

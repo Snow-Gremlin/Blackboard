@@ -7,25 +7,6 @@ using S = System;
 
 namespace Blackboard.Core.Nodes.Outer {
 
-    /// <summary>Event arguments for the change in a value node.</summary>
-    /// <typeparam name="T">The type of the value node.</typeparam>
-    sealed public class OutputValueEventArgs<T>: S.EventArgs {
-
-        /// <summary>The previous value before the change.</summary>
-        public readonly T Previous;
-
-        /// <summary>The current value after the change.</summary>
-        public readonly T Current;
-
-        /// <summary>Creates a new event arguments for a value node.</summary>
-        /// <param name="prev">The previous value before the change.</param>
-        /// <param name="cur">The current value after the change.</param>
-        public OutputValueEventArgs(T prev, T cur) {
-            this.Previous = prev;
-            this.Current = cur;
-        }
-    }
-
     /// <summary>A node for listening for changes in values used for outputting to the user.</summary>
     /// <typeparam name="T">The type of the value to hold.</typeparam>
     sealed public class OutputValue<T>: ValueNode<T>, IValueOutput<T, OutputValueEventArgs<T>>
@@ -33,15 +14,15 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new Function<IValueAdopter<T>, OutputValue<T>>((IValueAdopter<T> source) => new OutputValue<T>(source));
+            new Function<IValueParent<T>, OutputValue<T>>((IValueParent<T> source) => new OutputValue<T>(source));
 
         /// <summary>The parent source to listen to.</summary>
-        private IValueAdopter<T> source;
+        private IValueParent<T> source;
 
         /// <summary>Creates a new output value node.</summary>
         /// <param name="source">The initial source to get the value from.</param>
         /// <param name="value">The initial value for this node.</param>
-        public OutputValue(IValueAdopter<T> source = null, T value = default) : base(value) {
+        public OutputValue(IValueParent<T> source = null, T value = default) : base(value) {
             this.Parent = source;
             this.UpdateValue();
         }
@@ -50,7 +31,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public override string TypeName => "Output";
 
         /// <summary>The parent node to get the value from.</summary>
-        public IValueAdopter<T> Parent {
+        public IValueParent<T> Parent {
             get => this.source;
             set {
                 this.SetParent(ref this.source, value);
@@ -62,7 +43,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public event S.EventHandler<OutputValueEventArgs<T>> OnChanged;
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents => INode.NotNull(this.source);
+        public override IEnumerable<IAdopter> Parents => INode.NotNull(this.source);
 
         /// <summary>This will update the value.</summary>
         /// <returns>This will always return true.</returns>

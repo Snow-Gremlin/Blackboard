@@ -116,7 +116,6 @@ namespace Blackboard.Core {
                 BitwiseOr<Int>.Factory,
                 Any.Factory);
             add("power",
-                Power<Int>.Factory,
                 Power<Double>.Factory);
             add("remainder",
                 Rem<Int>.Factory,
@@ -151,9 +150,9 @@ namespace Blackboard.Core {
                 Abs<Int>.Factory,
                 Abs<Double>.Factory);
             add("acos",
-                DoubleMath<Double>.Acos);
+                DoubleMath1<Double>.Acos);
             add("acosh",
-                DoubleMath<Double>.Acosh);
+                DoubleMath1<Double>.Acosh);
             add("all",
                 All.Factory);
             add("and",
@@ -162,31 +161,31 @@ namespace Blackboard.Core {
             add("any",
                 Any.Factory);
             add("asin",
-                DoubleMath<Double>.Asin);
+                DoubleMath1<Double>.Asin);
             add("asinh",
-                DoubleMath<Double>.Asinh);
+                DoubleMath1<Double>.Asinh);
             add("atan",
                 Atan2<Double>.Factory,
-                DoubleMath<Double>.Atan);
+                DoubleMath1<Double>.Atan);
             add("atanh",
-                DoubleMath<Double>.Atanh);
+                DoubleMath1<Double>.Atanh);
             add("average",
                 Average.Factory);
             add("cbrt",
-                DoubleMath<Double>.Cbrt);
+                DoubleMath1<Double>.Cbrt);
             add("ceiling",
-                DoubleMath<Double>.Ceiling);
+                DoubleMath1<Double>.Ceiling);
             add("clamp",
                 Clamp<Int>.Factory,
                 Clamp<Double>.Factory);
             add("cos",
-                DoubleMath<Double>.Cos);
+                DoubleMath1<Double>.Cos);
             add("cosh",
-                DoubleMath<Double>.Cosh);
+                DoubleMath1<Double>.Cosh);
             add("exp",
-                DoubleMath<Double>.Exp);
+                DoubleMath1<Double>.Exp);
             add("floor",
-                DoubleMath<Double>.Floor);
+                DoubleMath1<Double>.Floor);
             add("implies",
                 Implies.Factory);
             add("latch",
@@ -197,12 +196,12 @@ namespace Blackboard.Core {
             add("lerp",
                 Lerp<Double>.Factory);
             add("log",
-                DoubleMath<Double>.Log,
+                DoubleMath1<Double>.Log,
                 Log<Double>.Factory);
             add("log10",
-                DoubleMath<Double>.Log10);
+                DoubleMath1<Double>.Log10);
             add("log2",
-                DoubleMath<Double>.Log2);
+                DoubleMath1<Double>.Log2);
             add("max",
                 Max<Int>.Factory,
                 Max<Double>.Factory);
@@ -226,24 +225,24 @@ namespace Blackboard.Core {
                 BitwiseOr<Int>.Factory,
                 Or.Factory);
             add("round",
-                DoubleMath<Double>.Round,
+                DoubleMath1<Double>.Round,
                 Round<Double>.Factory);
             add("sin",
-                DoubleMath<Double>.Sin);
+                DoubleMath1<Double>.Sin);
             add("sinh",
-                DoubleMath<Double>.Sinh);
+                DoubleMath1<Double>.Sinh);
             add("sqrt",
-                DoubleMath<Double>.Sqrt);
+                DoubleMath1<Double>.Sqrt);
             add("sum",
                 Sum<Int>.Factory(),
                 Sum<Double>.Factory(),
                 Sum<String>.Factory(true));
             add("tan",
-                DoubleMath<Double>.Tan);
+                DoubleMath1<Double>.Tan);
             add("tanh",
-                DoubleMath<Double>.Tanh);
+                DoubleMath1<Double>.Tanh);
             add("trunc",
-                DoubleMath<Double>.Truncate);
+                DoubleMath1<Double>.Truncate);
             add("xor",
                 BitwiseXor<Int>.Factory,
                 Xor.Factory);

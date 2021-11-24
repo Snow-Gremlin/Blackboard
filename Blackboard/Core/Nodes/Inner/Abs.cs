@@ -11,12 +11,12 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new Function<IValueAdopter<T>, Abs<T>>((value) => new Abs<T>(value));
+            new Function<IValueParent<T>, Abs<T>>((value) => new Abs<T>(value));
 
         /// <summary>Creates an absolute value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Abs(IValueAdopter<T> source = null, T value = default) :
+        public Abs(IValueParent<T> source = null, T value = default) :
             base(source, value) { }
 
         /// <summary>This is the type name of the node.</summary>

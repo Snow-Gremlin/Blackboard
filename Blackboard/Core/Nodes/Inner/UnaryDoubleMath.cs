@@ -7,7 +7,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This gets the double mathmatical function value from the parent.</summary>
-    sealed public class DoubleMath<T>: Unary<T, T>
+    sealed public class UnaryDoubleMath<T>: Unary<T, T>
         where T : IFloatingPoint<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory for creating a new Acos instance of this node.</summary>
@@ -94,7 +94,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <remarks>The hyperbolic tangent of the specified angle.</remarks>
         static public readonly IFuncDef Tanh = Factory("Tanh", S.Math.Tanh);
 
-        /// <summary>This is a factory for creating a new Tan instance of this node.</summary>
+        /// <summary>This is a factory for creating a new Truncate instance of this node.</summary>
         /// <remarks>The integral part of the given number.</remarks>
         static public readonly IFuncDef Truncate = Factory("Truncate", S.Math.Truncate);
 
@@ -102,7 +102,8 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="funcName">The display name for this function.</param>
         /// <param name="func">The function to perform for this node.</param>
         static public IFuncDef Factory(string funcName, S.Func<double, double> func) =>
-            new Function<IValueAdopter<T>, DoubleMath<T>>((value) => new DoubleMath<T>(funcName, func, value));
+            new Function<IValueParent<T>, UnaryDoubleMath<T>>((value) =>
+                new UnaryDoubleMath<T>(funcName, func, value));
 
         /// <summary>The name of the function for this mathmatics.</summary>
         private readonly string funcName;
@@ -111,9 +112,12 @@ namespace Blackboard.Core.Nodes.Inner {
         private readonly S.Func<double, double> func;
 
         /// <summary>Creates a double mathmatical function value node.</summary>
+        /// <param name="funcName">The name of the function to perform.</param>
+        /// <param name="func">This is the function to apply to the parent.</param>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public DoubleMath(string funcName, S.Func<double, double> func, IValueAdopter<T> source = null, T value = default) :
+        public UnaryDoubleMath(string funcName, S.Func<double, double> func,
+            IValueParent<T> source = null, T value = default) :
             base(source, value) {
             this.funcName = funcName;
             this.func = func;
@@ -124,7 +128,7 @@ namespace Blackboard.Core.Nodes.Inner {
         public override string TypeName => this.funcName;
 
         /// <summary>The result of the double mathmatical function the parent's value during evaluation.</summary>
-        /// <param name="value">The value to ceiling.</param>
+        /// <param name="value">The value to evaluate.</param>
         /// <returns>The ceiling value.</returns>
         protected override T OnEval(T value) => this.func is null ? value : value.DoubleMath(this.func);
     }

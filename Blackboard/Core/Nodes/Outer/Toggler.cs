@@ -21,7 +21,7 @@ namespace Blackboard.Core.Nodes.Outer {
         private ITriggerAdopter reset;
 
         /// <summary>This is the parent holding the value to reset with.</summary>
-        private IValueAdopter<Bool> resetValue;
+        private IValueParent<Bool> resetValue;
 
         /// <summary>Creates a toggling value node.</summary>
         /// <param name="toggle">The initial parent to toggle the value.</param>
@@ -29,7 +29,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <param name="resetValue">The initial parent for the value to reset to.</param>
         /// <param name="value">The initial boolean value for this node.</param>
         public Toggler(ITriggerAdopter toggle = null, ITriggerAdopter reset = null,
-            IValueAdopter<Bool> resetValue = null, Bool value = default) : base(value) {
+            IValueParent<Bool> resetValue = null, Bool value = default) : base(value) {
             this.Toggle = toggle;
             this.Reset = reset;
             this.ResetValue = resetValue;
@@ -52,13 +52,13 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
-        public IValueAdopter<Bool> ResetValue {
+        public IValueParent<Bool> ResetValue {
             get => this.resetValue;
             set => this.SetParent(ref this.resetValue, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents => INode.NotNull(this.toggle, this.reset);
+        public override IEnumerable<IAdopter> Parents => INode.NotNull(this.toggle, this.reset);
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>

@@ -12,13 +12,13 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new Function<IValueAdopter<T>, IValueAdopter<Int>, Round<T>>((input1, input2) => new Round<T>(input1, input2));
+            new Function<IValueParent<T>, IValueParent<Int>, Round<T>>((input1, input2) => new Round<T>(input1, input2));
 
         /// <summary>Creates a rounded value node.</summary>
         /// <param name="source1">This is the value parent for the source value.</param>
         /// <param name="source2">This is the decimals parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Round(IValueAdopter<T> source1 = null, IValueAdopter<Int> source2 = null, T value = default) :
+        public Round(IValueParent<T> source1 = null, IValueParent<Int> source2 = null, T value = default) :
             base(source1, source2, value) { }
 
         /// <summary>This is the type name of the node.</summary>

@@ -56,7 +56,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<INode> Parents => this.Sources;
+        public override IEnumerable<IAdopter> Parents => this.Sources;
 
         /// <summary>
         /// This handles updating this node's value given the

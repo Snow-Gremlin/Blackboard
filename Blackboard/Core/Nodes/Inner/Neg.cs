@@ -11,12 +11,12 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new Function<IValueAdopter<T>, Neg<T>>((input) => new Neg<T>(input));
+            new Function<IValueParent<T>, Neg<T>>((input) => new Neg<T>(input));
 
         /// <summary>Creates a negated value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Neg(IValueAdopter<T> source = null, T value = default) :
+        public Neg(IValueParent<T> source = null, T value = default) :
             base(source, value) { }
 
         /// <summary>This is the type name of the node.</summary>

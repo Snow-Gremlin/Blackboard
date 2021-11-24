@@ -12,12 +12,12 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new Function<IValueAdopter<T1>, Implicit<T1, T2>>((value) => new Implicit<T1, T2>(value));
+            new Function<IValueParent<T1>, Implicit<T1, T2>>((value) => new Implicit<T1, T2>(value));
 
         /// <summary>Creates a node implicit cast.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Implicit(IValueAdopter<T1> source = null, T2 value = default) :
+        public Implicit(IValueParent<T1> source = null, T2 value = default) :
             base(source, value) { }
 
         /// <summary>This is the type name of the node.</summary>

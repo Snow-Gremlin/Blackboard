@@ -55,7 +55,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public bool SetValue(T value) => this.SetNodeValue(value);
 
         /// <summary>Always returns no parents since literals have no parent.</summary>
-        public override IEnumerable<INode> Parents => Enumerable.Empty<INode>();
+        public override IEnumerable<IAdopter> Parents => Enumerable.Empty<IAdopter>();
 
         /// <summary>Updates this value during evaluation.</summary>
         /// <returns>This always returns true.</returns>

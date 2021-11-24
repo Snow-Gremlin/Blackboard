@@ -3,6 +3,7 @@ using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.Diagnostics;
 using S = System;
 
@@ -27,7 +28,7 @@ namespace BlackboardTests {
         /// <summary>Checks the list of parents of a node.</summary>
         /// <param name="node">The node to check the parents of.</param>
         /// <param name="exp">The comma seperated list of parent strings.</param>
-        static public void CheckParents(this INode node, string exp) =>
+        static public void CheckParents(this IChild node, string exp) =>
             Assert.AreEqual(exp, node.Parents.Join(", "));
 
         /// <summary>Checks the boolean value of this node.</summary>
@@ -68,6 +69,23 @@ namespace BlackboardTests {
         static public void CheckProvoked(this INode node, bool exp) {
             Assert.IsInstanceOfType(node, typeof(ITrigger));
             Assert.AreEqual(exp, (node as ITrigger).Provoked);
+        }
+
+        /// <summary>
+        /// Installs this child's parents, any parent which is a child,
+        /// and any parent's parent etc.
+        /// </summary>
+        /// <param name="node">The node to start installing from.</param>
+        static public void InstallAll(this IChild node) {
+            Stack<IChild> stack = new();
+            stack.Push(node);
+            while (stack.Count > 0) {
+                node = stack.Pop();
+                node.InstallIntoParents();
+                foreach (IParent parent in node.Parents) {
+                    if (parent is IChild child) stack.Push(child);
+                }
+            }
         }
 
         #endregion

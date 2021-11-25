@@ -1,10 +1,10 @@
 ﻿namespace Blackboard.Core.Nodes.Interfaces {
 
-    /// <summary>Indicates nodes which can be or is const or literal.</summary>
+    /// <summary>Indicates nodes which can be a constant.</summary>
     public interface IConstantable: INode {
 
-        /// <summary>Converts this node to a literal.</summary>
-        /// <returns>A literal of this node, itself if already literal, otherwise null.</returns>
+        /// <summary>Converts this node to a constant.</summary>
+        /// <returns>A constant of this node.</returns>
         public IConstant ToConstant();
     }
 }

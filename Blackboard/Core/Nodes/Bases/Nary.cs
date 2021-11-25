@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
@@ -7,7 +8,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <summary>This is a value node which has several parents as the source of the value.</summary>
     /// <typeparam name="TIn">The type of the all the parents' value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
-    public abstract class Nary<TIn, TResult>: ValueNode<TResult>
+    public abstract class Nary<TIn, TResult>: ValueNode<TResult>, IChild
         where TIn : IData
         where TResult : IComparable<TResult>, new() {
 
@@ -70,7 +71,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<IAdopter> Parents => this.sources;
+        public IEnumerable<IParent> Parents => this.sources;
 
         /// <summary>This handles updating this node's value given the parents' values during evaluation.</summary>
         /// <remarks>Any null parents are ignored.</remarks>

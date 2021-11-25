@@ -6,12 +6,10 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>A base node for any trigger node.</summary>
-    public abstract class TriggerNode: Evaluatable, ITriggerAdopter {
+    public abstract class TriggerNode: Evaluatable, ITriggerParent, IConstantable {
 
         /// <summary>Creates a new trigger node.</summary>
-        public TriggerNode(bool provoked = false) {
-            this.Provoked = provoked;
-        }
+        public TriggerNode(bool provoked = false) => this.Provoked = provoked;
 
         /// <summary>Indicates if this trigger has been fired during a current evaluation.</summary>
         public bool Provoked { get; protected set; }
@@ -29,9 +27,6 @@ namespace Blackboard.Core.Nodes.Bases {
             this.Provoked = this.UpdateTrigger();
             return this.Provoked ? this.Children.OfType<IEvaluatable>() : Enumerable.Empty<IEvaluatable>();
         }
-
-        /// <summary>This always returns false because triggers aren't constant but can be converted to one.</summary>
-        public virtual bool IsConstant => false;
 
         /// <summary>Converts this node to a constant trigger.</summary>
         /// <returns>The constant trigger carrying the provoked condition.</returns>

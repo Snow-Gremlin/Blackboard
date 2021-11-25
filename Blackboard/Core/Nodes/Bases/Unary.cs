@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
@@ -7,7 +8,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <summary>This is a value node which has a single parent as the source of the value.</summary>
     /// <typeparam name="T1">The type of the parent's value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
-    public abstract class Unary<T1, TResult>: ValueNode<TResult>
+    public abstract class Unary<T1, TResult>: ValueNode<TResult>, IChild
         where T1 : IData
         where TResult : IComparable<TResult>, new() {
 
@@ -33,7 +34,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<IAdopter> Parents => INode.NotNull(this.source);
+        public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.source);
 
         /// <summary>This handles updating this node's value given the parent's value during evaluation.</summary>
         /// <remarks>This will not be called if the parent is null.</remarks>

@@ -35,7 +35,7 @@ namespace Blackboard.Core.Nodes.Outer {
     /// <summary>This is a literal value.</summary>
     /// <typeparam name="T">The type of this literal.</typeparam>
     sealed public class Literal<T>: ValueNode<T>, IConstant
-        where T : IComparable<T>, new() {
+        where T : IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = new Function<Literal<T>>(() => new Literal<T>());
@@ -53,9 +53,6 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <param name="value">The value to set.</param>
         /// <returns>True if the value has changed, false otherwise.</returns>
         public bool SetValue(T value) => this.SetNodeValue(value);
-
-        /// <summary>Always returns no parents since literals have no parent.</summary>
-        public override IEnumerable<IAdopter> Parents => Enumerable.Empty<IAdopter>();
 
         /// <summary>Updates this value during evaluation.</summary>
         /// <returns>This always returns true.</returns>

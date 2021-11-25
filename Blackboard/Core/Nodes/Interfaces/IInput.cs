@@ -5,7 +5,5 @@
     /// All inputs may be used as an output so that a single value can
     /// be written to and read from without having to attach an output to it.
     /// </remarks>
-    public interface IInput: IOutput {
-        // Empty
-    }
+    public interface IInput: IOutput { }
 }

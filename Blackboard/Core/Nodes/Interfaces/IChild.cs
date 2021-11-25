@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Blackboard.Core.Extensions;
+using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Interfaces {
 
@@ -18,16 +19,5 @@ namespace Blackboard.Core.Nodes.Interfaces {
 
         /// <summary>The set of parent nodes to this node.</summary>
         public IEnumerable<IParent> Parents { get; }
-
-        /// <summary>
-        /// Installing this node into the parent will make this node be automatially called when
-        /// the parent is updated. This should be done if the node is part of a definition.
-        /// Do not do install if the node is only suppose to evaluate so that we aren't updating what
-        /// we don't need to update and aren't constantly adding and removing children from parents.
-        /// </summary>
-        public void InstallIntoParents() {
-            foreach (IParent parent in this.Parents)
-                parent?.AddChildren(this);
-        }
     }
 }

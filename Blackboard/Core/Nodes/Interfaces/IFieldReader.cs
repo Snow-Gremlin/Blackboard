@@ -26,7 +26,8 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// <summary>Finds the node at the given path.</summary>
         /// <param name="names">The names to the node to find.</param>
         /// <returns>The node at the end of the path or null.</returns>
-        public INode Find(params string[] names) => this.Find(names as IEnumerable<string>);
+        public INode Find(params string[] names) =>
+            this.Find(names as IEnumerable<string>);
 
         /// <summary>Finds the node at the given path.</summary>
         /// <param name="names">The names to the node to find.</param>

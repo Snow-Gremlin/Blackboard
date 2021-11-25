@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,27 +9,12 @@ namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>A base node for a node which has a value.</summary>
     /// <typeparam name="T">The type of the value being held.</typeparam>
-    public abstract class ValueNode<T>: Evaluatable, IValueParent<T>, IValue<T>
-        where T : IData, IComparable<T> {
+    public abstract class ValueNode<T>: Evaluatable, IValueParent<T>, IConstantable
+        where T : IComparable<T> {
 
         /// <summary>Creates a new value node.</summary>
         /// <param name="value">The initial value of the node.</param>
-        public ValueNode(T value = default) {
-            this.Value = value ?? new();
-        }
-
-        /// <summary>Determines if the node is constant or if all of it's parents are constant.</summary>
-        /// <returns>True if constant, false otherwise.</returns>
-        public bool IsConstant {
-            get {
-                if (this is IConstant) return true;
-                if (this is IInput) return false;
-                foreach (INode parent in this.Parents) {
-                    if (parent is not IConstant) return false;
-                }
-                return true;
-            }
-        }
+        public ValueNode(T value = default) => this.Value = value ?? default;
 
         /// <summary>Converts this node to a constant.</summary>
         /// <returns>A consant of this node.</returns>

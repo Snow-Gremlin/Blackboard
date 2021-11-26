@@ -14,7 +14,7 @@ namespace Blackboard.Core.Nodes.Bases {
         public virtual IConstant ToConstant() => new ConstTrigger(this.Provoked);
 
         /// <summary>Indicates if this trigger has been fired during a current evaluation.</summary>
-        public bool Provoked { get; protected set; }
+        public bool Provoked { get; private set; }
 
         /// <summary>Resets the trigger at the end of the evaluation.</summary>
         public void Reset() => this.Provoked = false;

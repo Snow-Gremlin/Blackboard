@@ -6,7 +6,7 @@ using S = System;
 
 namespace Blackboard.Core.Nodes.Functions {
 
-    /// <summary>This is the factory for a node which has abritrary parents as the source of the value.</summary>
+    /// <summary>This is the factory for a node which has arbitrary number of parents as the source of the value.</summary>
     /// <typeparam name="Tn">The type of the parents' values for this node.</typeparam>
     /// <typeparam name="TReturn">The type of this function will return.</typeparam>
     sealed public class FunctionN<Tn, TReturn>: FuncDef<TReturn>
@@ -16,7 +16,7 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>The factory for creating the node.</summary>
         private readonly S.Func<IEnumerable<Tn>, TReturn> hndl;
 
-        /// <summary>Creates a new dual node factory.</summary>
+        /// <summary>Creates a new N-ary node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
         /// <param name="needsOneNoCast">Indicates that at least one argument must not be a cast.</param>
         /// <param name="passOne">Indicates if there is only one argument for a new node, return the argument.</param>

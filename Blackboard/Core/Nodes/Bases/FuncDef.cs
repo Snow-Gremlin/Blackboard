@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// </summary>
     /// <typeparam name="TReturn">The type of this function will return.</typeparam>
     public abstract class FuncDef<TReturn>: IFuncDef
-        where TReturn : class, INode {
+        where TReturn : INode {
 
         /// <summary>The minimum required nodes for the new node's arguments.</summary>
         /// <remarks>Must be less than or equal to the maximum arguments and zero or more.</remarks>
@@ -21,15 +21,6 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>The maximum allowed nodes for the new node's arguments.</summary>
         /// <remarks>Must be greater than or equal to the minimum arguments.</remarks>
         public readonly int MaxArgs;
-
-        /// <summary>Indicates if there is only one argument for a new node, return the argument.</summary>
-        /// <remarks>
-        /// This is for things like sum which is valid with only one so we don't want to set minimum
-        /// to 2. However sum of a single value is that value (same with multiply, and, or, etc), so for
-        /// functions like that, instead of wrapping it in the function, simply return the argument.
-        /// This is only used if the minimum allowed arguments is less than two.
-        /// </remarks>
-        public readonly bool PassthroughOne;
 
         /// <summary>Indicates that at least one argument must not be a cast.</summary>
         /// <remarks>
@@ -41,6 +32,15 @@ namespace Blackboard.Core.Nodes.Bases {
         /// </remarks>
         public readonly bool NeedsOneNoCast;
 
+        /// <summary>Indicates if there is only one argument for a new node, return the argument.</summary>
+        /// <remarks>
+        /// This is for things like sum which is valid with only one so we don't want to set minimum
+        /// to 2. However sum of a single value is that value (same with multiply, and, or, etc), so for
+        /// functions like that, instead of wrapping it in the function, simply return the argument.
+        /// This is only used if the minimum allowed arguments is less than two.
+        /// </remarks>
+        public readonly bool PassthroughOne;
+
         /// <summary>All the argument types.</summary>
         private readonly Type[] argTypes;
 
@@ -51,17 +51,24 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>Creates a new non-group function base.</summary>
         /// <remarks>By default no group is defined for this function.</remarks>
+        /// <param name="min">The minimum allowed number of arguments. Will be clamped to zero.</param>
+        /// <param name="max">The maximum allowed number of arguments. Will be clamped to the minimum value.</param>
+        /// <param name="needsOneNoCast">
+        /// This indicates that at least one argument must not be implicitly cast for this function.
+        /// This helps ensure that some functions are only called if there is not cast so that the developer can select the
+        /// function they want to use which have similar implicit cast weights by adding a non-cast value or pre-casting a value.
+        /// </param>
+        /// <param name="passOne">
+        /// This indicates that if there is only one input, just return it.
+        /// If needed it will still perform an implicit cast to match the first argument type.
+        /// </param>
+        /// <param name="argTypes">The types for all the arguments. Any nil types are ignored.</param>
         protected FuncDef(int min, int max, bool needsOneNoCast, bool passOne, params Type[] argTypes) {
             this.MinArgs = S.Math.Max(min, 0);
             this.MaxArgs = S.Math.Max(this.MinArgs, max);
             this.NeedsOneNoCast = needsOneNoCast;
             this.PassthroughOne = passOne;
-            this.argTypes = argTypes;
-
-            // Check that all the types are set correctly.
-            for (int i = 0; i < argTypes.Length; i++) {
-                if (argTypes[i] is null) throw Exceptions.UnknownFunctionParamType(i);
-            }
+            this.argTypes = argTypes.NotNull().ToArray();
         }
 
         /// <summary>This is the type name of the node.</summary>

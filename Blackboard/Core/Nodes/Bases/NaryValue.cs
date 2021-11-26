@@ -15,7 +15,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>This is the list of all the parent nodes to read from.</summary>
         private List<IValueParent<TIn>> sources;
 
-        /// <summary>Creates a Nary value node.</summary>
+        /// <summary>Creates a N-ary value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         public NaryValue(params IValueParent<TIn>[] parents) :
             this(parents as IEnumerable<IValueParent<TIn>>) { }

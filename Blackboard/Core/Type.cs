@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
@@ -35,7 +36,7 @@ namespace Blackboard.Core {
         /// <summary>The string value type.</summary>
         static public readonly Type String;
 
-        /// <summary>The namespace value type.</summary>
+        /// <summary>The Namespace value type.</summary>
         static public readonly Type Namespace;
 
         /// <summary>The function group value type.</summary>
@@ -55,7 +56,7 @@ namespace Blackboard.Core {
         /// <summary>The double counter type which is an extension of the double value type.</summary>
         static public readonly Type CounterDouble;
 
-        /// <summary>The toggler type which is an extension of the boolean value type.</summary>
+        /// <summary>The Toggler type which is an extension of the boolean value type.</summary>
         static public readonly Type Toggler;
 
         /// <summary>The boolean latch which is an extension of the boolean value type.</summary>
@@ -103,7 +104,7 @@ namespace Blackboard.Core {
             }
         }
 
-        /// <summary>This determines the implicit and inheritence match.</summary>
+        /// <summary>This determines the implicit and inheritance match.</summary>
         /// <param name="input">This is the type to cast from.</param>
         /// <param name="output">This is the type to cast too.</param>
         /// <returns>The result of the match.</returns>
@@ -146,17 +147,20 @@ namespace Blackboard.Core {
             this.inheritors = new();
 
             if ((dataType is null) == realType.IsAssignableTo(typeof(IDataNode)))
-                throw Exceptions.TypeDefinitionInvalid(name, realType, dataType);
+                throw new Exception("").
+                    With("Name",     name).
+                    With("RealType", realType).
+                    With("DataType", dataType);
             if (baseType is not null) baseType.inheritors.Add(this);
         }
 
-        /// <summary>This determines the implicit and inheritence match.</summary>
+        /// <summary>This determines the implicit and inheritance match.</summary>
         /// <param name="node">The node to try casting from.</param>
         /// <returns>The result of the match.</returns>
         static public TypeMatch Match<T>(INode node) where T : INode =>
             Match<T>(TypeOf(node));
 
-        /// <summary>This determines the implicit and inheritence match.</summary>
+        /// <summary>This determines the implicit and inheritance match.</summary>
         /// <param name="t">The type to try casting from.</param>
         /// <returns>The result of the match.</returns>
         static public TypeMatch Match<T>(Type t) where T : INode =>
@@ -164,7 +168,7 @@ namespace Blackboard.Core {
 
         /// <summary>
         /// Checks if inheritance can be used for this given type.
-        /// Finds the closest inherited type so that the most specific match can be choosen.
+        /// Finds the closest inherited type so that the most specific match can be chosen.
         /// </summary>
         /// <param name="t">The type to check inheritance against.</param>
         /// <returns>The inheritance match steps or -1 if no inheritance match.</returns>
@@ -197,7 +201,7 @@ namespace Blackboard.Core {
             return -1;
         }
 
-        /// <summary>This determines the implicit and inheritence match.</summary>
+        /// <summary>This determines the implicit and inheritance match.</summary>
         /// <param name="t">The type to try casting from.</param>
         /// <returns>The result of the match.</returns>
         public TypeMatch Match(Type t, bool explicitCasts = false) {
@@ -231,25 +235,25 @@ namespace Blackboard.Core {
 
         /// <summary>Performs an implicit cast of the given node into this type.</summary>
         /// <param name="node">The node to implicitly cast.</param>
-        /// <returns>The node cast into this type or null if the cast is not posible.</returns>
+        /// <returns>The node cast into this type or null if the cast is not possible.</returns>
         static public T Implicit<T>(INode node) where T : class, INode =>
             FromType<T>().Implicit(node) as T;
 
         /// <summary>Performs an implicit cast of the given node into this type.</summary>
         /// <param name="node">The node to implicitly cast.</param>
-        /// <returns>The node cast into this type or null if the cast is not posible.</returns>
+        /// <returns>The node cast into this type or null if the cast is not possible.</returns>
         public INode Implicit(INode node) =>
             cast(true, node, TypeOf(node), this);
 
         /// <summary>Performs an explicit cast of the given node into this type.</summary>
         /// <param name="node">The node to explicitly cast.</param>
-        /// <returns>The node cast into this type or null if the cast is not posible.</returns>
+        /// <returns>The node cast into this type or null if the cast is not possible.</returns>
         static public T Explicit<T>(INode node) where T : class, INode =>
             FromType<T>().Explicit(node) as T;
 
         /// <summary>Performs an explicit cast of the given node into this type.</summary>
         /// <param name="node">The node to explicitly cast.</param>
-        /// <returns>The node cast into this type or null if the cast is not posible.</returns>
+        /// <returns>The node cast into this type or null if the cast is not possible.</returns>
         public INode Explicit(INode node) =>
             cast(false, node, TypeOf(node), this);
 
@@ -301,9 +305,9 @@ namespace Blackboard.Core {
         /// <returns>The name of the type.</returns>
         public override string ToString() => this.Name;
 
-        /// <summary>Adds a castability definition to a type.</summary>
+        /// <summary>Adds a cast-ability definition to a type.</summary>
         /// <typeparam name="T">The node type for the source type to cast from.</typeparam>
-        /// <param name="dict">Either the implicit or explicit dictionar for the type being added to.</param>
+        /// <param name="dict">Either the implicit or explicit dictionary for the type being added to.</param>
         /// <param name="dest">The destination type to cast to.</param>
         /// <param name="func">The function for performing the cast.</param>
         static private void addCast<T>(Dictionary<Type, Caster> dict, Type dest, S.Func<T, INode> func) where T : INode =>

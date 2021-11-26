@@ -68,9 +68,11 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <returns>The new value for this node.</returns>
         protected abstract bool OnEval(IEnumerable<bool> provoked);
 
-        /// <summary>This updates the trigger during evaluation.</summary>
-        /// <returns>True if the value was provoked, false otherwise.</returns>
-        protected override bool UpdateTrigger() =>
-            this.Provoked = this.OnEval(this.Sources.NotNull().Triggers());
+        /// <summary>
+        /// This is called when the trigger is evaluated and updated.
+        /// It will determine if the trigger should be provoked.
+        /// </summary>
+        /// <returns>True if this trigger should be provoked, false if not.</returns>
+        protected override bool ShouldProvoke() => this.OnEval(this.Sources.NotNull().Triggers());
     }
 }

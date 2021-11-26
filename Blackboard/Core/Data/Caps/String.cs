@@ -4,7 +4,9 @@ namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a string value such that it can be used in generics.</summary>
     public struct String: IAdditive<String>, IComparable<String>,
-        IImplicit<IData, String> {
+        IImplicit<Bool,   String>,
+        IImplicit<Double, String>,
+        IImplicit<Int,    String> {
 
         /// <summary>Gets an empty string. This is the same as default.</summary>
         static public readonly String Empty = new("");
@@ -32,10 +34,20 @@ namespace Blackboard.Core.Data.Caps {
         #endregion
         #region Casts...
 
-        /// <summary>Casts a data into a string for an implicit cast.</summary>
+        /// <summary>Casts a boolean into a string for an implicit cast.</summary>
         /// <param name="value">The boolean value to cast.</param>
         /// <returns>The resulting string value.</returns>
-        public String CastFrom(IData value) => new(value.ValueString);
+        public String CastFrom(Bool value) => new(value.ValueString);
+
+        /// <summary>Casts a double into a string for an implicit cast.</summary>
+        /// <param name="value">The double value to cast.</param>
+        /// <returns>The resulting string value.</returns>
+        public String CastFrom(Double value) => new(value.ValueString);
+
+        /// <summary>Casts an integer into a string for an implicit cast.</summary>
+        /// <param name="value">The integer value to cast.</param>
+        /// <returns>The resulting string value.</returns>
+        public String CastFrom(Int value) => new(value.ValueString);
 
         #endregion
         #region Comparable...

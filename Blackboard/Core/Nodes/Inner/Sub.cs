@@ -6,7 +6,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Gets the difference between the two parent values.</summary>
-    sealed public class Sub<T>: Binary<T, T, T>
+    sealed public class Sub<T>: BinaryValue<T, T, T>
         where T : IArithmetic<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>

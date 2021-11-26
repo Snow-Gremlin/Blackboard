@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <summary>This is a value node which has a single parent as the source of the value.</summary>
     /// <typeparam name="T1">The type of the parent's value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
-    public abstract class Unary<T1, TResult>: ValueNode<TResult>, IChild
+    public abstract class UnaryValue<T1, TResult>: ValueNode<TResult>, IChild
         where T1 : IData
         where TResult : IComparable<TResult>, new() {
 
@@ -18,19 +18,13 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Creates a unary value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="source">This is the single parent for the source value.</param>
-        /// <param name="value">The default value for this node.</param>
-        public Unary(IValueParent<T1> source = null, TResult value = default) : base(value) {
+        public UnaryValue(IValueParent<T1> source = null) =>
             this.SetParent(ref this.source, source);
-            this.UpdateValue();
-        }
 
         /// <summary>The parent node to get the source value from.</summary>
         public IValueParent<T1> Parent {
             get => this.source;
-            set {
-                this.SetParent(ref this.source, value);
-                this.UpdateValue();
-            }
+            set => this.SetParent(ref this.source, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
@@ -44,10 +38,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>
-        protected override bool UpdateValue() {
-            if (this.source is null) return false;
-            TResult value = this.OnEval(this.source.Value);
-            return this.SetNodeValue(value);
-        }
+        protected override TResult CalcuateValue() =>
+            this.source is null ? default : this.OnEval(this.source.Value);
     }
 }

@@ -7,7 +7,7 @@ namespace Blackboard.Core.Extensions {
     static class StringExt {
 
         /// <summary>The strings for all the given values.</summary>
-        /// <typeparam name="T">The types of values to stringify.</typeparam>
+        /// <typeparam name="T">The types of values to convert into strings.</typeparam>
         /// <param name="values">The values to get the string for.</param>
         /// <param name="nullStr">The string to return if the value is null.</param>
         /// <returns>The strings for the given values.</returns>
@@ -22,7 +22,7 @@ namespace Blackboard.Core.Extensions {
             from p in parts select p.Replace("\n", "\n" + indent);
 
         /// <summary>This is short hand to make joining strings into one.</summary>
-        /// <typeparam name="T">The types of values to stringify and join.</typeparam>
+        /// <typeparam name="T">The types of values to convert into strings and join.</typeparam>
         /// <param name="parts">The strings to join together into one.</param>
         /// <param name="seperator">The separator to put between the parts.</param>
         /// <returns>The string from the joined parts.</returns>
@@ -30,7 +30,7 @@ namespace Blackboard.Core.Extensions {
             string.Join(seperator, parts);
 
         /// <summary>This is short hand to make joining strings into one.</summary>
-        /// <typeparam name="T">The types of values to stringify and join.</typeparam>
+        /// <typeparam name="T">The types of values to convert into strings and join.</typeparam>
         /// <param name="parts">The strings to join together into one.</param>
         /// <param name="seperator">The separator to put between the parts.</param>
         /// <returns>The string from the joined parts.</returns>

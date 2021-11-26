@@ -1,52 +1,53 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>This is a trigger node which has several parents.</summary>
-    public abstract class Multitrigger: TriggerNode {
+    public abstract class NaryTrigger: TriggerNode, IChild {
 
         /// <summary>This is the list of all the parent nodes to listen to.</summary>
-        protected List<ITriggerAdopter> Sources;
+        protected List<ITriggerParent> Sources;
 
         /// <summary>Creates a multi-trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Multitrigger(params ITriggerAdopter[] parents) :
-            this(parents as IEnumerable<ITriggerAdopter>) { }
+        public NaryTrigger(params ITriggerParent[] parents) :
+            this(parents as IEnumerable<ITriggerParent>) { }
 
         /// <summary>Creates a multi-trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Multitrigger(IEnumerable<ITriggerAdopter> parents = null) {
-            this.Sources = new List<ITriggerAdopter>();
+        public NaryTrigger(IEnumerable<ITriggerParent> parents = null) {
+            this.Sources = new List<ITriggerParent>();
             this.AddParents(parents);
         }
 
         /// <summary>This adds parents to this node.</summary>
         /// <param name="parents">The set of parents to add.</param>
-        public void AddParents(params ITriggerAdopter[] parents) =>
-            this.AddParents(parents as IEnumerable<ITriggerAdopter>);
+        public void AddParents(params ITriggerParent[] parents) =>
+            this.AddParents(parents as IEnumerable<ITriggerParent>);
 
         /// <summary>This adds parents to this node.</summary>
         /// <param name="parents">The set of parents to add.</param>
-        public void AddParents(IEnumerable<ITriggerAdopter> parents) {
+        public void AddParents(IEnumerable<ITriggerParent> parents) {
             parents = parents.NotNull();
             this.Sources.AddRange(parents);
-            foreach (ITriggerAdopter parent in parents)
+            foreach (ITriggerParent parent in parents)
                 parent.AddChildren(this);
         }
 
         /// <summary>This removes the given parents from this node.</summary>
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
-        public bool RemoveParents(params ITriggerAdopter[] parents) =>
-            this.RemoveParents(parents as IEnumerable<ITriggerAdopter>);
+        public bool RemoveParents(params ITriggerParent[] parents) =>
+            this.RemoveParents(parents as IEnumerable<ITriggerParent>);
 
         /// <summary>This removes the given parents from this node.</summary>
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
-        public bool RemoveParents(IEnumerable<ITriggerAdopter> parents) {
+        public bool RemoveParents(IEnumerable<ITriggerParent> parents) {
             bool anyRemoved = false;
-            foreach (ITriggerAdopter parent in parents) {
+            foreach (ITriggerParent parent in parents) {
                 if (this.Sources.Remove(parent)) {
                     parent.RemoveChildren(this);
                     anyRemoved = true;
@@ -56,7 +57,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<IAdopter> Parents => this.Sources;
+        public IEnumerable<IParent> Parents => this.Sources;
 
         /// <summary>
         /// This handles updating this node's value given the

@@ -24,9 +24,9 @@ namespace Blackboard.Core.Data.Caps {
 
         #region Additive Math...
 
-        /// <summary>This will concatinate this string to the other string.</summary>
-        /// <param name="other">The other string to concatinate to the end of this string.</param>
-        /// <returns>The concatinated string.</returns>
+        /// <summary>This will concatenate this string to the other string.</summary>
+        /// <param name="other">The other string to concatenate to the end of this string.</param>
+        /// <returns>The concatenated string.</returns>
         public String Sum(String other) => new(this.Value + other.Value);
 
         #endregion
@@ -38,7 +38,7 @@ namespace Blackboard.Core.Data.Caps {
         public String CastFrom(IData value) => new(value.ValueString);
 
         #endregion
-        #region Camparable...
+        #region Comparable...
 
         /// <summary>Compares two strings together.</summary>
         /// <param name="other">The other string to compare.</param>
@@ -63,8 +63,8 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The stored value's hash code.</returns>
         public override int GetHashCode() => this.Value.GetHashCode();
 
-        /// <summary>Gets the name of this data type.</summary>
-        /// <returns>The name of the bool type.</returns>
+        /// <summary>Gets the name of this data type and value.</summary>
+        /// <returns>The name of the string type and value.</returns>
         public override string ToString() => this.TypeName+"("+this.ValueString+")";
     }
 }

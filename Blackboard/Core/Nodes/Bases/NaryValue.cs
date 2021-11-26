@@ -8,23 +8,23 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <summary>This is a value node which has several parents as the source of the value.</summary>
     /// <typeparam name="TIn">The type of the all the parents' value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
-    public abstract class Nary<TIn, TResult>: ValueNode<TResult>, IChild
+    public abstract class NaryValue<TIn, TResult>: ValueNode<TResult>, IChild
         where TIn : IData
         where TResult : IComparable<TResult>, new() {
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
         private List<IValueParent<TIn>> sources;
 
-        /// <summary>Creates a N-ary value node.</summary>
+        /// <summary>Creates a Nary value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Nary(params IValueParent<TIn>[] parents) :
+        public NaryValue(params IValueParent<TIn>[] parents) :
             this(parents as IEnumerable<IValueParent<TIn>>) { }
 
         /// <summary>Creates a N-ary value node.</summary>
         /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public Nary(IEnumerable<IValueParent<TIn>> parents = null, TResult value = default) : base(value) {
+        public NaryValue(IEnumerable<IValueParent<TIn>> parents = null, TResult value = default) : base(value) {
             this.sources = new List<IValueParent<TIn>>();
             this.AddParents(parents);
             // UpdateValue already called by AddParents.
@@ -44,7 +44,6 @@ namespace Blackboard.Core.Nodes.Bases {
             this.sources.AddRange(parents);
             foreach (IValueParent<TIn> parent in parents)
                 parent.AddChildren(this);
-            this.UpdateValue();
         }
 
         /// <summary>This removes the given parents from this node.</summary>
@@ -66,7 +65,6 @@ namespace Blackboard.Core.Nodes.Bases {
                     anyRemoved = true;
                 }
             }
-            if (anyRemoved) this.UpdateValue();
             return anyRemoved;
         }
 
@@ -81,7 +79,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>
-        protected override bool UpdateValue() =>
-            this.SetNodeValue(this.OnEval(this.sources.NotNull().Values()));
+        protected override TResult CalcuateValue() =>
+            this.OnEval(this.sources.NotNull().Values());
     }
 }

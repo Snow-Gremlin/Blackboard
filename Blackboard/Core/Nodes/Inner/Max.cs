@@ -8,7 +8,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Determinines the maximum integer value from all the parents.</summary>
-    sealed public class Max<T>: Nary<T, T>
+    sealed public class Max<T>: NaryValue<T, T>
         where T : IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>

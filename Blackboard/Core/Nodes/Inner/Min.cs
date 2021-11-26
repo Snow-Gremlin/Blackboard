@@ -8,7 +8,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Determinines the minimum integer value from all the parents.</summary>
-    sealed public class Min<T>: Nary<T, T>
+    sealed public class Min<T>: NaryValue<T, T>
         where T : IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>

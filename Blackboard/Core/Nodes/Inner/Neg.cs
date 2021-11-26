@@ -6,7 +6,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Negates the given parents value.</summary>
-    sealed public class Neg<T>: Unary<T, T>
+    sealed public class Neg<T>: UnaryValue<T, T>
         where T : IArithmetic<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>

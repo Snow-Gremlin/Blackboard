@@ -7,7 +7,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This gets the double mathmatical function value from the parent.</summary>
-    sealed public class UnaryDoubleMath<T>: Unary<T, T>
+    sealed public class UnaryDoubleMath<T>: UnaryValue<T, T>
         where T : IFloatingPoint<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory for creating a new Acos instance of this node.</summary>

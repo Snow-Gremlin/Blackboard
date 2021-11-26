@@ -25,7 +25,8 @@ namespace Blackboard.Core.Extensions {
         /// <summary>Determines if the node is constant or if all of it's parents are constant.</summary>
         /// <param name="node">The node to check if constant.</param>
         /// <returns>True if constant, false otherwise.</returns>
-        static public bool IsConstant(this INode node) => node is IConstant ||
+        static public bool IsConstant(this INode node) =>
+            node is IConstant ||
             (node is not IInput && node is IChild child && child.Parents.IsConstant());
 
         /// <summary>This determines if all the given nodes are constant.</summary>

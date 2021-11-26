@@ -6,7 +6,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>A value node that gets the absolute value of the parent.</summary>
-    sealed public class Abs<T>: Unary<T, T>
+    sealed public class Abs<T>: UnaryValue<T, T>
         where T : IArithmetic<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>

@@ -5,7 +5,7 @@ namespace Blackboard.Core.Nodes.Interfaces {
 
     /// <summary>A child node is a node which may specify one or more parents.</summary>
     /// <remarks>
-    /// It is upto the node to define how the parents are set since the parents are
+    /// It is up to the node to define how the parents are set since the parents are
     /// the input values into a node so there may be a specific number of them and
     /// they may be required to be a specific type of nodes.
     /// </remarks>

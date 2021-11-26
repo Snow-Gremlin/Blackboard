@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Interfaces {
     /// <remarks>
     /// Since parents are nodes which can be used as a parent to a child as an input
     /// there is not limit to the number of children which may use the parent as input.
-    /// That is why it allowes children to be added and removed at will.
+    /// That is why it allows children to be added and removed at will.
     /// Any child known by the parent is automatically updated when the parent is changed.
     /// There may be children which listen to a parent 
     /// </remarks>
@@ -16,6 +16,10 @@ namespace Blackboard.Core.Nodes.Interfaces {
         public IEnumerable<IChild> Children { get; }
 
         /// <summary>Adds children nodes onto this node.</summary>
+        /// <remarks>
+        /// Any children which are added need to be put in the touched list
+        /// of the driver so that they will be evaluated in the next batch.
+        /// </remarks>
         /// <param name="children">The children to add.</param>
         public void AddChildren(params IChild[] children) =>
             this.AddChildren(children as IEnumerable<IChild>);

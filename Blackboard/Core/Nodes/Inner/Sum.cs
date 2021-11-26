@@ -8,7 +8,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Gets the sum of all of the parent values.</summary>
-    sealed public class Sum<T>: Nary<T, T>
+    sealed public class Sum<T>: NaryValue<T, T>
         where T : IAdditive<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>

@@ -1,4 +1,4 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Nodes.Bases;
 using System.Collections.Generic;
 using System.Linq;
 using S = System;
@@ -6,22 +6,22 @@ using S = System;
 namespace Blackboard.Core.Extensions {
 
     /// <summary>The set of extensions for working with IEvaluatable interfaces.</summary>
-    static class IEvaluatableExt {
+    static class EvaluableExt {
 
         /// <summary>This sort inserts unique nodes into the given linked list.</summary>
-        /// <typeparam name="T">The type of evaulatable node being worked with.</typeparam>
+        /// <typeparam name="T">The type of evaluable node being worked with.</typeparam>
         /// <param name="list">The list of values to sort insert into.</param>
         /// <param name="nodes">The set of nodes to insert.</param>
         static public void SortInsertUnique<T>(this LinkedList<T> list, params T[] nodes)
-            where T : IEvaluatable =>
+            where T : Evaluable =>
             list.SortInsertUnique(nodes as IEnumerable<T>);
 
-        /// <summary>This sort inserts unique evaluatable nodes into the given linked list.</summary>
-        /// <typeparam name="T">The type of evaulatable node being worked with.</typeparam>
+        /// <summary>This sort inserts unique evaluable nodes into the given linked list.</summary>
+        /// <typeparam name="T">The type of evaluable node being worked with.</typeparam>
         /// <param name="list">The list of values to sort insert into.</param>
         /// <param name="nodes">The set of nodes to insert.</param>
         static public void SortInsertUnique<T>(this LinkedList<T> list, IEnumerable<T> nodes)
-            where T : IEvaluatable {
+            where T : Evaluable {
             foreach (T node in nodes) {
                 bool addToEnd = true;
                 for (LinkedListNode<T> pend = list.First; pend is not null; pend = pend.Next) {
@@ -42,7 +42,7 @@ namespace Blackboard.Core.Extensions {
         /// <summary>Gets the maximum depth from the given nodes.</summary>
         /// <param name="nodes">The nodes to get the maximum depth from.</param>
         /// <returns>The maximum found depth.</returns>
-        static public int MaxDepth(this IEnumerable<IEvaluatable> nodes) =>
+        static public int MaxDepth(this IEnumerable<Evaluable> nodes) =>
             nodes.Select((node) => node.Depth).Aggregate(0, S.Math.Max);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Nodes.Bases;
 using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Interfaces {
@@ -9,13 +10,13 @@ namespace Blackboard.Core.Nodes.Interfaces {
         where T : IData {
 
         /// <summary>Sets the value of this input.</summary>
-        /// <remarks>This is not intended to be be called directly, it should be called via the driver.</remarks>
+        /// <remarks>This is not intended to be called directly, it should be called via the driver.</remarks>
         /// <param name="value">The value to input.</param>
         /// <returns>
-        /// The set of nodes (should be any evaluatable children of this node)
+        /// The set of nodes (should be any evaluable children of this node)
         /// that should be updated based on the results of this node's update.
         /// If this evaluation made no change then no node should be returned.
         /// </returns>
-        public IEnumerable<IEvaluatable> SetValue(T value);
+        public IEnumerable<Evaluable> SetValue(T value);
     }
 }

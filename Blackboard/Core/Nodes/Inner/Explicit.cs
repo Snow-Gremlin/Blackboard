@@ -6,7 +6,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Explicit casts a value node into another value node.</summary>
-    sealed public class Explicit<T1, T2>: Unary<T1, T2>
+    sealed public class Explicit<T1, T2>: UnaryValue<T1, T2>
         where T1 : IData
         where T2 : IExplicit<T1, T2>, IComparable<T2>, new() {
 

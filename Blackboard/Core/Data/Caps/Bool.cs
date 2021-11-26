@@ -49,8 +49,8 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The stored value's hash code.</returns>
         public override int GetHashCode() => this.Value.GetHashCode();
 
-        /// <summary>Gets the name of this data type.</summary>
-        /// <returns>The name of the bool type.</returns>
+        /// <summary>Gets the name of this data type and value.</summary>
+        /// <returns>The name of the boolean type and value.</returns>
         public override string ToString() => this.TypeName+"("+this.ValueString+")";
     }
 }

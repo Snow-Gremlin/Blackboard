@@ -7,7 +7,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This is a trigger which will be provoked when any of its non-null parents are provoked.</summary>
-    sealed public class Any: Multitrigger {
+    sealed public class Any: NaryTrigger {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =

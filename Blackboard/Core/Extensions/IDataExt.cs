@@ -1,10 +1,10 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
 
-namespace Blackboard.Core.Data {
+namespace Blackboard.Core.Extensions {
 
     /// <summary>Extensions to add to data specific methods.</summary>
-    static class Extensions {
+    static class IDataExt {
 
         /// <summary>Determines if this data can be cast implicitly, cast explicitly, or is already an inherited type.</summary>
         /// <typeparam name="T">The type of the data to cast to.</typeparam>
@@ -54,7 +54,7 @@ namespace Blackboard.Core.Data {
                              With("Input", value)
             };
 
-        /// <summary>Performs a cast of the given intput type into the given output type using he given cast type.</summary>
+        /// <summary>Performs a cast of the given input type into the given output type using he given cast type.</summary>
         /// <remarks>This will throw an exception if unable to cast.</remarks>
         /// <typeparam name="Tin">The input type to cast from.</typeparam>
         /// <typeparam name="Tout">The output type to cast to.</typeparam>

@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a boolean OR of all the boolean parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/OR.html"/>
-    sealed public class Or: Nary<Bool, Bool> {
+    sealed public class Or: NaryValue<Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =

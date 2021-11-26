@@ -6,7 +6,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This will return the value limitted to a range.</summary>
-    sealed public class Clamp<T>: Ternary<T, T, T, T>
+    sealed public class Clamp<T>: TernaryValue<T, T, T, T>
         where T : IArithmetic<T>, IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>

@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using S = System;
@@ -6,7 +7,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>
-    /// This is the base function node information for all non-group funtion types.
+    /// This is the base function node information for all non-group function types.
     /// This represents a single function definition with a specific signature.
     /// </summary>
     /// <typeparam name="TReturn">The type of this function will return.</typeparam>
@@ -24,7 +25,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Indicates if there is only one argument for a new node, return the argument.</summary>
         /// <remarks>
         /// This is for things like sum which is valid with only one so we don't want to set minimum
-        /// to 2. However sum of a single value is that value (same with mul, and, or, etc), so for
+        /// to 2. However sum of a single value is that value (same with multiply, and, or, etc), so for
         /// functions like that, instead of wrapping it in the function, simply return the argument.
         /// This is only used if the minimum allowed arguments is less than two.
         /// </remarks>
@@ -35,8 +36,8 @@ namespace Blackboard.Core.Nodes.Bases {
         /// This protects against situations where all arguments can be cast into two equal matches but we
         /// only want to take one when the programmer uses some type to indicate which one to use.
         /// For example if everything can be cast to a double and to a string during a sum, we don't
-        /// want to take the string concatination unless one of the arguments is a string. The programmer
-        /// then indicates if the value is a sum or a concatination by including at least one string.
+        /// want to take the string concatenation unless one of the arguments is a string. The programmer
+        /// then indicates if the value is a sum or a concatenation by including at least one string.
         /// </remarks>
         public readonly bool NeedsOneNoCast;
 
@@ -92,7 +93,7 @@ namespace Blackboard.Core.Nodes.Bases {
             types.Length > this.MaxArgs ? FuncMatch.NoMatch :
             FuncMatch.Create(this.NeedsOneNoCast, types.Zip(this.argTypes.RepeatLast(), Type.Match));
 
-        /// <summary>This will implicity cast the given parameter,</summary>
+        /// <summary>This will implicitly cast the given parameter,</summary>
         /// <param name="node">The node to cast.</param>
         /// <param name="t">The type to get the cast to.</param>
         /// <returns>The resulting parameter in the expected type.</returns>

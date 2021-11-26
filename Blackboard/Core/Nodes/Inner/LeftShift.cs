@@ -6,7 +6,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a left shifts the first parent the amount of the second parent.</summary>
-    sealed public class LeftShift<T>: Binary<T, T, T>
+    sealed public class LeftShift<T>: BinaryValue<T, T, T>
         where T : IBitwise<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>

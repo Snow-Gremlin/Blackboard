@@ -7,7 +7,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This gets the double mathmatical function value from two parents.</summary>
-    sealed public class BinaryDoubleMath<T>: Binary<T, T, T>
+    sealed public class BinaryDoubleMath<T>: BinaryValue<T, T, T>
         where T : IFloatingPoint<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory for creating a new Atan2 instance of this node.</summary>

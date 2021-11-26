@@ -1,15 +1,12 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>A base node for a node which has a value.</summary>
     /// <typeparam name="T">The type of the value being held.</typeparam>
-    public abstract class ValueNode<T>: Evaluatable, IValueParent<T>, IConstantable
+    public abstract class ValueNode<T>: Evaluable, IValueParent<T>, IConstantable
         where T : IComparable<T> {
 
         /// <summary>Creates a new value node.</summary>
@@ -17,7 +14,7 @@ namespace Blackboard.Core.Nodes.Bases {
         public ValueNode(T value = default) => this.Value = value ?? default;
 
         /// <summary>Converts this node to a constant.</summary>
-        /// <returns>A consant of this node.</returns>
+        /// <returns>A constant of this node.</returns>
         public virtual IConstant ToConstant() => new Literal<T>(this.Value);
 
         /// <summary>This gets the data being stored in this node.</summary>
@@ -27,29 +24,20 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>The value being held by this node.</summary>
         public T Value { get; private set; }
 
-        /// <summary>Sets the node value to the given value.</summary>
-        /// <param name="value">The new value to set to this node.</param>
-        /// <returns>True if the value changed, false if the value did not change.</returns>
-        protected bool SetNodeValue(T value) {
-            if (this.Value.CompareTo(value) == 0) return false;
+        /// <summary>
+        /// This is called when the value is evaluated and updated.
+        /// It will determine the new value the node should be set to.
+        /// </summary>
+        /// <returns>The new value that the node should be set to.</returns>
+        abstract protected T CalcuateValue();
+
+        /// <summary>Updates the node's provoked state.</summary>
+        /// <returns>True indicates that the value has been provoked, false otherwise.</returns>
+        protected override bool Evaluate() {
+            T value = this.CalcuateValue();
+            if (this.Value.Equals(value)) return false;
             this.Value = value;
             return true;
         }
-
-        /// <summary>Updates the node's value during node evaluation.</summary>
-        /// <returns>
-        /// True indicates that the value changed, false otherwise.
-        /// When the value has changed all the children are returned from the evaulation,
-        /// otherwise no children are returned.
-        /// </returns>
-        abstract protected bool UpdateValue();
-
-        /// <summary>Evaluates this node and updates it.</summary>
-        /// <returns>
-        /// The set of all the children if the value changed during update.
-        /// If the value hasn't changed then no children are returned.
-        /// </returns>
-        sealed public override IEnumerable<IEvaluatable> Eval() =>
-            this.UpdateValue() ? this.Children.OfType<IEvaluatable>() : Enumerable.Empty<IEvaluatable>();
     }
 }

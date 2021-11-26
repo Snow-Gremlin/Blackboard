@@ -8,7 +8,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Gets the average of all the inputs.</summary>
-    sealed public class Average: Nary<Double, Double> {
+    sealed public class Average: NaryValue<Double, Double> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =

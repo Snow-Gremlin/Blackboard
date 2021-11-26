@@ -6,7 +6,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This will return the linear interpolation between two parent values.</summary>
-    sealed public class Lerp<T>: Ternary<T, T, T, T>
+    sealed public class Lerp<T>: TernaryValue<T, T, T, T>
         where T : IFloatingPoint<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>

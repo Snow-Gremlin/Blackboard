@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <summary>This will return the value of one of two parents based on a boolean parent.</summary>
     /// <remarks>This functions just like a typical ternary statement.</remarks>
     /// <typeparam name="T">The type of input for the two value providing parents.</typeparam>
-    sealed public class Select<T>: Ternary<Bool, T, T, T>
+    sealed public class Select<T>: TernaryValue<Bool, T, T, T>
         where T : IComparable<T>, new() {
 
         // TODO: Determine if it is possible to select between two triggers (i.e. pick the trigger to listen too.

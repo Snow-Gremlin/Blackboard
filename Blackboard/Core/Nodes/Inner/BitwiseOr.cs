@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a bitwise OR of all the integer parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/OR.html"/>
-    sealed public class BitwiseOr<T>: Nary<T, T>
+    sealed public class BitwiseOr<T>: NaryValue<T, T>
         where T : IBitwise<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>

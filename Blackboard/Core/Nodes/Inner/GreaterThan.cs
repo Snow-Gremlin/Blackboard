@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Determines if the two values are greater than.</summary>
     /// <typeparam name="T">The type being compared.</typeparam>
-    sealed public class GreaterThan<T>: Binary<T, T, Bool>
+    sealed public class GreaterThan<T>: BinaryValue<T, T, Bool>
         where T : IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>

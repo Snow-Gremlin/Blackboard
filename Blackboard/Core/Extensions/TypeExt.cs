@@ -23,7 +23,7 @@ namespace Blackboard.Core.Extensions {
         /// <summary>This returns the first type from the given list which the given source is assignable to.</summary>
         /// <param name="types">The types to check if the source assignable to.</param>
         /// <param name="source">The source type find the first assignable to type.</param>
-        /// <returns>The first type the souce is assignable to or null if not found.</returns>
+        /// <returns>The first type that the source is assignable to or null if not found.</returns>
         static public Type FirstAssignable(this IEnumerable<Type> types, S.Type source) =>
             types.FirstOrDefault((t) => source.IsAssignableTo(t.RealType));
     }

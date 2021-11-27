@@ -38,6 +38,8 @@ namespace Blackboard.Core.Nodes.Bases {
         /// to 2. However sum of a single value is that value (same with multiply, and, or, etc), so for
         /// functions like that, instead of wrapping it in the function, simply return the argument.
         /// This is only used if the minimum allowed arguments is less than two.
+        /// This will not be allowed if the first argument type is not or
+        /// can not be implicitly cast to the returned value.
         /// </remarks>
         public readonly bool PassthroughOne;
 
@@ -64,10 +66,13 @@ namespace Blackboard.Core.Nodes.Bases {
         /// </param>
         /// <param name="argTypes">The types for all the arguments. Any nil types are ignored.</param>
         protected FuncDef(int min, int max, bool needsOneNoCast, bool passOne, params Type[] argTypes) {
+
+            // TODO: Check this to use exceptions to enforce the rules instead of quietly dealing with it.
+
             this.MinArgs = S.Math.Max(min, 0);
             this.MaxArgs = S.Math.Max(this.MinArgs, max);
             this.NeedsOneNoCast = needsOneNoCast;
-            this.PassthroughOne = passOne;
+            this.PassthroughOne = passOne && Type.Match<TReturn>(this.argTypes[0]).IsMatch;
             this.argTypes = argTypes.NotNull().ToArray();
         }
 
@@ -118,8 +123,8 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new function.</returns>
         public virtual INode Build(INode[] nodes) =>
-            this.PassthroughOne && nodes.Length == 1 ? this.argTypes[0].Implicit(nodes[0]) :
-                this.PostCastBuild(nodes.Zip(this.argTypes.RepeatLast(), castParam).ToArray());
+            this.PassthroughOne && nodes.Length == 1 ? castParam(nodes[0], Type.FromType<TReturn>()) :
+            this.PostCastBuild(nodes.Zip(this.argTypes.RepeatLast(), castParam).ToArray());
 
         /// <summary>Builds and return the function node with the given arguments already casted.</summary>
         /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>

@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Interfaces {
 
         /// <summary>Determines if the given field by name exists.</summary>
         /// <param name="name">The name of the field to look for.</param>
-        /// <returns>True if the name exists in this node node.</returns>
+        /// <returns>True if the name exists in this node.</returns>
         public bool ContainsField(string name);
 
         /// <summary>Reads the node for the field by the given name.</summary>

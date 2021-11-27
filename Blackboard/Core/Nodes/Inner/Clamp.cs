@@ -1,27 +1,22 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Nodes.Inner {
 
-    /// <summary>This will return the value limitted to a range.</summary>
+    /// <summary>This will return the value limited to a range.</summary>
     sealed public class Clamp<T>: TernaryValue<T, T, T, T>
         where T : IArithmetic<T>, IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory =
-            new Function<IValueParent<T>, IValueParent<T>, IValueParent<T>, Clamp<T>>(
-                (value1, value2, value3) => new Clamp<T>(value1, value2, value3));
+        static public readonly IFuncDef Factory = CreateFactory((value, min, max) => new Clamp<T>(value, min, max));
 
         /// <summary>Creates a clamped value node.</summary>
-        /// <param name="source1">This is the value parent that is clamped.</param>
-        /// <param name="source2">This is the minimum value parent for the lower edge of the clamp.</param>
-        /// <param name="source3">This is the maximum value parent for the upper edge of the clamp.</param>
-        /// <param name="value">The default value for this node.</param>
-        public Clamp(IValueParent<T> source1 = null, IValueParent<T> source2 = null,
-            IValueParent<T> source3 = null, T value = default) :
-            base(source1, source2, source3, value) { }
+        /// <param name="value">This is the value parent that is clamped.</param>
+        /// <param name="min">This is the minimum value parent for the lower edge of the clamp.</param>
+        /// <param name="max">This is the maximum value parent for the upper edge of the clamp.</param>
+        public Clamp(IValueParent<T> value = null, IValueParent<T> min = null, IValueParent<T> max = null) :
+            base(value, min, max) { }
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Clamp";

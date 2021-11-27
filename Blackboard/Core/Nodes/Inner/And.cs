@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,19 +11,15 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class And: NaryValue<Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory =
-            new FunctionN<IValueParent<Bool>, And>((values) => new And(values));
+        static public readonly IFuncDef Factory = CreateFactory((values) => new And(values));
 
         /// <summary>Creates a boolean AND value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public And(params IValueParent<Bool>[] parents) :
-            base(parents) { }
+        public And(params IValueParent<Bool>[] parents) : base(parents) { }
 
         /// <summary>Creates a boolean AND value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        /// <param name="value">The default value for this node.</param>
-        public And(IEnumerable<IValueParent<Bool>> parents = null, Bool value = default) :
-            base(parents, value) { }
+        public And(IEnumerable<IValueParent<Bool>> parents = null) : base(parents) { }
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "And";

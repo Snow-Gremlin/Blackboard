@@ -1,7 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Nodes.Inner {
@@ -9,26 +8,23 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <summary>Determines if the two values are greater than.</summary>
     /// <typeparam name="T">The type being compared.</typeparam>
     sealed public class GreaterThan<T>: BinaryValue<T, T, Bool>
-        where T : IComparable<T>, new() {
+        where T : IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory =
-            new Function<IValueParent<T>, IValueParent<T>, GreaterThan<T>>((left, right) => new GreaterThan<T>(left, right));
+        static public readonly IFuncDef Factory = CreateFactory((left, right) => new GreaterThan<T>(left, right));
 
         /// <summary>Creates a greater than value node.</summary>
-        /// <param name="source1">This is the first parent for the source value.</param>
-        /// <param name="source2">This is the second parent for the source value.</param>
-        /// <param name="value">The default value for this node.</param>
-        public GreaterThan(IValueParent<T> source1 = null, IValueParent<T> source2 = null, Bool value = default) :
-            base(source1, source2, value) { }
+        /// <param name="left">This is the first parent for the left value.</param>
+        /// <param name="right">This is the second parent for the right value.</param>
+        public GreaterThan(IValueParent<T> left = null, IValueParent<T> right = null) : base(left, right) { }
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "GreaterThan";
 
         /// <summary>Determine if the parent's values are greater than during evaluation.</summary>
-        /// <param name="value1">The first parent's value to compare.</param>
-        /// <param name="value2">The second parent's value to compare.</param>
-        /// <returns>True if the first value is greater than than the second value, false otherwise.</returns>
-        protected override Bool OnEval(T value1, T value2) => new(value1.CompareTo(value2) > 0);
+        /// <param name="left">The first parent's value to compare.</param>
+        /// <param name="right">The second parent's value to compare.</param>
+        /// <returns>True if the first value is greater than the second value, false otherwise.</returns>
+        protected override Bool OnEval(T left, T right) => new(left.CompareTo(right) > 0);
     }
 }

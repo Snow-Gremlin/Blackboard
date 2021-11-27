@@ -1,33 +1,29 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This gets the rounded value from the parent at the given decimal point.</summary>
     sealed public class Round<T>: BinaryValue<T, Int, T>
-        where T : IFloatingPoint<T>, IComparable<T>, new() {
+        where T : IFloatingPoint<T>, IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory =
-            new Function<IValueParent<T>, IValueParent<Int>, Round<T>>((input1, input2) => new Round<T>(input1, input2));
+        static public readonly IFuncDef Factory = CreateFactory((value, decimals) => new Round<T>(value, decimals));
 
         /// <summary>Creates a rounded value node.</summary>
-        /// <param name="source1">This is the value parent for the source value.</param>
-        /// <param name="source2">This is the decimals parent for the source value.</param>
-        /// <param name="value">The default value for this node.</param>
-        public Round(IValueParent<T> source1 = null, IValueParent<Int> source2 = null, T value = default) :
-            base(source1, source2, value) { }
+        /// <param name="value">This is the value parent for the source value.</param>
+        /// <param name="decimals">This is the decimals parent for the source value.</param>
+        public Round(IValueParent<T> value = null, IValueParent<Int> decimals = null) : base(value, decimals) { }
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Round";
 
         /// <summary>Rounds the parent's value during evaluation.</summary>
-        /// <param name="value1">The value to round.</param>
-        /// <param name="value2">The number of decimals to round to.</param>
+        /// <param name="value">The value to round.</param>
+        /// <param name="decimals">The number of decimals to round to.</param>
         /// <returns>The rounded value.</returns>
-        protected override T OnEval(T value1, Int value2) => value1.Round(value2);
+        protected override T OnEval(T value, Int decimals) => value.Round(decimals);
     }
 }

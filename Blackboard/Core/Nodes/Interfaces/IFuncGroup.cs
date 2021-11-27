@@ -2,7 +2,7 @@
 
 namespace Blackboard.Core.Nodes.Interfaces {
 
-    /// <summary>The interface for parsable function factory.</summary>
+    /// <summary>The interface for a collection of function factories.</summary>
     public interface IFuncGroup: INode {
 
         /// <summary>Finds and returns the best matching function in this collection.</summary>

@@ -80,7 +80,7 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Determines if the this value is negative.</summary>
         /// <returns>True if below zero, false if zero or more.</returns>
-        public Bool IsNegative() => new(double.IsNegative(this.Value));
+        public bool IsNegative() => double.IsNegative(this.Value);
 
         #endregion
         #region Floating Point Math...
@@ -114,11 +114,11 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Determines if this value is positive or negative infinity.</summary>
         /// <returns>True if the number is either positive or negative infinity, false otherwise.</returns>
-        public Bool IsInfinity() => new(double.IsInfinity(this.Value));
+        public bool IsInfinity() => double.IsInfinity(this.Value);
 
         /// <summary>Determines if this value is not a number.</summary>
         /// <returns>True if the number is not a number, false otherwise.</returns>
-        public Bool IsNAN() => new(double.IsNaN(this.Value));
+        public bool IsNAN() => double.IsNaN(this.Value);
 
         #endregion
         #region Casts...
@@ -143,10 +143,15 @@ namespace Blackboard.Core.Data.Caps {
         public static bool operator > (Double left, Double right) => left.CompareTo(right) >  0;
         public static bool operator >=(Double left, Double right) => left.CompareTo(right) >= 0;
 
+        /// <summary>Checks if the given double is equal to this data type.</summary>
+        /// <param name="other">This is the double to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
+        public bool Equals(Double other) => this.Value == other.Value;
+
         /// <summary>Checks if the given object is equal to this data type.</summary>
         /// <param name="obj">This is the object to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public override bool Equals(object obj) => obj is Double other && this.Value == other.Value;
+        public override bool Equals(object obj) => obj is Double other && this.Equals(other);
 
         #endregion
 

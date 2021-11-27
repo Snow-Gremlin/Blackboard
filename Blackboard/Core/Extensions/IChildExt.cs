@@ -8,7 +8,11 @@ namespace Blackboard.Core.Extensions {
     static class IChildExt {
 
         /// <summary>This is a helper method for setting a parent to the node.</summary>
-        /// <remarks>This is only intended to be called by the given child internally.</remarks>
+        /// <remarks>
+        /// This is only intended to be called by the given child internally.
+        /// Do not add this child to the new parent yet,
+        /// so we can read from the parents when only evaluating.
+        /// </remarks>
         /// <typeparam name="T">The node type for the parent.</typeparam>
         /// <param name="child">The child to set the parent to.</param>
         /// <param name="parent">The parent variable being set.</param>
@@ -19,8 +23,33 @@ namespace Blackboard.Core.Extensions {
             if (ReferenceEquals(parent, newParent)) return false;
             parent?.RemoveChildren(child);
             parent = newParent;
-            // Do not add parent yet, so we can read from the parents when only evaluating.
             return true;
+        }
+
+        /// <summary>This adds parents to this node.</summary>
+        /// <remarks>
+        /// This is only intended to be called by the given child internally.
+        /// Do not add this child to the new parent yet,
+        /// so we can read from the parents when only evaluating.
+        /// </remarks>
+        /// <param name="parents">The set of parents to add.</param>
+        static internal void AddParents<T>(this List<T> sources, IEnumerable<T> parents)
+            where T : class, IParent =>
+            sources.AddRange(parents.NotNull());
+
+        /// <summary>This removes the given parents from this node.</summary>
+        /// <param name="parents">The set of parents to remove.</param>
+        /// <returns>True if any of the parents are removed, false if none were removed.</returns>
+        static internal bool RemoveParents<T>(this List<T> sources, IChild child, IEnumerable<T> parents)
+            where T : class, IParent {
+            bool anyRemoved = false;
+            foreach (T parent in parents.NotNull()) {
+                if (sources.Remove(parent)) {
+                    parent.RemoveChildren(child);
+                    anyRemoved = true;
+                }
+            }
+            return anyRemoved;
         }
 
         /// <summary>

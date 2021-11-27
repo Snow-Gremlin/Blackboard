@@ -1,7 +1,9 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using S = System;
 
 namespace Blackboard.Core.Nodes.Bases {
 
@@ -15,6 +17,12 @@ namespace Blackboard.Core.Nodes.Bases {
         where T2 : IData
         where T3 : IData
         where TResult : IComparable<TResult> {
+
+        /// <summary>This is a helper for creating ternary node factories quickly.</summary>
+        /// <param name="handle">The handler for calling the node constructor.</param>
+        static public IFuncDef CreateFactory<Tout>(S.Func<IValueParent<T1>, IValueParent<T2>, IValueParent<T3>, Tout> handle)
+            where Tout : TernaryValue<T1, T2, T3, TResult> =>
+            new Function<IValueParent<T1>, IValueParent<T2>, IValueParent<T3>, Tout>(handle);
 
         /// <summary>This is the first parent node to read from.</summary>
         private IValueParent<T1> source1;

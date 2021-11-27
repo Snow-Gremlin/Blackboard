@@ -47,6 +47,6 @@ namespace Blackboard.Core.Data.Interfaces {
 
         /// <summary>Determines if the this value is negative.</summary>
         /// <returns>True if below zero, false if zero or more.</returns>
-        Bool IsNegative();
+        bool IsNegative();
     }
 }

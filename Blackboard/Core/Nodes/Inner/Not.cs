@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Nodes.Inner {
@@ -10,13 +9,12 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class Not: UnaryValue<Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory = new Function<IValueParent<Bool>, Not>((input) => new Not(input));
+        static public readonly IFuncDef Factory = CreateFactory(input => new Not(input));
 
-        /// <summary>Creates a boolean NOT value node.</summary>edrgs
+        /// <summary>Creates a boolean NOT value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Not(IValueParent<Bool> source = null, Bool value = default) :
-            base(source, value) { }
+        public Not(IValueParent<Bool> source = null) : base(source) { }
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Not";

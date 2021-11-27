@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a trigger when the parent becomes true.</summary>
-    sealed public class OnTrue: TriggerNode {
+    sealed public class OnTrue: TriggerNode, IChild {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
@@ -22,6 +23,9 @@ namespace Blackboard.Core.Nodes.Inner {
             this.Parent = source;
         }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "OnTrue";
+
         /// <summary>The parent node to get the source value from.</summary>
         public IValueParent<Bool> Parent {
             get => this.source;
@@ -29,13 +33,10 @@ namespace Blackboard.Core.Nodes.Inner {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<IAdopter> Parents => INode.NotNull(this.source);
+        public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.source);
 
-        /// <summary>This will update the trigger during evaluation.</summary>
-        /// <returns>True to trigger if the source value is true, false otherwise.</returns>
-        protected override bool UpdateTrigger() => this.source.Value.Value;
-
-        /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "OnTrue";
+        /// <summary>This updates the trigger during an evaluation.</summary>
+        /// <returns>This always returns true so that any parent change will trigger this node.</returns>
+        protected override bool ShouldProvoke() => this.source.Value.Value;
     }
 }

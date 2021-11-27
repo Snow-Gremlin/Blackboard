@@ -32,10 +32,10 @@ namespace Blackboard.Core.Data.Interfaces {
 
         /// <summary>Determines if this value is positive or negative infinity.</summary>
         /// <returns>True if the number is either positive or negative infinity, false otherwise.</returns>
-        Bool IsInfinity();
+        bool IsInfinity();
 
         /// <summary>Determines if this value is not a number.</summary>
         /// <returns>True if the number is not a number, false otherwise.</returns>
-        Bool IsNAN();
+        bool IsNAN();
     }
 }

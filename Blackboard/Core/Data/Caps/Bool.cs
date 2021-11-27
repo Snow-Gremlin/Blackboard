@@ -22,6 +22,10 @@ namespace Blackboard.Core.Data.Caps {
         public string TypeName => Type.Bool.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
+        /// <remarks>
+        /// We're defining this uniquely instead of using the bool.ToString since
+        /// those return "True" and "False" which don't match the Blackboard language.
+        /// </remarks>
         public string ValueString => this.Value ? "true" : "false";
 
         #region Comparable...
@@ -38,10 +42,15 @@ namespace Blackboard.Core.Data.Caps {
         public static bool operator > (Bool left, Bool right) => left.CompareTo(right) >  0;
         public static bool operator >=(Bool left, Bool right) => left.CompareTo(right) >= 0;
 
+        /// <summary>Checks if the given bool is equal to this data type.</summary>
+        /// <param name="other">This is the bool to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
+        public bool Equals(Bool other) => this.Value == other.Value;
+
         /// <summary>Checks if the given object is equal to this data type.</summary>
         /// <param name="obj">This is the object to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public override bool Equals(object obj) => obj is Bool other && this.Value == other.Value;
+        public override bool Equals(object obj) => obj is Bool other && this.Equals(other);
 
         #endregion
 

@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,19 +11,15 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class Xor: NaryValue<Bool, Bool> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory =
-            new FunctionN<IValueParent<Bool>, Xor>((inputs) => new Xor(inputs));
+        static public readonly IFuncDef Factory = CreateFactory(inputs => new Xor(inputs));
 
         /// <summary>Creates a boolean Exclusive OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Xor(params IValueParent<Bool>[] parents) :
-            base(parents) { }
+        public Xor(params IValueParent<Bool>[] parents) : base(parents) { }
 
         /// <summary>Creates a boolean Exclusive OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        /// <param name="value">The default value for this node.</param>
-        public Xor(IEnumerable<IValueParent<Bool>> parents = null, Bool value = default) :
-            base(parents, value) { }
+        public Xor(IEnumerable<IValueParent<Bool>> parents = null) : base(parents) { }
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Xor";

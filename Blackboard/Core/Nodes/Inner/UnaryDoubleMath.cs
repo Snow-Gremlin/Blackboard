@@ -6,7 +6,7 @@ using S = System;
 
 namespace Blackboard.Core.Nodes.Inner {
 
-    /// <summary>This gets the double mathmatical function value from the parent.</summary>
+    /// <summary>This gets the double mathematical function value from the parent.</summary>
     sealed public class UnaryDoubleMath<T>: UnaryValue<T, T>
         where T : IFloatingPoint<T>, IComparable<T>, new() {
 
@@ -105,29 +105,26 @@ namespace Blackboard.Core.Nodes.Inner {
             new Function<IValueParent<T>, UnaryDoubleMath<T>>((value) =>
                 new UnaryDoubleMath<T>(funcName, func, value));
 
-        /// <summary>The name of the function for this mathmatics.</summary>
+        /// <summary>The name of the function for this mathematics.</summary>
         private readonly string funcName;
 
         /// <summary>The function to perform on this node's value.</summary>
         private readonly S.Func<double, double> func;
 
-        /// <summary>Creates a double mathmatical function value node.</summary>
+        /// <summary>Creates a double mathematical function value node.</summary>
         /// <param name="funcName">The name of the function to perform.</param>
         /// <param name="func">This is the function to apply to the parent.</param>
         /// <param name="source">This is the single parent for the source value.</param>
-        /// <param name="value">The default value for this node.</param>
-        public UnaryDoubleMath(string funcName, S.Func<double, double> func,
-            IValueParent<T> source = null, T value = default) :
-            base(source, value) {
+        public UnaryDoubleMath(string funcName, S.Func<double, double> func, IValueParent<T> source = null) :
+            base(source) {
             this.funcName = funcName;
             this.func = func;
-            this.UpdateValue();
         }
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => this.funcName;
 
-        /// <summary>The result of the double mathmatical function the parent's value during evaluation.</summary>
+        /// <summary>The result of the double mathematical function the parent's value during evaluation.</summary>
         /// <param name="value">The value to evaluate.</param>
         /// <returns>The ceiling value.</returns>
         protected override T OnEval(T value) => this.func is null ? value : value.DoubleMath(this.func);

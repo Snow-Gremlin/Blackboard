@@ -3,7 +3,7 @@ using S = System;
 
 namespace Blackboard.Core.Nodes.Interfaces {
 
-    /// <summary>The interface for parsable function factory.</summary>
+    /// <summary>The interface for function factory.</summary>
     public interface IFuncDef: INode {
 
         /// <summary>The collection of argument types.</summary>
@@ -27,7 +27,7 @@ namespace Blackboard.Core.Nodes.Interfaces {
 
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>
         /// <param name="types">The input types to match against the function signatures with.</param>
-        /// <returns>The closest match is lower but not negatve.</returns>
+        /// <returns>The closest match is lower but not negative.</returns>
         public FuncMatch Match(Type[] types);
 
         /// <summary>Builds and returns the function node.</summary>

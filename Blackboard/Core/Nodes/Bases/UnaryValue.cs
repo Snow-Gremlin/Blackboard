@@ -1,7 +1,9 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using S = System;
 
 namespace Blackboard.Core.Nodes.Bases {
 
@@ -10,7 +12,13 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
     public abstract class UnaryValue<T1, TResult>: ValueNode<TResult>, IChild
         where T1 : IData
-        where TResult : IComparable<TResult>, new() {
+        where TResult : IComparable<TResult> {
+
+        /// <summary>This is a helper for creating unary node factories quickly.</summary>
+        /// <param name="handle">The handler for calling the node constructor.</param>
+        static public IFuncDef CreateFactory<Tout>(S.Func<IValueParent<T1>, Tout> handle)
+            where Tout : UnaryValue<T1, TResult> =>
+            new Function<IValueParent<T1>, Tout>(handle);
 
         /// <summary>This is the parent node to read from.</summary>
         private IValueParent<T1> source;

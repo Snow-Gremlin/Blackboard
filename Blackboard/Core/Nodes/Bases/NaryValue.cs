@@ -1,19 +1,27 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using S = System;
 
 namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>This is a value node which has several parents as the source of the value.</summary>
     /// <typeparam name="TIn">The type of the all the parents' value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
-    public abstract class NaryValue<TIn, TResult>: ValueNode<TResult>, IChild
+    public abstract class NaryValue<TIn, TResult>: ValueNode<TResult>, INaryChild<IValueParent<TIn>>
         where TIn : IData
-        where TResult : IComparable<TResult>, new() {
+        where TResult : IComparable<TResult> {
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
         private List<IValueParent<TIn>> sources;
+
+        /// <summary>This is a helper for creating unary node factories quickly.</summary>
+        /// <param name="handle">The handler for calling the node constructor.</param>
+        static public IFuncDef CreateFactory<Tout>(S.Func<IEnumerable<IValueParent<TIn>>, Tout> handle)
+            where Tout : NaryValue<TIn, TResult> =>
+            new FunctionN<IValueParent<TIn>, Tout>(handle);
 
         /// <summary>Creates a N-ary value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
@@ -33,40 +41,15 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>This adds parents to this node.</summary>
         /// <remarks>The value is updated after these parents are added.</remarks>
         /// <param name="parents">The set of parents to add.</param>
-        public void AddParents(params IValueParent<TIn>[] parents) =>
-            this.AddParents(parents as IEnumerable<IValueParent<TIn>>);
-
-        /// <summary>This adds parents to this node.</summary>
-        /// <remarks>The value is updated after these parents are added.</remarks>
-        /// <param name="parents">The set of parents to add.</param>
-        public void AddParents(IEnumerable<IValueParent<TIn>> parents) {
-            parents = parents.NotNull();
-            this.sources.AddRange(parents);
-            foreach (IValueParent<TIn> parent in parents)
-                parent.AddChildren(this);
-        }
+        public void AddParents(IEnumerable<IValueParent<TIn>> parents) =>
+            this.sources.AddParents(parents);
 
         /// <summary>This removes the given parents from this node.</summary>
         /// <remarks>The value is updated after these parents are removed.</remarks>
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
-        public bool RemoveParents(params IValueParent<TIn>[] parents) =>
-            this.RemoveParents(parents as IEnumerable<IValueParent<TIn>>);
-
-        /// <summary>This removes the given parents from this node.</summary>
-        /// <remarks>The value is updated after these parents are removed.</remarks>
-        /// <param name="parents">The set of parents to remove.</param>
-        /// <returns>True if any of the parents are removed, false if none were removed.</returns>
-        public bool RemoveParents(IEnumerable<IValueParent<TIn>> parents) {
-            bool anyRemoved = false;
-            foreach (IValueParent<TIn> parent in parents) {
-                if (this.sources.Remove(parent)) {
-                    parent.RemoveChildren(this);
-                    anyRemoved = true;
-                }
-            }
-            return anyRemoved;
-        }
+        public bool RemoveParents(IEnumerable<IValueParent<TIn>> parents) =>
+            this.sources.RemoveParents(this, parents);
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public IEnumerable<IParent> Parents => this.sources;

@@ -11,10 +11,10 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>Converts this node to a constant trigger.</summary>
         /// <returns>The constant trigger carrying the provoked condition.</returns>
-        public virtual IConstant ToConstant() => new ConstTrigger(this.Provoked);
+        public virtual IConstant ToConstant() => this is IConstant c ? c : new ConstTrigger(this.Provoked);
 
         /// <summary>Indicates if this trigger has been fired during a current evaluation.</summary>
-        public bool Provoked { get; private set; }
+        public bool Provoked { get; protected set; }
 
         /// <summary>Resets the trigger at the end of the evaluation.</summary>
         public void Reset() => this.Provoked = false;

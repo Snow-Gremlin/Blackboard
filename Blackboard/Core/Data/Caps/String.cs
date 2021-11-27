@@ -64,10 +64,15 @@ namespace Blackboard.Core.Data.Caps {
         public static bool operator > (String left, String right) => left.CompareTo(right) >  0;
         public static bool operator >=(String left, String right) => left.CompareTo(right) >= 0;
 
+        /// <summary>Checks if the given string is equal to this data type.</summary>
+        /// <param name="other">This is the string to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
+        public bool Equals(String other) => this.Value == other.Value;
+
         /// <summary>Checks if the given object is equal to this data type.</summary>
         /// <param name="obj">This is the object to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public override bool Equals(object obj) => obj is String other && this.Value == other.Value;
+        public override bool Equals(object obj) => obj is String other && this.Equals(other);
 
         #endregion
 

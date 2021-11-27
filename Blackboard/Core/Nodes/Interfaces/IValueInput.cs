@@ -1,6 +1,4 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Nodes.Bases;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Interfaces {
 
@@ -12,11 +10,7 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// <summary>Sets the value of this input.</summary>
         /// <remarks>This is not intended to be called directly, it should be called via the driver.</remarks>
         /// <param name="value">The value to input.</param>
-        /// <returns>
-        /// The set of nodes (should be any evaluable children of this node)
-        /// that should be updated based on the results of this node's update.
-        /// If this evaluation made no change then no node should be returned.
-        /// </returns>
-        public IEnumerable<Evaluable> SetValue(T value);
+        /// <returns>True if there was any change, false otherwise.</returns>
+        public bool SetValue(T value);
     }
 }

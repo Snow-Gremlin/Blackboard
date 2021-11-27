@@ -1,7 +1,9 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using S = System;
 
 namespace Blackboard.Core.Nodes.Bases {
 
@@ -12,7 +14,13 @@ namespace Blackboard.Core.Nodes.Bases {
     public abstract class BinaryValue<T1, T2, TResult>: ValueNode<TResult>, IChild
         where T1 : IData
         where T2 : IData
-        where TResult : IComparable<TResult>, new() {
+        where TResult : IComparable<TResult> {
+
+        /// <summary>This is a helper for creating binary node factories quickly.</summary>
+        /// <param name="handle">The handler for calling the node constructor.</param>
+        static public IFuncDef CreateFactory<Tout>(S.Func<IValueParent<T1>, IValueParent<T2>, Tout> handle)
+            where Tout : BinaryValue<T1, T2, TResult> =>
+            new Function<IValueParent<T1>, IValueParent<T2>, Tout>(handle);
 
         /// <summary>This is the first parent node to read from.</summary>
         private IValueParent<T1> source1;

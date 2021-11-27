@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,18 +9,15 @@ namespace Blackboard.Core.Nodes.Inner {
     sealed public class Any: NaryTrigger {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory =
-            new FunctionN<ITriggerAdopter, Any>((values) => new Any(values));
+        static public readonly IFuncDef Factory = CreateFactory((values) => new Any(values));
 
         /// <summary>Creates an any trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Any(params ITriggerAdopter[] parents) :
-            base(parents) { }
+        public Any(params ITriggerParent[] parents) : base(parents) { }
 
         /// <summary>Creates an any trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Any(IEnumerable<ITriggerAdopter> parents = null) :
-            base(parents) { }
+        public Any(IEnumerable<ITriggerParent> parents = null) : base(parents) { }
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Any";

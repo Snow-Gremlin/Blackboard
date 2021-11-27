@@ -15,14 +15,14 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>Converts this node to a constant.</summary>
         /// <returns>A constant of this node.</returns>
-        public virtual IConstant ToConstant() => new Literal<T>(this.Value);
+        public virtual IConstant ToConstant() => this is IConstant c ? c : new Literal<T>(this.Value);
 
         /// <summary>This gets the data being stored in this node.</summary>
         /// <returns>The data being stored.</returns>
         public IData Data => this.Value;
 
         /// <summary>The value being held by this node.</summary>
-        public T Value { get; private set; }
+        public T Value { get; protected set; }
 
         /// <summary>
         /// This is called when the value is evaluated and updated.

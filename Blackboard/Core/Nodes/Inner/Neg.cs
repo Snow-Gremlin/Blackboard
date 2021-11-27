@@ -1,23 +1,19 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Negates the given parents value.</summary>
     sealed public class Neg<T>: UnaryValue<T, T>
-        where T : IArithmetic<T>, IComparable<T>, new() {
+        where T : IArithmetic<T>, IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory =
-            new Function<IValueParent<T>, Neg<T>>((input) => new Neg<T>(input));
+        static public readonly IFuncDef Factory = CreateFactory((input) => new Neg<T>(input));
 
         /// <summary>Creates a negated value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        /// <param name="value">The default value for this node.</param>
-        public Neg(IValueParent<T> source = null, T value = default) :
-            base(source, value) { }
+        public Neg(IValueParent<T> source = null) : base(source) { }
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Neg";

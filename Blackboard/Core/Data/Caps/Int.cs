@@ -74,7 +74,7 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Determines if the this value is negative.</summary>
         /// <returns>True if below zero, false if zero or more.</returns>
-        public Bool IsNegative() => new(this.Value < 0);
+        public bool IsNegative() => new(this.Value < 0);
 
         #endregion
         #region Bitwise Math...
@@ -131,10 +131,15 @@ namespace Blackboard.Core.Data.Caps {
         public static bool operator > (Int left, Int right) => left.CompareTo(right) >  0;
         public static bool operator >=(Int left, Int right) => left.CompareTo(right) >= 0;
 
+        /// <summary>Checks if the given integer is equal to this data type.</summary>
+        /// <param name="other">This is the integer to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
+        public bool Equals(Int other) => this.Value == other.Value;
+
         /// <summary>Checks if the given object is equal to this data type.</summary>
         /// <param name="obj">This is the object to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public override bool Equals(object obj) => obj is Int other && this.Value == other.Value;
+        public override bool Equals(object obj) => obj is Int other && this.Equals(other);
 
         #endregion
 

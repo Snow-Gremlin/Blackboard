@@ -12,17 +12,18 @@ namespace Blackboard.Core.Extensions {
         /// This is only intended to be called by the given child internally.
         /// Do not add this child to the new parent yet,
         /// so we can read from the parents when only evaluating.
+        /// This allows nodes which aren't parents for nodes like select.
         /// </remarks>
         /// <typeparam name="T">The node type for the parent.</typeparam>
         /// <param name="child">The child to set the parent to.</param>
-        /// <param name="parent">The parent variable being set.</param>
+        /// <param name="node">The parent node variable being set.</param>
         /// <param name="newParent">The new parent being set, or null</param>
         /// <returns>True if the parent has changed, false otherwise.</returns>
-        static internal bool SetParent<T>(this IChild child, ref T parent, T newParent)
-            where T : IParent {
-            if (ReferenceEquals(parent, newParent)) return false;
-            parent?.RemoveChildren(child);
-            parent = newParent;
+        static internal bool SetParent<T>(this IChild child, ref T node, T newParent)
+            where T : INode {
+            if (ReferenceEquals(node, newParent)) return false;
+            if (node is IParent parent) parent?.RemoveChildren(child);
+            node = newParent;
             return true;
         }
 

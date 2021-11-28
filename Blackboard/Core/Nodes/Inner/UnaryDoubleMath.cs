@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This gets the double mathematical function value from the parent.</summary>
     sealed public class UnaryDoubleMath<T>: UnaryValue<T, T>
-        where T : IFloatingPoint<T>, IComparable<T>, new() {
+        where T : IFloatingPoint<T>, IComparable<T> {
 
         /// <summary>This is a factory for creating a new Acos instance of this node.</summary>
         /// <remarks>The angle whose cosine is the specified number.</remarks>

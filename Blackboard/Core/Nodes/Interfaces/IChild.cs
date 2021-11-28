@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Extensions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Core.Nodes.Interfaces {
 
@@ -15,7 +16,8 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// <remarks>This is designed to be used to help return parents as an enumerator.</remarks>
         /// <param name="values">The parent nodes to enumerate.</param>
         /// <returns>The enumerator for the passed in nodes which are not null.</returns>
-        static protected IEnumerable<IParent> EnumerateParents(params IParent[] values) => values.NotNull();
+        static protected IEnumerable<IParent> EnumerateParents(params INode[] values) =>
+            values.NotNull().OfType<IParent>();
 
         /// <summary>The set of parent nodes to this node.</summary>
         public IEnumerable<IParent> Parents { get; }

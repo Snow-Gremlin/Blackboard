@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 
-namespace Blackboard.Core.Nodes.Inner {
+namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>
     /// This node should only be used by the parser while reducing nodes.
@@ -12,10 +12,15 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates a new constant trigger value node.</summary>
         /// <param name="provoked">The provoke state for this trigger.</param>
-        public ConstTrigger(bool provoked = false) => this.Provoked = provoked;
+        public ConstTrigger(bool provoked = false) => this.SetProvoked(provoked);
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "ConstTrigger";
+
+        /// <summary>This sets the value of the provoked constant.</summary>
+        /// <param name="provoked">The state to set.</param>
+        /// <returns>True if the state has changed, false otherwise.</returns>
+        public bool SetProvoked(bool provoked) => this.UpdateProvoked(provoked);
 
         /// <summary>This will update the trigger during evaluation.</summary>
         /// <returns>True to trigger if the source value is true, false otherwise.</returns>

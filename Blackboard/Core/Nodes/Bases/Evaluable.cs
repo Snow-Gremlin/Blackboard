@@ -26,10 +26,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>The depth in the graph from the furthest input of this node.</summary>
         public int Depth { get; private set; }
 
-        /// <summary>
-        /// Updates the node's value, provoked state, and any other state.
-        /// This will be called during evaluation by default.
-        /// </summary>
+        /// <summary>Updates the node's value, provoked state, and any other state.</summary>
         /// <returns>
         /// True indicates that the value has changed or a trigger has been provoked, false otherwise.
         /// When the value has changed all the children are returned from the evaluation,

@@ -32,7 +32,7 @@ namespace Blackboard.Parser.Preppers {
     /// <summary>This is a prepper for creating a new literal node.</summary>
     /// <typeparam name="T">The type of the value in the literal.</typeparam>
     sealed internal class LiteralPrep<T>: IPrepper
-        where T : IComparable<T>, new() {
+        where T : IComparable<T> {
 
         /// <summary>Creates a new literal prepper for the given value.</summary>
         /// <param name="value">The value to assign to the literal.</param>

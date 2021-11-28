@@ -10,6 +10,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <summary>This is a value node which has a single parent as the source of the value.</summary>
     /// <typeparam name="T1">The type of the parent's value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
+    /// <see cref="https://en.wikipedia.org/wiki/Arity#Unary"/>
     public abstract class UnaryValue<T1, TResult>: ValueNode<TResult>, IChild
         where T1 : IData
         where TResult : IComparable<TResult> {
@@ -24,7 +25,6 @@ namespace Blackboard.Core.Nodes.Bases {
         private IValueParent<T1> source;
 
         /// <summary>Creates a unary value node.</summary>
-        /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="source">This is the single parent for the source value.</param>
         public UnaryValue(IValueParent<T1> source = null) =>
             this.SetParent(ref this.source, source);

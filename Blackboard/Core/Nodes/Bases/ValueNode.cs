@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Core.Nodes.Outer;
 
 namespace Blackboard.Core.Nodes.Bases {
 
@@ -13,16 +12,21 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="value">The initial value of the node.</param>
         public ValueNode(T value = default) => this.Value = value ?? default;
 
-        /// <summary>Converts this node to a constant.</summary>
-        /// <returns>A constant of this node.</returns>
-        public virtual IConstant ToConstant() => this is IConstant c ? c : new Literal<T>(this.Value);
-
         /// <summary>This gets the data being stored in this node.</summary>
         /// <returns>The data being stored.</returns>
         public IData Data => this.Value;
 
         /// <summary>The value being held by this node.</summary>
-        public T Value { get; protected set; }
+        public T Value { get; private set; }
+
+        /// <summary>Sets the given value to this node.</summary>
+        ///<param name="value">The new value to set.</param>
+        /// <returns>True if the value has changed, false otherwise.</returns>
+        protected bool UpdateValue(T value) {
+            if (this.Value.Equals(value)) return false;
+            this.Value = value;
+            return true;
+        }
 
         /// <summary>
         /// This is called when the value is evaluated and updated.
@@ -32,12 +36,7 @@ namespace Blackboard.Core.Nodes.Bases {
         abstract protected T CalcuateValue();
 
         /// <summary>Updates the node's provoked state.</summary>
-        /// <returns>True indicates that the value has been provoked, false otherwise.</returns>
-        protected override bool Evaluate() {
-            T value = this.CalcuateValue();
-            if (this.Value.Equals(value)) return false;
-            this.Value = value;
-            return true;
-        }
+        /// <returns>True indicates that the value has been changed, false otherwise.</returns>
+        protected override bool Evaluate() => this.UpdateValue(this.CalcuateValue());
     }
 }

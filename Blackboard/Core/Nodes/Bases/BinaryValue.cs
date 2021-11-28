@@ -11,6 +11,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="T1">The type of the first parent's value for this node.</typeparam>
     /// <typeparam name="T2">The type of the second parent's value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
+    /// <see cref="https://en.wikipedia.org/wiki/Arity#Binary"/>
     public abstract class BinaryValue<T1, T2, TResult>: ValueNode<TResult>, IChild
         where T1 : IData
         where T2 : IData
@@ -29,7 +30,6 @@ namespace Blackboard.Core.Nodes.Bases {
         private IValueParent<T2> source2;
 
         /// <summary>Creates a binary value node.</summary>
-        /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         public BinaryValue(IValueParent<T1> source1 = null, IValueParent<T2> source2 = null) {

@@ -5,7 +5,7 @@ using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
-namespace Blackboard.Core.Nodes.Inner {
+namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>This is a latching value node.</summary>
     /// <typeparam name="T">The type of the value for this node.</typeparam>
@@ -16,6 +16,18 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory =
             new Function<ITriggerParent, IValueParent<T>, Latch<T>>((trigger, source) => new Latch<T>(trigger, source));
 
+        /// <summary>
+        /// This is a function to assign a value to the counter node directly.
+        /// This will return the counter node on success, or null if value could not be cast.
+        /// </summary>
+        static public readonly IFuncDef Assign =
+            new Function<Latch<T>, IDataNode, Latch<T>>((Latch<T> input, IDataNode node) => {
+                T value = node.Data.ImplicitCastTo<T>();
+                if (value is null) return null;
+                input.SetValue(value);
+                return input;
+            });
+
         /// <summary>This is the first parent node to read from.</summary>
         private ITriggerParent trigger;
 
@@ -23,10 +35,10 @@ namespace Blackboard.Core.Nodes.Inner {
         private IValueParent<T> source;
 
         /// <summary>Creates a latching value node.</summary>
-        /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="trigger">This is the parent that indicates the value should be set.</param>
         /// <param name="source">This is the parent to get the value from when the other is provoked.</param>
-        public Latch(ITriggerParent trigger = null, IValueParent<T> source = null) {
+        /// <param name="value">The initial value for this node.</param>
+        public Latch(ITriggerParent trigger = null, IValueParent<T> source = null, T value = default) : base(value) {
             this.Trigger = trigger;
             this.Source = source;
         }
@@ -48,6 +60,11 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.trigger, this.source);
+
+        /// <summary>This sets the value of this node.</summary>
+        /// <param name="value">The value to set.</param>
+        /// <returns>True if the value has changed, false otherwise.</returns>
+        public bool SetValue(T value) => this.UpdateValue(value);
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>

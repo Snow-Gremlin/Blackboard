@@ -12,6 +12,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="T2">The type of the second parent's value for this node.</typeparam>
     /// <typeparam name="T3">The type of the third parent's value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
+    /// <see cref="https://en.wikipedia.org/wiki/Arity#Ternary"/>
     public abstract class TernaryValue<T1, T2, T3, TResult>: ValueNode<TResult>, IChild
         where T1 : IData
         where T2 : IData
@@ -34,7 +35,6 @@ namespace Blackboard.Core.Nodes.Bases {
         private IValueParent<T3> source3;
 
         /// <summary>Creates a ternary value node.</summary>
-        /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         /// <param name="source3">This is the third parent for the source value.</param>

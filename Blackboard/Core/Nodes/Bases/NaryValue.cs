@@ -10,6 +10,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <summary>This is a value node which has several parents as the source of the value.</summary>
     /// <typeparam name="TIn">The type of the all the parents' value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
+    /// <see cref="https://en.wikipedia.org/wiki/Arity#n-ary"/>
     public abstract class NaryValue<TIn, TResult>: ValueNode<TResult>, INaryChild<IValueParent<TIn>>
         where TIn : IData
         where TResult : IComparable<TResult> {
@@ -29,7 +30,6 @@ namespace Blackboard.Core.Nodes.Bases {
             this(parents as IEnumerable<IValueParent<TIn>>) { }
 
         /// <summary>Creates a N-ary value node.</summary>
-        /// <remarks>The value is updated right away so the default value may not be used.</remarks>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
         public NaryValue(IEnumerable<IValueParent<TIn>> parents = null, TResult value = default) : base(value) {

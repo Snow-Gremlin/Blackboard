@@ -1,8 +1,6 @@
 ﻿using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Blackboard.Core.Nodes.Outer {
 
@@ -35,16 +33,14 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Input";
 
-        /// <summary>Always returns no parents since inputs have no parent.</summary>
-        public override IEnumerable<IAdopter> Parents => Enumerable.Empty<IAdopter>();
-
-        /// <summary>This is set this trigger to emit during the next evaluation.</summary>
+        /// <summary>Provokes this trigger so that this node is provoked during the next evaluation.</summary>
+        /// <remarks>This is not intended to be called directly, it should be called via the driver.</remarks>
         /// <param name="value">True will provoke, false will reset the trigger.</param>
-        /// <remarks>This is not intended to be be called directly, it should be called via the driver.</remarks>
-        public void Provoke(bool value = true) => this.Provoked = value;
+        /// <returns>True if there was any change, false otherwise.</returns>
+        public bool Provoke(bool value = true) => this.UpdateProvoked(value);
 
         /// <summary>This updates the trigger during the an evaluation.</summary>
         /// <returns>This returns the provoked value as it currently is.</returns>
-        protected override bool UpdateTrigger() => this.Provoked;
+        protected override bool ShouldProvoke() => this.Provoked;
     }
 }

@@ -13,12 +13,6 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// <summary>Removes fields from this node by name if they exist.</summary>
         /// <param name="names">The names of the fields to remove.</param>
         /// <returns>True if the fields were removed, false otherwise.</returns>
-        public bool RemoveFields(params string[] names) =>
-            this.RemoveFields(names as IEnumerable<string>);
-
-        /// <summary>Removes fields from this node by name if they exist.</summary>
-        /// <param name="names">The names of the fields to remove.</param>
-        /// <returns>True if the fields were removed, false otherwise.</returns>
         public bool RemoveFields(IEnumerable<string> names);
     }
 }

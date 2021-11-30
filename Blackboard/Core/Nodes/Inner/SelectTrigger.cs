@@ -29,7 +29,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Updates the node's value, provoked state, and any other state.</summary>
         /// <remarks>Here we want to return if provoked and NOT if the provoke state has changed.</remarks>
         /// <returns>True indicates that the selected value has changed, false otherwise.</returns>
-        protected override bool Evaluate() {
+        public override bool Evaluate() {
             base.Evaluate();
             // It doesn't really matter to the value if this switches the selected node.
             // Even if the selection changes, if the state isn't provoked we don't want to indicate a change.

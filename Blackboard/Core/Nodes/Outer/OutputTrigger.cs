@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Bases;
+﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -7,26 +8,24 @@ using S = System;
 namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>This is a trigger which can be provoked from user output.</summary>
-    sealed public class OutputTrigger: TriggerNode, ITriggerOutput {
+    sealed public class OutputTrigger: TriggerNode, ITriggerOutput, IChild {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new Function<ITriggerAdopter, OutputTrigger>((ITriggerAdopter source) => new OutputTrigger(source));
+            new Function<ITriggerParent, OutputTrigger>((ITriggerParent source) => new OutputTrigger(source));
 
         /// <summary>The parent source to listen to.</summary>
-        private ITriggerAdopter source;
+        private ITriggerParent source;
 
         /// <summary>Creates a new output trigger.</summary>
         /// <param name="source">The initial source trigger to listen to.</param>
-        public OutputTrigger(ITriggerAdopter source = null) {
-            this.Parent = source;
-        }
+        public OutputTrigger(ITriggerParent source = null) => this.Parent = source;
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Output";
 
         /// <summary>The parent trigger node to listen to.</summary>
-        public ITriggerAdopter Parent {
+        public ITriggerParent Parent {
             get => this.source;
             set => this.SetParent(ref this.source, value);
         }
@@ -35,16 +34,20 @@ namespace Blackboard.Core.Nodes.Outer {
         public event S.EventHandler OnProvoked;
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public override IEnumerable<IAdopter> Parents => INode.NotNull(this.source);
+        public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.source);
 
         /// <summary>This updates the trigger during the an evaluation.</summary>
         /// <returns>This returns the provoked value as it currently is.</returns>
-        protected override bool UpdateTrigger() {
-            if (this.source.Provoked) {
-                this.OnProvoked?.Invoke(this, S.EventArgs.Empty);
-                return true;
-            }
-            return false;
+        protected override bool ShouldProvoke() =>
+            this.source is not null && this.source.Provoked;
+
+        /// <summary>Updates the node's provoked state.</summary>
+        /// <remarks>Here we want to return if provoked and NOT if the provoke state has changed.</remarks>
+        /// <returns>True indicates that the value has been provoked, false otherwise.</returns>
+        public override bool Evaluate() {
+            if (!base.Evaluate()) return false;
+            this.OnProvoked?.Invoke(this, S.EventArgs.Empty);
+            return true;
         }
     }
 }

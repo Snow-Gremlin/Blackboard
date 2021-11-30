@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Blackboard.Core.Extensions;
+using System.Collections.Generic;
 using System.Linq;
 using S = System;
 
@@ -65,7 +66,7 @@ namespace Blackboard.Core {
         /// <summary>Compares this match with another match.</summary>
         /// <remarks>
         /// This does not compare IsMatch since it is assumed only matching types will be compared.
-        /// This also assumes that the number of the type matches are te same in both function.
+        /// This also assumes that the number of the type matches are the same in both function.
         /// </remarks>
         /// <param name="other">The other match to compare with.</param>
         /// <returns>-1 if match if this is less than the other, 0 if they match, 1 if this is greater than the other.</returns>

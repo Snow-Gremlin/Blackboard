@@ -34,7 +34,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>Updates the node's provoked state.</summary>
         /// <returns>True indicates that the value has changed, false otherwise.</returns>
-        protected override bool Evaluate() {
+        public override bool Evaluate() {
             T prev = this.Value;
             if (!base.Evaluate()) return false;
             this.OnChanged?.Invoke(this, new OutputValueEventArgs<T>(prev, this.Value));

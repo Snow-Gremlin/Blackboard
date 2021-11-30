@@ -1,6 +1,7 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
-using System.IO;
+﻿using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Blackboard.Core {
@@ -22,10 +23,7 @@ namespace Blackboard.Core {
 
         /// <summary>The stringifier for converting nodes to strings.</summary>
         public Stringifier Stringifier {
-            get {
-                this.stringifier ??= Stringifier.Shallow();
-                return this.stringifier;
-            }
+            get => this.stringifier ??= Stringifier.Shallow();
             set => this.stringifier = value;
         }
 
@@ -48,14 +46,15 @@ namespace Blackboard.Core {
 
         /// <summary>This is called when a node is about to be evaluated.</summary>
         /// <param name="node">The node about to be evaluated.</param>
-        virtual public void Eval(IEvaluatable node) { }
+        virtual public void Eval(Evaluable node) { }
 
         /// <summary>This is called when a node has been evaluated.</summary>
         /// <param name="node">The node that was just evaluated.</param>
-        /// <param name="children">The resulting children from the evaluation.</param>
+        /// <param name="changed">True if the evaluation was changed or provoked, false otherwise.</param>
+        /// <param name="children">The resulting children from the evaluation or null if not changed.</param>
         /// <remarks>By default this will not log anything.</remarks>
-        virtual public void EvalResult(IEvaluatable node, IEnumerable<INode> children) =>
-            this.Log("  Eval(" + node.Depth + "): " + this.Stringifier.Stringify(node));
+        virtual public void EvalResult(Evaluable node, bool changed, IEnumerable<INode> children = null) =>
+            this.Log("  Evaluate(" + node.Depth + "): " + this.Stringifier.Stringify(node) + " => " + changed);
 
         /// <summary>This will get the logs.</summary>
         /// <returns>The logs which have been written.</returns>

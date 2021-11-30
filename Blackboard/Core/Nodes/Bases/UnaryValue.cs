@@ -26,8 +26,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>Creates a unary value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        public UnaryValue(IValueParent<T1> source = null) =>
-            this.SetParent(ref this.source, source);
+        public UnaryValue(IValueParent<T1> source = null) => this.Parent = source;
 
         /// <summary>The parent node to get the source value from.</summary>
         public IValueParent<T1> Parent {

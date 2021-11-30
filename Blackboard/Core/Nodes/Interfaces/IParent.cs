@@ -16,22 +16,8 @@ namespace Blackboard.Core.Nodes.Interfaces {
         public IEnumerable<IChild> Children { get; }
 
         /// <summary>Adds children nodes onto this node.</summary>
-        /// <remarks>
-        /// Any children which are added need to be put in the touched list
-        /// of the driver so that they will be evaluated in the next batch.
-        /// </remarks>
-        /// <param name="children">The children to add.</param>
-        public void AddChildren(params IChild[] children) =>
-            this.AddChildren(children as IEnumerable<IChild>);
-
-        /// <summary>Adds children nodes onto this node.</summary>
         /// <param name="children">The children to add.</param>
         public void AddChildren(IEnumerable<IChild> children);
-
-        /// <summary>Removes all the given children from this node if they exist.</summary>
-        /// <param name="children">The children to remove.</param>
-        public void RemoveChildren(params IChild[] children) =>
-            this.RemoveChildren(children as IEnumerable<IChild>);
 
         /// <summary>Removes all the given children from this node if they exist.</summary>
         /// <param name="children">The children to remove.</param>

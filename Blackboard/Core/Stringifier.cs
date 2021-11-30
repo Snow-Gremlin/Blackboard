@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using S = System;
@@ -108,7 +109,7 @@ namespace Blackboard.Core {
         /// <param name="showParents">Indicates that parents/arguments should be outputted.</param>
         /// <param name="showTailingNodes">Indicates that fields and function definitions should be outputted.</param>
         /// <param name="showFuncs">Indicates that functions should be outputted.</param>
-        /// <param name="depth">The number of parent nodes to decend into to output.</param>
+        /// <param name="depth">The number of parent nodes to descend into to output.</param>
         /// <param name="indent">The string to indent with.</param>
         public Stringifier(
             bool showDataType        = true,
@@ -156,7 +157,7 @@ namespace Blackboard.Core {
         /// <summary>Indicates that functions should be outputted.</summary>
         public bool ShowFuncs;
         
-        /// <summary>The number of parent nodes to decend into to output.</summary>
+        /// <summary>The number of parent nodes to descend into to output.</summary>
         public int Depth;
 
         /// <summary>The amount to indent newlines.</summary>
@@ -238,7 +239,7 @@ namespace Blackboard.Core {
 
         /// <summary>Gets the data type of the node.</summary>
         /// <param name="node">The node to get the data type of.</param>
-        /// <returns>The stringfor the data type.</returns>
+        /// <returns>The string for the data type.</returns>
         private string nodeDataType(INode node) =>
             !this.ShowDataType ? "" :
             node switch {
@@ -250,7 +251,7 @@ namespace Blackboard.Core {
 
         /// <summary>Gets the data type of the function definition.</summary>
         /// <param name="node">The function definition to get the data type of.</param>
-        /// <returns>The stringfor the data type.</returns>
+        /// <returns>The string for the data type.</returns>
         static private string nodeDataType(IFuncDef node) {
             string inputTypes = "";
             if (node.ArgumentTypes.Count > 0) {
@@ -265,11 +266,11 @@ namespace Blackboard.Core {
         /// <param name="node">The node to get the data value of.</param>
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <param name="first">Indicates this is a first node.</param>
-        /// <returns>The stringfor the data value.</returns>
+        /// <returns>The string for the data value.</returns>
         private string nodeDataValue(INode node, int depth, bool first) =>
             !this.ShowAllDataValues &&
             (!this.ShowFirstDataValues || !first) &&
-            (!this.ShowLastDataValues || (depth > 1 && node.Parents.Any())) ? "" :
+            (!this.ShowLastDataValues || (depth > 1 && node is IChild child && child.Parents.Any())) ? "" :
             node switch {
                 IDataNode => "[" + (node as IDataNode).Data.ValueString + "]",
                 ITrigger  => ((node as ITrigger).Provoked ? "[provoked]" : ""),
@@ -281,10 +282,10 @@ namespace Blackboard.Core {
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <returns>The string for the parents of the given node.</returns>
         private string parents(INode node, int depth) =>
-            !this.ShowParents || depth <= 1 || !node.Parents.Any() ? "" :
+            !this.ShowParents || depth <= 1 || node is not IChild child || !child.Parents.Any() ? "" :
             node switch {
                 IFuncDef => "",
-                _        => "(" + this.stringNode(node.Parents, depth-1, true, false) + ")",
+                _        => "(" + this.stringNode(child.Parents, depth-1, true, false) + ")",
             };
 
         /// <summary>Gets a string for the tailing nodes.</summary>
@@ -304,18 +305,18 @@ namespace Blackboard.Core {
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <returns>The string containing the tailing nodes.</returns>
         private string tailingNodes(IFuncGroup node, int depth) {
-            if (!node.Children.Any()) return "";
+            if (!node.Definitions.Any()) return "";
             if (!this.ShowFuncs || depth <= 1) return "{...}";
             string nl = S.Environment.NewLine;
 
-            string tail = node.Children.Select(def =>
+            string tail = node.Definitions.Select(def =>
                 this.stringNode(def, depth-1, false, false).Trim().Replace(nl, nl + this.Indent)).
                 Join("," + nl + this.Indent);
 
             return "{" + nl + this.Indent + tail + nl + "}";
         }
 
-        /// <summary>Gets the all the feild nodes for the field reader.</summary>
+        /// <summary>Gets the all the field nodes for the field reader.</summary>
         /// <param name="node">The field reader to get the tailing nodes from.</param>
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <returns>The string containing the tailing nodes.</returns>

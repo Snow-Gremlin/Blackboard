@@ -32,7 +32,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// When the value has changed all the children are returned from the evaluation,
         /// otherwise no children are returned.
         /// </returns>
-        protected abstract bool Evaluate();
+        public abstract bool Evaluate();
 
         /// <summary>The set of children nodes to this node in the graph.</summary>
         public IEnumerable<IChild> Children => this.children;

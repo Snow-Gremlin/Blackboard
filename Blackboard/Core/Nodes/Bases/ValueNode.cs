@@ -37,6 +37,6 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>Updates the node's provoked state.</summary>
         /// <returns>True indicates that the value has been changed, false otherwise.</returns>
-        protected override bool Evaluate() => this.UpdateValue(this.CalcuateValue());
+        public override bool Evaluate() => this.UpdateValue(this.CalcuateValue());
     }
 }

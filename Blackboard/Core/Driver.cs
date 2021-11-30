@@ -1,10 +1,13 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
+using System.Linq;
 using S = System;
 
 namespace Blackboard.Core {
@@ -19,14 +22,14 @@ namespace Blackboard.Core {
         public const string OperatorNamespace = "$operators";
 
         /// <summary>The input nodes which have been modified.</summary>
-        private List<IEvaluatable> touched;
+        private LinkedList<Evaluable> touched;
 
         /// <summary>Creates a new driver.</summary>
         /// <param name="addFuncs">Indicates that built-in functions should be added.</param>
         /// <param name="addConsts">Indicates that constants should be added.</param>
         public Driver(bool addFuncs = true, bool addConsts = true) {
-            this.touched = new List<IEvaluatable>();
-            this.Global = new Namespace();
+            this.touched = new LinkedList<Evaluable>();
+            this.Global  = new Namespace();
 
             this.addOperators();
             if (addFuncs)  this.addFunctions();
@@ -116,10 +119,7 @@ namespace Blackboard.Core {
                 BitwiseOr<Int>.Factory,
                 Any.Factory);
             add("power",
-                Power<Double>.Factory);
-            add("remainder",
-                Rem<Int>.Factory,
-                Rem<Double>.Factory);
+                BinaryDoubleMath<Double>.Pow);
             add("shiftLeft",
                 LeftShift<Int>.Factory);
             add("shiftRight",
@@ -131,10 +131,12 @@ namespace Blackboard.Core {
                 Sum<Int>.Factory(),
                 Sum<Double>.Factory(),
                 Sum<String>.Factory(true));
-            add("trinary",
-                Select<Bool>.Factory,
-                Select<Int>.Factory,
-                Select<Double>.Factory);
+            add("ternary",
+                SelectValue<Bool>.Factory,
+                SelectValue<Int>.Factory,
+                SelectValue<Double>.Factory,
+                SelectValue<String>.Factory,
+                SelectTrigger.Factory);
             add("xor",
                 Xor.Factory,
                 BitwiseXor<Int>.Factory,
@@ -150,9 +152,9 @@ namespace Blackboard.Core {
                 Abs<Int>.Factory,
                 Abs<Double>.Factory);
             add("acos",
-                DoubleMath1<Double>.Acos);
+                UnaryDoubleMath<Double>.Acos);
             add("acosh",
-                DoubleMath1<Double>.Acosh);
+                UnaryDoubleMath<Double>.Acosh);
             add("all",
                 All.Factory);
             add("and",
@@ -161,31 +163,33 @@ namespace Blackboard.Core {
             add("any",
                 Any.Factory);
             add("asin",
-                DoubleMath1<Double>.Asin);
+                UnaryDoubleMath<Double>.Asin);
             add("asinh",
-                DoubleMath1<Double>.Asinh);
+                UnaryDoubleMath<Double>.Asinh);
             add("atan",
-                Atan2<Double>.Factory,
-                DoubleMath1<Double>.Atan);
+                BinaryDoubleMath<Double>.Atan2,
+                UnaryDoubleMath<Double>.Atan);
             add("atanh",
-                DoubleMath1<Double>.Atanh);
+                UnaryDoubleMath<Double>.Atanh);
             add("average",
                 Average.Factory);
             add("cbrt",
-                DoubleMath1<Double>.Cbrt);
+                UnaryDoubleMath<Double>.Cbrt);
             add("ceiling",
-                DoubleMath1<Double>.Ceiling);
+                UnaryDoubleMath<Double>.Ceiling);
             add("clamp",
                 Clamp<Int>.Factory,
                 Clamp<Double>.Factory);
             add("cos",
-                DoubleMath1<Double>.Cos);
+                UnaryDoubleMath<Double>.Cos);
             add("cosh",
-                DoubleMath1<Double>.Cosh);
+                UnaryDoubleMath<Double>.Cosh);
             add("exp",
-                DoubleMath1<Double>.Exp);
+                UnaryDoubleMath<Double>.Exp);
+            add("epsilon",
+                EpsilonEqual<Double>.Factory);
             add("floor",
-                DoubleMath1<Double>.Floor);
+                UnaryDoubleMath<Double>.Floor);
             add("implies",
                 Implies.Factory);
             add("latch",
@@ -196,12 +200,12 @@ namespace Blackboard.Core {
             add("lerp",
                 Lerp<Double>.Factory);
             add("log",
-                DoubleMath1<Double>.Log,
-                Log<Double>.Factory);
+                BinaryDoubleMath<Double>.Log,
+                UnaryDoubleMath<Double>.Log);
             add("log10",
-                DoubleMath1<Double>.Log10);
+                UnaryDoubleMath<Double>.Log10);
             add("log2",
-                DoubleMath1<Double>.Log2);
+                UnaryDoubleMath<Double>.Log2);
             add("max",
                 Max<Int>.Factory,
                 Max<Double>.Factory);
@@ -225,30 +229,36 @@ namespace Blackboard.Core {
                 BitwiseOr<Int>.Factory,
                 Or.Factory);
             add("round",
-                DoubleMath1<Double>.Round,
+                UnaryDoubleMath<Double>.Round,
                 Round<Double>.Factory);
+            add("select",
+                SelectValue<Bool>.Factory,
+                SelectValue<Int>.Factory,
+                SelectValue<Double>.Factory,
+                SelectValue<String>.Factory,
+                SelectTrigger.Factory);
             add("sin",
-                DoubleMath1<Double>.Sin);
+                UnaryDoubleMath<Double>.Sin);
             add("sinh",
-                DoubleMath1<Double>.Sinh);
+                UnaryDoubleMath<Double>.Sinh);
             add("sqrt",
-                DoubleMath1<Double>.Sqrt);
+                UnaryDoubleMath<Double>.Sqrt);
             add("sum",
                 Sum<Int>.Factory(),
                 Sum<Double>.Factory(),
                 Sum<String>.Factory(true));
             add("tan",
-                DoubleMath1<Double>.Tan);
+                UnaryDoubleMath<Double>.Tan);
             add("tanh",
-                DoubleMath1<Double>.Tanh);
+                UnaryDoubleMath<Double>.Tanh);
             add("trunc",
-                DoubleMath1<Double>.Truncate);
+                UnaryDoubleMath<Double>.Truncate);
             add("xor",
                 BitwiseXor<Int>.Factory,
                 Xor.Factory);
         }
 
-        /// <summary>This adds all the initial constanst for Blackboard.</summary>
+        /// <summary>This adds all the initial constants for Blackboard.</summary>
         private void addConstants() {
             void add(string name, double value) =>
                 this.Global[name] = Literal.Double(value);
@@ -318,12 +328,17 @@ namespace Blackboard.Core {
         }
 
         /// <summary>Sets the value of the given input node.</summary>
-        /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
+        /// <remarks>
+        /// This will not cause an evaluation right away.
+        /// If the value is changed, then the children of this node will be touched
+        /// so that they are pending for the next evaluation.
+        /// </remarks>
         /// <typeparam name="T">The type of value to set.</typeparam>
         /// <param name="input">The input node to set the value of.</param>
         /// <param name="value">The value to set to the given input.</param>
         public void SetValue<T>(T value, IValueInput<T> input) where T : IData {
-            if (input.SetValue(value)) this.touched.Add(input);
+            if (input.SetValue(value))
+                this.Touch(input.Children.NotNull().OfType<Evaluable>());
         }
 
         #endregion
@@ -347,10 +362,15 @@ namespace Blackboard.Core {
         }
 
         /// <summary>This will provoke the given trigger node.</summary>
+        /// <remarks>
+        /// This will not cause an evaluation right away.
+        /// If the value is changed, then the children of this node will be touched
+        /// so that they are pending for the next evaluation.
+        /// </remarks>
         /// <param name="input">The input trigger node to provoke.</param>
         public void Provoke(ITriggerInput input) {
-            input.Provoke();
-            this.touched.Add(input);
+            if (input.Provoke())
+                this.Touch(input.Children.NotNull().OfType<Evaluable>());
         }
 
         /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
@@ -368,7 +388,7 @@ namespace Blackboard.Core {
         #endregion
         #region Value Getters...
 
-        /// <summary>Gets the type of the value or trigger at te given node.</summary>
+        /// <summary>Gets the type of the value or trigger at the given node.</summary>
         /// <param name="names">The name of the node to get the type of.</param>
         /// <returns>The type of the node or null if doesn't exist or not a node type.</returns>
         public Type GetType(IEnumerable<string> names) {
@@ -430,9 +450,14 @@ namespace Blackboard.Core {
         public T GetValue<T>(IEnumerable<string> names) where T : IData {
             object obj = this.Global.Find(names);
             return obj is null ?
-                    throw Exceptions.NoValueFoundByNames(names) :
+                    throw new Exception("Unable to get a value by the given name.").
+                        With("Name", names.Join(".")).
+                        With("Value Type", typeof(T)) :
                 obj is not IValue<T> node ?
-                    throw Exceptions.UnableToCastValueAsRequested(names, obj.GetType(), typeof(T)) :
+                    throw new Exception("The value found by the given name is not the expected type.").
+                        With("Name", names.Join(".")).
+                        With("Found Type", obj.GetType()).
+                        With("Expected Type", typeof(T)) :
                 node.Value;
         }
 
@@ -443,26 +468,34 @@ namespace Blackboard.Core {
 
         /// <summary>This touches the given nodes so that they are recalculated during evaluation.</summary>
         /// <param name="nodes">The nodes to touch.</param>
-        public void Touch(IEnumerable<IEvaluatable> nodes) => this.touched.AddRange(nodes);
+        public void Touch(params Evaluable[] nodes) => this.Touch(nodes as IEnumerable<Evaluable>);
+
+        /// <summary>This touches the given nodes so that they are recalculated during evaluation.</summary>
+        /// <param name="nodes">The nodes to touch.</param>
+        public void Touch(IEnumerable<Evaluable> nodes) => this.touched.SortInsertUnique(nodes.NotNull());
 
         /// <summary>This indicates if any changes are pending evaluation.</summary>
         public bool HasPending => this.touched.Count > 0;
 
-        /// <summary>Updates and propogates the changes from the given inputs through the blackboard nodes.</summary>
+        /// <summary>Updates and propagates the changes from the given inputs through the blackboard nodes.</summary>
         /// <param name="logger">An optional logger for debugging this evaluation.</param>
         public void Evaluate(EvalLogger logger = null) {
-            LinkedList<IEvaluatable> pending = new();
+            LinkedList<Evaluable> pending = new();
             LinkedList<ITrigger> needsReset = new();
-            pending.SortInsertUniqueEvaluatable(this.touched);
+            pending.SortInsertUnique(this.touched);
             this.touched.Clear();
             logger?.StartEval(pending);
 
             while (pending.Count > 0) {
-                IEvaluatable node = pending.TakeFirst();
-                logger?.Eval(node);
-                IEnumerable<IEvaluatable> children = node.Eval();
-                logger?.EvalResult(node, children);
-                pending.SortInsertUniqueEvaluatable(children);
+                Evaluable node = pending.TakeFirst();
+
+                logger?.Eval(node);               
+                if (node.Evaluate()) {
+                    IEnumerable<Evaluable> children = node.Children.NotNull().OfType<Evaluable>();
+                    logger?.EvalResult(node, true, children);
+                    pending.SortInsertUnique(children);
+                } else logger?.EvalResult(node, false);
+
                 if (node is ITrigger trigger && trigger.Provoked)
                     needsReset.AddLast(trigger);
             }

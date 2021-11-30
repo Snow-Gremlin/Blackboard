@@ -15,7 +15,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>This is a helper for creating a select node factories quickly.</summary>
         /// <param name="handle">The handler for calling the node constructor.</param>
-        static public IFuncDef CreateFactory<Tout>(S.Func<IValueParent<Bool>, T, T, Tout> handle)
+        static protected IFuncDef CreateFactory<Tout>(S.Func<IValueParent<Bool>, T, T, Tout> handle)
             where Tout : Select<T> => new Function<IValueParent<Bool>, T, T, Tout>(handle);
 
         /// <summary>This is the test node to read the select state from.</summary>
@@ -32,9 +32,9 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="left">This is the second parent to select when the test boolean is true.</param>
         /// <param name="right">This is the third parent to select when the test boolean is false.</param>
         public Select(IValueParent<Bool> test = null, T left = null, T right = null) {
-            this.SetParent(ref this.source1, test);
-            this.SetParent(ref this.source2, left);
-            this.SetParent(ref this.source3, right);
+            this.Parent1 = test;
+            this.Parent2 = left;
+            this.Parent3 = right;
             this.Selected = null;
         }
 
@@ -65,7 +65,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Updates the node's value, provoked state, and any other state.</summary>
         /// <remarks>This should be overridden by the inheriting class so that the results can be further tracked.</remarks>
         /// <returns>True indicates that the selected node has changed, false otherwise.</returns>
-        protected override bool Evaluate() {
+        public override bool Evaluate() {
             T newSelected = this.source1.Value.Value ? this.source2 : this.source3;
             if (ReferenceEquals(this.Selected, newSelected)) return false;
             this.Selected = newSelected;

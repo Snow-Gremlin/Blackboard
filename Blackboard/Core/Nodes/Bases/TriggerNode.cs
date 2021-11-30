@@ -33,6 +33,6 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Updates the node's provoked state.</summary>
         /// <remarks>Here we want to return if provoked and NOT if the provoke state has changed.</remarks>
         /// <returns>True indicates that the value has been provoked, false otherwise.</returns>
-        protected override bool Evaluate() => this.Provoked = this.ShouldProvoke();
+        public override bool Evaluate() => this.Provoked = this.ShouldProvoke();
     }
 }

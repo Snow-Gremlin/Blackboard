@@ -22,25 +22,5 @@ namespace Blackboard.Core.Nodes.Interfaces {
 
         /// <summary>Gets all the fields and their names in this reader.</summary>
         public IEnumerable<KeyValuePair<string, INode>> Fields { get; }
-
-        /// <summary>Finds the node at the given path.</summary>
-        /// <param name="names">The names to the node to find.</param>
-        /// <returns>The node at the end of the path or null.</returns>
-        public INode Find(params string[] names) =>
-            this.Find(names as IEnumerable<string>);
-
-        /// <summary>Finds the node at the given path.</summary>
-        /// <param name="names">The names to the node to find.</param>
-        /// <returns>The node at the end of the path or null.</returns>
-        public INode Find(IEnumerable<string> names) {
-            INode cur = this;
-            foreach (string name in names) {
-                if (cur is IFieldReader scope) {
-                    if (!scope.ContainsField(name)) return null;
-                    cur = scope.ReadField(name);
-                } else return null;
-            }
-            return cur;
-        }
     }
 }

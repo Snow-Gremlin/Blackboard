@@ -35,11 +35,11 @@ namespace Blackboard.Core {
         /// <returns>This new implicit cast type match.</returns>
         static public TypeMatch Implicit(int steps) => new(Kind.Implicit, steps);
 
-        /// <summary>Indicates there is an explict cast non-match for this type.</summary>
-        /// <returns>This new explict cast type non-match.</returns>
+        /// <summary>Indicates there is an explicit cast non-match for this type.</summary>
+        /// <returns>This new explicit cast type non-match.</returns>
         static public TypeMatch Explicit() => new(Kind.Explicit, 0);
 
-        /// <summary>True if a cast was neeeded, false if inheritance.</summary>
+        /// <summary>True if a cast was needed, false if inheritance.</summary>
         private readonly Kind matchKind;
 
         /// <summary>The number of inheritance steps away needed.</summary>

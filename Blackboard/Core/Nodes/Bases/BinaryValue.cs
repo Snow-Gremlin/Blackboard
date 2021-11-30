@@ -33,8 +33,8 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         public BinaryValue(IValueParent<T1> source1 = null, IValueParent<T2> source2 = null) {
-            this.SetParent(ref this.source1, source1);
-            this.SetParent(ref this.source2, source2);
+            this.Parent1 = source1;
+            this.Parent2 = source2;
         }
 
         /// <summary>The first parent node to get the first source value from.</summary>

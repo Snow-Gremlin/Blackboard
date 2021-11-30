@@ -74,7 +74,7 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Determines if the this value is negative.</summary>
         /// <returns>True if below zero, false if zero or more.</returns>
-        public bool IsNegative() => new(this.Value < 0);
+        public bool IsNegative() => this.Value < 0;
 
         #endregion
         #region Bitwise Math...

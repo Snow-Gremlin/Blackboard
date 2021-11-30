@@ -1,9 +1,13 @@
-﻿using S = System;
+﻿using System.Collections.Generic;
+using S = System;
 
 namespace Blackboard.Core.Nodes.Interfaces {
 
     /// <summary>The interface for a collection of function factories.</summary>
     public interface IFuncGroup: INode {
+
+        /// <summary>Gets the full list of function definitions in this group.</summary>
+        public IEnumerable<IFuncDef> Definitions { get; }
 
         /// <summary>Finds and returns the best matching function in this collection.</summary>
         /// <param name="types">The input types to match against the function signatures with.</param>

@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,15 +16,13 @@ namespace Blackboard.Core.Nodes.Functions {
 
         /// <summary>Creates a new function collection.</summary>
         /// <param name="defs">The function definitions to initially add.</param>
-        public FuncGroup(params IFuncDef[] defs) {
+        public FuncGroup(params IFuncDef[] defs) =>
             this.defs = new List<IFuncDef>(defs);
-        }
 
         /// <summary>Creates a new function collection.</summary>
         /// <param name="defs">The function definitions to initially add.</param>
-        public FuncGroup(IEnumerable<IFuncDef> defs) {
+        public FuncGroup(IEnumerable<IFuncDef> defs) =>
             this.defs = new List<IFuncDef>(defs);
-        }
 
         /// <summary>This is the type name of the node.</summary>
         public string TypeName => "FuncGroup";
@@ -38,9 +37,8 @@ namespace Blackboard.Core.Nodes.Functions {
 
         /// <summary>Adds function definitions onto this group.</summary>
         /// <param name="defs">The function definitions to add.</param>
-        public void AddDefs(IEnumerable<IFuncDef> defs) {
+        public void AddDefs(IEnumerable<IFuncDef> defs) =>
             this.defs.AddRange(defs.NotNull().WhereNot(this.defs.Contains));
-        }
 
         /// <summary>Removes all the given function definitions from this node if they exist.</summary>
         /// <param name="defs">The function definitions to remove.</param>

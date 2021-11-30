@@ -6,7 +6,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>A dictionary for containing named objects.</summary>
-    sealed public class Namespace: INode, IFieldReader, IFieldWriter {
+    sealed public class Namespace: IFieldReader, IFieldWriter {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =

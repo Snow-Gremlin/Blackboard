@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
@@ -20,18 +19,6 @@ namespace Blackboard.Core.Nodes.Outer {
         /// </summary>
         static public readonly IFuncDef FactoryWithInitialValue =
             new Function<IValue<T>, InputValue<T>>((IValue<T> node) => new InputValue<T>(node.Value));
-
-        /// <summary>
-        /// This is a function to assign a value to the input node.
-        /// This will return the input node on success, or null if value could not be cast.
-        /// </summary>
-        static public readonly IFuncDef Assign =
-            new Function<InputValue<T>, IDataNode, InputValue<T>>((InputValue<T> input, IDataNode node) => {
-                T value = node.Data.ImplicitCastTo<T>();
-                if (value is null) return null;
-                input.SetValue(value);
-                return input;
-            });
 
         /// <summary>Creates a new input value node.</summary>
         /// <param name="value">The initial value for this node.</param>

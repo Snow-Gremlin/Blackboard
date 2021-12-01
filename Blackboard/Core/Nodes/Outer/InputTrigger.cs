@@ -15,16 +15,6 @@ namespace Blackboard.Core.Nodes.Outer {
         static public readonly IFuncDef FactoryWithInitialValue =
             new Function<ITrigger, InputTrigger>((ITrigger node) => new InputTrigger(node.Provoked));
 
-        /// <summary>
-        /// This is a function to assign (provoke or not) to the input trigger.
-        /// This will return the input node.
-        /// </summary>
-        static public readonly IFuncDef Assign =
-            new Function<InputTrigger, ITrigger, InputTrigger>((InputTrigger input, ITrigger node) => {
-                input.Provoke(node.Provoked);
-                return input;
-            });
-
         /// <summary>Creates a new input trigger.</summary>
         /// <param name="provoked">The initial provoked state of the trigger.</param>
         public InputTrigger(bool provoked = false) :

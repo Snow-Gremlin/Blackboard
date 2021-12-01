@@ -337,8 +337,7 @@ namespace Blackboard.Core {
         /// <param name="input">The input node to set the value of.</param>
         /// <param name="value">The value to set to the given input.</param>
         public void SetValue<T>(T value, IValueInput<T> input) where T : IData {
-            if (input.SetValue(value))
-                this.Touch(input.Children.NotNull().OfType<Evaluable>());
+            if (input.SetValue(value)) this.Touch(input.Children);
         }
 
         #endregion
@@ -369,8 +368,7 @@ namespace Blackboard.Core {
         /// </remarks>
         /// <param name="input">The input trigger node to provoke.</param>
         public void Provoke(ITriggerInput input) {
-            if (input.Provoke())
-                this.Touch(input.Children.NotNull().OfType<Evaluable>());
+            if (input.Provoke()) this.Touch(input.Children);
         }
 
         /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
@@ -468,11 +466,11 @@ namespace Blackboard.Core {
 
         /// <summary>This touches the given nodes so that they are recalculated during evaluation.</summary>
         /// <param name="nodes">The nodes to touch.</param>
-        public void Touch(params Evaluable[] nodes) => this.Touch(nodes as IEnumerable<Evaluable>);
+        public void Touch(params INode[] nodes) => this.Touch(nodes as IEnumerable<INode>);
 
         /// <summary>This touches the given nodes so that they are recalculated during evaluation.</summary>
         /// <param name="nodes">The nodes to touch.</param>
-        public void Touch(IEnumerable<Evaluable> nodes) => this.touched.SortInsertUnique(nodes.NotNull());
+        public void Touch(IEnumerable<INode> nodes) => this.touched.SortInsertUnique(nodes.NotNull().OfType<Evaluable>());
 
         /// <summary>This indicates if any changes are pending evaluation.</summary>
         public bool HasPending => this.touched.Count > 0;

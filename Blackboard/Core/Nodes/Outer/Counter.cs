@@ -8,25 +8,13 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>Provides a node which can be used to count trigger events.</summary>
-    sealed public class Counter<T>: ValueNode<T>, IChild
+    sealed public class Counter<T>: ValueNode<T>, IValueInput<T>, IChild
         where T : IArithmetic<T>, IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <remarks>This will not initialize any sources except increment, the others can be set later.</remarks>
         static public readonly IFuncDef Factory =
             new Function<ITriggerParent, Counter<T>>((ITriggerParent increment) => new Counter<T>(increment));
-
-        /// <summary>
-        /// This is a function to assign a value to the counter node directly.
-        /// This will return the counter node on success, or null if value could not be cast.
-        /// </summary>
-        static public readonly IFuncDef Assign =
-            new Function<Counter<T>, IDataNode, Counter<T>>((Counter<T> input, IDataNode node) => {
-                T value = node.Data.ImplicitCastTo<T>();
-                if (value is null) return null;
-                input.SetValue(value);
-                return input;
-            });
 
         /// <summary>This is the parent to increment the counter.</summary>
         private ITriggerParent increment;

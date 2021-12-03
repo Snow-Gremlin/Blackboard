@@ -6,7 +6,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>A dictionary for containing named objects.</summary>
-    sealed public class Namespace: IFieldReader, IFieldWriter {
+    sealed public class Namespace: IFieldWriter {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
@@ -22,9 +22,6 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>This is the type name of the node.</summary>
         public string TypeName => "Namespace";
-
-        /// <summary>The set of children nodes to this node in the graph.</summary>
-        public IEnumerable<INode> Children => this.fields.Values;
 
         /// <summary>Gets or sets the field in this namespace.</summary>
         /// <param name="name">The name of the field.</param>

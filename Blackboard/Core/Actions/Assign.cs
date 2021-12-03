@@ -10,10 +10,10 @@ namespace Blackboard.Core.Actions {
         where T : IData {
 
         /// <summary>The target input node to set the value of.</summary>
-        private IValueInput<T> target;
+        private readonly IValueInput<T> target;
 
         /// <summary>The data node to get the data to assign.</summary>
-        private IDataNode value;
+        private readonly IDataNode value;
 
         /// <summary>Creates a new assignment.</summary>
         /// <remarks>

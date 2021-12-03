@@ -70,7 +70,7 @@ namespace Blackboard.Parser {
         /// <returns>The formula for performing the parsed actions.</returns>
         private Formula read(PP.ParseTree.ITreeNode node) {
             try {
-                FormulaBuilder stacks = new(this.driver);
+                Builder stacks = new(this.driver);
                 node.Process(this.prompts, stacks);
                 return stacks.ToFormula();
             } catch (S.Exception ex) {
@@ -147,9 +147,9 @@ namespace Blackboard.Parser {
         /// <summary>This adds a handler for the given name.</summary>
         /// <param name="name">This is the name of the prompt this handler is for.</param>
         /// <param name="hndl">This is the handler to call on this prompt.</param>
-        private void addHandler(string name, S.Action<FormulaBuilder> hndl) =>
+        private void addHandler(string name, S.Action<Builder> hndl) =>
             this.prompts[name] = (PP.ParseTree.PromptArgs args) =>
-                hndl(args as FormulaBuilder);
+                hndl(args as Builder);
 
         /// <summary>This adds a prompt for an operator handler.</summary>
         /// <param name="count">The number of values to pop off the stack for this function.</param>
@@ -157,7 +157,7 @@ namespace Blackboard.Parser {
         private void addProcess(int count, string name) {
             INode funcGroup = this.driver.Global.Find(Driver.OperatorNamespace, name);
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
-                FormulaBuilder builder = args as FormulaBuilder;
+                Builder builder = args as Builder;
                 PP.Scanner.Location loc = args.LastLocation;
                 IPrepper[] inputs = builder.PopPreppers(count);
                 builder.PushPrepper(new FuncPrep(loc, new NoPrep(funcGroup), inputs));
@@ -179,14 +179,14 @@ namespace Blackboard.Parser {
 
         /// <summary>This is called before each statement to prepare and clean up the parser.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleClear(FormulaBuilder builder) {
+        static private void handleClear(Builder builder) {
             builder.Tokens.Clear();
             builder.ClearStacks();
         }
 
         /// <summary>This is called when the namespace has openned.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePushNamespace(FormulaBuilder builder) {
+        static private void handlePushNamespace(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string name = builder.LastText;
             IWrappedNode scope = builder.CurrentScope;
@@ -210,12 +210,12 @@ namespace Blackboard.Parser {
 
         /// <summary>This is called when the namespace had closed.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePopNamespace(FormulaBuilder builder) =>
+        static private void handlePopNamespace(Builder builder) =>
             builder.PopScope();
 
         /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleNewTypeInputNoAssign(FormulaBuilder builder) {
+        static private void handleNewTypeInputNoAssign(Builder builder) {
             IdPrep target = builder.PopPrepper<IdPrep>();
             Type t = builder.PopType();
             PP.Scanner.Location loc = builder.LastLocation;
@@ -240,7 +240,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleNewTypeInputWithAssign(FormulaBuilder builder) {
+        static private void handleNewTypeInputWithAssign(Builder builder) {
             IPrepper value = builder.PopPrepper<IPrepper>();
             IdPrep target = builder.PopPrepper<IdPrep>();
             Type t = builder.PopType();
@@ -273,7 +273,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This creates a new input node and assigns it with an initial value.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleNewVarInputWithAssign(FormulaBuilder builder) {
+        static private void handleNewVarInputWithAssign(Builder builder) {
             IPrepper value = builder.PopPrepper<IPrepper>();
             IdPrep target = builder.PopPrepper<IdPrep>();
             PP.Scanner.Location loc = builder.LastLocation;
@@ -297,7 +297,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles defining a new typed named node.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleTypeDefine(FormulaBuilder builder) {
+        static private void handleTypeDefine(Builder builder) {
             IPrepper value = builder.PopPrepper<IPrepper>();
             IdPrep target = builder.PopPrepper<IdPrep>();
             Type t = builder.PopType();
@@ -336,7 +336,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles defining a new untyped named node.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleVarDefine(FormulaBuilder builder) {
+        static private void handleVarDefine(Builder builder) {
             IPrepper value = builder.PopPrepper<IPrepper>();
             IdPrep target = builder.PopPrepper<IdPrep>();
 
@@ -347,7 +347,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles when a trigger is provoked unconditionally.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleProvokeTrigger(FormulaBuilder builder) {
+        static private void handleProvokeTrigger(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             IdPrep target = builder.PopPrepper<IdPrep>();
             IPerformer targetPerf = target.Prepare(builder, false);
@@ -359,17 +359,17 @@ namespace Blackboard.Parser {
             builder.PushPrepper(valuePrep);
         }
 
-        static private void handleTypeGet(FormulaBuilder builder) {
+        static private void handleTypeGet(Builder builder) {
             // TODO: Implement
         }
 
-        static private void handleVarGet(FormulaBuilder builder) {
+        static private void handleVarGet(Builder builder) {
             // TODO: Implement
         }
 
         /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleConditionalProvokeTrigger(FormulaBuilder builder) {
+        static private void handleConditionalProvokeTrigger(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             IdPrep target  = builder.PopPrepper<IdPrep>();
             IPrepper value = builder.PopPrepper<IPrepper>();
@@ -393,7 +393,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles assigning the left value to the right value.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleAssignment(FormulaBuilder builder) {
+        static private void handleAssignment(Builder builder) {
             IPrepper value  = builder.PopPrepper<IPrepper>();
             IPrepper target = builder.PopPrepper<IPrepper>();
             PP.Scanner.Location loc = builder.LastLocation;
@@ -442,7 +442,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles performing a type cast of a node.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleCast(FormulaBuilder builder) {
+        static private void handleCast(Builder builder) {
             IPrepper value = builder.PopPrepper<IPrepper>();
             Type t = builder.PopType();
             PP.Scanner.Location loc = builder.LastLocation;
@@ -478,7 +478,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleMemberAccess(FormulaBuilder builder) {
+        static private void handleMemberAccess(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string name = builder.LastText;
             IPrepper receiver = builder.PopPrepper<IPrepper>();
@@ -488,7 +488,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles preparing for a method call.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleStartCall(FormulaBuilder builder) {
+        static private void handleStartCall(Builder builder) {
             IPrepper item = builder.PopPrepper<IPrepper>();
             PP.Scanner.Location loc = builder.LastLocation;
             builder.PushPrepper(new FuncPrep(loc, item));
@@ -496,7 +496,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles the end of a method call and creates the node for the method.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleAddArg(FormulaBuilder builder) {
+        static private void handleAddArg(Builder builder) {
             IPrepper arg = builder.PopPrepper<IPrepper>();
             FuncPrep func = builder.PopPrepper<FuncPrep>();
             func.Arguments.Add(arg);
@@ -505,7 +505,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePushId(FormulaBuilder builder) {
+        static private void handlePushId(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string name = builder.LastText;
 
@@ -514,7 +514,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePushBool(FormulaBuilder builder) {
+        static private void handlePushBool(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
 
@@ -530,7 +530,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles pushing a binary int literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePushBin(FormulaBuilder builder) {
+        static private void handlePushBin(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
 
@@ -546,7 +546,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles pushing an ocatal int literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePushOct(FormulaBuilder builder) {
+        static private void handlePushOct(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
 
@@ -562,7 +562,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles pushing a decimal int literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePushInt(FormulaBuilder builder) {
+        static private void handlePushInt(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
 
@@ -578,7 +578,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles pushing a hexadecimal int literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePushHex(FormulaBuilder builder) {
+        static private void handlePushHex(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText[2..];
 
@@ -594,7 +594,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles pushing a double literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePushDouble(FormulaBuilder builder) {
+        static private void handlePushDouble(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
 
@@ -610,7 +610,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles pushing a string literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePushString(FormulaBuilder builder) {
+        static private void handlePushString(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
 
@@ -626,7 +626,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This handles pushing a type onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePushType(FormulaBuilder builder) {
+        static private void handlePushType(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
 

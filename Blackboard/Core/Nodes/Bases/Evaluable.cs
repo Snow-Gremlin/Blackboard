@@ -38,6 +38,10 @@ namespace Blackboard.Core.Nodes.Bases {
         public IEnumerable<IChild> Children => this.children;
 
         /// <summary>Adds children nodes onto this node.</summary>
+        /// <remarks>
+        /// The parent will only keep a single copy of any child
+        /// even if the child uses the same parent for multiple inputs.
+        /// </remarks>
         /// <param name="children">The children to add.</param>
         public void AddChildren(IEnumerable<IChild> children) {
             if (this.CanReachAny(children.OfType<IParent>()))

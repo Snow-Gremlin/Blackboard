@@ -64,13 +64,19 @@ namespace Blackboard.Core.Extensions {
         /// <summary>
         /// Adding this node into the parents will make this node be automatically called when
         /// the parents are updated. This should be done if the node is part of a definition.
-        /// Do not do add if the node is only suppose to evaluate, that way we aren't updating what
+        /// Do not add to parents if the node is only suppose to evaluate, that way we aren't updating what
         /// we don't need to update and aren't constantly adding and removing children from parents.
         /// </summary>
         /// <param name="child">The child to add to the parents.</param>
         static public void AddToParents(this IChild child) {
             foreach (IParent parent in child.Parents) parent?.AddChildren(child);
         }
+
+        /// <summary>Checks if any parent doesn't contain this child.</summary>
+        /// <param name="child">The child to check.</param>
+        /// <returns>True if any parent doesn't contain this child, false otherwise.</returns>
+        static public bool NeedsToAddParents(this IChild child) =>
+            !child.Parents.All(parent => parent.Children.Contains(child));
 
         #endregion
         #region INaryChild...

@@ -13,9 +13,6 @@ namespace Blackboard.Core.Nodes.Outer {
     /// </remarks>
     sealed public class VirtualNode: IFieldWriter {
 
-        /// <summary>The receiver having children added or removed from it.</summary>
-        private readonly IFieldReader receiver;
-
         /// <summary>The overridden nodes for this receiver.</summary>
         /// <remarks>If the node value is null, then the node has been deleted.</remarks>
         private Dictionary<string, INode> overrides;
@@ -25,12 +22,15 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <param name="receiver">The receiver to virtually add and remove nodes from.</param>
         public VirtualNode(string name, IFieldReader receiver) {
             this.Name = name;
-            this.receiver = receiver;
+            this.Receiver = receiver;
             this.overrides = new Dictionary<string, INode>();
 
-            if (receiver is VirtualNode)
-                throw new Exception("May not construct a virtual node with a virtual node receiver.");
+            if (receiver is null or VirtualNode)
+                throw new Exception("May not construct a virtual node with a null or virtual node receiver.");
         }
+
+        /// <summary>The receiver having children virtually added or removed from it.</summary>
+        public readonly IFieldReader Receiver;
 
         /// <summary>This is the name for this virtual node in its field reader.</summary>
         public readonly string Name;
@@ -51,14 +51,14 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <returns>True if the name exists in this node.</returns>
         public bool ContainsField(string name) =>
             this.overrides.ContainsKey(name) ? this.overrides[name] is not null :
-            this.receiver.ContainsField(name);
+            this.Receiver.ContainsField(name);
 
         /// <summary>Reads the node for the field by the given name.</summary>
         /// <param name="name">The name for the node to look for.</param>
         /// <returns>The node or null if not found.</returns>
         public INode ReadField(string name) {
             if (this.overrides.ContainsKey(name)) return this.overrides[name];
-            INode node = this.receiver.ReadField(name);
+            INode node = this.Receiver.ReadField(name);
             if (node is not IFieldReader field) return node;
             VirtualNode vNode = new(name, field);
             this.overrides[name] = vNode;
@@ -74,7 +74,7 @@ namespace Blackboard.Core.Nodes.Outer {
                     reached.Add(pair.Key);
                     yield return pair;
                 }
-                foreach (KeyValuePair<string, INode> pair in this.receiver.Fields) {
+                foreach (KeyValuePair<string, INode> pair in this.Receiver.Fields) {
                     if (!reached.Contains(pair.Key)) yield return pair;
                 }
             }

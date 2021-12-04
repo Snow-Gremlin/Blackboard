@@ -217,7 +217,7 @@
     | <Conditional> [Assign] <Declaration> {assignment};
 
 <Conditional> := <LogicalOr>
-    | <Conditional> [Test] <Conditional> [Else] <Conditional> {trinary};
+    | <Conditional> [Test] <Conditional> [Else] <Conditional> {ternary};
 
 <LogicalOr> := <LogicalXor>
     | <LogicalOr> [LogicalOr] <LogicalXor> {logicalOr};
@@ -276,7 +276,7 @@
     | <Expression> [Dot] [Identifier] {memberAccess}
     | <Expression> <Call>;
 
-<Call> := [ParOpen] {startCall} <Args> [ParClose];
+<Call> := [ParOpen] {startCall} <Args> {endCall} [ParClose];
 
 <Args> := _
     | <Conditional> {addArg} <ArgsTail>;

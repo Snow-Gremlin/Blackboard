@@ -20,17 +20,19 @@ namespace Blackboard.Parser {
         private readonly LinkedList<Type> types;
         private readonly LinkedList<INode> stack;
         private readonly HashSet<INode> newNodes;
+        private readonly LinkedList<LinkedList<INode>> argStacks;
         private readonly LinkedList<IAction> actions;
 
         /// <summary>Creates a new formula builder for parsing states.</summary>
         /// <param name="driver">The driver this stack is for.</param>
         public Builder(Driver driver) {
-            this.Driver   = driver;
-            this.scopes   = new LinkedList<VirtualNode>();
-            this.types    = new LinkedList<Type>();
-            this.stack    = new LinkedList<INode>();
-            this.newNodes = new HashSet<INode>();
-            this.actions  = new LinkedList<IAction>();
+            this.Driver    = driver;
+            this.scopes    = new LinkedList<VirtualNode>();
+            this.types     = new LinkedList<Type>();
+            this.stack     = new LinkedList<INode>();
+            this.newNodes  = new HashSet<INode>();
+            this.argStacks = new LinkedList<LinkedList<INode>>();
+            this.actions   = new LinkedList<IAction>();
 
             // Call reset to prepare the formula.
             this.Reset();
@@ -53,12 +55,13 @@ namespace Blackboard.Parser {
             this.types.Clear();
             this.stack.Clear();
             this.newNodes.Clear();
+            this.argStacks.Clear();
         }
 
         #region Actions...
 
         /// <summary>Gets the formula containing all the pending actions.</summary>
-        public Formula ToFormula() => new(this.actions);
+        public IAction ToAction() => this.actions.Count <= 0 ? this.actions.First.Value : new Formula(this.actions);
 
         /// <summary>Adds a pending action into this formula.</summary>
         /// <param name="performer">The performer to add.</param>
@@ -99,6 +102,10 @@ namespace Blackboard.Parser {
             return item as T;
         }
 
+        /// <summary>Pops off a node is on the top of the stack.</summary>
+        /// <returns>The node which was on top of the stack.</returns>
+        public INode Pop() => this.Pop<INode>();
+
         /// <summary>Pops one or more node off the stack.</summary>
         /// <param name="count">The number of node to pop.</param>
         /// <returns>The popped node in the order oldest to newest.</returns>
@@ -107,6 +114,37 @@ namespace Blackboard.Parser {
             for (int i = 0; i < count; i++) items[^i] = this.Pop<INode>();
             return items;
         }
+
+        /// <summary>
+        /// Pushes a node to the stack and add it as a node
+        /// which has been created since the last clear.
+        /// </summary>
+        /// <param name="node">The node to push and add.</param>
+        public void PushNew(INode node) {
+            this.stack.AddLast(node);
+            this.newNodes.Add(node);
+        }
+
+        /// <summary>Gets all the nodes which have been added since the last clear.</summary>
+        public IEnumerable<INode> NewNodes => this.newNodes;
+
+        /// <summary>Adds a node which has been created since the last clear.</summary>
+        /// <param name="node">The node to add.</param>
+        public void AddNewNode(INode node) => this.newNodes.Add(node);
+
+        #endregion
+        #region Arguments Stack...
+
+        /// <summary>This starts a new argument list.</summary>
+        public void StartArgs() => this.argStacks.AddFirst(new LinkedList<INode>());
+
+        /// <summary>This adds the given node in to the newest argument list.</summary>
+        /// <param name="node">The node to add to the argument list.</param>
+        public void AddArg(INode node) => this.argStacks.First.Value.AddLast(node);
+
+        /// <summary>This gets all the nodes which are in the current argument list, then removes the list.</summary>
+        /// <returns>The nodes which were in the current argument list.</returns>
+        public INode[] EndArgs() => this.argStacks.TakeFirst().ToArray();
 
         #endregion
         #region Type Stack...
@@ -122,16 +160,6 @@ namespace Blackboard.Parser {
             this.types.RemoveLast();
             return value;
         }
-
-        #endregion
-        #region New Nodes...
-
-        /// <summary>Gets all the nodes which have been added since the last clear.</summary>
-        public IEnumerable<INode> NewNodes => this.newNodes;
-
-        /// <summary>Adds a node which has been created since the last clear.</summary>
-        /// <param name="node">The node to add.</param>
-        public void AddNewNode(INode node) => this.newNodes.Add(node);
 
         #endregion
 

@@ -1,9 +1,9 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Actions;
 using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
-using Blackboard.Parser.Performers;
-using Blackboard.Parser.Preppers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -44,18 +44,18 @@ namespace Blackboard.Parser {
 
         #region Formula Methods...
 
-        /// <summary>Reads the given lines of input Blackline code.</summary>
+        /// <summary>Reads the given lines of input Blackboard code.</summary>
         /// <remarks>The commands of this input will be added to formula if valid.</remarks>
         /// <param name="input">The input code to parse.</param>
         /// <returns>The formula for performing the parsed actions.</returns>
-        public Formula Read(params string[] input) =>
+        public IAction Read(params string[] input) =>
             this.Read(input as IEnumerable<string>);
 
-        /// <summary>Reads the given lines of input Blackline code.</summary>
+        /// <summary>Reads the given lines of input Blackboard code.</summary>
         /// <remarks>The commands of this input will be added to formula if valid.</remarks>
         /// <param name="input">The input code to parse.</param>
         /// <returns>The formula for performing the parsed actions.</returns>
-        public Formula Read(IEnumerable<string> input, string name = "Unnamed") {
+        public IAction Read(IEnumerable<string> input, string name = "Unnamed") {
             PP.Parser.Result result = baseParser.Parse(new PP.Scanner.Default(input, name));
 
             // Check for parser errors.
@@ -65,14 +65,14 @@ namespace Blackboard.Parser {
             return this.read(result.Tree);
         }
 
-        /// <summary>Reads the given parse tree root for an input Blackline code.</summary>
+        /// <summary>Reads the given parse tree root for an input Blackboard code.</summary>
         /// <param name="node">The parsed tree root node to read from.</param>
         /// <returns>The formula for performing the parsed actions.</returns>
-        private Formula read(PP.ParseTree.ITreeNode node) {
+        private IAction read(PP.ParseTree.ITreeNode node) {
             try {
                 Builder stacks = new(this.driver);
                 node.Process(this.prompts, stacks);
-                return stacks.ToFormula();
+                return stacks.ToAction();
             } catch (S.Exception ex) {
                 throw new Exception("Error occurred while parsing input code.", ex);
             }
@@ -107,6 +107,7 @@ namespace Blackboard.Parser {
             this.addHandler("memberAccess", handleMemberAccess);
             this.addHandler("startCall",    handleStartCall);
             this.addHandler("addArg",       handleAddArg);
+            this.addHandler("endCall",      handleEndCall);
             this.addHandler("pushId",       handlePushId);
             this.addHandler("pushBool",     handlePushBool);
             this.addHandler("pushBin",      handlePushBin);
@@ -117,7 +118,7 @@ namespace Blackboard.Parser {
             this.addHandler("pushString",   handlePushString);
             this.addHandler("pushType",     handlePushType);
 
-            this.addProcess(3, "trinary");
+            this.addProcess(3, "ternary");
             this.addProcess(2, "logicalOr");
             this.addProcess(2, "logicalXor");
             this.addProcess(2, "logicalAnd");
@@ -155,12 +156,17 @@ namespace Blackboard.Parser {
         /// <param name="count">The number of values to pop off the stack for this function.</param>
         /// <param name="name">The name of the prompt to add to.</param>
         private void addProcess(int count, string name) {
-            INode funcGroup = this.driver.Global.Find(Driver.OperatorNamespace, name);
+            IFuncGroup funcGroup = this.driver.Global.Find(Driver.OperatorNamespace, name) as IFuncGroup;
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 Builder builder = args as Builder;
                 PP.Scanner.Location loc = args.LastLocation;
-                IPrepper[] inputs = builder.PopPreppers(count);
-                builder.PushPrepper(new FuncPrep(loc, new NoPrep(funcGroup), inputs));
+                INode[] inputs = builder.Pop(count);
+                INode result = funcGroup.Build(inputs);
+                if (result is null)
+                    throw new Exception("Could not perform the operation with the given input.").
+                        With("Operation", name).
+                        With("Input", inputs.Types().Strings().Join(", "));
+                builder.Push(result);
             };
         }
 
@@ -169,9 +175,9 @@ namespace Blackboard.Parser {
             string[] unneeded = baseParser.UnneededPrompts(this.prompts);
             string[] missing  = baseParser.MissingPrompts(this.prompts);
             if (unneeded.Length > 0 || missing.Length > 0)
-                throw new Exception("Blackboard's parser grammer has prompts which do not match prompt handlers.").
+                throw new Exception("Blackboard's parser grammar has prompts which do not match prompt handlers.").
                     With("Not handled", unneeded.Join(", ")).
-                    With("Not in grammer", missing.Join(", "));
+                    With("Not in grammar", missing.Join(", "));
         }
 
         #endregion
@@ -181,30 +187,31 @@ namespace Blackboard.Parser {
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleClear(Builder builder) {
             builder.Tokens.Clear();
-            builder.ClearStacks();
+            builder.Clear();
         }
 
-        /// <summary>This is called when the namespace has openned.</summary>
+        /// <summary>This is called when the namespace has opened.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushNamespace(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string name = builder.LastText;
-            IWrappedNode scope = builder.CurrentScope;
+            VirtualNode scope = builder.CurrentScope;
 
-            // Check if the namespace already exists, even it if is just virtual.
-            IWrappedNode next = scope.ReadField(name);
+            // Check if the virtual namespace already exists.
+            INode next = scope.ReadField(name);
             if (next is not null) {
-                if (next.Type.IsAssignableTo(typeof(Namespace)))
+                if (next is not VirtualNode nextspace)
                     throw new Exception("Can not open namespace. Another non-namespace exists by that name.").
                          With("Identifier", name).
                          With("Location", loc);
-                builder.PushScope(next);
+                builder.PushScope(nextspace);
                 return;
             }
 
-            // Create a new virtual namespace and a performer to construct the new namespace if this formula is run.
-            VirtualNode nextScope = scope.CreateField(name, typeof(Namespace));
-            builder.Add(new VirtualNodeWriter(nextScope, new NodeHold(new Namespace())));
+            // Create a new virtual namespace and an action to define the new namespace when this formula is run.
+            Namespace newspace = new();
+            VirtualNode nextScope = new(name, newspace);
+            builder.AddAction(new Define(scope, name, newspace));
             builder.PushScope(nextScope);
         }
 
@@ -481,26 +488,41 @@ namespace Blackboard.Parser {
         static private void handleMemberAccess(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
             string name = builder.LastText;
-            IPrepper receiver = builder.PopPrepper<IPrepper>();
+            IFieldReader receiver = builder.Pop<IFieldReader>();
             
-            builder.PushPrepper(new IdPrep(loc, receiver, name));
+            INode node = receiver.ReadField(name);
+            if (node is not null) {
+                if (node is VirtualNode vNode) node = vNode.Receiver;
+                builder.Push(node);
+                return;
+            }
+
+            throw new Exception("No identifier found in the receiver stack.").
+                With("Identifier", name).
+                With("Location", loc);
         }
 
         /// <summary>This handles preparing for a method call.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleStartCall(Builder builder) {
-            IPrepper item = builder.PopPrepper<IPrepper>();
-            PP.Scanner.Location loc = builder.LastLocation;
-            builder.PushPrepper(new FuncPrep(loc, item));
-        }
+        static private void handleStartCall(Builder builder) => builder.StartArgs();
 
         /// <summary>This handles the end of a method call and creates the node for the method.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleAddArg(Builder builder) {
-            IPrepper arg = builder.PopPrepper<IPrepper>();
-            FuncPrep func = builder.PopPrepper<FuncPrep>();
-            func.Arguments.Add(arg);
-            builder.PushPrepper(func);
+        static private void handleAddArg(Builder builder) => builder.AddArg(builder.Pop());
+
+        /// <summary>This handles finishing a method call and building the node for the method.</summary>
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleEndCall(Builder builder) {
+            INode[] args = builder.EndArgs();
+            IFuncGroup group = builder.Pop<IFuncGroup>();
+            INode result = group.Build(args);
+            if (result is null)
+                throw new Exception("Could not perform the function with the given input.").
+                    With("Function", group).
+                    With("Input", args.Types().Strings().Join(", "));
+
+            if (!args.Contains(result)) builder.AddNewNode(result);
+            builder.Push(result);
         }
 
         /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
@@ -509,7 +531,18 @@ namespace Blackboard.Parser {
             PP.Scanner.Location loc = builder.LastLocation;
             string name = builder.LastText;
 
-            builder.PushPrepper(new IdPrep(loc, builder.Scopes, name));
+            foreach (VirtualNode scope in builder.Scopes) {
+                INode node = scope.ReadField(name);
+                if (node is not null) {
+                    if (node is VirtualNode vNode) node = vNode.Receiver;
+                    builder.Push(node);
+                    return;
+                }
+            }
+
+            throw new Exception("No identifier found in the scope stack.").
+                With("Identifier", name).
+                With("Location", loc);
         }
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>
@@ -520,7 +553,7 @@ namespace Blackboard.Parser {
 
             try {
                 bool value = bool.Parse(text);
-                builder.PushPrepper(LiteralPrep.Bool(value));
+                builder.PushNew(Literal.Bool(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a bool.", ex).
                     With("Text", text).
@@ -536,7 +569,7 @@ namespace Blackboard.Parser {
 
             try {
                 int value = S.Convert.ToInt32(text, 2);
-                builder.PushPrepper(LiteralPrep.Int(value));
+                builder.PushNew(Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a binary int.", ex).
                     With("Text", text).
@@ -544,7 +577,7 @@ namespace Blackboard.Parser {
             }
         }
 
-        /// <summary>This handles pushing an ocatal int literal value onto the stack.</summary>
+        /// <summary>This handles pushing an octal int literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushOct(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
@@ -552,7 +585,7 @@ namespace Blackboard.Parser {
 
             try {
                 int value = S.Convert.ToInt32(text, 8);
-                builder.PushPrepper(LiteralPrep.Int(value));
+                builder.PushNew(Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse an octal int.", ex).
                     With("Text", text).
@@ -568,7 +601,7 @@ namespace Blackboard.Parser {
 
             try {
                 int value = int.Parse(text);
-                builder.PushPrepper(LiteralPrep.Int(value));
+                builder.PushNew(Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a decimal int.", ex).
                     With("Text", text).
@@ -584,7 +617,7 @@ namespace Blackboard.Parser {
 
             try {
                 int value = int.Parse(text, NumberStyles.HexNumber);
-                builder.PushPrepper(LiteralPrep.Int(value));
+                builder.PushNew(Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a hex int.", ex).
                     With("Text", text).
@@ -600,7 +633,7 @@ namespace Blackboard.Parser {
 
             try {
                 double value = double.Parse(text);
-                builder.PushPrepper(LiteralPrep.Double(value));
+                builder.PushNew(Literal.Double(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a double.", ex).
                     With("Text", text).
@@ -616,7 +649,7 @@ namespace Blackboard.Parser {
 
             try {
                 string value = PP.Misc.Text.Unescape(text);
-                builder.PushPrepper(LiteralPrep.String(value));
+                builder.PushNew(Literal.String(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to decode escaped sequences.", ex).
                     With("Text", text).

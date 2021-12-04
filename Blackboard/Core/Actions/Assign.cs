@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
+using PetiteParser.Scanner;
 
 namespace Blackboard.Core.Actions {
 
@@ -9,35 +9,39 @@ namespace Blackboard.Core.Actions {
     sealed public class Assign<T>: IAction
         where T : IData {
 
+        /// <summary>
+        /// Creates an assignment from the given nodes after first checking
+        /// that the nodes can be used in this type of assignment.
+        /// </summary>
+        /// <param name="loc">The location that this provoke was created.</param>
+        /// <param name="target">The target node to assign to.</param>
+        /// <param name="value">The value to assign to the given target.</param>
+        /// <returns>The assignment action.</returns>
+        static public Assign<T> Create(Location loc, INode target, INode value) =>
+            (target is IValueInput<T> input) && (value is IValue<T> data) ?
+            new Assign<T>(input, data) :
+            throw new Exception("Unexpected node types for assignment.").
+                With("Location", loc).
+                With("Type", typeof(T)).
+                With("Target", target).
+                With("Value", value);
+
         /// <summary>The target input node to set the value of.</summary>
         private readonly IValueInput<T> target;
 
         /// <summary>The data node to get the data to assign.</summary>
-        private readonly IDataNode value;
+        private readonly IValue<T> value;
 
         /// <summary>Creates a new assignment.</summary>
-        /// <remarks>
-        /// Before creating this action ensure that the value type can be
-        /// implicitly cast to the targets type.
-        /// </remarks>
         /// <param name="target">The input node to assign.</param>
         /// <param name="value">The node to get the value from.</param>
-        public Assign(IValueInput<T> target, IDataNode value) {
+        public Assign(IValueInput<T> target, IValue<T> value) {
             this.target = target;
             this.value  = value;
         }
 
         /// <summary>This will perform the action.</summary>
         /// <param name="driver">The driver for this action.</param>
-        public void Perform(Driver driver) {
-            T value = this.value.Data.ImplicitCastTo<T>();
-            if (value is not null)
-                throw new Exception("Failed to cast while performing an assignment action").
-                    With("Target", this.target).
-                    With("Value", this.value);
-
-            if (this.target.SetValue(value))
-                driver.Touch(this.target.Children);
-        }
+        public void Perform(Driver driver) => driver.SetValue(this.value.Value, this.target);
     }
 }

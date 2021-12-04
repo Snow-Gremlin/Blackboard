@@ -94,24 +94,19 @@ namespace Blackboard.Parser {
         public void Push(INode node) => this.stack.AddLast(node);
 
         /// <summary>Pops off a node is on the top of the stack.</summary>
-        /// <typeparam name="T">The type of the node to read as.</typeparam>
         /// <returns>The node which was on top of the stack.</returns>
-        public T Pop<T>() where T : class, INode {
+        public INode Pop() {
             INode item = this.stack.Last.Value;
             this.stack.RemoveLast();
-            return item as T;
+            return item;
         }
-
-        /// <summary>Pops off a node is on the top of the stack.</summary>
-        /// <returns>The node which was on top of the stack.</returns>
-        public INode Pop() => this.Pop<INode>();
 
         /// <summary>Pops one or more node off the stack.</summary>
         /// <param name="count">The number of node to pop.</param>
         /// <returns>The popped node in the order oldest to newest.</returns>
         public INode[] Pop(int count) {
             INode[] items = new INode[count];
-            for (int i = 0; i < count; i++) items[^i] = this.Pop<INode>();
+            for (int i = count-1; i >= 0; i--) items[i] = this.Pop();
             return items;
         }
 

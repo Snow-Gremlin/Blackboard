@@ -23,6 +23,6 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// <remarks>Before this is called, Match must have been possible.</remarks>
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new function.</returns>
-        public INode Build(INode[] nodes);
+        public INode Build(params INode[] nodes);
     }
 }

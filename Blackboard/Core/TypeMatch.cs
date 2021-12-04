@@ -65,7 +65,7 @@ namespace Blackboard.Core {
         /// <summary>True if there is an explicit cast match, false otherwise.</summary>
         public bool IsExplicit => this.matchKind is Kind.Explicit;
 
-        /// <summary>True if there is an implicit or explicit cast match, false otherwise.</summary>
+        /// <summary>True if there is an implicit or explicit cast match, false inherit or no cast.</summary>
         public bool IsAnyCast => this.matchKind is Kind.Implicit or Kind.Explicit;
 
         /// <summary>Compares this match with another match.</summary>

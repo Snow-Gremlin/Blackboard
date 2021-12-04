@@ -367,8 +367,9 @@ namespace Blackboard.Core {
         /// so that they are pending for the next evaluation.
         /// </remarks>
         /// <param name="input">The input trigger node to provoke.</param>
-        public void Provoke(ITriggerInput input) {
-            if (input.Provoke()) this.Touch(input.Children);
+        /// <param name="value">The provoke state to set, typically this will be true.</param>
+        public void Provoke(ITriggerInput input, bool value = true) {
+            if (input.Provoke(value)) this.Touch(input.Children);
         }
 
         /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>

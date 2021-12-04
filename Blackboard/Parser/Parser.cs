@@ -20,10 +20,8 @@ namespace Blackboard.Parser {
         private const string resourceName = "Blackboard.Parser.Parser.lang";
 
         /// <summary>Prepares the parser's static variables before they are used.</summary>
-        static Parser() {
-            baseParser = PP.Loader.Loader.LoadParser(
+        static Parser() => baseParser = PP.Loader.Loader.LoadParser(
                 PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
-        }
 
         /// <summary>The Blackboard language base parser lazy singleton.</summary>
         static private readonly PP.Parser.Parser baseParser;
@@ -42,7 +40,7 @@ namespace Blackboard.Parser {
             this.validatePrompts();
         }
 
-        #region Formula Methods...
+        #region Read/Formula Methods...
 
         /// <summary>Reads the given lines of input Blackboard code.</summary>
         /// <remarks>The commands of this input will be added to formula if valid.</remarks>
@@ -149,8 +147,7 @@ namespace Blackboard.Parser {
         /// <param name="name">This is the name of the prompt this handler is for.</param>
         /// <param name="hndl">This is the handler to call on this prompt.</param>
         private void addHandler(string name, S.Action<Builder> hndl) =>
-            this.prompts[name] = (PP.ParseTree.PromptArgs args) =>
-                hndl(args as Builder);
+            this.prompts[name] = (PP.ParseTree.PromptArgs args) => hndl(args as Builder);
 
         /// <summary>This adds a prompt for an operator handler.</summary>
         /// <param name="count">The number of values to pop off the stack for this function.</param>
@@ -178,6 +175,58 @@ namespace Blackboard.Parser {
                 throw new Exception("Blackboard's parser grammar has prompts which do not match prompt handlers.").
                     With("Not handled", unneeded.Join(", ")).
                     With("Not in grammar", missing.Join(", "));
+        }
+
+        #endregion
+        #region Helper Methods...
+
+        // TODO: Comment
+        static private INode performCast(Builder builder, PP.Scanner.Location loc, Type type, INode value, bool explicitCasts = false) {
+            Type valueType = Type.TypeOf(value);
+            TypeMatch match = type.Match(valueType, explicitCasts);
+            if (!match.IsAnyCast)
+                return match.IsMatch ? value :
+                    throw new Exception("The value type can not be cast to the given type.").
+                        With("Location", loc).
+                        With("Target", type).
+                        With("Type", valueType).
+                        With("Value", value);
+
+            Namespace ops = builder.Driver.Global.Find(Driver.OperatorNamespace) as Namespace;
+            INode castGroup =
+                type == Type.Bool    ? ops.Find("castBool") :
+                type == Type.Int     ? ops.Find("castInt") :
+                type == Type.Double  ? ops.Find("castDouble") :
+                type == Type.String  ? ops.Find("castString") :
+                type == Type.Trigger ? ops.Find("castTrigger") :
+                throw new Exception("Unsupported type for new definition cast").
+                    With("Location", loc).
+                    With("Type", type);
+            INode castValue = (castGroup as IFuncGroup).Build(value);
+            builder.AddNewNode(castValue);
+            return castValue;
+        }
+
+        // TODO: Comment
+        static private INode addAssignment(Builder builder, PP.Scanner.Location loc, INode target, INode value) {
+            // Check if the base types match. Don't need to check that the type is
+            // a data type or trigger since only those can be reduced to constants.
+            Type targetType = Type.TypeOf(target);
+            INode castValue = performCast(builder, loc, targetType, value);
+            IAction assign =
+                targetType == Type.Bool    ? Assign<Bool>.  Create(loc, target, castValue) :
+                targetType == Type.Int     ? Assign<Int>.   Create(loc, target, castValue) :
+                targetType == Type.Double  ? Assign<Double>.Create(loc, target, castValue) :
+                targetType == Type.String  ? Assign<String>.Create(loc, target, castValue) :
+                targetType == Type.Trigger ? Provoke.       Create(loc, target, castValue) :
+                throw new Exception("Unsupported type for an assignment").
+                    With("Location", loc).
+                    With("Type", targetType).
+                    With("Input", target).
+                    With("Value", value);
+            builder.AddAction(assign);
+
+            return castValue;
         }
 
         #endregion
@@ -217,8 +266,7 @@ namespace Blackboard.Parser {
 
         /// <summary>This is called when the namespace had closed.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handlePopNamespace(Builder builder) =>
-            builder.PopScope();
+        static private void handlePopNamespace(Builder builder) => builder.PopScope();
 
         /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
@@ -355,31 +403,16 @@ namespace Blackboard.Parser {
         /// <summary>This handles when a trigger is provoked unconditionally.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleProvokeTrigger(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
-            IdPrep target = builder.PopPrepper<IdPrep>();
-            IPerformer targetPerf = target.Prepare(builder, false);
-
-            NoPrep valuePrep = new(Literal.Bool(true)), targetPrep = new(targetPerf), funcPrep = new(InputTrigger.Assign);
-            builder.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(builder));
-
-            // Push the literal true onto the stack for any following trigger pulls.
-            builder.PushPrepper(valuePrep);
-        }
-
-        static private void handleTypeGet(Builder builder) {
-            // TODO: Implement
-        }
-
-        static private void handleVarGet(Builder builder) {
-            // TODO: Implement
+            INode target = builder.Pop();
+            builder.AddAction(Provoke.Create(builder.LastLocation, target));
         }
 
         /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleConditionalProvokeTrigger(Builder builder) {
             PP.Scanner.Location loc = builder.LastLocation;
-            IdPrep target  = builder.PopPrepper<IdPrep>();
-            IPrepper value = builder.PopPrepper<IPrepper>();
+            INode target = builder.Pop();
+            INode value = builder.Pop();
 
             IPerformer valuePerf  = value.Prepare(builder, false);
             IPerformer targetPerf = target.Prepare(builder, false);
@@ -398,95 +431,43 @@ namespace Blackboard.Parser {
             builder.PushPrepper(valuePrep);
         }
 
+        static private void handleTypeGet(Builder builder) {
+            // TODO: Implement, need to add a result argument to actions
+            //       and a new action to write the gotten value to that result.
+        }
+
+        static private void handleVarGet(Builder builder) {
+            // TODO: Implement
+        }
+
         /// <summary>This handles assigning the left value to the right value.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleAssignment(Builder builder) {
-            IPrepper value  = builder.PopPrepper<IPrepper>();
-            IPrepper target = builder.PopPrepper<IPrepper>();
-            PP.Scanner.Location loc = builder.LastLocation;
+            INode value  = builder.Pop();
+            INode target = builder.Pop();
+            INode castValue = addAssignment(builder, builder.LastLocation, target, value);
 
-            IPerformer valuePerf  = value.Prepare(builder, false);
-            IPerformer targetPerf = target.Prepare(builder, false);
-
-            // Check if the value is an input, this may have to change if we allow assignments to non-input fields.
-            if (targetPerf is not WrappedNodeReader targetReader)
-                throw new Exception("The target of an assignment must be a wrapped node.").
-                    With("Location", loc).
-                    With("Target", targetPerf);
-            IWrappedNode wrappedTarget = targetReader.WrappedNode;
-            if (!wrappedTarget.Type.IsAssignableTo(typeof(IInput)))
-                throw new Exception("The target of an assignment must be an input node.").
-                    With("Location", loc).
-                    With("Type", wrappedTarget.Type).
-                    With("Target", wrappedTarget);
-
-            // Check if the base types match. Don't need to check that the type is
-            // a data type or trigger since only those can be reduced to constents.
-            Type valueType  = Type.FromType(valuePerf.Type);
-            Type targetType = Type.FromType(targetPerf.Type);
-            if (!valueType.Match(targetType).IsMatch)
-                throw new Exception("The value of an assignment must match base types.").
-                    With("Location", loc).
-                    With("Target", targetPerf).
-                    With("Value", valuePerf);
-
-            IFuncDef assignFunc =
-                targetType == Type.Bool    ? InputValue<Bool>.Assign :
-                targetType == Type.Int     ? InputValue<Int>.Assign :
-                targetType == Type.Double  ? InputValue<Double>.Assign :
-                targetType == Type.String  ? InputValue<String>.Assign :
-                targetType == Type.Trigger ? InputTrigger.Assign :
-                throw new Exception("Unsupported type for assignment").
-                    With("Location", loc).
-                    With("Type", targetType);
-
-            NoPrep valuePrep = new(valuePerf), targetPrep = new(targetPerf), funcPrep = new(assignFunc);
-            builder.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(builder));
-
-            // Push the value back onto the stack for any following assignments.
-            builder.PushPrepper(valuePrep);
+            // Push the cast value back onto the stack for any following assignments.
+            // By using the cast it makes it more like `X=Y=Z` is `Y=Z; X=Y;` but means that if a double and an int are being set by
+            // an int the int must be assigned first then it can cast to a double for the double assignment, otherwise it will cast
+            // to a double but not be able to implicitly cast that double back to an int. For example: if `int X; double Y;` then
+            // `Y=X=3;` works and `X=Y=3` will not. One drawback for this way is that if you assign an int to multiple doubles it will
+            // construct multiple cast nodes, but with a little optimization to remove duplicate node paths, this isn't an issue. 
+            // Alternatively, if we push he value then `X=Y=Z` will be like `Y=Z; X=Z;`. 
+            builder.Push(castValue);
         }
 
         /// <summary>This handles performing a type cast of a node.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleCast(Builder builder) {
-            IPrepper value = builder.PopPrepper<IPrepper>();
-            Type t = builder.PopType();
-            PP.Scanner.Location loc = builder.LastLocation;
-
-            IPerformer valuePerf = value.Prepare(builder, false);
-            Type valueType = Type.FromType(valuePerf.Type);
-            TypeMatch match = t.Match(valueType, true);
-            if (!match.IsMatch && !match.IsAnyCast)
-                throw new Exception("The value type can not be cast to the given type.").
-                    With("Location", loc).
-                    With("Target", t).
-                    With("Type", valueType).
-                    With("Value", valuePerf);
-
-            Namespace ops = builder.Driver.Global.Find(Driver.OperatorNamespace) as Namespace;
-            if (match.IsAnyCast) {
-                INode castGroup =
-                    t == Type.Bool    ? ops.Find("castBool") :
-                    t == Type.Int     ? ops.Find("castInt") :
-                    t == Type.Double  ? ops.Find("castDouble") :
-                    t == Type.String  ? ops.Find("castString") :
-                    t == Type.Trigger ? ops.Find("castTrigger") :
-                    throw new Exception("Unsupported type for new definition cast").
-                        With("Location", loc).
-                        With("Type", t);
-
-                IFuncDef castFunc = (castGroup as IFuncGroup).Find(valueType);
-                valuePerf = new Function(castFunc, valuePerf);
-            }
-
-            builder.PushPrepper(new NoPrep(valuePerf));
+            INode value = builder.Pop();
+            Type type   = builder.PopType();
+            builder.PushNew(performCast(builder, builder.LastLocation, type, value, true));
         }
 
         /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleMemberAccess(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             string name = builder.LastText;
             IFieldReader receiver = builder.Pop<IFieldReader>();
             
@@ -499,7 +480,7 @@ namespace Blackboard.Parser {
 
             throw new Exception("No identifier found in the receiver stack.").
                 With("Identifier", name).
-                With("Location", loc);
+                With("Location", builder.LastLocation);
         }
 
         /// <summary>This handles preparing for a method call.</summary>
@@ -519,7 +500,8 @@ namespace Blackboard.Parser {
             if (result is null)
                 throw new Exception("Could not perform the function with the given input.").
                     With("Function", group).
-                    With("Input", args.Types().Strings().Join(", "));
+                    With("Input", args.Types().Strings().Join(", ")).
+                    With("Location", builder.LastLocation);
 
             if (!args.Contains(result)) builder.AddNewNode(result);
             builder.Push(result);
@@ -528,9 +510,7 @@ namespace Blackboard.Parser {
         /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushId(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             string name = builder.LastText;
-
             foreach (VirtualNode scope in builder.Scopes) {
                 INode node = scope.ReadField(name);
                 if (node is not null) {
@@ -542,133 +522,116 @@ namespace Blackboard.Parser {
 
             throw new Exception("No identifier found in the scope stack.").
                 With("Identifier", name).
-                With("Location", loc);
+                With("Location", builder.LastLocation);
         }
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushBool(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
-
             try {
                 bool value = bool.Parse(text);
                 builder.PushNew(Literal.Bool(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a bool.", ex).
                     With("Text", text).
-                    With("Location", loc);
+                    With("Location", builder.LastLocation);
             }
         }
 
         /// <summary>This handles pushing a binary int literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushBin(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
-
             try {
                 int value = S.Convert.ToInt32(text, 2);
                 builder.PushNew(Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a binary int.", ex).
                     With("Text", text).
-                    With("Location", loc);
+                    With("Location", builder.LastLocation);
             }
         }
 
         /// <summary>This handles pushing an octal int literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushOct(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
-
             try {
                 int value = S.Convert.ToInt32(text, 8);
                 builder.PushNew(Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse an octal int.", ex).
                     With("Text", text).
-                    With("Location", loc);
+                    With("Location", builder.LastLocation);
             }
         }
 
         /// <summary>This handles pushing a decimal int literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushInt(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
-
             try {
                 int value = int.Parse(text);
                 builder.PushNew(Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a decimal int.", ex).
                     With("Text", text).
-                    With("Location", loc);
+                    With("Location", builder.LastLocation);
             }
         }
 
         /// <summary>This handles pushing a hexadecimal int literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushHex(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText[2..];
-
             try {
                 int value = int.Parse(text, NumberStyles.HexNumber);
                 builder.PushNew(Literal.Int(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a hex int.", ex).
                     With("Text", text).
-                    With("Location", loc);
+                    With("Location", builder.LastLocation);
             }
         }
 
         /// <summary>This handles pushing a double literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushDouble(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
-
             try {
                 double value = double.Parse(text);
                 builder.PushNew(Literal.Double(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to parse a double.", ex).
                     With("Text", text).
-                    With("Location", loc);
+                    With("Location", builder.LastLocation);
             }
         }
 
         /// <summary>This handles pushing a string literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushString(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
-
             try {
                 string value = PP.Misc.Text.Unescape(text);
                 builder.PushNew(Literal.String(value));
             } catch (S.Exception ex) {
                 throw new Exception("Failed to decode escaped sequences.", ex).
                     With("Text", text).
-                    With("Location", loc);
+                    With("Location", builder.LastLocation);
             }
         }
 
         /// <summary>This handles pushing a type onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushType(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             string text = builder.LastText;
-
             Type t = Type.FromName(text);
             if (t is null)
                 throw new Exception("Unrecognized type name.").
                     With("Text", text).
-                    With("Location", loc);
-
+                    With("Location", builder.LastLocation);
             builder.PushType(t);
         }
 

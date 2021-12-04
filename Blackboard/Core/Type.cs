@@ -203,6 +203,9 @@ namespace Blackboard.Core {
 
         /// <summary>This determines the implicit and inheritance match.</summary>
         /// <param name="t">The type to try casting from.</param>
+        /// <param name="explicitCasts">
+        /// True to also check if it can be cast explicitly, false to ignore explicit casts.
+        /// </param>
         /// <returns>The result of the match.</returns>
         public TypeMatch Match(Type t, bool explicitCasts = false) {
             int steps = this.inheritMatchSteps(t);

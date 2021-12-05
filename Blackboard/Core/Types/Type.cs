@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using S = System;
 
-namespace Blackboard.Core {
+namespace Blackboard.Core.Types {
 
     /// <summary>The types implemented for Blackboard.</summary>
     sealed public class Type {

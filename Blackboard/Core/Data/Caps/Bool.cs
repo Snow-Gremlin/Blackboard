@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Types;
 
 namespace Blackboard.Core.Data.Caps {
 

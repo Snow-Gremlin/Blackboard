@@ -4,6 +4,7 @@ using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -180,7 +181,13 @@ namespace Blackboard.Parser {
         #endregion
         #region Helper Methods...
 
-        // TODO: Comment
+        /// <summary>Performs a cast from one value to another by creating a new node.</summary>
+        /// <param name="builder">The builder the formula is being built for.</param>
+        /// <param name="loc">The location that the cast is being used for.</param>
+        /// <param name="type"></param>
+        /// <param name="value"></param>
+        /// <param name="explicitCasts"></param>
+        /// <returns></returns>
         static private INode performCast(Builder builder, PP.Scanner.Location loc, Type type, INode value, bool explicitCasts = false) {
             Type valueType = Type.TypeOf(value);
             TypeMatch match = type.Match(valueType, explicitCasts);
@@ -469,8 +476,13 @@ namespace Blackboard.Parser {
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleMemberAccess(Builder builder) {
             string name = builder.LastText;
-            IFieldReader receiver = builder.Pop<IFieldReader>();
-            
+            INode rNode = builder.Pop();
+            if (rNode is not IFieldReader receiver)
+                throw new Exception("Unexpected node type for a member access. Expected a field reader.").
+                    With("Node", rNode).
+                    With("Name", name).
+                    With("Location", builder.LastLocation);
+
             INode node = receiver.ReadField(name);
             if (node is not null) {
                 if (node is VirtualNode vNode) node = vNode.Receiver;
@@ -495,7 +507,13 @@ namespace Blackboard.Parser {
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleEndCall(Builder builder) {
             INode[] args = builder.EndArgs();
-            IFuncGroup group = builder.Pop<IFuncGroup>();
+            INode node = builder.Pop();
+            if (node is not IFuncGroup group)
+                throw new Exception("Unexpected node type for a method call. Expected a function group.").
+                    With("Node", node).
+                    With("Input", args.Types().Strings().Join(", ")).
+                    With("Location", builder.LastLocation);
+
             INode result = group.Build(args);
             if (result is null)
                 throw new Exception("Could not perform the function with the given input.").

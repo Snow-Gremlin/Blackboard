@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Blackboard.Core.Types;
+using System.Collections.Generic;
 using S = System;
 
 namespace Blackboard.Core.Nodes.Interfaces {

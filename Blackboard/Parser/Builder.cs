@@ -3,6 +3,7 @@ using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
 using PP = PetiteParser;

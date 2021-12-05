@@ -1,6 +1,6 @@
 ﻿using S = System;
 
-namespace Blackboard.Core {
+namespace Blackboard.Core.Types {
 
     /// <summary>This is a match for a single type.</summary>
     /// <remarks>This is used for choosing the most specific method for a function.</remarks>

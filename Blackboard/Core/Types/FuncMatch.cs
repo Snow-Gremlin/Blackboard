@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using S = System;
 
-namespace Blackboard.Core {
+namespace Blackboard.Core.Types {
 
     /// <summary>This is a match for a single function.</summary>
     /// <remarks>This is used for choosing the most specific method for a function.</remarks>

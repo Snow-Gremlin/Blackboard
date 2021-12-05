@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Debug;
+using Blackboard.Core.Nodes.Interfaces;
 using PetiteParser.Scanner;
 
 namespace Blackboard.Core.Actions {
@@ -34,23 +35,27 @@ namespace Blackboard.Core.Actions {
                 With("Location", loc).
                 With("Target", target);
 
-        /// <summary>The target input trigger to provoke.</summary>
-        private readonly ITriggerInput target;
-
-        /// <summary>The optional trigger to conditionally provoke with.</summary>
-        private readonly ITrigger trigger;
-
         /// <summary>Creates a new provoke action.</summary>
         /// <param name="target">The input trigger to provoke.</param>
         /// <param name="trigger">The optional trigger to conditionally provoke with or null to always provoke.</param>
         public Provoke(ITriggerInput target, ITrigger trigger = null) {
-            this.target  = target;
-            this.trigger = trigger;
+            this.Target  = target;
+            this.Trigger = trigger;
         }
+
+        /// <summary>The target input trigger to provoke.</summary>
+        public readonly ITriggerInput Target;
+
+        /// <summary>The optional trigger to conditionally provoke with.</summary>
+        public readonly ITrigger Trigger;
 
         /// <summary>This will perform the action.</summary>
         /// <param name="driver">The driver for this action.</param>
         public void Perform(Driver driver) =>
-            driver.Provoke(this.target, this.trigger?.Provoked ?? true);
+            driver.Provoke(this.Target, this.Trigger?.Provoked ?? true);
+
+        /// <summary>Gets a human readable string for this provoke.</summary>
+        /// <returns>The human readable string for debugging.</returns>
+        public override string ToString() => Stringifier.Simple(this);
     }
 }

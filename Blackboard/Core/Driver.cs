@@ -23,15 +23,15 @@ namespace Blackboard.Core {
         /// <summary>The namespace for all the operators.</summary>
         public const string OperatorNamespace = "$operators";
 
-        /// <summary>The input nodes which have been modified.</summary>
-        private LinkedList<IEvaluable> touched;
+        /// <summary>The nodes which have had one or more parent modified and they need to be reevaluated.</summary>
+        private LinkedList<IEvaluable> pending;
 
         /// <summary>Creates a new driver.</summary>
         /// <param name="addFuncs">Indicates that built-in functions should be added.</param>
         /// <param name="addConsts">Indicates that constants should be added.</param>
         public Driver(bool addFuncs = true, bool addConsts = true) {
-            this.touched = new LinkedList<IEvaluable>();
-            this.Global  = new Namespace();
+            this.pending = new LinkedList<IEvaluable>();
+            this.Global = new Namespace();
 
             this.addOperators();
             if (addFuncs)  this.addFunctions();
@@ -332,14 +332,14 @@ namespace Blackboard.Core {
         /// <summary>Sets the value of the given input node.</summary>
         /// <remarks>
         /// This will not cause an evaluation right away.
-        /// If the value is changed, then the children of this node will be touched
+        /// If the value is changed, then the children of this node will be pending evaluation
         /// so that they are pending for the next evaluation.
         /// </remarks>
         /// <typeparam name="T">The type of value to set.</typeparam>
         /// <param name="input">The input node to set the value of.</param>
         /// <param name="value">The value to set to the given input.</param>
         public void SetValue<T>(T value, IValueInput<T> input) where T : IData {
-            if (input.SetValue(value)) this.Touch(input.Children);
+            if (input.SetValue(value)) this.Pend(input.Children);
         }
 
         #endregion
@@ -365,13 +365,13 @@ namespace Blackboard.Core {
         /// <summary>This will provoke the given trigger node.</summary>
         /// <remarks>
         /// This will not cause an evaluation right away.
-        /// If the value is changed, then the children of this node will be touched
+        /// If the value is changed, then the children of this node will be pending evaluation
         /// so that they are pending for the next evaluation.
         /// </remarks>
         /// <param name="input">The input trigger node to provoke.</param>
         /// <param name="value">The provoke state to set, typically this will be true.</param>
         public void Provoke(ITriggerInput input, bool value = true) {
-            if (input.Provoke(value)) this.Touch(input.Children);
+            if (input.Provoke(value)) this.Pend(input.Children);
         }
 
         /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
@@ -467,24 +467,33 @@ namespace Blackboard.Core {
         /// <summary>The base set of named nodes to access the total node structure.</summary>
         public Namespace Global { get; }
 
-        /// <summary>This touches the given nodes so that they are recalculated during evaluation.</summary>
-        /// <param name="nodes">The nodes to touch.</param>
-        public void Touch(params INode[] nodes) => this.Touch(nodes as IEnumerable<INode>);
+        /// <summary>
+        /// This indicates that the given nodes have had parents changed
+        /// and need to be recalculated during evaluation.
+        /// </summary>
+        /// <param name="nodes">The nodes to pend evaluation for.</param>
+        public void Pend(params INode[] nodes) => this.Pend(nodes as IEnumerable<INode>);
 
-        /// <summary>This touches the given nodes so that they are recalculated during evaluation.</summary>
-        /// <param name="nodes">The nodes to touch.</param>
-        public void Touch(IEnumerable<INode> nodes) => this.touched.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
+        /// <summary>
+        /// This indicates that the given nodes have had parents changed
+        /// and need to be recalculated during evaluation.
+        /// </summary>
+        /// <param name="nodes">The nodes to pend evaluation for.</param>
+        public void Pend(IEnumerable<INode> nodes) => this.pending.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
+
+        /// <summary>This gets all the nodes pending evaluation.</summary>
+        public IEnumerable<INode> Pending => this.pending;
 
         /// <summary>This indicates if any changes are pending evaluation.</summary>
-        public bool HasPending => this.touched.Count > 0;
+        public bool HasPending => this.pending.Count > 0;
 
         /// <summary>Updates and propagates the changes from the given inputs through the blackboard nodes.</summary>
         /// <param name="logger">An optional logger for debugging this evaluation.</param>
         public void Evaluate(EvalLogger logger = null) {
             LinkedList<IEvaluable> pending = new();
             LinkedList<ITrigger> needsReset = new();
-            pending.SortInsertUnique(this.touched);
-            this.touched.Clear();
+            pending.SortInsertUnique(this.pending);
+            this.pending.Clear();
             logger?.StartEval(pending);
 
             while (pending.Count > 0) {

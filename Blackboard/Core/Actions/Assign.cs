@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Debug;
 using Blackboard.Core.Nodes.Interfaces;
 using PetiteParser.Scanner;
 
@@ -6,7 +7,7 @@ namespace Blackboard.Core.Actions {
 
     /// <summary>This is an action that will assign an input node to a data.</summary>
     /// <typeparam name="T">The type of data for the input node.</typeparam>
-    sealed public class Assign<T>: IAction
+    sealed public class Assign<T>: IAssign
         where T : IData {
 
         /// <summary>
@@ -40,8 +41,18 @@ namespace Blackboard.Core.Actions {
             this.value  = value;
         }
 
+        /// <summary>The target input node to set the value of.</summary>
+        public IInput Target => this.target;
+
+        /// <summary>The data node to get the data to assign.</summary>
+        public IDataNode Value => this.value;
+
         /// <summary>This will perform the action.</summary>
         /// <param name="driver">The driver for this action.</param>
         public void Perform(Driver driver) => driver.SetValue(this.value.Value, this.target);
+
+        /// <summary>Gets a human readable string for this assignment.</summary>
+        /// <returns>The human readable string for debugging.</returns>
+        public override string ToString() => Stringifier.Simple(this);
     }
 }

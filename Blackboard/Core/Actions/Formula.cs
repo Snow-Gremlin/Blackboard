@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Extensions;
+﻿using Blackboard.Core.Debug;
+using Blackboard.Core.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -35,8 +36,14 @@ namespace Blackboard.Core.Actions {
             }
         }
 
+        /// <summary>The actions for this formula.</summary>
+        public IReadOnlyList<IAction> Actions => this.actions;
+
         /// <summary>Performs all the actions for this formula.</summary>
-        public void Perform(Driver driver) =>
-            this.actions.Foreach(action => action.Perform(driver));
+        public void Perform(Driver driver) => this.actions.Foreach(action => action.Perform(driver));
+
+        /// <summary>Gets a human readable string for this formula as all internal actions on different lines.</summary>
+        /// <returns>The human readable string for debugging.</returns>
+        public override string ToString() => Stringifier.Simple(this);
     }
 }

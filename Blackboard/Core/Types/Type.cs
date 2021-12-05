@@ -154,18 +154,6 @@ namespace Blackboard.Core.Types {
             if (baseType is not null) baseType.inheritors.Add(this);
         }
 
-        /// <summary>This determines the implicit and inheritance match.</summary>
-        /// <param name="node">The node to try casting from.</param>
-        /// <returns>The result of the match.</returns>
-        static public TypeMatch Match<T>(INode node) where T : INode =>
-            Match<T>(TypeOf(node));
-
-        /// <summary>This determines the implicit and inheritance match.</summary>
-        /// <param name="t">The type to try casting from.</param>
-        /// <returns>The result of the match.</returns>
-        static public TypeMatch Match<T>(Type t) where T : INode =>
-            FromType<T>().Match(t);
-
         /// <summary>
         /// Checks if inheritance can be used for this given type.
         /// Finds the closest inherited type so that the most specific match can be chosen.
@@ -200,6 +188,18 @@ namespace Blackboard.Core.Types {
             } while (t is not null);
             return -1;
         }
+
+        /// <summary>This determines the implicit and inheritance match.</summary>
+        /// <param name="node">The node to try casting from.</param>
+        /// <returns>The result of the match.</returns>
+        static public TypeMatch Match<T>(INode node) where T : INode =>
+            Match<T>(TypeOf(node));
+
+        /// <summary>This determines the implicit and inheritance match.</summary>
+        /// <param name="t">The type to try casting from.</param>
+        /// <returns>The result of the match.</returns>
+        static public TypeMatch Match<T>(Type t) where T : INode =>
+            FromType<T>().Match(t);
 
         /// <summary>This determines the implicit and inheritance match.</summary>
         /// <param name="t">The type to try casting from.</param>

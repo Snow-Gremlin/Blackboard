@@ -48,8 +48,19 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>All the argument types.</summary>
         private readonly Type[] argTypes;
 
-        /// <summary>Creates a new non-group function base.</summary>
+        /// <summary>Creates a new non-group function base with the specific number of arguments.</summary>
         /// <remarks>By default no group is defined for this function.</remarks>
+        /// <param name="needsOneNoCast">
+        /// This indicates that at least one argument must not be implicitly cast for this function.
+        /// This helps ensure that some functions are only called if there is not cast so that the developer can select the
+        /// function they want to use which have similar implicit cast weights by adding a non-cast value or pre-casting a value.
+        /// </param>
+        /// <param name="passOne">
+        /// This indicates that if there is only one input, just return it.
+        /// If needed it will still perform an implicit cast to match the first argument type.
+        /// This is only valid for this constructor if and only if there is one argument.
+        /// </param>
+        /// <param name="argTypes">This is the required types for this function.</param>
         protected FuncDef(bool needsOneNoCast, bool passOne, params Type[] argTypes) :
             this(argTypes.Length, argTypes.Length, needsOneNoCast, passOne, argTypes) { }
 
@@ -68,14 +79,44 @@ namespace Blackboard.Core.Nodes.Bases {
         /// </param>
         /// <param name="argTypes">The types for all the arguments. Any nil types are ignored.</param>
         protected FuncDef(int min, int max, bool needsOneNoCast, bool passOne, params Type[] argTypes) {
+            argTypes = argTypes.NotNull().ToArray();
 
-            // TODO: Check this to use exceptions to enforce the rules instead of quietly dealing with it.
+            void throwExp(string message) =>
+                throw new Exception(message).
+                    With("Minimum", min).
+                    With("Maximum", max).
+                    With("Need one no cast", needsOneNoCast).
+                    With("Pass one", passOne).
+                    With("Types", argTypes.Strings().Join(", ")).
+                    With("Return type", typeof(TReturn));
 
-            this.MinArgs = S.Math.Max(min, 0);
-            this.MaxArgs = S.Math.Max(this.MinArgs, max);
+            if (min < 0)
+                throwExp("Must define a minimum required number of arguments that is zero or more.");
+
+            if (min > max)
+                throwExp("Must define a maximum allowed number of arguments that is greater than and equal to the minimum required number.");
+
+            if (max < argTypes.Length)
+                throwExp("The maximum allowed number of arguments is below the number of given types. Trim the type list.");
+
+            if (max > 0 && argTypes.Length <= 0)
+                throwExp("Must have at least one argument type if maximum is greater than zero.");
+
+            if (needsOneNoCast && min < 1)
+                throwExp("May not require one no cast and have a minimum required of arguments less than one.");
+
+            if (passOne && max < 1)
+                throwExp("May not allow pass one if the maximum allowed value less than one.");
+
+            bool passthroughOne = passOne && Type.Match<TReturn>(argTypes[0]).IsMatch;
+            if (passOne && !passthroughOne)
+                throwExp("May not pass one when the first argument type is not inherited nor implicit cast to the return type.");
+
+            this.MinArgs = min;
+            this.MaxArgs = max;
             this.NeedsOneNoCast = needsOneNoCast;
-            this.PassthroughOne = passOne && Type.Match<TReturn>(this.argTypes[0]).IsMatch;
-            this.argTypes = argTypes.NotNull().ToArray();
+            this.argTypes = argTypes;
+            this.PassthroughOne = passthroughOne;
         }
 
         /// <summary>This is the type name of the node.</summary>

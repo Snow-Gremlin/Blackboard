@@ -10,16 +10,6 @@ namespace Blackboard.Core.Nodes.Outer {
     sealed public class InputValue<T>: ValueNode<T>, IValueInput<T>
         where T : IData, IComparable<T> {
 
-        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory = new Function<InputValue<T>>(() => new InputValue<T>());
-
-        /// <summary>
-        /// This is a factory function for creating new instances
-        /// of this node easily with an initial value from the given node.
-        /// </summary>
-        static public readonly IFuncDef FactoryWithInitialValue =
-            new Function<IValue<T>, InputValue<T>>((IValue<T> node) => new InputValue<T>(node.Value));
-
         /// <summary>Creates a new input value node.</summary>
         /// <param name="value">The initial value for this node.</param>
         public InputValue(T value = default) : base(value) { }
@@ -36,7 +26,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <remarks>
         /// Since the value is set by the user this will always return the current value.
         /// This node typically won't be evaluated. When the value is set, if the value changes,
-        /// then the driver should touch the children so that they will be evaluated.
+        /// then the driver should pend evaluation for the children so that they will be updated.
         /// </remarks>
         /// <returns>This will always return the current value.</returns>
         protected override T CalcuateValue() => this.Value;

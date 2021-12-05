@@ -10,10 +10,6 @@ namespace Blackboard.Core.Nodes.Outer {
     /// <summary>This is a trigger which can be provoked from user output.</summary>
     sealed public class OutputTrigger: TriggerNode, ITriggerOutput, IChild {
 
-        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory =
-            new Function<ITriggerParent, OutputTrigger>((ITriggerParent source) => new OutputTrigger(source));
-
         /// <summary>The parent source to listen to.</summary>
         private ITriggerParent source;
 

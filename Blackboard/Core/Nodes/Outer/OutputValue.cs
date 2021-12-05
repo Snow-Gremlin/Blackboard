@@ -10,9 +10,6 @@ namespace Blackboard.Core.Nodes.Outer {
     sealed public class OutputValue<T>: UnaryValue<T, T>, IValueOutput<T>
         where T : IComparable<T> {
 
-        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory = CreateFactory(source => new OutputValue<T>(source));
-
         /// <summary>Creates a new output value node.</summary>
         /// <param name="source">The initial source to get the value from.</param>
         public OutputValue(IValueParent<T> source = null) : base(source) { }

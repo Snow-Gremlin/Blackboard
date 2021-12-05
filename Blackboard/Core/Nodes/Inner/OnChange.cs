@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
-            new FunctionN<IParent, OnChange>((inputs) => new OnChange(inputs));
+            new FunctionN<IParent, OnChange>((inputs) => new OnChange(inputs), passOne: false);
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
         private List<IParent> sources;

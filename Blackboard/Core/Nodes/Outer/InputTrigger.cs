@@ -7,14 +7,6 @@ namespace Blackboard.Core.Nodes.Outer {
     /// <summary>This is a trigger which can be provoked from user input.</summary>
     sealed public class InputTrigger: TriggerNode, ITriggerInput {
 
-        /// <summary>This is a factory function for creating new instances of this node easily.</summary>
-        static public readonly IFuncDef Factory =
-            new Function<InputTrigger>(() => new InputTrigger());
-
-        /// <summary>This is a factory function for creating new instances of this node easily with an initial value from the given node.</summary>
-        static public readonly IFuncDef FactoryWithInitialValue =
-            new Function<ITrigger, InputTrigger>((ITrigger node) => new InputTrigger(node.Provoked));
-
         /// <summary>Creates a new input trigger.</summary>
         /// <param name="provoked">The initial provoked state of the trigger.</param>
         public InputTrigger(bool provoked = false) :

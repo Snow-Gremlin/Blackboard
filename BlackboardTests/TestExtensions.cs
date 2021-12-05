@@ -35,7 +35,7 @@ namespace BlackboardTests {
             Assert.AreEqual(exp, node.Parents.Join(", "));
 
         /// <summary>Checks the boolean value of this node.</summary>
-        /// <param name="node">This is the boolean node to check the type of.</param>
+        /// <param name="node">This is the boolean node to check the value of.</param>
         /// <param name="exp">The expected boolean value.</param>
         static public void CheckValue(this INode node, bool exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<Bool>));
@@ -43,7 +43,7 @@ namespace BlackboardTests {
         }
 
         /// <summary>Checks the integer value of this node.</summary>
-        /// <param name="node">This is the integer node to check the type of.</param>
+        /// <param name="node">This is the integer node to check the value of.</param>
         /// <param name="exp">The expected integer value.</param>
         static public void CheckValue(this INode node, int exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<Int>));
@@ -51,7 +51,7 @@ namespace BlackboardTests {
         }
 
         /// <summary>Checks the double value of this node.</summary>
-        /// <param name="node">This is the double node to check the type of.</param>
+        /// <param name="node">This is the double node to check the value of.</param>
         /// <param name="exp">The expected double value.</param>
         static public void CheckValue(this INode node, double exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<Double>));
@@ -59,7 +59,7 @@ namespace BlackboardTests {
         }
 
         /// <summary>Checks the string value of this node.</summary>
-        /// <param name="node">This is the string node to check the type of.</param>
+        /// <param name="node">This is the string node to check the value of.</param>
         /// <param name="exp">The expected string value.</param>
         static public void CheckValue(this INode node, string exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<String>));
@@ -67,7 +67,7 @@ namespace BlackboardTests {
         }
 
         /// <summary>Checks the provoked state of this node.</summary>
-        /// <param name="node">This is the trigger node to check the type of.</param>
+        /// <param name="node">This is the trigger node to check the state of.</param>
         /// <param name="exp">The expected provoked state of the node.</param>
         static public void CheckProvoked(this INode node, bool exp) {
             Assert.IsInstanceOfType(node, typeof(ITrigger));
@@ -92,6 +92,15 @@ namespace BlackboardTests {
         }
 
         #endregion
+        #region Actions...
+
+        /// <summary>Checks the expected string for the given action.</summary>
+        /// <param name="action">The action to check the string for.</param>
+        /// <param name="lines">The lines for the expected string.</param>
+        static public void Check(this IAction action, params string[] lines) =>
+            Assert.AreEqual(lines.Join(S.Environment.NewLine), Stringifier.Shallow(action));
+
+        #endregion
         #region Driver...
 
         /// <summary>Gets the message for the CheckValues assertions.</summary>
@@ -102,39 +111,45 @@ namespace BlackboardTests {
             "Checking the " + type + " value of \"" + names.Join(".") + "\".";
 
         /// <summary>Checks the boolean value of this node.</summary>
-        /// <param name="driver">This is the driver to check the type of.</param>
+        /// <param name="driver">This is the driver to check the value with.</param>
         /// <param name="exp">The expected boolean value.</param>
         /// <param name="names">The name of the variable to look up.</param>
         static public void CheckValue(this Driver driver, bool exp, params string[] names) =>
             Assert.AreEqual(exp, driver.GetBool(names), checkValueMsg("bool", names));
 
         /// <summary>Checks the integer value of this node.</summary>
-        /// <param name="driver">This is the driver to check the type of.</param>
+        /// <param name="driver">This is the driver to check the value with.</param>
         /// <param name="exp">The expected integer value.</param>
         /// <param name="names">The name of the variable to look up.</param>
         static public void CheckValue(this Driver driver, int exp, params string[] names) =>
             Assert.AreEqual(exp, driver.GetInt(names), checkValueMsg("int", names));
 
         /// <summary>Checks the double value of this node.</summary>
-        /// <param name="driver">This is the driver to check the type of.</param>
+        /// <param name="driver">This is the driver to check the value with.</param>
         /// <param name="exp">The expected double value.</param>
         /// <param name="names">The name of the variable to look up.</param>
         static public void CheckValue(this Driver driver, double exp, params string[] names) =>
             Assert.AreEqual(exp, driver.GetDouble(names), checkValueMsg("double", names));
 
         /// <summary>Checks the string value of this node.</summary>
-        /// <param name="driver">This is the driver to check the type of.</param>
+        /// <param name="driver">This is the driver to check the value with.</param>
         /// <param name="exp">The expected string value.</param>
         /// <param name="names">The name of the variable to look up.</param>
         static public void CheckValue(this Driver driver, string exp, params string[] names) =>
             Assert.AreEqual(exp, driver.GetString(names), checkValueMsg("string", names));
 
         /// <summary>Checks the provoked state of this node.</summary>
-        /// <param name="driver">This is the driver to check the state of.</param>
+        /// <param name="driver">This is the driver to check the state with.</param>
         /// <param name="exp">The expected provoked state of the node.</param>
         /// <param name="names">The name of the variable to look up.</param>
         static public void CheckProvoked(this Driver driver, bool exp, params string[] names) =>
             Assert.AreEqual(exp, driver.Provoked(names), "Checking the provoked state of \"" + names.Join(".") + "\".");
+
+        /// <summary>Checks the pending nodes are as expected.</summary>
+        /// <param name="driver">This is the driver to check the pending of.</param>
+        /// <param name="exp">The expected names of the pending nodes.</param>
+        static public void CheckPending(this Driver driver, string exp) =>
+            Assert.AreEqual(exp, driver.Pending.Strings().Join(", "), "Checking the pending nodes.");
 
         /// <summary>Runs the driver evaluation and checks that evaluation performed as expected.</summary>
         /// <param name="driver">The driver to evaluate.</param>
@@ -165,6 +180,11 @@ namespace BlackboardTests {
             string exp = lines.Join(S.Environment.NewLine);
             Assert.AreEqual(exp, Stringifier.GraphString(driver));
         }
+
+        /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
+        /// <param name="driver">The driver to apply the parsed formula to.</param>
+        /// <param name="input">The lines of the code to read and commit.</param>
+        static public IAction Read(this Driver driver, params string[] input) => new Parser(driver).Read(input);
 
         /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
         /// <param name="driver">The driver to apply the parsed formula to.</param>

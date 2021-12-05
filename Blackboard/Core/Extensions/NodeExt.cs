@@ -128,19 +128,19 @@ namespace Blackboard.Core.Extensions {
         /// <param name="targets">The target nodes to try to reach.</param>
         /// <returns>True if any of the targets can be reached, false otherwise.</returns>
         static public bool CanReachAny(this IParent root, IEnumerable<IParent> targets) {
-            HashSet<IParent> touched = new();
+            HashSet<IParent> reached = new();
             Queue<IParent> pending = new();
             pending.Enqueue(root);
-            touched.Add(root);
+            reached.Add(root);
 
             while (pending.Count > 0) {
                 IParent node = pending.Dequeue();
                 if (targets.Contains(node)) return true;
 
                 if (node is IChild child) {
-                    foreach (IParent parent in child.Parents.NotNull().WhereNot(touched.Contains)) {
+                    foreach (IParent parent in child.Parents.NotNull().WhereNot(reached.Contains)) {
                         pending.Enqueue(parent);
-                        touched.Add(parent);
+                        reached.Add(parent);
                     }
                 }
             }
@@ -149,7 +149,7 @@ namespace Blackboard.Core.Extensions {
 
         /// <summary>Adds children nodes onto this node.</summary>
         /// <remarks>
-        /// Any children which are added need to be put in the touched list
+        /// Any children which are added need to be put in the pending evaluation list
         /// of the driver so that they will be evaluated in the next batch.
         /// </remarks>
         /// <param name="children">The children to add.</param>

@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Extensions;
+﻿using Blackboard.Core.Debug;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +11,6 @@ namespace Blackboard.Core.Actions {
     /// Typically this is for defining a new node into the namespaces reachable from global.
     /// </summary>
     public class Define: IAction {
-
-        /// <summary>This is the receiver that will be written to.</summary>
-        private readonly IFieldWriter receiver;
-
-        /// <summary>The name to write the node with.</summary>
-        private readonly string name;
-
-        /// <summary>The node being set to the receiver with the given name.</summary>
-        private readonly INode node;
 
         /// <summary>
         /// This is a subset of all the node for this node to write which need to be
@@ -40,17 +32,33 @@ namespace Blackboard.Core.Actions {
         /// <param name="node">The node being set to the receiver with the given name.</param>
         /// <param name="allNodes">All the nodes which are new children of the node to write.</param>
         public Define(IFieldWriter receiver, string name, INode node, IEnumerable<INode> allNodes) {
-            this.receiver = receiver;
-            this.name = name;
-            this.node = node;
+            this.Receiver = receiver;
+            this.Name = name;
+            this.Node = node;
             this.needParents = allNodes.NotNull().OfType<IChild>().Where(child => child.NeedsToAddParents()).ToArray();
         }
+
+        /// <summary>This is the receiver that will be written to.</summary>
+        public readonly IFieldWriter Receiver;
+
+        /// <summary>The name to write the node with.</summary>
+        public readonly string Name;
+
+        /// <summary>The node being set to the receiver with the given name.</summary>
+        public readonly INode Node;
+
+        /// <summary>All the nodes which are new children of the node to write.</summary>
+        public IReadOnlyList<IChild> NeedParents => this.needParents;
 
         /// <summary>This will perform the action.</summary>
         /// <param name="driver">The driver for this action.</param>
         public void Perform(Driver driver) {
-            this.receiver.WriteField(this.name, this.node);
+            this.Receiver.WriteField(this.Name, this.Node);
             this.needParents.Foreach(child => child.AddToParents());
         }
+
+        /// <summary>Gets a human readable string for this define.</summary>
+        /// <returns>The human readable string for debugging.</returns>
+        public override string ToString() => Stringifier.Simple(this);
     }
 }

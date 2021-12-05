@@ -20,10 +20,16 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>Creates a new N-ary node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
         /// <param name="needsOneNoCast">Indicates that at least one argument must not be a cast.</param>
-        /// <param name="passOne">Indicates if there is only one argument for a new node, return the argument.</param>
+        /// <param name="passOne">
+        /// Indicates if there is only one argument for a new node, return the argument.
+        /// By default a Nary function will pass one unless otherwise indicated.
+        /// For 
+        /// </param>
         /// <param name="min">The minimum number of required nodes.</param>
-        public FunctionN(S.Func<IEnumerable<Tn>, TReturn> hndl, bool needsOneNoCast = false, bool passOne = true, int min = 1) :
-            base(min, int.MaxValue, needsOneNoCast, passOne, Type.FromType<Tn>()) {
+        /// <param name="max">The maximum allowed number of nodes.</param>
+        public FunctionN(S.Func<IEnumerable<Tn>, TReturn> hndl,
+            bool needsOneNoCast = false, bool passOne = true, int min = 1, int max = int.MaxValue) :
+            base(min, max, needsOneNoCast, passOne, Type.FromType<Tn>()) {
             this.hndl = hndl;
         }
 

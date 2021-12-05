@@ -12,9 +12,17 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>This is a helper for creating unary node factories quickly.</summary>
         /// <param name="handle">The handler for calling the node constructor.</param>
-        static public IFuncDef CreateFactory<Tout>(S.Func<IEnumerable<ITriggerParent>, Tout> handle)
+        /// <param name="needsOneNoCast">Indicates that at least one argument must not be a cast.</param>
+        /// <param name="passOne">
+        /// Indicates if there is only one argument for a new node, return the argument.
+        /// By default a Nary function will pass one unless otherwise indicated.
+        /// </param>
+        /// <param name="min">The minimum number of required nodes.</param>
+        /// <param name="max">The maximum allowed number of nodes.</param>
+        static public IFuncDef CreateFactory<Tout>(S.Func<IEnumerable<ITriggerParent>, Tout> handle,
+            bool needsOneNoCast = false, bool passOne = true, int min = 1, int max = int.MaxValue)
             where Tout : NaryTrigger =>
-            new FunctionN<ITriggerParent, Tout>(handle);
+            new FunctionN<ITriggerParent, Tout>(handle, needsOneNoCast, passOne, min, max);
 
         /// <summary>This is the list of all the parent nodes to listen to.</summary>
         private List<ITriggerParent> sources;

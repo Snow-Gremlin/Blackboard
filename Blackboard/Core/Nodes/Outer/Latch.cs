@@ -16,18 +16,6 @@ namespace Blackboard.Core.Nodes.Outer {
         static public readonly IFuncDef Factory =
             new Function<ITriggerParent, IValueParent<T>, Latch<T>>((trigger, source) => new Latch<T>(trigger, source));
 
-        /// <summary>
-        /// This is a function to assign a value to the counter node directly.
-        /// This will return the counter node on success, or null if value could not be cast.
-        /// </summary>
-        static public readonly IFuncDef Assign =
-            new Function<Latch<T>, IDataNode, Latch<T>>((Latch<T> input, IDataNode node) => {
-                T value = node.Data.ImplicitCastTo<T>();
-                if (value is null) return null;
-                input.SetValue(value);
-                return input;
-            });
-
         /// <summary>This is the first parent node to read from.</summary>
         private ITriggerParent trigger;
 

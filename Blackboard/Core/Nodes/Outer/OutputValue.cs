@@ -13,9 +13,6 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory(source => new OutputValue<T>(source));
 
-        /// <summary>The parent source to listen to.</summary>
-        private IValueParent<T> source;
-
         /// <summary>Creates a new output value node.</summary>
         /// <param name="source">The initial source to get the value from.</param>
         public OutputValue(IValueParent<T> source = null) : base(source) { }
@@ -30,7 +27,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <param name="value">The parent value to negate.</param>
         /// <returns>The negated parent value.</returns>
         protected override T OnEval(T value) =>
-            this.source is null ? default : this.source.Value;
+            this.Parent is null ? default : this.Parent.Value;
 
         /// <summary>Updates the node's provoked state.</summary>
         /// <returns>True indicates that the value has changed, false otherwise.</returns>

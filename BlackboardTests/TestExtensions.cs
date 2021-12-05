@@ -1,5 +1,8 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Actions;
 using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Debug;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,12 +25,12 @@ namespace BlackboardTests {
         /// <summary>Checks the depth of the node.</summary>
         /// <param name="node">The node to check the depth of.</param>
         /// <param name="exp">This is the expected depth.</param>
-        static public void CheckDepth(this IEvaluatable node, int exp) =>
+        static public void CheckDepth(this IEvaluable node, int exp) =>
             Assert.AreEqual(exp, node.Depth);
 
         /// <summary>Checks the list of parents of a node.</summary>
         /// <param name="node">The node to check the parents of.</param>
-        /// <param name="exp">The comma seperated list of parent strings.</param>
+        /// <param name="exp">The comma separated list of parent strings.</param>
         static public void CheckParents(this IChild node, string exp) =>
             Assert.AreEqual(exp, node.Parents.Join(", "));
 
@@ -81,7 +84,7 @@ namespace BlackboardTests {
             stack.Push(node);
             while (stack.Count > 0) {
                 node = stack.Pop();
-                node.InstallIntoParents();
+                node.InstallAll();
                 foreach (IParent parent in node.Parents) {
                     if (parent is IChild child) stack.Push(child);
                 }
@@ -168,8 +171,8 @@ namespace BlackboardTests {
         /// <param name="input">The lines of the code to read and commit.</param>
         static public void ReadCommit(this Driver driver, params string[] input) {
             Parser parser = new(driver);
-            Formula formula = parser.Read(input);
-            formula.Perform();
+            IAction formula = parser.Read(input);
+            formula.Perform(driver);
         }
 
         #endregion
@@ -185,7 +188,7 @@ namespace BlackboardTests {
         /// The scalar to convert a call to an op.
         /// For example if the call makes 10 calls into some operation then the divisor is 10.
         /// </param>
-        /// <param name="minSecs">The minimum abount of time to keep repeating the action.</param>
+        /// <param name="minSecs">The minimum amount of time to keep repeating the action.</param>
         /// <returns>The average number of milliseconds per action operation.</returns>
         static public double Measure(this S.Action action, string title = null, double divisor = 1.0, double minSecs = 0.5) {
             S.TimeSpan minimum = S.TimeSpan.FromSeconds(minSecs);

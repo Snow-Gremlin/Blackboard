@@ -20,7 +20,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>Creates a new virtual node around the given receiver.</summary>
         /// <param name="name">The is the name for this virtual node.</param>
         /// <param name="receiver">The receiver to virtually add and remove nodes from.</param>
-        public VirtualNode(string name, IFieldReader receiver) {
+        public VirtualNode(string name, IFieldWriter receiver) {
             this.Name = name;
             this.Receiver = receiver;
             this.overrides = new Dictionary<string, INode>();
@@ -59,7 +59,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public INode ReadField(string name) {
             if (this.overrides.ContainsKey(name)) return this.overrides[name];
             INode node = this.Receiver.ReadField(name);
-            if (node is not IFieldReader field) return node;
+            if (node is not IFieldWriter field) return node;
             VirtualNode vNode = new(name, field);
             this.overrides[name] = vNode;
             return vNode;

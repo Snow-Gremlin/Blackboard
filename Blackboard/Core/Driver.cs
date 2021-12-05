@@ -24,13 +24,13 @@ namespace Blackboard.Core {
         public const string OperatorNamespace = "$operators";
 
         /// <summary>The input nodes which have been modified.</summary>
-        private LinkedList<Evaluable> touched;
+        private LinkedList<IEvaluable> touched;
 
         /// <summary>Creates a new driver.</summary>
         /// <param name="addFuncs">Indicates that built-in functions should be added.</param>
         /// <param name="addConsts">Indicates that constants should be added.</param>
         public Driver(bool addFuncs = true, bool addConsts = true) {
-            this.touched = new LinkedList<Evaluable>();
+            this.touched = new LinkedList<IEvaluable>();
             this.Global  = new Namespace();
 
             this.addOperators();
@@ -473,7 +473,7 @@ namespace Blackboard.Core {
 
         /// <summary>This touches the given nodes so that they are recalculated during evaluation.</summary>
         /// <param name="nodes">The nodes to touch.</param>
-        public void Touch(IEnumerable<INode> nodes) => this.touched.SortInsertUnique(nodes.NotNull().OfType<Evaluable>());
+        public void Touch(IEnumerable<INode> nodes) => this.touched.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
 
         /// <summary>This indicates if any changes are pending evaluation.</summary>
         public bool HasPending => this.touched.Count > 0;
@@ -481,18 +481,18 @@ namespace Blackboard.Core {
         /// <summary>Updates and propagates the changes from the given inputs through the blackboard nodes.</summary>
         /// <param name="logger">An optional logger for debugging this evaluation.</param>
         public void Evaluate(EvalLogger logger = null) {
-            LinkedList<Evaluable> pending = new();
+            LinkedList<IEvaluable> pending = new();
             LinkedList<ITrigger> needsReset = new();
             pending.SortInsertUnique(this.touched);
             this.touched.Clear();
             logger?.StartEval(pending);
 
             while (pending.Count > 0) {
-                Evaluable node = pending.TakeFirst();
+                IEvaluable node = pending.TakeFirst();
 
                 logger?.Eval(node);               
                 if (node.Evaluate()) {
-                    IEnumerable<Evaluable> children = node.Children.NotNull().OfType<Evaluable>();
+                    IEnumerable<IEvaluable> children = node.Children.NotNull().OfType<IEvaluable>();
                     logger?.EvalResult(node, true, children);
                     pending.SortInsertUnique(children);
                 } else logger?.EvalResult(node, false);

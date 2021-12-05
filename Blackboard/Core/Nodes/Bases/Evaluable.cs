@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// This is the base node for all nodes within the main part of the blackboard graph
     /// which propagates updates when a change occurs.
     /// </summary>
-    public abstract class Evaluable: IParent {
+    public abstract class Evaluable: IEvaluable {
 
         /// <summary>The collection of children nodes to this node.</summary>
         private List<IChild> children;
@@ -86,7 +86,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
                 // Determine the depth that this node should be at based on its parents.
                 int depth = node is not IChild child ? 0 :
-                    child.Parents.OfType<Evaluable>().MaxDepth() + 1;
+                    child.Parents.OfType<IEvaluable>().MaxDepth() + 1;
 
                 // If the depth has changed then its children also need to be updated.
                 if (node.Depth != depth) {

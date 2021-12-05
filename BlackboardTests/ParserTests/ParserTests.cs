@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Extensions;
 using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;

@@ -8,7 +8,7 @@ using S = System;
 namespace Blackboard.Core.Extensions {
 
     /// <summary>The set of extensions for working with different types of Nodes.</summary>
-    static class NodeExt {
+    static public class NodeExt {
         #region INode...
 
         /// <summary>The values from the given input values.</summary>
@@ -169,7 +169,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="list">The list of values to sort insert into.</param>
         /// <param name="nodes">The set of nodes to insert.</param>
         static public void SortInsertUnique<T>(this LinkedList<T> list, params T[] nodes)
-            where T : Evaluable =>
+            where T : IEvaluable =>
             list.SortInsertUnique(nodes as IEnumerable<T>);
 
         /// <summary>This sort inserts unique evaluable nodes into the given linked list.</summary>
@@ -177,7 +177,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="list">The list of values to sort insert into.</param>
         /// <param name="nodes">The set of nodes to insert.</param>
         static public void SortInsertUnique<T>(this LinkedList<T> list, IEnumerable<T> nodes)
-            where T : Evaluable {
+            where T : IEvaluable {
             foreach (T node in nodes) {
                 bool addToEnd = true;
                 for (LinkedListNode<T> pend = list.First; pend is not null; pend = pend.Next) {
@@ -198,7 +198,7 @@ namespace Blackboard.Core.Extensions {
         /// <summary>Gets the maximum depth from the given nodes.</summary>
         /// <param name="nodes">The nodes to get the maximum depth from.</param>
         /// <returns>The maximum found depth.</returns>
-        static public int MaxDepth(this IEnumerable<Evaluable> nodes) =>
+        static public int MaxDepth(this IEnumerable<IEvaluable> nodes) =>
             nodes.NotNull().Select((node) => node.Depth).Aggregate(0, S.Math.Max);
 
         #endregion

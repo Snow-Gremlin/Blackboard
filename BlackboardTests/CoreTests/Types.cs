@@ -1,10 +1,11 @@
-﻿using Blackboard.Core;
-using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Nodes.Inner;
-using Blackboard.Core.Nodes.Outer;
-using Blackboard.Core.Nodes.Interfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Debug;
 using Blackboard.Core.Nodes.Functions;
+using Blackboard.Core.Nodes.Inner;
+using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Types;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BlackboardTests.CoreTests {
 

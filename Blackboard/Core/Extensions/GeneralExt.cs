@@ -5,7 +5,7 @@ using S = System;
 namespace Blackboard.Core.Extensions {
 
     /// <summary>The set of general use extensions.</summary>
-    static class GeneralExt {
+    static public class GeneralExt {
 
         /// <summary>Filters a sequence of values based on the inverse of the predicate.</summary>
         /// <typeparam name="T">The type of values being filtered.</typeparam>

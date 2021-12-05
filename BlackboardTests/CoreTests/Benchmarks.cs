@@ -1,8 +1,9 @@
-﻿using Blackboard.Core;
-using Blackboard.Core.Data.Caps;
+﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using S = System;
@@ -13,8 +14,8 @@ namespace BlackboardTests.CoreTests {
     public class Benchmarks {
 
         /// <summary>Runs and measures a test on the given FromType implementation.</summary>
-        /// <param name="title">The title to show for this impelementation.</param>
-        /// <param name="testHandle">The FromType implemenatation to test and measure.</param>
+        /// <param name="title">The title to show for this implementation.</param>
+        /// <param name="testHandle">The FromType implementation to test and measure.</param>
         /// <returns>The average milliseconds per </returns>
         static private double measureFromTypeImplementation(string title, S.Func<S.Type, Type> testHandle) {
             Dictionary<S.Type, Type> testTypes = new() {
@@ -53,7 +54,7 @@ namespace BlackboardTests.CoreTests {
             double b = measureFromTypeImplementation("Follow Inheritance (Current Implementation)", Type.FromType);
 
             Assert.IsTrue(a > b, "The current implementation ("+b+") is faster than other ("+a+")");
-            S.Console.WriteLine("Current implemention is {0:P} the time of the other.", b/a);
+            S.Console.WriteLine("Current implementation is {0:P} the time of the other.", b/a);
         }
     }
 }

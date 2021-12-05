@@ -7,7 +7,7 @@ using S = System;
 namespace Blackboard.Core.Extensions {
 
     /// <summary>The set of extensions for working with Types.</summary>
-    static class TypeExt {
+    static public class TypeExt {
 
         /// <summary>The type nodes for all the given nodes.</summary>
         /// <param name="nodes">The nodes to get the types for.</param>

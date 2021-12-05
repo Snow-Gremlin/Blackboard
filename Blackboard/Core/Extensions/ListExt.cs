@@ -4,7 +4,7 @@ using System.Linq;
 namespace Blackboard.Core.Extensions {
 
     /// <summary>The set of extensions for working with lists.</summary>
-    static class ListExt {
+    static public class ListExt {
 
         /// <summary>Adds only unique values into the given list.</summary>
         /// <typeparam name="T">The type of values in the list.</typeparam>

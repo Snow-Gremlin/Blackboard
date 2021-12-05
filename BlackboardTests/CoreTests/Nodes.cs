@@ -24,9 +24,6 @@ namespace BlackboardTests.CoreTests {
             and12 .CheckString("And<bool>[False](Input<bool>, Input<bool>)");
             not123.CheckString("Not<bool>[True](Or<bool>(And<bool>, Input<bool>))");
 
-            input1.CheckParents("");
-            input2.CheckParents("");
-            input3.CheckParents("");
             and12 .CheckParents("Input<bool>[False], Input<bool>[False]");
             or123 .CheckParents("And<bool>[False], Input<bool>[False]");
             not123.CheckParents("Or<bool>[False]");

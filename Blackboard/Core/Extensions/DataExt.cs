@@ -4,7 +4,7 @@ using Blackboard.Core.Data.Interfaces;
 namespace Blackboard.Core.Extensions {
 
     /// <summary>Extensions to add to data specific methods.</summary>
-    static class DataExt {
+    static public class DataExt {
 
         /// <summary>Determines if this data can be cast implicitly, cast explicitly, or is already an inherited type.</summary>
         /// <typeparam name="T">The type of the data to cast to.</typeparam>

@@ -21,6 +21,7 @@ namespace Blackboard.Parser {
         private readonly LinkedList<Type> types;
         private readonly LinkedList<INode> stack;
         private readonly HashSet<INode> newNodes;
+        private readonly LinkedList<string> idStack;
         private readonly LinkedList<LinkedList<INode>> argStacks;
         private readonly LinkedList<IAction> actions;
 
@@ -32,6 +33,7 @@ namespace Blackboard.Parser {
             this.types     = new LinkedList<Type>();
             this.stack     = new LinkedList<INode>();
             this.newNodes  = new HashSet<INode>();
+            this.idStack   = new LinkedList<string>();
             this.argStacks = new LinkedList<LinkedList<INode>>();
             this.actions   = new LinkedList<IAction>();
 
@@ -56,6 +58,7 @@ namespace Blackboard.Parser {
             this.types.Clear();
             this.stack.Clear();
             this.newNodes.Clear();
+            this.idStack.Clear();
             this.argStacks.Clear();
         }
 
@@ -121,6 +124,9 @@ namespace Blackboard.Parser {
             this.newNodes.Add(node);
         }
 
+        /// <summary>Clears the list of new nodes.</summary>
+        public void ClearNewNodes() => this.newNodes.Clear();
+
         /// <summary>Gets all the nodes which have been added since the last clear.</summary>
         public IEnumerable<INode> NewNodes => this.newNodes;
 
@@ -143,11 +149,15 @@ namespace Blackboard.Parser {
         public INode[] EndArgs() => this.argStacks.TakeFirst().ToArray();
 
         #endregion
-        #region Type Stack...
+        #region Other Stacks...
 
         /// <summary>Pushes a type onto the stack of types.</summary>
         /// <param name="value">The type to push.</param>
         public void PushType(Type value) => this.types.AddLast(value);
+
+        /// <summary>Peeks the type off the top of the stack without removing it.</summary>
+        /// <returns>The type that is n the top of the stack.</returns>
+        public Type PeekType() => this.types.Last.Value;
 
         /// <summary>Pops off a type is on the top of the stack of types.</summary>
         /// <returns>The type which was on top of the stack.</returns>
@@ -156,6 +166,14 @@ namespace Blackboard.Parser {
             this.types.RemoveLast();
             return value;
         }
+
+        /// <summary>This pushes a new identifier name onto the id stack.</summary>
+        /// <param name="id">The identifier to push onto the id stack.</param>
+        public void PushId(string id) => this.idStack.AddFirst(id);
+
+        /// <summary>This pops an identifier from the id stack.</summary>
+        /// <returns>The identifier popped off the id stack.</returns>
+        public string PopId() => this.idStack.TakeFirst();
 
         #endregion
 

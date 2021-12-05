@@ -176,8 +176,8 @@
 <NewTypedInputTail> := _
     | [Comma] <NewTypedInputPart> <NewTypedInputTail>;
 
-<NewTypedInputPart> := [Identifier] {pushId} {newTypeInputNoAssign}
-    | [Identifier] {pushId} [Assign] <Declaration> {newTypeInputWithAssign};
+<NewTypedInputPart> := [Identifier] {defineId} {newTypeInputNoAssign}
+    | [Identifier] {defineId} [Assign] <Declaration> {newTypeInputWithAssign};
 
 #----------------------------------------------------------
 
@@ -187,15 +187,15 @@
 <NewVarInputTail> := _
     | [Comma] <NewVarInputPart> <NewVarInputTail>;
 
-<NewVarInputPart> := [Identifier] {pushId} [Assign] <Declaration> {newVarInputWithAssign};
+<NewVarInputPart> := [Identifier] {defineId} [Assign] <Declaration> {newVarInputWithAssign};
 
 #----------------------------------------------------------
 
-<DefineTypedRule> := <RootType> [Identifier] {pushId} [Define] <Conditional> {typeDefine}
-    | [DeclareDefine] <RootType> [Identifier] {pushId} [Assign] <Conditional> {typeDefine};
+<DefineTypedRule> := <RootType> [Identifier] {defineId} [Define] <Conditional> {typeDefine}
+    | [DeclareDefine] <RootType> [Identifier] {defineId} [Assign] <Conditional> {typeDefine};
 
-<DefineVarRule> := [Identifier] {pushId} [Define] <Conditional> {varDefine}
-    | [DeclareDefine] [Identifier] {pushId} [Assign] <Conditional> {varDefine};
+<DefineVarRule> := [Identifier] {defineId} [Define] <Conditional> {varDefine}
+    | [DeclareDefine] [Identifier] {defineId} [Assign] <Conditional> {varDefine};
 
 #----------------------------------------------------------
 
@@ -207,9 +207,9 @@
 
 #----------------------------------------------------------
 
-<GetTypedValue> := [DeclareGet] <RootType> [Identifier] {pushId} [Assign] <Conditional> {typeGet};
+<GetTypedValue> := [DeclareGet] <RootType> [Identifier] {defineId} [Assign] <Conditional> {typeGet};
 
-<GetVarValue> := [DeclareGet] [Identifier] {pushId} [Assign] <Conditional> {varGet};
+<GetVarValue> := [DeclareGet] [Identifier] {defineId} [Assign] <Conditional> {varGet};
 
 #==========================================================
 

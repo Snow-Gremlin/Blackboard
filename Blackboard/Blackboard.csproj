@@ -7,11 +7,11 @@
   <ItemGroup>
     <None Remove="Core\Cast.txt" />
     <None Remove="Core\Nodes\Cast.txt" />
-    <None Remove="Core\Parser\Parser.lang" />
+    <None Remove="Parser\Parser.lang" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Core\Parser\Parser.lang" />
+    <EmbeddedResource Include="Parser\Parser.lang" />
   </ItemGroup>
 
   <ItemGroup>

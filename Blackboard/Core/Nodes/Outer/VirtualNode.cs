@@ -30,7 +30,7 @@ namespace Blackboard.Core.Nodes.Outer {
         }
 
         /// <summary>The receiver having children virtually added or removed from it.</summary>
-        public readonly IFieldReader Receiver;
+        public readonly IFieldWriter Receiver;
 
         /// <summary>This is the name for this virtual node in its field reader.</summary>
         public readonly string Name;

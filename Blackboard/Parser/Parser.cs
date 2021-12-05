@@ -85,6 +85,7 @@ namespace Blackboard.Parser {
             this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>();
 
             this.addHandler("clear",         handleClear);
+            this.addHandler("defineId",      handleDefineId);
             this.addHandler("pushNamespace", handlePushNamespace);
             this.addHandler("popNamespace",  handlePopNamespace);
 
@@ -181,20 +182,23 @@ namespace Blackboard.Parser {
         #endregion
         #region Helper Methods...
 
-        /// <summary>Performs a cast from one value to another by creating a new node.</summary>
-        /// <param name="builder">The builder the formula is being built for.</param>
-        /// <param name="loc">The location that the cast is being used for.</param>
-        /// <param name="type"></param>
-        /// <param name="value"></param>
-        /// <param name="explicitCasts"></param>
-        /// <returns></returns>
-        static private INode performCast(Builder builder, PP.Scanner.Location loc, Type type, INode value, bool explicitCasts = false) {
+        /// <summary>Performs a cast if needed from one value to another by creating a new node.</summary>
+        /// <remarks>If a cast is added then the cast will be added to the builder as a new node.</remarks>
+        /// <param name="builder">The formula builder being used.</param>
+        /// <param name="type">The type to cast the value to.</param>
+        /// <param name="value">The value to cast to the given type.</param>
+        /// <param name="explicitCasts">
+        /// Indicates if explicit casts are allowed to be used when casting.
+        /// If false then only inheritance or implicit casts will be used.
+        /// </param>
+        /// <returns>The cast value or the given value in the given type.</returns>
+        static private INode performCast(Builder builder, Type type, INode value, bool explicitCasts = false) {
             Type valueType = Type.TypeOf(value);
             TypeMatch match = type.Match(valueType, explicitCasts);
             if (!match.IsAnyCast)
                 return match.IsMatch ? value :
                     throw new Exception("The value type can not be cast to the given type.").
-                        With("Location", loc).
+                        With("Location", builder.LastLocation).
                         With("Target", type).
                         With("Type", valueType).
                         With("Value", value);
@@ -207,19 +211,24 @@ namespace Blackboard.Parser {
                 type == Type.String  ? ops.Find("castString") :
                 type == Type.Trigger ? ops.Find("castTrigger") :
                 throw new Exception("Unsupported type for new definition cast").
-                    With("Location", loc).
+                    With("Location", builder.LastLocation).
                     With("Type", type);
             INode castValue = (castGroup as IFuncGroup).Build(value);
             builder.AddNewNode(castValue);
             return castValue;
         }
 
-        // TODO: Comment
-        static private INode addAssignment(Builder builder, PP.Scanner.Location loc, INode target, INode value) {
+        /// <summary>Creates an assignment action and adds it to the builder if possible.</summary>
+        /// <param name="builder">The formula builder being used.</param>
+        /// <param name="target">The node to assign the value to.</param>
+        /// <param name="value">The value to assign to the given target node.</param>
+        /// <returns>The cast value or given value which was used in the assignment.</returns>
+        static private INode addAssignment(Builder builder, INode target, INode value) {
             // Check if the base types match. Don't need to check that the type is
             // a data type or trigger since only those can be reduced to constants.
+            PP.Scanner.Location loc = builder.LastLocation;
             Type targetType = Type.TypeOf(target);
-            INode castValue = performCast(builder, loc, targetType, value);
+            INode castValue = performCast(builder, targetType, value);
             IAction assign =
                 targetType == Type.Bool    ? Assign<Bool>.  Create(loc, target, castValue) :
                 targetType == Type.Int     ? Assign<Int>.   Create(loc, target, castValue) :
@@ -232,8 +241,34 @@ namespace Blackboard.Parser {
                     With("Input", target).
                     With("Value", value);
             builder.AddAction(assign);
-
             return castValue;
+        }
+
+        /// <summary>Creates a new input node with the given name in the local scope.</summary>
+        /// <param name="builder">The formula builder being used.</param>
+        /// <param name="name">The name to create the input for.</param>
+        /// <param name="type">The type of input to create.</param>
+        /// <returns>The newly created input.</returns>
+        static private INode createInput(Builder builder, string name, Type type) {
+            if (builder.CurrentScope.ContainsField(name))
+                throw new Exception("A node already exists with the given name.").
+                    With("Name", name).
+                    With("Type", type);
+
+            INode node =
+                type == Type.Bool    ? new InputValue<Bool>() :
+                type == Type.Int     ? new InputValue<Int>() :
+                type == Type.Double  ? new InputValue<Double>() :
+                type == Type.String  ? new InputValue<String>() :
+                type == Type.Trigger ? new InputTrigger() :
+                throw new Exception("Unsupported type for new typed input").
+                    With("Location", builder.LastLocation).
+                    With("Type", type);
+
+            builder.AddAction(new Define(builder.CurrentScope.Receiver, name, node, builder.NewNodes));
+            builder.CurrentScope.WriteField(name, node);
+            builder.ClearNewNodes();
+            return node;
         }
 
         #endregion
@@ -246,10 +281,13 @@ namespace Blackboard.Parser {
             builder.Clear();
         }
 
+        /// <summary></summary>
+        /// <param name="builder">The formula builder being worked on.</param>
+        static private void handleDefineId(Builder builder) => builder.PushId(builder.LastText);
+
         /// <summary>This is called when the namespace has opened.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushNamespace(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             string name = builder.LastText;
             VirtualNode scope = builder.CurrentScope;
 
@@ -259,7 +297,7 @@ namespace Blackboard.Parser {
                 if (next is not VirtualNode nextspace)
                     throw new Exception("Can not open namespace. Another non-namespace exists by that name.").
                          With("Identifier", name).
-                         With("Location", loc);
+                         With("Location", builder.LastLocation);
                 builder.PushScope(nextspace);
                 return;
             }
@@ -278,133 +316,51 @@ namespace Blackboard.Parser {
         /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleNewTypeInputNoAssign(Builder builder) {
-            IdPrep target = builder.PopPrepper<IdPrep>();
-            Type t = builder.PopType();
-            PP.Scanner.Location loc = builder.LastLocation;
-
-            IFuncDef inputFactory =
-                t == Type.Bool    ? InputValue<Bool>.Factory :
-                t == Type.Int     ? InputValue<Int>.Factory :
-                t == Type.Double  ? InputValue<Double>.Factory :
-                t == Type.String  ? InputValue<String>.Factory :
-                t == Type.Trigger ? InputTrigger.Factory :
-                throw new Exception("Unsupported type for new typed input").
-                    With("Location", loc).
-                    With("Type", t);
-
-            VirtualNode virtualInput = target.CreateNode(builder, inputFactory.ReturnType);
-            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory)).Prepare(builder);
-            builder.Add(new VirtualNodeWriter(virtualInput, inputPerf));
-
-            // Push the type back onto the stack for the next assignment.
-            builder.PushType(t);
+            string name = builder.PopId();
+            Type type = builder.PeekType();
+            createInput(builder, name, type);
         }
 
         /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleNewTypeInputWithAssign(Builder builder) {
-            IPrepper value = builder.PopPrepper<IPrepper>();
-            IdPrep target = builder.PopPrepper<IdPrep>();
-            Type t = builder.PopType();
-            PP.Scanner.Location loc = builder.LastLocation;
-
-            IPerformer valuePerf = value.Prepare(builder, true);
-            IFuncDef inputFactory =
-                t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
-                t == Type.Int     ? InputValue<Int>.FactoryWithInitialValue :
-                t == Type.Double  ? InputValue<Double>.FactoryWithInitialValue :
-                t == Type.String  ? InputValue<String>.FactoryWithInitialValue :
-                t == Type.Trigger ? InputTrigger.FactoryWithInitialValue :
-                throw new Exception("Unsupported type for new typed input with assignment").
-                    With("Type", t);
-
-            VirtualNode virtualInput = target.CreateNode(builder, inputFactory.ReturnType);
-            Type valueType = Type.FromType(valuePerf.Type);
-            if (!t.Match(valueType).IsMatch)
-                throw new Exception("May not assign the value to that type of input.").
-                    With("Location", loc).
-                    With("Input Type", t).
-                    With("Value Type", valueType);
-
-            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(builder);
-            builder.Add(new VirtualNodeWriter(virtualInput, inputPerf));
-
-            // Push the type back onto the stack for the next assignment.
-            builder.PushType(t);
+            INode value = builder.Pop();
+            Type type = builder.PeekType();
+            string name = builder.PopId();
+            INode target = createInput(builder, name, type);
+            addAssignment(builder, target, value);
         }
 
         /// <summary>This creates a new input node and assigns it with an initial value.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleNewVarInputWithAssign(Builder builder) {
-            IPrepper value = builder.PopPrepper<IPrepper>();
-            IdPrep target = builder.PopPrepper<IdPrep>();
-            PP.Scanner.Location loc = builder.LastLocation;
-
-            IPerformer valuePerf = value.Prepare(builder, true);
-            Type t = Type.FromType(valuePerf.Type);
-            IFuncDef inputFactory =
-                t == Type.Bool    ? InputValue<Bool>.FactoryWithInitialValue :
-                t == Type.Int     ? InputValue<Int>.FactoryWithInitialValue :
-                t == Type.Double  ? InputValue<Double>.FactoryWithInitialValue :
-                t == Type.String  ? InputValue<String>.FactoryWithInitialValue :
-                t == Type.Trigger ? InputTrigger.FactoryWithInitialValue :
-                throw new Exception("Unsupported type for new input").
-                    With("Location", loc).
-                    With("Type", t);
-
-            VirtualNode virtualInput = target.CreateNode(builder, inputFactory.ReturnType);
-            IPerformer inputPerf = new FuncPrep(loc, new NoPrep(inputFactory), new NoPrep(valuePerf)).Prepare(builder);
-            builder.Add(new VirtualNodeWriter(virtualInput, inputPerf));
+            INode value = builder.Pop();
+            string name = builder.PopId();
+            Type type = Type.TypeOf(value);
+            INode target = createInput(builder, name, type);
+            addAssignment(builder, target, value);
         }
 
         /// <summary>This handles defining a new typed named node.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleTypeDefine(Builder builder) {
-            IPrepper value = builder.PopPrepper<IPrepper>();
-            IdPrep target = builder.PopPrepper<IdPrep>();
-            Type t = builder.PopType();
-            PP.Scanner.Location loc = builder.LastLocation;
-
-            IPerformer valuePerf = value.Prepare(builder, false);
-            Type valueType  = Type.FromType(valuePerf.Type);
-            TypeMatch match = t.Match(valueType);
-            if (!match.IsMatch)
-                throw new Exception("May not define the value to that type of input.").
-                    With("Location", loc).
-                    With("Input Type", t).
-                    With("Value Type", valueType);
-
-            VirtualNode virtualInput = target.CreateNode(builder, t.RealType);
-            Namespace ops = builder.Driver.Global.Find(Driver.OperatorNamespace) as Namespace;
-            if (match.IsImplicit) {
-                INode castGroup =
-                    t == Type.Bool    ? ops.Find("castBool") :
-                    t == Type.Int     ? ops.Find("castInt") :
-                    t == Type.Double  ? ops.Find("castDouble") :
-                    t == Type.String  ? ops.Find("castString") :
-                    t == Type.Trigger ? ops.Find("castTrigger") :
-                    throw new Exception("Unsupported type for new definition cast").
-                        With("Location", loc).
-                        With("Type", t);
-
-                IFuncDef castFunc = (castGroup as IFuncGroup).Find(valueType);
-                valuePerf = new Function(castFunc, valuePerf);
-            }
-            builder.Add(new VirtualNodeWriter(virtualInput, valuePerf));
-
-            // Push the type back onto the stack for the next definition.
-            builder.PushType(t);
+            INode value = builder.Pop();
+            Type type = builder.PeekType();
+            string name = builder.PopId();
+            INode castValue = performCast(builder, type, value);
+            builder.AddAction(new Define(builder.CurrentScope.Receiver, name, castValue, builder.NewNodes));
+            builder.CurrentScope.WriteField(name, castValue);
+            builder.ClearNewNodes();
         }
 
         /// <summary>This handles defining a new untyped named node.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleVarDefine(Builder builder) {
-            IPrepper value = builder.PopPrepper<IPrepper>();
-            IdPrep target = builder.PopPrepper<IdPrep>();
-
-            IPerformer  valuePerf    = value.Prepare(builder, false);
-            VirtualNode virtualInput = target.CreateNode(builder, valuePerf.Type);
-            builder.Add(new VirtualNodeWriter(virtualInput, valuePerf));
+            INode value = builder.Pop();
+            string name = builder.PopId();
+            builder.AddAction(new Define(builder.CurrentScope.Receiver, name, value, builder.NewNodes));
+            builder.CurrentScope.WriteField(name, value);
+            builder.ClearNewNodes();
         }
 
         /// <summary>This handles when a trigger is provoked unconditionally.</summary>
@@ -417,25 +373,20 @@ namespace Blackboard.Parser {
         /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleConditionalProvokeTrigger(Builder builder) {
-            PP.Scanner.Location loc = builder.LastLocation;
             INode target = builder.Pop();
-            INode value = builder.Pop();
+            INode value  = builder.Pop();
+            if (target is not ITriggerInput input)
+                throw new Exception("Target node is not an input trigger.").
+                    With("Target", target).
+                    With("Value", value).
+                    With("Location", builder.LastLocation);
 
-            IPerformer valuePerf  = value.Prepare(builder, false);
-            IPerformer targetPerf = target.Prepare(builder, false);
-
-            Type valueType  = Type.FromType(valuePerf.Type);
-            TypeMatch match = Type.Trigger.Match(valueType);
-            if (!match.IsMatch)
-                throw new Exception("May only conditionally provoke a trigger with a bool or trigger.").
-                    With("Location", loc).
-                    With("Conditional Type", valueType);
-
-            NoPrep valuePrep = new(valuePerf), targetPrep = new(targetPerf), funcPrep = new(InputTrigger.Assign);
-            builder.Add(new FuncPrep(loc, funcPrep, targetPrep, valuePrep).Prepare(builder));
+            INode castValue = performCast(builder, Type.Trigger, value);
+            builder.AddAction(new Provoke(input, castValue as ITrigger));
 
             // Push the condition onto the stack for any following trigger pulls.
-            builder.PushPrepper(valuePrep);
+            // See comment in `handleAssignment` about pushing cast value back onto the stack.
+            builder.Push(castValue);
         }
 
         static private void handleTypeGet(Builder builder) {
@@ -452,7 +403,7 @@ namespace Blackboard.Parser {
         static private void handleAssignment(Builder builder) {
             INode value  = builder.Pop();
             INode target = builder.Pop();
-            INode castValue = addAssignment(builder, builder.LastLocation, target, value);
+            INode castValue = addAssignment(builder, target, value);
 
             // Push the cast value back onto the stack for any following assignments.
             // By using the cast it makes it more like `X=Y=Z` is `Y=Z; X=Y;` but means that if a double and an int are being set by
@@ -469,7 +420,7 @@ namespace Blackboard.Parser {
         static private void handleCast(Builder builder) {
             INode value = builder.Pop();
             Type type   = builder.PopType();
-            builder.PushNew(performCast(builder, builder.LastLocation, type, value, true));
+            builder.PushNew(performCast(builder, type, value, true));
         }
 
         /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>

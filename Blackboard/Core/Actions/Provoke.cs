@@ -1,6 +1,9 @@
 ﻿using Blackboard.Core.Debug;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
 using PetiteParser.Scanner;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Core.Actions {
 
@@ -13,10 +16,10 @@ namespace Blackboard.Core.Actions {
         /// </summary>
         /// <param name="loc">The location that this provoke was created.</param>
         /// <param name="target">The target node to provoke.</param>
-        /// <param name="value">The value to use as the conditional.</param>
+        /// <param name="value">The value to use as the conditional.</param>v
         /// <returns>The provoke action.</returns>
-        static public Provoke Create(Location loc, INode target, INode value) =>
-            (target is ITriggerInput input) && (value is ITrigger conditional) ? new Provoke(input, conditional) :
+        static public Provoke Create(Location loc, INode target, INode value, IEnumerable<INode> allNodes) =>
+            (target is ITriggerInput input) && (value is ITrigger conditional) ? new Provoke(input, conditional, allNodes) :
             throw new Exception("Unexpected node types for a conditional provoke.").
                 With("Location", loc).
                 With("Target", target).
@@ -28,19 +31,28 @@ namespace Blackboard.Core.Actions {
         /// </summary>
         /// <param name="loc">The location that this provoke was created.</param>
         /// <param name="target">The target node to provoke.</param>
+        /// <param name="allNodes">All the nodes which are new children of the node to provoke.</param>
         /// <returns>The provoke action.</returns>
-        static public Provoke Create(Location loc, INode target) =>
-            (target is ITriggerInput input) ? new Provoke(input) :
+        static public Provoke Create(Location loc, INode target, IEnumerable<INode> allNodes) =>
+            (target is ITriggerInput input) ? new Provoke(input, null, allNodes) :
             throw new Exception("Unexpected node types for a unconditional provoke.").
                 With("Location", loc).
                 With("Target", target);
 
+        /// <summary>
+        /// This is a subset of all the node for the trigger which need to be pended
+        /// for evaluation in order to perform this assignment.
+        /// </summary>
+        private readonly IEvaluable[] needPending;
+
         /// <summary>Creates a new provoke action.</summary>
         /// <param name="target">The input trigger to provoke.</param>
         /// <param name="trigger">The optional trigger to conditionally provoke with or null to always provoke.</param>
-        public Provoke(ITriggerInput target, ITrigger trigger = null) {
+        /// <param name="allNodes">All the nodes which are new children of the node to provoke.</param>
+        public Provoke(ITriggerInput target, ITrigger trigger, IEnumerable<INode> allNodes) {
             this.Target  = target;
             this.Trigger = trigger;
+            this.needPending = allNodes.NotNull().OfType<IEvaluable>().ToArray();
         }
 
         /// <summary>The target input trigger to provoke.</summary>
@@ -49,10 +61,16 @@ namespace Blackboard.Core.Actions {
         /// <summary>The optional trigger to conditionally provoke with.</summary>
         public readonly ITrigger Trigger;
 
+        /// <summary>All the nodes which are new children of the node to provoke.</summary>
+        public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
+
         /// <summary>This will perform the action.</summary>
         /// <param name="driver">The driver for this action.</param>
-        public void Perform(Driver driver) =>
+        public void Perform(Driver driver) {
+            driver.Pend(this.needPending);
+            driver.Evaluate();
             driver.Provoke(this.Target, this.Trigger?.Provoked ?? true);
+        }
 
         /// <summary>Gets a human readable string for this provoke.</summary>
         /// <returns>The human readable string for debugging.</returns>

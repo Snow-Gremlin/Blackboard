@@ -155,7 +155,7 @@ namespace BlackboardTests {
         /// <param name="driver">The driver to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckEvaluate(this Driver driver, params string[] lines) {
-            EvalLogger logger = new();
+            Logger logger = new();
             logger.Stringifier.PreloadNames(driver);
             driver.Evaluate(logger);
             string exp = lines.Join(S.Environment.NewLine);

@@ -487,32 +487,24 @@ namespace Blackboard.Core {
         /// <summary>This indicates if any changes are pending evaluation.</summary>
         public bool HasPending => this.pending.Count > 0;
 
+        /// <summary>This updates the depth values of the given pending nodes.</summary>
+        /// <remarks>
+        /// The pending list will be emptied by this call. The pending nodes are expected to be
+        /// presorted by depth which will usually provide the fastest update.
+        /// </remarks>
+        /// <param name="pending">The initial set of nodes which are pending depth update.</param>
+        static private void updateDepths(LinkedList<Evaluable> pending) {
+            
+        }
+
         /// <summary>Updates and propagates the changes from the given inputs through the blackboard nodes.</summary>
         /// <param name="logger">An optional logger for debugging this evaluation.</param>
-        public void Evaluate(EvalLogger logger = null) {
+        public void Evaluate(Logger logger = null) {
+            this.pending.Evaluate(logger);
             LinkedList<IEvaluable> pending = new();
             LinkedList<ITrigger> needsReset = new();
             pending.SortInsertUnique(this.pending);
             this.pending.Clear();
-            logger?.StartEval(pending);
-
-            while (pending.Count > 0) {
-                IEvaluable node = pending.TakeFirst();
-
-                logger?.Eval(node);               
-                if (node.Evaluate()) {
-                    IEnumerable<IEvaluable> children = node.Children.NotNull().OfType<IEvaluable>();
-                    logger?.EvalResult(node, true, children);
-                    pending.SortInsertUnique(children);
-                } else logger?.EvalResult(node, false);
-
-                if (node is ITrigger trigger && trigger.Provoked)
-                    needsReset.AddLast(trigger);
-            }
-
-            logger?.EndEval(needsReset);
-            foreach (ITrigger trigger in needsReset)
-                trigger.Reset();
         }
     }
 }

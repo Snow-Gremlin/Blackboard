@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Debug;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -68,8 +69,12 @@ namespace Blackboard.Core.Extensions {
         /// we don't need to update and aren't constantly adding and removing children from parents.
         /// </summary>
         /// <param name="child">The child to add to the parents.</param>
-        static public void AddToParents(this IChild child) {
-            foreach (IParent parent in child.Parents) parent?.AddChildren(child);
+        /// <returns>True if this child was added to any parent.</returns>
+        static public bool AddToParents(this IChild child) {
+            bool anyAdded = false;
+            foreach (IParent parent in child.Parents)
+                anyAdded = (parent?.AddChildren(child) ?? false) || anyAdded;
+            return anyAdded;
         }
 
         /// <summary>Checks if any parent doesn't contain this child.</summary>
@@ -150,15 +155,17 @@ namespace Blackboard.Core.Extensions {
         /// <summary>Adds children nodes onto this node.</summary>
         /// <remarks>
         /// Any children which are added need to be put in the pending evaluation list
-        /// of the driver so that they will be evaluated in the next batch.
+        /// of the driver so that they will be evaluated and/or depth updated in the next batch.
         /// </remarks>
         /// <param name="children">The children to add.</param>
-        static public void AddChildren(this IParent node, params IChild[] children) =>
+        /// <returns>True if any children were added, false otherwise.</returns>
+        static public bool AddChildren(this IParent node, params IChild[] children) =>
             node.AddChildren(children);
 
         /// <summary>Removes all the given children from this node if they exist.</summary>
         /// <param name="children">The children to remove.</param>
-        static public void RemoveChildren(this IParent node, params IChild[] children) =>
+        /// <returns>True if any children were removed, false otherwise.</returns>
+        static public bool RemoveChildren(this IParent node, params IChild[] children) =>
             node.RemoveChildren(children);
 
         #endregion
@@ -173,6 +180,7 @@ namespace Blackboard.Core.Extensions {
             list.SortInsertUnique(nodes as IEnumerable<T>);
 
         /// <summary>This sort inserts unique evaluable nodes into the given linked list.</summary>
+        /// <remarks>This assumes that lower depth nodes will be added after their parents typically.</remarks>
         /// <typeparam name="T">The type of evaluable node being worked with.</typeparam>
         /// <param name="list">The list of values to sort insert into.</param>
         /// <param name="nodes">The set of nodes to insert.</param>
@@ -180,13 +188,13 @@ namespace Blackboard.Core.Extensions {
             where T : IEvaluable {
             foreach (T node in nodes) {
                 bool addToEnd = true;
-                for (LinkedListNode<T> pend = list.First; pend is not null; pend = pend.Next) {
+                for (LinkedListNode<T> pend = list.Last; pend is not null; pend = pend.Previous) {
                     if (ReferenceEquals(node, pend.Value)) {
                         addToEnd = false;
                         break;
                     }
-                    if (node.Depth < pend.Value.Depth) {
-                        list.AddBefore(pend, node);
+                    if (node.Depth >= pend.Value.Depth) {
+                        list.AddAfter(pend, node);
                         addToEnd = false;
                         break;
                     }
@@ -195,14 +203,90 @@ namespace Blackboard.Core.Extensions {
             }
         }
 
+        /// <summary>This updates the depth values of the given pending nodes.</summary>
+        /// <remarks>
+        /// The pending list will be emptied by this call. The pending nodes are expected to be
+        /// presorted by depth which will usually provide the fastest update.
+        /// </remarks>
+        /// <param name="pending">The initial set of nodes which are pending depth update.</param>
+        /// <param name="logger">The logger to debug the update with.</param>
+        static public void UpdateDepths(this LinkedList<IEvaluable> pending, ILogger logger = null) {
+            LinkedList<IEvaluable> pend = new();
+            pend.SortInsertUnique(pending);
+
+            while (pend.Count > 0) {
+                IEvaluable node = pend.TakeFirst();
+
+                // Determine the depth that this node should be at based on its parents.
+                int depth = node is not IChild child ? 0 :
+                    child.Parents.OfType<IEvaluable>().MaxDepth() + 1;
+
+                // If the depth has changed then its children also need to be updated.
+                if (node.Depth != depth) {
+                    node.Depth = depth;
+                    pend.SortInsertUnique(node.Children.OfType<Evaluable>());
+                }
+            }
+        }
+
+        /// <summary>Updates and propagates the changes from the given inputs through the blackboard nodes.</summary>
+        /// <param name="pending">The initial set of nodes which are pending depth update.</param>
+        /// <param name="logger">The logger to debug the evaluate with.</param>
+        static public void Evaluate(this LinkedList<IEvaluable> pending, ILogger logger = null) {
+            LinkedList<IEvaluable> pend = new();
+            pend.SortInsertUnique(pending);
+            LinkedList<ITrigger> needsReset = new();
+            logger?.Log("StartEval(Pending: " + pend.Count() + ")");
+
+            while (pend.Count > 0) {
+                IEvaluable node = pend.TakeFirst();
+
+                //logger?.Eval(node);
+                if (node.Evaluate()) {
+                    IEnumerable<IEvaluable> children = node.Children.NotNull().OfType<IEvaluable>();
+                    //logger?.EvalResult(node, true, children);
+                    pend.SortInsertUnique(children);
+                }
+                //else logger?.EvalResult(node, false);
+
+                if (node is ITrigger trigger && trigger.Provoked)
+                    needsReset.AddLast(trigger);
+            }
+
+            //logger?.EndEval(needsReset);
+            foreach (ITrigger trigger in needsReset)
+                trigger.Reset();
+
+
+            /*
+            
+        StartEval(IEnumerable<INode> pending) =>
+            this.Log("StartEval(Pending: " + pending.Count() + ")");
+
+        EndEval(IEnumerable<ITrigger> provoked) =>
+            this.Log("EndEval(Provoked: " + provoked.Count() + ")");
+
+        Eval(IEvaluable node) { }
+
+        EvalResult(IEvaluable node, bool changed, IEnumerable<INode> children = null) =>
+            this.Log("  Evaluate(" + node.Depth + "): " + this.Stringifier.Stringify(node) + " => " + changed);
+             */
+        }
+
         /// <summary>Gets the maximum depth from the given nodes.</summary>
         /// <param name="nodes">The nodes to get the maximum depth from.</param>
         /// <returns>The maximum found depth.</returns>
         static public int MaxDepth(this IEnumerable<IEvaluable> nodes) =>
             nodes.NotNull().Select((node) => node.Depth).Aggregate(0, S.Math.Max);
 
+        /// <summary>The minimum allowed depth based on the given nodes parents, if it has any.</summary>
+        /// <param name="node">The evaluable node to get the minimum allowed depth.</param>
+        /// <returns></returns>
+        static public int MinimumAllowedDepth(this IEvaluable node) =>
+            node is not IChild child ? 0 : child.Parents.OfType<IEvaluable>().MaxDepth() + 1;
+
         #endregion
-        #region IFieldReader...
+        #region Field Reader & Writer...
 
         /// <summary>Removes fields from this node by name if they exist.</summary>
         /// <param name="node">The field writer to remove fields from.</param>
@@ -210,9 +294,6 @@ namespace Blackboard.Core.Extensions {
         /// <returns>True if the fields were removed, false otherwise.</returns>
         static public bool RemoveFields(this IFieldWriter node, params string[] names) =>
             node.RemoveFields(names);
-
-        #endregion
-        #region IFieldWriter...
 
         /// <summary>Finds the node at the given path.</summary>
         /// <param name="node">The field reader to find a node in.</param>

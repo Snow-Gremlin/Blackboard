@@ -4,7 +4,7 @@
     public interface IEvaluable: IParent {
 
         /// <summary>The depth in the graph from the furthest input of this node.</summary>
-        public int Depth { get; }
+        public int Depth { get; set; }
 
         /// <summary>Updates the node's value, provoked state, and any other state.</summary>
         /// <returns>

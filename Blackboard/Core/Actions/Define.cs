@@ -23,14 +23,6 @@ namespace Blackboard.Core.Actions {
         /// <param name="name">The name to write the node with.</param>
         /// <param name="node">The node being set to the receiver with the given name.</param>
         /// <param name="allNodes">All the nodes which are new children of the node to write.</param>
-        public Define(IFieldWriter receiver, string name, INode node, params INode[] allNodes) :
-            this(receiver, name, node, allNodes as IEnumerable<INode>) { }
-
-        /// <summary>Creates a new define action.</summary>
-        /// <param name="receiver">This is the receiver that will be written to.</param>
-        /// <param name="name">The name to write the node with.</param>
-        /// <param name="node">The node being set to the receiver with the given name.</param>
-        /// <param name="allNodes">All the nodes which are new children of the node to write.</param>
         public Define(IFieldWriter receiver, string name, INode node, IEnumerable<INode> allNodes) {
             this.Receiver = receiver;
             this.Name = name;
@@ -54,7 +46,7 @@ namespace Blackboard.Core.Actions {
         /// <param name="driver">The driver for this action.</param>
         public void Perform(Driver driver) {
             this.Receiver.WriteField(this.Name, this.Node);
-            this.needParents.Foreach(child => child.AddToParents());
+            driver.Pend(this.needParents.Where(child => child.AddToParents()));
         }
 
         /// <summary>Gets a human readable string for this define.</summary>

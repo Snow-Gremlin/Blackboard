@@ -21,10 +21,12 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// even if the child uses the same parent for multiple inputs.
         /// </remarks>
         /// <param name="children">The children to add.</param>
-        public void AddChildren(IEnumerable<IChild> children);
+        /// <returns>True if any children were added, false otherwise.</returns>
+        public bool AddChildren(IEnumerable<IChild> children);
 
         /// <summary>Removes all the given children from this node if they exist.</summary>
         /// <param name="children">The children to remove.</param>
-        public void RemoveChildren(IEnumerable<IChild> children);
+        /// <returns>True if any children were removed, false otherwise.</returns>
+        public bool RemoveChildren(IEnumerable<IChild> children);
     }
 }

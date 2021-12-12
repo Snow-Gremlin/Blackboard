@@ -1,5 +1,5 @@
-﻿using Blackboard.Core.Debug;
-using Blackboard.Core.Extensions;
+﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +44,8 @@ namespace Blackboard.Core.Actions {
 
         /// <summary>This will perform the action.</summary>
         /// <param name="driver">The driver for this action.</param>
-        public void Perform(Driver driver) {
+        /// <param name="logger">The optional logger to debug with.</param>
+        public void Perform(Driver driver, Logger logger = null) {
             this.Receiver.WriteField(this.Name, this.Node);
             driver.Pend(this.needParents.Where(child => child.AddToParents()));
         }

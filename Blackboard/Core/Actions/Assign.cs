@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Debug;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using PetiteParser.Scanner;
 using System.Collections.Generic;
@@ -64,7 +64,8 @@ namespace Blackboard.Core.Actions {
 
         /// <summary>This will perform the action.</summary>
         /// <param name="driver">The driver for this action.</param>
-        public void Perform(Driver driver) {
+        /// <param name="logger">The optional logger to debug with.</param>
+        public void Perform(Driver driver, Logger logger = null) {
             driver.Pend(this.needPending);
             driver.Evaluate();
             driver.SetValue(this.value.Value, this.target);

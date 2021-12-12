@@ -15,13 +15,31 @@ namespace Blackboard.Core.Extensions {
         static public IEnumerable<T> WhereNot<T>(this IEnumerable<T> input, S.Func<T, bool> predicate) =>
             input.Where(value => !predicate(value));
 
-        /// <summary>Runs all the values on a the given predicate.</summary>
+        /// <summary>Runs all the values on the given predicate.</summary>
         /// <typeparam name="T">The type of values being run.</typeparam>
         /// <param name="input">The values to run.</param>
         /// <param name="predicate">The predicate to run on each value.</param>
         static public void Foreach<T>(this IEnumerable<T> input, S.Action<T> predicate) {
             foreach (T value in input) predicate(value);
         }
+
+        /// <summary>Consumes all the values in the set by running the enumerable until the end.</summary>
+        /// <typeparam name="T">The type of values being run.</typeparam>
+        /// <param name="input">The values to run.</param>
+        static public void Foreach<T>(this IEnumerable<T> input) =>
+            input.Foreach((T v) => { });
+
+        /// <summary>Runs all the values on the given predicate.</summary>
+        /// <remarks>
+        /// This is designed to make it easy to use methods with have a return value but the return isn't used.
+        /// Instead of `data.Foreach(v => hashSet.Add(v))` it allows `data.Foreach(hashSet.Add)`.
+        /// </remarks>
+        /// <typeparam name="Tin">The type of values being run.</typeparam>
+        /// <typeparam name="Tout">The type returned by the predicate, this is ignored.</typeparam>
+        /// <param name="input">The values to run.</param>
+        /// <param name="predicate">The predicate to run on each value.</param>
+        static public void Foreach<Tin, Tout>(this IEnumerable<Tin> input, S.Func<Tin, Tout> predicate) =>
+            input.Foreach(v => predicate(v));
 
         /// <summary>Filters any null values out of the given enumerable.</summary>
         /// <typeparam name="T">The type of the values to check.</typeparam>
@@ -52,6 +70,17 @@ namespace Blackboard.Core.Extensions {
                 yield return value;
             }
             while (true) yield return prev;
+        }
+
+        /// <summary>This will expand several enumerable sets into one joined enumerable.</summary>
+        /// <remarks>This is useful for using after a `Select` which returns an enumerable.</remarks>
+        /// <typeparam name="T">The type of the list to enumerate.</typeparam>
+        /// <param name="input">The set of enumerable sets to join together.</param>
+        /// <returns>The single enumerable set with all the values from the input.</returns>
+        static public IEnumerable<T> Expand<T>(this IEnumerable<IEnumerable<T>> input) {
+            foreach (IEnumerable<T> inner in input) {
+                foreach (T value in inner) yield return value;
+            }
         }
     }
 }

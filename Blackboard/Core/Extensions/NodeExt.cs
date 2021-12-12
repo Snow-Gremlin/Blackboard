@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Debug;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -39,6 +39,11 @@ namespace Blackboard.Core.Extensions {
         static public bool IsConstant(this IEnumerable<INode> nodes) =>
             nodes.All(node => IsConstant(node));
 
+        /// <summary>This will reset all the given trigger nodes.</summary>
+        /// <param name="nodes">The trigger nodes to reset.</param>
+        static public void Reset(this IEnumerable<ITrigger> nodes) =>
+            nodes.NotNull().Foreach(t => t.Reset());
+
         #endregion
         #region IChild...
 
@@ -55,9 +60,9 @@ namespace Blackboard.Core.Extensions {
         /// <param name="newParent">The new parent being set, or null</param>
         /// <returns>True if the parent has changed, false otherwise.</returns>
         static internal bool SetParent<T>(this IChild child, ref T node, T newParent)
-            where T : INode {
+            where T : IParent {
             if (ReferenceEquals(node, newParent)) return false;
-            if (node is IParent parent) parent?.RemoveChildren(child);
+            node?.RemoveChildren(child);
             node = newParent;
             return true;
         }
@@ -82,9 +87,6 @@ namespace Blackboard.Core.Extensions {
         /// <returns>True if any parent doesn't contain this child, false otherwise.</returns>
         static public bool NeedsToAddParents(this IChild child) =>
             !child.Parents.All(parent => parent.Children.Contains(child));
-
-        #endregion
-        #region INaryChild...
 
         /// <summary>This adds parents to this node.</summary>
         /// <typeparam name="T">The type of parent used for this child.</typeparam>
@@ -205,72 +207,63 @@ namespace Blackboard.Core.Extensions {
 
         /// <summary>This updates the depth values of the given pending nodes.</summary>
         /// <remarks>
-        /// The pending list will be emptied by this call. The pending nodes are expected to be
+        /// The given list will be emptied by this call. The pending nodes are expected to be
         /// presorted by depth which will usually provide the fastest update.
         /// </remarks>
         /// <param name="pending">The initial set of nodes which are pending depth update.</param>
         /// <param name="logger">The logger to debug the update with.</param>
         static public void UpdateDepths(this LinkedList<IEvaluable> pending, ILogger logger = null) {
-            LinkedList<IEvaluable> pend = new();
-            pend.SortInsertUnique(pending);
+            logger?.Log("Start Update (pending: {0})", pending.Count());
 
-            while (pend.Count > 0) {
-                IEvaluable node = pend.TakeFirst();
+            while (pending.Count > 0) {
+                IEvaluable node = pending.TakeFirst();
 
                 // Determine the depth that this node should be at based on its parents.
                 int depth = node is not IChild child ? 0 :
                     child.Parents.OfType<IEvaluable>().MaxDepth() + 1;
 
                 // If the depth has changed then its children also need to be updated.
+                bool changed = false;
                 if (node.Depth != depth) {
                     node.Depth = depth;
-                    pend.SortInsertUnique(node.Children.OfType<Evaluable>());
+                    pending.SortInsertUnique(node.Children.OfType<Evaluable>());
+                    changed = true;
                 }
+
+                logger?.Log("  Updated (changed: {0}, depth: {1}, node: {2}, remaining: {3})", changed, node.Depth, node, pending.Count);
             }
+
+            logger?.Log("End Update");
         }
 
         /// <summary>Updates and propagates the changes from the given inputs through the blackboard nodes.</summary>
+        /// <remarks>
+        /// The given list will be emptied by this call. The pending nodes are expected to be
+        /// presorted by depth which will usually provide the fastest update.
+        /// </remarks>
         /// <param name="pending">The initial set of nodes which are pending depth update.</param>
         /// <param name="logger">The logger to debug the evaluate with.</param>
-        static public void Evaluate(this LinkedList<IEvaluable> pending, ILogger logger = null) {
-            LinkedList<IEvaluable> pend = new();
-            pend.SortInsertUnique(pending);
-            LinkedList<ITrigger> needsReset = new();
-            logger?.Log("StartEval(Pending: " + pend.Count() + ")");
+        /// <returns>The list of provoked triggers</returns>
+        static public HashSet<ITrigger> Evaluate(this LinkedList<IEvaluable> pending, ILogger logger = null) {
+            logger?.Log("Start Eval (pending: {0})", pending.Count());
 
-            while (pend.Count > 0) {
-                IEvaluable node = pend.TakeFirst();
+            HashSet<ITrigger> provoked = new();
+            while (pending.Count > 0) {
+                IEvaluable node = pending.TakeFirst();
 
-                //logger?.Eval(node);
+                bool changed = false;
                 if (node.Evaluate()) {
-                    IEnumerable<IEvaluable> children = node.Children.NotNull().OfType<IEvaluable>();
-                    //logger?.EvalResult(node, true, children);
-                    pend.SortInsertUnique(children);
+                    pending.SortInsertUnique(node.Children.NotNull().OfType<IEvaluable>());
+                    if (node is ITrigger trigger && trigger.Provoked)
+                        provoked.Add(trigger);
+                    changed = true;
                 }
-                //else logger?.EvalResult(node, false);
 
-                if (node is ITrigger trigger && trigger.Provoked)
-                    needsReset.AddLast(trigger);
+                logger?.Log("  Evaluated (changed: {0}, depth: {1}, node: {2}, remaining: {3})", changed, node.Depth, node, pending.Count);
             }
 
-            //logger?.EndEval(needsReset);
-            foreach (ITrigger trigger in needsReset)
-                trigger.Reset();
-
-
-            /*
-            
-        StartEval(IEnumerable<INode> pending) =>
-            this.Log("StartEval(Pending: " + pending.Count() + ")");
-
-        EndEval(IEnumerable<ITrigger> provoked) =>
-            this.Log("EndEval(Provoked: " + provoked.Count() + ")");
-
-        Eval(IEvaluable node) { }
-
-        EvalResult(IEvaluable node, bool changed, IEnumerable<INode> children = null) =>
-            this.Log("  Evaluate(" + node.Depth + "): " + this.Stringifier.Stringify(node) + " => " + changed);
-             */
+            logger?.Log("End Eval (provoked: {0})", provoked.Count());
+            return provoked;
         }
 
         /// <summary>Gets the maximum depth from the given nodes.</summary>
@@ -286,7 +279,7 @@ namespace Blackboard.Core.Extensions {
             node is not IChild child ? 0 : child.Parents.OfType<IEvaluable>().MaxDepth() + 1;
 
         #endregion
-        #region Field Reader & Writer...
+        #region Fields...
 
         /// <summary>Removes fields from this node by name if they exist.</summary>
         /// <param name="node">The field writer to remove fields from.</param>

@@ -1,8 +1,7 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Debug;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Extensions;
-using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
@@ -23,14 +22,22 @@ namespace Blackboard.Core {
         /// <summary>The namespace for all the operators.</summary>
         public const string OperatorNamespace = "$operators";
 
+        /// <summary>The nodes which have had one or more parent modified and they need to have their depth updated.</summary>
+        private LinkedList<IEvaluable> pendingUpdate;
+
         /// <summary>The nodes which have had one or more parent modified and they need to be reevaluated.</summary>
-        private LinkedList<IEvaluable> pending;
+        private LinkedList<IEvaluable> pendingEval;
+
+        /// <summary>The set of provoked triggers which need to be reset.</summary>
+        private HashSet<ITrigger> needsReset;
 
         /// <summary>Creates a new driver.</summary>
         /// <param name="addFuncs">Indicates that built-in functions should be added.</param>
         /// <param name="addConsts">Indicates that constants should be added.</param>
         public Driver(bool addFuncs = true, bool addConsts = true) {
-            this.pending = new LinkedList<IEvaluable>();
+            this.pendingUpdate = new LinkedList<IEvaluable>();
+            this.pendingEval   = new LinkedList<IEvaluable>();
+            this.needsReset    = new HashSet<ITrigger>();
             this.Global = new Namespace();
 
             this.addOperators();
@@ -339,7 +346,7 @@ namespace Blackboard.Core {
         /// <param name="input">The input node to set the value of.</param>
         /// <param name="value">The value to set to the given input.</param>
         public void SetValue<T>(T value, IValueInput<T> input) where T : IData {
-            if (input.SetValue(value)) this.Pend(input.Children);
+            if (input.SetValue(value)) this.PendEval(input.Children);
         }
 
         #endregion
@@ -371,7 +378,10 @@ namespace Blackboard.Core {
         /// <param name="input">The input trigger node to provoke.</param>
         /// <param name="value">The provoke state to set, typically this will be true.</param>
         public void Provoke(ITriggerInput input, bool value = true) {
-            if (input.Provoke(value)) this.Pend(input.Children);
+            if (input.Provoke(value)) {
+                this.PendEval(input.Children);
+                this.NeedsReset(input);
+            }
         }
 
         /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
@@ -467,44 +477,85 @@ namespace Blackboard.Core {
         /// <summary>The base set of named nodes to access the total node structure.</summary>
         public Namespace Global { get; }
 
-        /// <summary>
-        /// This indicates that the given nodes have had parents changed
-        /// and need to be recalculated during evaluation.
-        /// </summary>
+        #region Update...
+
+        /// <summary> This indicates that the given nodes have had parents added or removed and need to be updated. </summary>
         /// <param name="nodes">The nodes to pend evaluation for.</param>
-        public void Pend(params INode[] nodes) => this.Pend(nodes as IEnumerable<INode>);
+        public void PendUpdate(params INode[] nodes) => this.PendUpdate(nodes as IEnumerable<INode>);
+
+        /// <summaryThis indicates that the given nodes have had parents added or removed and need to be updated.</summary>
+        /// <param name="nodes">The nodes to pend evaluation for.</param>
+        public void PendUpdate(IEnumerable<INode> nodes) => this.pendingUpdate.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
+
+        /// <summary>This gets all the nodes pending update.</summary>
+        public IEnumerable<INode> PendingUpdate => this.pendingEval;
+
+        /// <summary>This indicates if any nodes are pending update.</summary>
+        public bool HasPendingUpdate => this.pendingUpdate.Count > 0;
+
+        /// <summary>
+        /// This updates the depth values of the given pending nodes and
+        /// propagates the updating through the Blackboard nodes.
+        /// </summary>
+        /// <remarks>By performing the update the pending update list will be cleared.</remarks>
+        /// <param name="logger">An optional logger for debugging this update.</param>
+        public void PerformUpdates(ILogger logger = null) =>
+            this.pendingUpdate.UpdateDepths(logger);
+
+        #endregion
+        #region Evaluate...
 
         /// <summary>
         /// This indicates that the given nodes have had parents changed
         /// and need to be recalculated during evaluation.
         /// </summary>
         /// <param name="nodes">The nodes to pend evaluation for.</param>
-        public void Pend(IEnumerable<INode> nodes) => this.pending.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
+        public void PendEval(params INode[] nodes) => this.PendEval(nodes as IEnumerable<INode>);
+
+        /// <summary>
+        /// This indicates that the given nodes have had parents changed
+        /// and need to be recalculated during evaluation.
+        /// </summary>
+        /// <param name="nodes">The nodes to pend evaluation for.</param>
+        public void PendEval(IEnumerable<INode> nodes) => this.pendingEval.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
 
         /// <summary>This gets all the nodes pending evaluation.</summary>
-        public IEnumerable<INode> Pending => this.pending;
+        public IEnumerable<INode> PendingEval => this.pendingEval;
 
         /// <summary>This indicates if any changes are pending evaluation.</summary>
-        public bool HasPending => this.pending.Count > 0;
+        public bool HasPendingEval => this.pendingEval.Count > 0;
 
-        /// <summary>This updates the depth values of the given pending nodes.</summary>
-        /// <remarks>
-        /// The pending list will be emptied by this call. The pending nodes are expected to be
-        /// presorted by depth which will usually provide the fastest update.
-        /// </remarks>
-        /// <param name="pending">The initial set of nodes which are pending depth update.</param>
-        static private void updateDepths(LinkedList<Evaluable> pending) {
-            
-        }
-
-        /// <summary>Updates and propagates the changes from the given inputs through the blackboard nodes.</summary>
+        /// <summary>
+        /// Performs an evaluation of all pending nodes and
+        /// propagates the changes through the Blackboard nodes.
+        /// </summary>
+        /// <remarks>By performing the update the pending evaluation list will be cleared.</remarks>
         /// <param name="logger">An optional logger for debugging this evaluation.</param>
-        public void Evaluate(Logger logger = null) {
-            this.pending.Evaluate(logger);
-            LinkedList<IEvaluable> pending = new();
-            LinkedList<ITrigger> needsReset = new();
-            pending.SortInsertUnique(this.pending);
-            this.pending.Clear();
+        public void PerformEvaluation(ILogger logger = null) =>
+            this.NeedsReset(this.pendingEval.Evaluate(logger));
+
+        #endregion
+        #region Needs Reset...
+
+        /// <summary>This adds provoked trigger nodes which need to be reset.</summary>
+        /// <param name="nodes">The provoked trigger nodes to add.</param>
+        public void NeedsReset(params ITrigger[] nodes) => this.PendEval(nodes as IEnumerable<ITrigger>);
+
+        /// <summary>This adds provoked trigger nodes which need to be reset.</summary>
+        /// <param name="nodes">The provoked trigger nodes to add.</param>
+        public void NeedsReset(IEnumerable<ITrigger> nodes) => nodes.NotNull().
+            Where(trig => trig.Provoked).Foreach(node => this.needsReset.Add(node));
+
+        /// <summary>This will reset all provoked trigger nodes which have been added.</summary>
+        /// <remarks>The needs reset set will be cleared by this call.</remarks>
+        public void ResetTriggers() {
+            this.needsReset.Reset();
+            this.needsReset.Clear();
         }
+
+        /// <summary>Indicates if there are any provoked triggers which need results.</summary>
+        public bool HasTriggersNeedingReset => this.needsReset.Count > 0;
+
+        #endregion
     }
 }

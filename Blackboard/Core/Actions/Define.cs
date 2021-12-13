@@ -43,11 +43,13 @@ namespace Blackboard.Core.Actions {
         public IReadOnlyList<IChild> NeedParents => this.needParents;
 
         /// <summary>This will perform the action.</summary>
-        /// <param name="driver">The driver for this action.</param>
+        /// <param name="slate">The slate for this action.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Driver driver, Logger logger = null) {
+        public void Perform(Slate slate, Logger logger = null) {
             this.Receiver.WriteField(this.Name, this.Node);
-            driver.Pend(this.needParents.Where(child => child.AddToParents()));
+            List<IChild> changed = this.needParents.Where(child => child.AddToParents()).ToList();
+            slate.PendUpdate(changed);
+            slate.PendEval(changed);
         }
 
         /// <summary>Gets a human readable string for this define.</summary>

@@ -54,7 +54,7 @@ namespace BlackboardTests.CoreTests {
             or123 .CheckValue(false);
             not123.CheckValue(true);
 
-            Driver drv = new(addConsts: false);
+            Slate drv = new(addConsts: false);
             drv.Global["One"]   = input1;
             drv.Global["Two"]   = input2;
             drv.Global["Three"] = input3;
@@ -108,7 +108,7 @@ namespace BlackboardTests.CoreTests {
 
         [TestMethod]
         public void TestTriggerNodes() {
-            Driver drv = new();
+            Slate drv = new();
             InputTrigger inputA = new();
             InputTrigger inputB = new();
             InputTrigger inputC = new();

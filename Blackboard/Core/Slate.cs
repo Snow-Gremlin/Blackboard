@@ -14,10 +14,10 @@ using S = System;
 namespace Blackboard.Core {
 
     /// <summary>
-    /// The driver will store a blackboard node structure and
-    /// perform evaluations/updates of change to that structure's values.
+    /// The slate stores all blackboard data via a node graph and
+    /// perform evaluations/updates of change the values of the nodes.
     /// </summary>
-    public class Driver {
+    public class Slate {
 
         /// <summary>The namespace for all the operators.</summary>
         public const string OperatorNamespace = "$operators";
@@ -31,10 +31,10 @@ namespace Blackboard.Core {
         /// <summary>The set of provoked triggers which need to be reset.</summary>
         private HashSet<ITrigger> needsReset;
 
-        /// <summary>Creates a new driver.</summary>
+        /// <summary>Creates a new slate.</summary>
         /// <param name="addFuncs">Indicates that built-in functions should be added.</param>
         /// <param name="addConsts">Indicates that constants should be added.</param>
-        public Driver(bool addFuncs = true, bool addConsts = true) {
+        public Slate(bool addFuncs = true, bool addConsts = true) {
             this.pendingUpdate = new LinkedList<IEvaluable>();
             this.pendingEval   = new LinkedList<IEvaluable>();
             this.needsReset    = new HashSet<ITrigger>();

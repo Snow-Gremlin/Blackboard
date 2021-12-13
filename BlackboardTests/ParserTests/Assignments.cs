@@ -10,8 +10,8 @@ namespace BlackboardTests.ParserTests {
 
         [TestMethod]
         public void TestBasicParses_TypedInput() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in int A = 2, B = 3;",
                 "in bool C = true;",
                 "",
@@ -22,20 +22,20 @@ namespace BlackboardTests.ParserTests {
                 "   in double I;",
                 "}");
 
-            driver.CheckValue(2, "A");
-            driver.CheckValue(3, "B");
-            driver.CheckValue(true, "C");
-            driver.CheckValue(3.14, "D", "E");
-            driver.CheckValue(0, "D", "F");
-            driver.CheckValue(0, "D", "G");
-            driver.CheckValue(false, "D", "H");
-            driver.CheckValue(0.0, "D", "I");
+            slate.CheckValue(2, "A");
+            slate.CheckValue(3, "B");
+            slate.CheckValue(true, "C");
+            slate.CheckValue(3.14, "D", "E");
+            slate.CheckValue(0, "D", "F");
+            slate.CheckValue(0, "D", "G");
+            slate.CheckValue(false, "D", "H");
+            slate.CheckValue(0.0, "D", "I");
         }
 
         [TestMethod]
         public void TestBasicParses_VarInput() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in A = 2, B = 3;",
                 "in C = true;",
                 "",
@@ -44,19 +44,19 @@ namespace BlackboardTests.ParserTests {
                 "   in var F = 0, G = 0.0, H = false;",
                 "}");
 
-            driver.CheckValue(2, "A");
-            driver.CheckValue(3, "B");
-            driver.CheckValue(true, "C");
-            driver.CheckValue(3.14, "D", "E");
-            driver.CheckValue(0, "D", "F");
-            driver.CheckValue(0.0, "D", "G");
-            driver.CheckValue(false, "D", "H");
+            slate.CheckValue(2, "A");
+            slate.CheckValue(3, "B");
+            slate.CheckValue(true, "C");
+            slate.CheckValue(3.14, "D", "E");
+            slate.CheckValue(0, "D", "F");
+            slate.CheckValue(0.0, "D", "G");
+            slate.CheckValue(false, "D", "H");
         }
 
         [TestMethod]
         public void TestBasicParses_DoubleLiteral() {
-            Driver driver = new();
-            IAction formula = driver.Read(
+            Slate slate = new();
+            IAction formula = slate.Read(
                 "in double A = 3.0;",
                 "in double B = 0.003;",
                 "in double C = 3.0e-3;",
@@ -80,43 +80,43 @@ namespace BlackboardTests.ParserTests {
                 "Namespace.I := Input<double>[0];", "Input<double>[0] = Literal<double>[1];",
                 "Namespace.J := Input<double>[0];", "Input<double>[0] = Literal<double>[0];",
                 "Namespace.K := Input<double>[0];", "Input<double>[0] = Literal<double>[28];");
-            formula.Perform(driver);
+            formula.Perform(slate);
 
-            driver.CheckValue(3.0, "A");
-            driver.CheckValue(0.003, "B");
-            driver.CheckValue(0.003, "C");
-            driver.CheckValue(0.003, "D");
-            driver.CheckValue(0.003, "E");
-            driver.CheckValue(3.0, "F");
-            driver.CheckValue(0.0, "G");
-            driver.CheckValue(0.0, "H");
-            driver.CheckValue(1.0, "I");
-            driver.CheckValue(0.0, "J");
-            driver.CheckValue(28.0, "K");
+            slate.CheckValue(3.0, "A");
+            slate.CheckValue(0.003, "B");
+            slate.CheckValue(0.003, "C");
+            slate.CheckValue(0.003, "D");
+            slate.CheckValue(0.003, "E");
+            slate.CheckValue(3.0, "F");
+            slate.CheckValue(0.0, "G");
+            slate.CheckValue(0.0, "H");
+            slate.CheckValue(1.0, "I");
+            slate.CheckValue(0.0, "J");
+            slate.CheckValue(28.0, "K");
         }
 
         [TestMethod]
         public void TestBasicParses_LiteralMath() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in double A = 3.0 + 0.07 * 2;",
                 "in double B = floor(A), C = round(A), D = round(A, 1);",
                 "in double E = (B ** C) / 2;",
                 "in double F = -E + -3;");
 
-            driver.CheckValue(3.14, "A");
-            driver.CheckValue(3.0, "B");
-            driver.CheckValue(3.0, "C");
-            driver.CheckValue(3.1, "D");
-            driver.CheckValue(13.5, "E");
-            driver.CheckValue(-16.5, "F");
+            slate.CheckValue(3.14, "A");
+            slate.CheckValue(3.0, "B");
+            slate.CheckValue(3.0, "C");
+            slate.CheckValue(3.1, "D");
+            slate.CheckValue(13.5, "E");
+            slate.CheckValue(-16.5, "F");
         }
 
         [TestMethod]
         public void TestBasicParses_ModRemAndStrings() {
             // See: https://docs.microsoft.com/en-us/dotnet/api/system.math.ieeeremainder?view=net-5.0
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in string A = (  3.0 %%  2.0) + ', ' + (  3.0 %  2.0);",
                 "in string B = (  4.0 %%  2.0) + ', ' + (  4.0 %  2.0);",
                 "in string C = ( 10.0 %%  3.0) + ', ' + ( 10.0 %  3.0);",
@@ -129,37 +129,37 @@ namespace BlackboardTests.ParserTests {
                 "in string J = ( 17.8 %% -4.1) + ', ' + ( 17.8 % -4.1);",
                 "in string K = (-17.8 %% -4.1) + ', ' + (-17.8 % -4.1);");
 
-            driver.CheckValue("-1, 1", "A");
-            driver.CheckValue("0, 0", "B");
-            driver.CheckValue("1, 1", "C");
-            driver.CheckValue("-1, 2", "D");
-            driver.CheckValue("-1, 3", "E");
-            driver.CheckValue("-2, 3", "F");
-            driver.CheckValue("1.8000000000000007, 1.8000000000000007", "G");
-            driver.CheckValue("1.4000000000000021, 1.4000000000000021", "H");
-            driver.CheckValue("0.09999999999999787, -4.000000000000002", "I");
-            driver.CheckValue("1.4000000000000021, 1.4000000000000021", "J");
-            driver.CheckValue("-1.4000000000000021, -1.4000000000000021", "K");
+            slate.CheckValue("-1, 1", "A");
+            slate.CheckValue("0, 0", "B");
+            slate.CheckValue("1, 1", "C");
+            slate.CheckValue("-1, 2", "D");
+            slate.CheckValue("-1, 3", "E");
+            slate.CheckValue("-2, 3", "F");
+            slate.CheckValue("1.8000000000000007, 1.8000000000000007", "G");
+            slate.CheckValue("1.4000000000000021, 1.4000000000000021", "H");
+            slate.CheckValue("0.09999999999999787, -4.000000000000002", "I");
+            slate.CheckValue("1.4000000000000021, 1.4000000000000021", "J");
+            slate.CheckValue("-1.4000000000000021, -1.4000000000000021", "K");
         }
 
         [TestMethod]
         public void TestBasicParses_Assignment() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in int A = 2, B = 5;",
                 "in int C = A = 8;",
                 "B = A = 14;",
                 "A = 6;");
 
-            driver.CheckValue(6, "A");
-            driver.CheckValue(14, "B");
-            driver.CheckValue(8, "C");
+            slate.CheckValue(6, "A");
+            slate.CheckValue(14, "B");
+            slate.CheckValue(8, "C");
         }
 
         [TestMethod]
         public void TestBasicParses_NamespaceAssignment() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "namespace X {",
                 "   in int a = 2;",
                 "   in int b = 3;",
@@ -177,18 +177,18 @@ namespace BlackboardTests.ParserTests {
                 "X.Y.d = 555;",
                 "X.a = 222;");
 
-            driver.CheckValue(222, "X", "a");
-            driver.CheckValue(333, "X", "b");
-            driver.CheckValue(444, "X", "c");
-            driver.CheckValue(555, "X", "Y", "d");
-            driver.CheckValue(666, "X", "Y", "e");
-            driver.CheckValue(777, "X", "Y", "f");
+            slate.CheckValue(222, "X", "a");
+            slate.CheckValue(333, "X", "b");
+            slate.CheckValue(444, "X", "c");
+            slate.CheckValue(555, "X", "Y", "d");
+            slate.CheckValue(666, "X", "Y", "e");
+            slate.CheckValue(777, "X", "Y", "f");
         }
 
         [TestMethod]
         public void TestBasicParses_DoubleToIntAssignError() {
-            Driver driver = new();
-            Parser parser = new(driver);
+            Slate slate = new();
+            Parser parser = new(slate);
             TestTools.CheckException(() => parser.Read("in int A = 3.14;"),
                 "Error occurred while parsing input code.",
                "May not assign the value to that type of input.",

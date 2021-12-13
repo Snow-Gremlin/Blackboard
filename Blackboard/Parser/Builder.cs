@@ -26,9 +26,9 @@ namespace Blackboard.Parser {
         private readonly LinkedList<IAction> actions;
 
         /// <summary>Creates a new formula builder for parsing states.</summary>
-        /// <param name="driver">The driver this stack is for.</param>
-        public Builder(Driver driver) {
-            this.Driver    = driver;
+        /// <param name="slate">The slate this stack is for.</param>
+        public Builder(Slate slate) {
+            this.Slate     = slate;
             this.scopes    = new LinkedList<VirtualNode>();
             this.types     = new LinkedList<Type>();
             this.stack     = new LinkedList<INode>();
@@ -41,12 +41,12 @@ namespace Blackboard.Parser {
             this.Reset();
         }
 
-        /// <summary>The driver for the Blackboard these stacks belongs too.</summary>
-        public readonly Driver Driver;
+        /// <summary>The slate for the Blackboard these stacks belongs too.</summary>
+        public readonly Slate Slate;
 
         /// <summary>Resets the stack back to the initial state.</summary>
         public void Reset() {
-            this.Global = new VirtualNode("Global", this.Driver.Global);
+            this.Global = new VirtualNode("Global", this.Slate.Global);
             this.scopes.Clear();
             this.scopes.AddFirst(this.Global);
             this.actions.Clear();

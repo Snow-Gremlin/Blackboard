@@ -25,7 +25,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <remarks>
         /// Since the value is set by the user this will always return the current value.
         /// This node typically won't be evaluated. When the value is set, if the value changes,
-        /// then the driver should pend evaluation for the children so that they will be updated.
+        /// then the slate should pend evaluation for the children so that they will be updated.
         /// </remarks>
         /// <returns>This will always return the current value.</returns>
         protected override T CalcuateValue() => this.Value;

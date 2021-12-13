@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Blackboard.Core.Actions {
 
-    /// <summary>This is a collection of actions to perform on the Blackboard data via the Driver.</summary>
+    /// <summary>This is a collection of actions to perform on the Blackboard slate.</summary>
     /// <remarks>
     /// It contains the set of actions pending to be performed on the Blackboard.
     /// This holds onto virtual nodes being added and nodes virtually removed
@@ -27,11 +27,11 @@ namespace Blackboard.Core.Actions {
         /// <summary>The collection of performers for this formula.</summary>
         private readonly IAction[] actions;
 
-        /// <summary>Creates a new formula to perform changes to the given driver.</summary>
+        /// <summary>Creates a new formula to perform changes to the slate.</summary>
         public Formula(params IAction[] actions) :
             this(actions as IEnumerable<IAction>) { }
 
-        /// <summary>Creates a new formula to perform changes to the given driver.</summary>
+        /// <summary>Creates a new formula to perform changes to the slate.</summary>
         public Formula(IEnumerable<IAction> actions) =>
             this.actions = actions.Select(allActions).Expand().NotNull().ToArray();
 
@@ -40,13 +40,13 @@ namespace Blackboard.Core.Actions {
 
         /// <summary>Performs all the actions for this formula.</summary>
         /// <remarks>
-        /// The given driver MUST be the driver this formula was created for
-        /// since several of these actions will hold onto nodes from a specific driver.
+        /// The given slate MUST be the slate this formula was created for
+        /// since several of these actions will hold onto nodes from a specific slate.
         /// </remarks>
-        /// <param name="driver">The driver for this formula.</param>
+        /// <param name="slate">The slate for this formula.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Driver driver, Logger logger = null) =>
-            this.actions.Foreach(action => action.Perform(driver, logger));
+        public void Perform(Slate slate, Logger logger = null) =>
+            this.actions.Foreach(action => action.Perform(slate, logger));
 
         /// <summary>Gets a human readable string for this formula as all internal actions on different lines.</summary>
         /// <returns>The human readable string for debugging.</returns>

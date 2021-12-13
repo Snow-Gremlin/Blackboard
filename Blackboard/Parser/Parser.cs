@@ -14,7 +14,7 @@ using S = System;
 
 namespace Blackboard.Parser {
 
-    /// <summary>This will parse the Blackboard language into actions and nodes to apply to the driver.</summary>
+    /// <summary>This will parse the Blackboard language into actions and nodes to apply to the slate.</summary>
     sealed public class Parser {
 
         /// <summary>The resource file for the Blackboard language definition.</summary>
@@ -27,14 +27,16 @@ namespace Blackboard.Parser {
         /// <summary>The Blackboard language base parser lazy singleton.</summary>
         static private readonly PP.Parser.Parser baseParser;
 
-        private readonly Driver driver;
+        // TODO: Comment
+        private readonly Slate slate;
 
+        // TODO: Comment
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
-        /// <param name="driver">The driver to modify.</param>
-        public Parser(Driver driver) {
-            this.driver = driver;
+        /// <param name="slate">The slate to modify.</param>
+        public Parser(Slate slate) {
+            this.slate   = slate;
             this.prompts = null;
 
             this.initPrompts();
@@ -69,7 +71,7 @@ namespace Blackboard.Parser {
         /// <returns>The formula for performing the parsed actions.</returns>
         private IAction read(PP.ParseTree.ITreeNode node) {
             try {
-                Builder stacks = new(this.driver);
+                Builder stacks = new(this.slate);
                 node.Process(this.prompts, stacks);
                 return stacks.ToAction();
             } catch (S.Exception ex) {
@@ -155,7 +157,7 @@ namespace Blackboard.Parser {
         /// <param name="count">The number of values to pop off the stack for this function.</param>
         /// <param name="name">The name of the prompt to add to.</param>
         private void addProcess(int count, string name) {
-            IFuncGroup funcGroup = this.driver.Global.Find(Driver.OperatorNamespace, name) as IFuncGroup;
+            IFuncGroup funcGroup = this.slate.Global.Find(Slate.OperatorNamespace, name) as IFuncGroup;
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 Builder builder = args as Builder;
                 PP.Scanner.Location loc = args.LastLocation;
@@ -203,7 +205,7 @@ namespace Blackboard.Parser {
                         With("Type", valueType).
                         With("Value", value);
 
-            Namespace ops = builder.Driver.Global.Find(Driver.OperatorNamespace) as Namespace;
+            Namespace ops = builder.Slate.Global.Find(Slate.OperatorNamespace) as Namespace;
             INode castGroup =
                 type == Type.Bool    ? ops.Find("castBool") :
                 type == Type.Int     ? ops.Find("castInt") :

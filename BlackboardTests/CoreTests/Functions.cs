@@ -21,12 +21,12 @@ namespace BlackboardTests.CoreTests {
             private Dictionary<string, INode> nodes;
 
             public Tester(params string[] names) {
-                Driver driver = new();
+                Slate slate = new();
                 this.stringifier = Stringifier.Shallow();
-                this.stringifier.PreloadNames(driver);
+                this.stringifier.PreloadNames(slate);
                 this.stringifier.ShowFirstDataValues = false;
                 
-                this.group = driver.Global.Find(names) as FuncGroup;
+                this.group = slate.Global.Find(names) as FuncGroup;
                 Assert.IsNotNull(this.group);
                 this.funcName = names.Join(".");
 
@@ -52,7 +52,7 @@ namespace BlackboardTests.CoreTests {
 
         [TestMethod]
         public void TestFunctionsOr() {
-            Tester t = new(Driver.OperatorNamespace, "or");
+            Tester t = new(Slate.OperatorNamespace, "or");
             t.Test("T, T",    "Any<trigger>(T, T)");
             t.Test("B, B",    "Or<bool>(B, B)");
             t.Test("B, B, B", "Or<bool>(B, B, B)");
@@ -81,7 +81,7 @@ namespace BlackboardTests.CoreTests {
 
         [TestMethod]
         public void TestFunctionsSum() {
-            Tester t = new(Driver.OperatorNamespace, "sum");
+            Tester t = new(Slate.OperatorNamespace, "sum");
             t.Test("B, B",       "null");
             t.Test("B, I",       "null");
             t.Test("I, I",       "Sum<int>(I, I)");

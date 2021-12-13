@@ -9,9 +9,9 @@ namespace Blackboard.Core.Actions {
         public ResetTriggers() { }
 
         /// <summary>This will perform the action.</summary>
-        /// <param name="driver">The driver for this action.</param>
+        /// <param name="slate">The slate for this action.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Driver driver, Logger logger = null) => driver.ResetTriggers();
+        public void Perform(Slate slate, Logger logger = null) => slate.ResetTriggers();
 
         /// <summary>Gets a human readable string for this reset.</summary>
         /// <returns>The human readable string for debugging.</returns>

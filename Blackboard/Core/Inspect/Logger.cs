@@ -3,7 +3,10 @@ using System.IO;
 
 namespace Blackboard.Core.Inspect {
 
-    /// <summary>This is a logger used for debugging the evaluation of nodes in the driver.</summary>
+    /// <summary>
+    /// This is a logger used for debugging the evaluation
+    /// and update of nodes and actions in the slate.
+    /// </summary>
     public class Logger: ILogger {
 
         /// <summary>The string buffer to write to.</summary>

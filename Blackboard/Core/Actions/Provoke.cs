@@ -22,8 +22,8 @@ namespace Blackboard.Core.Actions {
             (target is ITriggerInput input) && (value is ITrigger conditional) ? new Provoke(input, conditional, allNodes) :
             throw new Exception("Unexpected node types for a conditional provoke.").
                 With("Location", loc).
-                With("Target", target).
-                With("Value", value);
+                With("Target",   target).
+                With("Value",    value);
 
         /// <summary>
         /// Creates an unconditional provoke from the given nodes after
@@ -37,7 +37,7 @@ namespace Blackboard.Core.Actions {
             (target is ITriggerInput input) ? new Provoke(input, null, allNodes) :
             throw new Exception("Unexpected node types for a unconditional provoke.").
                 With("Location", loc).
-                With("Target", target);
+                With("Target",   target);
 
         /// <summary>
         /// This is a subset of all the node for the trigger which need to be pended
@@ -65,12 +65,12 @@ namespace Blackboard.Core.Actions {
         public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
 
         /// <summary>This will perform the action.</summary>
-        /// <param name="driver">The driver for this action.</param>
+        /// <param name="slate">The slate for this action.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Driver driver, Logger logger = null) {
-            driver.Pend(this.needPending);
-            driver.Evaluate();
-            driver.Provoke(this.Target, this.Trigger?.Provoked ?? true);
+        public void Perform(Slate slate, Logger logger = null) {
+            slate.PendEval(this.needPending);
+            slate.PerformEvaluation();
+            slate.Provoke(this.Target, this.Trigger?.Provoked ?? true);
         }
 
         /// <summary>Gets a human readable string for this provoke.</summary>

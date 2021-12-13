@@ -12,129 +12,129 @@ namespace BlackboardTests.ParserTests {
 
         [TestMethod]
         public void TestBasicParses_IntIntSum() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in int A = 2;",
                 "in int B = 3;",
                 "int C := A + B;");
 
-            driver.CheckValue(2, "A");
-            driver.CheckValue(3, "B");
-            driver.CheckValue(5, "C");
+            slate.CheckValue(2, "A");
+            slate.CheckValue(3, "B");
+            slate.CheckValue(5, "C");
 
-            driver.SetInt(7, "A");
-            driver.Evaluate();
-            driver.CheckValue( 7, "A");
-            driver.CheckValue( 3, "B");
-            driver.CheckValue(10, "C");
+            slate.SetInt(7, "A");
+            slate.Evaluate();
+            slate.CheckValue( 7, "A");
+            slate.CheckValue( 3, "B");
+            slate.CheckValue(10, "C");
 
-            driver.SetInt(1, "B");
-            driver.Evaluate();
-            driver.CheckValue(7, "A");
-            driver.CheckValue(1, "B");
-            driver.CheckValue(8, "C");
+            slate.SetInt(1, "B");
+            slate.Evaluate();
+            slate.CheckValue(7, "A");
+            slate.CheckValue(1, "B");
+            slate.CheckValue(8, "C");
         }
 
         [TestMethod]
         public void TestBasicParses_IntDoubleSum() {
-            Driver driver = new(addFuncs: false, addConsts: false);
-            driver.ReadCommit(
+            Slate slate = new(addFuncs: false, addConsts: false);
+            slate.ReadCommit(
                 "in int A = 2;",
                 "in double B = 3.0;",
                 "double C := A + B;");
-            driver.CheckGraphString(
+            slate.CheckGraphString(
                 "Global: Namespace{",
                 "  A: Input<int>[2],",
                 "  B: Input<double>[3],",
                 "  C: Sum<double>(Implicit<double>(A[2]), B[3])",
                 "}");
 
-            driver.CheckValue(2,   "A");
-            driver.CheckValue(3.0, "B");
-            driver.CheckValue(5.0, "C");
+            slate.CheckValue(2,   "A");
+            slate.CheckValue(3.0, "B");
+            slate.CheckValue(5.0, "C");
 
-            driver.SetInt(7, "A");
-            driver.Evaluate();
-            driver.CheckValue( 7,   "A");
-            driver.CheckValue( 3.0, "B");
-            driver.CheckValue(10.0, "C");
+            slate.SetInt(7, "A");
+            slate.Evaluate();
+            slate.CheckValue( 7,   "A");
+            slate.CheckValue( 3.0, "B");
+            slate.CheckValue(10.0, "C");
 
-            driver.SetDouble(1.23, "B");
-            driver.Evaluate();
-            driver.CheckValue(7,    "A");
-            driver.CheckValue(1.23, "B");
-            driver.CheckValue(8.23, "C");
+            slate.SetDouble(1.23, "B");
+            slate.Evaluate();
+            slate.CheckValue(7,    "A");
+            slate.CheckValue(1.23, "B");
+            slate.CheckValue(8.23, "C");
         }
 
         [TestMethod]
         public void TestBasicParses_IntDoubleImplicitCast() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in int A = 2;",
                 "double B := A;",
                 "string C := B;");
 
-            driver.CheckValue(2,   "A");
-            driver.CheckValue(2.0, "B");
-            driver.CheckValue("2", "C");
+            slate.CheckValue(2,   "A");
+            slate.CheckValue(2.0, "B");
+            slate.CheckValue("2", "C");
 
-            driver.SetInt(42, "A");
-            driver.Evaluate();
-            driver.CheckValue(42,   "A");
-            driver.CheckValue(42.0, "B");
-            driver.CheckValue("42", "C");
+            slate.SetInt(42, "A");
+            slate.Evaluate();
+            slate.CheckValue(42,   "A");
+            slate.CheckValue(42.0, "B");
+            slate.CheckValue("42", "C");
         }
 
         [TestMethod]
         public void TestBasicParses_IntIntCompare() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in A = 2;",
                 "in B = 3;",
                 "maxA := 3;",
                 "C := A <= maxA && A > B ? 1 : 0;");
 
-            driver.CheckValue(2, "A");
-            driver.CheckValue(3, "B");
-            driver.CheckValue(0, "C");
+            slate.CheckValue(2, "A");
+            slate.CheckValue(3, "B");
+            slate.CheckValue(0, "C");
 
-            driver.SetInt(7, "A");
-            driver.Evaluate();
-            driver.CheckValue(0, "C");
+            slate.SetInt(7, "A");
+            slate.Evaluate();
+            slate.CheckValue(0, "C");
 
-            driver.SetInt(2, "A");
-            driver.SetInt(-1, "B");
-            driver.Evaluate();
-            driver.CheckValue(1, "C");
+            slate.SetInt(2, "A");
+            slate.SetInt(-1, "B");
+            slate.Evaluate();
+            slate.CheckValue(1, "C");
         }
 
         [TestMethod]
         public void TestBasicParses_Bitwise() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in int A = 0x0F;",
                 "int shift := 1;",
                 "int B := (A | 0x10) & 0x15;",
                 "int C := B << shift;",
                 "int D := ~C;");
-            driver.CheckPending("asdf");
+            slate.CheckPending("asdf");
 
-            driver.CheckValue( 0x0F, "A");
-            driver.CheckValue( 0x15, "B");
-            driver.CheckValue( 0x2A, "C");
-            driver.CheckValue(-0x2B, "D");
+            slate.CheckValue( 0x0F, "A");
+            slate.CheckValue( 0x15, "B");
+            slate.CheckValue( 0x2A, "C");
+            slate.CheckValue(-0x2B, "D");
 
-            driver.SetInt(0x44, "A");
-            driver.Evaluate();
-            driver.CheckValue( 0x14, "B");
-            driver.CheckValue( 0x28, "C");
-            driver.CheckValue(-0x29, "D");
+            slate.SetInt(0x44, "A");
+            slate.Evaluate();
+            slate.CheckValue( 0x14, "B");
+            slate.CheckValue( 0x28, "C");
+            slate.CheckValue(-0x29, "D");
         }
 
         [TestMethod]
         public void TestBasicParses_SomeBooleanMath() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in int A = 0x03;",
                 "bool B := A & 0x01 != 0;",
                 "bool C := A & 0x02 != 0;",
@@ -142,15 +142,15 @@ namespace BlackboardTests.ParserTests {
                 "bool E := A & 0x08 != 0;",
                 "bool F := B & !C ^ (D | E);");
 
-            driver.CheckValue(0x3, "A");
-            driver.CheckValue(true, "B");
-            driver.CheckValue(true, "C");
-            driver.CheckValue(false, "D");
-            driver.CheckValue(false, "E");
-            driver.CheckValue(false, "F");
+            slate.CheckValue(0x3, "A");
+            slate.CheckValue(true, "B");
+            slate.CheckValue(true, "C");
+            slate.CheckValue(false, "D");
+            slate.CheckValue(false, "E");
+            slate.CheckValue(false, "F");
 
-            driver.SetInt(0x5, "A");
-            driver.CheckEvaluate(
+            slate.SetInt(0x5, "A");
+            slate.CheckEvaluate(
                 "Start(Pending: 6)",
                 "  Eval(0): A: Input<int>[5]",
                 "  Eval(1): BitwiseAnd<int>[1](A, Literal<int>)",
@@ -166,10 +166,10 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(4): And<bool>[True](B, Not<bool>(C))",
                 "  Eval(5): F: Xor<bool>[False](And<bool>(B, Not<bool>), Or<bool>(D, E))",
                 "End(Provoked: 0)");
-            driver.CheckValue(false, "F");
+            slate.CheckValue(false, "F");
 
-            driver.SetInt(0x4, "A");
-            driver.CheckEvaluate(
+            slate.SetInt(0x4, "A");
+            slate.CheckEvaluate(
                 "Start(Pending: 1)",
                 "  Eval(0): A: Input<int>[4]",
                 "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
@@ -180,10 +180,10 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(4): And<bool>[False](B, Not<bool>(C))",
                 "  Eval(5): F: Xor<bool>[True](And<bool>(B, Not<bool>), Or<bool>(D, E))",
                 "End(Provoked: 0)");
-            driver.CheckValue(true, "F");
+            slate.CheckValue(true, "F");
 
-            driver.SetInt(0x8, "A");
-            driver.CheckEvaluate(
+            slate.SetInt(0x8, "A");
+            slate.CheckEvaluate(
                 "Start(Pending: 1)",
                 "  Eval(0): A: Input<int>[8]",
                 "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
@@ -194,10 +194,10 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(2): E: NotEqual<bool>[True](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
                 "  Eval(3): Or<bool>[True](D, E)",
                 "End(Provoked: 0)");
-            driver.CheckValue(true, "F");
+            slate.CheckValue(true, "F");
 
-            driver.SetInt(0xF, "A");
-            driver.CheckEvaluate(
+            slate.SetInt(0xF, "A");
+            slate.CheckEvaluate(
                 "Start(Pending: 1)",
                 "  Eval(0): A: Input<int>[15]",
                 "  Eval(1): BitwiseAnd<int>[1](A, Literal<int>)",
@@ -212,10 +212,10 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(3): Or<bool>[True](D, E)",
                 "  Eval(4): And<bool>[False](B, Not<bool>(C))",
                 "End(Provoked: 0)");
-            driver.CheckValue(true, "F");
+            slate.CheckValue(true, "F");
 
-            driver.SetInt(0x5, "A");
-            driver.CheckEvaluate(
+            slate.SetInt(0x5, "A");
+            slate.CheckEvaluate(
                 "Start(Pending: 1)",
                 "  Eval(0): A: Input<int>[5]",
                 "  Eval(1): BitwiseAnd<int>[1](A, Literal<int>)",
@@ -229,23 +229,23 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(4): And<bool>[True](B, Not<bool>(C))",
                 "  Eval(5): F: Xor<bool>[False](And<bool>(B, Not<bool>), Or<bool>(D, E))",
                 "End(Provoked: 0)");
-            driver.CheckValue(false, "F");
+            slate.CheckValue(false, "F");
         }
 
         [TestMethod]
         public void TestBasicParses_Trigger() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in trigger A;",
                 "in trigger B = true;",
                 "C := A | B;",
                 "D := A & B;",
                 "E := C ^ D;");
 
-            driver.Provoke("A");
-            driver.CheckProvoked(true, "A");
-            driver.CheckProvoked(true, "B"); // this was created provoked
-            driver.CheckEvaluate(
+            slate.Provoke("A");
+            slate.CheckProvoked(true, "A");
+            slate.CheckProvoked(true, "B"); // this was created provoked
+            slate.CheckEvaluate(
                 "Start(Pending: 5)",
                 "  Eval(0): A: Input<trigger>[provoked]",
                 "  Eval(0): B: Input<trigger>[provoked]",
@@ -254,10 +254,10 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(2): E: OnlyOne<trigger>(C, D)",
                 "End(Provoked: 4)");
 
-            driver.Provoke("A");
-            driver.CheckProvoked(true, "A");
-            driver.CheckProvoked(false, "B");
-            driver.CheckEvaluate(
+            slate.Provoke("A");
+            slate.CheckProvoked(true, "A");
+            slate.CheckProvoked(false, "B");
+            slate.CheckEvaluate(
                 "Start(Pending: 1)",
                 "  Eval(0): A: Input<trigger>[provoked]",
                 "  Eval(1): C: Any<trigger>[provoked](A, B)",
@@ -265,10 +265,10 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(2): E: OnlyOne<trigger>[provoked](C, D)",
                 "End(Provoked: 3)");
 
-            driver.Provoke("B");
-            driver.CheckProvoked(false, "A");
-            driver.CheckProvoked(true, "B");
-            driver.CheckEvaluate(
+            slate.Provoke("B");
+            slate.CheckProvoked(false, "A");
+            slate.CheckProvoked(true, "B");
+            slate.CheckEvaluate(
                 "Start(Pending: 1)",
                 "  Eval(0): B: Input<trigger>[provoked]",
                 "  Eval(1): C: Any<trigger>[provoked](A, B)",
@@ -276,22 +276,22 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(2): E: OnlyOne<trigger>[provoked](C, D)",
                 "End(Provoked: 3)");
 
-            driver.CheckProvoked(false, "A");
-            driver.CheckProvoked(false, "B");
-            driver.CheckEvaluate(
+            slate.CheckProvoked(false, "A");
+            slate.CheckProvoked(false, "B");
+            slate.CheckEvaluate(
                 "Start(Pending: 0)",
                 "End(Provoked: 0)");
         }
 
         [TestMethod]
         public void TestBasicParses_ExplicitCasts() {
-            Driver driver = new(addConsts: false);
-            driver.ReadCommit(
+            Slate slate = new(addConsts: false);
+            slate.ReadCommit(
                 "in double A = 1.2;",
                 "B := (int)A;",     // Explicit
                 "C := (string)A;",  // Implicit
                 "D := (double)A;"); // Inheritance
-            driver.CheckGraphString(
+            slate.CheckGraphString(
                 "Global: Namespace{",
                 "  A: Input<double>[1.2],",
                 "  B: Explicit<int>(D[1.2]),",
@@ -299,32 +299,32 @@ namespace BlackboardTests.ParserTests {
                 "  D: Input<double>[1.2]",
                 "}");
 
-            driver.CheckValue( 1.2,  "A");
-            driver.CheckValue( 1,    "B");
-            driver.CheckValue("1.2", "C");
-            driver.CheckValue( 1.2,  "D");
+            slate.CheckValue( 1.2,  "A");
+            slate.CheckValue( 1,    "B");
+            slate.CheckValue("1.2", "C");
+            slate.CheckValue( 1.2,  "D");
 
-            driver.SetDouble(42.9, "A");
-            driver.Evaluate();
-            driver.CheckValue( 42.9,  "A");
-            driver.CheckValue( 42,    "B");
-            driver.CheckValue("42.9", "C");
-            driver.CheckValue( 42.9,  "D");
+            slate.SetDouble(42.9, "A");
+            slate.Evaluate();
+            slate.CheckValue( 42.9,  "A");
+            slate.CheckValue( 42,    "B");
+            slate.CheckValue("42.9", "C");
+            slate.CheckValue( 42.9,  "D");
         }
 
         [TestMethod]
         public void TestBasicParses_ProvokingTriggers() {
-            Driver driver = new();
-            driver.ReadCommit(
+            Slate slate = new();
+            slate.ReadCommit(
                 "in trigger A;",
                 "in trigger B;",
                 "C := A & B;",
                 "in D = 3;");
-            driver.CheckProvoked(false, "A");
-            driver.CheckProvoked(false, "B");
-            driver.CheckProvoked(false, "C");
-            driver.CheckValue(3, "D");
-            driver.CheckEvaluate(
+            slate.CheckProvoked(false, "A");
+            slate.CheckProvoked(false, "B");
+            slate.CheckProvoked(false, "C");
+            slate.CheckValue(3, "D");
+            slate.CheckEvaluate(
                 "Start(Pending: 4)",
                 "  Eval(0): A: Input<trigger>", // Evaluates because they are new
                 "  Eval(0): B: Input<trigger>",
@@ -332,42 +332,42 @@ namespace BlackboardTests.ParserTests {
                 "  Eval(1): C: All<trigger>(A, B)",
                 "End(Provoked: 0)");
 
-            driver.ReadCommit(
+            slate.ReadCommit(
                 "->A;",
                 "D = 5;");
-            driver.CheckProvoked(true, "A");
-            driver.CheckProvoked(false, "B");
-            driver.CheckProvoked(false, "C");
-            driver.CheckValue(5, "D");
-            driver.CheckEvaluate(
+            slate.CheckProvoked(true, "A");
+            slate.CheckProvoked(false, "B");
+            slate.CheckProvoked(false, "C");
+            slate.CheckValue(5, "D");
+            slate.CheckEvaluate(
                 "Start(Pending: 2)",
                 "  Eval(0): A: Input<trigger>[provoked]",
                 "  Eval(0): D: Input<int>[5]",
                 "  Eval(1): C: All<trigger>(A, B)",
                 "End(Provoked: 1)");
 
-            driver.ReadCommit(
+            slate.ReadCommit(
                 "D > 3 -> A;",
                 "A -> B;");
-            driver.CheckProvoked(true, "A");
-            driver.CheckProvoked(true, "B");
-            driver.CheckProvoked(false, "C");
-            driver.CheckValue(5, "D");
-            driver.CheckEvaluate(
+            slate.CheckProvoked(true, "A");
+            slate.CheckProvoked(true, "B");
+            slate.CheckProvoked(false, "C");
+            slate.CheckValue(5, "D");
+            slate.CheckEvaluate(
                 "Start(Pending: 2)",
                 "  Eval(0): A: Input<trigger>[provoked]",
                 "  Eval(0): B: Input<trigger>[provoked]",
                 "  Eval(1): C: All<trigger>[provoked](A, B)",
                 "End(Provoked: 3)");
 
-            driver.ReadCommit(
+            slate.ReadCommit(
                 "false -> A;",
                 "D < -1 -> B;");
-            driver.CheckProvoked(false, "A");
-            driver.CheckProvoked(false, "B");
-            driver.CheckProvoked(false, "C");
-            driver.CheckValue(5, "D");
-            driver.CheckEvaluate(
+            slate.CheckProvoked(false, "A");
+            slate.CheckProvoked(false, "B");
+            slate.CheckProvoked(false, "C");
+            slate.CheckValue(5, "D");
+            slate.CheckEvaluate(
                 "Start(Pending: 2)",
                 "  Eval(0): A: Input<trigger>",
                 "  Eval(0): B: Input<trigger>",

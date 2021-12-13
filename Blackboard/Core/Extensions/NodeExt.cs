@@ -157,7 +157,7 @@ namespace Blackboard.Core.Extensions {
         /// <summary>Adds children nodes onto this node.</summary>
         /// <remarks>
         /// Any children which are added need to be put in the pending evaluation list
-        /// of the driver so that they will be evaluated and/or depth updated in the next batch.
+        /// of the slate so that they will be evaluated and/or depth updated in the next batch.
         /// </remarks>
         /// <param name="children">The children to add.</param>
         /// <returns>True if any children were added, false otherwise.</returns>
@@ -213,7 +213,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="pending">The initial set of nodes which are pending depth update.</param>
         /// <param name="logger">The logger to debug the update with.</param>
         static public void UpdateDepths(this LinkedList<IEvaluable> pending, ILogger logger = null) {
-            logger?.Log("Start Update (pending: {0})", pending.Count());
+            logger?.Log("Start Update (pending: {0})", pending.Count);
 
             while (pending.Count > 0) {
                 IEvaluable node = pending.TakeFirst();
@@ -245,7 +245,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="logger">The logger to debug the evaluate with.</param>
         /// <returns>The list of provoked triggers</returns>
         static public HashSet<ITrigger> Evaluate(this LinkedList<IEvaluable> pending, ILogger logger = null) {
-            logger?.Log("Start Eval (pending: {0})", pending.Count());
+            logger?.Log("Start Eval (pending: {0})", pending.Count);
 
             HashSet<ITrigger> provoked = new();
             while (pending.Count > 0) {
@@ -262,7 +262,7 @@ namespace Blackboard.Core.Extensions {
                 logger?.Log("  Evaluated (changed: {0}, depth: {1}, node: {2}, remaining: {3})", changed, node.Depth, node, pending.Count);
             }
 
-            logger?.Log("End Eval (provoked: {0})", provoked.Count());
+            logger?.Log("End Eval (provoked: {0})", provoked.Count);
             return provoked;
         }
 

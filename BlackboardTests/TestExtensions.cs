@@ -101,7 +101,7 @@ namespace BlackboardTests {
             Assert.AreEqual(lines.Join(S.Environment.NewLine), Stringifier.Shallow(action));
 
         #endregion
-        #region Driver...
+        #region Slate...
 
         /// <summary>Gets the message for the CheckValues assertions.</summary>
         /// <param name="type">The type of the value being checked.</param>
@@ -111,88 +111,105 @@ namespace BlackboardTests {
             "Checking the " + type + " value of \"" + names.Join(".") + "\".";
 
         /// <summary>Checks the boolean value of this node.</summary>
-        /// <param name="driver">This is the driver to check the value with.</param>
+        /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected boolean value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        static public void CheckValue(this Driver driver, bool exp, params string[] names) =>
-            Assert.AreEqual(exp, driver.GetBool(names), checkValueMsg("bool", names));
+        static public void CheckValue(this Slate slate, bool exp, params string[] names) =>
+            Assert.AreEqual(exp, slate.GetBool(names), checkValueMsg("bool", names));
 
         /// <summary>Checks the integer value of this node.</summary>
-        /// <param name="driver">This is the driver to check the value with.</param>
+        /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected integer value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        static public void CheckValue(this Driver driver, int exp, params string[] names) =>
-            Assert.AreEqual(exp, driver.GetInt(names), checkValueMsg("int", names));
+        static public void CheckValue(this Slate slate, int exp, params string[] names) =>
+            Assert.AreEqual(exp, slate.GetInt(names), checkValueMsg("int", names));
 
         /// <summary>Checks the double value of this node.</summary>
-        /// <param name="driver">This is the driver to check the value with.</param>
+        /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected double value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        static public void CheckValue(this Driver driver, double exp, params string[] names) =>
-            Assert.AreEqual(exp, driver.GetDouble(names), checkValueMsg("double", names));
+        static public void CheckValue(this Slate slate, double exp, params string[] names) =>
+            Assert.AreEqual(exp, slate.GetDouble(names), checkValueMsg("double", names));
 
         /// <summary>Checks the string value of this node.</summary>
-        /// <param name="driver">This is the driver to check the value with.</param>
+        /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected string value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        static public void CheckValue(this Driver driver, string exp, params string[] names) =>
-            Assert.AreEqual(exp, driver.GetString(names), checkValueMsg("string", names));
+        static public void CheckValue(this Slate slate, string exp, params string[] names) =>
+            Assert.AreEqual(exp, slate.GetString(names), checkValueMsg("string", names));
 
         /// <summary>Checks the provoked state of this node.</summary>
-        /// <param name="driver">This is the driver to check the state with.</param>
+        /// <param name="slate">This is the slate to check the state with.</param>
         /// <param name="exp">The expected provoked state of the node.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        static public void CheckProvoked(this Driver driver, bool exp, params string[] names) =>
-            Assert.AreEqual(exp, driver.Provoked(names), "Checking the provoked state of \"" + names.Join(".") + "\".");
+        static public void CheckProvoked(this Slate slate, bool exp, params string[] names) =>
+            Assert.AreEqual(exp, slate.Provoked(names), "Checking the provoked state of \"" + names.Join(".") + "\".");
 
-        /// <summary>Checks the pending nodes are as expected.</summary>
-        /// <param name="driver">This is the driver to check the pending of.</param>
+        /// <summary>Checks the pending nodes to evaluate are as expected.</summary>
+        /// <param name="slate">This is the slate to check the pending of.</param>
         /// <param name="exp">The expected names of the pending nodes.</param>
-        static public void CheckPending(this Driver driver, string exp) =>
-            Assert.AreEqual(exp, driver.Pending.Strings().Join(", "), "Checking the pending nodes.");
+        static public void CheckPendingEval(this Slate slate, string exp) =>
+            Assert.AreEqual(exp, slate.PendingEval.Strings().Join(", "), "Checking the pending nodes.");
 
-        /// <summary>Runs the driver evaluation and checks that evaluation performed as expected.</summary>
-        /// <param name="driver">The driver to evaluate.</param>
+        /// <summary>Checks the pending nodes to update are as expected.</summary>
+        /// <param name="slate">This is the slate to check the pending of.</param>
+        /// <param name="exp">The expected names of the pending nodes.</param>
+        static public void CheckPendingUpdate(this Slate slate, string exp) =>
+            Assert.AreEqual(exp, slate.PendingUpdate.Strings().Join(", "), "Checking the pending nodes.");
+
+        /// <summary>Runs the slate evaluation and checks that evaluation performed as expected.</summary>
+        /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
-        static public void CheckEvaluate(this Driver driver, params string[] lines) {
+        static public void CheckEvaluate(this Slate slate, params string[] lines) {
             Logger logger = new();
-            logger.Stringifier.PreloadNames(driver);
-            driver.Evaluate(logger);
+            logger.Stringifier.PreloadNames(slate);
+            slate.PerformEvaluation(logger);
             string exp = lines.Join(S.Environment.NewLine);
             Assert.AreEqual(exp, logger.ToString().Trim());
         }
 
-        /// <summary>Checks the deep string for the given node using the names from the given driver.</summary>
-        /// <param name="driver">The driver to load the names for the nodes from.</param>
+        /// <summary>Runs the slate update and checks that evaluation performed as expected.</summary>
+        /// <param name="slate">The slate to evaluate.</param>
+        /// <param name="lines">The expected evaluation log output.</param>
+        static public void CheckUpdate(this Slate slate, params string[] lines) {
+            Logger logger = new();
+            logger.Stringifier.PreloadNames(slate);
+            slate.PerformUpdates(logger);
+            string exp = lines.Join(S.Environment.NewLine);
+            Assert.AreEqual(exp, logger.ToString().Trim());
+        }
+
+        /// <summary>Checks the deep string for the given node using the names from the given slate.</summary>
+        /// <param name="slate">The slate to load the names for the nodes from.</param>
         /// <param name="node">The node to get the deep string for.</param>
         /// <param name="lines">The line to compare the node's string against.</param>
-        static public void CheckNodeString(this Driver driver, INode node, params string[] lines) {
+        static public void CheckNodeString(this Slate slate, INode node, params string[] lines) {
             string exp = lines.Join(S.Environment.NewLine);
             Stringifier stringifier = Stringifier.Deep();
-            stringifier.PreloadNames(driver);
+            stringifier.PreloadNames(slate);
             Assert.AreEqual(exp, stringifier.Stringify(node));
         }
 
         /// <summary>Checks the namespace string for the whole graph and compares against the given lines.</summary>
-        /// <param name="driver">The driver to compare against.</param>
+        /// <param name="slate">The slate to compare against.</param>
         /// <param name="lines">The expected lines of the returned string.</param>
-        static public void CheckGraphString(this Driver driver, params string[] lines) {
+        static public void CheckGraphString(this Slate slate, params string[] lines) {
             string exp = lines.Join(S.Environment.NewLine);
-            Assert.AreEqual(exp, Stringifier.GraphString(driver));
+            Assert.AreEqual(exp, Stringifier.GraphString(slate));
         }
 
         /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
-        /// <param name="driver">The driver to apply the parsed formula to.</param>
+        /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
-        static public IAction Read(this Driver driver, params string[] input) => new Parser(driver).Read(input);
+        static public IAction Read(this Slate slate, params string[] input) => new Parser(slate).Read(input);
 
         /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
-        /// <param name="driver">The driver to apply the parsed formula to.</param>
+        /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
-        static public void ReadCommit(this Driver driver, params string[] input) {
-            Parser parser = new(driver);
+        static public void ReadCommit(this Slate slate, params string[] input) {
+            Parser parser = new(slate);
             IAction formula = parser.Read(input);
-            formula.Perform(driver);
+            formula.Perform(slate);
         }
 
         #endregion

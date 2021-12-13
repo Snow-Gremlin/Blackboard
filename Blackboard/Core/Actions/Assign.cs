@@ -27,9 +27,9 @@ namespace Blackboard.Core.Actions {
             new Assign<T>(input, data, allNodes) :
             throw new Exception("Unexpected node types for assignment.").
                 With("Location", loc).
-                With("Type", typeof(T)).
-                With("Target", target).
-                With("Value", value);
+                With("Type",     typeof(T)).
+                With("Target",   target).
+                With("Value",    value);
 
         /// <summary>The target input node to set the value of.</summary>
         private readonly IValueInput<T> target;
@@ -63,12 +63,12 @@ namespace Blackboard.Core.Actions {
         public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
 
         /// <summary>This will perform the action.</summary>
-        /// <param name="driver">The driver for this action.</param>
+        /// <param name="slate">The slate for this action.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Driver driver, Logger logger = null) {
-            driver.Pend(this.needPending);
-            driver.Evaluate();
-            driver.SetValue(this.value.Value, this.target);
+        public void Perform(Slate slate, Logger logger = null) {
+            slate.PendEval(this.needPending);
+            slate.PerformEvaluation();
+            slate.SetValue(this.value.Value, this.target);
         }
 
         /// <summary>Gets a human readable string for this assignment.</summary>

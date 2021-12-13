@@ -133,15 +133,15 @@ namespace Blackboard.Core.Inspect {
 
         #endregion
 
-        /// <summary>Gets a string showing the whole driver from the global.</summary>
-        /// <param name="driver">The driver to get the graph from.</param>
+        /// <summary>Gets a string showing the whole slate from the global.</summary>
+        /// <param name="slate">The slate to get the graph from.</param>
         /// <param name="showFuncs">Indicates that functions should be outputted.</param>
-        /// <returns>The full debug string for this driver.</returns>
-        static public string GraphString(Driver driver, bool showFuncs = false) {
+        /// <returns>The full debug string for this slate.</returns>
+        static public string GraphString(Slate slate, bool showFuncs = false) {
             Stringifier stringifier = Deep();
             stringifier.ShowFuncs = showFuncs;
-            stringifier.PreloadNames(driver);
-            return stringifier.Stringify(driver.Global);
+            stringifier.PreloadNames(slate);
+            return stringifier.Stringify(slate.Global);
         }
 
         /// <summary>Creates a new node stringifier instance.</summary>
@@ -222,10 +222,10 @@ namespace Blackboard.Core.Inspect {
             this.nodeNames[node] = name;
 
         /// <summary>Preloads the node name to use when outputting using the namespaces reachable from global.</summary>
-        /// <param name="driver">The driver containing the global namespace to load.</param>
-        public void PreloadNames(Driver driver) {
-            this.SetNodeName("Global", driver.Global);
-            this.PreloadNames(driver.Global);
+        /// <param name="slate">The slate containing the global namespace to load.</param>
+        public void PreloadNames(Slate slate) {
+            this.SetNodeName("Global", slate.Global);
+            this.PreloadNames(slate.Global);
         }
 
         /// <summary>Preloads the node names to use when outputting the parents of nodes.</summary>
@@ -374,7 +374,7 @@ namespace Blackboard.Core.Inspect {
 
             string tail = node.Fields.Select(pair =>
                 (pair.Value is IFuncGroup or IFuncDef) && !this.ShowFuncs ? null :
-                pair.Key == Driver.OperatorNamespace ? null :
+                pair.Key == Slate.OperatorNamespace ? null :
                 pair.Key + ": " + this.stringNode(pair.Value, depth-1, false, false)
             ).NotNull().Indent(this.Indent).Join("," + nl + this.Indent);
 

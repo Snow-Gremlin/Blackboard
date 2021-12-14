@@ -23,13 +23,13 @@ namespace BlackboardTests.ParserTests {
             slate.CheckValue(5, "C");
 
             slate.SetInt(7, "A");
-            slate.Evaluate();
+            slate.PerformEvaluation();
             slate.CheckValue( 7, "A");
             slate.CheckValue( 3, "B");
             slate.CheckValue(10, "C");
 
             slate.SetInt(1, "B");
-            slate.Evaluate();
+            slate.PerformEvaluation();
             slate.CheckValue(7, "A");
             slate.CheckValue(1, "B");
             slate.CheckValue(8, "C");
@@ -54,13 +54,13 @@ namespace BlackboardTests.ParserTests {
             slate.CheckValue(5.0, "C");
 
             slate.SetInt(7, "A");
-            slate.Evaluate();
+            slate.PerformEvaluation();
             slate.CheckValue( 7,   "A");
             slate.CheckValue( 3.0, "B");
             slate.CheckValue(10.0, "C");
 
             slate.SetDouble(1.23, "B");
-            slate.Evaluate();
+            slate.PerformEvaluation();
             slate.CheckValue(7,    "A");
             slate.CheckValue(1.23, "B");
             slate.CheckValue(8.23, "C");
@@ -79,7 +79,7 @@ namespace BlackboardTests.ParserTests {
             slate.CheckValue("2", "C");
 
             slate.SetInt(42, "A");
-            slate.Evaluate();
+            slate.PerformEvaluation();
             slate.CheckValue(42,   "A");
             slate.CheckValue(42.0, "B");
             slate.CheckValue("42", "C");
@@ -99,12 +99,12 @@ namespace BlackboardTests.ParserTests {
             slate.CheckValue(0, "C");
 
             slate.SetInt(7, "A");
-            slate.Evaluate();
+            slate.PerformEvaluation();
             slate.CheckValue(0, "C");
 
             slate.SetInt(2, "A");
             slate.SetInt(-1, "B");
-            slate.Evaluate();
+            slate.PerformEvaluation();
             slate.CheckValue(1, "C");
         }
 
@@ -117,7 +117,7 @@ namespace BlackboardTests.ParserTests {
                 "int B := (A | 0x10) & 0x15;",
                 "int C := B << shift;",
                 "int D := ~C;");
-            slate.CheckPending("asdf");
+            slate.CheckPendingEval("asdf"); // TODO
 
             slate.CheckValue( 0x0F, "A");
             slate.CheckValue( 0x15, "B");
@@ -125,7 +125,7 @@ namespace BlackboardTests.ParserTests {
             slate.CheckValue(-0x2B, "D");
 
             slate.SetInt(0x44, "A");
-            slate.Evaluate();
+            slate.PerformEvaluation();
             slate.CheckValue( 0x14, "B");
             slate.CheckValue( 0x28, "C");
             slate.CheckValue(-0x29, "D");
@@ -305,7 +305,7 @@ namespace BlackboardTests.ParserTests {
             slate.CheckValue( 1.2,  "D");
 
             slate.SetDouble(42.9, "A");
-            slate.Evaluate();
+            slate.PerformEvaluation();
             slate.CheckValue( 42.9,  "A");
             slate.CheckValue( 42,    "B");
             slate.CheckValue("42.9", "C");

@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <remarks>This functions just like a typical ternary (i.e. `test ? left : right`) statement.</remarks>
     /// <typeparam name="T">The parent type to select between and return.</typeparam>
     public abstract class Select<T>: Evaluable, IChild, IConstantable
-        where T : class, INode {
+        where T : class, IParent {
 
         /// <summary>This is a helper for creating a select node factories quickly.</summary>
         /// <param name="handle">The handler for calling the node constructor.</param>

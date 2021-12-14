@@ -134,6 +134,11 @@ namespace Blackboard.Parser {
         /// <param name="node">The node to add.</param>
         public void AddNewNode(INode node) => this.newNodes.Add(node);
 
+        /// <summary>Determines is the given node is in the new nodes set.</summary>
+        /// <param name="node">The node to check for.</param>
+        /// <returns>True if the node is a new node, false otherwise.</returns>
+        public bool IsNewNode(INode node) => this.newNodes.Contains(node);
+
         #endregion
         #region Arguments Stack...
 

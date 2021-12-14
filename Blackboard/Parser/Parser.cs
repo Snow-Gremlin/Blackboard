@@ -232,11 +232,11 @@ namespace Blackboard.Parser {
             Type targetType = Type.TypeOf(target);
             INode castValue = performCast(builder, targetType, value);
             IAction assign =
-                targetType == Type.Bool    ? Assign<Bool>.  Create(loc, target, castValue) :
-                targetType == Type.Int     ? Assign<Int>.   Create(loc, target, castValue) :
-                targetType == Type.Double  ? Assign<Double>.Create(loc, target, castValue) :
-                targetType == Type.String  ? Assign<String>.Create(loc, target, castValue) :
-                targetType == Type.Trigger ? Provoke.       Create(loc, target, castValue) :
+                targetType == Type.Bool    ? Assign<Bool>.  Create(loc, target, castValue, builder.NewNodes) :
+                targetType == Type.Int     ? Assign<Int>.   Create(loc, target, castValue, builder.NewNodes) :
+                targetType == Type.Double  ? Assign<Double>.Create(loc, target, castValue, builder.NewNodes) :
+                targetType == Type.String  ? Assign<String>.Create(loc, target, castValue, builder.NewNodes) :
+                targetType == Type.Trigger ? Provoke.       Create(loc, target, castValue, builder.NewNodes) :
                 throw new Exception("Unsupported type for an assignment").
                     With("Location", loc).
                     With("Type", targetType).
@@ -331,6 +331,7 @@ namespace Blackboard.Parser {
             string name = builder.PopId();
             INode target = createInput(builder, name, type);
             addAssignment(builder, target, value);
+            builder.ClearNewNodes();
         }
 
         /// <summary>This creates a new input node and assigns it with an initial value.</summary>
@@ -341,6 +342,7 @@ namespace Blackboard.Parser {
             Type type = Type.TypeOf(value);
             INode target = createInput(builder, name, type);
             addAssignment(builder, target, value);
+            builder.ClearNewNodes();
         }
 
         /// <summary>This handles defining a new typed named node.</summary>
@@ -370,6 +372,7 @@ namespace Blackboard.Parser {
         static private void handleProvokeTrigger(Builder builder) {
             INode target = builder.Pop();
             builder.AddAction(Provoke.Create(builder.LastLocation, target));
+            builder.ClearNewNodes();
         }
 
         /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
@@ -385,6 +388,7 @@ namespace Blackboard.Parser {
 
             INode castValue = performCast(builder, Type.Trigger, value);
             builder.AddAction(new Provoke(input, castValue as ITrigger));
+            builder.ClearNewNodes();
 
             // Push the condition onto the stack for any following trigger pulls.
             // See comment in `handleAssignment` about pushing cast value back onto the stack.

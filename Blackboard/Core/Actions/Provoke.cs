@@ -4,6 +4,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using PetiteParser.Scanner;
 using System.Collections.Generic;
 using System.Linq;
+using S = System;
 
 namespace Blackboard.Core.Actions {
 
@@ -18,7 +19,7 @@ namespace Blackboard.Core.Actions {
         /// <param name="target">The target node to provoke.</param>
         /// <param name="value">The value to use as the conditional.</param>v
         /// <returns>The provoke action.</returns>
-        static public Provoke Create(Location loc, INode target, INode value, IEnumerable<INode> allNodes) =>
+        static public Provoke Create(Location loc, INode target, INode value, IEnumerable<INode> allNodes = null) =>
             (target is ITriggerInput input) && (value is ITrigger conditional) ? new Provoke(input, conditional, allNodes) :
             throw new Exception("Unexpected node types for a conditional provoke.").
                 With("Location", loc).
@@ -33,7 +34,7 @@ namespace Blackboard.Core.Actions {
         /// <param name="target">The target node to provoke.</param>
         /// <param name="allNodes">All the nodes which are new children of the node to provoke.</param>
         /// <returns>The provoke action.</returns>
-        static public Provoke Create(Location loc, INode target, IEnumerable<INode> allNodes) =>
+        static public Provoke Create(Location loc, INode target, IEnumerable<INode> allNodes = null) =>
             (target is ITriggerInput input) ? new Provoke(input, null, allNodes) :
             throw new Exception("Unexpected node types for a unconditional provoke.").
                 With("Location", loc).
@@ -49,10 +50,11 @@ namespace Blackboard.Core.Actions {
         /// <param name="target">The input trigger to provoke.</param>
         /// <param name="trigger">The optional trigger to conditionally provoke with or null to always provoke.</param>
         /// <param name="allNodes">All the nodes which are new children of the node to provoke.</param>
-        public Provoke(ITriggerInput target, ITrigger trigger, IEnumerable<INode> allNodes) {
+        public Provoke(ITriggerInput target, ITrigger trigger, IEnumerable<INode> allNodes = null) {
             this.Target  = target;
             this.Trigger = trigger;
-            this.needPending = allNodes.NotNull().OfType<IEvaluable>().ToArray();
+            this.needPending = allNodes is null ? S.Array.Empty<IEvaluable>() :
+                allNodes.NotNull().OfType<IEvaluable>().ToArray();
         }
 
         /// <summary>The target input trigger to provoke.</summary>

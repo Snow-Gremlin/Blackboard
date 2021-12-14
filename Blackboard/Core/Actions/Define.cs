@@ -3,6 +3,7 @@ using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using S = System;
 
 namespace Blackboard.Core.Actions {
 
@@ -23,11 +24,12 @@ namespace Blackboard.Core.Actions {
         /// <param name="name">The name to write the node with.</param>
         /// <param name="node">The node being set to the receiver with the given name.</param>
         /// <param name="allNodes">All the nodes which are new children of the node to write.</param>
-        public Define(IFieldWriter receiver, string name, INode node, IEnumerable<INode> allNodes) {
+        public Define(IFieldWriter receiver, string name, INode node, IEnumerable<INode> allNodes = null) {
             this.Receiver = receiver;
             this.Name = name;
             this.Node = node;
-            this.needParents = allNodes.NotNull().OfType<IChild>().Where(child => child.NeedsToAddParents()).ToArray();
+            this.needParents = allNodes is null ? S.Array.Empty<IChild>() :
+                allNodes.NotNull().OfType<IChild>().Where(child => child.NeedsToAddParents()).ToArray();
         }
 
         /// <summary>This is the receiver that will be written to.</summary>

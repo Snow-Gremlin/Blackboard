@@ -139,7 +139,7 @@ namespace BlackboardTests.CoreTests {
                 if (triggerB) drv.Provoke("TrigB");
                 if (triggerC) drv.Provoke("TrigC");
                 high = false;
-                drv.Evaluate();
+                drv.PerformEvaluation();
 
                 int  count  = drv.GetValue<Int>("Count").Value;
                 bool toggle = drv.GetValue<Bool>("Toggle").Value;

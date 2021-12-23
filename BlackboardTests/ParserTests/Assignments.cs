@@ -69,30 +69,32 @@ namespace BlackboardTests.ParserTests {
                 "in double J = 0e-5;",
                 "in double K = 28.0;");
             formula.Check(
-                "Namespace.A := Input<double>[0];", "Input<double>[0] = Literal<double>[3];",
-                "Namespace.B := Input<double>[0];", "Input<double>[0] = Literal<double>[0.003];",
-                "Namespace.C := Input<double>[0];", "Input<double>[0] = Literal<double>[0.003];",
-                "Namespace.D := Input<double>[0];", "Input<double>[0] = Literal<double>[0.003];",
-                "Namespace.E := Input<double>[0];", "Input<double>[0] = Literal<double>[0.003];",
-                "Namespace.F := Input<double>[0];", "Input<double>[0] = Implicit<double>[0](Literal<int>);",
-                "Namespace.G := Input<double>[0];", "Input<double>[0] = Implicit<double>[0](Literal<int>);",
-                "Namespace.H := Input<double>[0];", "Input<double>[0] = Literal<double>[0];",
-                "Namespace.I := Input<double>[0];", "Input<double>[0] = Literal<double>[1];",
-                "Namespace.J := Input<double>[0];", "Input<double>[0] = Literal<double>[0];",
-                "Namespace.K := Input<double>[0];", "Input<double>[0] = Literal<double>[28];");
+                "[",
+                "  Namespace.A := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[3] {};",
+                "  Namespace.B := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0.003] {};",
+                "  Namespace.C := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0.003] {};",
+                "  Namespace.D := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0.003] {};",
+                "  Namespace.E := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0.003] {};",
+                "  Namespace.F := Input<double>[0] {};", "  Input<double>[0] = Implicit<double>[0](Literal<int>) {Implicit<double>[0](Literal<int>)};",
+                "  Namespace.G := Input<double>[0] {};", "  Input<double>[0] = Implicit<double>[0](Literal<int>) {Implicit<double>[0](Literal<int>)};",
+                "  Namespace.H := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0] {};",
+                "  Namespace.I := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[1] {};",
+                "  Namespace.J := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0] {};",
+                "  Namespace.K := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[28] {};",
+                "]");
             formula.Perform(slate);
 
-            slate.CheckValue(3.0, "A");
-            slate.CheckValue(0.003, "B");
-            slate.CheckValue(0.003, "C");
-            slate.CheckValue(0.003, "D");
-            slate.CheckValue(0.003, "E");
-            slate.CheckValue(3.0, "F");
-            slate.CheckValue(0.0, "G");
-            slate.CheckValue(0.0, "H");
-            slate.CheckValue(1.0, "I");
-            slate.CheckValue(0.0, "J");
-            slate.CheckValue(28.0, "K");
+            slate.CheckValue( 3.0,   "A");
+            slate.CheckValue( 0.003, "B");
+            slate.CheckValue( 0.003, "C");
+            slate.CheckValue( 0.003, "D");
+            slate.CheckValue( 0.003, "E");
+            slate.CheckValue( 3.0,   "F");
+            slate.CheckValue( 0.0,   "G");
+            slate.CheckValue( 0.0,   "H");
+            slate.CheckValue( 1.0,   "I");
+            slate.CheckValue( 0.0,   "J");
+            slate.CheckValue(28.0,   "K");
         }
 
         [TestMethod]
@@ -104,12 +106,12 @@ namespace BlackboardTests.ParserTests {
                 "in double E = (B ** C) / 2;",
                 "in double F = -E + -3;");
 
-            slate.CheckValue(3.14, "A");
-            slate.CheckValue(3.0, "B");
-            slate.CheckValue(3.0, "C");
-            slate.CheckValue(3.1, "D");
-            slate.CheckValue(13.5, "E");
-            slate.CheckValue(-16.5, "F");
+            slate.CheckValue(  3.14, "A");
+            slate.CheckValue(  3.0,  "B");
+            slate.CheckValue(  3.0,  "C");
+            slate.CheckValue(  3.1,  "D");
+            slate.CheckValue( 13.5,  "E");
+            slate.CheckValue(-16.5,  "F");
         }
 
         [TestMethod]
@@ -190,7 +192,7 @@ namespace BlackboardTests.ParserTests {
             Slate slate = new();
             Parser parser = new(slate);
             TestTools.CheckException(() => parser.Read("in int A = 3.14;"),
-                "Error occurred while parsing input code.",
+               "Error occurred while parsing input code.",
                "May not assign the value to that type of input.",
                "[Location: Unnamed:1, 15, 15]",
                "[Input Type: int]",

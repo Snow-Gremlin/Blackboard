@@ -354,7 +354,7 @@ namespace Blackboard.Core.Inspect {
         private string tailingNodes(IFuncGroup node, int depth) {
             if (!node.Definitions.Any()) return "";
             if (!this.ShowFuncs || depth <= 1) return "{...}";
-            string nl = S.Environment.NewLine;
+            string nl = "\n";
 
             string tail = node.Definitions.Select(def =>
                 this.stringNode(def, depth-1, false, false).Trim().Replace(nl, nl + this.Indent)).
@@ -370,7 +370,7 @@ namespace Blackboard.Core.Inspect {
         private string tailingNodes(IFieldReader node, int depth) {
             if (!node.Fields.Any()) return "";
             if (depth <= 1) return "{...}";
-            string nl = S.Environment.NewLine;
+            string nl = "\n";
 
             string tail = node.Fields.Select(pair =>
                 (pair.Value is IFuncGroup or IFuncDef) && !this.ShowFuncs ? null :
@@ -394,7 +394,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="actions">The actions to stringify.</param>
         /// <returns>The string for the given actions.</returns>
         public string Stringify(IEnumerable<IAction> actions) =>
-            actions.Select(this.stringAction).Join(S.Environment.NewLine);
+            actions.Select(this.stringAction).Join("\n");
 
         /// <summary>Gets the string for a given action.</summary>
         /// <param name="action">The action to stringify.</param>
@@ -435,7 +435,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="formula">The formula to stringify.</param>
         /// <returns>The string for the given formula.</returns>
         private string stringFormula(Formula formula) {
-            string nl = S.Environment.NewLine;
+            string nl = "\n";
             return formula is null ? "null" : formula.Actions.Count <= 0 ? "[]" :
                 "[" + nl + this.Indent + this.Stringify(formula.Actions).Replace(nl, nl+this.Indent) + nl + "]";
         }

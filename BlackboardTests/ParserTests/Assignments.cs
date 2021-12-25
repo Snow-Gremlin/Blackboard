@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Actions;
+using Blackboard.Core.Inspect;
 using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -102,11 +103,12 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_LiteralMath() {
             Slate slate = new();
-            slate.ReadCommit(
+            IAction action = new Parser(slate).Read(
                 "in double A = 3.0 + 0.07 * 2;",
                 "in double B = floor(A), C = round(A), D = round(A, 1);",
                 "in double E = (B ** C) / 2;",
                 "in double F = -E + -3;");
+            action.Perform(slate, new ConsoleLogger());
 
             slate.CheckValue(  3.14, "A");
             slate.CheckValue(  3.0,  "B");

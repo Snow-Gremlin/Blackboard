@@ -4,7 +4,6 @@ using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
-using S = System;
 
 namespace Blackboard.Core.Inspect {
 
@@ -439,6 +438,26 @@ namespace Blackboard.Core.Inspect {
             return formula is null ? "null" : formula.Actions.Count <= 0 ? "[]" :
                 "[" + nl + this.Indent + this.Stringify(formula.Actions).Replace(nl, nl+this.Indent) + nl + "]";
         }
+
+        #endregion
+        #region Other...
+
+        /// <summary>Converts the given object with this stringifier.</summary>
+        /// <param name="value">The value to stringify.</param>
+        /// <returns>
+        /// The string of the given action or node,
+        /// or the original value if not an action or node.
+        /// </returns>
+        private object stringifyObject(object value) =>
+            value switch {
+                INode   node   => this.Stringify(node),
+                IAction action => this.Stringify(action),
+                _              => value
+            };
+
+
+        public IEnumerable<object> Stringify(IEnumerable<object> values) =>
+            values.Select(this.stringifyObject);
 
         #endregion
     }

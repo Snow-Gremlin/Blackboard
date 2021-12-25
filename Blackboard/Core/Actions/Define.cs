@@ -26,13 +26,14 @@ namespace Blackboard.Core.Actions {
         /// <param name="node">The node being set to the receiver with the given name.</param>
         /// <param name="allNodes">All the nodes which are new children of the node to write.</param>
         public Define(IFieldWriter receiver, string name, INode node, IEnumerable<INode> allNodes = null) {
+            if (receiver is null or VirtualNode)
+                throw new Exception("May not use a null or virtual node as the receiver in a define.");
+
             this.Receiver = receiver;
             this.Name = name;
             this.Node = node;
             this.needParents = allNodes is null ? S.Array.Empty<IChild>() :
                 allNodes.NotNull().OfType<IChild>().Where(child => child.NeedsToAddParents()).ToArray();
-            if (this.Receiver is VirtualNode)
-                throw new Exception("May not use a virtual node in a define.");
         }
 
         /// <summary>This is the receiver that will be written to.</summary>
@@ -50,7 +51,8 @@ namespace Blackboard.Core.Actions {
         /// <summary>This will perform the action.</summary>
         /// <param name="slate">The slate for this action.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, Logger logger = null) {
+        public void Perform(Slate slate, ILogger logger = null) {
+            logger?.Log("Define: {0}", this);
             this.Receiver.WriteField(this.Name, this.Node);
             List<IChild> changed = this.needParents.Where(child => child.AddToParents()).ToList();
             slate.PendUpdate(changed);

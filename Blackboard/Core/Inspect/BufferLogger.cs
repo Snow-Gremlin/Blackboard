@@ -1,13 +1,13 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
-using System.IO;
+﻿using System.IO;
+using System.Linq;
 
 namespace Blackboard.Core.Inspect {
 
     /// <summary>
-    /// This is a logger used for debugging the evaluation
+    /// This is a buffer logger used for debugging the evaluation
     /// and update of nodes and actions in the slate.
     /// </summary>
-    public class Logger: ILogger {
+    public class BufferLogger: ILogger {
 
         /// <summary>The string buffer to write to.</summary>
         private StringWriter fout;
@@ -16,7 +16,7 @@ namespace Blackboard.Core.Inspect {
         private Stringifier stringifier;
 
         /// <summary>Creates a new evaluation logger.</summary>
-        public Logger() {
+        public BufferLogger() {
             this.fout = new StringWriter();
             this.stringifier = null;
         }
@@ -33,12 +33,11 @@ namespace Blackboard.Core.Inspect {
         /// <summary>This will write to this log followed by a new line.</summary>
         /// <param name="format">The test to write.</param>
         /// <param name="args">Any arguments to pass into the log too.</param>
-        public virtual void Log(string format, params object[] args) {
-            for (int i = 0; i < args.Length; i++) {
-                if (args[i] is INode node) args[i] = this.Stringifier.Stringify(node);
-            }
-            this.fout.WriteLine(format, args);
-        }
+        public virtual void Log(string format, params object[] args) =>
+            this.fout.WriteLine(format, this.Stringifier.Stringify(args).ToArray());
+
+        /// <summary>Creates a new logger indented one level.</summary>
+        public ILogger Sub => new SubLogger(this);
 
         /// <summary>This will get the logs.</summary>
         /// <returns>The logs which have been written.</returns>

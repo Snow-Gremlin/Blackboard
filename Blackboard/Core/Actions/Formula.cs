@@ -45,8 +45,11 @@ namespace Blackboard.Core.Actions {
         /// </remarks>
         /// <param name="slate">The slate for this formula.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, Logger logger = null) =>
-            this.actions.Foreach(action => action.Perform(slate, logger));
+        public void Perform(Slate slate, ILogger logger = null) {
+            logger?.Log("Formula:");
+            ILogger sub = logger?.Sub;
+            this.actions.Foreach(action => action.Perform(slate, sub));
+        }
 
         /// <summary>Gets a human readable string for this formula as all internal actions on different lines.</summary>
         /// <returns>The human readable string for debugging.</returns>

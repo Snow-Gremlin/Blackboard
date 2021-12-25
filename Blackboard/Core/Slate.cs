@@ -510,14 +510,16 @@ namespace Blackboard.Core {
         /// and need to be recalculated during evaluation.
         /// </summary>
         /// <param name="nodes">The nodes to pend evaluation for.</param>
-        public void PendEval(params INode[] nodes) => this.PendEval(nodes as IEnumerable<INode>);
+        public void PendEval(params INode[] nodes) =>
+            this.PendEval(nodes as IEnumerable<INode>);
 
         /// <summary>
         /// This indicates that the given nodes have had parents changed
         /// and need to be recalculated during evaluation.
         /// </summary>
         /// <param name="nodes">The nodes to pend evaluation for.</param>
-        public void PendEval(IEnumerable<INode> nodes) => this.pendingEval.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
+        public void PendEval(IEnumerable<INode> nodes) =>
+            this.pendingEval.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
 
         /// <summary>This gets all the nodes pending evaluation.</summary>
         public IEnumerable<INode> PendingEval => this.pendingEval;
@@ -539,7 +541,8 @@ namespace Blackboard.Core {
 
         /// <summary>This adds provoked trigger nodes which need to be reset.</summary>
         /// <param name="nodes">The provoked trigger nodes to add.</param>
-        public void NeedsReset(params ITrigger[] nodes) => this.PendEval(nodes as IEnumerable<ITrigger>);
+        public void NeedsReset(params ITrigger[] nodes) =>
+            this.PendEval(nodes as IEnumerable<ITrigger>);
 
         /// <summary>This adds provoked trigger nodes which need to be reset.</summary>
         /// <param name="nodes">The provoked trigger nodes to add.</param>

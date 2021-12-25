@@ -11,7 +11,10 @@ namespace Blackboard.Core.Actions {
         /// <summary>This will perform the action.</summary>
         /// <param name="slate">The slate for this action.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, Logger logger = null) => slate.ResetTriggers();
+        public void Perform(Slate slate, ILogger logger = null) {
+            logger?.Log("Reset: {0}", this);
+            slate.ResetTriggers();
+        }
 
         /// <summary>Gets a human readable string for this reset.</summary>
         /// <returns>The human readable string for debugging.</returns>

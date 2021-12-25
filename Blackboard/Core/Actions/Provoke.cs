@@ -69,9 +69,10 @@ namespace Blackboard.Core.Actions {
         /// <summary>This will perform the action.</summary>
         /// <param name="slate">The slate for this action.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, Logger logger = null) {
+        public void Perform(Slate slate, ILogger logger = null) {
+            logger?.Log("Provoke: {0}", this);
             slate.PendEval(this.needPending);
-            slate.PerformEvaluation();
+            slate.PerformEvaluation(logger?.Sub);
             slate.Provoke(this.Target, this.Trigger?.Provoked ?? true);
         }
 

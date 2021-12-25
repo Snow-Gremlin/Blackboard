@@ -163,7 +163,7 @@ namespace BlackboardTests {
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckEvaluate(this Slate slate, params string[] lines) {
-            Logger logger = new();
+            BufferLogger logger = new();
             logger.Stringifier.PreloadNames(slate);
             slate.PerformEvaluation(logger);
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
@@ -173,7 +173,7 @@ namespace BlackboardTests {
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckUpdate(this Slate slate, params string[] lines) {
-            Logger logger = new();
+            BufferLogger logger = new();
             logger.Stringifier.PreloadNames(slate);
             slate.PerformUpdates(logger);
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
@@ -203,11 +203,8 @@ namespace BlackboardTests {
         /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
         /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
-        static public void ReadCommit(this Slate slate, params string[] input) {
-            IAction action = new Parser(slate).Read(input);
-            action.Perform(slate);
-            S.Console.WriteLine(Stringifier.Shallow(action).Trim()); // TODO: REMOVE
-        }
+        static public void ReadCommit(this Slate slate, params string[] input) =>
+            new Parser(slate).Read(input).Perform(slate);
 
         #endregion
         #region Other...

@@ -37,7 +37,7 @@ namespace BlackboardTests {
         static public void NoDiff(IEnumerable<string> results, IEnumerable<string> exp, string message = "") {
             string[] gotLines = results.Split("\n").ToArray();
             string[] expLines = exp.Split("\n").ToArray();
-            if (!Enumerable.SequenceEqual(results, exp)) {
+            if (!Enumerable.SequenceEqual(gotLines, expLines)) {
                 S.Console.WriteLine("Diff:");
                 gotLines.Diff(expLines).Indent("  ").Foreach(S.Console.WriteLine);
                 S.Console.WriteLine();

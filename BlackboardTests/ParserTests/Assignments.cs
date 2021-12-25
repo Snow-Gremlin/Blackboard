@@ -22,6 +22,8 @@ namespace BlackboardTests.ParserTests {
                 "   in double I;",
                 "}");
 
+            System.Console.WriteLine(slate.ToString());
+
             slate.CheckValue(2, "A");
             slate.CheckValue(3, "B");
             slate.CheckValue(true, "C");
@@ -193,10 +195,11 @@ namespace BlackboardTests.ParserTests {
             Parser parser = new(slate);
             TestTools.CheckException(() => parser.Read("in int A = 3.14;"),
                "Error occurred while parsing input code.",
-               "May not assign the value to that type of input.",
+               "The value type can not be cast to the given type.",
                "[Location: Unnamed:1, 15, 15]",
-               "[Input Type: int]",
-               "[Value Type: double]");
+               "[Target: int]",
+               "[Type: double]",
+               "[Value: Literal<double>[3.14]]");
         }
     }
 }

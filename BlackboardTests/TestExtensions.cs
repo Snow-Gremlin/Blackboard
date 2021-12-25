@@ -101,6 +101,7 @@ namespace BlackboardTests {
         static public void Check(this IAction action, params string[] lines) =>
             TestTools.NoDiff(lines, Stringifier.Shallow(action).Trim().Split("\n"));
 
+
         #endregion
         #region Slate...
 
@@ -165,9 +166,7 @@ namespace BlackboardTests {
             Logger logger = new();
             logger.Stringifier.PreloadNames(slate);
             slate.PerformEvaluation(logger);
-            string exp = lines.Join("\n");
-            Assert.AreEqual(exp, logger.ToString().Trim());
-            // TODO: REMOVE
+            TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
         }
 
         /// <summary>Runs the slate update and checks that evaluation performed as expected.</summary>
@@ -177,9 +176,7 @@ namespace BlackboardTests {
             Logger logger = new();
             logger.Stringifier.PreloadNames(slate);
             slate.PerformUpdates(logger);
-            string exp = lines.Join("\n");
-            Assert.AreEqual(exp, logger.ToString().Trim());
-            // TODO: REMOVE
+            TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
         }
 
         /// <summary>Checks the deep string for the given node using the names from the given slate.</summary>
@@ -187,21 +184,16 @@ namespace BlackboardTests {
         /// <param name="node">The node to get the deep string for.</param>
         /// <param name="lines">The line to compare the node's string against.</param>
         static public void CheckNodeString(this Slate slate, INode node, params string[] lines) {
-            string exp = lines.Join("\n");
             Stringifier stringifier = Stringifier.Deep();
             stringifier.PreloadNames(slate);
-            Assert.AreEqual(exp, stringifier.Stringify(node));
-            // TODO: REMOVE
+            TestTools.NoDiff(lines.Join("\n"), stringifier.Stringify(node));
         }
 
         /// <summary>Checks the namespace string for the whole graph and compares against the given lines.</summary>
         /// <param name="slate">The slate to compare against.</param>
         /// <param name="lines">The expected lines of the returned string.</param>
-        static public void CheckGraphString(this Slate slate, params string[] lines) {
-            string exp = lines.Join("\n");
-            Assert.AreEqual(exp, Stringifier.GraphString(slate));
-            // TODO: REMOVE
-        }
+        static public void CheckGraphString(this Slate slate, params string[] lines) =>
+            TestTools.NoDiff(lines.Join("\n"), Stringifier.GraphString(slate));
 
         /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
         /// <param name="slate">The slate to apply the parsed formula to.</param>
@@ -212,9 +204,9 @@ namespace BlackboardTests {
         /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
         static public void ReadCommit(this Slate slate, params string[] input) {
-            Parser parser = new(slate);
-            IAction formula = parser.Read(input);
-            formula.Perform(slate);
+            IAction action = new Parser(slate).Read(input);
+            action.Perform(slate);
+            S.Console.WriteLine(Stringifier.Shallow(action).Trim()); // TODO: REMOVE
         }
 
         #endregion

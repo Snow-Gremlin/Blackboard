@@ -15,6 +15,13 @@ namespace Blackboard.Core.Extensions {
         static public IEnumerable<T> WhereNot<T>(this IEnumerable<T> input, S.Func<T, bool> predicate) =>
             input.Where(value => !predicate(value));
 
+        /// <summary>Consumes all the values in the set by running the enumerable until the end.</summary>
+        /// <typeparam name="T">The type of values being run.</typeparam>
+        /// <param name="input">The values to run.</param>
+        static public void Foreach<T>(this IEnumerable<T> input) {
+            foreach (T _ in input) { }
+        }
+
         /// <summary>Runs all the values on the given predicate.</summary>
         /// <typeparam name="T">The type of values being run.</typeparam>
         /// <param name="input">The values to run.</param>
@@ -22,12 +29,6 @@ namespace Blackboard.Core.Extensions {
         static public void Foreach<T>(this IEnumerable<T> input, S.Action<T> predicate) {
             foreach (T value in input) predicate(value);
         }
-
-        /// <summary>Consumes all the values in the set by running the enumerable until the end.</summary>
-        /// <typeparam name="T">The type of values being run.</typeparam>
-        /// <param name="input">The values to run.</param>
-        static public void Foreach<T>(this IEnumerable<T> input) =>
-            input.Foreach((T v) => { });
 
         /// <summary>Runs all the values on the given predicate.</summary>
         /// <remarks>
@@ -38,8 +39,9 @@ namespace Blackboard.Core.Extensions {
         /// <typeparam name="Tout">The type returned by the predicate, this is ignored.</typeparam>
         /// <param name="input">The values to run.</param>
         /// <param name="predicate">The predicate to run on each value.</param>
-        static public void Foreach<Tin, Tout>(this IEnumerable<Tin> input, S.Func<Tin, Tout> predicate) =>
-            input.Foreach(v => predicate(v));
+        static public void Foreach<Tin, Tout>(this IEnumerable<Tin> input, S.Func<Tin, Tout> predicate) {
+            foreach (Tin value in input) predicate(value);
+        }
 
         /// <summary>Filters any null values out of the given enumerable.</summary>
         /// <typeparam name="T">The type of the values to check.</typeparam>

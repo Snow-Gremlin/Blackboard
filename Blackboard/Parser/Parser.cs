@@ -285,7 +285,8 @@ namespace Blackboard.Parser {
 
         /// <summary></summary>
         /// <param name="builder">The formula builder being worked on.</param>
-        static private void handleDefineId(Builder builder) => builder.PushId(builder.LastText);
+        static private void handleDefineId(Builder builder) =>
+            builder.PushId(builder.LastText);
 
         /// <summary>This is called when the namespace has opened.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
@@ -307,7 +308,7 @@ namespace Blackboard.Parser {
             // Create a new virtual namespace and an action to define the new namespace when this formula is run.
             Namespace newspace = new();
             VirtualNode nextScope = new(name, newspace);
-            builder.AddAction(new Define(scope, name, newspace));
+            builder.AddAction(new Define(scope.Receiver, name, newspace));
             builder.PushScope(nextScope);
         }
 

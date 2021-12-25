@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 using S = System;
@@ -30,6 +31,8 @@ namespace Blackboard.Core.Actions {
             this.Node = node;
             this.needParents = allNodes is null ? S.Array.Empty<IChild>() :
                 allNodes.NotNull().OfType<IChild>().Where(child => child.NeedsToAddParents()).ToArray();
+            if (this.Receiver is VirtualNode)
+                throw new Exception("May not use a virtual node in a define.");
         }
 
         /// <summary>This is the receiver that will be written to.</summary>

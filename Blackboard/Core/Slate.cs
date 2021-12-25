@@ -557,5 +557,9 @@ namespace Blackboard.Core {
         public bool HasTriggersNeedingReset => this.needsReset.Count > 0;
 
         #endregion
+
+        /// <summary>Gets the string for the graph of this slate without functions.</summary>
+        /// <returns>The human readable debug string for the slate.</returns>
+        public override string ToString() => Stringifier.GraphString(this);
     }
 }

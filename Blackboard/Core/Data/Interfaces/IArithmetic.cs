@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
+using System.Collections.Generic;
 
 namespace Blackboard.Core.Data.Interfaces {
 
@@ -25,9 +26,10 @@ namespace Blackboard.Core.Data.Interfaces {
         T Sub(T other);
 
         /// <summary>Gets the product of this value and the other value.</summary>
+        /// <remarks>The current value is not used in the product.</remarks>
         /// <param name="other">The value to multiply this value with.</param>
         /// <returns>The product of this value and the other value.</returns>
-        T Mul(T other);
+        T Mul(IEnumerable<T> other);
 
         /// <summary>Gets the division of this value and the other value.</summary>
         /// <param name="other">The value to divide this value with.</param>

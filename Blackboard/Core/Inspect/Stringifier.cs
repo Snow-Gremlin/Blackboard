@@ -455,7 +455,12 @@ namespace Blackboard.Core.Inspect {
                 _              => value
             };
 
-
+        /// <summary>Converts the given collection object with this stringifier.</summary>
+        /// <param name="value">The values to stringify.</param>
+        /// <returns>
+        /// For each object this returns the string of a given action or node,
+        /// or the original value if not an action or node.
+        /// </returns>
         public IEnumerable<object> Stringify(IEnumerable<object> values) =>
             values.Select(this.stringifyObject);
 

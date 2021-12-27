@@ -2,13 +2,12 @@
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Determines the maximum integer value from all the parents.</summary>
     sealed public class Max<T>: NaryValue<T, T>
-        where T : IComparable<T> {
+        where T : IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((inputs) => new Max<T>(inputs));
@@ -27,7 +26,6 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Updates this node's value to the maximum value during evaluation.</summary>
         /// <param name="values">The parents' values to get the max of.</param>
         /// <returns>The maximum value from all the parents.</returns>
-        protected override T OnEval(IEnumerable<T> values) =>
-            values.Aggregate((T left, T right) => left.CompareTo(right) > 0 ? left : right);
+        protected override T OnEval(IEnumerable<T> values) => new T().Max(values);
     }
 }

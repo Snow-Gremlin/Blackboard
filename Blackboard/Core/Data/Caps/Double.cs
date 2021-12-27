@@ -1,5 +1,7 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Types;
+using System.Collections.Generic;
+using System.Linq;
 using S = System;
 
 namespace Blackboard.Core.Data.Caps {
@@ -31,7 +33,7 @@ namespace Blackboard.Core.Data.Caps {
         public string TypeName => Type.Double.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value.ToString();
+        public string ValueString => this.Value.ToString("F6");
 
         #region Arithmetic Math...
 
@@ -59,19 +61,21 @@ namespace Blackboard.Core.Data.Caps {
         public Double Mod(Double other) => new(this.Value % other.Value);
 
         /// <summary>Gets the product of this value and the other value.</summary>
-        /// <param name="other">The value to multiply this value with.</param>
-        /// <returns>The product of this value and the other value.</returns>
-        public Double Mul(Double other) => new(this.Value * other.Value);
+        /// <remarks>The current value is not used in the product.</remarks>
+        /// <param name="other">The values to multiply this value with.</param>
+        /// <returns>The product of this value and the other values.</returns>
+        public Double Mul(IEnumerable<Double> other) => new(other.Aggregate(1.0, (t1, t2) => t1 * t2.Value));
 
         /// <summary>Gets the difference between this value and the other value.</summary>
         /// <param name="other">The value to subtract from this value.</param>
         /// <returns>The difference between this value and the other value.</returns>
         public Double Sub(Double other) => new(this.Value - other.Value);
 
-        /// <summary>This will add this data to the other data.</summary>
-        /// <param name="other">The other data to add to this value.</param>
-        /// <returns>The sum of the two data values.</returns>
-        public Double Sum(Double other) => new(this.Value + other.Value);
+        /// <summary>Gets the difference between the first given value and the rest of the other values.</summary>
+        /// <remarks>The current value is not used in the subtraction.</remarks>
+        /// <param name="other">The values to subtract from the first value.</param>
+        /// <returns>The difference between the first value and the rest of the values.</returns>s
+        public Double Sum(IEnumerable<Double> other) => new(other.Sum(t => t.Value));
 
         /// <summary>Gets this value clamped to the inclusive range of the given min and max.</summary>
         /// <param name="min">The minimum allowed value.</param>
@@ -153,6 +157,18 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="obj">This is the object to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
         public override bool Equals(object obj) => obj is Double other && this.Equals(other);
+
+        /// <summary>Gets the maximum value from this and the given other values.</summary>
+        /// <remarks>The current value is not used in the maximum value.</remarks>
+        /// <param name="other">The values to find the maximum from.</param>
+        /// <returns>The maximum value from this and the given vales.</returns>
+        public Double Max(IEnumerable<Double> other) => new(other.Max(t => t.Value));
+
+        /// <summary>Gets the minimum value from this and the given other values.</summary>
+        /// <remarks>The current value is not used in the minimum value.</remarks>
+        /// <param name="other">The values to find the minimum from.</param>
+        /// <returns>The minimum value from this and the given vales.</returns>
+        public Double Min(IEnumerable<Double> other) => new(other.Min(t => t.Value));
 
         #endregion
 

@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
@@ -24,10 +25,12 @@ namespace Blackboard.Parser {
         private readonly LinkedList<string> idStack;
         private readonly LinkedList<LinkedList<INode>> argStacks;
         private readonly LinkedList<IAction> actions;
+        private readonly ILogger logger;
 
         /// <summary>Creates a new formula builder for parsing states.</summary>
         /// <param name="slate">The slate this stack is for.</param>
-        public Builder(Slate slate) {
+        /// <param name="logger">The optional logger to output the build steps.</param>
+        public Builder(Slate slate, ILogger logger = null) {
             this.Slate     = slate;
             this.scopes    = new LinkedList<VirtualNode>();
             this.types     = new LinkedList<Type>();
@@ -36,6 +39,7 @@ namespace Blackboard.Parser {
             this.idStack   = new LinkedList<string>();
             this.argStacks = new LinkedList<LinkedList<INode>>();
             this.actions   = new LinkedList<IAction>();
+            this.logger    = logger;
 
             // Call reset to prepare the formula.
             this.Reset();
@@ -46,15 +50,22 @@ namespace Blackboard.Parser {
 
         /// <summary>Resets the stack back to the initial state.</summary>
         public void Reset() {
+            this.logger?.Log("Reset");
             this.Global = new VirtualNode("Global", this.Slate.Global);
             this.scopes.Clear();
             this.scopes.AddFirst(this.Global);
             this.actions.Clear();
-            this.Clear();
+
+            this.types.Clear();
+            this.stack.Clear();
+            this.newNodes.Clear();
+            this.idStack.Clear();
+            this.argStacks.Clear();
         }
 
         /// <summary>Clears the node stack and type stack without changing pending nor scopes.</summary>
         public void Clear() {
+            this.logger?.Log("Clear");
             this.types.Clear();
             this.stack.Clear();
             this.newNodes.Clear();
@@ -69,7 +80,10 @@ namespace Blackboard.Parser {
 
         /// <summary>Adds a pending action into this formula.</summary>
         /// <param name="performer">The performer to add.</param>
-        public void AddAction(IAction action) => this.actions.AddLast(action);
+        public void AddAction(IAction action) {
+            this.logger?.Log("Add Action: {0}", action);
+            this.actions.AddLast(action);
+        }
 
         #endregion
         #region Scope...
@@ -84,34 +98,26 @@ namespace Blackboard.Parser {
         public VirtualNode[] Scopes => this.scopes.ToArray();
 
         /// <summary>Pops a top node from the scope.</summary>
-        public void PopScope() => this.scopes.RemoveFirst();
+        public void PopScope() {
+            this.logger?.Log("Pop Scope");
+            this.scopes.RemoveFirst();
+        }
 
         /// <summary>Pushes a new node onto the scope.</summary>
         /// <param name="node">The node to push on the scope.</param>
-        public void PushScope(VirtualNode node) => this.scopes.AddFirst(node);
+        public void PushScope(VirtualNode node) {
+            this.logger?.Log("Push Scope: {0}", node);
+            this.scopes.AddFirst(node);
+        }
 
         #endregion
         #region Stack...
 
         /// <summary>Pushes a node onto the stack.</summary>
         /// <param name="node">The node to push.</param>
-        public void Push(INode node) => this.stack.AddLast(node);
-
-        /// <summary>Pops off a node is on the top of the stack.</summary>
-        /// <returns>The node which was on top of the stack.</returns>
-        public INode Pop() {
-            INode item = this.stack.Last.Value;
-            this.stack.RemoveLast();
-            return item;
-        }
-
-        /// <summary>Pops one or more node off the stack.</summary>
-        /// <param name="count">The number of node to pop.</param>
-        /// <returns>The popped node in the order oldest to newest.</returns>
-        public INode[] Pop(int count) {
-            INode[] items = new INode[count];
-            for (int i = count-1; i >= 0; i--) items[i] = this.Pop();
-            return items;
+        public void Push(INode node) {
+            this.logger?.Log("Push Node: {0}", node);
+            this.stack.AddLast(node);
         }
 
         /// <summary>
@@ -120,19 +126,48 @@ namespace Blackboard.Parser {
         /// </summary>
         /// <param name="node">The node to push and add.</param>
         public void PushNew(INode node) {
+            this.logger?.Log("Push New Node: {0} ", node);
             this.stack.AddLast(node);
             this.newNodes.Add(node);
         }
 
+        /// <summary>Pops off a node is on the top of the stack.</summary>
+        /// <returns>The node which was on top of the stack.</returns>
+        public INode Pop() {
+            this.logger?.Log("Pop Node");
+            INode node = this.stack.Last.Value;
+            this.stack.RemoveLast();
+            return node;
+        }
+
+        /// <summary>Pops one or more node off the stack.</summary>
+        /// <param name="count">The number of node to pop.</param>
+        /// <returns>The popped node in the order oldest to newest.</returns>
+        public INode[] Pop(int count) {
+            this.logger?.Log("Pop {0} Node(s)", count);
+            INode[] items = new INode[count];
+            for (int i = count-1; i >= 0; i--) {
+                items[i] = this.stack.Last.Value;
+                this.stack.RemoveLast();
+            }
+            return items;
+        }
+
         /// <summary>Clears the list of new nodes.</summary>
-        public void ClearNewNodes() => this.newNodes.Clear();
+        public void ClearNewNodes() {
+            this.logger?.Log("Clear New Nodes");
+            this.newNodes.Clear();
+        }
 
         /// <summary>Gets all the nodes which have been added since the last clear.</summary>
         public IEnumerable<INode> NewNodes => this.newNodes;
 
         /// <summary>Adds a node which has been created since the last clear.</summary>
         /// <param name="node">The node to add.</param>
-        public void AddNewNode(INode node) => this.newNodes.Add(node);
+        public void AddNewNode(INode node) {
+            this.logger?.Log("Add New Node: {0} ", node);
+            this.newNodes.Add(node);
+        }
 
         /// <summary>Determines is the given node is in the new nodes set.</summary>
         /// <param name="node">The node to check for.</param>
@@ -143,22 +178,31 @@ namespace Blackboard.Parser {
         #region Arguments Stack...
 
         /// <summary>This starts a new argument list.</summary>
-        public void StartArgs() => this.argStacks.AddFirst(new LinkedList<INode>());
+        public void StartArgs() {
+            this.logger?.Log("Start Args");
+            this.argStacks.AddFirst(new LinkedList<INode>());
+        }
 
         /// <summary>This adds the given node in to the newest argument list.</summary>
         /// <param name="node">The node to add to the argument list.</param>
-        public void AddArg(INode node) => this.argStacks.First.Value.AddLast(node);
+        public void AddArg(INode node) {
+            this.logger?.Log("Add Arg: {0}", node);
+            this.argStacks.First.Value.AddLast(node);
+        }
 
         /// <summary>This gets all the nodes which are in the current argument list, then removes the list.</summary>
         /// <returns>The nodes which were in the current argument list.</returns>
         public INode[] EndArgs() => this.argStacks.TakeFirst().ToArray();
 
         #endregion
-        #region Other Stacks...
+        #region Type Stack...
 
         /// <summary>Pushes a type onto the stack of types.</summary>
         /// <param name="value">The type to push.</param>
-        public void PushType(Type value) => this.types.AddLast(value);
+        public void PushType(Type value) {
+            this.logger?.Log("Push Type: {0}", value);
+            this.types.AddLast(value);
+        }
 
         /// <summary>Peeks the type off the top of the stack without removing it.</summary>
         /// <returns>The type that is n the top of the stack.</returns>
@@ -167,18 +211,28 @@ namespace Blackboard.Parser {
         /// <summary>Pops off a type is on the top of the stack of types.</summary>
         /// <returns>The type which was on top of the stack.</returns>
         public Type PopType() {
+            this.logger?.Log("Pop Type");
             Type value = this.types.Last.Value;
             this.types.RemoveLast();
             return value;
         }
 
+        #endregion
+        #region Identifier Stack...
+
         /// <summary>This pushes a new identifier name onto the id stack.</summary>
         /// <param name="id">The identifier to push onto the id stack.</param>
-        public void PushId(string id) => this.idStack.AddFirst(id);
+        public void PushId(string id) {
+            this.logger?.Log("Push ID: {0}", id);
+            this.idStack.AddFirst(id);
+        }
 
         /// <summary>This pops an identifier from the id stack.</summary>
         /// <returns>The identifier popped off the id stack.</returns>
-        public string PopId() => this.idStack.TakeFirst();
+        public string PopId() {
+            this.logger?.Log("Pop ID");
+            return this.idStack.TakeFirst();
+        }
 
         #endregion
 
@@ -192,8 +246,10 @@ namespace Blackboard.Parser {
         /// <param name="showTypes">Indicates that the type stack should be shown.</param>
         /// <param name="showStack">Indicates that the node stack should be shown.</param>
         /// <param name="showActions">Indicates that pending actions should be shown.</param>
+        /// <param name="showNew">Indicates that the new nodes should be shown.</param>
         /// <returns>A human readable debug string.</returns>
-        public string StackString(bool showGlobal = true, bool showScope = true, bool showTypes = true, bool showStack = true, bool showActions = true) {
+        public string StackString(bool showGlobal = true, bool showScope = true, bool showTypes = true,
+            bool showStack = true, bool showActions = true, bool showNew = true) {
             const string indent = "  ";
             List<string> parts = new();
             if (showGlobal)  parts.Add("Global: "+this.Global.ToString());
@@ -201,6 +257,7 @@ namespace Blackboard.Parser {
             if (showTypes)   parts.Add("Types: [" + this.types.Strings().Join(", ") + "]");
             if (showStack)   parts.Add("Stack: [\n" + indent + this.stack.Strings().Indent(indent).Join(",\n" + indent) + "]");
             if (showActions) parts.Add("Actions: [\n" + indent + this.actions.Strings().Indent(indent).Join(",\n" + indent) + "]");
+            if (showNew)     parts.Add("New: [\n" + indent + this.newNodes.Strings().Indent(indent).Join(",\n" + indent) + "]");
             return parts.Join("\n");
         }
     }

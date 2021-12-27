@@ -70,6 +70,7 @@ namespace Blackboard.Core.Actions {
             slate.PendEval(this.needPending);
             slate.PerformEvaluation(logger?.Sub);
             slate.SetValue(this.value.Value, this.target);
+            logger?.Log("Assign Done {0}", this.target);
         }
 
         /// <summary>Gets a human readable string for this assignment.</summary>

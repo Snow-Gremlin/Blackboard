@@ -1,10 +1,12 @@
-﻿namespace Blackboard.Core.Inspect {
+﻿using Blackboard.Core.Extensions;
+
+namespace Blackboard.Core.Inspect {
 
     /// <summary>A logger for logging with an indent.</summary>
     sealed public class SubLogger : ILogger {
 
         /// <summary>The indent to apply to the level.</summary>
-        private const string defaultIndent = "   ";
+        private const string defaultIndent = "  ";
 
         /// <summary>The base logger to write out to.</summary>
         private readonly ILogger logger;
@@ -30,7 +32,7 @@
         /// <param name="format">The test to write.</param>
         /// <param name="args">Any arguments to pass into the log too.</param>
         public void Log(string format, params object[] args) =>
-            this.logger.Log(this.indent + format, args);
+            this.logger.Log(format.Indent(this.indent), args);
 
         /// <summary>Creates a new logger indented one level.</summary>
         public ILogger Sub => new SubLogger(this);

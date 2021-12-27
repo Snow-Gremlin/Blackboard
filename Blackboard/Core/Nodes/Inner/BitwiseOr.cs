@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <summary>Performs a bitwise OR of all the integer parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/OR.html"/>
     sealed public class BitwiseOr<T>: NaryValue<T, T>
-        where T : IBitwise<T>, IComparable<T> {
+        where T : IBitwise<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((values) => new BitwiseOr<T>(values));
@@ -28,6 +28,6 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Gets the bitwise OR of all the parent's booleans.</summary>
         /// <param name="values">The parents to bitwise OR together.</param>
         /// <returns>The bitwise OR of all the given values.</returns>
-        protected override T OnEval(IEnumerable<T> values) => values.Aggregate((left, right) => left.BitwiseOr(right));
+        protected override T OnEval(IEnumerable<T> values) => new T().BitwiseOr(values);
     }
 }

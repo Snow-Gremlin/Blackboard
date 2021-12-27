@@ -1,5 +1,7 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Types;
+using System.Collections.Generic;
+using System.Linq;
 using S = System;
 
 namespace Blackboard.Core.Data.Caps {
@@ -52,20 +54,22 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The modulo of this value and the other value.</returns>
         public Int Mod(Int other) => new(this.Value % other.Value);
 
-        /// <summary>Gets the product of this value and the other value.</summary>
-        /// <param name="other">The value to multiply this value with.</param>
-        /// <returns>The product of this value and the other value.</returns>
-        public Int Mul(Int other) => new(this.Value * other.Value);
+        /// <summary>Gets the product of this value and the other values.</summary>
+        /// <remarks>The current value is not used in the product.</remarks>
+        /// <param name="other">The values to multiply this value with.</param>
+        /// <returns>The product of this value and the other values.</returns>
+        public Int Mul(IEnumerable<Int> other) => new(other.Aggregate(1, (t1, t2) => t1 * t2.Value));
 
         /// <summary>Gets the difference between this value and the other value.</summary>
         /// <param name="other">The value to subtract from this value.</param>
         /// <returns>The difference between this value and the other value.</returns>
         public Int Sub(Int other) => new(this.Value - other.Value);
 
-        /// <summary>This will add this data to the other data.</summary>
-        /// <param name="other">The other data to add to this value.</param>
-        /// <returns>The sum of the two data values.</returns>
-        public Int Sum(Int other) => new(this.Value + other.Value);
+        /// <summary>Gets the difference between the first given value and the rest of the other values.</summary>
+        /// <remarks>The current value is not used in the subtraction.</remarks>
+        /// <param name="other">The values to subtract from the first value.</param>
+        /// <returns>The difference between the first value and the rest of the values.</returns>s
+        public Int Sum(IEnumerable<Int> other) => new(other.Sum(t => t.Value));
 
         /// <summary>Gets this value clamped to the inclusive range of the given min and max.</summary>
         /// <param name="min">The minimum allowed value.</param>
@@ -84,20 +88,23 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The bitwise NOT of this value.</returns>
         public Int BitwiseNot() => new(~this.Value);
 
-        /// <summary>This gets the bitwise AND of this value and the other value.</summary>
-        /// <param name="other">The other value to bitwise AND with.</param>
+        /// <summary>This gets the bitwise AND of the other values.</summary>
+        /// <remarks>This does not use the current value in the AND.</remarks>
+        /// <param name="other">The other values to bitwise AND with.</param>
         /// <returns>The result of the bitwise AND.</returns>
-        public Int BitwiseAnd(Int other) => new(this.Value & other.Value);
+        public Int BitwiseAnd(IEnumerable<Int> other) => new(other.Aggregate(int.MaxValue, (t1, t2) => t1 & t2.Value));
 
-        /// <summary>This gets the bitwise OR of this value and the other value.</summary>
-        /// <param name="other">The other value to bitwise OR with.</param>
+        /// <summary>This gets the bitwise OR of the other values.</summary>
+        /// <remarks>This does not use the current value in the OR.</remarks>
+        /// <param name="other">The other values to bitwise OR with.</param>
         /// <returns>The result of the bitwise OR.</returns>
-        public Int BitwiseOr(Int other) => new(this.Value | other.Value);
+        public Int BitwiseOr(IEnumerable<Int> other) => new(other.Aggregate(0, (t1, t2) => t1 | t2.Value));
 
-        /// <summary>This gets the bitwise XOR of this value and the other value.</summary>
-        /// <param name="other">The other value to bitwise XOR with.</param>
+        /// <summary>This gets the bitwise XOR of the other values.</summary>
+        /// <remarks>This does not use the current value in the XOR.</remarks>
+        /// <param name="other">The other values to bitwise XOR with.</param>
         /// <returns>The result of the bitwise XOR.</returns>
-        public Int BitwiseXor(Int other) => new(this.Value ^ other.Value);
+        public Int BitwiseXor(IEnumerable<Int> other) => new(other.Aggregate(0, (t1, t2) => t1 ^ t2.Value));
 
         /// <summary>This gets the left shift of this value by the other value.</summary>
         /// <param name="other">The number of bits to shift by.</param>
@@ -141,6 +148,18 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="obj">This is the object to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
         public override bool Equals(object obj) => obj is Int other && this.Equals(other);
+
+        /// <summary>Gets the maximum value from this and the given other values.</summary>
+        /// <remarks>The current value is not used in the maximum value.</remarks>
+        /// <param name="other">The values to find the maximum from.</param>
+        /// <returns>The maximum value from this and the given vales.</returns>
+        public Int Max(IEnumerable<Int> other) => new(other.Max(t => t.Value));
+
+        /// <summary>Gets the minimum value from this and the given other values.</summary>
+        /// <remarks>The current value is not used in the minimum value.</remarks>
+        /// <param name="other">The values to find the minimum from.</param>
+        /// <returns>The minimum value from this and the given vales.</returns>
+        public Int Min(IEnumerable<Int> other) => new(other.Min(t => t.Value));
 
         #endregion
 

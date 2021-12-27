@@ -96,7 +96,7 @@ namespace Blackboard.Core.Nodes.Outer {
         protected override T CalcuateValue() {
             T value = this.Value;
             T delta = this.delta is null ? default(T).Inc() : this.delta.Value;
-            if (this.increment?.Provoked ?? false) value = value.Sum(delta);
+            if (this.increment?.Provoked ?? false) value = value.Sum(new T[] { value, delta });
             if (this.decrement?.Provoked ?? false) value = value.Sub(delta);
             if (this.reset?.Provoked     ?? false) value = this.resetValue is null ? default : this.resetValue.Value;
             return value;

@@ -103,7 +103,7 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_LiteralMath() {
             Slate slate = new();
-            IAction action = new Parser(slate).Read(
+            IAction action = new Parser(slate, new ConsoleLogger()).Read(
                 "in double A = 3.0 + 0.07 * 2;",
                 "in double B = floor(A), C = round(A), D = round(A, 1);",
                 "in double E = (B ** C) / 2;",

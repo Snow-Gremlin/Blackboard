@@ -2,13 +2,12 @@
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This gets the product of all the double parents.</summary>
     sealed public class Mul<T>: NaryValue<T, T>
-        where T : IArithmetic<T>, IComparable<T> {
+        where T : IArithmetic<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((inputs) => new Mul<T>(inputs));
@@ -27,7 +26,6 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Gets the product of the parent values during evaluation.</summary>
         /// <param name="values">All the parent values to multiply.</param>
         /// <returns>The product of the parent values.</returns>
-        protected override T OnEval(IEnumerable<T> values) =>
-            values.Aggregate((T left, T right) => left.Mul(right));
+        protected override T OnEval(IEnumerable<T> values) => new T().Mul(values);
     }
 }

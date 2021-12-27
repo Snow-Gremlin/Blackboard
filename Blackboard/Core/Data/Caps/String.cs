@@ -1,5 +1,9 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Types;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Blackboard.Core.Data.Caps {
 
@@ -27,10 +31,15 @@ namespace Blackboard.Core.Data.Caps {
 
         #region Additive Math...
 
-        /// <summary>This will concatenate this string to the other string.</summary>
-        /// <param name="other">The other string to concatenate to the end of this string.</param>
-        /// <returns>The concatenated string.</returns>
-        public String Sum(String other) => new(this.Value + other.Value);
+        /// <summary>This will concatenate of the given other data.</summary>
+        /// <remarks>The current value is not used in the concatenation.</remarks>
+        /// <param name="other">The other data to concatenate together.</param>
+        /// <returns>The concatenation of the given other data values.</returns>
+        public String Sum(IEnumerable<String> other) {
+            StringBuilder buf = new();
+            other.Select(t => t.Value).Foreach(buf.Append);
+            return new(other.ToString());
+        }
 
         #endregion
         #region Casts...
@@ -74,6 +83,18 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="obj">This is the object to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
         public override bool Equals(object obj) => obj is String other && this.Equals(other);
+
+        /// <summary>Gets the maximum value from the given other values.</summary>
+        /// <remarks>The current value is not used in the maximum value.</remarks>
+        /// <param name="other">The values to find the maximum from.</param>
+        /// <returns>The maximum value from the given vales.</returns>
+        public String Max(IEnumerable<String> other) => new(other.Max(t => t.Value));
+
+        /// <summary>Gets the minimum value from given other values.</summary>
+        /// <remarks>The current value is not used in the minimum value.</remarks>
+        /// <param name="other">The values to find the minimum from.</param>
+        /// <returns>The minimum value from the given vales.</returns>
+        public String Min(IEnumerable<String> other) => new(other.Min(t => t.Value));
 
         #endregion
 

@@ -2,6 +2,7 @@
 using Blackboard.Core.Actions;
 using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
@@ -27,17 +28,22 @@ namespace Blackboard.Parser {
         /// <summary>The Blackboard language base parser lazy singleton.</summary>
         static private readonly PP.Parser.Parser baseParser;
 
-        // TODO: Comment
+        /// <summary>The slate that this Blackboard is to create the actions for.</summary>
         private readonly Slate slate;
 
-        // TODO: Comment
+        /// <summary>The list of prompt handlers for running the Blackboard grammar with.</summary>
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
+
+        /// <summary>Optional logger to debugging and inspecting the parser.</summary>
+        private ILogger logger;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="slate">The slate to modify.</param>
-        public Parser(Slate slate) {
+        /// <param name="logger">An optional logger for debugging and inspecting the parser.</param>
+        public Parser(Slate slate, ILogger logger = null) {
             this.slate   = slate;
             this.prompts = null;
+            this.logger  = logger;
 
             this.initPrompts();
             this.validatePrompts();
@@ -60,7 +66,8 @@ namespace Blackboard.Parser {
             PP.Parser.Result result = baseParser.Parse(new PP.Scanner.Default(input, name));
 
             // Check for parser errors.
-            if (result.Errors.Length > 0) throw new Exception(result.Errors.Join("\n"));
+            if (result.Errors.Length > 0)
+                throw new Exception(result.Errors.Join("\n"));
 
             // process the resulting tree to build the formula.
             return this.read(result.Tree);
@@ -71,8 +78,10 @@ namespace Blackboard.Parser {
         /// <returns>The formula for performing the parsed actions.</returns>
         private IAction read(PP.ParseTree.ITreeNode node) {
             try {
-                Builder stacks = new(this.slate);
+                this.logger?.Log("Parser Read");
+                Builder stacks = new(this.slate, this.logger?.Sub);
                 node.Process(this.prompts, stacks);
+                this.logger?.Log("Parser Finished");
                 return stacks.ToAction();
             } catch (S.Exception ex) {
                 throw new Exception("Error occurred while parsing input code.", ex);
@@ -86,39 +95,39 @@ namespace Blackboard.Parser {
         private void initPrompts() {
             this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>();
 
-            this.addHandler("clear",         handleClear);
-            this.addHandler("defineId",      handleDefineId);
+            this.addHandler("clear", handleClear);
+            this.addHandler("defineId", handleDefineId);
             this.addHandler("pushNamespace", handlePushNamespace);
-            this.addHandler("popNamespace",  handlePopNamespace);
+            this.addHandler("popNamespace", handlePopNamespace);
 
-            this.addHandler("newTypeInputNoAssign",   handleNewTypeInputNoAssign);
+            this.addHandler("newTypeInputNoAssign", handleNewTypeInputNoAssign);
             this.addHandler("newTypeInputWithAssign", handleNewTypeInputWithAssign);
-            this.addHandler("newVarInputWithAssign",  handleNewVarInputWithAssign);
+            this.addHandler("newVarInputWithAssign", handleNewVarInputWithAssign);
 
             this.addHandler("typeDefine", handleTypeDefine);
-            this.addHandler("varDefine",  handleVarDefine);
+            this.addHandler("varDefine", handleVarDefine);
 
-            this.addHandler("provokeTrigger",            handleProvokeTrigger);
+            this.addHandler("provokeTrigger", handleProvokeTrigger);
             this.addHandler("conditionalProvokeTrigger", handleConditionalProvokeTrigger);
 
             this.addHandler("typeGet", handleTypeGet);
-            this.addHandler("varGet",  handleVarGet);
+            this.addHandler("varGet", handleVarGet);
 
-            this.addHandler("assignment",   handleAssignment);
-            this.addHandler("cast",         handleCast);
+            this.addHandler("assignment", handleAssignment);
+            this.addHandler("cast", handleCast);
             this.addHandler("memberAccess", handleMemberAccess);
-            this.addHandler("startCall",    handleStartCall);
-            this.addHandler("addArg",       handleAddArg);
-            this.addHandler("endCall",      handleEndCall);
-            this.addHandler("pushId",       handlePushId);
-            this.addHandler("pushBool",     handlePushBool);
-            this.addHandler("pushBin",      handlePushBin);
-            this.addHandler("pushOct",      handlePushOct);
-            this.addHandler("pushInt",      handlePushInt);
-            this.addHandler("pushHex",      handlePushHex);
-            this.addHandler("pushDouble",   handlePushDouble);
-            this.addHandler("pushString",   handlePushString);
-            this.addHandler("pushType",     handlePushType);
+            this.addHandler("startCall", handleStartCall);
+            this.addHandler("addArg", handleAddArg);
+            this.addHandler("endCall", handleEndCall);
+            this.addHandler("pushId", handlePushId);
+            this.addHandler("pushBool", handlePushBool);
+            this.addHandler("pushBin", handlePushBin);
+            this.addHandler("pushOct", handlePushOct);
+            this.addHandler("pushInt", handlePushInt);
+            this.addHandler("pushHex", handlePushHex);
+            this.addHandler("pushDouble", handlePushDouble);
+            this.addHandler("pushString", handlePushString);
+            this.addHandler("pushType", handlePushType);
 
             this.addProcess(3, "ternary");
             this.addProcess(2, "logicalOr");
@@ -151,7 +160,10 @@ namespace Blackboard.Parser {
         /// <param name="name">This is the name of the prompt this handler is for.</param>
         /// <param name="hndl">This is the handler to call on this prompt.</param>
         private void addHandler(string name, S.Action<Builder> hndl) =>
-            this.prompts[name] = (PP.ParseTree.PromptArgs args) => hndl(args as Builder);
+            this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
+                this.logger?.Log("Handle {0} [{1}]", name, args.LastLocation);
+                hndl(args as Builder);
+            };
 
         /// <summary>This adds a prompt for an operator handler.</summary>
         /// <param name="count">The number of values to pop off the stack for this function.</param>
@@ -161,13 +173,14 @@ namespace Blackboard.Parser {
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 Builder builder = args as Builder;
                 PP.Scanner.Location loc = args.LastLocation;
+                this.logger?.Log("Process {0}({1}) [{2}]", name, count, loc);
                 INode[] inputs = builder.Pop(count);
                 INode result = funcGroup.Build(inputs);
                 if (result is null)
                     throw new Exception("Could not perform the operation with the given input.").
                         With("Operation", name).
                         With("Input", inputs.Types().Strings().Join(", "));
-                builder.Push(result);
+                builder.PushNew(result);
             };
         }
 

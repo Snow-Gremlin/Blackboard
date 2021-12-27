@@ -3,13 +3,12 @@ using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Gets the sum of all of the parent values.</summary>
     sealed public class Sum<T>: NaryValue<T, T>
-        where T : IAdditive<T>, IComparable<T> {
+        where T : IAdditive<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <param name="needsOneNoCast">
@@ -33,7 +32,6 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Gets the sum of all the parent values.</summary>
         /// <param name="values">The values to sum together.</param>
         /// <returns>The sum of the parent values.</returns>
-        protected override T OnEval(IEnumerable<T> values) =>
-            values.Aggregate((left, right) => left.Sum(right));
+        protected override T OnEval(IEnumerable<T> values) => new T().Sum(values);
     }
 }

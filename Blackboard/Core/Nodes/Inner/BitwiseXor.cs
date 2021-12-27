@@ -2,14 +2,13 @@
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a bitwise Exclusive OR of two integer parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/XOR.html"/>
     sealed public class BitwiseXor<T>: NaryValue<T, T>
-        where T : IBitwise<T>, IComparable<T> {
+        where T : IBitwise<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((values) => new BitwiseXor<T>(values));
@@ -28,6 +27,6 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Gets the bitwise Exclusive OR of all the parent's booleans.</summary>
         /// <param name="values">The parents to bitwise Exclusive OR together.</param>
         /// <returns>The bitwise Exclusive OR of all the given values.</returns>
-        protected override T OnEval(IEnumerable<T> values) => values.Aggregate((left, right) => left.BitwiseOr(right));
+        protected override T OnEval(IEnumerable<T> values) => new T().BitwiseXor(values);
     }
 }

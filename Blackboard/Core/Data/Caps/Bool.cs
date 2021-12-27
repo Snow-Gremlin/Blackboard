@@ -1,5 +1,7 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Types;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Core.Data.Caps {
 
@@ -52,6 +54,24 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="obj">This is the object to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
         public override bool Equals(object obj) => obj is Bool other && this.Equals(other);
+
+        /// <summary>Gets the maximum value from the given other values.</summary>
+        /// <remarks>
+        /// The current value is not used in the maximum value.
+        /// If there is any true then we know the maximum is false and exit early.
+        /// </remarks>
+        /// <param name="other">The values to find the maximum from.</param>
+        /// <returns>The maximum value from the given vales.</returns>
+        public Bool Max(IEnumerable<Bool> other) => new(other.Any(t => t.Value));
+
+        /// <summary>Gets the minimum value from given other values.</summary>
+        /// <remarks>
+        /// The current value is not used in the minimum value.
+        /// If there is any false then we know the minimum is false and exit early.
+        /// </remarks>
+        /// <param name="other">The values to find the minimum from.</param>
+        /// <returns>The minimum value from the given vales.</returns>
+        public Bool Min(IEnumerable<Bool> other) => new(other.All(t => t.Value));
 
         #endregion
 

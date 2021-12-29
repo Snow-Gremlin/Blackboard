@@ -24,16 +24,16 @@ namespace Blackboard.Core.Actions {
         /// <param name="receiver">This is the receiver that will be written to.</param>
         /// <param name="name">The name to write the node with.</param>
         /// <param name="node">The node being set to the receiver with the given name.</param>
-        /// <param name="allNodes">All the nodes which are new children of the node to write.</param>
-        public Define(IFieldWriter receiver, string name, INode node, IEnumerable<INode> allNodes = null) {
+        /// <param name="allNewNodes">All the nodes which are new children of the node to write.</param>
+        public Define(IFieldWriter receiver, string name, INode node, IEnumerable<INode> allNewNodes = null) {
             if (receiver is null or VirtualNode)
                 throw new Exception("May not use a null or virtual node as the receiver in a define.");
 
             this.Receiver = receiver;
             this.Name = name;
             this.Node = node;
-            this.needParents = allNodes is null ? S.Array.Empty<IChild>() :
-                allNodes.NotNull().OfType<IChild>().Where(child => child.NeedsToAddParents()).ToArray();
+            this.needParents = allNewNodes is null ? S.Array.Empty<IChild>() :
+                allNewNodes.NotNull().OfType<IChild>().Where(child => child.NeedsToAddParents()).ToArray();
         }
 
         /// <summary>This is the receiver that will be written to.</summary>

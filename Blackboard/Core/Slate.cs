@@ -481,11 +481,13 @@ namespace Blackboard.Core {
 
         /// <summary> This indicates that the given nodes have had parents added or removed and need to be updated. </summary>
         /// <param name="nodes">The nodes to pend evaluation for.</param>
-        public void PendUpdate(params INode[] nodes) => this.PendUpdate(nodes as IEnumerable<INode>);
+        public void PendUpdate(params INode[] nodes) =>
+            this.PendUpdate(nodes as IEnumerable<INode>);
 
         /// <summaryThis indicates that the given nodes have had parents added or removed and need to be updated.</summary>
         /// <param name="nodes">The nodes to pend evaluation for.</param>
-        public void PendUpdate(IEnumerable<INode> nodes) => this.pendingUpdate.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
+        public void PendUpdate(IEnumerable<INode> nodes) =>
+            this.pendingUpdate.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
 
         /// <summary>This gets all the nodes pending update.</summary>
         public IEnumerable<INode> PendingUpdate => this.pendingEval;

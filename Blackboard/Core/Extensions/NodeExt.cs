@@ -219,8 +219,7 @@ namespace Blackboard.Core.Extensions {
                 IEvaluable node = pending.TakeFirst();
 
                 // Determine the depth that this node should be at based on its parents.
-                int depth = node is not IChild child ? 0 :
-                    child.Parents.OfType<IEvaluable>().MaxDepth() + 1;
+                int depth = node.MinimumAllowedDepth();
 
                 // If the depth has changed then its children also need to be updated.
                 bool changed = false;

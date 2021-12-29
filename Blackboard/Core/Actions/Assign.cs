@@ -20,11 +20,11 @@ namespace Blackboard.Core.Actions {
         /// <param name="loc">The location that this provoke was created.</param>
         /// <param name="target">The target node to assign to.</param>
         /// <param name="value">The value to assign to the given target.</param>
-        /// <param name="allNodes">All the nodes which are new children of the value.</param>
+        /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         /// <returns>The assignment action.</returns>
-        static public Assign<T> Create(Location loc, INode target, INode value, IEnumerable<INode> allNodes) =>
+        static public Assign<T> Create(Location loc, INode target, INode value, IEnumerable<INode> allNewNodes) =>
             (target is IValueInput<T> input) && (value is IValue<T> data) ?
-            new Assign<T>(input, data, allNodes) :
+            new Assign<T>(input, data, allNewNodes) :
             throw new Exception("Unexpected node types for assignment.").
                 With("Location", loc).
                 With("Type",     typeof(T)).
@@ -46,11 +46,11 @@ namespace Blackboard.Core.Actions {
         /// <summary>Creates a new assignment.</summary>
         /// <param name="target">The input node to assign.</param>
         /// <param name="value">The node to get the value from.</param>
-        /// <param name="allNodes">All the nodes which are new children of the value.</param>
-        public Assign(IValueInput<T> target, IValue<T> value, IEnumerable<INode> allNodes) {
+        /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
+        public Assign(IValueInput<T> target, IValue<T> value, IEnumerable<INode> allNewNodes) {
             this.target = target;
             this.value  = value;
-            this.needPending = allNodes.NotNull().OfType<IEvaluable>().ToArray();
+            this.needPending = allNewNodes.NotNull().OfType<IEvaluable>().ToArray();
         }
 
         /// <summary>The target input node to set the value of.</summary>

@@ -321,15 +321,15 @@ namespace Blackboard.Parser {
 
             /// <summary>Clears the set of existing nodes.</summary>
             public void Clear() {
-                this.builder.Logger?.Log("Clear Old Nodes");
+                this.builder.Logger?.Log("Clear Existing"); // TODO: REMOVE
                 this.nodes.Clear();
             }
 
             /// <summary>Adds an existing node which has been referenced since the last clear.</summary>
             /// <param name="node">The existing node to add.</param>
             public void Add(INode node) {
-                this.builder.Logger?.Log("Add Old Node: {0} ", node);
-                this.nodes.Add(node);
+                this.builder.Logger?.Log("Add Existing: {0} ", node);
+                this.nodes.Add(node is VirtualNode virt ? virt.Receiver : node);
             }
 
             /// <summary>Determines if the given node is in the existing nodes set.</summary>
@@ -394,19 +394,19 @@ namespace Blackboard.Parser {
         /// <param name="root">The root node of the tree to prepare.</param>
         /// <returns>All the nodes which are new node in the tree.</returns>
         public IEnumerable<INode> PrepareTree(INode root) {
+            HashSet<INode> newNodes = new();
+
             // Find all new nodes
             Stack<INode> stack = new();
             stack.Push(root);
-            HashSet<INode> touched = new();
             while (stack.Count > 0) {
                 INode cur = stack.Pop();
+                if (newNodes.Contains(cur) || this.Existing.Has(cur)) continue;
+                newNodes.Add(cur);
                 if (cur is IChild child) {
-                    foreach (IParent par in child.Parents.NotNull().WhereNot(this.Existing.Has)) {
+                    foreach (IParent par in child.Parents.NotNull()) {
                         par.AddChildren(child);
-                        if (!touched.Contains(par)) {
-                            touched.Add(par);
-                            stack.Push(par);
-                        }
+                        stack.Push(par);
                     }
                 }
             }
@@ -415,13 +415,13 @@ namespace Blackboard.Parser {
             // Update Depths
             LinkedList<IEvaluable> needsUpdate = new();
             needsUpdate.SortInsertUnique(root as IEvaluable);
-            needsUpdate.SortInsertUnique(touched.OfType<IEvaluable>());
+            needsUpdate.SortInsertUnique(newNodes.OfType<IEvaluable>());
             needsUpdate.UpdateDepths();
 
 
             // TODO: Add Optimization
 
-            return touched;
+            return newNodes;
         }
 
         /// <summary>Creates an assignment action and adds it to the builder if possible.</summary>

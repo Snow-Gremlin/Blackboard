@@ -33,7 +33,7 @@ namespace Blackboard.Core.Data.Caps {
         public string TypeName => Type.Double.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value.ToString("F6");
+        public string ValueString => this.Value.ToString();
 
         #region Arithmetic Math...
 

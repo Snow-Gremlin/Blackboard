@@ -2,6 +2,7 @@
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 using S = System;
@@ -43,6 +44,15 @@ namespace Blackboard.Core.Extensions {
         /// <param name="nodes">The trigger nodes to reset.</param>
         static public void Reset(this IEnumerable<ITrigger> nodes) =>
             nodes.NotNull().Foreach(t => t.Reset());
+
+        /// <summary>
+        /// This will get all the non-virtual nodes from the given nodes.
+        /// For any virtual nodes, the real node (receiver) inside of it is returned.
+        /// </summary>
+        /// <param name="nodes">The nodes to actualize.</param>
+        /// <returns>All real nodes and the receivers from any virtual nodes.</returns>
+        static public IEnumerable<INode> Actualize(this IEnumerable<INode> nodes) =>
+            nodes.Select(node => node is VirtualNode virt ? virt.Receiver : node);
 
         #endregion
         #region IChild...

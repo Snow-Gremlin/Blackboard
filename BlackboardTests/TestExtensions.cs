@@ -198,13 +198,16 @@ namespace BlackboardTests {
         /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
         /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
-        static public IAction Read(this Slate slate, params string[] input) => new Parser(slate).Read(input);
+        static public IAction Read(this Slate slate, params string[] input) =>
+            new Parser(slate).Read(input);
 
         /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
         /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
-        static public void ReadCommit(this Slate slate, params string[] input) =>
-            new Parser(slate).Read(input).Perform(slate);
+        static public void ReadCommit(this Slate slate, params string[] input) {
+            ConsoleLogger log = null;// new();
+            new Parser(slate, log).Read(input).Perform(slate, log);
+        }
 
         #endregion
         #region Other...

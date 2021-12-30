@@ -83,7 +83,7 @@
 (Start): '-' => [Neg]: '>' => [Trigger];
 (Start): '/' => [Div];
 (Start): '*' => [Mul]: '*' => [Power];
-(Start): '%' => [Mod]: '%' => [Remainder];
+(Start): '%' => [Mod];
 (Start): '^' => [Xor]: '^' => [LogicalXor];
 (Start): '~' => [Invert];
 (Start): '?' => [Test];
@@ -256,10 +256,9 @@
     | <Additive> [Neg] <Multiplicative> {subtract};
 
 <Multiplicative> := <Exponent>
-    | <Multiplicative> [Mul]       <Exponent> {multiply}
-    | <Multiplicative> [Div]       <Exponent> {divide}
-    | <Multiplicative> [Mod]       <Exponent> {modulo}
-    | <Multiplicative> [Remainder] <Exponent> {remainder};
+    | <Multiplicative> [Mul] <Exponent> {multiply}
+    | <Multiplicative> [Div] <Exponent> {divide}
+    | <Multiplicative> [Mod] <Exponent> {modulo};
 
 <Exponent> := <Unary>
     | <Exponent> [Power] <Unary> {power};

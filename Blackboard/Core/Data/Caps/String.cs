@@ -38,7 +38,7 @@ namespace Blackboard.Core.Data.Caps {
         public String Sum(IEnumerable<String> other) {
             StringBuilder buf = new();
             other.Select(t => t.Value).Foreach(buf.Append);
-            return new(other.ToString());
+            return new(buf.ToString());
         }
 
         #endregion

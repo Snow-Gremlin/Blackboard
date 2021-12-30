@@ -148,7 +148,6 @@ namespace Blackboard.Parser {
             this.addProcess(2, "multiply");
             this.addProcess(2, "divide");
             this.addProcess(2, "modulo");
-            this.addProcess(2, "remainder");
             this.addProcess(2, "power");
             this.addProcess(1, "negate");
             this.addProcess(1, "not");
@@ -167,14 +166,18 @@ namespace Blackboard.Parser {
         /// <summary>This adds a prompt for an operator handler.</summary>
         /// <param name="count">The number of values to pop off the stack for this function.</param>
         /// <param name="name">The name of the prompt to add to.</param>
-        private void addProcess(int count, string name) =>
+        private void addProcess(int count, string name) {
+            IFuncGroup funcGroup = this.slate.Global.Find(Slate.OperatorNamespace, name) as IFuncGroup;
+            if (funcGroup is null)
+                throw new Exception("Could not find the operation by the given name.").
+                    With("Name", name);
+
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 Builder builder = args as Builder;
                 PP.Scanner.Location loc = args.LastLocation;
                 builder.Logger?.Log("Process {0}({1}) [{2}]", name, count, loc);
 
-                IFuncGroup funcGroup = builder.Scope.Global.Find(Slate.OperatorNamespace, name) as IFuncGroup;
-                INode[] inputs = builder.Nodes.Pop(count);
+                INode[] inputs = builder.Nodes.Pop(count).Actualize().ToArray();
                 INode result = funcGroup.Build(inputs);
                 if (result is null)
                     throw new Exception("Could not perform the operation with the given input.").
@@ -183,6 +186,7 @@ namespace Blackboard.Parser {
 
                 builder.Nodes.Push(result);
             };
+        }
 
         /// <summary>Validates that all prompts in the grammar are handled.</summary>
         private void validatePrompts() {
@@ -215,6 +219,7 @@ namespace Blackboard.Parser {
         /// <summary>This is called before each statement to prepare and clean up the parser.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleClear(Builder builder) {
+            builder.Logger?.Log("\n======================================================================"); // TODO: REMOVE
             builder.Tokens.Clear();
             builder.Clear();
         }
@@ -243,9 +248,10 @@ namespace Blackboard.Parser {
 
             // Create a new virtual namespace and an action to define the new namespace when this formula is run.
             Namespace newspace = new();
-            VirtualNode nextScope = new(name, newspace);
             builder.Actions.Add(new Define(scope.Receiver, name, newspace));
+            VirtualNode nextScope = new(name, newspace);
             builder.Scope.Push(nextScope);
+            scope.WriteField(name, nextScope);
         }
 
         /// <summary>This is called when the namespace had closed.</summary>
@@ -423,12 +429,13 @@ namespace Blackboard.Parser {
             foreach (VirtualNode scope in builder.Scope.Scopes) {
                 INode node = scope.ReadField(name);
                 if (node is not null) {
-                    if (node is VirtualNode vNode) node = vNode.Receiver;
                     builder.Nodes.Push(node);
                     builder.Existing.Add(node);
                     return;
                 }
             }
+
+            S.Console.WriteLine(builder.Scope.Global);
 
             throw new Exception("No identifier found in the scope stack.").
                 With("Identifier", name).

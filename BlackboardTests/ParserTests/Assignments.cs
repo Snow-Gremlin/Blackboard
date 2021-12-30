@@ -59,7 +59,7 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_DoubleLiteral() {
             Slate slate = new();
-            IAction formula = slate.Read(
+            slate.ReadCommit(
                 "in double A = 3.0;",
                 "in double B = 0.003;",
                 "in double C = 3.0e-3;",
@@ -71,21 +71,6 @@ namespace BlackboardTests.ParserTests {
                 "in double I = 1.0;",
                 "in double J = 0e-5;",
                 "in double K = 28.0;");
-            formula.Check(
-                "[",
-                "  Namespace.A := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[3] {};",
-                "  Namespace.B := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0.003] {};",
-                "  Namespace.C := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0.003] {};",
-                "  Namespace.D := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0.003] {};",
-                "  Namespace.E := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0.003] {};",
-                "  Namespace.F := Input<double>[0] {};", "  Input<double>[0] = Implicit<double>[0](Literal<int>) {Implicit<double>[0](Literal<int>)};",
-                "  Namespace.G := Input<double>[0] {};", "  Input<double>[0] = Implicit<double>[0](Literal<int>) {Implicit<double>[0](Literal<int>)};",
-                "  Namespace.H := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0] {};",
-                "  Namespace.I := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[1] {};",
-                "  Namespace.J := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[0] {};",
-                "  Namespace.K := Input<double>[0] {};", "  Input<double>[0] = Literal<double>[28] {};",
-                "]");
-            formula.Perform(slate);
 
             slate.CheckValue( 3.0,   "A");
             slate.CheckValue( 0.003, "B");
@@ -103,12 +88,11 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_LiteralMath() {
             Slate slate = new();
-            IAction action = new Parser(slate, new ConsoleLogger()).Read(
+            slate.ReadCommit(
                 "in double A = 3.0 + 0.07 * 2;",
                 "in double B = floor(A), C = round(A), D = round(A, 1);",
                 "in double E = (B ** C) / 2;",
                 "in double F = -E + -3;");
-            action.Perform(slate, new ConsoleLogger());
 
             slate.CheckValue(  3.14, "A");
             slate.CheckValue(  3.0,  "B");
@@ -119,33 +103,33 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
-        public void TestBasicParses_ModRemAndStrings() {
+        public void TestBasicParses_ModAndStrings() {
             // See: https://docs.microsoft.com/en-us/dotnet/api/system.math.ieeeremainder?view=net-5.0
             Slate slate = new();
             slate.ReadCommit(
-                "in string A = (  3.0 %%  2.0) + ', ' + (  3.0 %  2.0);",
-                "in string B = (  4.0 %%  2.0) + ', ' + (  4.0 %  2.0);",
-                "in string C = ( 10.0 %%  3.0) + ', ' + ( 10.0 %  3.0);",
-                "in string D = ( 11.0 %%  3.0) + ', ' + ( 11.0 %  3.0);",
-                "in string E = ( 27.0 %%  4.0) + ', ' + ( 27.0 %  4.0);",
-                "in string F = ( 28.0 %%  5.0) + ', ' + ( 28.0 %  5.0);",
-                "in string G = ( 17.8 %%  4.0) + ', ' + ( 17.8 %  4.0);",
-                "in string H = ( 17.8 %%  4.1) + ', ' + ( 17.8 %  4.1);",
-                "in string I = (-16.3 %%  4.1) + ', ' + (-16.3 %  4.1);",
-                "in string J = ( 17.8 %% -4.1) + ', ' + ( 17.8 % -4.1);",
-                "in string K = (-17.8 %% -4.1) + ', ' + (-17.8 % -4.1);");
+                "in string A =   3.0 + ' % ' +  2.0 + ' = ' + (  3.0 %  2.0);",
+                "in string B =   4.0 + ' % ' +  2.0 + ' = ' + (  4.0 %  2.0);",
+                "in string C =  10.0 + ' % ' +  3.0 + ' = ' + ( 10.0 %  3.0);",
+                "in string D =  11.0 + ' % ' +  3.0 + ' = ' + ( 11.0 %  3.0);",
+                "in string E =  27.0 + ' % ' +  4.0 + ' = ' + ( 27.0 %  4.0);",
+                "in string F =  28.0 + ' % ' +  5.0 + ' = ' + ( 28.0 %  5.0);",
+                "in string G =  17.8 + ' % ' +  4.0 + ' = ' + ( 17.8 %  4.0);",
+                "in string H =  17.8 + ' % ' +  4.1 + ' = ' + ( 17.8 %  4.1);",
+                "in string I = -16.3 + ' % ' +  4.1 + ' = ' + (-16.3 %  4.1);",
+                "in string J =  17.8 + ' % ' + -4.1 + ' = ' + ( 17.8 % -4.1);",
+                "in string K = -17.8 + ' % ' + -4.1 + ' = ' + (-17.8 % -4.1);");
 
-            slate.CheckValue("-1, 1", "A");
-            slate.CheckValue("0, 0", "B");
-            slate.CheckValue("1, 1", "C");
-            slate.CheckValue("-1, 2", "D");
-            slate.CheckValue("-1, 3", "E");
-            slate.CheckValue("-2, 3", "F");
-            slate.CheckValue("1.8000000000000007, 1.8000000000000007", "G");
-            slate.CheckValue("1.4000000000000021, 1.4000000000000021", "H");
-            slate.CheckValue("0.09999999999999787, -4.000000000000002", "I");
-            slate.CheckValue("1.4000000000000021, 1.4000000000000021", "J");
-            slate.CheckValue("-1.4000000000000021, -1.4000000000000021", "K");
+            slate.CheckValue("3 % 2 = 1", "A");
+            slate.CheckValue("4 % 2 = 0", "B");
+            slate.CheckValue("10 % 3 = 1", "C");
+            slate.CheckValue("11 % 3 = 2", "D");
+            slate.CheckValue("27 % 4 = 3", "E");
+            slate.CheckValue("28 % 5 = 3", "F");
+            slate.CheckValue("17.8 % 4 = 1.8000000000000007", "G");
+            slate.CheckValue("17.8 % 4.1 = 1.4000000000000021", "H");
+            slate.CheckValue("-16.3 % 4.1 = -4.000000000000002", "I");
+            slate.CheckValue("17.8 % -4.1 = 1.4000000000000021", "J");
+            slate.CheckValue("-17.8 % -4.1 = -1.4000000000000021", "K");
         }
 
         [TestMethod]

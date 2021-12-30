@@ -35,7 +35,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <returns>The new value that the node should be set to.</returns>
         abstract protected T CalcuateValue();
 
-        /// <summary>Updates the node's provoked state.</summary>
+        /// <summary>Updates the node's value, usually based on current parents.</summary>
         /// <returns>True indicates that the value has been changed, false otherwise.</returns>
         public override bool Evaluate() => this.UpdateValue(this.CalcuateValue());
     }

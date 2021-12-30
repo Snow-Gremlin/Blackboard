@@ -76,16 +76,16 @@ namespace BlackboardTests {
         }
 
         /// <summary>
-        /// Installs this child's parents, any parent which is a child,
+        /// Add this child's parents, any parent which is a child,
         /// and any parent's parent etc.
         /// </summary>
         /// <param name="node">The node to start installing from.</param>
-        static public void InstallAll(this IChild node) {
+        static public void AddToAllParents (this IChild node) {
             Stack<IChild> stack = new();
             stack.Push(node);
             while (stack.Count > 0) {
                 node = stack.Pop();
-                node.InstallAll();
+                node.AddToParents();
                 foreach (IParent parent in node.Parents) {
                     if (parent is IChild child) stack.Push(child);
                 }

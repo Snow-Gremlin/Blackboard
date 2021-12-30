@@ -219,7 +219,6 @@ namespace Blackboard.Parser {
         /// <summary>This is called before each statement to prepare and clean up the parser.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleClear(Builder builder) {
-            builder.Logger?.Log("\n======================================================================"); // TODO: REMOVE
             builder.Tokens.Clear();
             builder.Clear();
         }
@@ -294,9 +293,10 @@ namespace Blackboard.Parser {
             string name = builder.Identifiers.Pop();
             INode castValue = builder.PerformCast(type, value);
 
+            VirtualNode curScope = builder.Scope.Current;
             IEnumerable<INode> allNewNodes = builder.PrepareTree(castValue);
-            builder.Actions.Add(new Define(builder.Scope.Current.Receiver, name, castValue, allNewNodes));
-            builder.Scope.Current.WriteField(name, castValue);
+            builder.Actions.Add(new Define(curScope.Receiver, name, castValue, allNewNodes));
+            curScope.WriteField(name, castValue);
         }
 
         /// <summary>This handles defining a new untyped named node.</summary>
@@ -383,7 +383,6 @@ namespace Blackboard.Parser {
 
             INode node = receiver.ReadField(name);
             if (node is not null) {
-                if (node is VirtualNode vNode) node = vNode.Receiver;
                 builder.Nodes.Push(node);
                 return;
             }

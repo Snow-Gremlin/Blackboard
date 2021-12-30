@@ -320,10 +320,7 @@ namespace Blackboard.Parser {
             }
 
             /// <summary>Clears the set of existing nodes.</summary>
-            public void Clear() {
-                this.builder.Logger?.Log("Clear Existing"); // TODO: REMOVE
-                this.nodes.Clear();
-            }
+            public void Clear() => this.nodes.Clear();
 
             /// <summary>Adds an existing node which has been referenced since the last clear.</summary>
             /// <param name="node">The existing node to add.</param>

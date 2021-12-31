@@ -24,20 +24,20 @@ namespace BlackboardTests {
         }
 
         /// <summary>Asserts that all the given lines are equal, otherwise shows the diff.</summary>
-        /// <param name="results">The result that is being checked.</param>
         /// <param name="exp">The expected result to check against.</param>
+        /// <param name="results">The result that is being checked.</param>
         /// <param name="message">The message to go along with the test.</param>
-        static public void NoDiff(string results, string exp, string message = "") =>
-            NoDiff(results.Split("\n"), exp.Split("\n"), message);
+        static public void NoDiff(string exp, string results, string message = "") =>
+            NoDiff(exp.Split("\n"), results.Split("\n"), message);
 
         /// <summary>Asserts that all the given lines are equal, otherwise shows the diff.</summary>
-        /// <param name="results">The result that is being checked.</param>
         /// <param name="exp">The expected result to check against.</param>
+        /// <param name="results">The result that is being checked.</param>
         /// <param name="message">The message to go along with the test.</param>
-        static public void NoDiff(IEnumerable<string> results, IEnumerable<string> exp, string message = "") {
-            string[] gotLines = results.Split("\n").ToArray();
+        static public void NoDiff(IEnumerable<string> exp, IEnumerable<string> results, string message = "") {
             string[] expLines = exp.Split("\n").ToArray();
-            if (!Enumerable.SequenceEqual(gotLines, expLines)) {
+            string[] gotLines = results.Split("\n").ToArray();
+            if (!Enumerable.SequenceEqual(expLines, gotLines)) {
                 S.Console.WriteLine("Diff:");
                 gotLines.Diff(expLines).Indent("  ").Foreach(S.Console.WriteLine);
                 S.Console.WriteLine();

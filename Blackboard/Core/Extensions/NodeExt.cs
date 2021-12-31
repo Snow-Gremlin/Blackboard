@@ -211,7 +211,7 @@ namespace Blackboard.Core.Extensions {
                         break;
                     }
                 }
-                if (addToEnd) list.AddLast(node);
+                if (addToEnd) list.AddFirst(node);
             }
         }
 

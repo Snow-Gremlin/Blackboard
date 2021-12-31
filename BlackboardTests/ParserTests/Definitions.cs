@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
 using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -46,7 +47,7 @@ namespace BlackboardTests.ParserTests {
                 "Global: Namespace{",
                 "  A: Input<int>[2],",
                 "  B: Input<double>[3],",
-                "  C: Sum<double>(Implicit<double>(A[2]), B[3])",
+                "  C: Sum<double>[5](Implicit<double>(A[2]), B[3])",
                 "}");
 
             slate.CheckValue(2,   "A");
@@ -117,7 +118,7 @@ namespace BlackboardTests.ParserTests {
                 "int B := (A | 0x10) & 0x15;",
                 "int C := B << shift;",
                 "int D := ~C;");
-            slate.CheckPendingEval("asdf"); // TODO
+            slate.CheckPendingEval(); // TODO
 
             slate.CheckValue( 0x0F, "A");
             slate.CheckValue( 0x15, "B");
@@ -294,8 +295,8 @@ namespace BlackboardTests.ParserTests {
             slate.CheckGraphString(
                 "Global: Namespace{",
                 "  A: Input<double>[1.2],",
-                "  B: Explicit<int>(D[1.2]),",
-                "  C: Implicit<string>(D[1.2]),",
+                "  B: Explicit<int>[1](D[1.2]),",
+                "  C: Implicit<string>[1.2](D[1.2]),",
                 "  D: Input<double>[1.2]",
                 "}");
 
@@ -324,13 +325,6 @@ namespace BlackboardTests.ParserTests {
             slate.CheckProvoked(false, "B");
             slate.CheckProvoked(false, "C");
             slate.CheckValue(3, "D");
-            slate.CheckEvaluate(
-                "Start(Pending: 4)",
-                "  Eval(0): A: Input<trigger>", // Evaluates because they are new
-                "  Eval(0): B: Input<trigger>",
-                "  Eval(0): D: Input<int>[3]",
-                "  Eval(1): C: All<trigger>(A, B)",
-                "End(Provoked: 0)");
 
             slate.ReadCommit(
                 "->A;",
@@ -339,26 +333,14 @@ namespace BlackboardTests.ParserTests {
             slate.CheckProvoked(false, "B");
             slate.CheckProvoked(false, "C");
             slate.CheckValue(5, "D");
-            slate.CheckEvaluate(
-                "Start(Pending: 2)",
-                "  Eval(0): A: Input<trigger>[provoked]",
-                "  Eval(0): D: Input<int>[5]",
-                "  Eval(1): C: All<trigger>(A, B)",
-                "End(Provoked: 1)");
 
             slate.ReadCommit(
                 "D > 3 -> A;",
                 "A -> B;");
             slate.CheckProvoked(true, "A");
             slate.CheckProvoked(true, "B");
-            slate.CheckProvoked(false, "C");
+            slate.CheckProvoked(true, "C");
             slate.CheckValue(5, "D");
-            slate.CheckEvaluate(
-                "Start(Pending: 2)",
-                "  Eval(0): A: Input<trigger>[provoked]",
-                "  Eval(0): B: Input<trigger>[provoked]",
-                "  Eval(1): C: All<trigger>[provoked](A, B)",
-                "End(Provoked: 3)");
 
             slate.ReadCommit(
                 "false -> A;",
@@ -367,11 +349,6 @@ namespace BlackboardTests.ParserTests {
             slate.CheckProvoked(false, "B");
             slate.CheckProvoked(false, "C");
             slate.CheckValue(5, "D");
-            slate.CheckEvaluate(
-                "Start(Pending: 2)",
-                "  Eval(0): A: Input<trigger>",
-                "  Eval(0): B: Input<trigger>",
-                "End(Provoked: 0)");
         }
     }
 }

@@ -12,6 +12,10 @@ namespace BlackboardTests.CoreTests {
     [TestClass]
     public class Types {
 
+        static private Stringifier stringifier = new(
+            showLastDataValues:  false,
+            showFirstDataValues: false);
+
         static private void checkTypeOf(INode node, Type exp) =>
             Assert.AreEqual(exp, Type.TypeOf(node));
 
@@ -19,9 +23,9 @@ namespace BlackboardTests.CoreTests {
             string msg = "Checking if " + t + " matches " + node + ".";
             string resultMatch    = t.Match(Type.TypeOf(node), true).ToString();
             Assert.AreEqual(expMatch, resultMatch, msg);
-            string resultImplicit = Stringifier.Shallow(t.Implicit(node));
+            string resultImplicit = stringifier.Stringify(t.Implicit(node));
             Assert.AreEqual(expImplicit, resultImplicit, msg);
-            string resultExplicit = Stringifier.Shallow(t.Explicit(node));
+            string resultExplicit = stringifier.Stringify(t.Explicit(node));
             Assert.AreEqual(expExplicit, resultExplicit, msg);
         }
 
@@ -29,7 +33,7 @@ namespace BlackboardTests.CoreTests {
             checkCasts(t, node, "Implicit("+steps+")", expImplicit, "null");
 
         static private void checkInherit(Type t, INode node, int steps) =>
-            checkCasts(t, node, "Inherit("+steps+")", Stringifier.Shallow(node), Stringifier.Shallow(node));
+            checkCasts(t, node, "Inherit("+steps+")", stringifier.Stringify(node), stringifier.Stringify(node));
 
         static private void checkNoCast(Type t, INode node) =>
             checkCasts(t, node, "None", "null", "null");
@@ -60,11 +64,11 @@ namespace BlackboardTests.CoreTests {
         public void TestCastBoolInput() {
             InputValue<Bool> node = new();
             checkInherit (Type.Node,          node, 1);
-            checkImplicit(Type.Trigger,       node, 0, "BoolAsTrigger<bool>[False](Input<bool>)");
+            checkImplicit(Type.Trigger,       node, 0, "BoolAsTrigger<bool>(Input<bool>)");
             checkInherit (Type.Bool,          node, 0);
             checkNoCast  (Type.Int,           node);
             checkNoCast  (Type.Double,        node);
-            checkImplicit(Type.String,        node, 0, "Implicit<string>[False](Input<bool>)");
+            checkImplicit(Type.String,        node, 0, "Implicit<string>(Input<bool>)");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);
@@ -84,8 +88,8 @@ namespace BlackboardTests.CoreTests {
             checkNoCast  (Type.Trigger,       node);
             checkNoCast  (Type.Bool,          node);
             checkInherit (Type.Int,           node, 1);
-            checkImplicit(Type.Double,        node, 1, "Implicit<double>[0](Latch<int>)");
-            checkImplicit(Type.String,        node, 1, "Implicit<string>[0](Latch<int>)");
+            checkImplicit(Type.Double,        node, 1, "Implicit<double>(Latch<int>)");
+            checkImplicit(Type.String,        node, 1, "Implicit<string>(Latch<int>)");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);
@@ -104,9 +108,9 @@ namespace BlackboardTests.CoreTests {
             checkInherit (Type.Node,          node, 2);
             checkNoCast  (Type.Trigger,       node);
             checkNoCast  (Type.Bool,          node);
-            checkExplicit(Type.Int,           node, "Explicit<int>[0](Counter<double>)");
+            checkExplicit(Type.Int,           node, "Explicit<int>(Counter<double>)");
             checkInherit (Type.Double,        node, 1);
-            checkImplicit(Type.String,        node, 1, "Implicit<string>[0](Counter<double>)");
+            checkImplicit(Type.String,        node, 1, "Implicit<string>(Counter<double>)");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);

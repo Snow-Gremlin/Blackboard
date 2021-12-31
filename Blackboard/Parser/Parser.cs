@@ -167,8 +167,7 @@ namespace Blackboard.Parser {
         /// <param name="count">The number of values to pop off the stack for this function.</param>
         /// <param name="name">The name of the prompt to add to.</param>
         private void addProcess(int count, string name) {
-            IFuncGroup funcGroup = this.slate.Global.Find(Slate.OperatorNamespace, name) as IFuncGroup;
-            if (funcGroup is null)
+            if (this.slate.Global.Find(Slate.OperatorNamespace, name) is not IFuncGroup funcGroup)
                 throw new Exception("Could not find the operation by the given name.").
                     With("Name", name);
 
@@ -434,8 +433,6 @@ namespace Blackboard.Parser {
                 }
             }
 
-            S.Console.WriteLine(builder.Scope.Global);
-
             throw new Exception("No identifier found in the scope stack.").
                 With("Identifier", name).
                 With("Location", builder.LastLocation);
@@ -464,7 +461,7 @@ namespace Blackboard.Parser {
         /// <summary>This handles pushing a hexadecimal int literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushHex(Builder builder) =>
-            parseLiteral(builder, "parse a hex int", (string text) => Literal.Int(int.Parse(text, NumberStyles.HexNumber)));
+            parseLiteral(builder, "parse a hex int", (string text) => Literal.Int(int.Parse(text[2..], NumberStyles.HexNumber)));
 
         /// <summary>This handles pushing a double literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>

@@ -278,10 +278,18 @@ namespace Blackboard.Core.Inspect {
 
             // Construct the node and any of its children, if it is a first node and it has a name, show it.
             return (first && this.nodeNames.ContainsKey(node) ? this.nodeNames[node]+": " : "") +
-                node.TypeName +
-                this.nodeDataType(node)   + this.nodeDataValue(node, depth, first) +
-                this.parents(node, depth) + this.tailingNodes(node, depth);
+                this.stringNodeWithoutName(node, depth, first);
         }
+
+        /// <summary>Creates a string for a single node without the a name.</summary>
+        /// <param name="node">The node to stringify.</param>
+        /// <param name="depth">The depth to output theses nodes to.</param>
+        /// <param name="first">Indicates this is a first node and if it has a name, it should show it.</param>
+        /// <returns>The string for this node.</returns>
+        private string stringNodeWithoutName(INode node, int depth, bool first) =>
+            node is null ? "null" : node.TypeName +
+            this.nodeDataType(node)   + this.nodeDataValue(node, depth, first) +
+            this.parents(node, depth) + this.tailingNodes(node, depth);
 
         /// <summary>Gets the data type of the node.</summary>
         /// <param name="node">The node to get the data type of.</param>
@@ -308,20 +316,25 @@ namespace Blackboard.Core.Inspect {
             return "<"+inputTypes+Type.FromType(node.ReturnType) + ">";
         }
 
+        /// <summary>Gets the string for the data value of the given node.</summary>
+        /// <param name="node">The node to get the data value for.</param>
+        /// <returns>The string for the data value.</returns>
+        private static string getDataValue(INode node) =>
+            node switch {
+                IDataNode dat => "[" + dat.Data.ValueString + "]",
+                ITrigger trig => (trig.Provoked ? "[provoked]" : "[]"),
+                _             => "",
+            };
+
         /// <summary>Gets the data value of the node without the node type.</summary>
         /// <param name="node">The node to get the data value of.</param>
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <param name="first">Indicates this is a first node.</param>
         /// <returns>The string for the data value.</returns>
         private string nodeDataValue(INode node, int depth, bool first) =>
-            !this.ShowAllDataValues &&
-            (!this.ShowFirstDataValues || !first) &&
-            (!this.ShowLastDataValues || (depth > 1 && node is IChild child && child.Parents.Any())) ? "" :
-            node switch {
-                IDataNode dat  => "[" + dat.Data.ValueString + "]",
-                ITrigger  trig => (trig.Provoked ? "[provoked]" : ""),
-                _              => "",
-            };
+            this.ShowAllDataValues ? getDataValue(node) :
+            this.ShowFirstDataValues && first ? getDataValue(node) :
+            this.ShowLastDataValues && (depth <= 1 || node is not IChild child || !child.Parents.Any()) ? getDataValue(node) : "";
 
         /// <summary>Gets a string for the parents of the given node</summary>
         /// <param name="node">The node to get the parents from.</param>
@@ -356,10 +369,10 @@ namespace Blackboard.Core.Inspect {
             string nl = "\n";
 
             string tail = node.Definitions.Select(def =>
-                this.stringNode(def, depth-1, false, false).Trim().Replace(nl, nl + this.Indent)).
-                Join("," + nl + this.Indent);
+                this.stringNode(def, depth-1, false, false).Trim().Indent(this.Indent)).
+                Join("," + nl);
 
-            return "{" + nl + this.Indent + tail + nl + "}";
+            return "{" + nl + tail + nl + "}";
         }
 
         /// <summary>Gets the all the field nodes for the field reader.</summary>
@@ -374,10 +387,10 @@ namespace Blackboard.Core.Inspect {
             string tail = node.Fields.Select(pair =>
                 (pair.Value is IFuncGroup or IFuncDef) && !this.ShowFuncs ? null :
                 pair.Key == Slate.OperatorNamespace ? null :
-                pair.Key + ": " + this.stringNode(pair.Value, depth-1, false, false)
-            ).NotNull().Indent(this.Indent).Join("," + nl + this.Indent);
+                pair.Key + ": " + this.stringNodeWithoutName(pair.Value, depth-1, true)
+            ).NotNull().Indent(this.Indent).Join("," + nl);
 
-            return string.IsNullOrEmpty(tail) ? "" : "{" + nl + this.Indent + tail + nl +"}";
+            return string.IsNullOrEmpty(tail) ? "" : "{" + nl + tail + nl +"}";
         }
 
         #endregion
@@ -436,7 +449,7 @@ namespace Blackboard.Core.Inspect {
         private string stringFormula(Formula formula) {
             string nl = "\n";
             return formula is null ? "null" : formula.Actions.Count <= 0 ? "[]" :
-                "[" + nl + this.Indent + this.Stringify(formula.Actions).Replace(nl, nl+this.Indent) + nl + "]";
+                "[" + nl + this.Stringify(formula.Actions).Indent(this.Indent) + nl + "]";
         }
 
         #endregion

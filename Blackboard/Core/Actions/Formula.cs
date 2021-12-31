@@ -49,6 +49,8 @@ namespace Blackboard.Core.Actions {
             logger?.Log("Formula:");
             ILogger sub = logger?.Sub;
             this.actions.Foreach(action => action.Perform(slate, sub));
+            slate.PerformEvaluation(sub);
+            slate.ResetTriggers();
         }
 
         /// <summary>Gets a human readable string for this formula as all internal actions on different lines.</summary>

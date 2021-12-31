@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Nodes.Outer {

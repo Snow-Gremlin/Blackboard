@@ -75,22 +75,50 @@ namespace BlackboardTests {
             Assert.AreEqual(exp, (node as ITrigger).Provoked);
         }
 
-        /// <summary>
-        /// Add this child's parents, any parent which is a child,
-        /// and any parent's parent etc.
-        /// </summary>
-        /// <param name="node">The node to start installing from.</param>
-        static public void AddToAllParents (this IChild node) {
-            Stack<IChild> stack = new();
+        /// <summary>Gets all reachable nodes by walking up the parents.</summary>
+        /// <param name="node">The node to start walking up the parents.</param>
+        /// <returns>
+        /// The depth first trace through all the parents starting from the given node.
+        /// The first node will be the given node.
+        /// </returns>
+        static public IEnumerable<INode> GetAllParents(this INode node) {
+            Stack<INode> stack = new();
             stack.Push(node);
             while (stack.Count > 0) {
                 node = stack.Pop();
-                node.AddToParents();
-                foreach (IParent parent in node.Parents) {
-                    if (parent is IChild child) stack.Push(child);
-                }
+                yield return node;
+
+                if (node is IChild child)
+                    child.Parents.Foreach(stack.Push);
             }
         }
+
+        /// <summary>Gets a sorted link list of all the evaluable nodes from the given nodes.</summary>
+        /// <param name="nodes">The nodes to get the sorted link list from.</param>
+        /// <returns>The sorted link list of evaluable nodes.</returns>
+        static public LinkedList<IEvaluable> ToEvalList(this IEnumerable<INode> nodes) {
+            LinkedList<IEvaluable> list = new();
+            list.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
+            return list;
+        }
+
+        /// <summary>Will assign all the children reachable via parents to the parents.</summary>
+        /// <param name="node">The node to start adding to the parents from.</param>
+        static public void AddToAllParents(this INode node) =>
+            node.GetAllParents().OfType<IChild>().Foreach(child => child.AddToParents());
+
+        /// <summary>Will perform depth update on all the nodes reachable from the parents.</summary>
+        /// <param name="node">The node to start updating from and to get all parents and parent parents from.</param>
+        /// <param name="logger">Optional logger to use to debug the update with.</param>
+        static public void UpdateAllParents(this INode node, ILogger logger = null) =>
+            GetAllParents(node).ToEvalList().UpdateDepths(logger);
+
+        /// <summary>Will perform evaluation on all the nodes reachable from the parents.</summary>
+        /// <param name="node">The node to start evaluate from and to get all parents and parent parents from.</param>
+        /// <param name="logger">Optional logger to use to debug the update with.</param>
+        /// <returns>All the triggers which have been provoked and need to be reset.</returns>
+        static public HashSet<ITrigger> EvaluateAllParents(this INode node, ILogger logger = null) =>
+            GetAllParents(node).ToEvalList().Evaluate(logger);
 
         #endregion
         #region Actions...
@@ -100,7 +128,6 @@ namespace BlackboardTests {
         /// <param name="lines">The lines for the expected string.</param>
         static public void Check(this IAction action, params string[] lines) =>
             TestTools.NoDiff(lines, Stringifier.Shallow(action).Trim().Split("\n"));
-
 
         #endregion
         #region Slate...
@@ -202,11 +229,23 @@ namespace BlackboardTests {
             new Parser(slate).Read(input);
 
         /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
+        /// <param name="slate">The slate to apply the parsed action to.</param>
+        /// <param name="action">The action to apply to this slate.</param>
+        /// <param name="lines">The expected evaluation log output.</param>
+        static public void CheckCommit(this Slate slate, IAction action, params string[] lines) {
+            BufferLogger logger = new();
+            logger.Stringifier.PreloadNames(slate);
+            action.Perform(slate, logger);
+            TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
+        }
+
+        /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
         /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
         static public void ReadCommit(this Slate slate, params string[] input) {
-            ConsoleLogger log = null;// new();
-            new Parser(slate, log).Read(input).Perform(slate, log);
+            ConsoleLogger logger = new(); // TODO: REMOVE
+            logger?.Stringifier.PreloadNames(slate);
+            new Parser(slate, logger).Read(input).Perform(slate, logger);
         }
 
         #endregion

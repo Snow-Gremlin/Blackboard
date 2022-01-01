@@ -1,6 +1,4 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Actions;
-using Blackboard.Core.Inspect;
 using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,7 +10,7 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_TypedInput() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in int A = 2, B = 3;",
                 "in bool C = true;",
                 "",
@@ -21,9 +19,8 @@ namespace BlackboardTests.ParserTests {
                 "   in int F, G;",
                 "   in bool H;",
                 "   in double I;",
-                "}");
-
-            System.Console.WriteLine(slate.ToString());
+                "}").
+                Perform();
 
             slate.CheckValue(2, "A");
             slate.CheckValue(3, "B");
@@ -38,14 +35,15 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_VarInput() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in A = 2, B = 3;",
                 "in C = true;",
                 "",
                 "namespace D {",
                 "   in E = 3.14;",
                 "   in var F = 0, G = 0.0, H = false;",
-                "}");
+                "}").
+                Perform();
 
             slate.CheckValue(2, "A");
             slate.CheckValue(3, "B");
@@ -59,7 +57,7 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_DoubleLiteral() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in double A = 3.0;",
                 "in double B = 0.003;",
                 "in double C = 3.0e-3;",
@@ -70,7 +68,8 @@ namespace BlackboardTests.ParserTests {
                 "in double H = 0.0;",
                 "in double I = 1.0;",
                 "in double J = 0e-5;",
-                "in double K = 28.0;");
+                "in double K = 28.0;").
+                Perform();
 
             slate.CheckValue( 3.0,   "A");
             slate.CheckValue( 0.003, "B");
@@ -88,11 +87,12 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_LiteralMath() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in double A = 3.0 + 0.07 * 2;",
                 "in double B = floor(A), C = round(A), D = round(A, 1);",
                 "in double E = (B ** C) / 2;",
-                "in double F = -E + -3;");
+                "in double F = -E + -3;").
+                Perform();
 
             slate.CheckValue(  3.14, "A");
             slate.CheckValue(  3.0,  "B");
@@ -106,7 +106,7 @@ namespace BlackboardTests.ParserTests {
         public void TestBasicParses_ModAndStrings() {
             // See: https://docs.microsoft.com/en-us/dotnet/api/system.math.ieeeremainder?view=net-5.0
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in string A =   3.0 + ' % ' +  2.0 + ' = ' + (  3.0 %  2.0);",
                 "in string B =   4.0 + ' % ' +  2.0 + ' = ' + (  4.0 %  2.0);",
                 "in string C =  10.0 + ' % ' +  3.0 + ' = ' + ( 10.0 %  3.0);",
@@ -117,7 +117,8 @@ namespace BlackboardTests.ParserTests {
                 "in string H =  17.8 + ' % ' +  4.1 + ' = ' + ( 17.8 %  4.1);",
                 "in string I = -16.3 + ' % ' +  4.1 + ' = ' + (-16.3 %  4.1);",
                 "in string J =  17.8 + ' % ' + -4.1 + ' = ' + ( 17.8 % -4.1);",
-                "in string K = -17.8 + ' % ' + -4.1 + ' = ' + (-17.8 % -4.1);");
+                "in string K = -17.8 + ' % ' + -4.1 + ' = ' + (-17.8 % -4.1);").
+                Perform();
 
             slate.CheckValue("3 % 2 = 1", "A");
             slate.CheckValue("4 % 2 = 0", "B");
@@ -135,11 +136,12 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_Assignment() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in int A = 2, B = 5;",
                 "in int C = A = 8;",
                 "B = A = 14;",
-                "A = 6;");
+                "A = 6;").
+                Perform();
 
             slate.CheckValue(6, "A");
             slate.CheckValue(14, "B");
@@ -149,7 +151,7 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_NamespaceAssignment() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "namespace X {",
                 "   in int a = 2;",
                 "   in int b = 3;",
@@ -165,7 +167,8 @@ namespace BlackboardTests.ParserTests {
                 "   b = 333;",
                 "}",
                 "X.Y.d = 555;",
-                "X.a = 222;");
+                "X.a = 222;").
+                Perform();
 
             slate.CheckValue(222, "X", "a");
             slate.CheckValue(333, "X", "b");

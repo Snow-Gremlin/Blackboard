@@ -205,7 +205,7 @@ namespace Blackboard.Core.Extensions {
                         addToEnd = false;
                         break;
                     }
-                    if (node.Depth >= pend.Value.Depth) {
+                    if (node.Depth > pend.Value.Depth) {
                         list.AddAfter(pend, node);
                         addToEnd = false;
                         break;

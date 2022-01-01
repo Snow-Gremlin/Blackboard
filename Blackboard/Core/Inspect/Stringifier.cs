@@ -30,6 +30,11 @@ namespace Blackboard.Core.Inspect {
         /// <returns>The simple string for the given nodes.</returns>
         static public string Simple(IEnumerable<INode> nodes) => Simple().Stringify(nodes);
 
+        /// <summary>Gets a simple string for the given formula.</summary>
+        /// <param name="formula">The formula to stringify.</param>
+        /// <returns>The simple string for the given formula.</returns>
+        static public string Simple(Formula formula) => Simple().Stringify(formula);
+
         /// <summary>Gets a simple string for the given actions even any action which is null.</summary>
         /// <param name="actions">The actions to stringify.</param>
         /// <returns>The simple string for the given actions.</returns>
@@ -60,6 +65,11 @@ namespace Blackboard.Core.Inspect {
         /// <param name="nodes">The set of nodes which may contain nulls.</param>
         /// <returns>The basic string for the given nodes.</returns>
         static public string Basic(IEnumerable<INode> nodes) => Basic().Stringify(nodes);
+
+        /// <summary>Gets a basic string for the given formula.</summary>
+        /// <param name="formula">The formula to stringify.</param>
+        /// <returns>The basic string for the given formula.</returns>
+        static public string Basic(Formula formula) => Simple().Stringify(formula);
 
         /// <summary>Gets a basic string for the given actions even any action which is null.</summary>
         /// <param name="actions">The actions to stringify.</param>
@@ -93,6 +103,11 @@ namespace Blackboard.Core.Inspect {
         /// <returns>The shallow string for the given nodes.</returns>
         static public string Shallow(IEnumerable<INode> nodes) => Shallow().Stringify(nodes);
 
+        /// <summary>Gets a shallow string for the given formula.</summary>
+        /// <param name="formula">The formula to stringify.</param>
+        /// <returns>The shallow string for the given formula.</returns>
+        static public string Shallow(Formula formula) => Simple().Stringify(formula);
+
         /// <summary>Gets a shallow string for the given actions even any action which is null.</summary>
         /// <param name="actions">The actions to stringify.</param>
         /// <returns>The shallow string for the given actions.</returns>
@@ -119,6 +134,11 @@ namespace Blackboard.Core.Inspect {
         /// <param name="nodes">The set of nodes which may contain nulls.</param>
         /// <returns>The deep string for the given nodes.</returns>
         static public string Deep(IEnumerable<INode> nodes) => Deep().Stringify(nodes);
+
+        /// <summary>Gets a deep string for the given formula.</summary>
+        /// <param name="formula">The formula to stringify.</param>
+        /// <returns>The deep string for the given formula.</returns>
+        static public string Deep(Formula formula) => Simple().Stringify(formula);
 
         /// <summary>Gets a deep string for the given actions even any action which is null.</summary>
         /// <param name="actions">The actions to stringify.</param>
@@ -396,6 +416,15 @@ namespace Blackboard.Core.Inspect {
         #endregion
         #region Actions...
 
+        /// <summary>Get the string for the given formula.</summary>
+        /// <param name="formula">The formula to stringify.</param>
+        /// <returns>The string for the given formula.</returns>
+        public string Stringify(Formula formula) {
+            string nl = "\n";
+            return formula is null ? "null" : formula.Actions.Count <= 0 ? "[]" :
+                "[" + nl + this.Stringify(formula.Actions).Indent(this.Indent) + nl + "]";
+        }
+
         /// <summary>Gets a string for the given actions even any action which is null.</summary>
         /// <param name="actions">The actions to stringify.</param>
         /// <returns>The string for the given actions.</returns>
@@ -417,9 +446,8 @@ namespace Blackboard.Core.Inspect {
                 IAssign assign  => this.stringAssign(assign),
                 Define  define  => this.stringDefine(define),
                 Provoke provoke => this.stringProvoke(provoke),
-                Formula formula => this.stringFormula(formula),
-                ResetTriggers   => "Reset Triggers",
-                _ => "Unknown Action",
+                Finish          => "Finish",
+                _               => "Unknown Action",
             };
 
         /// <summary>Get the string for the given assign action.</summary>
@@ -442,15 +470,6 @@ namespace Blackboard.Core.Inspect {
         private string stringProvoke(Provoke provoke) =>
             this.Stringify(provoke.Trigger) + " -> " + this.Stringify(provoke.Target) +
                 " {" + this.Stringify(provoke.NeedPending) + "};";
-
-        /// <summary>Get the string for the given formula.</summary>
-        /// <param name="formula">The formula to stringify.</param>
-        /// <returns>The string for the given formula.</returns>
-        private string stringFormula(Formula formula) {
-            string nl = "\n";
-            return formula is null ? "null" : formula.Actions.Count <= 0 ? "[]" :
-                "[" + nl + this.Stringify(formula.Actions).Indent(this.Indent) + nl + "]";
-        }
 
         #endregion
         #region Other...

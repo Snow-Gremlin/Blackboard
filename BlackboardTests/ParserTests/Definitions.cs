@@ -14,10 +14,11 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_IntIntSum() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in int A = 2;",
                 "in int B = 3;",
-                "int C := A + B;");
+                "int C := A + B;").
+                Perform();
 
             slate.CheckValue(2, "A");
             slate.CheckValue(3, "B");
@@ -39,10 +40,11 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_IntDoubleSum() {
             Slate slate = new(addFuncs: false, addConsts: false);
-            slate.ReadCommit(
+            slate.Read(
                 "in int A = 2;",
                 "in double B = 3.0;",
-                "double C := A + B;");
+                "double C := A + B;").
+                Perform();
             slate.CheckGraphString(
                 "Global: Namespace{",
                 "  A: Input<int>[2],",
@@ -70,10 +72,11 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_IntDoubleImplicitCast() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in int A = 2;",
                 "double B := A;",
-                "string C := B;");
+                "string C := B;").
+                Perform();
 
             slate.CheckValue(2,   "A");
             slate.CheckValue(2.0, "B");
@@ -89,11 +92,12 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_IntIntCompare() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in A = 2;",
                 "in B = 3;",
                 "maxA := 3;",
-                "C := A <= maxA && A > B ? 1 : 0;");
+                "C := A <= maxA && A > B ? 1 : 0;").
+                Perform();
 
             slate.CheckValue(2, "A");
             slate.CheckValue(3, "B");
@@ -112,12 +116,13 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_Bitwise() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in int A = 0x0F;",
                 "int shift := 1;",
                 "int B := (A | 0x10) & 0x15;",
                 "int C := B << shift;",
-                "int D := ~C;");
+                "int D := ~C;").
+                Perform();
             slate.CheckPendingEval(); // TODO
 
             slate.CheckValue( 0x0F, "A");
@@ -135,13 +140,14 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_SomeBooleanMath() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in int A = 0x03;",
                 "bool B := A & 0x01 != 0;",
                 "bool C := A & 0x02 != 0;",
                 "bool D := A & 0x04 != 0;",
                 "bool E := A & 0x08 != 0;",
-                "bool F := B & !C ^ (D | E);");
+                "bool F := B & !C ^ (D | E);").
+                Perform();
 
             slate.CheckValue(0x3, "A");
             slate.CheckValue(true, "B");
@@ -152,146 +158,144 @@ namespace BlackboardTests.ParserTests {
 
             slate.SetInt(0x5, "A");
             slate.CheckEvaluate(
-                "Start(Pending: 6)",
-                "  Eval(0): A: Input<int>[5]",
-                "  Eval(1): BitwiseAnd<int>[1](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[4](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
-                "  Eval(2): B: NotEqual<bool>[True](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                "  Eval(2): C: NotEqual<bool>[False](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                "  Eval(2): D: NotEqual<bool>[True](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                "  Eval(2): E: NotEqual<bool>[False](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                "  Eval(3): Not<bool>[True](C)",
-                "  Eval(3): Or<bool>[True](D, E)",
-                "  Eval(4): And<bool>[True](B, Not<bool>(C))",
-                "  Eval(5): F: Xor<bool>[False](And<bool>(B, Not<bool>), Or<bool>(D, E))",
-                "End(Provoked: 0)");
+                "Start Eval (pending: 4)",
+                "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, Literal<int>), remaining: 3)",
+                "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[4](A, Literal<int>), remaining: 3)",
+                "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, Literal<int>), remaining: 3)",
+                "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[1](A, Literal<int>), remaining: 2)",
+                "  Evaluated (changed: True, depth: 2, node: C: NotEqual<bool>[false](BitwiseAnd<int>(A, Literal<int>), Literal<int>), remaining: 2)",
+                "  Evaluated (changed: True, depth: 2, node: D: NotEqual<bool>[true](BitwiseAnd<int>(A, Literal<int>), Literal<int>), remaining: 2)",
+                "  Evaluated (changed: True, depth: 3, node: Or<bool>[true](D, E), remaining: 2)",
+                "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](C), remaining: 2)",
+                "  Evaluated (changed: True, depth: 4, node: And<bool>[true](B, Not<bool>(C)), remaining: 1)",
+                "  Evaluated (changed: False, depth: 5, node: F: Xor<bool>[false](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
+                "End Eval (provoked: 0)");
             slate.CheckValue(false, "F");
 
             slate.SetInt(0x4, "A");
             slate.CheckEvaluate(
-                "Start(Pending: 1)",
-                "  Eval(0): A: Input<int>[4]",
-                "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[4](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
-                "  Eval(2): B: NotEqual<bool>[False](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                "  Eval(4): And<bool>[False](B, Not<bool>(C))",
-                "  Eval(5): F: Xor<bool>[True](And<bool>(B, Not<bool>), Or<bool>(D, E))",
-                "End(Provoked: 0)");
+                "Start Eval (pending: 4)",
+                "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, Literal<int>), remaining: 3)",
+                "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[4](A, Literal<int>), remaining: 2)",
+                "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, Literal<int>), remaining: 1)",
+                "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, Literal<int>), remaining: 1)",
+                "  Evaluated (changed: True, depth: 2, node: B: NotEqual<bool>[false](BitwiseAnd<int>(A, Literal<int>), Literal<int>), remaining: 1)",
+                "  Evaluated (changed: True, depth: 4, node: And<bool>[false](B, Not<bool>(C)), remaining: 1)",
+                "  Evaluated (changed: True, depth: 5, node: F: Xor<bool>[true](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
+                "End Eval (provoked: 0)");
             slate.CheckValue(true, "F");
 
             slate.SetInt(0x8, "A");
             slate.CheckEvaluate(
-                "Start(Pending: 1)",
-                "  Eval(0): A: Input<int>[8]",
-                "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[8](A, Literal<int>)",
-                "  Eval(2): D: NotEqual<bool>[False](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                "  Eval(2): E: NotEqual<bool>[True](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                "  Eval(3): Or<bool>[True](D, E)",
-                "End(Provoked: 0)");
+                "Start Eval (pending: 4)",
+                "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[8](A, Literal<int>), remaining: 4)",
+                "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, Literal<int>), remaining: 4)",
+                "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, Literal<int>), remaining: 3)",
+                "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, Literal<int>), remaining: 2)",
+                "  Evaluated (changed: True, depth: 2, node: D: NotEqual<bool>[false](BitwiseAnd<int>(A, Literal<int>), Literal<int>), remaining: 2)",
+                "  Evaluated (changed: True, depth: 2, node: E: NotEqual<bool>[true](BitwiseAnd<int>(A, Literal<int>), Literal<int>), remaining: 1)",
+                "  Evaluated (changed: False, depth: 3, node: Or<bool>[true](D, E), remaining: 0)",
+                "End Eval (provoked: 0)");
             slate.CheckValue(true, "F");
 
             slate.SetInt(0xF, "A");
             slate.CheckEvaluate(
-                "Start(Pending: 1)",
-                "  Eval(0): A: Input<int>[15]",
-                "  Eval(1): BitwiseAnd<int>[1](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[2](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[4](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[8](A, Literal<int>)",
-                "  Eval(2): B: NotEqual<bool>[True](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                "  Eval(2): C: NotEqual<bool>[True](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                "  Eval(2): D: NotEqual<bool>[True](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                // E was not checked because BitwiseAnd<int>[8] didn't change.
-                "  Eval(3): Not<bool>[False](C)",
-                "  Eval(3): Or<bool>[True](D, E)",
-                "  Eval(4): And<bool>[False](B, Not<bool>(C))",
-                "End(Provoked: 0)");
+                "Start Eval (pending: 4)",
+                "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[8](A, Literal<int>), remaining: 3)",
+                "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[4](A, Literal<int>), remaining: 3)",
+                "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[2](A, Literal<int>), remaining: 3)",
+                "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[1](A, Literal<int>), remaining: 3)",
+                "  Evaluated (changed: True, depth: 2, node: B: NotEqual<bool>[true](BitwiseAnd<int>(A, Literal<int>), Literal<int>), remaining: 3)",
+                "  Evaluated (changed: True, depth: 2, node: C: NotEqual<bool>[true](BitwiseAnd<int>(A, Literal<int>), Literal<int>), remaining: 3)",
+                "  Evaluated (changed: True, depth: 2, node: D: NotEqual<bool>[true](BitwiseAnd<int>(A, Literal<int>), Literal<int>), remaining: 3)",
+                "  Evaluated (changed: False, depth: 3, node: Or<bool>[true](D, E), remaining: 2)",
+                "  Evaluated (changed: True, depth: 3, node: Not<bool>[false](C), remaining: 1)",
+                "  Evaluated (changed: False, depth: 4, node: And<bool>[false](B, Not<bool>(C)), remaining: 0)",
+                "End Eval (provoked: 0)");
             slate.CheckValue(true, "F");
 
             slate.SetInt(0x5, "A");
             slate.CheckEvaluate(
-                "Start(Pending: 1)",
-                "  Eval(0): A: Input<int>[5]",
-                "  Eval(1): BitwiseAnd<int>[1](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[4](A, Literal<int>)",
-                "  Eval(1): BitwiseAnd<int>[0](A, Literal<int>)",
-                "  Eval(2): C: NotEqual<bool>[False](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                "  Eval(2): E: NotEqual<bool>[False](BitwiseAnd<int>(A, Literal<int>), Literal<int>)",
-                "  Eval(3): Not<bool>[True](C)",
-                "  Eval(3): Or<bool>[True](D, E)",
-                "  Eval(4): And<bool>[True](B, Not<bool>(C))",
-                "  Eval(5): F: Xor<bool>[False](And<bool>(B, Not<bool>), Or<bool>(D, E))",
-                "End(Provoked: 0)");
+                "Start Eval (pending: 4)",
+                "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, Literal<int>), remaining: 4)",
+                "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[4](A, Literal<int>), remaining: 3)",
+                "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, Literal<int>), remaining: 3)",
+                "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[1](A, Literal<int>), remaining: 2)",
+                "  Evaluated (changed: True, depth: 2, node: C: NotEqual<bool>[false](BitwiseAnd<int>(A, Literal<int>), Literal<int>), remaining: 2)",
+                "  Evaluated (changed: True, depth: 2, node: E: NotEqual<bool>[false](BitwiseAnd<int>(A, Literal<int>), Literal<int>), remaining: 2)",
+                "  Evaluated (changed: False, depth: 3, node: Or<bool>[true](D, E), remaining: 1)",
+                "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](C), remaining: 1)",
+                "  Evaluated (changed: True, depth: 4, node: And<bool>[true](B, Not<bool>(C)), remaining: 1)",
+                "  Evaluated (changed: True, depth: 5, node: F: Xor<bool>[false](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
+                "End Eval (provoked: 0)");
             slate.CheckValue(false, "F");
         }
 
         [TestMethod]
         public void TestBasicParses_Trigger() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in trigger A;",
                 "in trigger B = true;",
                 "C := A | B;",
                 "D := A & B;",
-                "E := C ^ D;");
+                "E := C ^ D;").
+                NoFinish().
+                Perform();
 
             slate.Provoke("A");
             slate.CheckProvoked(true, "A");
             slate.CheckProvoked(true, "B"); // this was created provoked
             slate.CheckEvaluate(
-                "Start(Pending: 5)",
-                "  Eval(0): A: Input<trigger>[provoked]",
-                "  Eval(0): B: Input<trigger>[provoked]",
-                "  Eval(1): C: Any<trigger>[provoked](A, B)",
-                "  Eval(1): D: All<trigger>[provoked](A, B)",
-                "  Eval(2): E: OnlyOne<trigger>(C, D)",
-                "End(Provoked: 4)");
+                "Start Eval (pending: 4)",
+                "  Evaluated (changed: True, depth: 0, node: A: Input<trigger>[provoked], remaining: 3)",
+                "  Evaluated (changed: True, depth: 0, node: B: Input<trigger>[provoked], remaining: 2)",
+                "  Evaluated (changed: True, depth: 1, node: D: All<trigger>[provoked](A, B), remaining: 2)",
+                "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
+                "  Evaluated (changed: False, depth: 2, node: E: OnlyOne<trigger>[](C, D), remaining: 0)",
+                "End Eval (provoked: 4)");
+            slate.ResetTriggers();
 
             slate.Provoke("A");
             slate.CheckProvoked(true, "A");
             slate.CheckProvoked(false, "B");
             slate.CheckEvaluate(
-                "Start(Pending: 1)",
-                "  Eval(0): A: Input<trigger>[provoked]",
-                "  Eval(1): C: Any<trigger>[provoked](A, B)",
-                "  Eval(1): D: All<trigger>(A, B)",
-                "  Eval(2): E: OnlyOne<trigger>[provoked](C, D)",
-                "End(Provoked: 3)");
+                "Start Eval (pending: 3)",
+                "  Evaluated (changed: True, depth: 0, node: A: Input<trigger>[provoked], remaining: 2)",
+                "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
+                "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
+                "  Evaluated (changed: True, depth: 2, node: E: OnlyOne<trigger>[provoked](C, D), remaining: 0)",
+                "End Eval (provoked: 3)");
+            slate.ResetTriggers();
 
             slate.Provoke("B");
             slate.CheckProvoked(false, "A");
             slate.CheckProvoked(true, "B");
             slate.CheckEvaluate(
-                "Start(Pending: 1)",
-                "  Eval(0): B: Input<trigger>[provoked]",
-                "  Eval(1): C: Any<trigger>[provoked](A, B)",
-                "  Eval(1): D: All<trigger>(A, B)",
-                "  Eval(2): E: OnlyOne<trigger>[provoked](C, D)",
-                "End(Provoked: 3)");
+                "Start Eval (pending: 3)",
+                "  Evaluated (changed: True, depth: 0, node: B: Input<trigger>[provoked], remaining: 2)",
+                "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
+                "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
+                "  Evaluated (changed: True, depth: 2, node: E: OnlyOne<trigger>[provoked](C, D), remaining: 0)",
+                "End Eval (provoked: 3)");
+            slate.ResetTriggers();
 
             slate.CheckProvoked(false, "A");
             slate.CheckProvoked(false, "B");
             slate.CheckEvaluate(
-                "Start(Pending: 0)",
-                "End(Provoked: 0)");
+                "Start Eval (pending: 0)",
+                "End Eval (provoked: 0)");
         }
 
         [TestMethod]
         public void TestBasicParses_ExplicitCasts() {
             Slate slate = new(addConsts: false);
-            slate.ReadCommit(
+            slate.Read(
                 "in double A = 1.2;",
                 "B := (int)A;",     // Explicit
                 "C := (string)A;",  // Implicit
-                "D := (double)A;"); // Inheritance
+                "D := (double)A;"). // Inheritance
+                Perform();
             slate.CheckGraphString(
                 "Global: Namespace{",
                 "  A: Input<double>[1.2],",
@@ -316,39 +320,55 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_ProvokingTriggers() {
             Slate slate = new();
-            slate.ReadCommit(
+            slate.Read(
                 "in trigger A;",
                 "in trigger B;",
                 "C := A & B;",
-                "in D = 3;");
+                "in D = 3;").
+                NoFinish().
+                Perform();
+            slate.PerformEvaluation();
             slate.CheckProvoked(false, "A");
             slate.CheckProvoked(false, "B");
             slate.CheckProvoked(false, "C");
             slate.CheckValue(3, "D");
+            slate.ResetTriggers();
 
-            slate.ReadCommit(
+            slate.Read(
                 "->A;",
-                "D = 5;");
+                "D = 5;").
+                NoFinish().
+                Perform();
+            slate.PerformEvaluation();
             slate.CheckProvoked(true, "A");
             slate.CheckProvoked(false, "B");
             slate.CheckProvoked(false, "C");
             slate.CheckValue(5, "D");
+            slate.ResetTriggers();
 
-            slate.ReadCommit(
+            slate.Read(
                 "D > 3 -> A;",
-                "A -> B;");
+                "A -> B;").
+                NoFinish().
+                Perform();
+            slate.PerformEvaluation();
             slate.CheckProvoked(true, "A");
             slate.CheckProvoked(true, "B");
             slate.CheckProvoked(true, "C");
             slate.CheckValue(5, "D");
+            slate.ResetTriggers();
 
-            slate.ReadCommit(
+            slate.Read(
                 "false -> A;",
-                "D < -1 -> B;");
+                "D < -1 -> B;").
+                NoFinish().
+                Perform();
+            slate.PerformEvaluation();
             slate.CheckProvoked(false, "A");
             slate.CheckProvoked(false, "B");
             slate.CheckProvoked(false, "C");
             slate.CheckValue(5, "D");
+            slate.ResetTriggers();
         }
     }
 }

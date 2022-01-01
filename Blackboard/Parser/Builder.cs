@@ -88,13 +88,11 @@ namespace Blackboard.Parser {
             public void Clear() => this.actions.Clear();
 
             /// <summary>
-            /// Gets the single action which as been added or
-            /// a formula containing all the actions if there was more than one.
+            /// Gets the formula containing all the actions or null if there were no actions.
             /// </summary>
-            public IAction Current =>
+            public Formula Formula =>
                 this.actions.Count <= 0 ? null :
-                this.actions.Count == 1 ? this.actions.First.Value :
-                new Formula(this.actions);
+                new Formula(this.builder.Slate, this.actions.Append(new Finish()));
 
             /// <summary>Adds a pending action into this formula.</summary>
             /// <param name="performer">The performer to add.</param>
@@ -402,7 +400,7 @@ namespace Blackboard.Parser {
                 newNodes.Add(cur);
                 if (cur is IChild child) {
                     foreach (IParent par in child.Parents.NotNull()) {
-                        par.AddChildren(child);
+                        par.AddChildren(child); // TODO: Rework to sort using first found parent and depth first.
                         stack.Push(par);
                     }
                 }

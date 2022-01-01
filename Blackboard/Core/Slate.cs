@@ -58,7 +58,8 @@ namespace Blackboard.Core {
                 And.Factory,
                 BitwiseAnd<Int>.Factory,
                 All.Factory);
-            add("castTrigger");
+            add("castTrigger",
+                BoolAsTrigger.Factory);
             add("castBool");
             add("castInt",
                 Explicit<Double, Int>.Factory);

@@ -54,14 +54,14 @@ namespace Blackboard.Parser {
         /// <remarks>The commands of this input will be added to formula if valid.</remarks>
         /// <param name="input">The input code to parse.</param>
         /// <returns>The formula for performing the parsed actions.</returns>
-        public IAction Read(params string[] input) =>
+        public Formula Read(params string[] input) =>
             this.Read(input as IEnumerable<string>);
 
         /// <summary>Reads the given lines of input Blackboard code.</summary>
         /// <remarks>The commands of this input will be added to formula if valid.</remarks>
         /// <param name="input">The input code to parse.</param>
         /// <returns>The formula for performing the parsed actions.</returns>
-        public IAction Read(IEnumerable<string> input, string name = "Unnamed") {
+        public Formula Read(IEnumerable<string> input, string name = "Unnamed") {
             PP.Parser.Result result = baseParser.Parse(new PP.Scanner.Default(input, name));
 
             // Check for parser errors.
@@ -75,13 +75,13 @@ namespace Blackboard.Parser {
         /// <summary>Reads the given parse tree root for an input Blackboard code.</summary>
         /// <param name="node">The parsed tree root node to read from.</param>
         /// <returns>The formula for performing the parsed actions.</returns>
-        private IAction read(PP.ParseTree.ITreeNode node) {
+        private Formula read(PP.ParseTree.ITreeNode node) {
             try {
                 this.logger?.Log("Parser Read");
                 Builder builder = new(this.slate, this.logger?.Sub);
                 node.Process(this.prompts, builder);
-                this.logger?.Log("Parser Finished");
-                return builder.Actions.Current;
+                this.logger?.Log("Parser Done");
+                return builder.Actions.Formula;
             } catch (S.Exception ex) {
                 throw new Exception("Error occurred while parsing input code.", ex);
             }
@@ -328,7 +328,8 @@ namespace Blackboard.Parser {
                     With("Location", builder.LastLocation);
 
             INode castValue = builder.PerformCast(Type.Trigger, value);
-            builder.Actions.Add(new Provoke(input, castValue as ITrigger));
+            IEnumerable<INode> allNewNodes = builder.PrepareTree(castValue);
+            builder.Actions.Add(new Provoke(input, castValue as ITrigger, allNewNodes));
 
             // Push the condition onto the stack for any following trigger pulls.
             // See comment in `handleAssignment` about pushing cast value back onto the stack.
@@ -424,6 +425,7 @@ namespace Blackboard.Parser {
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushId(Builder builder) {
             string name = builder.LastText;
+            builder.Logger?.Log("Id = \"{0}\"", name);
             foreach (VirtualNode scope in builder.Scope.Scopes) {
                 INode node = scope.ReadField(name);
                 if (node is not null) {

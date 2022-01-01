@@ -5,52 +5,38 @@ using System.Linq;
 
 namespace Blackboard.Core.Actions {
 
-    /// <summary>This is a collection of actions to perform on the Blackboard slate.</summary>
-    /// <remarks>
-    /// It contains the set of actions pending to be performed on the Blackboard.
-    /// This holds onto virtual nodes being added and nodes virtually removed
-    /// prior to the actions being performed. 
-    /// </remarks>
-    sealed public class Formula: IAction {
-
-        /// <summary>This gets all the actions from the given action.</summary>
-        /// <param name="action">The action to get all inner actions from.</param>
-        /// <returns>Either the given action or all the inner actions from a function.</returns>
-        static private IEnumerable<IAction> allActions(IAction action) {
-            if (action is null) yield break;
-            if (action is Formula formula) {
-                foreach (IAction inner in formula.Actions.Select(allActions).Expand().NotNull())
-                    yield return inner;
-            } else yield return action;
-        }
+    /// <summary>This is a collection of actions pending to perform on the Blackboard slate.</summary>
+    sealed public class Formula {
 
         /// <summary>The collection of performers for this formula.</summary>
         private readonly IAction[] actions;
 
         /// <summary>Creates a new formula to perform changes to the slate.</summary>
-        public Formula(params IAction[] actions) :
-            this(actions as IEnumerable<IAction>) { }
+        /// <param name="slate">The slate that these actions were created for.</param>
+        /// <param name="actions">The actions that this formula will perform.</param>
+        public Formula(Slate slate, params IAction[] actions) :
+            this(slate, actions as IEnumerable<IAction>) { }
 
         /// <summary>Creates a new formula to perform changes to the slate.</summary>
-        public Formula(IEnumerable<IAction> actions) =>
-            this.actions = actions.Select(allActions).Expand().NotNull().ToArray();
+        /// <param name="slate">The slate that these actions were created for.</param>
+        /// <param name="actions">The actions that this formula will perform.</param>
+        public Formula(Slate slate, IEnumerable<IAction> actions) {
+            this.actions = actions.NotNull().ToArray();
+            this.Slate = slate;
+        }
+
+        /// <summary>The slate that this formula was built for and will be run on.</summary>
+        public readonly Slate Slate;
 
         /// <summary>The actions for this formula.</summary>
         public IReadOnlyList<IAction> Actions => this.actions;
 
         /// <summary>Performs all the actions for this formula.</summary>
-        /// <remarks>
-        /// The given slate MUST be the slate this formula was created for
-        /// since several of these actions will hold onto nodes from a specific slate.
-        /// </remarks>
-        /// <param name="slate">The slate for this formula.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, ILogger logger = null) {
+        public void Perform(ILogger logger = null) {
             logger?.Log("Formula:");
             ILogger sub = logger?.Sub;
-            this.actions.Foreach(action => action.Perform(slate, sub));
-            slate.PerformEvaluation(sub);
-            slate.ResetTriggers();
+            this.actions.Foreach(action => action.Perform(this.Slate, sub));
         }
 
         /// <summary>Gets a human readable string for this formula as all internal actions on different lines.</summary>

@@ -121,13 +121,42 @@ namespace BlackboardTests {
             GetAllParents(node).ToEvalList().Evaluate(logger);
 
         #endregion
-        #region Actions...
+        #region Formula...
 
-        /// <summary>Checks the expected string for the given action.</summary>
-        /// <param name="action">The action to check the string for.</param>
+        /// <summary>Performs the formula and outputs the logs to the console.</summary>
+        /// <param name="formula">The formula to perform.</param>
+        /// <returns>The formula that is passed in so this can be chained.</returns>
+        static public Formula LogPerform(this Formula formula) {
+            formula.Perform(new ConsoleLogger());
+            return formula;
+        }
+
+        /// <summary>Performs the formula and checks that the log output as expected..</summary>
+        /// <param name="formula">The formula to perform.</param>
+        /// <param name="lines">The expected evaluation log output.</param>
+        /// <returns>The formula that is passed in so this can be chained.</returns>
+        static public Formula CheckPerform(this Formula formula, params string[] lines) {
+            BufferLogger logger = new();
+            logger.Stringifier.PreloadNames(formula.Slate);
+            formula.Perform(logger);
+            TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
+            return formula;
+        }
+
+        /// <summary>Checks the expected string for the given formula.</summary>
+        /// <param name="formula">The formula to check the string for.</param>
         /// <param name="lines">The lines for the expected string.</param>
-        static public void Check(this IAction action, params string[] lines) =>
-            TestTools.NoDiff(lines, Stringifier.Shallow(action).Trim().Split("\n"));
+        /// <returns>The formula that is passed in so this can be chained.</returns>
+        static public Formula Check(this Formula formula, params string[] lines) {
+            TestTools.NoDiff(lines, Stringifier.Shallow(formula).Trim().Split("\n"));
+            return formula;
+        }
+
+        /// <summary>Creates a new formula without the finish action.</summary>
+        /// <param name="formula">The formula to copy without the finish action.</param>
+        /// <returns>The new formula copy from the given formula but without the finish action.</returns>
+        static public Formula NoFinish(this Formula formula) =>
+            new(formula.Slate, formula.Actions.Where(action => action is not Finish));
 
         #endregion
         #region Slate...
@@ -222,31 +251,17 @@ namespace BlackboardTests {
         static public void CheckGraphString(this Slate slate, params string[] lines) =>
             TestTools.NoDiff(lines.Join("\n"), Stringifier.GraphString(slate));
 
-        /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
+        /// <summary>Performs a parse of the given input.</summary>
         /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
-        static public IAction Read(this Slate slate, params string[] input) =>
+        static public Formula Read(this Slate slate, params string[] input) =>
             new Parser(slate).Read(input);
 
-        /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
-        /// <param name="slate">The slate to apply the parsed action to.</param>
-        /// <param name="action">The action to apply to this slate.</param>
-        /// <param name="lines">The expected evaluation log output.</param>
-        static public void CheckCommit(this Slate slate, IAction action, params string[] lines) {
-            BufferLogger logger = new();
-            logger.Stringifier.PreloadNames(slate);
-            action.Perform(slate, logger);
-            TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
-        }
-
-        /// <summary>Performs a parse of the given input and commits the changes if there are no errors.</summary>
+        /// <summary>Performs a parse of the given input and logs the parse output.</summary>
         /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
-        static public void ReadCommit(this Slate slate, params string[] input) {
-            ConsoleLogger logger = new(); // TODO: REMOVE
-            logger?.Stringifier.PreloadNames(slate);
-            new Parser(slate, logger).Read(input).Perform(slate, logger);
-        }
+        static public Formula LogRead(this Slate slate, params string[] input) =>
+            new Parser(slate, new ConsoleLogger()).Read(input);
 
         #endregion
         #region Other...

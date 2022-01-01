@@ -2,17 +2,18 @@
 
 namespace Blackboard.Core.Actions {
 
-    /// <summary>This is an action for resetting the provoked triggers.</summary>
-    sealed public class ResetTriggers: IAction {
+    /// <summary>This is an action for performing any remaining evaluation and resets any provoked triggers.</summary>
+    sealed public class Finish: IAction {
 
-        /// <summary>Creates a new reset trigger action.</summary>
-        public ResetTriggers() { }
+        /// <summary>Creates a new finish action.</summary>
+        public Finish() { }
 
         /// <summary>This will perform the action.</summary>
         /// <param name="slate">The slate for this action.</param>
         /// <param name="logger">The optional logger to debug with.</param>
         public void Perform(Slate slate, ILogger logger = null) {
-            logger?.Log("Reset: {0}", this);
+            logger?.Log("Finish: {0}", this);
+            slate.PerformEvaluation(logger?.Sub);
             slate.ResetTriggers();
         }
 

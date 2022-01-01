@@ -1,8 +1,11 @@
-﻿namespace Blackboard.Core.Data.Interfaces {
+﻿using Blackboard.Core.Data.Caps;
+using System.Collections.Generic;
+
+namespace Blackboard.Core.Data.Interfaces {
 
     /// <summary>This indicates that this Blackboard data type can do basic arithmetic.</summary>
     /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
-    public interface IArithmetic<T>: IAdditive<T>, IData
+    public interface IArithmetic<T>: IAdditive<T>
         where T : IData {
 
         /// <summary>Gets the absolute value of this data value.</summary>
@@ -23,9 +26,10 @@
         T Sub(T other);
 
         /// <summary>Gets the product of this value and the other value.</summary>
+        /// <remarks>The current value is not used in the product.</remarks>
         /// <param name="other">The value to multiply this value with.</param>
         /// <returns>The product of this value and the other value.</returns>
-        T Mul(T other);
+        T Mul(IEnumerable<T> other);
 
         /// <summary>Gets the division of this value and the other value.</summary>
         /// <param name="other">The value to divide this value with.</param>
@@ -37,14 +41,14 @@
         /// <returns>The modulo of this value and the other value.</returns>
         T Mod(T other);
 
-        /// <summary>Gets the remainder of this value divided by the other value.</summary>
-        /// <param name="other">The value to divide this value with.</param>
-        /// <returns>The remainder of this value divided the other value.</returns>
-        T Rem(T other);
+        /// <summary>Gets this value clamped to the inclusive range of the given min and max.</summary>
+        /// <param name="min">The minimum allowed value.</param>
+        /// <param name="max">The maximum allowed value.</param>
+        /// <returns>The value clamped between the given values.</returns>
+        T Clamp(T min, T max);
 
-        /// <summary>Gets the power of this value to the other value.</summary>
-        /// <param name="other">The value to use as the exponent.</param>
-        /// <returns>The power of this value to the other value.</returns>
-        T Pow(T other);
+        /// <summary>Determines if the this value is negative.</summary>
+        /// <returns>True if below zero, false if zero or more.</returns>
+        bool IsNegative();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Types;
 using S = System;
 
 namespace Blackboard.Core.Nodes.Functions {
@@ -13,38 +14,20 @@ namespace Blackboard.Core.Nodes.Functions {
         where T2 : class, INode
         where TReturn : class, INode {
 
-        /// <summary>Indicates that at least one argument must not be a cast.</summary>
-        readonly private bool needOneNoCast;
-
         /// <summary>The factory for creating the node.</summary>
         readonly private S.Func<T1, T2, TReturn> hndl;
 
         /// <summary>Creates a new dual node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
-        /// <param name="needOneNoCast">Indicates that at least one argument must not be a cast.</param>
-        public Function(S.Func<T1, T2, TReturn> hndl, bool needOneNoCast = false) {
+        /// <param name="needsOneNoCast">Indicates that at least one argument must not be a cast.</param>
+        public Function(S.Func<T1, T2, TReturn> hndl, bool needsOneNoCast = false) :
+            base(needsOneNoCast, false, Type.FromType<T1>(), Type.FromType<T2>()) {
             this.hndl = hndl;
-            this.needOneNoCast = needOneNoCast;
-
-            if (Type.FromType<T1>() is null) throw Exceptions.UnknownFunctionParamType<T1>("T1");
-            if (Type.FromType<T2>() is null) throw Exceptions.UnknownFunctionParamType<T2>("T2");
         }
 
-        /// <summary>Determines how closely matching the given nodes are for this match.</summary>
-        /// <param name="types">The input types to match against the function signatures with.</param>
-        /// <returns>The matching results for this function.</returns>
-        public override FuncMatch Match(Type[] types) =>
-            types.Length != 2 ? FuncMatch.NoMatch :
-            FuncMatch.Create(this.needOneNoCast, Type.Match<T1>(types[0]), Type.Match<T2>(types[1]));
-
-        /// <summary>Builds and returns the function object.</summary>
-        /// <remarks>Before this is called, Match must have been possible.</remarks>
-        /// <param name="nodes">The nodes as parameters to the function.</param>
-        /// <returns>The new function.</returns>
-        public override INode Build(INode[] nodes) {
-            T1 node1 = Type.Implicit<T1>(nodes[0]);
-            T2 node2 = Type.Implicit<T2>(nodes[1]);
-            return this.hndl(node1, node2);
-        }
+        /// <summary>Builds and return the function node with the given arguments already casted.</summary>
+        /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>
+        /// <returns>The resulting function node.</returns>
+        protected override INode PostCastBuild(INode[] nodes) => this.hndl(nodes[0] as T1, nodes[1] as T2);
     }
 }

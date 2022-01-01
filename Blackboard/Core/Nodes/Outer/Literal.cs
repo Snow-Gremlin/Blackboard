@@ -3,8 +3,6 @@ using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Blackboard.Core.Nodes.Outer {
 
@@ -30,39 +28,43 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <param name="value">The value to use for the literal.</param>
         /// <returns>The new literal node.</returns>
         static public Literal<String> String(string value) => new(new String(value));
+
+        /// <summary>Tries to create a new literal for the given data.</summary>
+        /// <param name="value">The value to use for the literal.</param>
+        /// <returns>The new literal node for the given data.</returns>
+        static public IConstant Data(IData value) =>
+            value switch {
+                Bool   b => new Literal<Bool>  (b),
+                Int    i => new Literal<Int>   (i),
+                Double d => new Literal<Double>(d),
+                String s => new Literal<String>(s),
+                _        => throw new Exception("Unexpected value type in literal creation").
+                               With("Value", value)
+            };
     }
 
     /// <summary>This is a literal value.</summary>
     /// <typeparam name="T">The type of this literal.</typeparam>
     sealed public class Literal<T>: ValueNode<T>, IConstant
-        where T : IComparable<T>, new() {
+        where T : IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = new Function<Literal<T>>(() => new Literal<T>());
 
         /// <summary>Creates a new literal value node.</summary>
         /// <param name="value">The initial value of the node.</param>
-        public Literal(T value = default) :
-            base(value) { }
-
-        /// <summary>Converts this node to a literal.</summary>
-        /// <returns>This returns this literal itself.</returns>
-        public override IConstant ToConstant() => this;
+        public Literal(T value = default) : base(value) { }
 
         /// <summary>This sets the literal value.</summary>
         /// <param name="value">The value to set.</param>
         /// <returns>True if the value has changed, false otherwise.</returns>
-        public bool SetValue(T value) => this.SetNodeValue(value);
+        public bool SetValue(T value) => this.UpdateValue(value);
 
-        /// <summary>Always returns no parents since literals have no parent.</summary>
-        public override IEnumerable<INode> Parents => Enumerable.Empty<INode>();
+        /// <summary>This is called when the value is evaluated and updated.</summary>
+        /// <returns>The new value that the node should be set to.</returns>
+        protected override T CalcuateValue() => this.Value;
 
-        /// <summary>Updates thie value during evaluation.</summary>
-        /// <returns>This always returns true.</returns>
-        protected override bool UpdateValue() => true;
-
-        /// <summary>Gets the string for this node.</summary>
-        /// <returns>The debug string for this node.</returns>
-        public override string ToString() => this.Value.ToString();
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Literal";
     }
 }

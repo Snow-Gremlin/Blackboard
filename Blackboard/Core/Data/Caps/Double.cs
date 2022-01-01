@@ -1,4 +1,7 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Types;
+using System.Collections.Generic;
+using System.Linq;
 using S = System;
 
 namespace Blackboard.Core.Data.Caps {
@@ -7,14 +10,32 @@ namespace Blackboard.Core.Data.Caps {
     public struct Double: IArithmetic<Double>, IComparable<Double>, IFloatingPoint<Double>,
         IImplicit<Int, Double> {
 
+        /// <summary>Gets a double value for zero. This is the same as default.</summary>
+        static public readonly Double Zero = new(0.0);
+
+        /// <summary>Gets a double value for one.</summary>
+        static public readonly Double One = new(1.0);
+
+        /// <summary>Gets a double value for one.</summary>
+        static public readonly Double MaxVale = new(double.MaxValue);
+
+        /// <summary>Gets a double value for one.</summary>
+        static public readonly Double MinValue = new(double.MinValue);
+
         /// <summary>The double value being stored.</summary>
         public readonly double Value;
 
         /// <summary>Creates a new double data value.</summary>
         /// <param name="value">The double value to store.</param>
-        public Double(double value = 0.0) {
-            this.Value = value;
-        }
+        public Double(double value) => this.Value = value;
+
+        /// <summary>Gets the name for the type of data.</summary>
+        public string TypeName => Type.Double.Name;
+
+        /// <summary>Get the value of the data as a string.</summary>
+        public string ValueString => this.Value.ToString();
+
+        #region Arithmetic Math...
 
         /// <summary>Gets the absolute value of this data value.</summary>
         /// <returns>The absolute value of this value.</returns>
@@ -39,31 +60,35 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The modulo of this value and the other value.</returns>
         public Double Mod(Double other) => new(this.Value % other.Value);
 
-        /// <summary>Gets the remainder of this value divided by the other value.</summary>
-        /// <remarks>This is the IEEE 754 specification of remainder.</remarks>
-        /// <param name="other">The value to divide this value with.</param>
-        /// <returns>The remainder of this value divided the other value.</returns>
-        public Double Rem(Double other) => new(S.Math.IEEERemainder(this.Value, other.Value));
-
         /// <summary>Gets the product of this value and the other value.</summary>
-        /// <param name="other">The value to multiply this value with.</param>
-        /// <returns>The product of this value and the other value.</returns>
-        public Double Mul(Double other) => new(this.Value * other.Value);
+        /// <remarks>The current value is not used in the product.</remarks>
+        /// <param name="other">The values to multiply this value with.</param>
+        /// <returns>The product of this value and the other values.</returns>
+        public Double Mul(IEnumerable<Double> other) => new(other.Aggregate(1.0, (t1, t2) => t1 * t2.Value));
 
         /// <summary>Gets the difference between this value and the other value.</summary>
         /// <param name="other">The value to subtract from this value.</param>
         /// <returns>The difference between this value and the other value.</returns>
         public Double Sub(Double other) => new(this.Value - other.Value);
 
-        /// <summary>This will add this data to the other data.</summary>
-        /// <param name="other">The other data to add to this value.</param>
-        /// <returns>The sum of the two data values.</returns>
-        public Double Sum(Double other) => new(this.Value + other.Value);
+        /// <summary>Gets the difference between the first given value and the rest of the other values.</summary>
+        /// <remarks>The current value is not used in the subtraction.</remarks>
+        /// <param name="other">The values to subtract from the first value.</param>
+        /// <returns>The difference between the first value and the rest of the values.</returns>s
+        public Double Sum(IEnumerable<Double> other) => new(other.Sum(t => t.Value));
 
-        /// <summary>Gets the power of this value to the other value.</summary>
-        /// <param name="other">The value to use as the exponent.</param>
-        /// <returns>The power of this value to the other value.</returns>
-        public Double Pow(Double other) => new(S.Math.Pow(this.Value, other.Value));
+        /// <summary>Gets this value clamped to the inclusive range of the given min and max.</summary>
+        /// <param name="min">The minimum allowed value.</param>
+        /// <param name="max">The maximum allowed value.</param>
+        /// <returns>The value clamped between the given values.</returns>
+        public Double Clamp(Double min, Double max) => new(S.Math.Clamp(this.Value, min.Value, max.Value));
+
+        /// <summary>Determines if the this value is negative.</summary>
+        /// <returns>True if below zero, false if zero or more.</returns>
+        public bool IsNegative() => double.IsNegative(this.Value);
+
+        #endregion
+        #region Floating Point Math...
 
         /// <summary>This gets the linear interpolation between to points using this value as a factor.</summary>
         /// <param name="min">The minimum value for a factor of zero or less.</param>
@@ -81,48 +106,78 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>This value rounded to the given decimals.</returns>
         public Double Round(Int decimals) => new(S.Math.Round(this.Value, decimals.Value));
 
-        /// <summary>This gets the Atan2 where this value is the Y input.</summary>
-        /// <param name="x">This is the X input value.</param>
-        /// <returns>The Atan2 of this and the other value.</returns>
-        public Double Atan2(Double x) => new(S.Math.Atan2(this.Value, x.Value));
-
-        /// <summary>This gets the logarithm of this value using the other value as the base.</summary>
-        /// <param name="newBase">The value to use as the base of the log.</param>
-        /// <returns>The result of the logarithm.</returns>
-        public Double Log(Double newBase) => new(S.Math.Log(this.Value, newBase.Value));
-
         /// <summary>This performs the given function on this value.</summary>
         /// <param name="func">The function to run on this value.</param>
         /// <returns>The resulting value from this value being used in the given function.</returns>
         public Double DoubleMath(S.Func<double, double> func) => new(func(this.Value));
+
+        /// <summary>This performs the given function on this value.</summary>
+        /// <param name="other">The value to use as the second input to the function.</param>
+        /// <param name="func">The function to run on this and the given value.</param>
+        /// <returns>The resulting value from this and the other value being used in the given function.</returns>
+        public Double DoubleMath(Double other, S.Func<double, double, double> func) => new(func(this.Value, other.Value));
+
+        /// <summary>Determines if this value is positive or negative infinity.</summary>
+        /// <returns>True if the number is either positive or negative infinity, false otherwise.</returns>
+        public bool IsInfinity() => double.IsInfinity(this.Value);
+
+        /// <summary>Determines if this value is not a number.</summary>
+        /// <returns>True if the number is not a number, false otherwise.</returns>
+        public bool IsNAN() => double.IsNaN(this.Value);
+
+        #endregion
+        #region Casts...
 
         /// <summary>Casts an integer into a double for an implicit cast.</summary>
         /// <param name="value">The integer value to cast.</param>
         /// <returns>The resulting double value.</returns>
         public Double CastFrom(Int value) => new(value.Value);
 
+        #endregion
+        #region Comparable...
+
         /// <summary>Compares two doubles together.</summary>
         /// <param name="other">The other double to compare.</param>
         /// <returns>The comparison result indicating which is greater than or equal.</returns>
         public int CompareTo(Double other) => this.Value.CompareTo(other.Value);
+
         public static bool operator ==(Double left, Double right) => left.CompareTo(right) == 0;
         public static bool operator !=(Double left, Double right) => left.CompareTo(right) != 0;
-        public static bool operator <(Double left, Double right) => left.CompareTo(right) < 0;
+        public static bool operator < (Double left, Double right) => left.CompareTo(right) <  0;
         public static bool operator <=(Double left, Double right) => left.CompareTo(right) <= 0;
-        public static bool operator >(Double left, Double right) => left.CompareTo(right) > 0;
+        public static bool operator > (Double left, Double right) => left.CompareTo(right) >  0;
         public static bool operator >=(Double left, Double right) => left.CompareTo(right) >= 0;
+
+        /// <summary>Checks if the given double is equal to this data type.</summary>
+        /// <param name="other">This is the double to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
+        public bool Equals(Double other) => this.Value == other.Value;
 
         /// <summary>Checks if the given object is equal to this data type.</summary>
         /// <param name="obj">This is the object to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public override bool Equals(object obj) => obj is Double other && this.Value == other.Value;
+        public override bool Equals(object obj) => obj is Double other && this.Equals(other);
+
+        /// <summary>Gets the maximum value from this and the given other values.</summary>
+        /// <remarks>The current value is not used in the maximum value.</remarks>
+        /// <param name="other">The values to find the maximum from.</param>
+        /// <returns>The maximum value from this and the given vales.</returns>
+        public Double Max(IEnumerable<Double> other) => new(other.Max(t => t.Value));
+
+        /// <summary>Gets the minimum value from this and the given other values.</summary>
+        /// <remarks>The current value is not used in the minimum value.</remarks>
+        /// <param name="other">The values to find the minimum from.</param>
+        /// <returns>The minimum value from this and the given vales.</returns>
+        public Double Min(IEnumerable<Double> other) => new(other.Min(t => t.Value));
+
+        #endregion
 
         /// <summary>Gets the hash code of the stored value.</summary>
         /// <returns>The stored value's hash code.</returns>
         public override int GetHashCode() => this.Value.GetHashCode();
 
-        /// <summary>Gets the name of this data type.</summary>
-        /// <returns>The name of the bool type.</returns>
-        public override string ToString() => "double";
+        /// <summary>Gets the name of this data type and value.</summary>
+        /// <returns>The name of the double type and value.</returns>
+        public override string ToString() => this.TypeName+"("+this.ValueString+")";
     }
 }

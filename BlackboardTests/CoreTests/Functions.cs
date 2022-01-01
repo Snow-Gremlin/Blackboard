@@ -1,98 +1,116 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Inspect;
+using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BlackboardTests.CoreTests {
 
     [TestClass]
     public class Functions {
 
-        static private string toStr(INode node) => node is null ? "null" : node.ToString();
+        private class Tester {
+            private Stringifier stringifier;
+            private FuncGroup group;
+            private string funcName;
+            private Dictionary<string, INode> nodes;
+
+            public Tester(params string[] names) {
+                Slate slate = new();
+                this.stringifier = Stringifier.Shallow();
+                this.stringifier.PreloadNames(slate);
+                this.stringifier.ShowFirstDataValues = false;
+                
+                this.group = slate.Global.Find(names) as FuncGroup;
+                Assert.IsNotNull(this.group);
+                this.funcName = names.Join(".");
+
+                this.nodes = new Dictionary<string, INode>();
+                this.addNode("T", new InputTrigger());
+                this.addNode("B", new InputValue<Bool>());
+                this.addNode("I", new InputValue<Int>());
+                this.addNode("D", new InputValue<Double>());
+                this.addNode("S", new InputValue<String>());
+            }
+
+            private void addNode(string name, INode node) {
+                this.stringifier.SetNodeName(name, node);
+                this.nodes.Add(name, node);
+            }
+
+            public void Test(string nodeNames, string exp) {
+                INode[] nodes = nodeNames.SplitAndTrim(",").Select(this.nodes.GetValueOrDefault).ToArray();
+                string result = this.stringifier.Stringify(this.group.Build(nodes));
+                Assert.AreEqual(exp, result, "For "+this.funcName + "(" + nodeNames + ")");
+            }
+        }
 
         [TestMethod]
         public void TestFunctionsOr() {
-            Driver driver = new();
-            FuncGroup group = driver.Global.Find(Driver.OperatorNamespace, "or") as FuncGroup;
-
-            InputTrigger       tNode = new();
-            InputValue<Bool>   bNode = new();
-            InputValue<Int>    iNode = new();
-            InputValue<Double> dNode = new();
-
-            Assert.AreEqual("Any(Input<trigger>, Input<trigger>)",             toStr(group.Build(tNode, tNode)));
-            Assert.AreEqual("Or(Input<bool>, Input<bool>)",                    toStr(group.Build(bNode, bNode)));
-            Assert.AreEqual("Or(Input<bool>, Input<bool>, Input<bool>)",       toStr(group.Build(bNode, bNode, bNode)));
-            Assert.AreEqual("Input<bool>",                                     toStr(group.Build(bNode)));
-            Assert.AreEqual("null",                                            toStr(group.Build()));
-            Assert.AreEqual("BitwiseOr(Input<int>, Input<int>)",               toStr(group.Build(iNode, iNode)));
-            Assert.AreEqual("null",                                            toStr(group.Build(dNode, dNode)));
-            Assert.AreEqual("null",                                            toStr(group.Build(iNode, bNode)));
-            Assert.AreEqual("null",                                            toStr(group.Build(bNode, iNode)));
-            Assert.AreEqual("Any(Input<trigger>, BoolAsTrigger(Input<bool>))", toStr(group.Build(tNode, bNode)));
-            Assert.AreEqual("Any(BoolAsTrigger(Input<bool>), Input<trigger>)", toStr(group.Build(bNode, tNode)));
+            Tester t = new(Slate.OperatorNamespace, "or");
+            t.Test("T, T",    "Any<trigger>(T, T)");
+            t.Test("B, B",    "Or<bool>(B, B)");
+            t.Test("B, B, B", "Or<bool>(B, B, B)");
+            t.Test("B",       "B: Input<bool>");
+            t.Test("",        "null");
+            t.Test("I, I",    "BitwiseOr<int>(I, I)");
+            t.Test("D, D",    "null");
+            t.Test("I, B",    "null");
+            t.Test("B, I",    "null");
+            t.Test("T, B",    "Any<trigger>(T, BoolAsTrigger<bool>(B))");
+            t.Test("B, T",    "Any<trigger>(BoolAsTrigger<bool>(B), T)");
         }
 
         [TestMethod]
         public void TestFunctionsRound() {
-            Driver driver = new();
-            FuncGroup group = driver.Global.Find("round") as FuncGroup;
-
-            InputValue<Bool>   bNode = new();
-            InputValue<Int>    iNode = new();
-            InputValue<Double> dNode = new();
-
-            Assert.AreEqual("null",                                            toStr(group.Build(bNode, bNode)));
-            Assert.AreEqual("Round(Implicit<double>(Input<int>), Input<int>)", toStr(group.Build(iNode, iNode)));
-            Assert.AreEqual("Round(Input<double>, Input<int>)",                toStr(group.Build(dNode, iNode)));
-            Assert.AreEqual("null",                                            toStr(group.Build(iNode, dNode)));
-            Assert.AreEqual("null",                                            toStr(group.Build(dNode, dNode)));
-            Assert.AreEqual("Round(Implicit<double>(Input<int>))",             toStr(group.Build(iNode)));
-            Assert.AreEqual("Round(Input<double>)",                            toStr(group.Build(dNode)));
-            Assert.AreEqual("null",                                            toStr(group.Build(dNode, dNode, dNode)));
+            Tester t = new("round");
+            t.Test("B, B",    "null");
+            t.Test("I, I",    "Round<double>(Implicit<double>(I), I)");
+            t.Test("D, I",    "Round<double>(D, I)");
+            t.Test("I, D",    "null");
+            t.Test("D, D",    "null");
+            t.Test("I",       "Round<double>(Implicit<double>(I))");
+            t.Test("D",       "Round<double>(D)");
+            t.Test("D, D, D", "null");
         }
 
         [TestMethod]
         public void TestFunctionsSum() {
-            Driver driver = new();
-            FuncGroup group = driver.Global.Find(Driver.OperatorNamespace, "sum") as FuncGroup;
-
-            InputValue<Bool>   bNode = new();
-            InputValue<Int>    iNode = new();
-            InputValue<Double> dNode = new();
-            InputValue<String> sNode = new();
-
-            Assert.AreEqual("null",                                                toStr(group.Build(bNode, bNode)));
-            Assert.AreEqual("null",                                                toStr(group.Build(bNode, iNode)));
-            Assert.AreEqual("Sum(Input<int>, Input<int>)",                         toStr(group.Build(iNode, iNode)));
-            Assert.AreEqual("Sum(Input<double>, Implicit<double>(Input<int>))",    toStr(group.Build(dNode, iNode)));
-            Assert.AreEqual("Sum(Implicit<double>(Input<int>), Input<double>)",    toStr(group.Build(iNode, dNode)));
-            Assert.AreEqual("Sum(Input<double>, Input<double>)",                   toStr(group.Build(dNode, dNode)));
-            Assert.AreEqual("Sum(Input<string>, Input<string>)",                   toStr(group.Build(sNode, sNode)));
-            Assert.AreEqual("Sum(Implicit<string>(Input<bool>), Input<string>)",   toStr(group.Build(bNode, sNode)));
-            Assert.AreEqual("Sum(Implicit<string>(Input<int>), Input<string>)",    toStr(group.Build(iNode, sNode)));
-            Assert.AreEqual("Sum(Implicit<string>(Input<double>), Input<string>)", toStr(group.Build(dNode, sNode)));
+            Tester t = new(Slate.OperatorNamespace, "sum");
+            t.Test("B, B",       "null");
+            t.Test("B, I",       "null");
+            t.Test("I, I",       "Sum<int>(I, I)");
+            t.Test("D, I",       "Sum<double>(D, Implicit<double>(I))");
+            t.Test("I, D",       "Sum<double>(Implicit<double>(I), D)");
+            t.Test("D, D",       "Sum<double>(D, D)");
+            t.Test("S, S",       "Sum<string>(S, S)");
+            t.Test("B, S",       "Sum<string>(Implicit<string>(B), S)");
+            t.Test("I, S",       "Sum<string>(Implicit<string>(I), S)");
+            t.Test("D, S",       "Sum<string>(Implicit<string>(D), S)");
+            t.Test("S, B",       "Sum<string>(S, Implicit<string>(B))");
+            t.Test("S, I",       "Sum<string>(S, Implicit<string>(I))");
+            t.Test("S, D",       "Sum<string>(S, Implicit<string>(D))");
+            t.Test("I, D, S",    "Sum<string>(Implicit<string>(I), Implicit<string>(D), S)");
+            t.Test("B, I, S, D", "Sum<string>(Implicit<string>(B), Implicit<string>(I), S, Implicit<string>(D))");
         }
 
         [TestMethod]
         public void TestFunctionsAtan() {
-            Driver driver = new();
-            FuncGroup group = driver.Global.Find("atan") as FuncGroup;
-
-            InputValue<Int>    iNode = new();
-            InputValue<Double> dNode = new();
-
-            Assert.AreEqual("null",                                                              toStr(group.Build()));
-            Assert.AreEqual("Atan(Implicit<double>(Input<int>))",                                toStr(group.Build(iNode)));
-            Assert.AreEqual("Atan(Input<double>)",                                               toStr(group.Build(dNode)));
-            Assert.AreEqual("Atan2(Implicit<double>(Input<int>), Implicit<double>(Input<int>))", toStr(group.Build(iNode, iNode)));
-            Assert.AreEqual("Atan2(Implicit<double>(Input<int>), Input<double>)",                toStr(group.Build(iNode, dNode)));
-            Assert.AreEqual("Atan2(Input<double>, Implicit<double>(Input<int>))",                toStr(group.Build(dNode, iNode)));
-            Assert.AreEqual("Atan2(Input<double>, Input<double>)",                               toStr(group.Build(dNode, dNode)));
-            Assert.AreEqual("null",                                                              toStr(group.Build(iNode, iNode, iNode)));
-            Assert.AreEqual("null",                                                              toStr(group.Build(dNode, dNode, dNode)));
+            Tester t = new("atan");
+            t.Test("",        "null");
+            t.Test("I",       "Atan<double>(Implicit<double>(I))");
+            t.Test("D",       "Atan<double>(D)");
+            t.Test("I, I",    "Atan2<double>(Implicit<double>(I), Implicit<double>(I))");
+            t.Test("I, D",    "Atan2<double>(Implicit<double>(I), D)");
+            t.Test("D, I",    "Atan2<double>(D, Implicit<double>(I))");
+            t.Test("D, D",    "Atan2<double>(D, D)");
+            t.Test("I, I, I", "null");
+            t.Test("D, D, D", "null");
         }
     }
 }

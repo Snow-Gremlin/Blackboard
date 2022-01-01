@@ -36,7 +36,6 @@
 (Zero): 'x' => (HexStart): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
 
 # Doubles
-(Start):       '.' => (Decimal);
 (Zero):        '.' => (Decimal);
 (PossibleBin): '.' => (Decimal);
 (PossibleOct): '.' => (Decimal);
@@ -84,7 +83,7 @@
 (Start): '-' => [Neg]: '>' => [Trigger];
 (Start): '/' => [Div];
 (Start): '*' => [Mul]: '*' => [Power];
-(Start): '%' => [Mod]: '%' => [Remainder];
+(Start): '%' => [Mod];
 (Start): '^' => [Xor]: '^' => [LogicalXor];
 (Start): '~' => [Invert];
 (Start): '?' => [Test];
@@ -121,10 +120,10 @@
 [Identifier] = 'namespace' => [Namespace];
 [Identifier] = 'var' => [Var];
 
-[Identifier] = 'in'      => [DeclareIn];
-[Identifier] = 'get'     => [DeclareGet];
-[Identifier] = 'const'   => [DeclareConst];
-[Identifier] = 'define'  => [DeclareDefine];
+[Identifier] = 'in'     => [DeclareIn];
+[Identifier] = 'get'    => [DeclareGet];
+[Identifier] = 'define' => [DeclareDefine];
+
 [Identifier] = 'counter' => [DeclareCounter];
 [Identifier] = 'latch'   => [DeclareLatch];
 [Identifier] = 'toggle'  => [DeclareToggle];
@@ -143,7 +142,7 @@
 [Identifier] = 'internal', 'global', 'local',
                'private', 'protected', 'public', 'static' => [ReservedScoping];
 
-[Identifier] = 'abstract', 'class', 'def', 'func', 'interface', 'operator',
+[Identifier] = 'abstract', 'class', 'const', 'def', 'func', 'interface', 'operator',
                'override', 'typedef', 'void', 'virtual' => [ReservedDefinitions];
 
 [Identifier] = 'as', 'break', 'catch', 'case', 'continue', 'default', 'else',
@@ -164,10 +163,11 @@
     | <NewTypedInput>
     | <NewVarInput>
     | <Declaration>
-#    | <DefineTypedRule>
-#    | <DefineVarRule>
-#    | <PullTrigger>
-    ;
+    | <DefineTypedRule>
+    | <DefineVarRule>
+    | <ProvokeTrigger>
+    | <GetTypedValue>
+    | <GetVarValue>;
 
 #----------------------------------------------------------
 
@@ -176,8 +176,8 @@
 <NewTypedInputTail> := _
     | [Comma] <NewTypedInputPart> <NewTypedInputTail>;
 
-<NewTypedInputPart> := [Identifier] {pushId} {newTypeInputNoAssign}
-    | [Identifier] {pushId} [Assign] <Declaration> {newTypeInputWithAssign};
+<NewTypedInputPart> := [Identifier] {defineId} {newTypeInputNoAssign}
+    | [Identifier] {defineId} [Assign] <Declaration> {newTypeInputWithAssign};
 
 #----------------------------------------------------------
 
@@ -187,24 +187,40 @@
 <NewVarInputTail> := _
     | [Comma] <NewVarInputPart> <NewVarInputTail>;
 
-<NewVarInputPart> := [Identifier] {pushId} [Assign] <Declaration> {newVarInputWithAssign};
-    
+<NewVarInputPart> := [Identifier] {defineId} [Assign] <Declaration> {newVarInputWithAssign};
+
 #----------------------------------------------------------
 
-###<DefineTypedRule> := {startDefine} [Type] {setType} <Id> [Define] <Conditional> {typeDefine};
-###
-###<DefineVarRule> := {startDefine} <Id> [Define] <Conditional> {varDefine};
-###
-###<PullTrigger> := [Trigger] <Id> {pullTrigger}
-###    | <Conditional> [Trigger] <Id> {conditionalPullTrigger};
+<DefineTypedRule> := <RootType> [Identifier] {defineId} [Define] <Conditional> {typeDefine}
+    | [DeclareDefine] <RootType> [Identifier] {defineId} [Assign] <Conditional> {typeDefine};
+
+<DefineVarRule> := [Identifier] {defineId} [Define] <Conditional> {varDefine}
+    | [DeclareDefine] [Identifier] {defineId} [Assign] <Conditional> {varDefine};
+
+#----------------------------------------------------------
+
+<ProvokeTrigger> := [Trigger] <Conditional> {provokeTrigger} <ProvokeTriggerTail>
+    | <Conditional> [Trigger] <Conditional> {conditionalProvokeTrigger} <ConditionalProvokeTriggerTail>;
     
+<ProvokeTriggerTail> := _
+    | [Trigger] <Conditional> {provokeTrigger} <ProvokeTriggerTail>;
+
+<ConditionalProvokeTriggerTail> := _
+    | [Trigger] <Conditional> {conditionalProvokeTrigger} <ConditionalProvokeTriggerTail>;
+
+#----------------------------------------------------------
+
+<GetTypedValue> := [DeclareGet] <RootType> [Identifier] {defineId} [Assign] <Conditional> {typeGet};
+
+<GetVarValue> := [DeclareGet] [Identifier] {defineId} [Assign] <Conditional> {varGet};
+
 #==========================================================
 
 <Declaration> := <Conditional>
-    | <Declaration> [Assign] <Conditional> {assignment};
+    | <Conditional> [Assign] <Declaration> {assignment};
 
 <Conditional> := <LogicalOr>
-    | <Conditional> [Test] <Conditional> [Else] <Conditional> {trinary};
+    | <Conditional> [Test] <Conditional> [Else] <Conditional> {ternary};
 
 <LogicalOr> := <LogicalXor>
     | <LogicalOr> [LogicalOr] <LogicalXor> {logicalOr};
@@ -243,10 +259,9 @@
     | <Additive> [Neg] <Multiplicative> {subtract};
 
 <Multiplicative> := <Exponent>
-    | <Multiplicative> [Mul]       <Exponent> {multiply}
-    | <Multiplicative> [Div]       <Exponent> {divide}
-    | <Multiplicative> [Mod]       <Exponent> {modulo}
-    | <Multiplicative> [Remainder] <Exponent> {remainder};
+    | <Multiplicative> [Mul] <Exponent> {multiply}
+    | <Multiplicative> [Div] <Exponent> {divide}
+    | <Multiplicative> [Mod] <Exponent> {modulo};
 
 <Exponent> := <Unary>
     | <Exponent> [Power] <Unary> {power};
@@ -263,7 +278,7 @@
     | <Expression> [Dot] [Identifier] {memberAccess}
     | <Expression> <Call>;
 
-<Call> := [ParOpen] {startCall} <Args> [ParClose];
+<Call> := [ParOpen] {startCall} <Args> {endCall} [ParClose];
 
 <Args> := _
     | <Conditional> {addArg} <ArgsTail>;

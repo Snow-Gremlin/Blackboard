@@ -14,20 +14,14 @@ namespace Blackboard.Core.Nodes.Functions {
 
         /// <summary>Creates a new singular node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
-        public Function(S.Func<TReturn> hndl) {
+        public Function(S.Func<TReturn> hndl) :
+            base(false, false) {
             this.hndl = hndl;
         }
 
-        /// <summary>Determines how closely matching the given nodes are for this match.</summary>
-        /// <param name="types">The input types to match against the function signatures with.</param>
-        /// <returns>The matching results for this function.</returns>
-        public override FuncMatch Match(Type[] types) =>
-            types.Length != 0 ? FuncMatch.NoMatch : FuncMatch.Create(false);
-
-        /// <summary>Builds and returns the function object.</summary>
-        /// <remarks>Before this is called, Match must have been possible.</remarks>
-        /// <param name="nodes">The nodes as parameters to the function.</param>
-        /// <returns>The new function.</returns>
-        public override INode Build(INode[] nodes) => this.hndl();
+        /// <summary>Builds and return the function node with the given arguments already casted.</summary>
+        /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>
+        /// <returns>The resulting function node.</returns>
+        protected override INode PostCastBuild(INode[] nodes) => this.hndl();
     }
 }

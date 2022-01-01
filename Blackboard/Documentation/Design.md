@@ -114,3 +114,10 @@ E := D || (A && B);
 
 TODO:
 
+
+## Ideas
+
+- Would it be possible to make an equation which does `min <= i < max`
+  where it converts to `min <= i && i < max` and not `(min <= i) < max`
+  which would resolve to `bool < max`? Maybe add a special symbol like a
+  ternary? And could it also support `a == b == c == d`?

@@ -1,11 +1,14 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Inspect;
+using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Blackboard.Core.Nodes.Functions {
 
     /// <summary>A collection of function signatures.</summary>
-    sealed public class FuncGroup: IFuncGroup, IAdopter {
+    sealed public class FuncGroup: IFuncGroup {
 
         /// <summary>
         /// The children functions of this group.
@@ -15,50 +18,39 @@ namespace Blackboard.Core.Nodes.Functions {
 
         /// <summary>Creates a new function collection.</summary>
         /// <param name="defs">The function definitions to initially add.</param>
-        public FuncGroup(params IFuncDef[] defs) {
+        public FuncGroup(params IFuncDef[] defs) =>
             this.defs = new List<IFuncDef>(defs);
-        }
 
         /// <summary>Creates a new function collection.</summary>
         /// <param name="defs">The function definitions to initially add.</param>
-        public FuncGroup(IEnumerable<IFuncDef> defs) {
+        public FuncGroup(IEnumerable<IFuncDef> defs) =>
             this.defs = new List<IFuncDef>(defs);
-        }
 
-        /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<INode> Parents => Enumerable.Empty<INode>();
+        /// <summary>This is the type name of the node.</summary>
+        public string TypeName => "FuncGroup";
 
-        /// <summary>The set of children nodes to this node in the graph.</summary>
-        public IEnumerable<INode> Children => this.defs;
+        /// <summary>The set of function definitions for this group.</summary>
+        public IEnumerable<IFuncDef> Definitions => this.defs;
 
-        /// <summary>Adds children nodes onto this node.</summary>
-        /// <remarks>This will always check for loops.</remarks>
-        /// <param name="children">The children to add.</param>
-        public void AddChildren(params INode[] children) =>
-            this.AddChildren(children as IEnumerable<INode>);
+        /// <summary>Adds function definitions onto this group.</summary>
+        /// <param name="defs">The function definitions to add.</param>
+        public void AddDefs(params IFuncDef[] defs) =>
+            this.AddDefs(defs as IEnumerable<IFuncDef>);
 
-        /// <summary>Adds children nodes onto this node.</summary>
-        /// <param name="children">The children to add.</param>
-        /// <param name="checkedForLoops">Indicates if loops in the graph should be checked for.</param>
-        public void AddChildren(IEnumerable<INode> children, bool checkedForLoops = true) {
-            IEnumerable<IFuncDef> newDefs = children.NotNull().OfType<IFuncDef>();
-            if (checkedForLoops && INode.CanReachAny(this, newDefs))
-                throw Exceptions.NodeLoopDetected();
-            foreach (IFuncDef def in newDefs) {
-                if (!this.defs.Contains(def)) this.defs.Add(def);
-            }
-        }
+        /// <summary>Adds function definitions onto this group.</summary>
+        /// <param name="defs">The function definitions to add.</param>
+        public void AddDefs(IEnumerable<IFuncDef> defs) =>
+            this.defs.AddRange(defs.NotNull().WhereNot(this.defs.Contains));
 
-        /// <summary>Removes all the given children from this node if they exist.</summary>
-        /// <param name="children">The children to remove.</param>
-        public void RemoveChildren(params INode[] children) =>
-            this.RemoveChildren(children as IEnumerable<INode>);
+        /// <summary>Removes all the given function definitions from this node if they exist.</summary>
+        /// <param name="defs">The function definitions to remove.</param>
+        public void RemoveDefs(params IFuncDef[] defs) =>
+            this.RemoveDefs(defs as IEnumerable<IFuncDef>);
 
-        /// <summary>Removes all the given children from this node if they exist.</summary>
-        /// <param name="children">The children to remove.</param>
-        public void RemoveChildren(IEnumerable<INode> children) {
-            IEnumerable<IFuncDef> newDefs = children.NotNull().OfType<IFuncDef>();
-            foreach (IFuncDef def in newDefs) {
+        /// <summary>Removes all the given function definitions from this node if they exist.</summary>
+        /// <param name="defs">The function definitions to remove.</param>
+        public void RemoveDefs(IEnumerable<IFuncDef> defs) {
+            foreach (IFuncDef def in defs.NotNull()) {
                 int index = this.defs.IndexOf(def);
                 if (index >= 0) this.defs.RemoveAt(index);
             }
@@ -91,5 +83,9 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new node from the function or null.</returns>
         public INode Build(params INode[] nodes) => this.Find(nodes.Select(Type.TypeOf).ToArray())?.Build(nodes);
+
+        /// <summary>Gets the string for this node.</summary>
+        /// <returns>The debug string for this node.</returns>
+        public override string ToString() => Stringifier.Simple(this);
     }
 }

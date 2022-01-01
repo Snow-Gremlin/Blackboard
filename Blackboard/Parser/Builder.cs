@@ -385,37 +385,44 @@ namespace Blackboard.Parser {
             return castValue;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="newNodes"></param>
+        /// <returns></returns>
+        private bool collectAndOrder(INode node, HashSet<INode> newNodes) {
+            if (node is null || this.Existing.Has(node)) return false;
+            if (newNodes.Contains(node)) return true;
+
+            if (node.IsConstant()) {
+                IConstant con = node.ToConstant();
+                if (con is not null) {
+                    // TODO: REPLACE in children the pointers to this node.
+                }
+            }
+
+            // TODO: Add More Optimization
+
+            newNodes.Add(node);
+            if (node is IChild child) {
+                foreach (IParent par in child.Parents) {
+                    if (this.collectAndOrder(par, newNodes))
+                        par.AddChildren(child);
+                }
+            }
+            if (node is IEvaluable eval)
+                eval.Depth = eval.MinimumAllowedDepth();
+            return true;
+        }
+
         /// <summary>Prepares the tree from the given node up to the old nodes from the builder.</summary>
         /// <param name="root">The root node of the tree to prepare.</param>
         /// <returns>All the nodes which are new node in the tree.</returns>
         public IEnumerable<INode> PrepareTree(INode root) {
             HashSet<INode> newNodes = new();
-
-            // Find all new nodes
-            Stack<INode> stack = new();
-            stack.Push(root);
-            while (stack.Count > 0) {
-                INode cur = stack.Pop();
-                if (newNodes.Contains(cur) || this.Existing.Has(cur)) continue;
-                newNodes.Add(cur);
-                if (cur is IChild child) {
-                    foreach (IParent par in child.Parents.NotNull()) {
-                        par.AddChildren(child); // TODO: Rework to sort using first found parent and depth first.
-                        stack.Push(par);
-                    }
-                }
-            }
+            this.collectAndOrder(root, newNodes);
             this.Existing.Clear();
-
-            // Update Depths
-            LinkedList<IEvaluable> needsUpdate = new();
-            needsUpdate.SortInsertUnique(root as IEvaluable);
-            needsUpdate.SortInsertUnique(newNodes.OfType<IEvaluable>());
-            needsUpdate.UpdateDepths();
-
-
-            // TODO: Add Optimization
-
             return newNodes;
         }
 

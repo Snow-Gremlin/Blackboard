@@ -40,6 +40,17 @@ namespace Blackboard.Core.Extensions {
         static public bool IsConstant(this IEnumerable<INode> nodes) =>
             nodes.All(node => IsConstant(node));
 
+        /// <summary>Converts this node to a constant.</summary>
+        /// <param name="node">The node to try to convert into a constant.</param>
+        /// <returns>A constant of this node or null if not able to be made into a constant.</returns>
+        static public IConstant ToConstant(this INode node) =>
+            node switch {
+                IConstant c => c,
+                IDataNode v => Literal.Data(v.Data),
+                ITrigger  t => new ConstTrigger(t.Provoked),
+                _           => null,
+            };
+
         /// <summary>This will reset all the given trigger nodes.</summary>
         /// <param name="nodes">The trigger nodes to reset.</param>
         static public void Reset(this IEnumerable<ITrigger> nodes) =>

@@ -203,10 +203,10 @@
     | <Conditional> [Trigger] <Conditional> {conditionalProvokeTrigger} <ConditionalProvokeTriggerTail>;
     
 <ProvokeTriggerTail> := _
-    | [Trigger] <Conditional> {provokeTrigger} <ProvokeTriggerTail>; ## TODO: TEST
+    | [Trigger] <Conditional> {provokeTrigger} <ProvokeTriggerTail>;
 
 <ConditionalProvokeTriggerTail> := _
-    | [Trigger] <Conditional> {conditionalProvokeTrigger} <ConditionalProvokeTriggerTail>;  ## TODO: TEST
+    | [Trigger] <Conditional> {conditionalProvokeTrigger} <ConditionalProvokeTriggerTail>;
 
 #----------------------------------------------------------
 

@@ -1,10 +1,5 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Actions;
-using Blackboard.Core.Extensions;
-using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using S = System;
 
 namespace BlackboardTests.ParserTests {
 
@@ -123,7 +118,6 @@ namespace BlackboardTests.ParserTests {
                 "int C := B << shift;",
                 "int D := ~C;").
                 Perform();
-            slate.CheckPendingEval(); // TODO
 
             slate.CheckValue( 0x0F, "A");
             slate.CheckValue( 0x15, "B");
@@ -247,9 +241,9 @@ namespace BlackboardTests.ParserTests {
             slate.CheckProvoked(true, "A");
             slate.CheckProvoked(true, "B"); // this was created provoked
             slate.CheckEvaluate(
-                "Start Eval (pending: 4)",
-                "  Evaluated (changed: True, depth: 0, node: A: Input<trigger>[provoked], remaining: 3)",
-                "  Evaluated (changed: True, depth: 0, node: B: Input<trigger>[provoked], remaining: 2)",
+                "Start Eval (pending: 5)",
+                "  Evaluated (changed: True, depth: 0, node: A: Input<trigger>[provoked], remaining: 4)",
+                "  Evaluated (changed: True, depth: 0, node: B: Input<trigger>[provoked], remaining: 3)",
                 "  Evaluated (changed: True, depth: 1, node: D: All<trigger>[provoked](A, B), remaining: 2)",
                 "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
                 "  Evaluated (changed: False, depth: 2, node: E: OnlyOne<trigger>[](C, D), remaining: 0)",
@@ -367,6 +361,39 @@ namespace BlackboardTests.ParserTests {
             slate.CheckProvoked(false, "A");
             slate.CheckProvoked(false, "B");
             slate.CheckProvoked(false, "C");
+            slate.CheckValue(5, "D");
+            slate.ResetTriggers();
+
+            slate.Read(
+                "-> A -> B;").
+                NoFinish().
+                Perform();
+            slate.PerformEvaluation();
+            slate.CheckProvoked(true, "A");
+            slate.CheckProvoked(true, "B");
+            slate.CheckProvoked(true, "C");
+            slate.CheckValue(5, "D");
+            slate.ResetTriggers();
+
+            slate.Read(
+                "false -> A -> B;").
+                NoFinish().
+                Perform();
+            slate.PerformEvaluation();
+            slate.CheckProvoked(false, "A");
+            slate.CheckProvoked(false, "B");
+            slate.CheckProvoked(false, "C");
+            slate.CheckValue(5, "D");
+            slate.ResetTriggers();
+
+            slate.Read(
+                "true -> A -> B;").
+                NoFinish().
+                Perform();
+            slate.PerformEvaluation();
+            slate.CheckProvoked(true, "A");
+            slate.CheckProvoked(true, "B");
+            slate.CheckProvoked(true, "C");
             slate.CheckValue(5, "D");
             slate.ResetTriggers();
         }

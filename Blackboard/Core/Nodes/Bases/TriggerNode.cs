@@ -3,7 +3,7 @@
 namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>A base node for any trigger node.</summary>
-    public abstract class TriggerNode: Evaluable, ITriggerParent, IConstantable {
+    public abstract class TriggerNode: Evaluable, ITriggerParent {
 
         /// <summary>Creates a new trigger node.</summary>
         public TriggerNode(bool provoked = false) => this.Provoked = provoked;

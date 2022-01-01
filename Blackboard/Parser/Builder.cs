@@ -385,32 +385,24 @@ namespace Blackboard.Parser {
             return castValue;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="newNodes"></param>
-        /// <returns></returns>
+        /// <summary>Recessively collect the new nodes and apply depths.</summary>
+        /// <param name="node">The current node to check.</param>
+        /// <param name="newNodes">The set of new nodes being added.</param>
+        /// <returns>True if a new node, false if not.</returns>
         private bool collectAndOrder(INode node, HashSet<INode> newNodes) {
             if (node is null || this.Existing.Has(node)) return false;
             if (newNodes.Contains(node)) return true;
-
-            if (node.IsConstant()) {
-                IConstant con = node.ToConstant();
-                if (con is not null) {
-                    // TODO: REPLACE in children the pointers to this node.
-                }
-            }
-
-            // TODO: Add More Optimization
-
             newNodes.Add(node);
+            
+            // Continue up to all the parents.
             if (node is IChild child) {
                 foreach (IParent par in child.Parents) {
                     if (this.collectAndOrder(par, newNodes))
                         par.AddChildren(child);
                 }
             }
+
+            // Now that all parents are prepared, update the depth.
             if (node is IEvaluable eval)
                 eval.Depth = eval.MinimumAllowedDepth();
             return true;
@@ -422,6 +414,9 @@ namespace Blackboard.Parser {
         public IEnumerable<INode> PrepareTree(INode root) {
             HashSet<INode> newNodes = new();
             this.collectAndOrder(root, newNodes);
+
+            // TODO: Add Optimization
+
             this.Existing.Clear();
             return newNodes;
         }

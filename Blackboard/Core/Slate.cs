@@ -45,6 +45,9 @@ namespace Blackboard.Core {
             if (addConsts) this.addConstants();
         }
 
+        /// <summary>The base set of named nodes to access the total node structure.</summary>
+        public Namespace Global { get; }
+
         #region Built-in Functions and Constants...
 
         /// <summary>This adds all the operators used by the language.</summary>
@@ -400,7 +403,7 @@ namespace Blackboard.Core {
         #endregion
         #region Value Getters...
 
-        /// <summary>Gets the type of the value or trigger at the given node.</summary>
+        /// <summary>Gets the type of the value at the given node.</summary>
         /// <param name="names">The name of the node to get the type of.</param>
         /// <returns>The type of the node or null if doesn't exist or not a node type.</returns>
         public Type GetType(IEnumerable<string> names) {
@@ -408,53 +411,38 @@ namespace Blackboard.Core {
             return obj is null ? null : Type.FromType(obj.GetType());
         }
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
-        /// <returns>
-        /// The value from the node or the default value if the node
-        /// by that name doesn't exists and the found node is the incorrect type.
-        /// </returns>
+        /// <returns>The value from the node.</returns>
         public bool GetBool(params string[] names) =>
             this.GetValue<Bool>(names).Value;
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
-        /// <returns>
-        /// The value from the node or the default value if the node
-        /// by that name doesn't exists and the found node is the incorrect type.
-        /// </returns>
+        /// <returns>The value from the node.</returns>
         public int GetInt(params string[] names) =>
             this.GetValue<Int>(names).Value;
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
-        /// <returns>
-        /// The value from the node or the default value if the node
-        /// by that name doesn't exists and the found node is the incorrect type.
-        /// </returns>
+        /// <returns>The value from the node.</returns>
         public double GetDouble(params string[] names) =>
             this.GetValue<Double>(names).Value;
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
-        /// <returns>
-        /// The value from the node or the default value if the node
-        /// by that name doesn't exists and the found node is the incorrect type.
-        /// </returns>
+        /// <returns>The value from the node.</returns>
         public string GetString(params string[] names) =>
             this.GetValue<String>(names).Value;
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <typeparam name="T">The type of value to read.</typeparam>
         /// <param name="name">The name of the node to read the value from.</param>
-        /// <returns>
-        /// The value from the node or the default value if the node
-        /// by that name doesn't exists and the found node is the incorrect type.
-        /// </returns>
+        /// <returns>The value from the node.</returns>
         public T GetValue<T>(params string[] names) where T : IData =>
             this.GetValue<T>(names as IEnumerable<string>);
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <remarks>This will throw an exception if no node by that name exists or the found node is the incorrect type.</remarks>
         /// <typeparam name="T">The type of value to read.</typeparam>
         /// <param name="name">The name of the node to read the value from.</param>
@@ -474,10 +462,6 @@ namespace Blackboard.Core {
         }
 
         #endregion
-
-        /// <summary>The base set of named nodes to access the total node structure.</summary>
-        public Namespace Global { get; }
-
         #region Update...
 
         /// <summary> This indicates that the given nodes have had parents added or removed and need to be updated. </summary>

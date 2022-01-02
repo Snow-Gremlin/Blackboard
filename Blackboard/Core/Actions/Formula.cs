@@ -33,10 +33,13 @@ namespace Blackboard.Core.Actions {
 
         /// <summary>Performs all the actions for this formula.</summary>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(ILogger logger = null) {
+        /// <returns>The results of the formula being performed.</returns>
+        public Result Perform(ILogger logger = null) {
             logger?.Log("Formula:");
             ILogger sub = logger?.Sub;
-            this.actions.Foreach(action => action.Perform(this.Slate, sub));
+            Result result = new();
+            this.actions.Foreach(action => action.Perform(this.Slate, result, sub));
+            return result;
         }
 
         /// <summary>Gets a human readable string for this formula as all internal actions on different lines.</summary>

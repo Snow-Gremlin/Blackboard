@@ -443,12 +443,20 @@ namespace Blackboard.Core.Inspect {
         private string stringAction(IAction action) =>
             action switch {
                 null            => "null",
+                IGetter getter  => this.stringGetter(getter),
                 IAssign assign  => this.stringAssign(assign),
                 Define  define  => this.stringDefine(define),
                 Provoke provoke => this.stringProvoke(provoke),
                 Finish          => "Finish",
                 _               => "Unknown Action",
             };
+
+        /// <summary>Get the string for the given getter action.</summary>
+        /// <param name="getter">The getter action to stringify.</param>
+        /// <returns>The string for the given output action.</returns>
+        private string stringGetter(IGetter getter) =>
+            getter.Name + " <= " + this.Stringify(getter.Value) +
+                " {" + this.Stringify(getter.NeedPending) + "};";
 
         /// <summary>Get the string for the given assign action.</summary>
         /// <param name="assign">The assign action to stringify.</param>

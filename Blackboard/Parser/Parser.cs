@@ -334,15 +334,25 @@ namespace Blackboard.Parser {
             // Push the condition onto the stack for any following trigger pulls.
             // See comment in `handleAssignment` about pushing cast value back onto the stack.
             builder.Nodes.Push(castValue);
+            builder.Existing.Add(castValue);
         }
 
+        /// <summary>This handles getting the typed left value and writing it out to the given name.</summary>
+        /// <param name="builder">The formula builder being worked on.</param>
         static private void handleTypeGet(Builder builder) {
-            // TODO: Implement, need to add a result argument to actions
-            //       and a new action to write the gotten value to that result.
+            INode value = builder.Nodes.Pop();
+            Type type = builder.Types.Peek();
+            string name = builder.Identifiers.Pop();
+            builder.AddGetter(type, name, value);
         }
 
+        /// <summary>This handles getting the variable type left value and writing it out to the given name.</summary>
+        /// <param name="builder">The formula builder being worked on.</param>
         static private void handleVarGet(Builder builder) {
-            // TODO: Implement
+            INode value = builder.Nodes.Pop();
+            string name = builder.Identifiers.Pop();
+            Type type = Type.TypeOf(value);
+            builder.AddGetter(type, name, value);
         }
 
         /// <summary>This handles assigning the left value to the right value.</summary>
@@ -358,8 +368,10 @@ namespace Blackboard.Parser {
             // to a double but not be able to implicitly cast that double back to an int. For example: if `int X; double Y;` then
             // `Y=X=3;` works and `X=Y=3` will not. One drawback for this way is that if you assign an int to multiple doubles it will
             // construct multiple cast nodes, but with a little optimization to remove duplicate node paths, this isn't an issue. 
-            // Alternatively, if we push he value then `X=Y=Z` will be like `Y=Z; X=Z;`. 
+            // Alternatively, if we push he value then `X=Y=Z` will be like `Y=Z; X=Z;`.
             builder.Nodes.Push(castValue);
+            // Add to existing since the first assignment will handle preparing the tree being assigned.
+            builder.Existing.Add(castValue);
         }
 
         /// <summary>This handles performing a type cast of a node.</summary>

@@ -422,7 +422,6 @@ namespace Blackboard.Parser {
         }
 
         /// <summary>Creates an assignment action and adds it to the builder if possible.</summary>
-        /// <param name="builder">The formula builder being used.</param>
         /// <param name="target">The node to assign the value to.</param>
         /// <param name="value">The value to assign to the given target node.</param>
         /// <returns>The cast value or given value which was used in the assignment.</returns>
@@ -448,6 +447,31 @@ namespace Blackboard.Parser {
 
             this.Actions.Add(assign);
             return castValue;
+        }
+
+        /// <summary>Creates a getter action and adds it to the builder if possible.</summary>
+        /// <param name="targetType">The target type of the value to get.</param>
+        /// <param name="name">The name to output the value to.</param>
+        /// <param name="value">The value to get and write to the given name.</param>
+        public void AddGetter(Type targetType, string name, INode value) {
+            // Check if the base types match. Don't need to check that the type is
+            // a data type or trigger since only those can be reduced to constants.
+            PP.Scanner.Location loc = this.LastLocation;
+            INode castValue = this.PerformCast(targetType, value);
+            IEnumerable<INode> allNewNodes = this.PrepareTree(castValue);
+            
+            IAction getter =
+                targetType == Type.Bool    ? Getter<Bool>.  Create(loc, name, castValue, allNewNodes) :
+                targetType == Type.Int     ? Getter<Int>.   Create(loc, name, castValue, allNewNodes) :
+                targetType == Type.Double  ? Getter<Double>.Create(loc, name, castValue, allNewNodes) :
+                targetType == Type.String  ? Getter<String>.Create(loc, name, castValue, allNewNodes) :
+                throw new Exception("Unsupported type for an assignment").
+                    With("Location", loc).
+                    With("Type", targetType).
+                    With("Name", name).
+                    With("Value", value);
+
+            this.Actions.Add(getter);
         }
 
         /// <summary>Creates a new input node with the given name in the local scope.</summary>

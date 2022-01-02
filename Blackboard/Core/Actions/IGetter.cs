@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace Blackboard.Core.Actions {
 
-    /// <summary>The interface for all the typed assignment actions.</summary>
-    public interface IAssign: IAction {
+    /// <summary>The interface for all the typed getter actions.</summary>
+    public interface IGetter: IAction {
 
-        /// <summary>The target input node to set the value of.</summary>
-        public IInput Target { get; }
+        /// <summary>The name to write the value to.</summary>
+        public string Name { get; }
 
-        /// <summary>The data node to get the data to assign.</summary>
+        /// <summary>The data node to get the data to get.</summary>
         public IDataNode Value { get; }
 
         /// <summary>All the nodes which are new children of the node to write.</summary>

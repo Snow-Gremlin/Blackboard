@@ -31,6 +31,13 @@ namespace Blackboard.Core {
         /// <summary>The set of provoked triggers which need to be reset.</summary>
         private HashSet<ITrigger> needsReset;
 
+        /// <summary>A collection of literals and constants used in the graph.</summary>
+        /// <remarks>
+        /// This is to help reduce overhead of duplicate constants and
+        /// help with optimization of constant branches in the graph.
+        /// </remarks>
+        private HashSet<IConstant> constants;
+
         /// <summary>Creates a new slate.</summary>
         /// <param name="addFuncs">Indicates that built-in functions should be added.</param>
         /// <param name="addConsts">Indicates that constants should be added.</param>
@@ -38,10 +45,11 @@ namespace Blackboard.Core {
             this.pendingUpdate = new LinkedList<IEvaluable>();
             this.pendingEval   = new LinkedList<IEvaluable>();
             this.needsReset    = new HashSet<ITrigger>();
+            this.constants     = new HashSet<IConstant>();
             this.Global = new Namespace();
 
             this.addOperators();
-            if (addFuncs)  this.addFunctions();
+            if (addFuncs) this.addFunctions();
             if (addConsts) this.addConstants();
         }
 
@@ -545,6 +553,24 @@ namespace Blackboard.Core {
 
         /// <summary>Indicates if there are any provoked triggers which need results.</summary>
         public bool HasTriggersNeedingReset => this.needsReset.Count > 0;
+
+        #endregion
+        #region Constants...
+
+        /// <summary>Find or add the given constant in the set of constants.</summary>
+        /// <remarks>
+        /// Constants should only be checked like this if we know it is going to be used.
+        /// Constants with zero children should not exist in this storage.
+        /// </remarks>
+        /// <typeparam name="T">The type of the constant to add or find.</typeparam>
+        /// <param name="con">The constant to find already stored or to add.</param>
+        /// <returns>The already existing constant or the passed in constant if added.</returns>
+        public T FindConstant<T>(T con)
+            where T : class, IConstant {
+            if (this.constants.TryGetValue(con, out IConstant result)) return result as T;
+            this.constants.Add(con);
+            return con;
+        }
 
         #endregion
 

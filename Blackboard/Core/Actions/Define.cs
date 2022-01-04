@@ -34,6 +34,8 @@ namespace Blackboard.Core.Actions {
             this.Node = node;
             this.needParents = allNewNodes is null ? S.Array.Empty<IChild>() :
                 allNewNodes.NotNull().OfType<IChild>().Where(child => child.NeedsToAddParents()).ToArray();
+
+            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
         }
 
         /// <summary>This is the receiver that will be written to.</summary>

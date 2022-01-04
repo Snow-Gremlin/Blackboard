@@ -53,6 +53,13 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public IEnumerable<IParent> Parents => this.sources;
 
+        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
+        public bool ReplaceParent(IParent oldParent, IParent newParent) =>
+            this.sources.ReplaceParents(this, oldParent, newParent);
+
         /// <summary>
         /// This handles updating this node's value given the
         /// parents' provoked state during evaluation.

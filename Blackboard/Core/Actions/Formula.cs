@@ -38,7 +38,8 @@ namespace Blackboard.Core.Actions {
             logger?.Log("Formula:");
             ILogger sub = logger?.Sub;
             Result result = new();
-            this.actions.Foreach(action => action.Perform(this.Slate, result, sub));
+            foreach (IAction action in this.actions)
+                action.Perform(this.Slate, result, sub);
             return result;
         }
 

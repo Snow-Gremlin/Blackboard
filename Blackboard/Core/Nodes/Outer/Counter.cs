@@ -53,38 +53,49 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>This is the parent to increment the counter.</summary>
         public ITriggerParent Increment {
             get => this.increment;
-            set => this.SetParent(ref this.increment, value);
+            set => IChild.SetParent(this, ref this.increment, value);
         }
 
         /// <summary>This is the parent to decrement the counter.</summary>
         public ITriggerParent Decrement {
             get => this.decrement;
-            set => this.SetParent(ref this.decrement, value);
+            set => IChild.SetParent(this, ref this.decrement, value);
         }
 
         /// <summary>This is the parent reset the toggle to false.</summary>
         public ITriggerParent Reset {
             get => this.reset;
-            set => this.SetParent(ref this.reset, value);
+            set => IChild.SetParent(this, ref this.reset, value);
         }
 
         /// <summary>The value to step during an increment or decrement.</summary>
         /// <remarks>If this parent is null then the counter will increment and decrement by one.</remarks>
         public IValueParent<T> Delta {
             get => this.delta;
-            set => this.SetParent(ref this.delta, value);
+            set => IChild.SetParent(this, ref this.delta, value);
         }
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
         public IValueParent<T> ResetValue {
             get => this.resetValue;
-            set => this.SetParent(ref this.resetValue, value);
+            set => IChild.SetParent(this, ref this.resetValue, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public IEnumerable<IParent> Parents =>
             IChild.EnumerateParents(this.increment, this.decrement, this.reset, this.delta, this.resetValue);
+        
+        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
+        public bool ReplaceParent(IParent oldParent, IParent newParent) =>
+            IChild.ReplaceParent(this, ref this.increment,  oldParent, newParent) |
+            IChild.ReplaceParent(this, ref this.decrement,  oldParent, newParent) |
+            IChild.ReplaceParent(this, ref this.reset,      oldParent, newParent) |
+            IChild.ReplaceParent(this, ref this.delta,      oldParent, newParent) |
+            IChild.ReplaceParent(this, ref this.resetValue, oldParent, newParent);
 
         /// <summary>This sets the value of this node.</summary>
         /// <param name="value">The value to set.</param>

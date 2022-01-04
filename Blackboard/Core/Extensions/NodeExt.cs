@@ -68,26 +68,6 @@ namespace Blackboard.Core.Extensions {
         #endregion
         #region IChild...
 
-        /// <summary>This is a helper method for setting a parent to the node.</summary>
-        /// <remarks>
-        /// This is only intended to be called by the given child internally.
-        /// Do not add this child to the new parent yet,
-        /// so we can read from the parents when only evaluating.
-        /// This allows nodes which aren't parents for nodes like select.
-        /// </remarks>
-        /// <typeparam name="T">The node type for the parent.</typeparam>
-        /// <param name="child">The child to set the parent to.</param>
-        /// <param name="node">The parent node variable being set.</param>
-        /// <param name="newParent">The new parent being set, or null</param>
-        /// <returns>True if the parent has changed, false otherwise.</returns>
-        static internal bool SetParent<T>(this IChild child, ref T node, T newParent)
-            where T : IParent {
-            if (ReferenceEquals(node, newParent)) return false;
-            node?.RemoveChildren(child);
-            node = newParent;
-            return true;
-        }
-
         /// <summary>
         /// Adding this node into the parents will make this node be automatically called when
         /// the parents are updated. This should be done if the node is part of a definition.
@@ -131,12 +111,15 @@ namespace Blackboard.Core.Extensions {
         /// Do not add this child to the new parent yet,
         /// so we can read from the parents when only evaluating.
         /// </remarks>
+        /// <param name="sources">The node source list to add the parents to.</param>
         /// <param name="parents">The set of parents to add.</param>
         static internal void AddParents<T>(this List<T> sources, IEnumerable<T> parents)
             where T : class, IParent =>
             sources.AddRange(parents.NotNull());
 
-        /// <summary>This removes the given parents from this node.</summary>
+        /// <summary>This removes the given parents from this node collection.</summary>
+        /// <param name="sources">The node source list to remove the parents from.</param>
+        /// <param name="child">The child this sources are for.</param>
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
         static internal bool RemoveParents<T>(this List<T> sources, IChild child, IEnumerable<T> parents)
@@ -149,6 +132,34 @@ namespace Blackboard.Core.Extensions {
                 }
             }
             return anyRemoved;
+        }
+
+        /// <summary>This replaces all instances of given parents from this node collection.</summary>
+        /// <param name="sources">The node source list to replace the parents inside of.</param>
+        /// <param name="child">The child this sources are for.</param>
+        /// <param name="oldParent">The old parent to replace.</param>
+        /// <param name="newParent">The new parent to replace the old parent with.</param>
+        /// <returns>True if any of the parents are replaced, false if none were removed.</returns>
+        static internal bool ReplaceParents<T>(this List<T> sources, IChild child, IParent oldParent, IParent newParent)
+            where T : class, IParent {
+            bool replaced = false;
+            bool typeChecked = false;
+            for (int i = sources.Count - 1; i >= 0; i--) {
+                T node = sources[i];
+                if (!ReferenceEquals(node, oldParent)) continue;
+                if (!typeChecked && newParent is not null and not T)
+                    throw new Exception("Unable to replace old parent with new parent in a list.").
+                        With("child", child).
+                        With("index", i).
+                        With("node", node).
+                        With("old Parent", oldParent).
+                        With("new Parent", newParent);
+                typeChecked = true;
+                node?.RemoveChildren(child);
+                sources[i] = newParent as T;
+                replaced = true;
+            }
+            return replaced;
         }
 
         /// <summary>This will check if from the given root node any of the given target nodes can be reachable.</summary>

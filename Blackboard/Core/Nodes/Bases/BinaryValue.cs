@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -40,17 +39,25 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>The first parent node to get the first source value from.</summary>
         public IValueParent<T1> Parent1 {
             get => this.source1;
-            set => this.SetParent(ref this.source1, value);
+            set => IChild.SetParent(this, ref this.source1, value);
         }
 
         /// <summary>The second parent node to get the second source value from.</summary>
         public IValueParent<T2> Parent2 {
             get => this.source2;
-            set => this.SetParent(ref this.source2, value);
+            set => IChild.SetParent(this, ref this.source2, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.source1, this.source2);
+
+        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
+        public bool ReplaceParent(IParent oldParent, IParent newParent) =>
+            IChild.ReplaceParent(this, ref this.source1, oldParent, newParent) |
+            IChild.ReplaceParent(this, ref this.source2, oldParent, newParent);
 
         /// <summary>This handles updating this node's value given the parents' values during evaluation.</summary>
         /// <remarks>This will not be called if any of the parents are null.</remarks>

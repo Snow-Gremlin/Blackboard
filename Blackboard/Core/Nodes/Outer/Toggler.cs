@@ -42,25 +42,33 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>This is the parent to toggle the value.</summary>
         public ITriggerParent Toggle {
             get => this.toggle;
-            set => this.SetParent(ref this.toggle, value);
+            set => IChild.SetParent(this, ref this.toggle, value);
         }
 
         /// <summary>This is the parent reset the toggle to false.</summary>
         public ITriggerParent Reset {
             get => this.reset;
-            set => this.SetParent(ref this.reset, value);
+            set => IChild.SetParent(this, ref this.reset, value);
         }
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
         public IValueParent<Bool> ResetValue {
             get => this.resetValue;
-            set => this.SetParent(ref this.resetValue, value);
+            set => IChild.SetParent(this, ref this.resetValue, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.toggle, this.reset, this.resetValue);
 
+        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
+        public bool ReplaceParent(IParent oldParent, IParent newParent) =>
+            IChild.ReplaceParent(this, ref this.toggle,     oldParent, newParent) |
+            IChild.ReplaceParent(this, ref this.reset,      oldParent, newParent) |
+            IChild.ReplaceParent(this, ref this.resetValue, oldParent, newParent);
 
         /// <summary>This will determine the new value the node should be set to.</summary>
         /// <returns>The new value that the node should be set to.</returns>

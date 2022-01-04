@@ -48,9 +48,16 @@ namespace Blackboard.Core.Actions {
         /// <param name="value">The node to get the value from.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         public Assign(IValueInput<T> target, IValue<T> value, IEnumerable<INode> allNewNodes) {
+
+            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
+
             this.target = target;
             this.value  = value;
-            this.needPending = allNewNodes.NotNull().OfType<IEvaluable>().ToArray();
+
+            // Pre-sort the evaluable nodes.
+            LinkedList<IEvaluable> nodes = new();
+            nodes.SortInsertUnique(allNewNodes.NotNull().OfType<IEvaluable>());
+            this.needPending = nodes.ToArray();
         }
 
         /// <summary>The target input node to set the value of.</summary>

@@ -49,12 +49,18 @@ namespace Blackboard.Core.Actions {
         /// <summary>Creates a new provoke action.</summary>
         /// <param name="target">The input trigger to provoke.</param>
         /// <param name="trigger">The optional trigger to conditionally provoke with or null to always provoke.</param>
-        /// <param name="allNodes">All the nodes which are new children of the node to provoke.</param>
-        public Provoke(ITriggerInput target, ITrigger trigger, IEnumerable<INode> allNodes = null) {
+        /// <param name="allNewNodes">All the nodes which are new children of the trigger.</param>
+        public Provoke(ITriggerInput target, ITrigger trigger, IEnumerable<INode> allNewNodes = null) {
+
+            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
+
             this.Target  = target;
             this.Trigger = trigger;
-            this.needPending = allNodes is null ? S.Array.Empty<IEvaluable>() :
-                allNodes.NotNull().OfType<IEvaluable>().ToArray();
+
+            // Pre-sort the evaluable nodes.
+            LinkedList<IEvaluable> nodes = new();
+            nodes.SortInsertUnique(allNewNodes.NotNull().OfType<IEvaluable>());
+            this.needPending = nodes.ToArray();
         }
 
         /// <summary>The target input trigger to provoke.</summary>

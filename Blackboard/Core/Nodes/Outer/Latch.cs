@@ -37,17 +37,25 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>The parent node to indicate when the value should be set to the other parent.</summary>
         public ITriggerParent Trigger {
             get => this.trigger;
-            set => this.SetParent(ref this.trigger, value);
+            set => IChild.SetParent(this, ref this.trigger, value);
         }
 
         /// <summary>The parent node to get the source value from if the other parent is provoked.</summary>
         public IValueParent<T> Source {
             get => this.source;
-            set => this.SetParent(ref this.source, value);
+            set => IChild.SetParent(this, ref this.source, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.trigger, this.source);
+
+        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
+        public bool ReplaceParent(IParent oldParent, IParent newParent) =>
+            IChild.ReplaceParent(this, ref this.trigger, oldParent, newParent) |
+            IChild.ReplaceParent(this, ref this.source,  oldParent, newParent);
 
         /// <summary>This sets the value of this node.</summary>
         /// <param name="value">The value to set.</param>

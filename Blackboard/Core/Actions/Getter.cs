@@ -44,9 +44,16 @@ namespace Blackboard.Core.Actions {
         /// <param name="value">The node to get the value from.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         public Getter(string name, IValue<T> value, IEnumerable<INode> allNewNodes) {
-            this.Name = name;
-            this.value  = value;
-            this.needPending = allNewNodes.NotNull().OfType<IEvaluable>().ToArray();
+
+            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
+
+            this.Name  = name;
+            this.value = value;
+            
+            // Pre-sort the evaluable nodes.
+            LinkedList<IEvaluable> nodes = new();
+            nodes.SortInsertUnique(allNewNodes.NotNull().OfType<IEvaluable>());
+            this.needPending = nodes.ToArray();
         }
 
         /// <summary>The name to write the value to.</summary>

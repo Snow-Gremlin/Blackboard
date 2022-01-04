@@ -29,11 +29,18 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>The parent node to get the source value from.</summary>
         public IValueParent<Bool> Parent {
             get => this.source;
-            set => this.SetParent(ref this.source, value);
+            set => IChild.SetParent(this, ref this.source, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.source);
+
+        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
+        public bool ReplaceParent(IParent oldParent, IParent newParent) =>
+            IChild.ReplaceParent(this, ref this.source, oldParent, newParent);
 
         /// <summary>This updates the trigger during an evaluation.</summary>
         /// <returns>This always returns true so that any parent change will trigger this node.</returns>

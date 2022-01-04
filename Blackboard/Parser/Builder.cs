@@ -403,6 +403,8 @@ namespace Blackboard.Parser {
             }
 
             // Now that all parents are prepared, update the depth.
+            // During optimization the depths may change from this but this initial depth
+            // will help make all future depth updates perform efficiently.
             if (node is IEvaluable eval)
                 eval.Depth = eval.MinimumAllowedDepth();
             return true;
@@ -415,7 +417,7 @@ namespace Blackboard.Parser {
             HashSet<INode> newNodes = new();
             this.collectAndOrder(root, newNodes);
 
-            // TODO: Add Optimization
+            new Optimization.Optimizer().Perform(root, newNodes);
 
             this.Existing.Clear();
             return newNodes;
@@ -521,14 +523,14 @@ namespace Blackboard.Parser {
             bool showExisting = true) {
             const string indent = "  ";
             List<string> parts = new();
-            if (showActions)   parts.Add("Actions: " + this.Actions.ToString(indent));
-            if (showGlobal)    parts.Add("Global: " + this.Scope.Global.ToString());
-            if (showScope)     parts.Add("Scope: " + this.Scope);
-            if (showNodes)     parts.Add("Stack: " + this.Nodes.ToString(indent, false));
-            if (showTypes)     parts.Add("Types: " + this.Types.ToString(indent, true));
-            if (showIds)       parts.Add("Ids: " + this.Identifiers.ToString(indent, true));
+            if (showActions)   parts.Add("Actions: "   + this.Actions.ToString(indent));
+            if (showGlobal)    parts.Add("Global: "    + this.Scope.Global.ToString());
+            if (showScope)     parts.Add("Scope: "     + this.Scope);
+            if (showNodes)     parts.Add("Stack: "     + this.Nodes.ToString(indent, false));
+            if (showTypes)     parts.Add("Types: "     + this.Types.ToString(indent, true));
+            if (showIds)       parts.Add("Ids: "       + this.Identifiers.ToString(indent, true));
             if (showArguments) parts.Add("Arguments: " + this.Arguments.ToString(indent));
-            if (showExisting)  parts.Add("Existing: " + this.Existing.ToString(indent));
+            if (showExisting)  parts.Add("Existing: "  + this.Existing.ToString(indent));
             return parts.Join("\n");
         }
     }

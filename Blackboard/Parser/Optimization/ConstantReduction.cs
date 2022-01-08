@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Extensions;
+﻿using Blackboard.Core;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ namespace Blackboard.Parser.Optimization {
     /// <summary>
     /// This is an optimization rule for finding constant branches and replacing them with literals.
     /// This may leave nodes further down the constant branch in the nodes set.
+    /// This will also look up the stored constant in the slate and use that or
+    /// store the constant if one by that value doesn't exist yet.
     /// </summary>
     sealed internal class ConstantReduction: IRule {
 
@@ -32,11 +35,12 @@ namespace Blackboard.Parser.Optimization {
         }
 
         /// <summary>Recursively finds constant branches and replaces the branch with literals.</summary>
+        /// <param name="slate">The slate the formula is for.</param>
         /// <param name="node">The node of the tree to constant optimize.</param>
         /// <param name="nodes">The formula nodes to optimize.</param>
         /// <param name="logger">The logger to debug and inspect the optimization.</param>
         /// <remarks>The node to replace the given one in the parent or null to not replace.</remarks>
-        public INode Perform(INode node, HashSet<INode> nodes, ILogger logger = null) {
+        public INode Perform(Slate slate, INode node, HashSet<INode> nodes, ILogger logger = null) {
             // If this node is not part of the new nodes, just return it.
             if (!nodes.Contains(node)) return null;
 
@@ -44,9 +48,14 @@ namespace Blackboard.Parser.Optimization {
             if (node.IsConstant()) {
                 this.updateValue(node, nodes);
                 IConstant con = node.ToConstant();
-                if (con is not null && !ReferenceEquals(con, node)) {
-                    logger?.Log("Replace {0} with constant {1}", node, con);
-                    return con;
+                if (con is not null) {
+
+                    // Look up constant in slate, if one doesn't exist, this will add it.
+                    con = slate.FindConstant(con);
+                    if (!ReferenceEquals(con, node)) {
+                        logger?.Log("Replace {0} with constant {1}", node, con);
+                        return con;
+                    }
                 }
             }
 
@@ -55,7 +64,7 @@ namespace Blackboard.Parser.Optimization {
 
             // Check each parent in the child node.
             foreach (IParent parent in child.Parents.ToList()) {
-                INode newNode = this.Perform(parent, nodes, logger);
+                INode newNode = this.Perform(slate, parent, nodes, logger);
                 if (newNode is not null and IParent newParent)
                     child.ReplaceParent(parent, newParent);
             }

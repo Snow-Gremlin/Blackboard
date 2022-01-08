@@ -419,7 +419,7 @@ namespace Blackboard.Parser {
 
             // Optimize the new branch for the new formula.
             this.Logger?.Log("Optimize:");
-            new Optimization.Optimizer().Perform(root, newNodes, this.Logger?.Sub);
+            new Optimization.Optimizer().Perform(this.Slate, root, newNodes, this.Logger?.Sub);
 
             this.Existing.Clear();
             return newNodes;

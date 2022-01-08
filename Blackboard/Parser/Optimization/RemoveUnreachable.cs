@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Inspect;
+﻿using Blackboard.Core;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
@@ -24,11 +25,12 @@ namespace Blackboard.Parser.Optimization {
         }
 
         /// <summary>Finds unreachable nodes to remove from the given set of nodes.</summary>
+        /// <param name="slate">The slate the formula is for.</param>
         /// <param name="root">The root node of the tree to optimize.</param>
         /// <param name="nodes">The formula nodes to optimize.</param>
         /// <param name="logger">The logger to debug and inspect the optimization.</param>
         /// <remarks>The node to replace the given one in the parent or null to not replace.</remarks>
-        public INode Perform(INode root, HashSet<INode> nodes, ILogger logger = null) {
+        public INode Perform(Slate slate, INode root, HashSet<INode> nodes, ILogger logger = null) {
             HashSet<INode> reached = new();
             this.findReachable(root, nodes, reached);
             logger?.Log("Removed {0} unreachable nodes. {1} nodes were reachable.", nodes.Count - reached.Count, reached.Count);

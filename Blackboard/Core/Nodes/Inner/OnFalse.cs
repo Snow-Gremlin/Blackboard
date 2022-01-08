@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
@@ -19,9 +18,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates a trigger node which triggers when the boolean goes from false to false.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        public OnFalse(IValueParent<Bool> source = null) {
-            this.Parent = source;
-        }
+        public OnFalse(IValueParent<Bool> source = null) => this.Parent = source;
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "OnFalse";

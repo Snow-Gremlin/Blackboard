@@ -59,7 +59,7 @@ namespace Blackboard.Core.Actions {
 
             // Pre-sort the evaluable nodes.
             LinkedList<IEvaluable> nodes = new();
-            nodes.SortInsertUnique(allNewNodes.NotNull().OfType<IEvaluable>());
+            nodes.SortInsertUnique(allNewNodes?.NotNull()?.OfType<IEvaluable>());
             this.needPending = nodes.ToArray();
         }
 

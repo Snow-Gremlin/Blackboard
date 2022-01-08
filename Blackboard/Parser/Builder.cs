@@ -417,7 +417,9 @@ namespace Blackboard.Parser {
             HashSet<INode> newNodes = new();
             this.collectAndOrder(root, newNodes);
 
-            new Optimization.Optimizer().Perform(root, newNodes);
+            // Optimize the new branch for the new formula.
+            this.Logger?.Log("Optimize:");
+            new Optimization.Optimizer().Perform(root, newNodes, this.Logger?.Sub);
 
             this.Existing.Clear();
             return newNodes;

@@ -41,6 +41,10 @@ namespace Blackboard.Core.Extensions {
             nodes.All(node => IsConstant(node));
 
         /// <summary>Converts this node to a constant.</summary>
+        /// <remarks>
+        /// This will make a constant with the current value of the node.
+        /// Evaluate the correct node value before converting it to a constant.
+        /// </remarks>
         /// <param name="node">The node to try to convert into a constant.</param>
         /// <returns>A constant of this node or null if not able to be made into a constant.</returns>
         static public IConstant ToConstant(this INode node) =>
@@ -220,6 +224,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="nodes">The set of nodes to insert.</param>
         static public void SortInsertUnique<T>(this LinkedList<T> list, IEnumerable<T> nodes)
             where T : IEvaluable {
+            if (nodes is null) return;
             foreach (T node in nodes) {
                 bool addToEnd = true;
                 for (LinkedListNode<T> pend = list.Last; pend is not null; pend = pend.Previous) {

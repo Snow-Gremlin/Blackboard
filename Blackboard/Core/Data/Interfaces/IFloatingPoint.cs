@@ -5,7 +5,7 @@ namespace Blackboard.Core.Data.Interfaces {
 
     /// <summary>This indicates that this Blackboard data type is a floating point value.</summary>
     /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
-    public interface IFloatingPoint<T>: IArithmetic<T>
+    public interface IFloatingPoint<T>: IData
         where T : IData {
 
         /// <summary>This gets the linear interpolation between to points using this value as a factor.</summary>

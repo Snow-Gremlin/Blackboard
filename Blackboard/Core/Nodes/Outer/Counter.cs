@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
@@ -9,7 +8,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>Provides a node which can be used to count trigger events.</summary>
     sealed public class Counter<T>: ValueNode<T>, IValueInput<T>, IChild
-        where T : IArithmetic<T>, IComparable<T> {
+        where T : ISubtractive<T>, IAdditive<T>, IIdentities<T>, IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <remarks>This will not initialize any sources except increment, the others can be set later.</remarks>
@@ -106,7 +105,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <returns>True if the value was changed, false otherwise.</returns>
         protected override T CalcuateValue() {
             T value = this.Value;
-            T delta = this.delta is null ? default(T).Inc() : this.delta.Value;
+            T delta = this.delta is null ? default(T).One() : this.delta.Value;
             if (this.increment?.Provoked ?? false) value = value.Sum(new T[] { value, delta });
             if (this.decrement?.Provoked ?? false) value = value.Sub(delta);
             if (this.reset?.Provoked     ?? false) value = this.resetValue is null ? default : this.resetValue.Value;

@@ -14,7 +14,7 @@ namespace Blackboard.Core.Nodes.Bases {
     public abstract class BinaryValue<T1, T2, TResult>: ValueNode<TResult>, IChild
         where T1 : IData
         where T2 : IData
-        where TResult : IComparable<TResult> {
+        where TResult : IEquatable<TResult> {
 
         /// <summary>This is a helper for creating binary node factories quickly.</summary>
         /// <param name="handle">The handler for calling the node constructor.</param>

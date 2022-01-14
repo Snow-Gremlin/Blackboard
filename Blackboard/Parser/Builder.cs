@@ -6,6 +6,7 @@ using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
+using Blackboard.Parser.Optimization;
 using System.Collections.Generic;
 using System.Linq;
 using PP = PetiteParser;
@@ -34,6 +35,7 @@ namespace Blackboard.Parser {
             this.Identifiers = new BuilderStack<string>("Id", this);
             this.Existing    = new ExistingNodeSet(this);
             this.Arguments   = new ArgumentStack(this);
+            this.Optimizer   = new Optimizer();
         }
 
         /// <summary>The slate for the Blackboard these stacks belongs too.</summary>
@@ -410,6 +412,9 @@ namespace Blackboard.Parser {
             return true;
         }
 
+        /// <summary>The optimizer being used to </summary>
+        public readonly Optimizer Optimizer;
+
         /// <summary>Prepares the tree from the given node up to the old nodes from the builder.</summary>
         /// <param name="root">The root node of the tree to prepare.</param>
         /// <returns>All the nodes which are new node in the tree.</returns>
@@ -419,7 +424,7 @@ namespace Blackboard.Parser {
 
             // Optimize the new branch for the new formula.
             this.Logger?.Log("Optimize:");
-            new Optimization.Optimizer().Perform(this.Slate, root, newNodes, this.Logger?.Sub);
+            this.Optimizer.Perform(this.Slate, root, newNodes, this.Logger?.Sub);
 
             this.Existing.Clear();
             return newNodes;

@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Gets the difference between the two parent values.</summary>
     sealed public class Sub<T>: BinaryValue<T, T, T>
-        where T : IArithmetic<T>, IComparable<T> {
+        where T : ISubtractive<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new Sub<T>(left, right));

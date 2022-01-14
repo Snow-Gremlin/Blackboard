@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
-using S = System;
 
 namespace Blackboard.Core.Nodes.Outer {
 

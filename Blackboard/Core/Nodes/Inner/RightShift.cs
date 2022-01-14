@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a right shifts the first parent the amount of the second parent.</summary>
     sealed public class RightShift<T>: BinaryValue<T, T, T>
-        where T : IBitwise<T>, IComparable<T> {
+        where T : IBitwise<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new RightShift<T>(left, right));

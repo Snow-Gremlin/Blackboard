@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Attributes;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,10 @@ using System.Text;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a string value such that it can be used in generics.</summary>
-    public struct String: IAdditive<String>, IComparable<String>,
+    [Commutable(false)]
+    public struct String:
+        IAdditive<String>,
+        IComparable<String>,
         IImplicit<Bool,   String>,
         IImplicit<Double, String>,
         IImplicit<Int,    String> {
@@ -29,7 +33,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Get the value of the data as a string.</summary>
         public string ValueString => this.Value;
 
-        #region Additive Math...
+        #region Additive...
 
         /// <summary>This will concatenate of the given other data.</summary>
         /// <remarks>The current value is not used in the concatenation.</remarks>
@@ -40,24 +44,6 @@ namespace Blackboard.Core.Data.Caps {
             other.Select(t => t.Value).Foreach(buf.Append);
             return new(buf.ToString());
         }
-
-        #endregion
-        #region Casts...
-
-        /// <summary>Casts a boolean into a string for an implicit cast.</summary>
-        /// <param name="value">The boolean value to cast.</param>
-        /// <returns>The resulting string value.</returns>
-        public String CastFrom(Bool value) => new(value.ValueString);
-
-        /// <summary>Casts a double into a string for an implicit cast.</summary>
-        /// <param name="value">The double value to cast.</param>
-        /// <returns>The resulting string value.</returns>
-        public String CastFrom(Double value) => new(value.ValueString);
-
-        /// <summary>Casts an integer into a string for an implicit cast.</summary>
-        /// <param name="value">The integer value to cast.</param>
-        /// <returns>The resulting string value.</returns>
-        public String CastFrom(Int value) => new(value.ValueString);
 
         #endregion
         #region Comparable...
@@ -95,6 +81,30 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="other">The values to find the minimum from.</param>
         /// <returns>The minimum value from the given vales.</returns>
         public String Min(IEnumerable<String> other) => new(other.Min(t => t.Value));
+
+        /// <summary>Gets this value clamped to the inclusive range of the given min and max.</summary>
+        /// <param name="min">The minimum allowed value.</param>
+        /// <param name="max">The maximum allowed value.</param>
+        /// <returns>The value clamped between the given values.</returns>
+        public String Clamp(String min, String max) => (this < min) ? min : (this > max) ? max : this;
+
+        #endregion
+        #region Casts...
+
+        /// <summary>Casts a boolean into a string for an implicit cast.</summary>
+        /// <param name="value">The boolean value to cast.</param>
+        /// <returns>The resulting string value.</returns>
+        public String CastFrom(Bool value) => new(value.ValueString);
+
+        /// <summary>Casts a double into a string for an implicit cast.</summary>
+        /// <param name="value">The double value to cast.</param>
+        /// <returns>The resulting string value.</returns>
+        public String CastFrom(Double value) => new(value.ValueString);
+
+        /// <summary>Casts an integer into a string for an implicit cast.</summary>
+        /// <param name="value">The integer value to cast.</param>
+        /// <returns>The resulting string value.</returns>
+        public String CastFrom(Int value) => new(value.ValueString);
 
         #endregion
 

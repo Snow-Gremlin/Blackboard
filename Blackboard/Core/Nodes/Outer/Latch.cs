@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
@@ -10,7 +9,7 @@ namespace Blackboard.Core.Nodes.Outer {
     /// <summary>This is a latching value node.</summary>
     /// <typeparam name="T">The type of the value for this node.</typeparam>
     sealed public class Latch<T>: ValueNode<T>, IChild
-        where T : IComparable<T> {
+        where T : IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =

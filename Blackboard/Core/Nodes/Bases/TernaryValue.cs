@@ -17,7 +17,7 @@ namespace Blackboard.Core.Nodes.Bases {
         where T1 : IData
         where T2 : IData
         where T3 : IData
-        where TResult : IComparable<TResult> {
+        where TResult : IEquatable<TResult> {
 
         /// <summary>This is a helper for creating ternary node factories quickly.</summary>
         /// <param name="handle">The handler for calling the node constructor.</param>

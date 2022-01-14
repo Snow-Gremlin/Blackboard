@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Negates the given parents value.</summary>
     sealed public class Neg<T>: UnaryValue<T, T>
-        where T : IArithmetic<T>, IComparable<T> {
+        where T : ISigned<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((input) => new Neg<T>(input));

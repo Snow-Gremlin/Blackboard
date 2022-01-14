@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This gets the product of all the double parents.</summary>
     sealed public class Mul<T>: NaryValue<T, T>
-        where T : IArithmetic<T>, IComparable<T>, new() {
+        where T : IMultiplicative<T>, IComparable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((inputs) => new Mul<T>(inputs));

@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <summary>Determines if the two values are equal with an allowed variance called the epsilon.</summary>
     /// <typeparam name="T">The type being compared.</typeparam>
     sealed public class EpsilonEqual<T>: TernaryValue<T, T, T, Bool>
-        where T : IFloatingPoint<T>, IComparable<T> {
+        where T : ISubtractive<T>, ISigned<T>, IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((left, right, epsilon) => new EpsilonEqual<T>(left, right, epsilon));

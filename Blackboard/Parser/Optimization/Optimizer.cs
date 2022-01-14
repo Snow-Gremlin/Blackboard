@@ -1,12 +1,14 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
 namespace Blackboard.Parser.Optimization {
 
     /// <summary>
-    /// A tool for running rules on the new nodes for a formula to optimize
+    /// A tool for running rules on the new nodes for a formula to optimize, validate,
     /// and reduce the formula as much as possible. This will save memory, make
     /// comparisons faster, and improve performance of Blackboard's graph in slate.
     /// </summary>
@@ -17,6 +19,18 @@ namespace Blackboard.Parser.Optimization {
         public Optimizer() {
             this.rules = new List<IRule>() {
                 new ConstantReduction(),
+                new NoEffectDegenerate().
+                    Add<All>().
+                    Add<And>().
+                    Add<Any>().
+                    Add<Average>().
+                    Add<BitwiseAnd<Int>>().
+                    Add<BitwiseAnd<Int>>().
+                    Add<Sum<Int>>().
+                    Add<Sum<Double>>().
+                    Add<Sum<String>>(),
+
+
 
                 // TODO: Add ruled for node specific reductions:
                 //   - TODO: Group these based on what they do so we can determine if they
@@ -27,65 +41,53 @@ namespace Blackboard.Parser.Optimization {
                 //   - TODO: Use the following old list to fill out new lists
                 //        - Combine all constants in communicative nodes, such as sum (not string concatenation), products, ANDs, ORs, etc.
                 //        - Remove all 1 constants in products, all 0 constants in sums, all true constants in ANDs, etc.
-                //        - Find all unneeded nodes such as a single parent sum, product, and, or, etc.
-                //        - Find all unneeded nodes such as a switch with both parents the same.
+                //        
                 //   - [ ] All:
                 //         - <TBA>
                 //   - [ ] And:
                 //         - <TBA>
                 //   - [ ] Any:
                 //         - <TBA>
-                //   - [ ] Average:
-                //         - If there is only one parent, replace node with that parent
                 //   - [ ] BitwiseAnd:
-                //         - <TBA>
-                //   - [ ] BitwiseNot:
                 //         - <TBA>
                 //   - [ ] BitwiseOr:
                 //         - <TBA>
                 //   - [ ] BitwiseXor:
                 //         - <TBA>
-                //   - [ ] Div:
+                //   - [ ] OnlyOne:
                 //         - <TBA>
-                //   - [ ] Implies
+                //   - [ ] Or:
                 //         - <TBA>
-                //   - [ ] LeftShift
+                //   - [ ] Xor:
                 //         - <TBA>
-                //   - [ ] Max:
-                //         - If there is only one parent, replace node with that parent
-                //   - [ ] Min:
-                //         - If there is only one parent, replace node with that parent
+                
+                // TODO: Add ruled for node specific reductions:
                 //   - [ ] Mul:
                 //         - Pre-multiply all constants
                 //         - Remove 1 constants
                 //         - If there is only one parent in the mul, remove mul node and replace with single parent
-                //   - [ ] OnChange:
-                //         - <TBA>
-                //   - [ ] OnFalse:
-                //         - <TBA>
-                //   - [ ] OnlyOne:
-                //         - <TBA>
-                //   - [ ] OnTrue:
-                //         - <TBA>
-                //   - [ ] Or:
-                //         - <TBA>
-                //   - [ ] RightShift:
-                //         - <TBA>
-                //   - [ ] SelectTrigger:
-                //         - <TBA>
-                //   - [ ] SelectValue:
-                //         - <TBA>
+                //   - [ ] SelectTrigger, SelectValue:
+                //         - Remove selects with both parents the same, replace with parent.
+                //         - Remove selects if the condition is constant, replaces with selected content.
                 //   - [ ] Sum:
                 //         - Pre-add all constants, if communicative (i.e. not string concatenations)
                 //         - Remove 0 constants for numbers and empty string constants for strings
                 //         - If there is only one parent in the sum, remove sum node and replace with single parent
-                //   - [ ] Xor:
-                //         - If there is only one parent, replace node with that parent
-                //         - <TBA>
+                //   - [ ] LeftShift, RightShift:
+                //         - If the first value is a 0 constant, then replace with that constant.
+                //         - If the second value is a 0 constant, then return the first parent.
+                //   - [ ] Div:
+                //         - If the first parent is 0 constant, replace 
+                //         - If the second parent is 1 constant return first parent.
+                //   - [ ] Implies
+                //         - If the first value is false constant, replace with a true constant.
+                //         - If the second value is a true constant, replace with a true constant.
+                //         - TODO: Add math simplification rules for if a parent is a NOT
+                //
 
                 // TODO: Add advanced mathematics simplification rules:
                 //   - Simplify ANDs of ORs, DeMorgan's rule to reduce NOTs in ANDs and ORs, Sums of Products, etc
-                //   - [ ] NotEqual
+                //   - [ ] BitwiseNot:
                 //         - <TBA>
                 //   - [ ] Neg:
                 //         - If parent is a Neg, remove both this node and parent, and replace with parent's parent (recheck for deep nesting)
@@ -94,6 +96,8 @@ namespace Blackboard.Parser.Optimization {
                 //         - If parent is a Not, remove both this node and parent, and replace with parent's parent (recheck for deep nesting)
                 //         - If parent is NotEqual, remove both this node and parent, and replace with an Equal with the parent's parents
                 //         - Same as previous but for other comparisons, e.g. `Not(GreaterThan(a, b))` => `LessThanOrEqual(a, b)`
+                //         - <TBA>
+                //   - [ ] NotEqual
                 //         - <TBA>
                 //   - [ ] Sub:
                 //         - If parent is a Sub, remove both this node and parent, and replace with parent's parent (recheck for deep nesting)

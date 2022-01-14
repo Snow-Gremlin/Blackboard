@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a bitwise NOT of one integer parent.</summary>
     sealed public class BitwiseNot<T>: UnaryValue<T, T>
-        where T : IBitwise<T>, IComparable<T> {
+        where T : IBitwise<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((value) => new BitwiseNot<T>(value));

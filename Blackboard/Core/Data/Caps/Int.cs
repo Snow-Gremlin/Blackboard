@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Nodes.Attributes;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,14 +8,17 @@ using S = System;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a 32 bit signed integer value such that it can be used in generics.</summary>
-    public struct Int: IArithmetic<Int>, IComparable<Int>, IBitwise<Int>,
+    [Commutable(true)]
+    public struct Int:
+        IAdditive<Int>,
+        IBitwise<Int>,
+        IComparable<Int>,
+        IDivisible<Int>,
+        IIdentities<Int>,
+        IMultiplicative<Int>,
+        ISigned<Int>,
+        ISubtractive<Int>,
         IExplicit<Double, Int> {
-
-        /// <summary>Gets an integer value for zero. This is the same as default.</summary>
-        static public readonly Int Zero = new(0);
-
-        /// <summary>Gets an integer double value for one.</summary>
-        static public readonly Int One = new(1);
 
         /// <summary>The integer value being stored.</summary>
         public readonly int Value;
@@ -29,41 +33,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Get the value of the data as a string.</summary>
         public string ValueString => this.Value.ToString();
 
-        #region Arithmetic Math...
-
-        /// <summary>Gets the absolute value of this data value.</summary>
-        /// <returns>The absolute value of this value.</returns>
-        public Int Abs() => new(S.Math.Abs(this.Value));
-
-        /// <summary>Gets the absolute value of this data value.</summary>
-        /// <returns>The absolute value of this value.</returns>
-        public Int Neg() => new(-this.Value);
-
-        /// <summary>Gets this value incremented by one.</summary>
-        /// <returns>This data value plus one.</returns>
-        public Int Inc() => new(this.Value + 1);
-
-        /// <summary>Gets the division of this value and the other value.</summary>
-        /// <param name="other">The value to divide this value with.</param>
-        /// <returns>This value divided by the other value.</returns>
-        public Int Div(Int other) => new(this.Value / other.Value);
-
-        /// <summary>Gets the modulo of this value and the other value.</summary>
-        /// <remarks>The result will have the same sign as this value.</remarks>
-        /// <param name="other">The value to mod this value with.</param>
-        /// <returns>The modulo of this value and the other value.</returns>
-        public Int Mod(Int other) => new(this.Value % other.Value);
-
-        /// <summary>Gets the product of this value and the other values.</summary>
-        /// <remarks>The current value is not used in the product.</remarks>
-        /// <param name="other">The values to multiply this value with.</param>
-        /// <returns>The product of this value and the other values.</returns>
-        public Int Mul(IEnumerable<Int> other) => new(other.Aggregate(1, (t1, t2) => t1 * t2.Value));
-
-        /// <summary>Gets the difference between this value and the other value.</summary>
-        /// <param name="other">The value to subtract from this value.</param>
-        /// <returns>The difference between this value and the other value.</returns>
-        public Int Sub(Int other) => new(this.Value - other.Value);
+        #region Additive...
 
         /// <summary>Gets the difference between the first given value and the rest of the other values.</summary>
         /// <remarks>The current value is not used in the subtraction.</remarks>
@@ -71,18 +41,8 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The difference between the first value and the rest of the values.</returns>s
         public Int Sum(IEnumerable<Int> other) => new(other.Sum(t => t.Value));
 
-        /// <summary>Gets this value clamped to the inclusive range of the given min and max.</summary>
-        /// <param name="min">The minimum allowed value.</param>
-        /// <param name="max">The maximum allowed value.</param>
-        /// <returns>The value clamped between the given values.</returns>
-        public Int Clamp(Int min, Int max) => new(S.Math.Clamp(this.Value, min.Value, max.Value));
-
-        /// <summary>Determines if the this value is negative.</summary>
-        /// <returns>True if below zero, false if zero or more.</returns>
-        public bool IsNegative() => this.Value < 0;
-
         #endregion
-        #region Bitwise Math...
+        #region Bitwise...
 
         /// <summary>This gets the bitwise NOT of this data value.</summary>
         /// <returns>The bitwise NOT of this value.</returns>
@@ -115,14 +75,6 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="other">The number of bits to shift by.</param>
         /// <returns>The right shifted value.</returns>
         public Int RightShift(Int other) => new(this.Value >> other.Value);
-
-        #endregion
-        #region Casts...
-
-        /// <summary>Casts a double into an int for an explicit cast.</summary>
-        /// <param name="value">The double value to cast.</param>
-        /// <returns>The resulting integer value.</returns>
-        public Int CastFrom(Double value) => new((int)value.Value);
 
         #endregion
         #region Comparable...
@@ -160,6 +112,89 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="other">The values to find the minimum from.</param>
         /// <returns>The minimum value from this and the given vales.</returns>
         public Int Min(IEnumerable<Int> other) => new(other.Min(t => t.Value));
+
+        /// <summary>Gets this value clamped to the inclusive range of the given min and max.</summary>
+        /// <param name="min">The minimum allowed value.</param>
+        /// <param name="max">The maximum allowed value.</param>
+        /// <returns>The value clamped between the given values.</returns>
+        public Int Clamp(Int min, Int max) => new(S.Math.Clamp(this.Value, min.Value, max.Value));
+
+        #endregion
+        #region Divisible...
+
+        /// <summary>Gets the division of this value and the other value.</summary>
+        /// <param name="other">The value to divide this value with.</param>
+        /// <returns>This value divided by the other value.</returns>
+        public Int Div(Int other) => new(this.Value / other.Value);
+
+        /// <summary>Gets the modulo of this value and the other value.</summary>
+        /// <remarks>The result will have the same sign as this value.</remarks>
+        /// <param name="other">The value to mod this value with.</param>
+        /// <returns>The modulo of this value and the other value.</returns>
+        public Int Mod(Int other) => new(this.Value % other.Value);
+
+        #endregion
+        #region Identities...
+
+        /// <summary>Gets this additive identity, zero.</summary>
+        /// <remarks>The current value is not used when getting this identity.</remarks>
+        /// <returns>The identity data value.</returns>
+        public Int Zero() => new(0);
+
+        /// <summary>Gets this multiplicative identity, one.</summary>
+        /// <remarks>The current value is not used when getting this identity.</remarks>
+        /// <returns>The identity data value.</returns>
+        public Int One() => new(1);
+
+        /// <summary>Gets the minimum value for this data type.</summary>
+        /// <remarks>The current value is not used when getting this identity.</remarks>
+        /// <returns>The minimum data value.</returns>
+        public Int MinValue() => new(int.MinValue);
+
+        /// <summary>Gets the maximum value for this data type.</summary>
+        /// <remarks>The current value is not used when getting this identity.</remarks>
+        /// <returns>The maximum data value.</returns>
+        public Int MaxValue() => new(int.MaxValue);
+
+        #endregion
+        #region Multiplicative...
+
+        /// <summary>Gets the product of this value and the other values.</summary>
+        /// <remarks>The current value is not used in the product.</remarks>
+        /// <param name="other">The values to multiply this value with.</param>
+        /// <returns>The product of this value and the other values.</returns>
+        public Int Mul(IEnumerable<Int> other) => new(other.Aggregate(1, (t1, t2) => t1 * t2.Value));
+
+        #endregion
+        #region Signed...
+
+        /// <summary>Gets the absolute value of this data value.</summary>
+        /// <returns>The absolute value of this value.</returns>
+        public Int Abs() => new(S.Math.Abs(this.Value));
+
+        /// <summary>Gets the absolute value of this data value.</summary>
+        /// <returns>The absolute value of this value.</returns>
+        public Int Neg() => new(-this.Value);
+
+        /// <summary>Determines if the this value is negative.</summary>
+        /// <returns>True if below zero, false if zero or more.</returns>
+        public bool IsNegative() => this.Value < 0;
+
+        #endregion
+        #region Subtractive...
+
+        /// <summary>Gets the difference between this value and the other value.</summary>
+        /// <param name="other">The value to subtract from this value.</param>
+        /// <returns>The difference between this value and the other value.</returns>
+        public Int Sub(Int other) => new(this.Value - other.Value);
+
+        #endregion
+        #region Casts...
+
+        /// <summary>Casts a double into an int for an explicit cast.</summary>
+        /// <param name="value">The double value to cast.</param>
+        /// <returns>The resulting integer value.</returns>
+        public Int CastFrom(Double value) => new((int)value.Value);
 
         #endregion
 

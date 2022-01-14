@@ -2,14 +2,13 @@
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a bitwise OR of all the integer parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/OR.html"/>
     sealed public class BitwiseOr<T>: NaryValue<T, T>
-        where T : IBitwise<T>, IComparable<T>, new() {
+        where T : IBitwise<T>, IEquatable<T>, new() {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((values) => new BitwiseOr<T>(values));

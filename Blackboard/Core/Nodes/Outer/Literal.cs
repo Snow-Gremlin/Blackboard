@@ -46,7 +46,7 @@ namespace Blackboard.Core.Nodes.Outer {
     /// <summary>This is a literal value.</summary>
     /// <typeparam name="T">The type of this literal.</typeparam>
     sealed public class Literal<T>: ValueNode<T>, IConstant
-        where T : IComparable<T> {
+        where T : IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = new Function<Literal<T>>(() => new Literal<T>());

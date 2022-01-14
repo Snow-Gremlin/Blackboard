@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This will get the modulo the first parent value by the second parent value.</summary>
     sealed public class Mod<T>: BinaryValue<T, T, T>
-        where T : IArithmetic<T>, IComparable<T> {
+        where T : IDivisible<T>, IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new Mod<T>(left, right));

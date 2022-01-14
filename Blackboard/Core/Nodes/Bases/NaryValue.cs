@@ -13,7 +13,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <see cref="https://en.wikipedia.org/wiki/Arity#n-ary"/>
     public abstract class NaryValue<TIn, TResult>: ValueNode<TResult>, INaryChild<IValueParent<TIn>>
         where TIn : IData
-        where TResult : IComparable<TResult> {
+        where TResult : IEquatable<TResult> {
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
         private List<IValueParent<TIn>> sources;

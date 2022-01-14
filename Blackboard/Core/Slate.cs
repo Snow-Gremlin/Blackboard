@@ -89,24 +89,20 @@ namespace Blackboard.Core {
                 Equal<Double>.Factory,
                 Equal<String>.Factory);
             add("greater",
-                GreaterThan<Bool>.Factory,
                 GreaterThan<Int>.Factory,
                 GreaterThan<Double>.Factory,
                 GreaterThan<String>.Factory);
             add("greaterEqual",
-                GreaterThanOrEqual<Bool>.Factory,
                 GreaterThanOrEqual<Int>.Factory,
                 GreaterThanOrEqual<Double>.Factory,
                 GreaterThanOrEqual<String>.Factory);
             add("invert",
                 BitwiseNot<Int>.Factory);
             add("less",
-                LessThan<Bool>.Factory,
                 LessThan<Int>.Factory,
                 LessThan<Double>.Factory,
                 LessThan<String>.Factory);
             add("lessEqual",
-                LessThanOrEqual<Bool>.Factory,
                 LessThanOrEqual<Int>.Factory,
                 LessThanOrEqual<Double>.Factory,
                 LessThanOrEqual<String>.Factory);

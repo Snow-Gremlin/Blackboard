@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This gets the rounded value from the parent at the given decimal point.</summary>
     sealed public class Round<T>: BinaryValue<T, Int, T>
-        where T : IFloatingPoint<T>, IComparable<T> {
+        where T : IFloatingPoint<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((value, decimals) => new Round<T>(value, decimals));

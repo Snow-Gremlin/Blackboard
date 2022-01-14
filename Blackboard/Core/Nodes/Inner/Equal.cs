@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <summary>Determines if the two values are equal.</summary>
     /// <typeparam name="T">The type being compared.</typeparam>
     sealed public class Equal<T>: BinaryValue<T, T, Bool>
-        where T : IComparable<T> {
+        where T : IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new Equal<T>(left, right));

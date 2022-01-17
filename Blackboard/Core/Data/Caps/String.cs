@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
-using Blackboard.Core.Nodes.Attributes;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +8,6 @@ using System.Text;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a string value such that it can be used in generics.</summary>
-    [Commutable(false)]
     public struct String:
         IAdditive<String>,
         IComparable<String>,
@@ -44,6 +42,14 @@ namespace Blackboard.Core.Data.Caps {
             other.Select(t => t.Value).Foreach(buf.Append);
             return new(buf.ToString());
         }
+
+        /// <summary>
+        /// Indicates that for this data type, summation is commutable,
+        /// meaning that the order of the parents makes no difference to the result.
+        /// </summary>
+        /// <remarks>String summation is concatination which is not commutable.</remarks>
+        /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
+        public bool CommutableSummation => false;
 
         #endregion
         #region Comparable...

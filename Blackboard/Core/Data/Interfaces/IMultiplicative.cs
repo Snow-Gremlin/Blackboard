@@ -12,5 +12,13 @@ namespace Blackboard.Core.Data.Interfaces {
         /// <param name="other">The value to multiply this value with.</param>
         /// <returns>The product of this value and the other value.</returns>
         T Mul(IEnumerable<T> other);
+
+        /// <summary>
+        /// Indicates that for this data type, multiplication is commutable,
+        /// meaning that the order of the parents makes no difference to the result.
+        /// </summary>
+        /// <remarks>This value shall be constant for a data type.</remarks>
+        /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
+        bool CommutableMultiplication { get; }
     }
 }

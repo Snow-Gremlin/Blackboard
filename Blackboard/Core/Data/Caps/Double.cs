@@ -8,7 +8,6 @@ using S = System;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for an IEEE 754 double value such that it can be used in generics.</summary>
-    [Commutable(true)]
     public struct Double:
         IAdditive<Double>,
         IComparable<Double>,
@@ -40,6 +39,13 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="other">The values to subtract from the first value.</param>
         /// <returns>The difference between the first value and the rest of the values.</returns>s
         public Double Sum(IEnumerable<Double> other) => new(other.Sum(t => t.Value));
+
+        /// <summary>
+        /// Indicates that for this data type, summation is commutable,
+        /// meaning that the order of the parents makes no difference to the result.
+        /// </summary>
+        /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
+        public bool CommutableSummation => true;
 
         #endregion
         #region Comparable...
@@ -167,6 +173,13 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="other">The values to multiply this value with.</param>
         /// <returns>The product of this value and the other values.</returns>
         public Double Mul(IEnumerable<Double> other) => new(other.Aggregate(1.0, (t1, t2) => t1 * t2.Value));
+
+        /// <summary>
+        /// Indicates that for this data type, multiplication is commutable,
+        /// meaning that the order of the parents makes no difference to the result.
+        /// </summary>
+        /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
+        public bool CommutableMultiplication => true;
 
         #endregion
         #region Signed...

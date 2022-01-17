@@ -12,5 +12,13 @@ namespace Blackboard.Core.Data.Interfaces {
         /// <param name="other">The other data to sum together.</param>
         /// <returns>The sum of the given data values.</returns>
         T Sum(IEnumerable<T> other);
+
+        /// <summary>
+        /// Indicates that for this data type, summation is commutable,
+        /// meaning that the order of the parents makes no difference to the result.
+        /// </summary>
+        /// <remarks>This value shall be constant for a data type.</remarks>
+        /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
+        bool CommutableSummation { get; }
     }
 }

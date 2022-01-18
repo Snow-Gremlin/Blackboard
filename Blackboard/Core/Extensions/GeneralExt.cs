@@ -84,5 +84,16 @@ namespace Blackboard.Core.Extensions {
                 foreach (T value in inner) yield return value;
             }
         }
+
+        /// <summary>Gets the given value clamped to the inclusive range of the given min and max.</summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The minimum allowed value.</param>
+        /// <param name="max">The maximum allowed value.</param>
+        /// <returns>The value clamped between the given values.</returns>
+        static public T Clamp<T>(this T value, T min, T max)
+            where T : S.IComparable<T> =>
+            value.CompareTo(min) < 0 ? min :
+            value.CompareTo(max) > 0 ? max :
+            value;
     }
 }

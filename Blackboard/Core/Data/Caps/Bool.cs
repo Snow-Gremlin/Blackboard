@@ -1,17 +1,32 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Types;
+using S = System;
 
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a boolean value such that it can be used in generics.</summary>
     public struct Bool:
-        IEquatable<Bool> {
+        S.IComparable<Bool>,
+        IData,
+        S.IEquatable<Bool> {
+
+        #region Static...
+
+        /// <summary>Gets a string for the false boolean value.</summary>
+        /// <remarks>This is defined to match the Blackboard language instead of C#, "False".</remarks>
+        public const string FalseString = "false";
+
+        /// <summary>Gets a string for the true boolean value.</summary>
+        /// <remarks>This is defined to match the Blackboard language instead of C#, "True".</remarks>
+        public const string TrueString = "true";
+
+        /// <summary>Gets a boolean value for false. This is the same as default.</summary>
+        static public readonly Bool False = new(false);
 
         /// <summary>Gets a boolean value for true.</summary>
         static public readonly Bool True = new(true);
 
-        /// <summary>Gets a boolean value for false. This is the same as default.</summary>
-        static public readonly Bool False = new(false);
+        #endregion
 
         /// <summary>The boolean value being stored.</summary>
         public readonly bool Value;
@@ -20,16 +35,28 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="value">The boolean value to store.</param>
         public Bool(bool value) => this.Value = value;
 
+        #region Comparable...
+
+        public static bool operator < (Bool left, Bool right) => left.CompareTo(right) <  0;
+        public static bool operator <=(Bool left, Bool right) => left.CompareTo(right) <= 0;
+        public static bool operator > (Bool left, Bool right) => left.CompareTo(right) >  0;
+        public static bool operator >=(Bool left, Bool right) => left.CompareTo(right) >= 0;
+
+        /// <summary>Compares two integers together.</summary>
+        /// <param name="other">The other integer to compare.</param>
+        /// <returns>The comparison result indicating which is greater than, less than, or equal.</returns>
+        public int CompareTo(Bool other) => this.Value.CompareTo(other.Value);
+
+        #endregion
+        #region Data...
+
         /// <summary>Gets the name for the type of data.</summary>
         public string TypeName => Type.Bool.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        /// <remarks>
-        /// We're defining this uniquely instead of using the bool.ToString since
-        /// those return "True" and "False" which don't match the desired Blackboard language.
-        /// </remarks>
-        public string ValueString => this.Value ? "true" : "false";
+        public string ValueString => this.Value ? TrueString : FalseString;
 
+        #endregion
         #region Equatable...
 
         public static bool operator ==(Bool left, Bool right) => left.Equals(right);
@@ -40,16 +67,16 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>True if they are equal, otherwise false.</returns>
         public bool Equals(Bool other) => this.Value == other.Value;
 
-        /// <summary>Checks if the given object is equal to this data type.</summary>
-        /// <param name="obj">This is the object to test.</param>
-        /// <returns>True if they are equal, otherwise false.</returns>
-        public override bool Equals(object obj) => obj is Bool other && this.Equals(other);
-
         #endregion
 
         /// <summary>Gets the hash code of the stored value.</summary>
         /// <returns>The stored value's hash code.</returns>
         public override int GetHashCode() => this.Value.GetHashCode();
+
+        /// <summary>Checks if the given object is equal to this data type.</summary>
+        /// <param name="obj">This is the object to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
+        public override bool Equals(object obj) => obj is Bool other && this.Equals(other);
 
         /// <summary>Gets the name of this data type and value.</summary>
         /// <returns>The name of the boolean type and value.</returns>

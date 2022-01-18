@@ -10,13 +10,42 @@ namespace Blackboard.Core.Data.Caps {
     public struct Int:
         IAdditive<Int>,
         IBitwise<Int>,
-        IComparable<Int>,
+        S.IComparable<Int>,
+        IData,
         IDivisible<Int>,
-        IIdentities<Int>,
+        S.IEquatable<Int>,
+        IFinite<Int>,
         IMultiplicative<Int>,
         ISigned<Int>,
         ISubtractive<Int>,
         IExplicit<Double, Int> {
+
+        #region Static...
+
+        /// <summary>Gets this additive identity, zero.</summary>
+        static public readonly Int Zero = new(0);
+
+        /// <summary>Gets this multiplicative identity, one.</summary>
+        static public readonly Int One = new(1);
+
+        /// <summary>Gets the minimum value, false, for this data type.</summary>
+        static public readonly Int Min = new(int.MinValue);
+
+        /// <summary>Gets the maximum value, true, for this data type.</summary>
+        static public readonly Int Max = new(int.MaxValue);
+
+        /// <summary>The identity of summation for this data type.</summary>
+        static public readonly Int SumIdentity = Zero;
+
+        /// <summary>The identity of multiplication for this data type.</summary>
+        static public readonly Int MulIdentity = One;
+
+        #endregion
+
+
+
+
+
 
         /// <summary>The integer value being stored.</summary>
         public readonly int Value;
@@ -86,7 +115,7 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Compares two integers together.</summary>
         /// <param name="other">The other integer to compare.</param>
-        /// <returns>The comparison result indicating which is greater than or equal.</returns>
+        /// <returns>The comparison result indicating which is greater than, less than, or equal.</returns>
         public int CompareTo(Int other) => this.Value.CompareTo(other.Value);
 
         public static bool operator ==(Int left, Int right) => left.CompareTo(right) == 0;
@@ -106,13 +135,13 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>True if they are equal, otherwise false.</returns>
         public override bool Equals(object obj) => obj is Int other && this.Equals(other);
 
-        /// <summary>Gets the maximum value from this and the given other values.</summary>
+        /// <summary>Gets the maximum value from the given other values.</summary>
         /// <remarks>The current value is not used in the maximum value.</remarks>
         /// <param name="other">The values to find the maximum from.</param>
         /// <returns>The maximum value from this and the given vales.</returns>
         public Int Max(IEnumerable<Int> other) => new(other.Max(t => t.Value));
 
-        /// <summary>Gets the minimum value from this and the given other values.</summary>
+        /// <summary>Gets the minimum value from the given other values.</summary>
         /// <remarks>The current value is not used in the minimum value.</remarks>
         /// <param name="other">The values to find the minimum from.</param>
         /// <returns>The minimum value from this and the given vales.</returns>

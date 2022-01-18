@@ -19,6 +19,11 @@ namespace Blackboard.Core.Data.Interfaces {
         /// </summary>
         /// <remarks>This value shall be constant for a data type.</remarks>
         /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
-        bool CommutableSummation { get; }
+        bool SumCommutable { get; }
+
+        /// <summary>The identity of summation for this data type.</summary>
+        /// <remarks>Typically this is zero or empty.</remarks>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        T SumIdentityValue { get; }
     }
 }

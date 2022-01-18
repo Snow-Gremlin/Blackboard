@@ -4,6 +4,7 @@ namespace Blackboard.Core.Data.Interfaces {
 
     /// <summary>This indicates that this Blackboard data type can be multiplied with another of the same type.</summary>
     /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
+    /// <see cref="https://en.wikipedia.org/wiki/Multiplication"/>
     public interface IMultiplicative<T>: IData
         where T : IData {
 
@@ -19,6 +20,11 @@ namespace Blackboard.Core.Data.Interfaces {
         /// </summary>
         /// <remarks>This value shall be constant for a data type.</remarks>
         /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
-        bool CommutableMultiplication { get; }
-    }
+        bool MulCommutable { get; }
+
+        /// <summary>The identity of multiplication for this data type.</summary>
+        /// <remarks>Typically this is one.</remarks>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        T MulIdentityValue { get; }
+   }
 }

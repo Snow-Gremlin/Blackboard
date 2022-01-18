@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Nodes.Attributes;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +9,44 @@ namespace Blackboard.Core.Data.Caps {
     /// <summary>This is the data storage for an IEEE 754 double value such that it can be used in generics.</summary>
     public struct Double:
         IAdditive<Double>,
-        IComparable<Double>,
+        S.IComparable<Double>,
+        IData,
         IDivisible<Double>,
+        S.IEquatable<Double>,
+        IFinite<Double>,
         IFloatingPoint<Double>,
-        IIdentities<Double>,
         IMultiplicative<Double>,
         ISigned<Double>,
         ISubtractive<Double>,
         IImplicit<Int, Double> {
+
+        #region Static...
+
+        /// <summary>Gets this additive identity, zero.</summary>
+        static public readonly Double Zero = new(0.0);
+
+        /// <summary>Gets this multiplicative identity, one.</summary>
+        static public readonly Double One = new(1.0);
+
+        /// <summary>Gets the minimum value, false, for this data type.</summary>
+        static public readonly Double Min = new(double.MinValue);
+
+        /// <summary>Gets the maximum value, true, for this data type.</summary>
+        static public readonly Double Max = new(double.MaxValue);
+
+        /// <summary>The identity of summation for this data type.</summary>
+        static public readonly Double SumIdentity = Zero;
+
+        /// <summary>The identity of multiplication for this data type.</summary>
+        static public readonly Double MulIdentity = One;
+
+        /// <summary>This gets the positive infinity value.</summary>
+        static public readonly Double Infinity = new(double.PositiveInfinity);
+
+        /// <summary>Determines if this value is not a number.</summary>
+        static public readonly Double NaN = new(double.NaN);
+
+        #endregion
 
         /// <summary>The double value being stored.</summary>
         public readonly double Value;
@@ -25,12 +54,6 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Creates a new double data value.</summary>
         /// <param name="value">The double value to store.</param>
         public Double(double value) => this.Value = value;
-
-        /// <summary>Gets the name for the type of data.</summary>
-        public string TypeName => Type.Double.Name;
-
-        /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value.ToString();
 
         #region Additive...
 
@@ -45,50 +68,34 @@ namespace Blackboard.Core.Data.Caps {
         /// meaning that the order of the parents makes no difference to the result.
         /// </summary>
         /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
-        public bool CommutableSummation => true;
+        public bool SumCommutable => true;
+
+        /// <summary>The identity of summation for this data type.</summary>
+        /// <remarks>The current value is not used in the product.</remarks>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        public Double SumIdentityValue => SumIdentity;
 
         #endregion
         #region Comparable...
 
-        /// <summary>Compares two doubles together.</summary>
-        /// <param name="other">The other double to compare.</param>
-        /// <returns>The comparison result indicating which is greater than or equal.</returns>
-        public int CompareTo(Double other) => this.Value.CompareTo(other.Value);
-
-        public static bool operator ==(Double left, Double right) => left.CompareTo(right) == 0;
-        public static bool operator !=(Double left, Double right) => left.CompareTo(right) != 0;
         public static bool operator < (Double left, Double right) => left.CompareTo(right) <  0;
         public static bool operator <=(Double left, Double right) => left.CompareTo(right) <= 0;
         public static bool operator > (Double left, Double right) => left.CompareTo(right) >  0;
         public static bool operator >=(Double left, Double right) => left.CompareTo(right) >= 0;
 
-        /// <summary>Checks if the given double is equal to this data type.</summary>
-        /// <param name="other">This is the double to test.</param>
-        /// <returns>True if they are equal, otherwise false.</returns>
-        public bool Equals(Double other) => this.Value == other.Value;
+        /// <summary>Compares two doubles together.</summary>
+        /// <param name="other">The other double to compare.</param>
+        /// <returns>The comparison result indicating which is greater than, less than, or equal.</returns>
+        public int CompareTo(Double other) => this.Value.CompareTo(other.Value);
 
-        /// <summary>Checks if the given object is equal to this data type.</summary>
-        /// <param name="obj">This is the object to test.</param>
-        /// <returns>True if they are equal, otherwise false.</returns>
-        public override bool Equals(object obj) => obj is Double other && this.Equals(other);
+        #endregion
+        #region Data...
 
-        /// <summary>Gets the maximum value from this and the given other values.</summary>
-        /// <remarks>The current value is not used in the maximum value.</remarks>
-        /// <param name="other">The values to find the maximum from.</param>
-        /// <returns>The maximum value from this and the given vales.</returns>
-        public Double Max(IEnumerable<Double> other) => new(other.Max(t => t.Value));
+        /// <summary>Gets the name for the type of data.</summary>
+        public string TypeName => Type.Double.Name;
 
-        /// <summary>Gets the minimum value from this and the given other values.</summary>
-        /// <remarks>The current value is not used in the minimum value.</remarks>
-        /// <param name="other">The values to find the minimum from.</param>
-        /// <returns>The minimum value from this and the given vales.</returns>
-        public Double Min(IEnumerable<Double> other) => new(other.Min(t => t.Value));
-
-        /// <summary>Gets this value clamped to the inclusive range of the given min and max.</summary>
-        /// <param name="min">The minimum allowed value.</param>
-        /// <param name="max">The maximum allowed value.</param>
-        /// <returns>The value clamped between the given values.</returns>
-        public Double Clamp(Double min, Double max) => new(S.Math.Clamp(this.Value, min.Value, max.Value));
+        /// <summary>Get the value of the data as a string.</summary>
+        public string ValueString => this.Value.ToString();
 
         #endregion
         #region Divisible...
@@ -103,6 +110,36 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="other">The value to mod this value with.</param>
         /// <returns>The modulo of this value and the other value.</returns>
         public Double Mod(Double other) => new(this.Value % other.Value);
+
+        #endregion
+        #region Equatable...
+
+        public static bool operator ==(Double left, Double right) => left.Equals(right);
+        public static bool operator !=(Double left, Double right) => !left.Equals(right);
+
+        /// <summary>Checks if the given double is equal to this data type.</summary>
+        /// <param name="other">This is the double to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
+        public bool Equals(Double other) => this.Value == other.Value;
+
+        #endregion
+        #region Finite...
+
+        /// <summary>Gets this additive identity, zero.</summary>
+        /// <remarks>The current value is not used when getting this identity.</remarks>
+        public Double ZeroValue => Zero;
+
+        /// <summary>Gets this multiplicative identity, one.</summary>
+        /// <remarks>The current value is not used when getting this identity.</remarks>
+        public Double OneValue => One;
+
+        /// <summary>Gets the minimum value for this data type.</summary>
+        /// <remarks>The current value is not used when getting this identity.</remarks>
+        public Double MinValue => Min;
+
+        /// <summary>Gets the maximum value for this data type.</summary>
+        /// <remarks>The current value is not used when getting this identity.</remarks>
+        public Double MaxValue => Max;
 
         #endregion
         #region Floating Point...
@@ -140,30 +177,15 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Determines if this value is not a number.</summary>
         /// <returns>True if the number is not a number, false otherwise.</returns>
-        public bool IsNAN() => double.IsNaN(this.Value);
+        public bool IsNaN() => double.IsNaN(this.Value);
 
-        #endregion
-        #region Identities...
-
-        /// <summary>Gets this additive identity, zero.</summary>
+        /// <summary>This gets the positive infinity value.</summary>
         /// <remarks>The current value is not used when getting this identity.</remarks>
-        /// <returns>This identity data value.</returns>
-        public Double Zero() => new(0.0);
+        public Double InfinityValue => Infinity;
 
-        /// <summary>Gets this multiplicative identity, one.</summary>
+        /// <summary>Determines if this value is not a number.</summary>
         /// <remarks>The current value is not used when getting this identity.</remarks>
-        /// <returns>This identity data value.</returns>
-        public Double One() => new(1.0);
-
-        /// <summary>Gets the minimum value for this data type.</summary>
-        /// <remarks>The current value is not used when getting this identity.</remarks>
-        /// <returns>The minimum data value.</returns>
-        public Double MinValue() => new(double.MinValue);
-
-        /// <summary>Gets the maximum value for this data type.</summary>
-        /// <remarks>The current value is not used when getting this identity.</remarks>
-        /// <returns>The maximum data value.</returns>
-        public Double MaxValue() => new(double.MaxValue);
+        public Double NaNValue => NaN;
 
         #endregion
         #region Multiplicative...
@@ -179,7 +201,12 @@ namespace Blackboard.Core.Data.Caps {
         /// meaning that the order of the parents makes no difference to the result.
         /// </summary>
         /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
-        public bool CommutableMultiplication => true;
+        public bool MulCommutable => true;
+
+        /// <summary>The identity of multiplication for this data type.</summary>
+        /// <remarks>The current value is not used in the product.</remarks>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        public Double MulIdentityValue => MulIdentity;
 
         #endregion
         #region Signed...
@@ -217,6 +244,11 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Gets the hash code of the stored value.</summary>
         /// <returns>The stored value's hash code.</returns>
         public override int GetHashCode() => this.Value.GetHashCode();
+
+        /// <summary>Checks if the given object is equal to this data type.</summary>
+        /// <param name="obj">This is the object to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
+        public override bool Equals(object obj) => obj is Double other && this.Equals(other);
 
         /// <summary>Gets the name of this data type and value.</summary>
         /// <returns>The name of the double type and value.</returns>

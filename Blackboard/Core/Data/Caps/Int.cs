@@ -10,10 +10,10 @@ namespace Blackboard.Core.Data.Caps {
     public struct Int:
         IAdditive<Int>,
         IBitwise<Int>,
-        S.IComparable<Int>,
+        IComparable<Int>,
         IData,
         IDivisible<Int>,
-        S.IEquatable<Int>,
+        IEquatable<Int>,
         IFinite<Int>,
         IMultiplicative<Int>,
         ISigned<Int>,

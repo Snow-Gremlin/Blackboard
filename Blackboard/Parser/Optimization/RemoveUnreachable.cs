@@ -15,7 +15,7 @@ namespace Blackboard.Parser.Optimization {
         /// <param name="node">The node to check.</param>
         /// <param name="newNodes">The set of new nodes for the formula.</param>
         /// <param name="reached">The set of the nodes which have been reached.</param>
-        public void findReachable(INode node, HashSet<INode> newNodes, HashSet<INode> reached) {
+        private void findReachable(INode node, HashSet<INode> newNodes, HashSet<INode> reached) {
             if (!newNodes.Contains(node)) return;
             reached.Add(node);
             if (node is IChild child) {

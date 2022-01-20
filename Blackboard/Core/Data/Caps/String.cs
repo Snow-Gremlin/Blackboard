@@ -4,16 +4,15 @@ using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using S = System;
 
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a string value such that it can be used in generics.</summary>
     public struct String:
         IAdditive<String>,
-        S.IComparable<String>,
+        IComparable<String>,
         IData,
-        S.IEquatable<String>,
+        IEquatable<String>,
         IImplicit<Bool,   String>,
         IImplicit<Double, String>,
         IImplicit<Int,    String> {
@@ -24,7 +23,7 @@ namespace Blackboard.Core.Data.Caps {
         static public readonly String Empty = new("");
 
         /// <summary>The identity of summation for this data type.</summary>
-        static public String SumIdentity = Empty;
+        static public readonly String SumIdentity = Empty;
 
         #endregion
 

@@ -2,6 +2,7 @@
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Core.Nodes.Inner {
 
@@ -26,6 +27,6 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Updates this node's value to the minimum value during evaluation.</summary>
         /// <param name="values">The parents' values to get the min of.</param>
         /// <returns>The minimum value from all the parents.</returns>
-        protected override T OnEval(IEnumerable<T> values) => new T().Min(values);
+        protected override T OnEval(IEnumerable<T> values) => values.Min();
     }
 }

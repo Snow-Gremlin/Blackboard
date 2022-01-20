@@ -1,14 +1,13 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Types;
-using S = System;
 
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a boolean value such that it can be used in generics.</summary>
     public struct Bool:
-        S.IComparable<Bool>,
+        IComparable<Bool>,
         IData,
-        S.IEquatable<Bool> {
+        IEquatable<Bool> {
 
         #region Static...
 

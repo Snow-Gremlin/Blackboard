@@ -2,6 +2,7 @@
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Core.Nodes.Inner {
 
@@ -26,6 +27,6 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Updates this node's value to the maximum value during evaluation.</summary>
         /// <param name="values">The parents' values to get the max of.</param>
         /// <returns>The maximum value from all the parents.</returns>
-        protected override T OnEval(IEnumerable<T> values) => new T().Max(values);
+        protected override T OnEval(IEnumerable<T> values) => values.Max();
     }
 }

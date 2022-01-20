@@ -105,7 +105,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <returns>True if the value was changed, false otherwise.</returns>
         protected override T CalcuateValue() {
             T value = this.Value;
-            T delta = this.delta is null ? default(T).One() : this.delta.Value;
+            T delta = this.delta is null ? default(T).OneValue : this.delta.Value;
             if (this.increment?.Provoked ?? false) value = value.Sum(new T[] { value, delta });
             if (this.decrement?.Provoked ?? false) value = value.Sub(delta);
             if (this.reset?.Provoked     ?? false) value = this.resetValue is null ? default : this.resetValue.Value;

@@ -9,10 +9,10 @@ namespace Blackboard.Core.Data.Caps {
     /// <summary>This is the data storage for an IEEE 754 double value such that it can be used in generics.</summary>
     public struct Double:
         IAdditive<Double>,
-        S.IComparable<Double>,
+        IComparable<Double>,
         IData,
         IDivisible<Double>,
-        S.IEquatable<Double>,
+        IEquatable<Double>,
         IFinite<Double>,
         IFloatingPoint<Double>,
         IMultiplicative<Double>,

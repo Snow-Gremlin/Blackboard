@@ -40,12 +40,13 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>The identity of multiplication for this data type.</summary>
         static public readonly Int MulIdentity = One;
 
+        /// <summary>The identity of AND for this data type.</summary>
+        static public readonly Int AndIdentity = Max;
+
+        /// <summary>The identity of OR for this data type.</summary>
+        static public readonly Int OrIdentity = Zero;
+
         #endregion
-
-
-
-
-
 
         /// <summary>The integer value being stored.</summary>
         public readonly int Value;
@@ -53,12 +54,6 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Creates a new integer data value.</summary>
         /// <param name="value">The integer value to store.</param>
         public Int(int value) => this.Value = value;
-
-        /// <summary>Gets the name for the type of data.</summary>
-        public string TypeName => Type.Int.Name;
-
-        /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value.ToString();
 
         #region Additive...
 
@@ -73,7 +68,11 @@ namespace Blackboard.Core.Data.Caps {
         /// meaning that the order of the parents makes no difference to the result.
         /// </summary>
         /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
-        public bool CommutableSummation => true;
+        public bool SumCommutable => true;
+
+        /// <summary>The identity of summation for this data type.</summary>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        public Int SumIdentityValue => SumIdentity;
 
         #endregion
         #region Bitwise...
@@ -100,6 +99,14 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The result of the bitwise XOR.</returns>
         public Int BitwiseXor(IEnumerable<Int> other) => new(other.Aggregate(0, (t1, t2) => t1 ^ t2.Value));
 
+        /// <summary>The identity of AND fr this data type.</summary>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        public Int AndIdentityValue => AndIdentity;
+
+        /// <summary>The identity of OR fr this data type.</summary>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        public Int OrIdentityValue => OrIdentity;
+
         /// <summary>This gets the left shift of this value by the other value.</summary>
         /// <param name="other">The number of bits to shift by.</param>
         /// <returns>The left shifted value.</returns>
@@ -112,46 +119,25 @@ namespace Blackboard.Core.Data.Caps {
 
         #endregion
         #region Comparable...
+        
+        public static bool operator < (Int left, Int right) => left.CompareTo(right) <  0;
+        public static bool operator <=(Int left, Int right) => left.CompareTo(right) <= 0;
+        public static bool operator > (Int left, Int right) => left.CompareTo(right) >  0;
+        public static bool operator >=(Int left, Int right) => left.CompareTo(right) >= 0;
 
         /// <summary>Compares two integers together.</summary>
         /// <param name="other">The other integer to compare.</param>
         /// <returns>The comparison result indicating which is greater than, less than, or equal.</returns>
         public int CompareTo(Int other) => this.Value.CompareTo(other.Value);
 
-        public static bool operator ==(Int left, Int right) => left.CompareTo(right) == 0;
-        public static bool operator !=(Int left, Int right) => left.CompareTo(right) != 0;
-        public static bool operator < (Int left, Int right) => left.CompareTo(right) <  0;
-        public static bool operator <=(Int left, Int right) => left.CompareTo(right) <= 0;
-        public static bool operator > (Int left, Int right) => left.CompareTo(right) >  0;
-        public static bool operator >=(Int left, Int right) => left.CompareTo(right) >= 0;
+        #endregion
+        #region Data...
 
-        /// <summary>Checks if the given integer is equal to this data type.</summary>
-        /// <param name="other">This is the integer to test.</param>
-        /// <returns>True if they are equal, otherwise false.</returns>
-        public bool Equals(Int other) => this.Value == other.Value;
+        /// <summary>Gets the name for the type of data.</summary>
+        public string TypeName => Type.Int.Name;
 
-        /// <summary>Checks if the given object is equal to this data type.</summary>
-        /// <param name="obj">This is the object to test.</param>
-        /// <returns>True if they are equal, otherwise false.</returns>
-        public override bool Equals(object obj) => obj is Int other && this.Equals(other);
-
-        /// <summary>Gets the maximum value from the given other values.</summary>
-        /// <remarks>The current value is not used in the maximum value.</remarks>
-        /// <param name="other">The values to find the maximum from.</param>
-        /// <returns>The maximum value from this and the given vales.</returns>
-        public Int Max(IEnumerable<Int> other) => new(other.Max(t => t.Value));
-
-        /// <summary>Gets the minimum value from the given other values.</summary>
-        /// <remarks>The current value is not used in the minimum value.</remarks>
-        /// <param name="other">The values to find the minimum from.</param>
-        /// <returns>The minimum value from this and the given vales.</returns>
-        public Int Min(IEnumerable<Int> other) => new(other.Min(t => t.Value));
-
-        /// <summary>Gets this value clamped to the inclusive range of the given min and max.</summary>
-        /// <param name="min">The minimum allowed value.</param>
-        /// <param name="max">The maximum allowed value.</param>
-        /// <returns>The value clamped between the given values.</returns>
-        public Int Clamp(Int min, Int max) => new(S.Math.Clamp(this.Value, min.Value, max.Value));
+        /// <summary>Get the value of the data as a string.</summary>
+        public string ValueString => this.Value.ToString();
 
         #endregion
         #region Divisible...
@@ -168,27 +154,38 @@ namespace Blackboard.Core.Data.Caps {
         public Int Mod(Int other) => new(this.Value % other.Value);
 
         #endregion
-        #region Identities...
+        #region Equatable...
+
+        public static bool operator ==(Int left, Int right) => left.Equals(right);
+        public static bool operator !=(Int left, Int right) => !left.Equals(right);
+
+        /// <summary>Checks if the given integer is equal to this data type.</summary>
+        /// <param name="other">This is the integer to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
+        public bool Equals(Int other) => this.Value == other.Value;
+
+        #endregion
+        #region Finite...
 
         /// <summary>Gets this additive identity, zero.</summary>
         /// <remarks>The current value is not used when getting this identity.</remarks>
         /// <returns>The identity data value.</returns>
-        public Int Zero() => new(0);
+        public Int ZeroValue => Zero;
 
         /// <summary>Gets this multiplicative identity, one.</summary>
         /// <remarks>The current value is not used when getting this identity.</remarks>
         /// <returns>The identity data value.</returns>
-        public Int One() => new(1);
+        public Int OneValue => One;
 
         /// <summary>Gets the minimum value for this data type.</summary>
         /// <remarks>The current value is not used when getting this identity.</remarks>
         /// <returns>The minimum data value.</returns>
-        public Int MinValue() => new(int.MinValue);
+        public Int MinValue => Min;
 
         /// <summary>Gets the maximum value for this data type.</summary>
         /// <remarks>The current value is not used when getting this identity.</remarks>
         /// <returns>The maximum data value.</returns>
-        public Int MaxValue() => new(int.MaxValue);
+        public Int MaxValue => Max;
 
         #endregion
         #region Multiplicative...
@@ -204,7 +201,11 @@ namespace Blackboard.Core.Data.Caps {
         /// meaning that the order of the parents makes no difference to the result.
         /// </summary>
         /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
-        public bool CommutableMultiplication => true;
+        public bool MulCommutable => true;
+
+        /// <summary>The identity of multiplication for this data type.</summary>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        public Int MulIdentityValue => MulIdentity;
 
         #endregion
         #region Signed...
@@ -242,6 +243,11 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Gets the hash code of the stored value.</summary>
         /// <returns>The stored value's hash code.</returns>
         public override int GetHashCode() => this.Value.GetHashCode();
+
+        /// <summary>Checks if the given object is equal to this data type.</summary>
+        /// <param name="obj">This is the object to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
+        public override bool Equals(object obj) => obj is Int other && this.Equals(other);
 
         /// <summary>Gets the name of this data type and value.</summary>
         /// <returns>The name of the integer type and value.</returns>

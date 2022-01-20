@@ -38,6 +38,16 @@ namespace Blackboard.Core.Data.Interfaces {
         /// <returns>The result of the bitwise XOR.</returns>
         T BitwiseXor(IEnumerable<T> other);
 
+        /// <summary>The identity of AND for this data type.</summary>
+        /// <remarks>Typically this all bits are set true.</remarks>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        T AndIdentityValue { get; }
+
+        /// <summary>The identity of OR for this data type.</summary>
+        /// <remarks>Typically this all bits are set false.</remarks>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        T OrIdentityValue { get; }
+
         /// <summary>This gets the left shift of this value by the other value.</summary>
         /// <param name="other">The number of bits to shift by. This should always be positive.</param>
         /// <returns>The left shifted value.</returns>

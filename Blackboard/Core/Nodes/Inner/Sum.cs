@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
@@ -33,5 +34,14 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="values">The values to sum together.</param>
         /// <returns>The sum of the parent values.</returns>
         protected override T OnEval(IEnumerable<T> values) => new T().Sum(values);
+
+        /// <summary>
+        /// The identity element for the node which is a constant
+        /// to use when coalescing the node for optimization.
+        /// </summary>
+        public override IConstant Identity => default(T).SumIdentityValue.ToLiteral();
+
+        /// <summary>Indicates that the parents can be reordered.</summary>
+        public override bool Commutative => default(T).SumCommutable;
     }
 }

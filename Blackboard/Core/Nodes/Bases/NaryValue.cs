@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="TIn">The type of the all the parents' value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
     /// <see cref="https://en.wikipedia.org/wiki/Arity#n-ary"/>
-    public abstract class NaryValue<TIn, TResult>: ValueNode<TResult>, INaryChild<IValueParent<TIn>>
+    public abstract class NaryValue<TIn, TResult>: ValueNode<TResult>, INaryChild<IValueParent<TIn>>, ICoalescable
         where TIn : IData
         where TResult : IEquatable<TResult> {
 
@@ -79,5 +79,33 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <returns>True if the value was changed, false otherwise.</returns>
         protected override TResult CalcuateValue() =>
             this.OnEval(this.sources.NotNull().Values());
+
+        /// <summary>
+        /// The identity element for the node which is a constant to use when coalescing the node for optimization.
+        /// This identity is used in place of the node if there are no parents.
+        /// </summary>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        abstract public IConstant Identity { get; }
+
+        /// <summary>
+        /// Indicates that the parents can be reordered.
+        /// To be able to reorder the parents the data type must also be commutative
+        /// for the summation or multiplication being used in by the node.
+        /// </summary>
+        /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
+        virtual public bool Commutative => true;
+
+        /// <summary>
+        /// Indicates that parents of the same type as this node may be removed and
+        /// all of the parent's parents will be inserted at the same location as the parent node was.
+        /// </summary>
+        virtual public bool ParentIncorporate => true;
+
+        /// <summary>Indicates that the parents may be reduced to the smallest set.</summary>
+        /// <remarks>
+        /// If true then constant parents will be precomputed
+        /// and constant parents equal to the identity will be removed.
+        /// </remarks>
+        virtual public bool ParentReducable => true;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -28,5 +29,11 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="values">The parents to bitwise Exclusive OR together.</param>
         /// <returns>The bitwise Exclusive OR of all the given values.</returns>
         protected override T OnEval(IEnumerable<T> values) => new T().BitwiseXor(values);
+
+        /// <summary>
+        /// The identity element for the node which is a constant
+        /// to use when coalescing the node for optimization.
+        /// </summary>
+        public override IConstant Identity => default(T).OrIdentityValue.ToLiteral();
     }
 }

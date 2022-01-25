@@ -1,8 +1,7 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Parser.Optimization.Rules;
 using System.Collections.Generic;
 
 namespace Blackboard.Parser.Optimization {
@@ -12,24 +11,14 @@ namespace Blackboard.Parser.Optimization {
     /// and reduce the formula as much as possible. This will save memory, make
     /// comparisons faster, and improve performance of Blackboard's graph in slate.
     /// </summary>
-    sealed internal class Optimizer: IRule {
+    sealed internal class Optimizer {
         private List<IRule> rules;
 
         /// <summary>Creates a new optimizer.</summary>
         public Optimizer() {
             this.rules = new List<IRule>() {
                 new ConstantReduction(),
-                new NoEffectDegenerate().
-                    Add<All>().
-                    Add<And>().
-                    Add<Any>().
-                    Add<Average>().
-                    Add<BitwiseAnd<Int>>().
-                    Add<BitwiseAnd<Int>>().
-                    Add<Sum<Int>>().
-                    Add<Sum<Double>>().
-                    Add<Sum<String>>(),
-
+                new Coalescer(),
 
 
                 // TODO: Add ruled for node specific reductions:
@@ -117,9 +106,13 @@ namespace Blackboard.Parser.Optimization {
         /// <param name="logger">The logger to debug and inspect the optimization.</param>
         /// <remarks>The node to replace the given root with or the given root.</remarks>
         public INode Perform(Slate slate, INode root, HashSet<INode> nodes, ILogger logger = null) {
-            foreach (IRule rule in this.rules)
-                root = rule.Perform(slate, root, nodes, logger) ?? root;
-            return root;
+            RuleArgs args = new(slate, root, nodes, logger);
+            while (args.Changed) {
+                args.Changed = false;
+                foreach (IRule rule in this.rules)
+                    rule.Perform(args);
+            }
+            return args.Root;
         }
     }
 }

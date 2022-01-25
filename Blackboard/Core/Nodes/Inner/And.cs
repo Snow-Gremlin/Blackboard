@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -28,5 +29,11 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="values">The parents to AND together.</param>
         /// <returns>The AND of all the given values.</returns>
         protected override Bool OnEval(IEnumerable<Bool> values) => new(values.All(val => val.Value));
+
+        /// <summary>
+        /// The identity element for the node which is a constant
+        /// to use when coalescing the node for optimization.
+        /// </summary>
+        public override IConstant Identity => Literal.Bool(true);
     }
 }

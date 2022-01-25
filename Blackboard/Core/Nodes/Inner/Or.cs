@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -28,5 +29,11 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="values">The parents to OR together.</param>
         /// <returns>The OR of all the given values.</returns>
         protected override Bool OnEval(IEnumerable<Bool> values) => new(values.Any(val => val.Value));
+
+        /// <summary>
+        /// The identity element for the node which is a constant
+        /// to use when coalescing the node for optimization.
+        /// </summary>
+        public override IConstant Identity => Bool.False.ToLiteral();
     }
 }

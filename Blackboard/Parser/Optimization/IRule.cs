@@ -1,19 +1,10 @@
-﻿using Blackboard.Core;
-using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
-
-namespace Blackboard.Parser.Optimization {
+﻿namespace Blackboard.Parser.Optimization {
 
     /// <summary>The interface for an optimization rule.</summary>
     internal interface IRule {
 
         /// <summary>Performs optimization on the given nodes and surrounding nodes.</summary>
-        /// <param name="slate">The slate the formula is for.</param>
-        /// <param name="root">The root node of the tree to optimize.</param>
-        /// <param name="nodes">The new nodes for a formula which need to be optimized.</param>
-        /// <param name="logger">The logger to debug and inspect the optimization.</param>
-        /// <remarks>The node to replace the given root with or the given root.</remarks>
-        public INode Perform(Slate slate, INode root, HashSet<INode> nodes, ILogger logger = null);
+        /// <param name="args">The arguments for the optimization rules.</param>
+        public void Perform(RuleArgs args);
     }
 }

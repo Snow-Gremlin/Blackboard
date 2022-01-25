@@ -5,7 +5,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Parser.Optimization {
+namespace Blackboard.Parser.Optimization.Rules {
 
     /// <summary>
     /// This is an optimization rule for finding constant branches and replacing them with literals.
@@ -14,9 +14,6 @@ namespace Blackboard.Parser.Optimization {
     /// store the constant if one by that value doesn't exist yet.
     /// </summary>
     sealed internal class ConstantReduction: IRule {
-
-        /// <summary>Creates a new constant reduction rule.</summary>
-        public ConstantReduction() { }
 
         /// <summary>
         /// This evaluates down the branch starting from the given node
@@ -40,7 +37,7 @@ namespace Blackboard.Parser.Optimization {
         /// <param name="nodes">The formula nodes to optimize.</param>
         /// <param name="logger">The logger to debug and inspect the optimization.</param>
         /// <remarks>The node to replace the given one in the parent or null to not replace.</remarks>
-        public INode Perform(Slate slate, INode node, HashSet<INode> nodes, ILogger logger = null) {
+        private INode reduceNode(Slate slate, INode node, HashSet<INode> nodes, ILogger logger) {
             // If this node is not part of the new nodes, just return it.
             if (!nodes.Contains(node)) return null;
 
@@ -64,12 +61,19 @@ namespace Blackboard.Parser.Optimization {
 
             // Check each parent in the child node.
             foreach (IParent parent in child.Parents.ToList()) {
-                INode newNode = this.Perform(slate, parent, nodes, logger);
+                INode newNode = this.reduceNode(slate, parent, nodes, logger);
                 if (newNode is not null and IParent newParent)
                     child.ReplaceParent(parent, newParent);
             }
 
             return null;
+        }
+
+        /// <summary>Finds all constant branches and replaces each branch with literals.</summary>
+        /// <param name="args">The arguments for the optimization rules.</param>
+        public void Perform(RuleArgs args) {
+            INode newNode = this.reduceNode(args.Slate, args.Root, args.Nodes, args.Logger);
+            if (newNode is not null) args.Root = newNode;
         }
     }
 }

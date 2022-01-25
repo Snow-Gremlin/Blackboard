@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -28,5 +29,11 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="values">The parents' values to get the min of.</param>
         /// <returns>The minimum value from all the parents.</returns>
         protected override T OnEval(IEnumerable<T> values) => values.Min();
+
+        /// <summary>
+        /// The identity element for the node which is a constant
+        /// to use when coalescing the node for optimization.
+        /// </summary>
+        public override IConstant Identity => default(T).ToLiteral();
     }
 }

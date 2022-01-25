@@ -41,6 +41,12 @@ namespace Blackboard.Core.Nodes.Outer {
                 _        => throw new Exception("Unexpected value type in literal creation").
                                With("Value", value)
             };
+
+        /// <summary></summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        static public Literal<T> Data<T>(T value) where T : IEquatable<T> => new(value);
     }
 
     /// <summary>This is a literal value.</summary>

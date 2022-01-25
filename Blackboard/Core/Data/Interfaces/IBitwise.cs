@@ -38,13 +38,13 @@ namespace Blackboard.Core.Data.Interfaces {
         /// <returns>The result of the bitwise XOR.</returns>
         T BitwiseXor(IEnumerable<T> other);
 
-        /// <summary>The identity of AND for this data type.</summary>
+        /// <summary>The identity of bitwise AND for this data type.</summary>
         /// <remarks>Typically this all bits are set true.</remarks>
         /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
         T AndIdentityValue { get; }
 
-        /// <summary>The identity of OR for this data type.</summary>
-        /// <remarks>Typically this all bits are set false.</remarks>
+        /// <summary>The identity of bitwise OR for this data type.</summary>
+        /// <remarks>Typically this all bits are set false. This works as an XOR identity too.</remarks>
         /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
         T OrIdentityValue { get; }
 

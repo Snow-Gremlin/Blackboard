@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 
 namespace Blackboard.Core.Extensions {
 
@@ -119,5 +120,11 @@ namespace Blackboard.Core.Extensions {
                 _         => throw new Exception("Unexpected input type in explicit cast").
                                 With("Input", value)
             };
+
+        /// <summary>Creates a literal for the value of this data.</summary>
+        /// <typeparam name="T">The type of data to create a literal with.</typeparam>
+        /// <param name="value">The value to create a literal with.</param>
+        /// <returns>The literal for the current data value.</returns>
+        static public Literal<T> ToLiteral<T>(this T value) where T : IEquatable<T> => new(value);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using S = System;
 
@@ -8,7 +9,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
     /// <summary>This is a trigger node which has several parents.</summary>
     /// <see cref="https://en.wikipedia.org/wiki/Arity#n-ary"/>
-    public abstract class NaryTrigger: TriggerNode, INaryChild<ITriggerParent> {
+    public abstract class NaryTrigger: TriggerNode, INaryChild<ITriggerParent>, ICoalescable {
 
         /// <summary>This is a helper for creating unary node factories quickly.</summary>
         /// <param name="handle">The handler for calling the node constructor.</param>
@@ -75,5 +76,33 @@ namespace Blackboard.Core.Nodes.Bases {
         /// </summary>
         /// <returns>True if this trigger should be provoked, false if not.</returns>
         protected override bool ShouldProvoke() => this.OnEval(this.sources.NotNull().Triggers());
+
+        /// <summary>
+        /// The identity element for the node which is a constant to use when coalescing the node for optimization.
+        /// This identity is used in place of the node if there are no parents.
+        /// </summary>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        virtual public IConstant Identity => new ConstTrigger();
+
+        /// <summary>
+        /// Indicates that the parents can be reordered.
+        /// To be able to reorder the parents the data type must also be commutative
+        /// for the summation or multiplication being used in by the node.
+        /// </summary>
+        /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
+        virtual public bool Commutative => true;
+
+        /// <summary>
+        /// Indicates that parents of the same type as this node may be removed and
+        /// all of the parent's parents will be inserted at the same location as the parent node was.
+        /// </summary>
+        virtual public bool ParentIncorporate => true;
+
+        /// <summary>Indicates that the parents may be reduced to the smallest set.</summary>
+        /// <remarks>
+        /// If true then constant parents will be precomputed
+        /// and constant parents equal to the identity will be removed.
+        /// </remarks>
+        virtual public bool ParentReducable => true;
     }
 }

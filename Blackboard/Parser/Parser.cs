@@ -290,12 +290,7 @@ namespace Blackboard.Parser {
             INode value = builder.Nodes.Pop();
             Type type = builder.Types.Peek();
             string name = builder.Identifiers.Pop();
-            INode castValue = builder.PerformCast(type, value);
-
-            VirtualNode curScope = builder.Scope.Current;
-            IEnumerable<INode> allNewNodes = builder.PrepareTree(castValue);
-            builder.Actions.Add(new Define(curScope.Receiver, name, castValue, allNewNodes));
-            curScope.WriteField(name, castValue);
+            builder.AddDefine(value, type, name);
         }
 
         /// <summary>This handles defining a new untyped named node.</summary>
@@ -303,17 +298,14 @@ namespace Blackboard.Parser {
         static private void handleVarDefine(Builder builder) {
             INode value = builder.Nodes.Pop();
             string name = builder.Identifiers.Pop();
-
-            IEnumerable<INode> allNewNodes = builder.PrepareTree(value);
-            builder.Actions.Add(new Define(builder.Scope.Current.Receiver, name, value, allNewNodes));
-            builder.Scope.Current.WriteField(name, value);
+            builder.AddDefine(value, null, name);
         }
 
         /// <summary>This handles when a trigger is provoked unconditionally.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleProvokeTrigger(Builder builder) {
             INode target = builder.Nodes.Pop();
-            builder.Actions.Add(Provoke.Create(builder.LastLocation, target));
+            builder.AddProvokeTrigger(target, null);
         }
 
         /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
@@ -321,37 +313,29 @@ namespace Blackboard.Parser {
         static private void handleConditionalProvokeTrigger(Builder builder) {
             INode target = builder.Nodes.Pop();
             INode value  = builder.Nodes.Pop();
-            if (target is not ITriggerInput input)
-                throw new Exception("Target node is not an input trigger.").
-                    With("Target", target).
-                    With("Value", value).
-                    With("Location", builder.LastLocation);
-
-            INode castValue = builder.PerformCast(Type.Trigger, value);
-            IEnumerable<INode> allNewNodes = builder.PrepareTree(castValue);
-            builder.Actions.Add(new Provoke(input, castValue as ITrigger, allNewNodes));
+            INode root   = builder.AddProvokeTrigger(target, value);
 
             // Push the condition onto the stack for any following trigger pulls.
             // See comment in `handleAssignment` about pushing cast value back onto the stack.
-            builder.Nodes.Push(castValue);
-            builder.Existing.Add(castValue);
+            builder.Nodes.Push(root);
+            builder.Existing.Add(root);
         }
 
         /// <summary>This handles getting the typed left value and writing it out to the given name.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleTypeGet(Builder builder) {
-            INode value = builder.Nodes.Pop();
-            Type type = builder.Types.Peek();
-            string name = builder.Identifiers.Pop();
+            INode  value = builder.Nodes.Pop();
+            Type   type  = builder.Types.Peek();
+            string name  = builder.Identifiers.Pop();
             builder.AddGetter(type, name, value);
         }
 
         /// <summary>This handles getting the variable type left value and writing it out to the given name.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleVarGet(Builder builder) {
-            INode value = builder.Nodes.Pop();
-            string name = builder.Identifiers.Pop();
-            Type type = Type.TypeOf(value);
+            INode  value = builder.Nodes.Pop();
+            string name  = builder.Identifiers.Pop();
+            Type   type  = Type.TypeOf(value);
             builder.AddGetter(type, name, value);
         }
 
@@ -360,7 +344,7 @@ namespace Blackboard.Parser {
         static private void handleAssignment(Builder builder) {
             INode value  = builder.Nodes.Pop();
             INode target = builder.Nodes.Pop();
-            INode castValue = builder.AddAssignment(target, value);
+            INode root   = builder.AddAssignment(target, value);
 
             // Push the cast value back onto the stack for any following assignments.
             // By using the cast it makes it more like `X=Y=Z` is `Y=Z; X=Y;` but means that if a double and an int are being set by
@@ -368,10 +352,10 @@ namespace Blackboard.Parser {
             // to a double but not be able to implicitly cast that double back to an int. For example: if `int X; double Y;` then
             // `Y=X=3;` works and `X=Y=3` will not. One drawback for this way is that if you assign an int to multiple doubles it will
             // construct multiple cast nodes, but with a little optimization to remove duplicate node paths, this isn't an issue. 
-            // Alternatively, if we push he value then `X=Y=Z` will be like `Y=Z; X=Z;`.
-            builder.Nodes.Push(castValue);
+            // Alternatively, if we push he value then `X=Y=Z` will be like `Y=Z; X=Z;`, but we won't.
+            builder.Nodes.Push(root);
             // Add to existing since the first assignment will handle preparing the tree being assigned.
-            builder.Existing.Add(castValue);
+            builder.Existing.Add(root);
         }
 
         /// <summary>This handles performing a type cast of a node.</summary>

@@ -4,7 +4,7 @@
     /// This interface indicates a node can be coalesced while optimizing.
     /// This is used by several optimization rules and may be extended for new optimizations.
     /// </summary>
-    public interface ICoalescable {
+    public interface ICoalescable: IChild {
 
         /// <summary>
         /// The identity element for the node which is a constant to use when coalescing the node for optimization.
@@ -25,6 +25,7 @@
         /// <summary>
         /// Indicates that parents of the same type as this node may be removed and
         /// all of the parent's parents will be inserted at the same location as the parent node was.
+        /// This may only be true for INaryChild nodes which allow multiple parents.
         /// </summary>
         /// <remarks>
         /// This will not work for nodes like average since the average of averages

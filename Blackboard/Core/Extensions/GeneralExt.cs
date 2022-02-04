@@ -60,6 +60,23 @@ namespace Blackboard.Core.Extensions {
         static public bool ContainsAny<T>(this IEnumerable<T> a, IEnumerable<T> b, IEqualityComparer<T> comparer = null) =>
             a.Any((value) => b.Contains(value, comparer));
 
+        /// <summary>Determines if the given enumerator has the given count.</summary>
+        /// <remarks>
+        /// This is faster than `a.Count() == count` because it will shortcut
+        /// if the enumerator is over the count t check against.
+        /// </remarks>
+        /// <typeparam name="T">The types of the value to count.</typeparam>
+        /// <param name="a">The values to check the count with.</param>
+        /// <param name="count">The count to check against.</param>
+        /// <returns>True if there are the same number of given values as the given count</returns>
+        static public bool IsCount<T>(this IEnumerable<T> a, int count) {
+            foreach (T value in a) {
+                count--;
+                if (count < 0) return false;
+            }
+            return count == 0;
+        }
+
         /// <summary>This will enumerate the given list then for each additional call it will return the last value.</summary>
         /// <remarks>This will continue forever so you must provide another part of the enumerations to stop it, such as a zip.</remarks>
         /// <typeparam name="T">The type of the list to enumerate.</typeparam>

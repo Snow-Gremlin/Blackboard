@@ -138,9 +138,9 @@ namespace Blackboard.Core.Extensions {
             return anyRemoved;
         }
 
-        /// <summary>This replaces all instances of given parents from this node collection.</summary>
+        /// <summary>This replaces all instances of given parent from this node collection.</summary>
         /// <param name="sources">The node source list to replace the parents inside of.</param>
-        /// <param name="child">The child this sources are for.</param>
+        /// <param name="child">The child these sources are for.</param>
         /// <param name="oldParent">The old parent to replace.</param>
         /// <param name="newParent">The new parent to replace the old parent with.</param>
         /// <returns>True if any of the parents are replaced, false if none were removed.</returns>
@@ -151,6 +151,8 @@ namespace Blackboard.Core.Extensions {
             for (int i = sources.Count - 1; i >= 0; i--) {
                 T node = sources[i];
                 if (!ReferenceEquals(node, oldParent)) continue;
+
+                // Now that at least one parent will be replaced, check that the new parent can be used.
                 if (!typeChecked && newParent is not null and not T)
                     throw new Exception("Unable to replace old parent with new parent in a list.").
                         With("child", child).
@@ -159,6 +161,8 @@ namespace Blackboard.Core.Extensions {
                         With("old Parent", oldParent).
                         With("new Parent", newParent);
                 typeChecked = true;
+
+                // Replace parent in list of sources.
                 node?.RemoveChildren(child);
                 sources[i] = newParent as T;
                 replaced = true;

@@ -33,7 +33,7 @@ namespace Blackboard.Core.Actions {
             this.Name = name;
             this.Node = node;
             this.needParents = allNewNodes is null ? S.Array.Empty<IChild>() :
-                allNewNodes.NotNull().OfType<IChild>().Where(child => child.NeedsToAddParents()).ToArray();
+                allNewNodes.NotNull().OfType<IChild>().Where(child => child.Illegitimate()).ToArray();
 
             // TODO: Need to validate these nodes, value, etc is ready for this type of action.
         }
@@ -57,7 +57,7 @@ namespace Blackboard.Core.Actions {
         public void Perform(Slate slate, Result result, ILogger logger = null) {
             logger?.Log("Define: {0}", this);
             this.Receiver.WriteField(this.Name, this.Node);
-            List<IChild> changed = this.needParents.Where(child => child.AddToParents()).ToList();
+            List<IChild> changed = this.needParents.Where(child => child.Legitimatize()).ToList();
             slate.PendUpdate(changed);
             slate.PendEval(changed);
         }

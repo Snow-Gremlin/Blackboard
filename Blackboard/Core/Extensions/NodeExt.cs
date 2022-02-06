@@ -80,34 +80,50 @@ namespace Blackboard.Core.Extensions {
         /// </summary>
         /// <param name="child">The child to add to the parents.</param>
         /// <returns>True if this child was added to any parent.</returns>
-        static public bool AddToParents(this IChild child) {
+        static public bool Legitimatize(this IChild child) {
             bool anyAdded = false;
             foreach (IParent parent in child.Parents)
                 anyAdded = (parent?.AddChildren(child) ?? false) || anyAdded;
             return anyAdded;
         }
 
-        /// <summary>Checks if any parent doesn't contain this child.</summary>
-        /// <param name="child">The child to check.</param>
+        /// <summary>Checks if any parent of this child doesn't contain this child.</summary>
+        /// <remarks>
+        /// When new nodes are being added into the graph, they will know the parents
+        /// they belong to but not all of their parents will not know about them yet.
+        /// Once the newly created nodes have been optimized and validated, the node needs
+        /// to be added as a child into the parent nodes, legitimatize the child,
+        /// until then, the child is illegitimate.
+        /// 
+        /// The main idea for doing this for two reasons:
+        /// First, when only evaluating nodes to determine a value during a get or assign the child
+        /// node will stay illegitimate. This means they won't automatically update when they
+        /// don't have to update, only when the value is needed.
+        /// Second, if the nodes in a branch are only legitimate to other nodes in a branch but
+        /// illegitimate to any parent in the graph, then the pointer to the root of the branch
+        /// can be discarded and the whole branch will be garbage collected, since no parent
+        /// fully inserted into the graph know about the children in the branches.
+        /// </remarks>
+        /// <param name="child">The child to check all the parents of.</param>
         /// <returns>True if any parent doesn't contain this child, false otherwise.</returns>
-        static public bool NeedsToAddParents(this IChild child) =>
-            !child.Parents.All(parent => parent.Children.Contains(child));
+        static public bool Illegitimate(this IChild child) =>
+            child.Parents.Any(parent => !parent.Children.Contains(child));
 
-        /// <summary>This adds parents to this node.</summary>
+        #endregion
+        #region INaryChild...
+
+        /// <summary>This adds parents to this n-ary node.</summary>
         /// <typeparam name="T">The type of parent used for this child.</typeparam>
         /// <param name="parents">The set of parents to add.</param>
         static public void AddParents<T>(this INaryChild<T> child, params T[] parents)
             where T : IParent => child.AddParents(parents);
 
-        /// <summary>This removes the given parents from this node.</summary>
+        /// <summary>This removes the given parents from this n-ary node.</summary>
         /// <typeparam name="T">The type of parent used for this child.</typeparam>
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
         static public bool RemoveParents<T>(this INaryChild<T> child, params T[] parents)
             where T : IParent => child.RemoveParents(parents);
-
-        #endregion
-        #region IParent...
 
         /// <summary>This adds parents to this node.</summary>
         /// <remarks>
@@ -115,6 +131,7 @@ namespace Blackboard.Core.Extensions {
         /// Do not add this child to the new parent yet,
         /// so we can read from the parents when only evaluating.
         /// </remarks>
+        /// <typeparam name="T">The type of the parents to add.</typeparam>
         /// <param name="sources">The node source list to add the parents to.</param>
         /// <param name="parents">The set of parents to add.</param>
         static internal void AddParents<T>(this List<T> sources, IEnumerable<T> parents)
@@ -122,6 +139,7 @@ namespace Blackboard.Core.Extensions {
             sources.AddRange(parents.NotNull());
 
         /// <summary>This removes the given parents from this node collection.</summary>
+        /// <typeparam name="T">The type of the parents to remove.</typeparam>
         /// <param name="sources">The node source list to remove the parents from.</param>
         /// <param name="child">The child this sources are for.</param>
         /// <param name="parents">The set of parents to remove.</param>
@@ -139,6 +157,7 @@ namespace Blackboard.Core.Extensions {
         }
 
         /// <summary>This replaces all instances of given parent from this node collection.</summary>
+        /// <typeparam name="T">The type of the parents to replace.</typeparam>
         /// <param name="sources">The node source list to replace the parents inside of.</param>
         /// <param name="child">The child these sources are for.</param>
         /// <param name="oldParent">The old parent to replace.</param>
@@ -169,6 +188,38 @@ namespace Blackboard.Core.Extensions {
             }
             return replaced;
         }
+
+        /// <summary>This will attempt to set all the parents in a node.</summary>
+        /// <remarks>This will throw an exception if there isn't the correct types.</remarks>
+        /// <typeparam name="T">The type of the parents to set.</typeparam>
+        /// <param name="sources">The node source list to replace the parents inside of.</param>
+        /// <param name="child">The child these sources are for.</param>
+        /// <param name="newParents">The parents to set.</param>
+        static internal bool SetAllParents<T>(this List<T> sources, IChild child, List<IParent> newParents)
+            where T : IParent {
+            IChild.CheckParentsBeingSet(newParents, true, typeof(T));
+            int oldCount = sources.Count;
+            int newCount = newParents.Count;
+            int minCount = S.Math.Min(oldCount, newCount);
+
+            bool changed = oldCount != newCount;
+            for (int i = 0; i < minCount; ++i) {
+                if (!ReferenceEquals(sources[i], newParents[i])) {
+                    bool removed = sources[i]?.RemoveChildren(child) ?? false;
+                    if (removed) newParents[i]?.AddChildren(child);
+                    changed = true;
+                }
+            }
+
+            for (int i = minCount; i < oldCount; ++i)
+                sources[i]?.RemoveChildren(child);
+            sources.Clear();
+            sources.AddRange(newParents.OfType<T>());
+            return changed;
+        }
+
+        #endregion
+        #region IParent...
 
         /// <summary>This will check if from the given root node any of the given target nodes can be reachable.</summary>
         /// <param name="root">The root to start checking from.</param>

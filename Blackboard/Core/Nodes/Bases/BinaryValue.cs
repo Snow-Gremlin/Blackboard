@@ -1,7 +1,9 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 using S = System;
 
 namespace Blackboard.Core.Nodes.Bases {
@@ -58,6 +60,16 @@ namespace Blackboard.Core.Nodes.Bases {
         public bool ReplaceParent(IParent oldParent, IParent newParent) =>
             IChild.ReplaceParent(this, ref this.source1, oldParent, newParent) |
             IChild.ReplaceParent(this, ref this.source2, oldParent, newParent);
+
+        /// <summary>This will attempt to set all the parents in a node.</summary>
+        /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
+        /// <param name="newParents">The parents to set.</param>
+        /// <returns>True if any parents changed, false if they were all the same.</returns>
+        public bool SetAllParents(List<IParent> newParents) {
+            IChild.CheckParentsBeingSet(newParents, false, typeof(IValueParent<T1>), typeof(IValueParent<T2>));
+            return IChild.SetParent(this, ref this.source1, newParents[0] as IValueParent<T1>) |
+                   IChild.SetParent(this, ref this.source2, newParents[1] as IValueParent<T2>);
+        }
 
         /// <summary>This handles updating this node's value given the parents' values during evaluation.</summary>
         /// <remarks>This will not be called if any of the parents are null.</remarks>

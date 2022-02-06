@@ -78,17 +78,24 @@ namespace Blackboard.Core.Extensions {
         }
 
         /// <summary>This will enumerate the given list then for each additional call it will return the last value.</summary>
-        /// <remarks>This will continue forever so you must provide another part of the enumerations to stop it, such as a zip.</remarks>
+        /// <remarks>
+        /// This will continue for the given maximum loops, so you must provide another part of the enumerations to stop it,
+        /// such as a zip. The maximum number of loops is to prevent this from being an infinite loop. Set it to more than
+        /// is reasonably going to be reached. For example, using this for a function type matching can limit to 1,000 because
+        /// it is unreasonable to have a function with that many arguments being passed into it.
+        /// </remarks>
         /// <typeparam name="T">The type of the list to enumerate.</typeparam>
         /// <param name="values">The values to enumerate and then repeat the last of.</param>
+        /// <param name="maxLoops">The maximum number of times the last value is repeated.</param>
         /// <returns>The enumeration of the values and repeated last. If no input values then default is returned.</returns>
-        static public IEnumerable<T> RepeatLast<T>(this IEnumerable<T> values) {
+        static public IEnumerable<T> RepeatLast<T>(this IEnumerable<T> values, int maxLoops = 1000) {
             T prev = default;
             foreach (T value in values) {
                 prev = value;
                 yield return value;
             }
-            while (true) yield return prev;
+            for (int i = 0; i < maxLoops; ++i)
+                yield return prev;
         }
 
         /// <summary>This will expand several enumerable sets into one joined enumerable.</summary>

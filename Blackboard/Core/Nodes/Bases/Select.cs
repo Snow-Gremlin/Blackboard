@@ -69,6 +69,17 @@ namespace Blackboard.Core.Nodes.Bases {
             IChild.ReplaceParent(this, ref this.source2, oldParent, newParent) |
             IChild.ReplaceParent(this, ref this.source3, oldParent, newParent);
 
+        /// <summary>This will attempt to set all the parents in a node.</summary>
+        /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
+        /// <param name="newParents">The parents to set.</param>
+        /// <returns>True if any parents changed, false if they were all the same.</returns>
+        public bool SetAllParents(List<IParent> newParents) {
+            IChild.CheckParentsBeingSet(newParents, false, typeof(IValueParent<Bool>), typeof(T), typeof(T));
+            return IChild.SetParent(this, ref this.source1, newParents[0] as IValueParent<Bool>) |
+                   IChild.SetParent(this, ref this.source2, newParents[1] as T) |
+                   IChild.SetParent(this, ref this.source3, newParents[2] as T);
+        }
+
         /// <summary>The node which is currently selected.</summary>
         public T Selected { get; private set; }
 

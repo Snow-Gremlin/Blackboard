@@ -96,6 +96,20 @@ namespace Blackboard.Core.Nodes.Outer {
             IChild.ReplaceParent(this, ref this.delta,      oldParent, newParent) |
             IChild.ReplaceParent(this, ref this.resetValue, oldParent, newParent);
 
+        /// <summary>This will attempt to set all the parents in a node.</summary>
+        /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
+        /// <param name="newParents">The parents to set.</param>
+        /// <returns>True if any parents changed, false if they were all the same.</returns>
+        public bool SetAllParents(List<IParent> newParents) {
+            IChild.CheckParentsBeingSet(newParents, false, typeof(ITriggerParent), typeof(ITriggerParent),
+                typeof(ITriggerParent), typeof(IValueParent<T>), typeof(IValueParent<T>));
+            return IChild.SetParent(this, ref this.increment,  newParents[0] as ITriggerParent)  |
+                   IChild.SetParent(this, ref this.decrement,  newParents[1] as ITriggerParent)  |
+                   IChild.SetParent(this, ref this.reset,      newParents[2] as ITriggerParent)  |
+                   IChild.SetParent(this, ref this.delta,      newParents[3] as IValueParent<T>) |
+                   IChild.SetParent(this, ref this.resetValue, newParents[4] as IValueParent<T>);
+        }
+
         /// <summary>This sets the value of this node.</summary>
         /// <param name="value">The value to set.</param>
         /// <returns>True if the value has changed, false otherwise.</returns>

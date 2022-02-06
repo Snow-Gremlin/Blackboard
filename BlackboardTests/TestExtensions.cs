@@ -104,8 +104,8 @@ namespace BlackboardTests {
 
         /// <summary>Will assign all the children reachable via parents to the parents.</summary>
         /// <param name="node">The node to start adding to the parents from.</param>
-        static public void AddToAllParents(this INode node) =>
-            node.GetAllParents().OfType<IChild>().Foreach(child => child.AddToParents());
+        static public void LegitimatizeAll(this INode node) =>
+            node.GetAllParents().OfType<IChild>().Foreach(child => child.Legitimatize());
 
         /// <summary>Will perform depth update on all the nodes reachable from the parents.</summary>
         /// <param name="node">The node to start updating from and to get all parents and parent parents from.</param>

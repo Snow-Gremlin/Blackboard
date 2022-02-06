@@ -15,21 +15,23 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// </summary>
         /// <param name="node">The node to incorporate parents into.</param>
         static private void incorporateParents(ICoalescable node) {
-            S.Type nodeType = node.GetType();
             List<IParent> parents = node.Parents.ToList();
             for (int i = 0; i < parents.Count; ++i) {
                 IParent parent = parents[i];
-                if (nodeType.Equals(parent.GetType()) &&
+
+                if (node.GetType().Equals(parent.GetType()) &&
                     parent.Children.IsCount(1) &&
                     ReferenceEquals(parent.Children.First(), node)) {
+
                     // Incorporate the parent's parents here.
-
-
-
-
+                    parents.RemoveAt(i);
+                    if (parent is IChild childParent)
+                        parents.InsertRange(i, childParent.Parents);
+                    --i;
                 }
             }
 
+            // TODO: Set Parents
         }
 
         /// <summary></summary>

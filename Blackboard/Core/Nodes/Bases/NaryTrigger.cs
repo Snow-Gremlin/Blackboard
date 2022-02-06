@@ -3,6 +3,7 @@ using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
+using System.Linq;
 using S = System;
 
 namespace Blackboard.Core.Nodes.Bases {
@@ -51,6 +52,9 @@ namespace Blackboard.Core.Nodes.Bases {
         public bool RemoveParents(IEnumerable<ITriggerParent> parents) =>
             this.sources.RemoveParents(this, parents);
 
+        /// <summary>This removes all the parents from this node.</summary>
+        public void ClearParents() => this.sources.Clear();
+
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public IEnumerable<IParent> Parents => this.sources;
 
@@ -60,6 +64,13 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
         public bool ReplaceParent(IParent oldParent, IParent newParent) =>
             this.sources.ReplaceParents(this, oldParent, newParent);
+
+        /// <summary>This will attempt to set all the parents in a node.</summary>
+        /// <remarks>This will throw an exception if there isn't the correct types.</remarks>
+        /// <param name="newParents">The parents to set.</param>
+        /// <returns>True if any parents changed, false if they were all the same.</returns>
+        public bool SetAllParents(List<IParent> newParents) =>
+            this.sources.SetAllParents(this, newParents);
 
         /// <summary>
         /// This handles updating this node's value given the

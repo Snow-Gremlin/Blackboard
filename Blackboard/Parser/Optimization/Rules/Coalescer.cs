@@ -16,6 +16,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <param name="node">The node to incorporate parents into.</param>
         static private void incorporateParents(ICoalescable node) {
             List<IParent> parents = node.Parents.ToList();
+            bool changed = false;
             for (int i = 0; i < parents.Count; ++i) {
                 IParent parent = parents[i];
 
@@ -25,13 +26,20 @@ namespace Blackboard.Parser.Optimization.Rules {
 
                     // Incorporate the parent's parents here.
                     parents.RemoveAt(i);
-                    if (parent is IChild childParent)
+                    if (parent is IChild childParent) {
                         parents.InsertRange(i, childParent.Parents);
+                        foreach (IParent parentsParent in childParent.Parents) {
+                            bool removed = parentsParent?.RemoveChildren(childParent) ?? false;
+                            if (removed) parentsParent?.AddChildren(node);
+                        }
+                    }
                     --i;
+                    changed = true;
                 }
             }
 
-            // TODO: Set Parents
+            if (changed)
+                node.SetAllParents(parents);
         }
 
         /// <summary></summary>

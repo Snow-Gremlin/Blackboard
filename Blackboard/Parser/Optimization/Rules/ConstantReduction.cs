@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         private void updateValue(INode node, HashSet<INode> nodes) {
             if (!nodes.Contains(node)) return;
             if (node is IChild child) {
-                foreach (INode parent in child.Parents)
+                foreach (INode parent in child.Parents.Nodes)
                     this.updateValue(parent, nodes);
             }
             if (node is IEvaluable eval)
@@ -60,10 +61,11 @@ namespace Blackboard.Parser.Optimization.Rules {
             if (node is not IChild child) return null;
 
             // Check each parent in the child node.
-            foreach (IParent parent in child.Parents.ToList()) {
+            IParentCollection parents = child.Parents;
+            foreach (IParent parent in parents.Nodes.ToList()) {
                 INode newNode = this.reduceNode(slate, parent, nodes, logger);
                 if (newNode is not null and IParent newParent)
-                    child.ReplaceParent(parent, newParent);
+                    parents.ReplaceParent(parent, newParent);
             }
 
             return null;

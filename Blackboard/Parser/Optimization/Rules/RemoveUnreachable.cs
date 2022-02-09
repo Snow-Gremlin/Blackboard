@@ -14,7 +14,7 @@ namespace Blackboard.Parser.Optimization.Rules {
             if (!newNodes.Contains(node)) return;
             reached.Add(node);
             if (node is IChild child) {
-                foreach (IParent parent in child.Parents)
+                foreach (IParent parent in child.Parents.Nodes)
                     this.findReachable(parent, newNodes, reached);
             }
         }

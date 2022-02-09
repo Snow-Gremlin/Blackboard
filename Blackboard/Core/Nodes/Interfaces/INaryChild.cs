@@ -15,8 +15,5 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// <param name="parents">The set of parents to remove.</param>
         /// <returns>True if any of the parents are removed, false if none were removed.</returns>
         public bool RemoveParents(IEnumerable<T> parents);
-
-        /// <summary>This removes all the parents from this node.</summary>
-        public void ClearParents();
     }
 }

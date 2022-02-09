@@ -1,8 +1,8 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Outer {
 
@@ -82,33 +82,12 @@ namespace Blackboard.Core.Nodes.Outer {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<IParent> Parents =>
-            IChild.EnumerateParents(this.increment, this.decrement, this.reset, this.delta, this.resetValue);
-        
-        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
-        /// <param name="oldParent">The old parent to find all instances with.</param>
-        /// <param name="newParent">The new parent to replace each instance with.</param>
-        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
-        public bool ReplaceParent(IParent oldParent, IParent newParent) =>
-            IChild.ReplaceParent(this, ref this.increment,  oldParent, newParent) |
-            IChild.ReplaceParent(this, ref this.decrement,  oldParent, newParent) |
-            IChild.ReplaceParent(this, ref this.reset,      oldParent, newParent) |
-            IChild.ReplaceParent(this, ref this.delta,      oldParent, newParent) |
-            IChild.ReplaceParent(this, ref this.resetValue, oldParent, newParent);
-
-        /// <summary>This will attempt to set all the parents in a node.</summary>
-        /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
-        /// <param name="newParents">The parents to set.</param>
-        /// <returns>True if any parents changed, false if they were all the same.</returns>
-        public bool SetAllParents(List<IParent> newParents) {
-            IChild.CheckParentsBeingSet(newParents, false, typeof(ITriggerParent), typeof(ITriggerParent),
-                typeof(ITriggerParent), typeof(IValueParent<T>), typeof(IValueParent<T>));
-            return IChild.SetParent(this, ref this.increment,  newParents[0] as ITriggerParent)  |
-                   IChild.SetParent(this, ref this.decrement,  newParents[1] as ITriggerParent)  |
-                   IChild.SetParent(this, ref this.reset,      newParents[2] as ITriggerParent)  |
-                   IChild.SetParent(this, ref this.delta,      newParents[3] as IValueParent<T>) |
-                   IChild.SetParent(this, ref this.resetValue, newParents[4] as IValueParent<T>);
-        }
+        public IParentCollection Parents => new FixedParents(this).
+            With(() => this.increment,  (ITriggerParent  parent) => this.increment  = parent).
+            With(() => this.decrement,  (ITriggerParent  parent) => this.decrement  = parent).
+            With(() => this.reset,      (ITriggerParent  parent) => this.reset      = parent).
+            With(() => this.delta,      (IValueParent<T> parent) => this.delta      = parent).
+            With(() => this.resetValue, (IValueParent<T> parent) => this.resetValue = parent);
 
         /// <summary>This sets the value of this node.</summary>
         /// <param name="value">The value to set.</param>

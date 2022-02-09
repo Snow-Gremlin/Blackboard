@@ -353,17 +353,17 @@ namespace Blackboard.Core.Inspect {
         private string nodeDataValue(INode node, int depth, bool first) =>
             this.ShowAllDataValues ? getDataValue(node) :
             this.ShowFirstDataValues && first ? getDataValue(node) :
-            this.ShowLastDataValues && (depth <= 1 || node is not IChild child || !child.Parents.Any()) ? getDataValue(node) : "";
+            this.ShowLastDataValues && (depth <= 1 || node is not IChild child || !child.Parents.Nodes.Any()) ? getDataValue(node) : "";
 
         /// <summary>Gets a string for the parents of the given node</summary>
         /// <param name="node">The node to get the parents from.</param>
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <returns>The string for the parents of the given node.</returns>
         private string parents(INode node, int depth) =>
-            !this.ShowParents || depth <= 1 || node is not IChild child || !child.Parents.Any() ? "" :
+            !this.ShowParents || depth <= 1 || node is not IChild child || !child.Parents.Nodes.Any() ? "" :
             node switch {
                 IFuncDef => "",
-                _        => "(" + this.stringNode(child.Parents, depth-1, true, false) + ")",
+                _        => "(" + this.stringNode(child.Parents.Nodes, depth-1, true, false) + ")",
             };
 
         /// <summary>Gets a string for the tailing nodes.</summary>

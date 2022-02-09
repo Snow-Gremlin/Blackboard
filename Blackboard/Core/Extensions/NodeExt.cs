@@ -32,7 +32,7 @@ namespace Blackboard.Core.Extensions {
         /// <returns>True if constant, false otherwise.</returns>
         static public bool IsConstant(this INode node) =>
             node is IConstant ||
-            (node is not IInput && node is IChild child && child.Parents.IsConstant());
+            (node is not IInput && node is IChild child && child.Parents.Nodes.IsConstant());
 
         /// <summary>This determines if all the given nodes are constant.</summary>
         /// <param name="nodes">The nodes to check if constant.</param>
@@ -82,7 +82,7 @@ namespace Blackboard.Core.Extensions {
         /// <returns>True if this child was added to any parent.</returns>
         static public bool Legitimatize(this IChild child) {
             bool anyAdded = false;
-            foreach (IParent parent in child.Parents)
+            foreach (IParent parent in child.Parents.Nodes)
                 anyAdded = (parent?.AddChildren(child) ?? false) || anyAdded;
             return anyAdded;
         }
@@ -107,7 +107,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="child">The child to check all the parents of.</param>
         /// <returns>True if any parent doesn't contain this child, false otherwise.</returns>
         static public bool Illegitimate(this IChild child) =>
-            child.Parents.Any(parent => !parent.Children.Contains(child));
+            child.Parents.Nodes.Any(parent => !parent.Children.Contains(child));
 
         #endregion
         #region INaryChild...
@@ -156,68 +156,6 @@ namespace Blackboard.Core.Extensions {
             return anyRemoved;
         }
 
-        /// <summary>This replaces all instances of given parent from this node collection.</summary>
-        /// <typeparam name="T">The type of the parents to replace.</typeparam>
-        /// <param name="sources">The node source list to replace the parents inside of.</param>
-        /// <param name="child">The child these sources are for.</param>
-        /// <param name="oldParent">The old parent to replace.</param>
-        /// <param name="newParent">The new parent to replace the old parent with.</param>
-        /// <returns>True if any of the parents are replaced, false if none were removed.</returns>
-        static internal bool ReplaceParents<T>(this List<T> sources, IChild child, IParent oldParent, IParent newParent)
-            where T : class, IParent {
-            bool replaced = false;
-            bool typeChecked = false;
-            for (int i = sources.Count - 1; i >= 0; i--) {
-                T node = sources[i];
-                if (!ReferenceEquals(node, oldParent)) continue;
-
-                // Now that at least one parent will be replaced, check that the new parent can be used.
-                if (!typeChecked && newParent is not null and not T)
-                    throw new Exception("Unable to replace old parent with new parent in a list.").
-                        With("child", child).
-                        With("index", i).
-                        With("node", node).
-                        With("old Parent", oldParent).
-                        With("new Parent", newParent);
-                typeChecked = true;
-
-                // Replace parent in list of sources.
-                node?.RemoveChildren(child);
-                sources[i] = newParent as T;
-                replaced = true;
-            }
-            return replaced;
-        }
-
-        /// <summary>This will attempt to set all the parents in a node.</summary>
-        /// <remarks>This will throw an exception if there isn't the correct types.</remarks>
-        /// <typeparam name="T">The type of the parents to set.</typeparam>
-        /// <param name="sources">The node source list to replace the parents inside of.</param>
-        /// <param name="child">The child these sources are for.</param>
-        /// <param name="newParents">The parents to set.</param>
-        static internal bool SetAllParents<T>(this List<T> sources, IChild child, List<IParent> newParents)
-            where T : IParent {
-            IChild.CheckParentsBeingSet(newParents, true, typeof(T));
-            int oldCount = sources.Count;
-            int newCount = newParents.Count;
-            int minCount = S.Math.Min(oldCount, newCount);
-
-            bool changed = oldCount != newCount;
-            for (int i = 0; i < minCount; ++i) {
-                if (!ReferenceEquals(sources[i], newParents[i])) {
-                    bool removed = sources[i]?.RemoveChildren(child) ?? false;
-                    if (removed) newParents[i]?.AddChildren(child);
-                    changed = true;
-                }
-            }
-
-            for (int i = minCount; i < oldCount; ++i)
-                sources[i]?.RemoveChildren(child);
-            sources.Clear();
-            sources.AddRange(newParents.OfType<T>());
-            return changed;
-        }
-
         #endregion
         #region IParent...
 
@@ -236,7 +174,7 @@ namespace Blackboard.Core.Extensions {
                 if (targets.Contains(node)) return true;
 
                 if (node is IChild child) {
-                    foreach (IParent parent in child.Parents.NotNull().WhereNot(reached.Contains)) {
+                    foreach (IParent parent in child.Parents.Nodes.NotNull().WhereNot(reached.Contains)) {
                         pending.Enqueue(parent);
                         reached.Add(parent);
                     }
@@ -367,7 +305,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="node">The evaluable node to get the minimum allowed depth.</param>
         /// <returns></returns>
         static public int MinimumAllowedDepth(this IEvaluable node) =>
-            node is not IChild child ? 0 : child.Parents.OfType<IEvaluable>().MaxDepth() + 1;
+            node is not IChild child ? 0 : child.Parents.Nodes.OfType<IEvaluable>().MaxDepth() + 1;
 
         #endregion
         #region Fields...

@@ -408,7 +408,7 @@ namespace Blackboard.Parser {
             
             // Continue up to all the parents.
             if (node is IChild child) {
-                foreach (IParent par in child.Parents) {
+                foreach (IParent par in child.Parents.Nodes) {
                     if (this.collectAndOrder(par, newNodes))
                         par.AddChildren(child);
                 }

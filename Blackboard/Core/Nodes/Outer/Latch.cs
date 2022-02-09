@@ -1,8 +1,8 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Outer {
 
@@ -46,25 +46,9 @@ namespace Blackboard.Core.Nodes.Outer {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.trigger, this.source);
-
-        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
-        /// <param name="oldParent">The old parent to find all instances with.</param>
-        /// <param name="newParent">The new parent to replace each instance with.</param>
-        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
-        public bool ReplaceParent(IParent oldParent, IParent newParent) =>
-            IChild.ReplaceParent(this, ref this.trigger, oldParent, newParent) |
-            IChild.ReplaceParent(this, ref this.source,  oldParent, newParent);
-
-        /// <summary>This will attempt to set all the parents in a node.</summary>
-        /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
-        /// <param name="newParents">The parents to set.</param>
-        /// <returns>True if any parents changed, false if they were all the same.</returns>
-        public bool SetAllParents(List<IParent> newParents) {
-            IChild.CheckParentsBeingSet(newParents, false, typeof(ITriggerParent), typeof(IValueParent<T>));
-            return IChild.SetParent(this, ref this.trigger, newParents[0] as ITriggerParent)  |
-                   IChild.SetParent(this, ref this.source,  newParents[1] as IValueParent<T>);
-        }
+        public IParentCollection Parents => new FixedParents(this).
+            With(() => this.trigger, (ITriggerParent  parent) => this.trigger = parent).
+            With(() => this.source,  (IValueParent<T> parent) => this.source  = parent);
 
         /// <summary>This sets the value of this node.</summary>
         /// <param name="value">The value to set.</param>

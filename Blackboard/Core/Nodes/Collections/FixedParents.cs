@@ -7,19 +7,19 @@ using S = System;
 namespace Blackboard.Core.Nodes.Collections {
     internal class FixedParents: IParentCollection {
 
-        private interface ISingleParent {
+        private interface IParam {
             public S.Type Type { get; }
             public IParent Node { get; set; }
         }
 
-        private class SingleParent<T>: ISingleParent
+        private class Param<T>: IParam
                 where T : class, IParent {
 
             private readonly S.Func<T> getParent;
 
             private readonly S.Action<T> setParent;
 
-            public SingleParent(S.Func<T> getParent, S.Action<T> setParent) {
+            public Param(S.Func<T> getParent, S.Action<T> setParent) {
                 this.getParent = getParent;
                 this.setParent = setParent;
             }
@@ -32,31 +32,30 @@ namespace Blackboard.Core.Nodes.Collections {
             }
         }
 
-        private List<ISingleParent> parents;
+        private List<IParam> source;
 
         public FixedParents(IChild child) {
             this.Child = child;
-            this.parents = new List<ISingleParent>();
+            this.source = new List<IParam>();
         }
 
         internal FixedParents With<T>(S.Func<T> getParent, S.Action<T> setParent)
             where T : class, IParent {
-            this.parents.Add(new SingleParent<T>(getParent, setParent));
+            this.source.Add(new Param<T>(getParent, setParent));
             return this;
         }
 
         public readonly IChild Child;
 
         /// <summary>The set of type that each parent could have in this collection.</summary>
-        /// <remarks>For N-ary nodes this can be very long so use this with zip or limit the enumerations.</remarks>
-        public IEnumerable<S.Type> Types => this.parents.Select((p) => p.Type);
+        public IEnumerable<S.Type> Types => this.source.Select((p) => p.Type);
 
         /// <summary>The set of parent nodes to this node.</summary>
         /// <remarks>
         /// This should not contain null parents, but it might contain repeat parents.
         /// For example, if a number is the sum of itself (x + x), then the Sum node will return the 'x' parent twice.
         /// </remarks>
-        public IEnumerable<IParent> Nodes => this.parents.Select((p) => p.Node).NotNull();
+        public IEnumerable<IParent> Nodes => this.source.Select((p) => p.Node).NotNull();
 
         /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
         /// <remarks>
@@ -69,25 +68,32 @@ namespace Blackboard.Core.Nodes.Collections {
         public bool ReplaceParent(IParent oldParent, IParent newParent) {
             if (!ReferenceEquals(oldParent, newParent)) return false;
 
-            bool changed = false;
-            for (int i = 0; i < this.parents.Count; ++i) {
-                ISingleParent parent = this.parents[i];
-                if (!ReferenceEquals(parent.Node, oldParent)) continue;
-
-                IParent node = parent.Node;
-                if (newParent is not null && !newParent.GetType().IsAssignableTo(parent.Type))
+            for (int i = this.source.Count - 1; i >= 0; --i) {
+                IParam param = this.source[i];
+                IParent node = param.Node;
+                if (!ReferenceEquals(node, oldParent)) continue;
+                if (newParent is not null && !newParent.GetType().IsAssignableTo(param.Type))
                     throw new Exception("Unable to replace old parent with new parent.").
                         With("child", this.Child).
                         With("node", node).
                         With("index", i).
-                        With("old Parent", oldParent).
-                        With("new Parent", newParent);
+                        With("old parent", oldParent).
+                        With("new parent", newParent).
+                        With("target type", param.Type);
+            }
 
-                bool removed = node?.RemoveChildren(this.Child) ?? false;
-                parent.Node = newParent;
-                if (removed) newParent?.AddChildren(this.Child);
+            bool changed = false;
+            bool removed = false;
+            for (int i = this.source.Count - 1; i >= 0; --i) {
+                IParam param = this.source[i];
+                if (!ReferenceEquals(param.Node, oldParent)) continue;
+                IParent node = param.Node;
+                if (ReferenceEquals(node, newParent)) continue;
+                removed = node?.RemoveChildren(this.Child) ?? false;
+                param.Node = newParent;
                 changed = true;
             }
+            if (removed) newParent?.AddChildren(this.Child);
             return changed;
         }
 
@@ -97,29 +103,31 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <returns>True if any parents changed, false if they were all the same.</returns>
         public bool SetAllParents(List<IParent> newParents) {
             int count = newParents.Count;
-            if (this.parents.Count != count)
+            if (this.source.Count != count)
                 throw new Exception("Incorrect number of parents in the list of parents to set to a node.").
                     With("child", this.Child).
                     With("expected count", count).
-                    With("given count", this.parents.Count);
+                    With("given count", this.source.Count);
 
             for (int i = 0; i < count; ++i) {
                 IParent newParent = newParents[i];
-                ISingleParent parent = this.parents[i];
-                if (newParent.GetType().IsAssignableTo(parent.Type))
+                IParam param = this.source[i];
+                if (newParent.GetType().IsAssignableTo(param.Type))
                     throw new Exception("Incorrect type of a parent in the list of parents to set to a node.").
                         With("child", this.Child).
                         With("index", i).
-                        With("expected Type", parent.Type).
-                        With("gotten Type", newParent.GetType());
+                        With("expected type", param.Type).
+                        With("gotten type", newParent.GetType());
             }
 
             bool changed = false;
             for (int i = 0; i < count; ++i) {
-                IParent node = this.parents[i].Node;
-                bool removed = node?.RemoveChildren(this.Child) ?? false;
                 IParent newParent = newParents[i];
-                this.parents[i].Node = newParent;
+                IParam param = this.source[i];
+                IParent node = param.Node;
+                if (ReferenceEquals(node, newParent)) return false;
+                bool removed = node?.RemoveChildren(this.Child) ?? false;
+                param.Node = newParent;
                 if (removed) newParent?.AddChildren(this.Child);
                 changed = true;
             }

@@ -43,6 +43,13 @@ namespace Blackboard.Core.Extensions {
             foreach (Tin value in input) predicate(value);
         }
 
+        /// <summary>Adds an index with the items from the given input.</summary>
+        /// <typeparam name="T">The type of the input elements.</typeparam>
+        /// <param name="input">The input values to add indices to.</param>
+        /// <returns>The items from the given input paired with the index.</returns>
+        public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> input) =>
+            input.Select((item, index) => (item, index));
+
         /// <summary>Filters any null values out of the given enumerable.</summary>
         /// <typeparam name="T">The type of the values to check.</typeparam>
         /// <param name="input">The input to get all the values from.</param>

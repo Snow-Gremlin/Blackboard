@@ -1,8 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 using System.Linq;
-using S = System;
 
 namespace Blackboard.Parser.Optimization.Rules {
 
@@ -15,8 +14,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// </summary>
         /// <param name="node">The node to incorporate parents into.</param>
         static private void incorporateParents(ICoalescable node) {
-            List<IParent> parents = node.Parents.Nodes.ToList();
-            bool changed = false;
+            IParentCollection parents = node.Parents;
             for (int i = 0; i < parents.Count; ++i) {
                 IParent parent = parents[i];
 
@@ -24,22 +22,15 @@ namespace Blackboard.Parser.Optimization.Rules {
                     parent.Children.IsCount(1) &&
                     ReferenceEquals(parent.Children.First(), node)) {
 
-                    // Incorporate the parent's parents here.
-                    parents.RemoveAt(i);
-                    if (parent is IChild childParent) {
-                        parents.InsertRange(i, childParent.Parents.Nodes);
-                        foreach (IParent parentsParent in childParent.Parents.Nodes) {
-                            bool removed = parentsParent?.RemoveChildren(childParent) ?? false;
-                            if (removed) parentsParent?.AddChildren(node);
-                        }
-                    }
+                    // Incorporate the parent's parents in place of the parent.
+                    // Back up the index, so that the new parents are checked.
+                    parents.Remove(i);
                     --i;
-                    changed = true;
+                    if (parent is IChild childParent) {
+                        parents.Insert(i, childParent.Parents.Nodes, childParent);
+                    }
                 }
             }
-
-            if (changed)
-                node.Parents.SetAllParents(parents);
         }
 
         /// <summary></summary>
@@ -57,7 +48,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <param name="node"></param>
         /// <returns></returns>
         static private INode notcommutableCoalesce(ICoalescable node) {
-
+            
             // TODO: Implement
 
             return null;
@@ -84,7 +75,7 @@ namespace Blackboard.Parser.Optimization.Rules {
                     args.Root = newNode;
                 else if (newNode is IParent newParent && cNode is IParent cParent ) {
                     foreach (IChild child in cParent.Children.ToList())
-                        child.Parents.ReplaceParent(cParent, newParent);
+                        child.Parents.Replace(cParent, newParent);
                 }
             }
         }

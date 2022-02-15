@@ -11,7 +11,7 @@ namespace Blackboard.Core.Inspect {
         /// <summary>The base logger to write out to.</summary>
         private readonly ILogger logger;
 
-        /// <summary>The indent to pre-pend to lines based on the current push.</summary>
+        /// <summary>The indent to prepend to lines based on the current push.</summary>
         private readonly string indent;
 
         /// <summary>Creates a new logger which is indented.</summary>

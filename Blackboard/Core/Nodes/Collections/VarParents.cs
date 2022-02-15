@@ -149,6 +149,12 @@ namespace Blackboard.Core.Nodes.Collections {
         /// </param>
         /// <returns>True if any parents were added, false otherwise.</returns>
         public bool Insert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) {
+            if (index < 0 || index >= this.source.Count)
+                throw new Exception("Invalid index to insert parents at.").
+                    With("child", this.Child).
+                    With("count", this.source.Count).
+                    With("index", index);
+
             foreach ((IParent parent, int i) in newParents.WithIndex()) {
                 if (parent is not T)
                     throw new Exception("Incorrect type of a parent in the list of parents to insert into a node.").

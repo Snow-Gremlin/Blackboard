@@ -12,9 +12,12 @@ namespace BlackboardTests.ParserTests {
             Slate slate = new();
             Formula formula = slate.LogRead(
                 "in A = 21.0 + (1.0 + 3.0*2.0)*3.0;");
-            formula.Check();
-
-
+            formula.Check(
+                "[",
+                "  Namespace.A := Input<double>[0] {};",
+                "  Input<double>[0] = Literal<double>[42] {};",
+                "  Finish",
+                "]");
         }
     }
 }

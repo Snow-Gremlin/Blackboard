@@ -227,7 +227,7 @@ namespace Blackboard.Core.Inspect {
         private HashSet<IFieldReader> readFieldNodes;
 
         /// <summary>A cache of named nodes used for replacing parent nodes with named ones.</summary>
-        /// <remarks>This will be automatically populated by namespaces.</remarks>
+        /// <remarks>This will be automatically populated by Namespaces.</remarks>
         private Dictionary<INode, string> nodeNames;
 
         #region Naming...

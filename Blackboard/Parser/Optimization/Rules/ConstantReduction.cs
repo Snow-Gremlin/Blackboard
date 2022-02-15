@@ -65,7 +65,7 @@ namespace Blackboard.Parser.Optimization.Rules {
             foreach (IParent parent in parents.Nodes.ToList()) {
                 INode newNode = this.reduceNode(slate, parent, nodes, logger);
                 if (newNode is not null and IParent newParent)
-                    parents.ReplaceParent(parent, newParent);
+                    parents.Replace(parent, newParent);
             }
 
             return null;

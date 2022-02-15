@@ -20,7 +20,6 @@ namespace Blackboard.Parser.Optimization {
                 new ConstantReduction(),
                 new Coalescer(),
 
-
                 // TODO: Add ruled for node specific reductions:
                 //   - TODO: Group these based on what they do so we can determine if they
                 //           need to have a common abstract/template class. Just need to know how

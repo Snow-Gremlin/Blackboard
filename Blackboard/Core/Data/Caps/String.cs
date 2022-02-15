@@ -79,7 +79,7 @@ namespace Blackboard.Core.Data.Caps {
         public string TypeName => Type.String.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value;
+        public string ValueString => this.Value ?? "";
 
         #endregion
         #region Equatable...
@@ -114,7 +114,7 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Gets the hash code of the stored value.</summary>
         /// <returns>The stored value's hash code.</returns>
-        public override int GetHashCode() => this.Value.GetHashCode();
+        public override int GetHashCode() => this.Value?.GetHashCode() ?? 0;
 
         /// <summary>Checks if the given object is equal to this data type.</summary>
         /// <param name="obj">This is the object to test.</param>

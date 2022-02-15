@@ -25,10 +25,9 @@ namespace Blackboard.Parser.Optimization.Rules {
                     // Incorporate the parent's parents in place of the parent.
                     // Back up the index, so that the new parents are checked.
                     parents.Remove(i);
-                    --i;
-                    if (parent is IChild childParent) {
+                    if (parent is IChild childParent)
                         parents.Insert(i, childParent.Parents.Nodes, childParent);
-                    }
+                    --i;
                 }
             }
         }

@@ -33,7 +33,7 @@ namespace BlackboardTests {
         /// <param name="node">The node to check the parents of.</param>
         /// <param name="exp">The comma separated list of parent strings.</param>
         static public void CheckParents(this IChild node, string exp) =>
-            Assert.AreEqual(exp, node.Parents.Join(", "));
+            Assert.AreEqual(exp, node.Parents.Nodes.Join(", "));
 
         /// <summary>Checks the boolean value of this node.</summary>
         /// <param name="node">This is the boolean node to check the value of.</param>
@@ -89,7 +89,7 @@ namespace BlackboardTests {
                 yield return node;
 
                 if (node is IChild child)
-                    child.Parents.Foreach(stack.Push);
+                    child.Parents.Nodes.Foreach(stack.Push);
             }
         }
 

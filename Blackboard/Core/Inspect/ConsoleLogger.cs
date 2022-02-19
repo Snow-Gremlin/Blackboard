@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using S = System;
+﻿using S = System;
 
 namespace Blackboard.Core.Inspect {
 
@@ -7,17 +6,15 @@ namespace Blackboard.Core.Inspect {
     /// This is a console logger used for debugging the evaluation
     /// and update of nodes and actions in the slate.
     /// </summary>
-    public class ConsoleLogger: BaseLogger {
+    public class ConsoleLogger: Logger {
 
         /// <summary>Creates a new console logger.</summary>
         public ConsoleLogger() { }
 
-        /// <summary>
-        /// This will write to this log followed by a new line.
-        /// The input has already been formatted, adjusted, and had a newline added.
-        /// </summary>
-        /// <param name="msg">The formatted and adjusted message to write.</param>
-        protected override void AdjustedLog(string msg) => S.Console.Write(msg);
+        protected override bool ProcessEntry(Entry entry) {
+            S.Console.Write(entry.ToString());
+            return true;
+        }
 
         /// <summary>This will get the name of the logger.</summary>
         /// <returns>The name of the logger.</returns>

@@ -7,7 +7,7 @@ namespace Blackboard.Core.Inspect {
     /// This is a buffer logger used for debugging the evaluation,
     /// and update of nodes and actions in the slate.
     /// </summary>
-    public class BufferLogger: BaseLogger {
+    public class BufferLogger: Logger {
 
         /// <summary>The string buffer to write to.</summary>
         private StringWriter fout;
@@ -18,12 +18,10 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Clears this logger.</summary>
         public void Clear() => this.fout = new StringWriter();
 
-        /// <summary>
-        /// This will write to this log followed by a new line.
-        /// The input has already been formatted, adjusted, and had a newline added.
-        /// </summary>
-        /// <param name="msg">The formatted and adjusted message to write.</param>
-        protected override void AdjustedLog(string msg) => this.fout.Write(msg);
+        protected override bool ProcessEntry(Entry entry) {
+            this.fout.Write(entry.ToString());
+            return true;
+        }
 
         /// <summary>This will get the logs.</summary>
         /// <returns>The logs which have been written.</returns>

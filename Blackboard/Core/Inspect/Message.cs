@@ -20,11 +20,25 @@ namespace Blackboard.Core.Inspect {
             this.Data = new Dictionary<string, object>();
         }
 
+        /// <summary>Creates a copy of this message.</summary>
+        /// <remarks>
+        /// This can only make shallow copies of the objects in the arguments and data.
+        /// Be careful to not modify the objects in the arguments and data because the
+        /// change would effect the clone as well.
+        /// </remarks>
+        /// <returns>The copied message.</returns>
+        public Message Clone() {
+            Message copy = new(this.Format, this.Arguments.Clone());
+            foreach ((string key, object value) in this.Data)
+                copy.Data[key] = value;
+            return null;
+        }
+
         /// <summary>The format text for the message.</summary>
-        public readonly string Format;
+        public string Format;
 
         /// <summary>The arguments for the format test of the message.</summary>
-        public readonly object[] Arguments;
+        public object[] Arguments;
 
         /// <summary>The data for the message.</summary>
         public readonly Dictionary<string, object> Data;
@@ -32,18 +46,18 @@ namespace Blackboard.Core.Inspect {
         /// <summary>This gets the text of the message with the arguments mixed in.</summary>
         public string Text => string.Format(this.Format, this.Arguments);
 
-        /// <summary>Adds additional key value pair of data to this exception.</summary>
+        /// <summary>Adds additional key value pair of data to this message.</summary>
         /// <param name="key">The key for the additional data.</param>
         /// <param name="value">The value for the additional data.</param>
-        /// <returns>This exception so that these calls can be chained.</returns>
+        /// <returns>This message so that these calls can be chained.</returns>
         public Message With(string key, object value) {
             this.Data.Add(key, value);
             return this;
         }
 
-        /// <summary>Creates a single string will all the exception message and data.</summary>
+        /// <summary>Creates a single string will all the message and data.</summary>
         /// <remarks>This is useful for logging and debugging exceptions which contain data.</remarks>
-        /// <returns>The string for the whole exception.</returns>
+        /// <returns>The string for the whole message.</returns>
         public override string ToString() {
             List<string> lines = new();
             lines.Add(this.Text);

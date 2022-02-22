@@ -1,11 +1,10 @@
 ﻿using System.IO;
-using System.Linq;
 
 namespace Blackboard.Core.Inspect {
 
     /// <summary>
-    /// This is a buffer logger used for debugging the evaluation,
-    /// and update of nodes and actions in the slate.
+    /// This is a buffer logger used as a temporary text based output, like a virtual console,
+    /// for recording the text of the messages followed by a newline which have been logged.
     /// </summary>
     public class BufferLogger: Logger {
 
@@ -13,14 +12,18 @@ namespace Blackboard.Core.Inspect {
         private StringWriter fout;
 
         /// <summary>Creates a new buffer logger.</summary>
-        public BufferLogger() => this.fout = new StringWriter();
+        /// <param name="next">The next logger the entry is passed to.</param>
+        public BufferLogger(Logger next = null) : base(next) => this.Clear();
 
         /// <summary>Clears this logger.</summary>
         public void Clear() => this.fout = new StringWriter();
 
+        /// <summary>This writes the given entry to the buffer.</summary>
+        /// <param name="entry">The entry to write.</param>
+        /// <returns>Always returns true to continue.</returns>
         protected override bool ProcessEntry(Entry entry) {
-            this.fout.Write(entry.ToString());
-            return true;
+            this.fout.WriteLine(entry.ToString());
+            return true; 
         }
 
         /// <summary>This will get the logs.</summary>

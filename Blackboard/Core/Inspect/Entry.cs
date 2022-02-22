@@ -19,7 +19,6 @@ namespace Blackboard.Core.Inspect {
             };
 
         private S.Func<Message> fetcher;
-        private List<string> sources;
 
         /// <summary>Creates a new entry for a deferred message.</summary>
         /// <param name="level">The level of this deferred message.</param>
@@ -33,7 +32,17 @@ namespace Blackboard.Core.Inspect {
                     "A message entry must have a non-null function for creating or getting a message.");
             this.fetcher = fetcher;
             this.Level = level;
-            this.sources = new List<string>();
+            this.Labels = "";
+        }
+
+        /// <summary>Creates a copy of this entry and message.</summary>
+        /// <remarks>This will actually create the message not just copy the fetcher.</remarks>
+        /// <returns>The cloned entry.</returns>
+        public Entry Clone() {
+            Message msg = this.Message.Clone();
+            Entry copy = new(this.Level, () => msg);
+            copy.Labels = this.Labels;
+            return copy;
         }
 
         /// <summary>Gets the message in this entry.</summary>
@@ -53,13 +62,23 @@ namespace Blackboard.Core.Inspect {
         /// <summary>The level of this message.</summary>
         public readonly Level Level;
 
-        /// <summary>The set of sources this message has passed through.</summary>
-        public IReadOnlyList<string> Sources { get; }
+        /// <summary>The set of labels this message has passed through.</summary>
+        /// <remarks>
+        /// Labels are divided like they are a path where the latest added (the parent label)
+        /// is added at the front of the label with a string. For example, adding label "cat"
+        /// then adding label "dog" will result in "dog/cat". If a duplicate label is added
+        /// or the label matches any subsection of the existing labels then it is ignored.
+        /// For example adding "cats" followed by "cat" will ignore the "cat" and result in "cats" only,
+        /// however doing it in the opposite order will result in "cats/cat".
+        /// </remarks>
+        public string Labels { private set; get; }
 
-        /// <summary>Adds a source to the list of sources.</summary>
-        /// <param name="source">The source to add to the list.</param>
-        internal void AddSource(string source) =>
-            this.sources.Add(source);
+        /// <summary>Adds a label to the list of labels.</summary>
+        /// <param name="label">The label to add to the list.</param>
+        internal void AddLabel(string label) => this.Labels =
+            this.Labels.Length <= 0     ? label :
+            this.Labels.Contains(label) ? this.Labels :
+            label + "/" + this.Labels;
 
         /// <summary>Adds a message processor for changing the message while it is being gotten or created.</summary>
         /// <remarks>The processor should not be null but will have no effect if it is.</remarks>
@@ -70,7 +89,7 @@ namespace Blackboard.Core.Inspect {
             this.fetcher = () => {
                 Message msg = oldFetcher();
                 return msg is null ? null : processor(msg);
-            };
+            }; 
         }
 
         /// <summary>Gets the message with the level prepended to it.</summary>

@@ -25,7 +25,7 @@ namespace Blackboard.Core.Actions {
         static public Assign<T> Create(Location loc, INode target, INode value, IEnumerable<INode> allNewNodes) =>
             (target is IValueInput<T> input) && (value is IValue<T> data) ?
             new Assign<T>(input, data, allNewNodes) :
-            throw new Exception("Unexpected node types for assignment.").
+            throw new Message("Unexpected node types for assignment.").
                 With("Location", loc).
                 With("Type",     typeof(T)).
                 With("Target",   target).
@@ -73,12 +73,12 @@ namespace Blackboard.Core.Actions {
         /// <param name="slate">The slate for this action.</param>
         /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, Result result, ILogger logger = null) {
-            logger?.Log("Assign: {0}", this);
+        public void Perform(Slate slate, Result result, Logger logger = null) {
+            logger?.Info("Assign: {0}", this);
             slate.PendEval(this.needPending);
-            slate.PerformEvaluation(logger?.Sub);
+            slate.PerformEvaluation(logger);
             slate.SetValue(this.value.Value, this.target);
-            logger?.Log("Assign Done {0}", this.target);
+            logger?.Info("Assign Done {0}", this.target);
         }
 
         /// <summary>Gets a human readable string for this assignment.</summary>

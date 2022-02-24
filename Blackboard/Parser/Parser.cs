@@ -34,15 +34,15 @@ namespace Blackboard.Parser {
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
         /// <summary>Optional logger to debugging and inspecting the parser.</summary>
-        private ILogger logger;
+        private Logger logger;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="slate">The slate to modify.</param>
         /// <param name="logger">An optional logger for debugging and inspecting the parser.</param>
-        public Parser(Slate slate, ILogger logger = null) {
+        public Parser(Slate slate, Logger logger = null) {
             this.slate   = slate;
             this.prompts = null;
-            this.logger  = logger;
+            this.logger  = logger?.Label("Parser");
 
             this.initPrompts();
             this.validatePrompts();
@@ -66,7 +66,7 @@ namespace Blackboard.Parser {
 
             // Check for parser errors.
             if (result.Errors.Length > 0)
-                throw new Exception(result.Errors.Join("\n"));
+                throw new Message(result.Errors.Join("\n"));
 
             // process the resulting tree to build the formula.
             return this.read(result.Tree);
@@ -77,13 +77,13 @@ namespace Blackboard.Parser {
         /// <returns>The formula for performing the parsed actions.</returns>
         private Formula read(PP.ParseTree.ITreeNode node) {
             try {
-                this.logger?.Log("Parser Read");
-                Builder builder = new(this.slate, this.logger?.Sub);
+                this.logger?.Info("Parser Read");
+                Builder builder = new(this.slate, this.logger);
                 node.Process(this.prompts, builder);
-                this.logger?.Log("Parser Done");
+                this.logger?.Info("Parser Done");
                 return builder.Actions.Formula;
             } catch (S.Exception ex) {
-                throw new Exception("Error occurred while parsing input code.", ex);
+                throw new Message("Error occurred while parsing input code.", ex);
             }
         }
 
@@ -159,7 +159,7 @@ namespace Blackboard.Parser {
         /// <param name="hndl">This is the handler to call on this prompt.</param>
         private void addHandler(string name, S.Action<Builder> hndl) =>
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
-                this.logger?.Log("Handle {0} [{1}]", name, args.LastLocation);
+                this.logger?.Info("Handle {0} [{1}]", name, args.LastLocation);
                 hndl(args as Builder);
             };
 
@@ -168,18 +168,18 @@ namespace Blackboard.Parser {
         /// <param name="name">The name of the prompt to add to.</param>
         private void addProcess(int count, string name) {
             if (this.slate.Global.Find(Slate.OperatorNamespace, name) is not IFuncGroup funcGroup)
-                throw new Exception("Could not find the operation by the given name.").
+                throw new Message("Could not find the operation by the given name.").
                     With("Name", name);
 
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 Builder builder = args as Builder;
                 PP.Scanner.Location loc = args.LastLocation;
-                builder.Logger?.Log("Process {0}({1}) [{2}]", name, count, loc);
+                builder.Logger?.Info("Process {0}({1}) [{2}]", name, count, loc);
 
                 INode[] inputs = builder.Nodes.Pop(count).Actualize().ToArray();
                 INode result = funcGroup.Build(inputs);
                 if (result is null)
-                    throw new Exception("Could not perform the operation with the given input.").
+                    throw new Message("Could not perform the operation with the given input.").
                         With("Operation", name).
                         With("Input", inputs.Types().Strings().Join(", "));
 
@@ -192,7 +192,7 @@ namespace Blackboard.Parser {
             string[] unneeded = baseParser.UnneededPrompts(this.prompts);
             string[] missing  = baseParser.MissingPrompts(this.prompts);
             if (unneeded.Length > 0 || missing.Length > 0)
-                throw new Exception("Blackboard's parser grammar has prompts which do not match prompt handlers.").
+                throw new Message("Blackboard's parser grammar has prompts which do not match prompt handlers.").
                     With("Not handled", unneeded.Join(", ")).
                     With("Not in grammar", missing.Join(", "));
         }
@@ -206,7 +206,7 @@ namespace Blackboard.Parser {
             try {
                 builder.Nodes.Push(parseMethod(text));
             } catch (S.Exception ex) {
-                throw new Exception("Failed to " + usage + ".", ex).
+                throw new Message("Failed to " + usage + ".", ex).
                     With("Text", text).
                     With("Location", builder.LastLocation);
             }
@@ -237,7 +237,7 @@ namespace Blackboard.Parser {
             INode next = scope.ReadField(name);
             if (next is not null) {
                 if (next is not VirtualNode nextspace)
-                    throw new Exception("Can not open namespace. Another non-namespace exists by that name.").
+                    throw new Message("Can not open namespace. Another non-namespace exists by that name.").
                          With("Identifier", name).
                          With("Location", builder.LastLocation);
                 builder.Scope.Push(nextspace);
@@ -372,7 +372,7 @@ namespace Blackboard.Parser {
             string name = builder.LastText;
             INode rNode = builder.Nodes.Pop();
             if (rNode is not IFieldReader receiver)
-                throw new Exception("Unexpected node type for a member access. Expected a field reader.").
+                throw new Message("Unexpected node type for a member access. Expected a field reader.").
                     With("Node", rNode).
                     With("Name", name).
                     With("Location", builder.LastLocation);
@@ -383,7 +383,7 @@ namespace Blackboard.Parser {
                 return;
             }
 
-            throw new Exception("No identifier found in the receiver stack.").
+            throw new Message("No identifier found in the receiver stack.").
                 With("Identifier", name).
                 With("Location", builder.LastLocation);
         }
@@ -402,14 +402,14 @@ namespace Blackboard.Parser {
             INode[] args = builder.Arguments.End();
             INode node = builder.Nodes.Pop();
             if (node is not IFuncGroup group)
-                throw new Exception("Unexpected node type for a method call. Expected a function group.").
+                throw new Message("Unexpected node type for a method call. Expected a function group.").
                     With("Node", node).
                     With("Input", args.Types().Strings().Join(", ")).
                     With("Location", builder.LastLocation);
 
             INode result = group.Build(args);
             if (result is null)
-                throw new Exception("Could not perform the function with the given input.").
+                throw new Message("Could not perform the function with the given input.").
                     With("Function", group).
                     With("Input", args.Types().Strings().Join(", ")).
                     With("Location", builder.LastLocation);
@@ -421,7 +421,7 @@ namespace Blackboard.Parser {
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushId(Builder builder) {
             string name = builder.LastText;
-            builder.Logger?.Log("Id = \"{0}\"", name);
+            builder.Logger?.Info("Id = \"{0}\"", name);
             foreach (VirtualNode scope in builder.Scope.Scopes) {
                 INode node = scope.ReadField(name);
                 if (node is not null) {
@@ -431,7 +431,7 @@ namespace Blackboard.Parser {
                 }
             }
 
-            throw new Exception("No identifier found in the scope stack.").
+            throw new Message("No identifier found in the scope stack.").
                 With("Identifier", name).
                 With("Location", builder.LastLocation);
         }
@@ -477,7 +477,7 @@ namespace Blackboard.Parser {
             string text = builder.LastText;
             Type t = Type.FromName(text);
             if (t is null)
-                throw new Exception("Unrecognized type name.").
+                throw new Message("Unrecognized type name.").
                     With("Text", text).
                     With("Location", builder.LastLocation);
             builder.Types.Push(t);

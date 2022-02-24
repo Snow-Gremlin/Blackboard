@@ -38,7 +38,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <param name="nodes">The formula nodes to optimize.</param>
         /// <param name="logger">The logger to debug and inspect the optimization.</param>
         /// <remarks>The node to replace the given one in the parent or null to not replace.</remarks>
-        private INode reduceNode(Slate slate, INode node, HashSet<INode> nodes, ILogger logger) {
+        private INode reduceNode(Slate slate, INode node, HashSet<INode> nodes, Logger logger) {
             // If this node is not part of the new nodes, just return it.
             if (!nodes.Contains(node)) return null;
 
@@ -51,7 +51,7 @@ namespace Blackboard.Parser.Optimization.Rules {
                     // Look up constant in slate, if one doesn't exist, this will add it.
                     con = slate.FindConstant(con);
                     if (!ReferenceEquals(con, node)) {
-                        logger?.Log("Replace {0} with constant {1}", node, con);
+                        logger?.Info("Replace {0} with constant {1}", node, con);
                         return con;
                     }
                 }

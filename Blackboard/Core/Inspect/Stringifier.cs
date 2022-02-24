@@ -236,25 +236,31 @@ namespace Blackboard.Core.Inspect {
         /// <remarks>If the node is already named, the name is overwritten with this new name.</remarks>
         /// <param name="name">The name to show for the node.</param>
         /// <param name="node">The node to give a name to.</param>
-        public void SetNodeName(string name, INode node) =>
+        /// <returns>The stringifier so that calls can be chained.</returns>
+        public Stringifier SetNodeName(string name, INode node) {
             this.nodeNames[node] = name;
+            return this;
+        }
 
         /// <summary>Preloads the node name to use when outputting using the namespaces reachable from global.</summary>
         /// <param name="slate">The slate containing the global namespace to load.</param>
-        public void PreloadNames(Slate slate) {
+        /// <returns>The stringifier so that calls can be chained.</returns>
+        public Stringifier PreloadNames(Slate slate) {
             this.SetNodeName("Global", slate.Global);
-            this.PreloadNames(slate.Global);
+            return this.PreloadNames(slate.Global);
         }
 
         /// <summary>Preloads the node names to use when outputting the parents of nodes.</summary>
         /// <param name="node">The node with the readers to start preloading names with.</param>
-        public void PreloadNames(IFieldReader node) {
-            if (this.readFieldNodes.Contains(node)) return;
+        /// <returns>The stringifier so that calls can be chained.</returns>
+        public Stringifier PreloadNames(IFieldReader node) {
+            if (this.readFieldNodes.Contains(node)) return this;
             this.readFieldNodes.Add(node);
             foreach (KeyValuePair<string, INode> pair in node.Fields) {
                 if (pair.Value is IFieldReader fieldReader) this.PreloadNames(fieldReader);
                 this.SetNodeName(pair.Key, pair.Value);
             }
+            return this;
         }
 
         #endregion

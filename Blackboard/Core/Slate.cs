@@ -454,11 +454,11 @@ namespace Blackboard.Core {
         public T GetValue<T>(IEnumerable<string> names) where T : IData {
             object obj = this.Global.Find(names);
             return obj is null ?
-                    throw new Exception("Unable to get a value by the given name.").
+                    throw new Message("Unable to get a value by the given name.").
                         With("Name", names.Join(".")).
                         With("Value Type", typeof(T)) :
                 obj is not IValue<T> node ?
-                    throw new Exception("The value found by the given name is not the expected type.").
+                    throw new Message("The value found by the given name is not the expected type.").
                         With("Name", names.Join(".")).
                         With("Found Type", obj.GetType()).
                         With("Expected Type", typeof(T)) :
@@ -490,8 +490,8 @@ namespace Blackboard.Core {
         /// </summary>
         /// <remarks>By performing the update the pending update list will be cleared.</remarks>
         /// <param name="logger">An optional logger for debugging this update.</param>
-        public void PerformUpdates(ILogger logger = null) =>
-            this.pendingUpdate.UpdateDepths(logger);
+        public void PerformUpdates(Logger logger = null) =>
+            this.pendingUpdate.UpdateDepths(logger.Label("PerformUpdates"));
 
         #endregion
         #region Evaluate...
@@ -524,8 +524,8 @@ namespace Blackboard.Core {
         /// </summary>
         /// <remarks>By performing the update the pending evaluation list will be cleared.</remarks>
         /// <param name="logger">An optional logger for debugging this evaluation.</param>
-        public void PerformEvaluation(ILogger logger = null) =>
-            this.NeedsReset(this.pendingEval.Evaluate(logger));
+        public void PerformEvaluation(Logger logger = null) =>
+            this.NeedsReset(this.pendingEval.Evaluate(logger.Label("PerformEvaluation")));
 
         #endregion
         #region Needs Reset...

@@ -110,14 +110,14 @@ namespace BlackboardTests {
         /// <summary>Will perform depth update on all the nodes reachable from the parents.</summary>
         /// <param name="node">The node to start updating from and to get all parents and parent parents from.</param>
         /// <param name="logger">Optional logger to use to debug the update with.</param>
-        static public void UpdateAllParents(this INode node, ILogger logger = null) =>
+        static public void UpdateAllParents(this INode node, Logger logger = null) =>
             GetAllParents(node).ToEvalList().UpdateDepths(logger);
 
         /// <summary>Will perform evaluation on all the nodes reachable from the parents.</summary>
         /// <param name="node">The node to start evaluate from and to get all parents and parent parents from.</param>
         /// <param name="logger">Optional logger to use to debug the update with.</param>
         /// <returns>All the triggers which have been provoked and need to be reset.</returns>
-        static public HashSet<ITrigger> EvaluateAllParents(this INode node, ILogger logger = null) =>
+        static public HashSet<ITrigger> EvaluateAllParents(this INode node, Logger logger = null) =>
             GetAllParents(node).ToEvalList().Evaluate(logger);
 
         #endregion
@@ -134,8 +134,8 @@ namespace BlackboardTests {
         /// <param name="lines">The expected evaluation log output.</param>
         /// <returns>The result from the perform.</returns>
         static public Result CheckPerform(this Formula formula, params string[] lines) {
-            BufferLogger logger = new();
-            logger.Stringifier.PreloadNames(formula.Slate);
+            BufferLogger buf = new();
+            Logger logger = buf.Stringify(Stringifier.Shallow().PreloadNames(formula.Slate));
             Result result = formula.Perform(logger);
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
             return result;
@@ -217,8 +217,8 @@ namespace BlackboardTests {
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckEvaluate(this Slate slate, params string[] lines) {
-            BufferLogger logger = new();
-            logger.Stringifier.PreloadNames(slate);
+            BufferLogger buf = new();
+            Logger logger = buf.Stringify(Stringifier.Shallow().PreloadNames(slate));
             slate.PerformEvaluation(logger);
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
         }
@@ -227,8 +227,8 @@ namespace BlackboardTests {
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckUpdate(this Slate slate, params string[] lines) {
-            BufferLogger logger = new();
-            logger.Stringifier.PreloadNames(slate);
+            BufferLogger buf = new();
+            Logger logger = buf.Stringify(Stringifier.Shallow().PreloadNames(slate));
             slate.PerformUpdates(logger);
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
         }

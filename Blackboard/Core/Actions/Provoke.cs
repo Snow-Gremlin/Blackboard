@@ -21,7 +21,7 @@ namespace Blackboard.Core.Actions {
         /// <returns>The provoke action.</returns>
         static public Provoke Create(Location loc, INode target, INode value, IEnumerable<INode> allNodes = null) =>
             (target is ITriggerInput input) && (value is ITrigger conditional) ? new Provoke(input, conditional, allNodes) :
-            throw new Exception("Unexpected node types for a conditional provoke.").
+            throw new Message("Unexpected node types for a conditional provoke.").
                 With("Location", loc).
                 With("Target",   target).
                 With("Value",    value);
@@ -36,7 +36,7 @@ namespace Blackboard.Core.Actions {
         /// <returns>The provoke action.</returns>
         static public Provoke Create(Location loc, INode target, IEnumerable<INode> allNodes = null) =>
             (target is ITriggerInput input) ? new Provoke(input, null, allNodes) :
-            throw new Exception("Unexpected node types for a unconditional provoke.").
+            throw new Message("Unexpected node types for a unconditional provoke.").
                 With("Location", loc).
                 With("Target",   target);
 
@@ -76,10 +76,10 @@ namespace Blackboard.Core.Actions {
         /// <param name="slate">The slate for this action.</param>
         /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, Result result, ILogger logger = null) {
-            logger?.Log("Provoke: {0}", this);
+        public void Perform(Slate slate, Result result, Logger logger = null) {
+            logger?.Info("Provoke: {0}", this);
             slate.PendEval(this.needPending);
-            slate.PerformEvaluation(logger?.Sub);
+            slate.PerformEvaluation(logger?.Label("Provoke"));
             slate.Provoke(this.Target, this.Trigger?.Provoked ?? true);
         }
 

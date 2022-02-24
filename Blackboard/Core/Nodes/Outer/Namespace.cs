@@ -51,11 +51,11 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <param name="node">The node to write to the field.</param>
         public void WriteField(string name, INode node) {
             if (node is null)
-                throw new Exception("May not write a null node to a namespace.").
+                throw new Message("May not write a null node to a namespace.").
                     With("Name", name).
                     With("Namespace", this);
             if (this.fields.ContainsKey(name))
-                throw new Exception("A node by the given name already exists in the namespace.").
+                throw new Message("A node by the given name already exists in the namespace.").
                     With("Name", name).
                     With("Node", node).
                     With("Namespace", this);

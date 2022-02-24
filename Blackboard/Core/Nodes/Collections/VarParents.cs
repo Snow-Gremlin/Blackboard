@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +54,7 @@ namespace Blackboard.Core.Nodes.Collections {
                 if (ReferenceEquals(this.source[index], value)) return;
 
                 if (value is not T newParent)
-                    throw new Exception("Incorrect type of a parent being set to a node.").
+                    throw new Message("Incorrect type of a parent being set to a node.").
                         With("child", this.Child).
                         With("index", index).
                         With("expected type", typeof(T)).
@@ -83,7 +84,7 @@ namespace Blackboard.Core.Nodes.Collections {
 
                 // Now that at least one parent will be replaced, check that the new parent can be used.
                 if (!typeChecked && newParent is not null and not T)
-                    throw new Exception("Unable to replace old parent with new parent in a list.").
+                    throw new Message("Unable to replace old parent with new parent in a list.").
                         With("child", this.Child).
                         With("index", i).
                         With("node", node).
@@ -110,7 +111,7 @@ namespace Blackboard.Core.Nodes.Collections {
             int index = 0;
             foreach (IParent parent in newParents) {
                 if (parent is not T)
-                    throw new Exception("Incorrect type of a parent in the list of parents to set to a node.").
+                    throw new Message("Incorrect type of a parent in the list of parents to set to a node.").
                         With("child", this.Child).
                         With("index", index).
                         With("expected type", typeof(T)).
@@ -150,14 +151,14 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <returns>True if any parents were added, false otherwise.</returns>
         public bool Insert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) {
             if (index < 0 || index >= this.source.Count)
-                throw new Exception("Invalid index to insert parents at.").
+                throw new Message("Invalid index to insert parents at.").
                     With("child", this.Child).
                     With("count", this.source.Count).
                     With("index", index);
 
             foreach ((IParent parent, int i) in newParents.WithIndex()) {
                 if (parent is not T)
-                    throw new Exception("Incorrect type of a parent in the list of parents to insert into a node.").
+                    throw new Message("Incorrect type of a parent in the list of parents to insert into a node.").
                         With("child", this.Child).
                         With("insert index", index).
                         With("parent index", i).
@@ -181,7 +182,7 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <param name="length">The number of parents to remove.</param>
         public void Remove(int index, int length = 1) {
             if (index < 0 || length < 0 || index+length >  this.source.Count)
-                throw new Exception("Not a valid range of parents to remove.").
+                throw new Message("Not a valid range of parents to remove.").
                     With("child", this.Child).
                     With("count", this.source.Count).
                     With("index", index).

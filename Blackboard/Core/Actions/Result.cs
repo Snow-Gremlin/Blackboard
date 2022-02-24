@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
@@ -55,11 +56,11 @@ namespace Blackboard.Core.Actions {
         public T GetValue<T>(string name) where T : IData {
             object obj = this.outputData[name];
             return obj is null ?
-                    throw new Exception("Unable to get an output value by the given name.").
+                    throw new Message("Unable to get an output value by the given name.").
                         With("Name", name).
                         With("Value Type", typeof(T)) :
                 obj is not T data ?
-                    throw new Exception("The output value found by the given name is not the expected type.").
+                    throw new Message("The output value found by the given name is not the expected type.").
                         With("Name", name).
                         With("Found Type", obj.GetType()).
                         With("Expected Type", typeof(T)) :

@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
@@ -147,7 +148,7 @@ namespace Blackboard.Core.Types {
             this.inheritors = new();
 
             if ((dataType is null) == realType.IsAssignableTo(typeof(IDataNode)))
-                throw new Exception("").
+                throw new Message("May not have null inherited data type with out a valid read type and visa versa.").
                     With("Name",     name).
                     With("RealType", realType).
                     With("DataType", dataType);

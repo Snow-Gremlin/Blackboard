@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Outer {
@@ -25,7 +26,7 @@ namespace Blackboard.Core.Nodes.Outer {
             this.overrides = new Dictionary<string, INode>();
 
             if (receiver is null or VirtualNode)
-                throw new Exception("May not construct a virtual node with a null or virtual node receiver.");
+                throw new Message("May not construct a virtual node with a null or virtual node receiver.");
         }
 
         /// <summary>The receiver having children virtually added or removed from it.</summary>

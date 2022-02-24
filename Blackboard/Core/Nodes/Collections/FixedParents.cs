@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,7 +107,7 @@ namespace Blackboard.Core.Nodes.Collections {
                 if (ReferenceEquals(this.source[index].Node, value)) return;
 
                 if (value.GetType().IsAssignableTo(param.Type))
-                    throw new Exception("Incorrect type of a parent being set to a node.").
+                    throw new Message("Incorrect type of a parent being set to a node.").
                         With("child", this.Child).
                         With("index", index).
                         With("expected type", param.Type).
@@ -134,7 +135,7 @@ namespace Blackboard.Core.Nodes.Collections {
                 IParent node = param.Node;
                 if (!ReferenceEquals(node, oldParent)) continue;
                 if (newParent is not null && !newParent.GetType().IsAssignableTo(param.Type))
-                    throw new Exception("Unable to replace old parent with new parent.").
+                    throw new Message("Unable to replace old parent with new parent.").
                         With("child", this.Child).
                         With("node", node).
                         With("index", i).
@@ -165,7 +166,7 @@ namespace Blackboard.Core.Nodes.Collections {
         public bool SetAll(List<IParent> newParents) {
             int count = newParents.Count;
             if (this.source.Count != count)
-                throw new Exception("Incorrect number of parents in the list of parents to set to a node.").
+                throw new Message("Incorrect number of parents in the list of parents to set to a node.").
                     With("child", this.Child).
                     With("expected count", count).
                     With("given count", this.source.Count);
@@ -174,7 +175,7 @@ namespace Blackboard.Core.Nodes.Collections {
                 IParent newParent = newParents[i];
                 IParam param = this.source[i];
                 if (newParent.GetType().IsAssignableTo(param.Type))
-                    throw new Exception("Incorrect type of a parent in the list of parents to set to a node.").
+                    throw new Message("Incorrect type of a parent in the list of parents to set to a node.").
                         With("child", this.Child).
                         With("index", i).
                         With("expected type", param.Type).
@@ -201,7 +202,7 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <param name="oldChild">The old child these parents are being moved from.</param>
         /// <returns>Nothing is returned because this will throw an exception.</returns>
         public bool Insert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) =>
-            throw new Exception("May not use Insert on a fixed parent collection.").
+            throw new Message("May not use Insert on a fixed parent collection.").
                 With("index", index).
                 With("new parents", newParents).
                 With("new child", this.Child).
@@ -211,7 +212,7 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <param name="index">The index to start removing the parents from.</param>
         /// <param name="length">The number of parents to remove.</param>
         public void Remove(int index, int length = 1) =>
-            throw new Exception("May not use Remove on a fixed parent collection.").
+            throw new Message("May not use Remove on a fixed parent collection.").
                 With("index", index).
                 With("length", length).
                 With("child", this.Child);

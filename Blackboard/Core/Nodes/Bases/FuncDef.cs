@@ -82,7 +82,7 @@ namespace Blackboard.Core.Nodes.Bases {
             argTypes = argTypes.NotNull().ToArray();
 
             void throwExp(string message) =>
-                throw new Exception(message).
+                throw new Message(message).
                     With("Minimum", min).
                     With("Maximum", max).
                     With("Need one no cast", needsOneNoCast).
@@ -155,7 +155,7 @@ namespace Blackboard.Core.Nodes.Bases {
         static private INode castParam(INode node, Type t) {
             INode cast = t.Implicit(node);
             return cast is not null ? cast :
-                throw new Exception("Error implicitly casting parameter").
+                throw new Message("Error implicitly casting parameter").
                     With("Node", node).
                     With("Implicit", t).
                     With("Result", cast);

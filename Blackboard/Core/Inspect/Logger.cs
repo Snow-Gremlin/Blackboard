@@ -102,10 +102,7 @@ namespace Blackboard.Core.Inspect {
 
         /// <summary>This creates a logger to outputs the messages to a console.</summary>
         /// <returns>The logger which will write messages to the console</returns>
-        public Logger Console() => new(this, (Entry entry) => {
-            S.Console.WriteLine(entry.ToString());
-            return true;
-        });
+        public ConsoleLogger Console() => new(this);
 
         /// <summary>This creates a logger to outputs the messages to a string buffer.</summary>
         /// <returns>The logger which will write messages to a string buffer.</returns>

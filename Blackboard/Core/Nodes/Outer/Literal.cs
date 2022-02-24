@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
@@ -38,7 +39,7 @@ namespace Blackboard.Core.Nodes.Outer {
                 Int    i => new Literal<Int>   (i),
                 Double d => new Literal<Double>(d),
                 String s => new Literal<String>(s),
-                _        => throw new Exception("Unexpected value type in literal creation").
+                _        => throw new Message("Unexpected value type in literal creation").
                                With("Value", value)
             };
 

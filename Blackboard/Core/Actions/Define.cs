@@ -27,7 +27,7 @@ namespace Blackboard.Core.Actions {
         /// <param name="allNewNodes">All the nodes which are new children of the node to write.</param>
         public Define(IFieldWriter receiver, string name, INode node, IEnumerable<INode> allNewNodes = null) {
             if (receiver is null or VirtualNode)
-                throw new Exception("May not use a null or virtual node as the receiver in a define.");
+                throw new Message("May not use a null or {0} as the receiver in a {1}.", nameof(VirtualNode), nameof(Define));
 
             this.Receiver = receiver;
             this.Name = name;
@@ -54,8 +54,8 @@ namespace Blackboard.Core.Actions {
         /// <param name="slate">The slate for this action.</param>
         /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, Result result, ILogger logger = null) {
-            logger?.Log("Define: {0}", this);
+        public void Perform(Slate slate, Result result, Logger logger = null) {
+            logger?.Info("Define: {0}", this);
             this.Receiver.WriteField(this.Name, this.Node);
             List<IChild> changed = this.needParents.Where(child => child.Legitimatize()).ToList();
             slate.PendUpdate(changed);

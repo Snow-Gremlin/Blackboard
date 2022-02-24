@@ -24,7 +24,7 @@ namespace Blackboard.Core.Actions {
         /// <returns>The getter action.</returns>
         static public Getter<T> Create(Location loc, string name, INode value, IEnumerable<INode> allNewNodes) =>
             (value is IValue<T> data) ? new Getter<T>(name, data, allNewNodes) :
-            throw new Exception("Unexpected node types for getter.").
+            throw new Message("Unexpected node types for getter.").
                 With("Location", loc).
                 With("Type",     typeof(T)).
                 With("Name",     name).
@@ -69,12 +69,12 @@ namespace Blackboard.Core.Actions {
         /// <param name="slate">The slate for this action.</param>
         /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, Result result, ILogger logger = null) {
-            logger?.Log("Getter: {0}", this);
+        public void Perform(Slate slate, Result result, Logger logger = null) {
+            logger?.Info("Getter: {0}", this);
             slate.PendEval(this.needPending);
-            slate.PerformEvaluation(logger?.Sub);
+            slate.PerformEvaluation(logger);
             result.SetValue(this.Name, this.value.Value);
-            logger?.Log("Getter Done {0}", this.Name);
+            logger?.Info("Getter Done {0}", this.Name);
         }
 
         /// <summary>Gets a human readable string for this getter.</summary>

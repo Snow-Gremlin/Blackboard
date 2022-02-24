@@ -14,6 +14,6 @@ namespace Blackboard.Core.Actions {
         /// <param name="slate">The slate for this action.</param>
         /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, Result result, ILogger logger = null);
+        public void Perform(Slate slate, Result result, Logger logger = null);
     }
 }

@@ -90,11 +90,7 @@ namespace Blackboard.Core.Inspect {
         /// <returns>The logger which will stringify values in the message.</returns>
         public Logger Stringify(Stringifier stringifier = null) => new(this, (Entry entry) => {
             entry.AddProcessing((Message msg) => {
-                stringifier ??= Stringifier.Shallow();
-                foreach ((object arg, int index) in stringifier.Stringify(msg.Arguments).WithIndex())
-                    msg.Arguments[index] = arg;
-                foreach ((string key, object value) in msg.Data.Keys.Zip(stringifier.Stringify(msg.Data.Values)))
-                    msg.Data[key] = value;
+                msg.Stringify(stringifier);
                 return msg;
             });
             return true;

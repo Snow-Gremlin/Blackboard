@@ -525,7 +525,7 @@ namespace Blackboard.Core {
         /// <remarks>By performing the update the pending evaluation list will be cleared.</remarks>
         /// <param name="logger">An optional logger for debugging this evaluation.</param>
         public void PerformEvaluation(Logger logger = null) =>
-            this.NeedsReset(this.pendingEval.Evaluate(logger.Label("PerformEvaluation")));
+            this.NeedsReset(this.pendingEval.Evaluate(logger?.Label("PerformEvaluation")));
 
         #endregion
         #region Needs Reset...

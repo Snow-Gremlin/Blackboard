@@ -134,9 +134,8 @@ namespace BlackboardTests {
         /// <param name="lines">The expected evaluation log output.</param>
         /// <returns>The result from the perform.</returns>
         static public Result CheckPerform(this Formula formula, params string[] lines) {
-            BufferLogger buf = new();
-            Logger logger = buf.Stringify(Stringifier.Shallow().PreloadNames(formula.Slate));
-            Result result = formula.Perform(logger);
+            BufferLogger logger = new();
+            Result result = formula.Perform(logger.Stringify(Stringifier.Shallow().PreloadNames(formula.Slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
             return result;
         }
@@ -217,9 +216,8 @@ namespace BlackboardTests {
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckEvaluate(this Slate slate, params string[] lines) {
-            BufferLogger buf = new();
-            Logger logger = buf.Stringify(Stringifier.Shallow().PreloadNames(slate));
-            slate.PerformEvaluation(logger);
+            BufferLogger logger = new();
+            slate.PerformEvaluation(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
         }
 
@@ -227,9 +225,8 @@ namespace BlackboardTests {
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckUpdate(this Slate slate, params string[] lines) {
-            BufferLogger buf = new();
-            Logger logger = buf.Stringify(Stringifier.Shallow().PreloadNames(slate));
-            slate.PerformUpdates(logger);
+            BufferLogger logger = new();
+            slate.PerformUpdates(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
         }
 

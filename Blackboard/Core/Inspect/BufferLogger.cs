@@ -22,7 +22,8 @@ namespace Blackboard.Core.Inspect {
         /// <param name="entry">The entry to write.</param>
         /// <returns>Always returns true to continue.</returns>
         protected override bool ProcessEntry(Entry entry) {
-            this.fout.WriteLine(entry.ToString());
+            // Not using WriteLine so that output doesn't have "\r" in it.
+            this.fout.Write(entry.ToString()+"\n");
             return true; 
         }
 

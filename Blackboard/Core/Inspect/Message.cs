@@ -55,6 +55,18 @@ namespace Blackboard.Core.Inspect {
             return this;
         }
 
+        /// <summary>This applies the given stringifier to the arguments and data.</summary>
+        /// <param name="stringifier">The stringifier to apply or null to use shallow.</param>
+        /// <returns>The logger which will stringify values in the message.</returns>
+        public Message Stringify(Stringifier stringifier = null) {
+            stringifier ??= Stringifier.Shallow();
+            for( int i = this.Arguments.Length-1; i >= 0; --i)
+                this.Arguments[i] = stringifier.StringifyObject(this.Arguments[i]);
+            foreach ((string key, object value) in this.Data)
+                this.Data[key] = stringifier.StringifyObject(value);
+            return this;
+        }
+
         /// <summary>Creates a single string will all the message and data.</summary>
         /// <remarks>This is useful for logging and debugging exceptions which contain data.</remarks>
         /// <returns>The string for the whole message.</returns>
@@ -63,7 +75,12 @@ namespace Blackboard.Core.Inspect {
             lines.Add(this.Text);
             foreach ((string key, object value) in this.Data) {
                 string strKey = key?.ToString() ?? "null";
-                string strVal = value?.ToString() ?? "null";
+                string strVal = value switch {
+                    null          => "null",
+                    Exception e   => e.FullMessage.ToString(),
+                    Message   msg => msg.ToString(),
+                    _             => value.ToString(),
+                };
                 strVal = strVal.Replace("\n", "\n   ");
                 lines.Add("[" + strKey + ": " + strVal + "]");
             }
@@ -72,14 +89,15 @@ namespace Blackboard.Core.Inspect {
 
         /// <summary>Implicitly convert to an exception when needed.</summary>
         /// <param name="msg">The message to convert.</param>
-        public static implicit operator S.Exception(Message msg) {
-            // Because VS test explorer doesn't post the data,
-            // use the whole message with the data as the exception's message.
-            S.Exception exp = new(msg.ToString());
-            exp.Data["Message"] = msg.Text;
-            foreach ((string key, object value) in msg.Data)
-                exp.Data[key] = value;
-            return exp;
+        public static implicit operator Exception(Message msg) {
+            S.Exception inner = null;
+            foreach (object value in msg.Data.Keys) {
+                if (value is S.Exception e) {
+                    inner = e;
+                    break;
+                }
+            }
+            return new(msg.Stringify(), inner);
         }
     }
 }

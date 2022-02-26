@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Inspect;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
@@ -62,8 +62,8 @@ namespace BlackboardTests.CoreTests {
             t.Test("D, D",    "null");
             t.Test("I, B",    "null");
             t.Test("B, I",    "null");
-            t.Test("T, B",    "Any<trigger>(T, BoolAsTrigger<bool>(B))");
-            t.Test("B, T",    "Any<trigger>(BoolAsTrigger<bool>(B), T)");
+            t.Test("T, B",    "Any<trigger>(T, BoolAsTrigger<trigger>(B))");
+            t.Test("B, T",    "Any<trigger>(BoolAsTrigger<trigger>(B), T)");
         }
 
         [TestMethod]

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using S = System;
+﻿using S = System;
 
 namespace Blackboard.Core.Inspect {
 
@@ -18,7 +17,7 @@ namespace Blackboard.Core.Inspect {
                 _             => "Unknown",
             };
 
-        private S.Func<Message> fetcher;
+        private S.Func<Message> fetcher; 
 
         /// <summary>Creates a new entry for a deferred message.</summary>
         /// <param name="level">The level of this deferred message.</param>
@@ -92,9 +91,8 @@ namespace Blackboard.Core.Inspect {
             }; 
         }
 
-        /// <summary>Gets the message with the level prepended to it.</summary>
+        /// <summary>Gets the message text.</summary>
         /// <returns>The string for this entry.</returns>
-        public override string ToString() =>
-            LevelToString(this.Level) + ": " + this.Message.ToString();
+        public override string ToString() => this.Message.ToString();
     }
 }

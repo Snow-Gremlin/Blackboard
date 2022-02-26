@@ -493,11 +493,13 @@ namespace Blackboard.Core.Inspect {
         /// The string of the given action or node,
         /// or the original value if not an action or node.
         /// </returns>
-        private object stringifyObject(object value) =>
+        public object StringifyObject(object value) =>
             value switch {
-                INode   node   => this.Stringify(node),
-                IAction action => this.Stringify(action),
-                _              => value
+                INode     node   => this.Stringify(node),
+                IAction   action => this.Stringify(action),
+                Message   msg    => msg.Stringify(this),
+                Exception e      => e.Stringify(this),
+                _                => value
             };
 
         /// <summary>Converts the given collection object with this stringifier.</summary>
@@ -506,8 +508,8 @@ namespace Blackboard.Core.Inspect {
         /// For each object this returns the string of a given action or node,
         /// or the original value if not an action or node.
         /// </returns>
-        public IEnumerable<object> Stringify(IEnumerable<object> values) =>
-            values.Select(this.stringifyObject);
+        public IEnumerable<object> StringifyObject(IEnumerable<object> values) =>
+            values.Select(this.StringifyObject);
 
         #endregion
     }

@@ -66,7 +66,8 @@ namespace Blackboard.Parser {
 
             // Check for parser errors.
             if (result.Errors.Length > 0)
-                throw new Message(result.Errors.Join("\n"));
+                throw new Message("Errors while reading code source").
+                    With("Errors", result.Errors);
 
             // process the resulting tree to build the formula.
             return this.read(result.Tree);
@@ -83,7 +84,8 @@ namespace Blackboard.Parser {
                 this.logger?.Info("Parser Done");
                 return builder.Actions.Formula;
             } catch (S.Exception ex) {
-                throw new Message("Error occurred while parsing input code.", ex);
+                throw new Message("Error occurred while parsing input code.").
+                    With("Error", ex);
             }
         }
 
@@ -206,7 +208,8 @@ namespace Blackboard.Parser {
             try {
                 builder.Nodes.Push(parseMethod(text));
             } catch (S.Exception ex) {
-                throw new Message("Failed to " + usage + ".", ex).
+                throw new Message("Failed to " + usage + ".").
+                    With("Error", ex).
                     With("Text", text).
                     With("Location", builder.LastLocation);
             }

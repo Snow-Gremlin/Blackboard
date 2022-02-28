@@ -79,6 +79,8 @@ namespace Blackboard.Parser.Optimization {
                 //         - <TBA>
                 //   - [ ] Neg:
                 //         - If parent is a Neg, remove both this node and parent, and replace with parent's parent (recheck for deep nesting)
+                //         - If a value is being negated in a sum and the same value exists in the sum they can both be removed.
+                //         - If parent is a sub, then replace it with a reversed sub, `Neg(Sub(X, Y)) => Sub(Y, X)`
                 //         - <TBA>
                 //   - [ ] Not:
                 //         - If parent is a Not, remove both this node and parent, and replace with parent's parent (recheck for deep nesting)
@@ -88,7 +90,9 @@ namespace Blackboard.Parser.Optimization {
                 //   - [ ] NotEqual
                 //         - <TBA>
                 //   - [ ] Sub:
-                //         - If parent is a Sub, remove both this node and parent, and replace with parent's parent (recheck for deep nesting)
+                //         - If parent is a Sub, remove both this node and parent, and replace with sum (recheck for deep nesting)
+                //         - If sub is a parent in a sum, check for a new combination which cancels out the sub and combine subs
+                //           with a neg sum if there are multiple subs.
                 //         - <TBA>
 
                 // TODO: Add rule for reusing existing nodes:

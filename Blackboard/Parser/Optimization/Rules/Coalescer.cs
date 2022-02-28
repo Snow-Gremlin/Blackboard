@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Blackboard.Parser.Optimization.Rules {
@@ -32,21 +33,49 @@ namespace Blackboard.Parser.Optimization.Rules {
             }
         }
 
-        /// <summary></summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        static private INode commutativeCoalesce(ICoalescable node) {
+        /// <summary>
+        /// This attempts to remove as many parents as possible from the given node by finding constant parents.
+        /// The constant parents will be precomputed and any identity parents will be removed.
+        /// If there are no parents left then the identity will be returned.
+        /// </summary>
+        /// <param name="node">The node to try and reduce.</param>
+        /// <returns>A node to replace this node with or null to not replace.</returns>
+        static private INode commutativeReduce(ICoalescable node) {
+            IConstant identity = node.Identity;
+            IParentCollection parents = node.Parents;
+            if (parents.Count <= 0) return identity;
 
-            // TODO: Implement
+            List<IParent> remainder = parents.Nodes.
+                WhereNot(parent => parent.IsConstant()).
+                ToList();
+            if (remainder.Count == parents.Count) return null;
+            
+            List<IParent> constants = parents.Nodes.
+                Where(parent => parent.IsConstant()).
+                WhereNot(parent => parent.SameValue(identity)).
+                ToList();
+            if (constants.Count > 1) {
+                ICoalescable temp = node.NewInstance();
+                temp.Parents.SetAll(constants);
+                IConstant constant = temp.ToConstant();
+                if (constant is not null && constant is IParent constParent) {
+                    constants.Clear();
+                    if (!constParent.SameValue(identity))
+                        constants.Add(constParent);
+                }
+            }
+            if (remainder.Count + constants.Count == parents.Count) return null;
 
+            remainder.AddRange(constants);
+            if (remainder.Count <= 0) return identity;
+            node.Parents.SetAll(remainder);
             return null;
         }
 
-
         /// <summary></summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        static private INode notcommutableCoalesce(ICoalescable node) {
+        /// <param name="node">The node to try and reduce.</param>
+        /// <returns>A node to replace this node with or null to not replace.</returns>
+        static private INode notcommutableReduce(ICoalescable node) {
             
             // TODO: Implement
 
@@ -58,10 +87,12 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <returns>A node to replace this node with or null to not replace.</returns>
         static private INode coalesce(ICoalescable node) {
             if (node.ParentIncorporate) incorporateParents(node);
-            return node.Commutative? commutativeCoalesce(node) : notcommutableCoalesce(node);
+            return !node.ParentReducable ? null :
+                node.Commutative ? commutativeReduce(node) :
+                notcommutableReduce(node);
         }
 
-        /// <summary>Reduce the parents and coalesce nodes as mush as possible.</summary>
+        /// <summary>Reduce the parents and coalesce nodes as much as possible.</summary>
         /// <param name="args">The arguments for the optimization rules.</param>
         public void Perform(RuleArgs args) {
             foreach (INode node in args.Nodes) {

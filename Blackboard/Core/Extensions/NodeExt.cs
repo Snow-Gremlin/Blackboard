@@ -69,6 +69,27 @@ namespace Blackboard.Core.Extensions {
         static public IEnumerable<INode> Actualize(this IEnumerable<INode> nodes) =>
             nodes.Select(node => node is VirtualNode virt ? virt.Receiver : node);
 
+        /// <summary>Attempts to create a new instance of the given node.</summary>
+        /// <typeparam name="T">The type of the node to get a new instance of.</typeparam>
+        /// <param name="node">The node of the type to get a new instance of.</param>
+        /// <returns>The new instance of the given node cast to the given type.</returns>
+        static public T NewInstance<T>(this T node) where T: class, INode =>
+            node.GetType().GetConstructor(S.Array.Empty<S.Type>()).Invoke(S.Array.Empty<object>()) as T;
+
+        /// <summary>
+        /// Determines if the contained values or triggers of the two given nodes are the same.
+        /// The node types do not have to match only the values or trigger values.
+        /// </summary>
+        /// <param name="node">The first node to compare the value of.</param>
+        /// <param name="other">The second node to compare the value against.</param>
+        /// <returns>True if the value or trigger are the same.</returns>
+        static public bool SameValue(this INode node, INode other) =>
+            node switch {
+                IDataNode d1 => other is IDataNode d2 && d1.Data.Equals(d2.Data),
+                ITrigger  t1 => other is ITrigger  t2 && t1.Provoked == t2.Provoked,
+                _            => false
+            };
+
         #endregion
         #region IChild...
 

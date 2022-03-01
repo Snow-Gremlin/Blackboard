@@ -150,7 +150,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="parents">The set of parents to add.</param>
         static internal void AddParents<T>(this List<T> sources, IEnumerable<T> parents)
             where T : class, IParent =>
-            sources.AddRange(parents.NotNull());
+            sources.AddRange(parents?.NotNull() ?? S.Array.Empty<T>());
 
         /// <summary>This removes the given parents from this node collection.</summary>
         /// <typeparam name="T">The type of the parents to remove.</typeparam>

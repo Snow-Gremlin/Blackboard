@@ -11,11 +11,18 @@ namespace Blackboard.Core.Nodes.Outer {
     sealed public class ConstTrigger: TriggerNode, IConstant {
 
         /// <summary>Creates a new constant trigger value node.</summary>
+        public ConstTrigger() { }
+
+        /// <summary>Creates a new constant trigger value node.</summary>
         /// <param name="provoked">The provoke state for this trigger.</param>
         public ConstTrigger(bool provoked = false) => this.SetProvoked(provoked);
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new ConstTrigger();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "ConstTrigger";
+        public override string TypeName => nameof(ConstTrigger);
 
         /// <summary>This sets the value of the provoked constant.</summary>
         /// <param name="provoked">The state to set.</param>

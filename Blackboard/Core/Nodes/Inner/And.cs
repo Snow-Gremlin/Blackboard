@@ -15,6 +15,9 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((values) => new And(values));
 
         /// <summary>Creates a boolean AND value node.</summary>
+        public And() : base() { }
+
+        /// <summary>Creates a boolean AND value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         public And(params IValueParent<Bool>[] parents) : base(parents) { }
 
@@ -22,8 +25,12 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="parents">The initial set of parents to use.</param>
         public And(IEnumerable<IValueParent<Bool>> parents = null) : base(parents) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new And();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "And";
+        public override string TypeName => nameof(And);
 
         /// <summary>Gets the AND of all the parent's booleans.</summary>
         /// <param name="values">The parents to AND together.</param>

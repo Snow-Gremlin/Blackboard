@@ -14,14 +14,21 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((left, right, epsilon) => new EpsilonEqual<T>(left, right, epsilon));
 
         /// <summary>Creates an epsilon equal value node.</summary>
+        public EpsilonEqual() { }
+
+        /// <summary>Creates an epsilon equal value node.</summary>
         /// <param name="left">This is the first parent for the left value.</param>
         /// <param name="right">This is the second parent for the right value.</param>
         /// <param name="epsilon">This is the third parent which is used as the epsilon in the comparison.</param>
         public EpsilonEqual(IValueParent<T> left = null, IValueParent<T> right = null, IValueParent<T> epsilon = null) :
             base(left, right, epsilon) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new EpsilonEqual<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "EpsilonEqual";
+        public override string TypeName => nameof(EpsilonEqual<T>);
 
         /// <summary>Determine if the parent's values are equal during evaluation.</summary>
         /// <param name="left">The first parent's value to compare.</param>

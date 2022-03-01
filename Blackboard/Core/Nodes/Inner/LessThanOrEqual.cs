@@ -14,12 +14,19 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new LessThanOrEqual<T>(left, right));
 
         /// <summary>Creates a less than or equal value node.</summary>
+        public LessThanOrEqual() { }
+
+        /// <summary>Creates a less than or equal value node.</summary>
         /// <param name="left">This is the first parent for the source value.</param>
         /// <param name="right">This is the second parent for the source value.</param>
         public LessThanOrEqual(IValueParent<T> left = null, IValueParent<T> right = null) : base(left, right) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new LessThanOrEqual<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "LessThanOrEqual";
+        public override string TypeName => nameof(LessThanOrEqual<T>);
 
         /// <summary>Determine if the parent's values are less than or equal during evaluation.</summary>
         /// <param name="left">The first parent's value to compare.</param>

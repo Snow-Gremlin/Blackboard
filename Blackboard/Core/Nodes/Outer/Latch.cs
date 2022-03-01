@@ -22,6 +22,9 @@ namespace Blackboard.Core.Nodes.Outer {
         private IValueParent<T> source;
 
         /// <summary>Creates a latching value node.</summary>
+        public Latch() { }
+
+        /// <summary>Creates a latching value node.</summary>
         /// <param name="trigger">This is the parent that indicates the value should be set.</param>
         /// <param name="source">This is the parent to get the value from when the other is provoked.</param>
         /// <param name="value">The initial value for this node.</param>
@@ -29,6 +32,10 @@ namespace Blackboard.Core.Nodes.Outer {
             this.Trigger = trigger;
             this.Source = source;
         }
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Latch<T>();
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Latch";

@@ -13,14 +13,21 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((value, min, max) => new Clamp<T>(value, min, max));
 
         /// <summary>Creates a clamped value node.</summary>
+        public Clamp() { }
+
+        /// <summary>Creates a clamped value node.</summary>
         /// <param name="value">This is the value parent that is clamped.</param>
         /// <param name="min">This is the minimum value parent for the lower edge of the clamp.</param>
         /// <param name="max">This is the maximum value parent for the upper edge of the clamp.</param>
         public Clamp(IValueParent<T> value = null, IValueParent<T> min = null, IValueParent<T> max = null) :
             base(value, min, max) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Clamp<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Clamp";
+        public override string TypeName => nameof(Clamp<T>);
 
         /// <summary>Selects the value to return during evaluation.</summary>
         /// <param name="value">

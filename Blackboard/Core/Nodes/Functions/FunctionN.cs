@@ -33,6 +33,14 @@ namespace Blackboard.Core.Nodes.Functions {
             this.hndl = hndl;
         }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new FunctionN<Tn, TReturn>(this.hndl,
+            this.NeedsOneNoCast, this.PassthroughOne, this.MinArgs, this.MaxArgs);
+
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => nameof(FunctionN<Tn, TReturn>);
+
         /// <summary>Builds and return the function node with the given arguments already casted.</summary>
         /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>
         /// <returns>The resulting function node.</returns>

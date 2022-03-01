@@ -12,13 +12,20 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new LeftShift<T>(left, right));
 
         /// <summary>Creates a left shift value node.</summary>
+        public LeftShift() { }
+
+        /// <summary>Creates a left shift value node.</summary>
         /// <param name="left">This is the first parent for the source value.</param>
         /// <param name="right">This is the second parent for the source value.</param>
         public LeftShift(IValueParent<T> left = null, IValueParent<T> right = null) :
             base(left, right) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new LeftShift<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "LeftShift";
+        public override string TypeName => nameof(LeftShift<T>);
 
         /// <summary>Left shifts the value during evaluation.</summary>
         /// <param name="left">The value to left shift.</param>

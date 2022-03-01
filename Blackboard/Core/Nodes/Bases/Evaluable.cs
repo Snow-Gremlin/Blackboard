@@ -21,6 +21,10 @@ namespace Blackboard.Core.Nodes.Bases {
             this.Depth = 0;
         }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public abstract INode NewInstance();
+
         /// <summary>This is the type name of the node without any type parameters.</summary>
         public abstract string TypeName { get; }
 

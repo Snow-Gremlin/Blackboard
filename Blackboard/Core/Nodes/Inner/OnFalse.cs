@@ -17,11 +17,18 @@ namespace Blackboard.Core.Nodes.Inner {
         private IValueParent<Bool> source;
 
         /// <summary>Creates a trigger node which triggers when the boolean goes from false to false.</summary>
+        public OnFalse() => this.Parent = null;
+
+        /// <summary>Creates a trigger node which triggers when the boolean goes from false to false.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         public OnFalse(IValueParent<Bool> source = null) => this.Parent = source;
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new OnFalse();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "OnFalse";
+        public override string TypeName => nameof(OnFalse);
 
         /// <summary>The parent node to get the source value from.</summary>
         public IValueParent<Bool> Parent {

@@ -20,6 +20,9 @@ namespace Blackboard.Core.Nodes.Inner {
             new FunctionN<IValueParent<T>, Sum<T>>((inputs) => new Sum<T>(inputs), needsOneNoCast: needsOneNoCast);
 
         /// <summary>Creates a sum value node.</summary>
+        public Sum() { }
+
+        /// <summary>Creates a sum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         public Sum(params IValueParent<T>[] parents) : base(parents) { }
 
@@ -27,8 +30,12 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="parents">The initial set of parents to use.</param>
         public Sum(IEnumerable<IValueParent<T>> parents = null) : base(parents) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Sum<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Sum";
+        public override string TypeName => nameof(Sum<T>);
 
         /// <summary>Gets the sum of all the parent values.</summary>
         /// <param name="values">The values to sum together.</param>

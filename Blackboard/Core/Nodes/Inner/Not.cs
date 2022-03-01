@@ -12,12 +12,18 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory(input => new Not(input));
 
         /// <summary>Creates a boolean NOT value node.</summary>
+        public Not() { }
+
+        /// <summary>Creates a boolean NOT value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        /// <param name="value">The default value for this node.</param>
         public Not(IValueParent<Bool> source = null) : base(source) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Not();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Not";
+        public override string TypeName => nameof(Not);
 
         /// <summary>Gets the boolean NOT of the given parent during evaluation.</summary>
         /// <param name="value">The parent value to get the NOT of.</param>

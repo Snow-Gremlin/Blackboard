@@ -121,6 +121,10 @@ namespace Blackboard.Core.Nodes.Inner {
             this.func = func;
         }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new UnaryDoubleMath<T>(this.funcName, this.func);
+
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => this.funcName;
 

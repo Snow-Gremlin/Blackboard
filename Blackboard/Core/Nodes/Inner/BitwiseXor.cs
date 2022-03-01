@@ -15,6 +15,9 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((values) => new BitwiseXor<T>(values));
 
         /// <summary>Creates a bitwise Exclusive OR value node.</summary>
+        public BitwiseXor() { }
+
+        /// <summary>Creates a bitwise Exclusive OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         public BitwiseXor(params IValueParent<T>[] parents) : base(parents) { }
 
@@ -22,8 +25,12 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="parents">The initial set of parents to use.</param>
         public BitwiseXor(IEnumerable<IValueParent<T>> parents = null) : base(parents) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new BitwiseXor<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "BitwiseXor";
+        public override string TypeName => nameof(BitwiseXor<T>);
 
         /// <summary>Gets the bitwise Exclusive OR of all the parent's booleans.</summary>
         /// <param name="values">The parents to bitwise Exclusive OR together.</param>

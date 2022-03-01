@@ -14,6 +14,9 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((inputs) => new Mul<T>(inputs));
 
         /// <summary>Creates a product value node.</summary>
+        public Mul() { }
+
+        /// <summary>Creates a product value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         public Mul(params IValueParent<T>[] parents) : base(parents) { }
 
@@ -21,8 +24,12 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="parents">The initial set of parents to use.</param>
         public Mul(IEnumerable<IValueParent<T>> parents = null) : base(parents) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Mul<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Mul";
+        public override string TypeName => nameof(Mul<T>);
 
         /// <summary>Gets the product of the parent values during evaluation.</summary>
         /// <param name="values">All the parent values to multiply.</param>

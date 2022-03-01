@@ -11,14 +11,18 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((test, left, right) => new SelectTrigger(test, left, right));
 
         /// <summary>Creates a selection trigger node.</summary>
+        public SelectTrigger() { }
+
+        /// <summary>Creates a selection trigger node.</summary>
         /// <param name="test">This is the first parent for the boolean for selection between the other two parents.</param>
         /// <param name="left">This is the second parent to select when the test boolean is true.</param>
         /// <param name="right">This is the third parent to select when the test boolean is false.</param>
         public SelectTrigger(IValueParent<Bool> test = null, ITriggerParent left = null, ITriggerParent right = null) :
             base(test, left, right) { }
 
-        /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Select";
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new SelectTrigger();
 
         /// <summary>Indicates this trigger had been provoked during the current evaluation.</summary>
         public bool Provoked { get; private set; }

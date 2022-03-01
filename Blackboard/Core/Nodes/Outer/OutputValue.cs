@@ -11,8 +11,15 @@ namespace Blackboard.Core.Nodes.Outer {
         where T : IComparable<T> {
 
         /// <summary>Creates a new output value node.</summary>
+        public OutputValue() { }
+
+        /// <summary>Creates a new output value node.</summary>
         /// <param name="source">The initial source to get the value from.</param>
         public OutputValue(IValueParent<T> source = null) : base(source) { }
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new OutputValue<T>();
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Output";

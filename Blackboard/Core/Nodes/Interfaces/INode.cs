@@ -10,5 +10,9 @@
         /// and should be a regular identifier (no spaces, periods, hyphens, etc).
         /// </remarks>
         public string TypeName { get; }
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public INode NewInstance();
     }
 }

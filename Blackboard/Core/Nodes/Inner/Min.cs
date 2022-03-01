@@ -15,6 +15,9 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((inputs) => new Min<T>(inputs));
 
         /// <summary>Creates a minimum value node.</summary>
+        public Min() { }
+
+        /// <summary>Creates a minimum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         public Min(params IValueParent<T>[] parents) : base(parents) { }
 
@@ -22,8 +25,12 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="parents">The initial set of parents to use.</param>
         public Min(IEnumerable<IValueParent<T>> parents = null) : base(parents) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Min<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Min";
+        public override string TypeName => nameof(Min<T>);
 
         /// <summary>Updates this node's value to the minimum value during evaluation.</summary>
         /// <param name="values">The parents' values to get the min of.</param>

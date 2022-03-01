@@ -12,11 +12,18 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((input) => new Neg<T>(input));
 
         /// <summary>Creates a negated value node.</summary>
+        public Neg() { }
+
+        /// <summary>Creates a negated value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         public Neg(IValueParent<T> source = null) : base(source) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Neg<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Neg";
+        public override string TypeName => nameof(Neg<T>);
 
         /// <summary>Gets the negated value of the parent during evaluation.</summary>
         /// <param name="value">The parent value to negate.</param>

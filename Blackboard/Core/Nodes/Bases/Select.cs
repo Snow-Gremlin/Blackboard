@@ -75,6 +75,9 @@ namespace Blackboard.Core.Nodes.Bases {
             return true;
         }
 
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Select";
+
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>
         public override string ToString() => Stringifier.Simple(this);

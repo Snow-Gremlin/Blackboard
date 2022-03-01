@@ -10,8 +10,15 @@ namespace Blackboard.Core.Nodes.Outer {
         where T : IData, IEquatable<T> {
 
         /// <summary>Creates a new input value node.</summary>
+        public InputValue() { }
+
+        /// <summary>Creates a new input value node.</summary>
         /// <param name="value">The initial value for this node.</param>
         public InputValue(T value = default) : base(value) { }
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new InputValue<T>();
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Input";

@@ -31,6 +31,9 @@ namespace Blackboard.Core.Nodes.Outer {
         private IValueParent<T> resetValue;
 
         /// <summary>Creates a new node for counting events.</summary>
+        public Counter() { }
+
+        /// <summary>Creates a new node for counting events.</summary>
         /// <param name="increment">The initial parent to trigger an increment.</param>
         /// <param name="decrement">The initial parent to trigger an decrement.</param>
         /// <param name="reset">The initial parent trigger to reset the counter.</param>
@@ -46,8 +49,12 @@ namespace Blackboard.Core.Nodes.Outer {
             this.ResetValue = resetValue;
         }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Counter<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Counter";
+        public override string TypeName => nameof(Counter<T>);
 
         /// <summary>This is the parent to increment the counter.</summary>
         public ITriggerParent Increment {

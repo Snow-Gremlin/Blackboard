@@ -119,8 +119,12 @@ namespace Blackboard.Core.Nodes.Bases {
             this.PassthroughOne = passthroughOne;
         }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public abstract INode NewInstance();
+
         /// <summary>This is the type name of the node.</summary>
-        public string TypeName => "Function";
+        public abstract string TypeName { get; }
 
         /// <summary>The collection of argument types.</summary>
         /// <remarks>

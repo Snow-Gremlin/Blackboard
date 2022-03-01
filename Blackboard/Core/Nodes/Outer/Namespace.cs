@@ -12,12 +12,15 @@ namespace Blackboard.Core.Nodes.Outer {
         private SortedDictionary<string, INode> fields;
 
         /// <summary>Creates a new namespace.</summary>
-        public Namespace() {
+        public Namespace() =>
             this.fields = new SortedDictionary<string, INode>();
-        }
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public INode NewInstance() => new Namespace();
 
         /// <summary>This is the type name of the node.</summary>
-        public string TypeName => "Namespace";
+        public string TypeName => nameof(Namespace);
 
         /// <summary>Gets or sets the field in this namespace.</summary>
         /// <param name="name">The name of the field.</param>

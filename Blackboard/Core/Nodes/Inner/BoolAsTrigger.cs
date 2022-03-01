@@ -22,11 +22,18 @@ namespace Blackboard.Core.Nodes.Inner {
         private IValueParent<Bool> source;
 
         /// <summary>Creates a new bool value to trigger conversion.</summary>
+        public BoolAsTrigger() { }
+
+        /// <summary>Creates a new bool value to trigger conversion.</summary>
         /// <param name="source">The boolean parent to get the provoked state from.</param>
         public BoolAsTrigger(IValueParent<Bool> source = null) => this.Parent = source;
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new BoolAsTrigger();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "BoolAsTrigger";
+        public override string TypeName => nameof(BoolAsTrigger);
 
         /// <summary>The parent node to get the source value from.</summary>
         public IValueParent<Bool> Parent {

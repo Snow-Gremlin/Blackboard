@@ -18,6 +18,9 @@ namespace Blackboard.Core.Nodes.Inner {
         private List<IParent> sources;
 
         /// <summary>Creates an on change trigger node.</summary>
+        public OnChange() : this(null) { }
+
+        /// <summary>Creates an on change trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         public OnChange(params IParent[] parents) :
             this(parents as IEnumerable<IParent>) { }
@@ -29,8 +32,12 @@ namespace Blackboard.Core.Nodes.Inner {
             this.AddParents(parents);
         }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new OnChange();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "OnChange";
+        public override string TypeName => nameof(OnChange);
 
         /// <summary>This adds parents to this node.</summary>
         /// <param name="parents">The set of parents to add.</param>

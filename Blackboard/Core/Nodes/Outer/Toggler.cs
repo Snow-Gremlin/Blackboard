@@ -3,7 +3,6 @@ using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Outer {
 
@@ -36,8 +35,12 @@ namespace Blackboard.Core.Nodes.Outer {
             this.ResetValue = resetValue;
         }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Toggler();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Toggler";
+        public override string TypeName => nameof(Toggler);
 
         /// <summary>This is the parent to toggle the value.</summary>
         public ITriggerParent Toggle {

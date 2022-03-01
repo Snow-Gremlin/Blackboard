@@ -14,12 +14,19 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new GreaterThan<T>(left, right));
 
         /// <summary>Creates a greater than value node.</summary>
+        public GreaterThan() { }
+
+        /// <summary>Creates a greater than value node.</summary>
         /// <param name="left">This is the first parent for the left value.</param>
         /// <param name="right">This is the second parent for the right value.</param>
         public GreaterThan(IValueParent<T> left = null, IValueParent<T> right = null) : base(left, right) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new GreaterThan<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "GreaterThan";
+        public override string TypeName => nameof(GreaterThan<T>);
 
         /// <summary>Determine if the parent's values are greater than during evaluation.</summary>
         /// <param name="left">The first parent's value to compare.</param>

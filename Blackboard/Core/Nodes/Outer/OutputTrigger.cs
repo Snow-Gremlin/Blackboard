@@ -12,8 +12,15 @@ namespace Blackboard.Core.Nodes.Outer {
         private ITriggerParent source;
 
         /// <summary>Creates a new output trigger.</summary>
+        public OutputTrigger() { }
+
+        /// <summary>Creates a new output trigger.</summary>
         /// <param name="source">The initial source trigger to listen to.</param>
         public OutputTrigger(ITriggerParent source = null) => this.Parent = source;
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new OutputTrigger();
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Output";

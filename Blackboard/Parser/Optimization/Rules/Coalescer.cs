@@ -55,7 +55,7 @@ namespace Blackboard.Parser.Optimization.Rules {
                 WhereNot(parent => parent.SameValue(identity)).
                 ToList();
             if (constants.Count > 1) {
-                ICoalescable temp = node.NewInstance();
+                ICoalescable temp = node.NewInstance() as ICoalescable;
                 temp.Parents.SetAll(constants);
                 IConstant constant = temp.ToConstant();
                 if (constant is not null && constant is IParent constParent) {

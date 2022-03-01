@@ -59,8 +59,15 @@ namespace Blackboard.Core.Nodes.Outer {
         static public readonly IFuncDef Factory = new Function<Literal<T>>(() => new Literal<T>());
 
         /// <summary>Creates a new literal value node.</summary>
+        public Literal() { }
+
+        /// <summary>Creates a new literal value node.</summary>
         /// <param name="value">The initial value of the node.</param>
         public Literal(T value = default) : base(value) { }
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Literal<T>();
 
         /// <summary>This sets the literal value.</summary>
         /// <param name="value">The value to set.</param>
@@ -72,6 +79,6 @@ namespace Blackboard.Core.Nodes.Outer {
         protected override T CalcuateValue() => this.Value;
 
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Literal";
+        public override string TypeName => nameof(Literal<T>);
     }
 }

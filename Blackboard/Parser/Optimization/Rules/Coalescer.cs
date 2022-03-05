@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// and replace that parent with the parent parents at the same location and in the same order.
         /// </summary>
         /// <param name="node">The node to incorporate parents into.</param>
-        static private void incorporateParents(ICoalescable node) {
+        static private void incorporateParents(ICoalescable node, Logger log) {
             IParentCollection parents = node.Parents;
             for (int i = 0; i < parents.Count; ++i) {
                 IParent parent = parents[i];
@@ -82,11 +83,11 @@ namespace Blackboard.Parser.Optimization.Rules {
             return null;
         }
 
-        /// <summary>Performs a coalesce on the given node.</summary>
+        /// <summary>Performs a coalesce on the given node.</summary> 
         /// <param name="node">The node to reduce and simplify.</param>
         /// <returns>A node to replace this node with or null to not replace.</returns>
-        static private INode coalesce(ICoalescable node) {
-            if (node.ParentIncorporate) incorporateParents(node);
+        static private INode coalesce(ICoalescable node, Logger log) {
+            if (node.ParentIncorporate) incorporateParents(node, log);
             return !node.ParentReducable ? null :
                 node.Commutative ? commutativeReduce(node) :
                 notcommutableReduce(node);
@@ -95,15 +96,16 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <summary>Reduce the parents and coalesce nodes as much as possible.</summary>
         /// <param name="args">The arguments for the optimization rules.</param>
         public void Perform(RuleArgs args) {
+            Logger log = args.Logger?.SubGroup(nameof(Coalescer));
             foreach (INode node in args.Nodes) {
                 if (node is not ICoalescable cNode) continue;
 
-                INode newNode = coalesce(cNode);
+                INode newNode = coalesce(cNode, log);
                 if (newNode is null) continue;
 
                 if (ReferenceEquals(cNode, args.Root))
                     args.Root = newNode;
-                else if (newNode is IParent newParent && cNode is IParent cParent ) {
+                else if (newNode is IParent newParent && cNode is IParent cParent) {
                     foreach (IChild child in cParent.Children.ToList())
                         child.Parents.Replace(cParent, newParent);
                 }

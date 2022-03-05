@@ -36,7 +36,7 @@ namespace Blackboard.Core.Actions {
         /// <returns>The results of the formula being performed.</returns>
         public Result Perform(Logger logger = null) {
             logger?.Info("Formula");
-            Logger sub = logger?.Label("Formula");
+            Logger sub = logger?.("Formula");
             Result result = new();
             foreach (IAction action in this.actions)
                 action.Perform(this.Slate, result, sub);

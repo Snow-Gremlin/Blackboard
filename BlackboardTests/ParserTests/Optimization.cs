@@ -19,5 +19,19 @@ namespace BlackboardTests.ParserTests {
                 "  Finish",
                 "]");
         }
+
+        [TestMethod]
+        public void TestParseOptimization_IncorporateParents() {
+            Slate slate = new();
+            Formula formula = slate.LogRead(
+                "in int A, B, C, D;",
+                "E := (A + B + 2) + ((C + D) + 3);");
+            formula.Check(
+                "[",
+                "  Namespace.A := Literal<double>[42] {};",
+                "  Finish",
+                "]");
+
+        }
     }
 }

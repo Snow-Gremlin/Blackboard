@@ -150,7 +150,7 @@ namespace Blackboard.Core.Nodes.Collections {
         /// </param>
         /// <returns>True if any parents were added, false otherwise.</returns>
         public bool Insert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) {
-            if (index < 0 || index >= this.source.Count)
+            if (index < 0 || index > this.source.Count)
                 throw new Message("Invalid index to insert parents at.").
                     With("child", this.Child).
                     With("count", this.source.Count).

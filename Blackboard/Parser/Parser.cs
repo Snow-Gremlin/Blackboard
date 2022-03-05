@@ -42,7 +42,7 @@ namespace Blackboard.Parser {
         public Parser(Slate slate, Logger logger = null) {
             this.slate   = slate;
             this.prompts = null;
-            this.logger  = logger?.Label("Parser");
+            this.logger  = logger?.SubGroup(nameof(Parser));
 
             this.initPrompts();
             this.validatePrompts();
@@ -67,7 +67,7 @@ namespace Blackboard.Parser {
             // Check for parser errors.
             if (result.Errors.Length > 0)
                 throw new Message("Errors while reading code source").
-                    With("Errors", result.Errors);
+                    With("Errors", result.Errors.Join("\n"));
 
             // process the resulting tree to build the formula.
             return this.read(result.Tree);

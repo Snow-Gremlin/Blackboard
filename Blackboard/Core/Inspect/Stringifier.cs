@@ -495,11 +495,12 @@ namespace Blackboard.Core.Inspect {
         /// </returns>
         public object StringifyObject(object value) =>
             value switch {
-                INode     node   => this.Stringify(node),
-                IAction   action => this.Stringify(action),
-                Message   msg    => msg.Stringify(this),
-                Exception e      => e.Stringify(this),
-                _                => value
+                INode               node   => this.Stringify(node),
+                IAction             action => this.Stringify(action),
+                Message             msg    => msg.Stringify(this),
+                Exception           e      => e.Stringify(this),
+                IEnumerable<object> list   => list.Select(this.StringifyObject).Join(", "),
+                _                          => value
             };
 
         /// <summary>Converts the given collection object with this stringifier.</summary>

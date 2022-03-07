@@ -26,7 +26,7 @@ namespace Blackboard.Parser {
         /// <param name="logger">The optional logger to output the build steps.</param>
         public Builder(Slate slate, Logger logger = null) {
             this.Slate  = slate;
-            this.Logger = logger?.Label("Builder");
+            this.Logger = logger.SubGroup(nameof(Builder));
 
             this.Actions     = new ActionCollection(this);
             this.Scope       = new ScopeStack(this);
@@ -49,7 +49,7 @@ namespace Blackboard.Parser {
 
         /// <summary>Resets the stack back to the initial state.</summary>
         public void Reset() {
-            this.Logger?.Info("Reset");
+            this.Logger.Info("Reset");
 
             this.Actions.Clear();
             this.Scope.Reset();
@@ -63,7 +63,7 @@ namespace Blackboard.Parser {
 
         /// <summary>Clears the node stack and type stack without changing pending actions nor scopes.</summary>
         public void Clear() {
-            this.Logger?.Info("Clear");
+            this.Logger.Info("Clear");
 
             this.Nodes.Clear();
             this.Types.Clear();
@@ -99,7 +99,7 @@ namespace Blackboard.Parser {
             /// <summary>Adds a pending action into this formula.</summary>
             /// <param name="performer">The performer to add.</param>
             public void Add(IAction action) {
-                this.builder.Logger?.Info("Add Action: {0}", action);
+                this.builder.Logger.Info("Add Action: {0}", action);
                 this.actions.AddLast(action);
             }
 
@@ -155,14 +155,14 @@ namespace Blackboard.Parser {
 
             /// <summary>Pops a top node from the scope.</summary>
             public void Pop() {
-                this.builder.Logger?.Info("Pop Scope");
+                this.builder.Logger.Info("Pop Scope");
                 this.scopes.RemoveFirst();
             }
 
             /// <summary>Pushes a new node onto the scope.</summary>
             /// <param name="node">The node to push on the scope.</param>
             public void Push(VirtualNode node) {
-                this.builder.Logger?.Info("Push Scope: {0}", node);
+                this.builder.Logger.Info("Push Scope: {0}", node);
                 this.scopes.AddFirst(node);
             }
 
@@ -198,7 +198,7 @@ namespace Blackboard.Parser {
             /// <summary>Pushes a value onto the stack.</summary>
             /// <param name="value">The value to push.</param>
             public void Push(T value) {
-                this.builder.Logger?.Info("Push {0}: {1}", this.usage, value);
+                this.builder.Logger.Info("Push {0}: {1}", this.usage, value);
                 this.stack.AddLast(value);
             }
 
@@ -209,7 +209,7 @@ namespace Blackboard.Parser {
             /// <summary>Pops off a value is on the top of the stack.</summary>
             /// <returns>The value which was on top of the stack.</returns>
             public T Pop() {
-                this.builder.Logger?.Info("Pop {0}", this.usage);
+                this.builder.Logger.Info("Pop {0}", this.usage);
                 T node = this.stack.Last.Value;
                 this.stack.RemoveLast();
                 return node;
@@ -219,7 +219,7 @@ namespace Blackboard.Parser {
             /// <param name="count">The number of values to pop.</param>
             /// <returns>The popped values in the order oldest to newest.</returns>
             public T[] Pop(int count) {
-                this.builder.Logger?.Info("Pop {1} {0}(s)", this.usage, count);
+                this.builder.Logger.Info("Pop {1} {0}(s)", this.usage, count);
                 T[] items = new T[count];
                 for (int i = count-1; i >= 0; i--) {
                     items[i] = this.stack.Last.Value;
@@ -271,21 +271,21 @@ namespace Blackboard.Parser {
 
             /// <summary>This starts a new argument list.</summary>
             public void Start() {
-                this.builder.Logger?.Info("Start Arguments");
+                this.builder.Logger.Info("Start Arguments");
                 this.argStacks.AddFirst(new LinkedList<INode>());
             }
 
             /// <summary>This adds the given node in to the newest argument list.</summary>
             /// <param name="node">The node to add to the argument list.</param>
             public void Add(INode node) {
-                this.builder.Logger?.Info("Add Argument: {0}", node);
+                this.builder.Logger.Info("Add Argument: {0}", node);
                 this.argStacks.First.Value.AddLast(node);
             }
 
             /// <summary>This gets all the nodes which are in the current argument list, then removes the list.</summary>
             /// <returns>The nodes which were in the current argument list.</returns>
             public INode[] End() {
-                this.builder.Logger?.Info("End Arguments");
+                this.builder.Logger.Info("End Arguments");
                 return this.argStacks.TakeFirst().ToArray();
             }
 
@@ -325,7 +325,7 @@ namespace Blackboard.Parser {
             /// <summary>Adds an existing node which has been referenced since the last clear.</summary>
             /// <param name="node">The existing node to add.</param>
             public void Add(INode node) {
-                this.builder.Logger?.Info("Add Existing: {0} ", node);
+                this.builder.Logger.Info("Add Existing: {0} ", node);
                 this.nodes.Add(node is VirtualNode virt ? virt.Receiver : node);
             }
 
@@ -431,7 +431,7 @@ namespace Blackboard.Parser {
         /// <param name="name">The name to write the node with to the current scope.</param>
         /// <returns>The root of the value branch which was used in the assignment.</returns>
         public INode AddDefine(INode value, Type type, string name) {
-            this.Logger?.Info("Add Define:");
+            this.Logger.Info("Add Define:");
             INode root = type is null ? value : this.PerformCast(type, value);
 
             HashSet<INode> newNodes = this.collectAndOrder(root);
@@ -448,7 +448,7 @@ namespace Blackboard.Parser {
         /// <param name="value">The conditional value to trigger with or null if unconditional.</param>
         /// <returns>The root of the value branch which was used in the assignment.</returns>
         public INode AddProvokeTrigger(INode target, INode value) {
-            this.Logger?.Info("Add Provoke Trigger:");
+            this.Logger.Info("Add Provoke Trigger:");
             if (target is not ITriggerInput input)
                 throw new Message("Target node is not an input trigger.").
                     With("Target", target).
@@ -474,7 +474,7 @@ namespace Blackboard.Parser {
         /// <param name="value">The value to assign to the given target node.</param>
         /// <returns>The root of the value branch which was used in the assignment.</returns>
         public INode AddAssignment(INode target, INode value) {
-            this.Logger?.Info("Add Assignment:");
+            this.Logger.Info("Add Assignment:");
 
             // Check if the base types match. Don't need to check that the type is
             // a data type or trigger since only those can be reduced to constants.
@@ -507,7 +507,7 @@ namespace Blackboard.Parser {
         /// <param name="value">The value to get and write to the given name.</param>
         /// <returns>The root of the value branch which was used in the assignment.</returns>
         public INode AddGetter(Type targetType, string name, INode value) {
-            this.Logger?.Info("Add Getter:");
+            this.Logger.Info("Add Getter:");
 
             // Check if the base types match. Don't need to check that the type is
             // a data type or trigger since only those can be reduced to constants.
@@ -536,7 +536,7 @@ namespace Blackboard.Parser {
         /// <param name="type">The type of input to create.</param>
         /// <returns>The newly created input.</returns>
         public INode CreateInput(string name, Type type) {
-            this.Logger?.Info("Create Input:");
+            this.Logger.Info("Create Input:");
 
             VirtualNode scope = this.Scope.Current;
             if (scope.ContainsField(name))

@@ -51,7 +51,7 @@ namespace Blackboard.Parser.Optimization.Rules {
                     // Look up constant in slate, if one doesn't exist, this will add it.
                     con = slate.FindConstant(con);
                     if (!ReferenceEquals(con, node)) {
-                        logger?.Info("Replace {0} with constant {1}", node, con);
+                        logger.Info("Replace {0} with constant {1}", node, con);
                         return con;
                     }
                 }

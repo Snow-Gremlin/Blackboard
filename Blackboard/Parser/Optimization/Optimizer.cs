@@ -109,7 +109,7 @@ namespace Blackboard.Parser.Optimization {
         /// <param name="logger">The logger to debug and inspect the optimization.</param>
         /// <remarks>The node to replace the given root with or the given root.</remarks>
         public INode Optimize(Slate slate, INode root, HashSet<INode> nodes, Logger logger = null) {
-            RuleArgs args = new(slate, root, nodes, logger?.Label("Optimize"));
+            RuleArgs args = new(slate, root, nodes, logger.SubGroup(nameof(Optimize)));
             while (args.Changed) {
                 args.Changed = false;
                 foreach (IRule rule in this.rules)

@@ -13,9 +13,8 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Creates a new logger which outputs to a console.</summary>
         /// <param name="output">The output to send the console logs, or null to use the default console.</param>
         /// <param name="next">The next logger the entry is passed to.</param>
-        public ConsoleLogger(IO.TextWriter output, Logger next = null) : base(next) {
+        public ConsoleLogger(IO.TextWriter output, Logger next = null) : base(next) =>
             this.Out = output;
-        }
 
         /// <summary>The output to send the logs too.</summary>
         public IO.TextWriter Out;

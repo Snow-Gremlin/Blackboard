@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Blackboard.Core.Extensions;
+using System.Collections.Generic;
 using S = System;
 
 namespace Blackboard.Core.Inspect {
@@ -70,7 +71,7 @@ namespace Blackboard.Core.Inspect {
         /// <remarks>To prevent groups being added in loops, this will cut off at 100 groups.</remarks>
         /// <param name="label">The label to add to the group's path.</param>
         internal void AddToGroup(string label) {
-            if (this.groups.Count < 100) this.groups.Add(label);
+            if (this.groups.Count < 100) this.groups.Insert(0, label);
         }
 
         /// <summary>This determines if the given labels match the groups.</summary>
@@ -101,6 +102,17 @@ namespace Blackboard.Core.Inspect {
 
         /// <summary>Gets the message text.</summary>
         /// <returns>The string for this entry.</returns>
-        public override string ToString() => this.Message.ToString();
+        public override string ToString() => this.ToString(true, false, false);
+
+        /// <summary>Gets the message text.</summary>
+        /// <param name="indent">Indicates the message should be indented by group depth.</param>
+        /// <returns>The string for this entry.</returns>
+        public string ToString(bool indent = true, bool showLevel = false, bool showGroup = false) {
+            string str = this.Message.ToString();
+            if (showLevel) str = LevelToString(this.Level) + " " + str;
+            if (showGroup) str = this.groups.Join("/") + " " + str;
+            if (indent) str = str.Indent(new string(' ', this.groups.Count*2));
+            return str;
+        }
     }
 }

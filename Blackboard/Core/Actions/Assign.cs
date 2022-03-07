@@ -74,11 +74,11 @@ namespace Blackboard.Core.Actions {
         /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>
         public void Perform(Slate slate, Result result, Logger logger = null) {
-            logger?.Info("Assign: {0}", this);
+            logger.Info("Assign: {0}", this);
             slate.PendEval(this.needPending);
             slate.PerformEvaluation(logger);
             slate.SetValue(this.value.Value, this.target);
-            logger?.Info("Assign Done {0}", this.target);
+            logger.Info("Assign Done {0}", this.target);
         }
 
         /// <summary>Gets a human readable string for this assignment.</summary>

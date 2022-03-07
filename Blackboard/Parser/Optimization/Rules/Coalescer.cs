@@ -15,14 +15,18 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// and replace that parent with the parent parents at the same location and in the same order.
         /// </summary>
         /// <param name="node">The node to incorporate parents into.</param>
-        static private void incorporateParents(ICoalescable node, Logger log) {
+        static private void incorporateParents(ICoalescable node, Logger logger) {
             IParentCollection parents = node.Parents;
+            logger.Info("incorporateParents: {0}", node);
             for (int i = 0; i < parents.Count; ++i) {
                 IParent parent = parents[i];
+                logger.Info("  {0}) parent: {1}", i, parent);
 
                 if (node.GetType().Equals(parent.GetType()) &&
                     parent.Children.IsCount(1) &&
                     ReferenceEquals(parent.Children.First(), node)) {
+                    logger.Info("    replace: {0}", parent);
+                    logger.Info("    before: [{0}]", parents.Nodes.ToList());
 
                     // Incorporate the parent's parents in place of the parent.
                     // Back up the index, so that the new parents are checked.
@@ -30,6 +34,7 @@ namespace Blackboard.Parser.Optimization.Rules {
                     if (parent is IChild childParent)
                         parents.Insert(i, childParent.Parents.Nodes, childParent);
                     --i;
+                    logger.Info("    after: [{0}]", parents.Nodes.ToList());
                 }
             }
         }
@@ -86,8 +91,8 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <summary>Performs a coalesce on the given node.</summary> 
         /// <param name="node">The node to reduce and simplify.</param>
         /// <returns>A node to replace this node with or null to not replace.</returns>
-        static private INode coalesce(ICoalescable node, Logger log) {
-            if (node.ParentIncorporate) incorporateParents(node, log);
+        static private INode coalesce(ICoalescable node, Logger logger) {
+            if (node.ParentIncorporate) incorporateParents(node, logger);
             return !node.ParentReducable ? null :
                 node.Commutative ? commutativeReduce(node) :
                 notcommutableReduce(node);
@@ -96,11 +101,11 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <summary>Reduce the parents and coalesce nodes as much as possible.</summary>
         /// <param name="args">The arguments for the optimization rules.</param>
         public void Perform(RuleArgs args) {
-            Logger log = args.Logger?.SubGroup(nameof(Coalescer));
+            Logger logger = args.Logger.SubGroup(nameof(Coalescer));
             foreach (INode node in args.Nodes) {
                 if (node is not ICoalescable cNode) continue;
 
-                INode newNode = coalesce(cNode, log);
+                INode newNode = coalesce(cNode, logger);
                 if (newNode is null) continue;
 
                 if (ReferenceEquals(cNode, args.Root))

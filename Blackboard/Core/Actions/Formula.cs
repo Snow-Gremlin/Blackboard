@@ -35,8 +35,8 @@ namespace Blackboard.Core.Actions {
         /// <param name="logger">The optional logger to debug with.</param>
         /// <returns>The results of the formula being performed.</returns>
         public Result Perform(Logger logger = null) {
-            logger?.Info("Formula");
-            Logger sub = logger?.("Formula");
+            logger.Info("Formula");
+            Logger sub = logger.SubGroup(nameof(Formula));
             Result result = new();
             foreach (IAction action in this.actions)
                 action.Perform(this.Slate, result, sub);

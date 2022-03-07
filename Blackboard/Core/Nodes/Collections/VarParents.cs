@@ -192,5 +192,9 @@ namespace Blackboard.Core.Nodes.Collections {
                 this.source[i]?.RemoveChildren(this.Child);
             this.source.RemoveRange(index, length);
         }
+
+        /// <summary>This creates a string for the given set of parents.</summary>
+        /// <returns>The string for this set of parents.</returns>
+        public override string ToString() => "[" + this.source.Join(", ") + "]";
     }
 }

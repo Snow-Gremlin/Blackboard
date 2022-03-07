@@ -42,7 +42,7 @@ namespace Blackboard.Parser {
         public Parser(Slate slate, Logger logger = null) {
             this.slate   = slate;
             this.prompts = null;
-            this.logger  = logger?.SubGroup(nameof(Parser));
+            this.logger  = logger.SubGroup(nameof(Parser));
 
             this.initPrompts();
             this.validatePrompts();
@@ -78,10 +78,10 @@ namespace Blackboard.Parser {
         /// <returns>The formula for performing the parsed actions.</returns>
         private Formula read(PP.ParseTree.ITreeNode node) {
             try {
-                this.logger?.Info("Parser Read");
+                this.logger.Info("Parser Read");
                 Builder builder = new(this.slate, this.logger);
                 node.Process(this.prompts, builder);
-                this.logger?.Info("Parser Done");
+                this.logger.Info("Parser Done");
                 return builder.Actions.Formula;
             } catch (S.Exception ex) {
                 throw new Message("Error occurred while parsing input code.").
@@ -161,7 +161,7 @@ namespace Blackboard.Parser {
         /// <param name="hndl">This is the handler to call on this prompt.</param>
         private void addHandler(string name, S.Action<Builder> hndl) =>
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
-                this.logger?.Info("Handle {0} [{1}]", name, args.LastLocation);
+                this.logger.Info("Handle {0} [{1}]", name, args.LastLocation);
                 hndl(args as Builder);
             };
 
@@ -176,7 +176,7 @@ namespace Blackboard.Parser {
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 Builder builder = args as Builder;
                 PP.Scanner.Location loc = args.LastLocation;
-                builder.Logger?.Info("Process {0}({1}) [{2}]", name, count, loc);
+                builder.Logger.Info("Process {0}({1}) [{2}]", name, count, loc);
 
                 INode[] inputs = builder.Nodes.Pop(count).Actualize().ToArray();
                 INode result = funcGroup.Build(inputs);
@@ -424,7 +424,7 @@ namespace Blackboard.Parser {
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushId(Builder builder) {
             string name = builder.LastText;
-            builder.Logger?.Info("Id = \"{0}\"", name);
+            builder.Logger.Info("Id = \"{0}\"", name);
             foreach (VirtualNode scope in builder.Scope.Scopes) {
                 INode node = scope.ReadField(name);
                 if (node is not null) {

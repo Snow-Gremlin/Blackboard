@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
 namespace Blackboard.Parser.Optimization.Rules {
@@ -25,7 +26,7 @@ namespace Blackboard.Parser.Optimization.Rules {
             HashSet<INode> reached = new();
             this.findReachable(args.Root, args.Nodes, reached);
 
-            args.Logger?.Info("Removed {0} unreachable nodes. {1} nodes were reachable.",
+            args.Logger.Info("Removed {0} unreachable nodes. {1} nodes were reachable.",
                 args.Nodes.Count - reached.Count, reached.Count);
             
             args.Nodes.Clear();

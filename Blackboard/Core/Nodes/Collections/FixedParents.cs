@@ -216,5 +216,9 @@ namespace Blackboard.Core.Nodes.Collections {
                 With("index", index).
                 With("length", length).
                 With("child", this.Child);
+
+        /// <summary>This creates a string for the given set of parents.</summary>
+        /// <returns>The string for this set of parents.</returns>
+        public override string ToString() => "[" + this.source.Join(", ") + "]";
     }
 }

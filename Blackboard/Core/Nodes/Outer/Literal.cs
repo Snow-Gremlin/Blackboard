@@ -43,10 +43,10 @@ namespace Blackboard.Core.Nodes.Outer {
                                With("Value", value)
             };
 
-        /// <summary></summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="value"></param>
-        /// <returns></returns>
+        /// <summary>This creates a new literal with the given typed data.</summary>
+        /// <typeparam name="T">The type of data to get the literal from.</typeparam>
+        /// <param name="value">The data value to set to the literal.</param>
+        /// <returns>The new literal for the given data.</returns>
         static public Literal<T> Data<T>(T value) where T : IEquatable<T> => new(value);
     }
 

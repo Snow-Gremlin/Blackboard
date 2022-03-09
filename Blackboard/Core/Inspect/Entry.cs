@@ -106,6 +106,8 @@ namespace Blackboard.Core.Inspect {
 
         /// <summary>Gets the message text.</summary>
         /// <param name="indent">Indicates the message should be indented by group depth.</param>
+        /// <param name="showLevel">Indicates the message should shows the level string for the message.</param>
+        /// <param name="showGroup">Indicates the message should show the group of the message.</param>
         /// <returns>The string for this entry.</returns>
         public string ToString(bool indent = true, bool showLevel = false, bool showGroup = false) {
             string str = this.Message.ToString();

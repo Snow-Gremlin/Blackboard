@@ -188,7 +188,7 @@ namespace BlackboardTests.ParserTests {
                "   [Location: Unnamed:1, 15, 15]",
                "   [Target: int]",
                "   [Type: double]",
-               "   [Value: Literal<double>[3.14]]]");
+               "   [Value: <double>[3.14]]]");
         }
     }
 }

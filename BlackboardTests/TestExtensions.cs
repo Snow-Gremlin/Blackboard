@@ -216,7 +216,7 @@ namespace BlackboardTests {
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckEvaluate(this Slate slate, params string[] lines) {
-            BufferLogger logger = new();
+            BufferLogger logger = new(false);
             slate.PerformEvaluation(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
         }
@@ -225,7 +225,7 @@ namespace BlackboardTests {
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckUpdate(this Slate slate, params string[] lines) {
-            BufferLogger logger = new();
+            BufferLogger logger = new(false);
             slate.PerformUpdates(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
         }
@@ -255,8 +255,13 @@ namespace BlackboardTests {
         /// <summary>Performs a parse of the given input and logs the parse output.</summary>
         /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
-        static public Formula LogRead(this Slate slate, params string[] input) =>
-            new Parser(slate, new ConsoleLogger()).Read(input);
+        static public Formula LogRead(this Slate slate, params string[] input) {
+            Stringifier stringifier = Stringifier.Deep().PreloadNames(slate);
+            stringifier.ShowFuncs = false;
+            Logger logger = new ConsoleLogger().Stringify(stringifier).
+                SelectGroup("Parser", "Builder", "Optimize"); // TODO: REMOVE
+            return new Parser(slate, logger).Read(input);
+        }
 
         #endregion
         #region Action Result...

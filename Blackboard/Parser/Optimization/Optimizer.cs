@@ -18,6 +18,7 @@ namespace Blackboard.Parser.Optimization {
         public Optimizer() {
             this.rules = new List<IRule>() {
                 new ConstantReduction(),
+                new ParentIncorporator(),
                 new Coalescer(),
 
                 // TODO: Add ruled for node specific reductions:

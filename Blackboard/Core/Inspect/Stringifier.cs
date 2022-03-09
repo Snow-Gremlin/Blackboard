@@ -166,9 +166,11 @@ namespace Blackboard.Core.Inspect {
         /// <param name="showDataType">Indicates that data types for the nodes should be outputted.</param>
         /// <param name="showAllDataValues">Indicates that values should be outputted at each node.</param>
         /// <param name="showLastDataValues">Indicates that values should only be outputted at the deepest node.</param>
+        /// <param name="showFirstDataValues">Indicates that values should only be outputted at the shallowest node.</param>
         /// <param name="showParents">Indicates that parents/arguments should be outputted.</param>
         /// <param name="showTailingNodes">Indicates that fields and function definitions should be outputted.</param>
         /// <param name="showFuncs">Indicates that functions should be outputted.</param>
+        /// <param name="showSimpleConstants">Indicates that constants should be shown just as their value.</param>
         /// <param name="depth">The number of parent nodes to descend into to output.</param>
         /// <param name="indent">The string to indent with.</param>
         public Stringifier(
@@ -179,6 +181,7 @@ namespace Blackboard.Core.Inspect {
             bool showParents         = true,
             bool showTailingNodes    = true,
             bool showFuncs           = true,
+            bool showSimpleConstants = true,
             int  depth               = int.MaxValue,
             string indent            = "  ") {
             this.ShowDataType        = showDataType;
@@ -188,6 +191,7 @@ namespace Blackboard.Core.Inspect {
             this.ShowParents         = showParents;
             this.ShowTailingNodes    = showTailingNodes;
             this.ShowFuncs           = showFuncs;
+            this.ShowSimpleConstants = showSimpleConstants;
             this.Depth               = depth;
             this.Indent              = indent;
             this.readFieldNodes      = new HashSet<IFieldReader>();
@@ -216,7 +220,10 @@ namespace Blackboard.Core.Inspect {
 
         /// <summary>Indicates that functions should be outputted.</summary>
         public bool ShowFuncs;
-        
+
+        /// <summary>Indicates that constants should be shown just as their value.</summary>
+        public bool ShowSimpleConstants;
+
         /// <summary>The number of parent nodes to descend into to output.</summary>
         public int Depth;
 
@@ -300,6 +307,10 @@ namespace Blackboard.Core.Inspect {
             // Check if a named parent which we can stop at with the name.
             if (useOnlyName && this.nodeNames.ContainsKey(node))
                 return this.nodeNames[node] + this.nodeDataValue(node, depth, first);
+
+            // Check if a constant which can be outputted as just the value.
+            if (this.ShowSimpleConstants && node is IConstant)
+                return this.nodeDataType(node) + getDataValue(node);
 
             // Construct the node and any of its children, if it is a first node and it has a name, show it.
             return (first && this.nodeNames.ContainsKey(node) ? this.nodeNames[node]+": " : "") +

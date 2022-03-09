@@ -15,7 +15,7 @@ namespace BlackboardTests.ParserTests {
             formula.Check(
                 "[",
                 "  Namespace.A := Input<double>[0] {};",
-                "  Input<double>[0] = Literal<double>[42] {};",
+                "  Input<double>[0] = <double>[42] {};",
                 "  Finish",
                 "]");
         }
@@ -23,12 +23,12 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestParseOptimization_IncorporateParents() {
             Slate slate = new();
+            slate.Read("in int A, B, C, D;").Perform();
             Formula formula = slate.LogRead(
-                "in int A, B, C, D;",
                 "E := (A + B + 2) + ((C + D) + 3);");
             formula.Check(
                 "[",
-                "  Namespace.A := Literal<double>[42] {};",
+                "  Namespace.A := <double>[42] {};",
                 "  Finish",
                 "]");
 

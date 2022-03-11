@@ -48,6 +48,10 @@ namespace Blackboard.Core.Nodes.Collections {
                 get => this.getParent();
                 set => this.setParent(value as T);
             }
+
+            /// <summary>This is the string for this parameter node.</summary>
+            /// <returns>The string for this parameter node.</returns>
+            public override string ToString() => this.Node?.ToString() ?? "null";
         }
 
         /// <summary>The parameters for each parent in this fixed collection.</summary>

@@ -36,5 +36,21 @@ namespace Blackboard.Parser.Optimization {
             this.Root    = root;
             this.Changed = true;
         }
+
+        /// <summary>
+        /// This evaluates down the branch starting from the given node
+        /// to get the correct value prior to converting it to a constant.
+        /// </summary>
+        /// <param name="node">The node to evaluate.</param>
+        public void UpdateValue(INode node) {
+            if (node is IChild child) {
+                foreach (INode parent in child.Parents.Nodes) {
+                    if (this.Nodes.Contains(node))
+                        this.UpdateValue(parent);
+                }
+            }
+            if (node is IEvaluable eval)
+                eval.Evaluate();
+        }
     }
 }

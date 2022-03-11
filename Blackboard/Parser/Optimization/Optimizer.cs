@@ -12,7 +12,7 @@ namespace Blackboard.Parser.Optimization {
     /// comparisons faster, and improve performance of Blackboard's graph in slate.
     /// </summary>
     sealed internal class Optimizer {
-        private List<IRule> rules;
+        private IReadOnlyList<IRule> rules;
 
         /// <summary>Creates a new optimizer.</summary>
         public Optimizer() {
@@ -111,11 +111,19 @@ namespace Blackboard.Parser.Optimization {
         /// <remarks>The node to replace the given root with or the given root.</remarks>
         public INode Optimize(Slate slate, INode root, HashSet<INode> nodes, Logger logger = null) {
             RuleArgs args = new(slate, root, nodes, logger.SubGroup(nameof(Optimize)));
+            args.Logger.Info("Start "+nameof(Optimize));
+            int i = 0;
             while (args.Changed) {
                 args.Changed = false;
                 foreach (IRule rule in this.rules)
                     rule.Perform(args);
+                i++;
+                if (i >= 100)
+                    throw new Message("Optimization took more than 1000 cycles.").
+                        With("Root", root).
+                        With("Nodes", nodes);
             }
+            args.Logger.Info("Done "+nameof(Optimize));
             return args.Root;
         }
     }

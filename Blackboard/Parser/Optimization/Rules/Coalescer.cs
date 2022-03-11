@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -7,25 +8,25 @@ using System.Linq;
 namespace Blackboard.Parser.Optimization.Rules {
 
     /// <summary>An optimizer rule for coalescing parents in nodes which implement ICoalescable.</summary>
-    sealed internal class Coalescer : IRule {
+    sealed internal class Coalescer: IRule {
 
         /// <summary>
         /// If there are more than one non-identity constant, then precompute the result of this node
         /// being applied to those constants. If the constants can be reduced, then it will be returned
         /// via the constants, unless it is the identity then the constants list will be empty.
-        /// </summary>
+        /// </summary> 
         /// <param name="node">The node these constants are parents of.</param>
         /// <param name="identity">The identity value for this node.</param>
         /// <param name="constants">The set of constants to reduce.</param>
         /// <returns>The reduced set of constants.</returns>
-        static private List<IParent> reduceConstants(RuleArgs args, ICoalescable node, IConstant identity, List<IParent> constants) {
+        static private List<IParent> reduceConstants(RuleArgs args, HashSet<INode> removed, ICoalescable node, IConstant identity, List<IParent> constants) {
             if (constants.Count <= 1) return constants;
 
             // Create a new instance of the current node, set the constants as the
             // only parents, evaluate that node, then get the result as a constant.
             ICoalescable temp = node.NewInstance() as ICoalescable;
             temp.Parents.SetAll(constants);
-            if (temp is IEvaluable teval) teval.Evaluate();
+            args.UpdateValue(temp);
             IConstant constant = temp.ToConstant();
 
             // If the reduced constant is valid, then replace the constants with the reduced constant.
@@ -34,7 +35,7 @@ namespace Blackboard.Parser.Optimization.Rules {
                 constants.Clear();
                 if (!constParent.SameValue(identity)) {
                     constants.Add(constParent);
-                    args.Nodes.Add(constParent);
+                    removed.Add(constParent);
                 }
             }
             return constants;
@@ -47,7 +48,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// </summary>
         /// <param name="node">The node to try and reduce.</param>
         /// <returns>A node to replace this node with or null to not replace.</returns>
-        static private INode commutativeReduce(RuleArgs args, ICoalescable node) {
+        static private INode commutativeReduce(RuleArgs args, HashSet<INode> removed, ICoalescable node) {
             IConstant identity = node.Identity;
             IParentCollection parents = node.Parents;
 
@@ -58,7 +59,7 @@ namespace Blackboard.Parser.Optimization.Rules {
             List<IParent> remainder = parents.Nodes.
                 WhereNot(parent => parent.IsConstant()).
                 ToList();
-            
+
             // If the non-constant parents are all of the parents, then just leave, there is nothing to do.
             if (remainder.Count == parents.Count) return null;
 
@@ -69,7 +70,7 @@ namespace Blackboard.Parser.Optimization.Rules {
                 ToList();
 
             // Reduce the constants to the smallest set of constants.
-            constants = reduceConstants(args, node, identity, constants);
+            constants = reduceConstants(args, removed, node, identity, constants);
 
             // If the non-constant parents and the reduced constant parents equal the initial parents,
             // then no parents were able to be reduced, so just leave, there is nothing to do.
@@ -79,15 +80,17 @@ namespace Blackboard.Parser.Optimization.Rules {
             // If there are no parents left at all, then return the identity for the node.
             remainder.AddRange(constants);
             if (remainder.Count <= 0) return identity;
+            args.Logger.Info(">> 1 Coalescer {0}", node);
             node.Parents.SetAll(remainder);
+            args.Logger.Info(">> 2 Coalescer {0}", node);
             return null;
         }
 
         /// <summary></summary>
         /// <param name="node">The node to try and reduce.</param>
         /// <returns>A node to replace this node with or null to not replace.</returns>
-        static private INode notcommutableReduce(RuleArgs args, ICoalescable node) {
-            
+        static private INode notcommutableReduce(RuleArgs args, HashSet<INode> removed, ICoalescable node) {
+
             // TODO: Implement
 
             return null;
@@ -96,21 +99,23 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <summary>Reduce the parents and coalesce nodes as much as possible.</summary>
         /// <param name="args">The arguments for the optimization rules.</param>
         public void Perform(RuleArgs args) {
+            args.Logger.Info("Run "+nameof(Coalescer));
+            HashSet<INode> removed = new();
             foreach (INode node in args.Nodes) {
-                if (node is not ICoalescable cNode) continue;
+                if (removed.Contains(node) || node is not ICoalescable cNode) continue;
 
                 INode newNode = !cNode.ParentReducable ? null :
-                    cNode.Commutative ? commutativeReduce(args, cNode) :
-                    notcommutableReduce(args, cNode);
+                    cNode.Commutative ? commutativeReduce(args, removed, cNode) :
+                    notcommutableReduce(args, removed, cNode);
                 if (newNode is null) continue;
 
-                if (ReferenceEquals(cNode, args.Root))
-                    args.Root = newNode;
+                if (ReferenceEquals(cNode, args.Root)) args.Root = newNode;
                 else if (newNode is IParent newParent && cNode is IParent cParent) {
                     foreach (IChild child in cParent.Children.ToList())
                         child.Parents.Replace(cParent, newParent);
                 }
             }
+            removed.Foreach(args.Nodes.Remove);
         }
     }
 }

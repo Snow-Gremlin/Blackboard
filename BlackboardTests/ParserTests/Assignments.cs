@@ -87,7 +87,7 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_LiteralMath() {
             Slate slate = new();
-            slate.Read(
+            slate.LogRead(
                 "in double A = 3.0 + 0.07 * 2;",
                 "in double B = floor(A), C = round(A), D = round(A, 1);",
                 "in double E = (B ** C) / 2;",
@@ -99,7 +99,7 @@ namespace BlackboardTests.ParserTests {
             slate.CheckValue(  3.0,  "C");
             slate.CheckValue(  3.1,  "D");
             slate.CheckValue( 13.5,  "E");
-            slate.CheckValue(-16.5,  "F");
+            slate.CheckValue(-16.5, "F");
         }
 
         [TestMethod]

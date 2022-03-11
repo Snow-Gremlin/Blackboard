@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Linq;
@@ -37,6 +38,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <summary>Incorporates parents as part of the coalesce of nodes.</summary>
         /// <param name="args">The arguments for the optimization rules.</param>
         public void Perform(RuleArgs args) {
+            args.Logger.Info("Run "+nameof(ParentIncorporator));
             foreach (INode node in args.Nodes) {
                 if (node is ICoalescable cNode && cNode.ParentIncorporate)
                     incorporateParents(args, cNode);

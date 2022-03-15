@@ -1,7 +1,9 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Blackboard.Parser.Optimization {
 
@@ -18,6 +20,9 @@ namespace Blackboard.Parser.Optimization {
         /// <summary>The new nodes for a formula which need to be optimized.</summary>
         public readonly HashSet<INode> Nodes;
 
+        /// <summary>The new nodes that will be removed when the rule ends.</summary>
+        public readonly HashSet<INode> Removed;
+
         /// <summary>The root node of the tree to optimize.</summary>
         public INode Root;
 
@@ -33,8 +38,9 @@ namespace Blackboard.Parser.Optimization {
             this.Slate   = slate;
             this.Logger  = logger;
             this.Nodes   = nodes;
+            this.Removed = new HashSet<INode>();
             this.Root    = root;
-            this.Changed = true;
+            this.Changed = false;
         }
 
         /// <summary>
@@ -42,15 +48,46 @@ namespace Blackboard.Parser.Optimization {
         /// to get the correct value prior to converting it to a constant.
         /// </summary>
         /// <param name="node">The node to evaluate.</param>
-        public void UpdateValue(INode node) {
+        public void UpdateValue(INode node) =>
+            this.PostReachable(node).OfType<IEvaluable>().Foreach(eval => eval.Evaluate());
+
+        /// <summary>This will enumerate all new nodes which are reachable from the given node.</summary>
+        /// <param name="node">The node to start enumerating from.</param>
+        /// <returns>The nodes outputted child before parent.</returns>
+        public IEnumerable<INode> PostReachable(INode node) {
             if (node is IChild child) {
-                foreach (INode parent in child.Parents.Nodes) {
-                    if (this.Nodes.Contains(node))
-                        this.UpdateValue(parent);
-                }
+                foreach (INode parent in child.Parents.Nodes.
+                    Where(this.Nodes.Contains).WhereNot(this.Removed.Contains).
+                    Select(this.PostReachable).Expand().ToList())
+                    yield return parent;
             }
-            if (node is IEvaluable eval)
-                eval.Evaluate();
+            yield return node;
+        }
+
+        /// <summary>This will enumerate all new nodes which are reachable from the given node.</summary>
+        /// <param name="node">The node to start enumerating from.</param>
+        /// <returns>The nodes outputted child after parent.</returns>
+        public IEnumerable<INode> PreReachable(INode node) {
+            yield return node;
+            if (node is IChild child) {
+                foreach (INode parent in child.Parents.Nodes.
+                    Where(this.Nodes.Contains).WhereNot(this.Removed.Contains).
+                    Select(this.PreReachable).Expand().ToList())
+                    yield return parent;
+            }
+        }
+
+        /// <summary>Replace will replace the old node with the new node in all of it's children and in the arguments.</summary>
+        /// <param name="oldNode">The old node to replace with the given new node.</param>
+        /// <param name="newNode">The new node to replace the old node with.</param>
+        public void Replace(INode oldNode, INode newNode) {
+            if (ReferenceEquals(this.Root, oldNode)) this.Root = newNode;
+            else if (oldNode is IParent oldParent && newNode is IParent newParent) {
+                foreach (IChild child in oldParent.Children)
+                    child.Parents.Replace(oldParent, newParent);
+            }
+            this.Nodes.Add(newNode);
+            this.Removed.Add(oldNode);
         }
     }
 }

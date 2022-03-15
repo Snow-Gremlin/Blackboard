@@ -10,6 +10,10 @@ namespace Blackboard.Parser.Optimization.Rules {
     /// <summary>An optimizer rule for coalescing parents in nodes which implement ICoalescable.</summary>
     sealed internal class Coalescer: IRule {
 
+        /// <summary>Gets the name of this rule.</summary>
+        /// <returns>The string for this class used as the name of the rule.</returns>
+        public override string ToString() => nameof(Coalescer);
+
         /// <summary>
         /// If there are more than one non-identity constant, then precompute the result of this node
         /// being applied to those constants. If the constants can be reduced, then it will be returned
@@ -19,7 +23,8 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <param name="identity">The identity value for this node.</param>
         /// <param name="constants">The set of constants to reduce.</param>
         /// <returns>The reduced set of constants.</returns>
-        static private List<IParent> reduceConstants(RuleArgs args, HashSet<INode> removed, ICoalescable node, IConstant identity, List<IParent> constants) {
+        static private List<IParent> reduceConstants(RuleArgs args, HashSet<INode> removed,
+            ICoalescable node, IConstant identity, List<IParent> constants) {
             if (constants.Count <= 1) return constants;
 
             // Create a new instance of the current node, set the constants as the
@@ -81,7 +86,7 @@ namespace Blackboard.Parser.Optimization.Rules {
             remainder.AddRange(constants);
             if (remainder.Count <= 0) return identity;
             args.Logger.Info(">> 1 Coalescer {0}", node);
-            node.Parents.SetAll(remainder);
+            parents.SetAll(remainder);
             args.Logger.Info(">> 2 Coalescer {0}", node);
             return null;
         }
@@ -99,7 +104,6 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <summary>Reduce the parents and coalesce nodes as much as possible.</summary>
         /// <param name="args">The arguments for the optimization rules.</param>
         public void Perform(RuleArgs args) {
-            args.Logger.Info("Run "+nameof(Coalescer));
             HashSet<INode> removed = new();
             foreach (INode node in args.Nodes) {
                 if (removed.Contains(node) || node is not ICoalescable cNode) continue;

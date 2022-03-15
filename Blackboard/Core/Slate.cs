@@ -49,7 +49,7 @@ namespace Blackboard.Core {
             this.Global = new Namespace();
 
             this.addOperators();
-            if (addFuncs) this.addFunctions();
+            if (addFuncs)  this.addFunctions();
             if (addConsts) this.addConstants();
         }
 
@@ -561,7 +561,7 @@ namespace Blackboard.Core {
         /// <typeparam name="T">The type of the constant to add or find.</typeparam>
         /// <param name="con">The constant to find already stored or to add.</param>
         /// <returns>The already existing constant or the passed in constant if added.</returns>
-        public T FindConstant<T>(T con)
+        public T FindAddConstant<T>(T con)
             where T : class, IConstant {
             if (this.constants.TryGetValue(con, out IConstant result)) return result as T;
             this.constants.Add(con);

@@ -9,6 +9,10 @@ namespace Blackboard.Parser.Optimization.Rules {
     /// <summary>An optimizer rule for incorporating parents in nodes which implement ICoalescable.</summary>
     sealed internal class ParentIncorporator : IRule {
 
+        /// <summary>Gets the name of this rule.</summary>
+        /// <returns>The string for this class used as the name of the rule.</returns>
+        public override string ToString() => nameof(ParentIncorporator);
+
         /// <summary>
         /// Find any parents of the same type of node with the given node as its only child
         /// and replace that parent with the parent parents at the same location and in the same order.
@@ -26,6 +30,7 @@ namespace Blackboard.Parser.Optimization.Rules {
 
                     // Incorporate the parent's parents in place of the parent.
                     // Step back the index, so that the new parents are checked.
+                    args.Logger.Info("  Incorporating parent {0} into {1}.", i, node);
                     parents.Remove(i);
                     parents.Insert(i, childParent.Parents.Nodes, childParent);
                     args.Nodes.Remove(childParent);
@@ -37,12 +42,7 @@ namespace Blackboard.Parser.Optimization.Rules {
 
         /// <summary>Incorporates parents as part of the coalesce of nodes.</summary>
         /// <param name="args">The arguments for the optimization rules.</param>
-        public void Perform(RuleArgs args) {
-            args.Logger.Info("Run "+nameof(ParentIncorporator));
-            foreach (INode node in args.Nodes) {
-                if (node is ICoalescable cNode && cNode.ParentIncorporate)
-                    incorporateParents(args, cNode);
-            }
-        }
+        public void Perform(RuleArgs args) =>
+            args.Nodes.OfType<ICoalescable>().Where(node => node.ParentIncorporate).Foreach(node => incorporateParents(args, node));
     }
 }

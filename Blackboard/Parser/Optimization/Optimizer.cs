@@ -19,7 +19,7 @@ namespace Blackboard.Parser.Optimization {
             this.rules = new List<IRule>() {
                 new ConstantReduction(),
                 new ParentIncorporator(),
-                new Coalescer(),
+                //new Coalescer(),
 
                 // TODO: Add ruled for node specific reductions:
                 //   - TODO: Group these based on what they do so we can determine if they
@@ -110,21 +110,55 @@ namespace Blackboard.Parser.Optimization {
         /// <param name="logger">The logger to debug and inspect the optimization.</param>
         /// <remarks>The node to replace the given root with or the given root.</remarks>
         public INode Optimize(Slate slate, INode root, HashSet<INode> nodes, Logger logger = null) {
-            RuleArgs args = new(slate, root, nodes, logger.SubGroup(nameof(Optimize)));
-            args.Logger.Info("Start "+nameof(Optimize));
+            string opName = nameof(Optimize);
+            Logger opLogger = logger.Stringify(Stringifier.Deep()).SubGroup(opName);
+            opLogger.Info("Start {0}:", opName);
+
             int i = 0;
-            while (args.Changed) {
-                args.Changed = false;
-                foreach (IRule rule in this.rules)
+            const int maxCycles = 100;
+            bool changed = true;
+            while (changed) {
+                changed = false;
+
+                foreach (IRule rule in this.rules) {
+                    string ruleName = rule.ToString();
+                    Logger ruleLogger = opLogger.SubGroup(ruleName);
+                    ruleLogger.Info("Start {0}:", ruleName);
+
+                    // Perform the rule on the given root and nodes.
+                    RuleArgs args = new(slate, root, nodes, ruleLogger);
+                    args.Logger.Info("  >> Before: {0}", args.Root); // TODO: REMOVE
                     rule.Perform(args);
+
+                    // Clean up and prepare for next rule or to be finished.
+                    if (args.Removed.Count > 0) {
+                        if (args.Removed.Contains(args.Root))
+                            throw new Message("Optimization rule {0} removed the root without updating the root.", ruleName).
+                                With("Old Root", root).
+                                With("Root", args.Root).
+                                With("Nodes", args.Nodes).
+                                With("Removed", args.Removed);
+
+                        args.Nodes.RemoveWhere(args.Removed.Contains);
+                        args.Removed.Clear();
+                        args.Changed = true;
+                    }
+
+                    if (args.Changed) changed = true;
+                    root = args.Root;
+                    args.Logger.Info("  >> After:  {0}{1}", (args.Changed ? "(Changed): " : ""), args.Root); // TODO: REMOVE
+                    ruleLogger.Info("Done {0}.", ruleName);
+                }
+                
                 i++;
-                if (i >= 100)
-                    throw new Message("Optimization took more than 1000 cycles.").
+                if (i >= maxCycles)
+                    throw new Message("Optimization took more than {0} cycles.", maxCycles).
                         With("Root", root).
                         With("Nodes", nodes);
             }
-            args.Logger.Info("Done "+nameof(Optimize));
-            return args.Root;
+
+            opLogger.Info("Done {0}.\n", opName);
+            return root;
         }
     }
 }

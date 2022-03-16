@@ -83,6 +83,16 @@ namespace Blackboard.Core.Extensions {
                 _            => false
             };
 
+        /// <summary>Gets the hash code for the given node differentiated by type name and value.</summary>
+        /// <param name="node">The node to get the hash code for.</param>
+        /// <returns>The hash code for the given node.</returns>
+        static public int GetNodeHashCode(this INode node) =>
+            node switch {
+                IDataNode d1 => S.HashCode.Combine(node.TypeName, d1.Data),
+                ITrigger  t1 => S.HashCode.Combine(node.TypeName, t1.Provoked),
+                _            => S.HashCode.Combine(node.TypeName)
+            };
+
         #endregion
         #region IChild...
 

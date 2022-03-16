@@ -56,9 +56,11 @@ namespace Blackboard.Parser.Optimization {
         /// <returns>The nodes outputted child before parent.</returns>
         public IEnumerable<INode> PostReachable(INode node) {
             if (node is IChild child) {
-                foreach (INode parent in child.Parents.Nodes.
+                // Copy parents into a list so they can be modified and
+                // filter from the list any which are no longer in the nodes.
+                foreach (INode parent in child.Parents.Nodes.ToList().
                     Where(this.Nodes.Contains).WhereNot(this.Removed.Contains).
-                    Select(this.PostReachable).Expand().ToList())
+                    Select(this.PostReachable).Expand())
                     yield return parent;
             }
             yield return node;
@@ -70,9 +72,11 @@ namespace Blackboard.Parser.Optimization {
         public IEnumerable<INode> PreReachable(INode node) {
             yield return node;
             if (node is IChild child) {
-                foreach (INode parent in child.Parents.Nodes.
+                // Copy parents into a list so they can be modified and
+                // filter from the list any which are no longer in the nodes.
+                foreach (INode parent in child.Parents.Nodes.ToList().
                     Where(this.Nodes.Contains).WhereNot(this.Removed.Contains).
-                    Select(this.PreReachable).Expand().ToList())
+                    Select(this.PreReachable).Expand())
                     yield return parent;
             }
         }
@@ -82,12 +86,11 @@ namespace Blackboard.Parser.Optimization {
         /// <param name="newNode">The new node to replace the old node with.</param>
         public void Replace(INode oldNode, INode newNode) {
             if (ReferenceEquals(this.Root, oldNode)) this.Root = newNode;
-            else if (oldNode is IParent oldParent && newNode is IParent newParent) {
-                foreach (IChild child in oldParent.Children)
-                    child.Parents.Replace(oldParent, newParent);
-            }
+            else if (oldNode is IParent oldParent && newNode is IParent newParent)
+                oldParent.Children.ToList().ForEach(child => child.Parents.Replace(oldParent, newParent));
             this.Nodes.Add(newNode);
             this.Removed.Add(oldNode);
+            this.Changed = true;
         }
     }
 }

@@ -2,6 +2,7 @@
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
@@ -45,7 +46,7 @@ namespace Blackboard.Core {
             this.pendingUpdate = new LinkedList<IEvaluable>();
             this.pendingEval   = new LinkedList<IEvaluable>();
             this.needsReset    = new HashSet<ITrigger>();
-            this.constants     = new HashSet<IConstant>();
+            this.constants     = new HashSet<IConstant>(new NodeValueComparer<IConstant>());
             this.Global = new Namespace();
 
             this.addOperators();
@@ -552,6 +553,13 @@ namespace Blackboard.Core {
 
         #endregion
         #region Constants...
+
+        /// <summary>Determines if the given constant reference is in the set of constants.</summary>
+        /// <typeparam name="T">The type of the constant to check for.</typeparam>
+        /// <param name="con">The constant to check for.</param>
+        /// <returns>True if the given constant reference is in the set, false otherwise.</returns>
+        public bool ConstainsConstant<T>(T con) where T : class, IConstant =>
+            this.constants.TryGetValue(con, out IConstant result) && ReferenceEquals(result, con);
 
         /// <summary>Find or add the given constant in the set of constants.</summary>
         /// <remarks>

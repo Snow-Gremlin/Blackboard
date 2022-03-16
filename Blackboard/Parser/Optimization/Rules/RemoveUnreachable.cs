@@ -16,9 +16,11 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <param name="args">The arguments for the optimization rules.</param>
         public void Perform(RuleArgs args) {
             HashSet<INode> reached = new(args.PostReachable(args.Root));
+            int removed = args.Nodes.Count - reached.Count;
+            if (removed <= 0) return;
+
             args.Nodes.WhereNot(reached.Contains).Foreach(args.Removed.Add);
-            args.Logger.Info("  Removed {0} unreachable nodes. {1} nodes were reachable.",
-                args.Nodes.Count - reached.Count, reached.Count);
+            args.Logger.Info("  Removed {0} unreachable nodes. {1} nodes were reachable.", removed, reached.Count);
         }
     }
 }

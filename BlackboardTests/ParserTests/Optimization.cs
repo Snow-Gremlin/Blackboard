@@ -28,10 +28,9 @@ namespace BlackboardTests.ParserTests {
                 "E := (A + B + 2) + ((C + D) + 3);");
             formula.Check(
                 "[",
-                "  Namespace.A := <double>[42] {};",
+                "  Namespace.E := Sum<int>[0](A, B, C, D, 5);",
                 "  Finish",
                 "]");
-
         }
     }
 }

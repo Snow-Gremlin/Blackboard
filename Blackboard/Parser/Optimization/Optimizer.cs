@@ -19,7 +19,7 @@ namespace Blackboard.Parser.Optimization {
             this.rules = new List<IRule>() {
                 new ConstantReduction(),
                 new ParentIncorporator(),
-                //new Coalescer(),
+                new ConstantConsolidator(),
 
                 // TODO: Add ruled for node specific reductions:
                 //   - TODO: Group these based on what they do so we can determine if they
@@ -99,7 +99,8 @@ namespace Blackboard.Parser.Optimization {
                 // TODO: Add rule for reusing existing nodes:
                 //   - [ ] Find and replace repeat branches in the new nodes.
                 //   - [ ] Find and replace existing duplicate branches defined on slate using constants and existing nodes.
-                new RemoveUnreachable()
+                new RemoveUnreachable(),
+                new Validator()
             };
         }
 
@@ -123,11 +124,10 @@ namespace Blackboard.Parser.Optimization {
                 foreach (IRule rule in this.rules) {
                     string ruleName = rule.ToString();
                     Logger ruleLogger = opLogger.SubGroup(ruleName);
-                    ruleLogger.Info("Start {0}:", ruleName);
+                    ruleLogger.Info("Start {0}: {1}", ruleName, root);
 
                     // Perform the rule on the given root and nodes.
                     RuleArgs args = new(slate, root, nodes, ruleLogger);
-                    args.Logger.Info("  >> Before: {0}", args.Root); // TODO: REMOVE
                     rule.Perform(args);
 
                     // Clean up and prepare for next rule or to be finished.
@@ -144,12 +144,13 @@ namespace Blackboard.Parser.Optimization {
                         args.Changed = true;
                     }
 
-                    if (args.Changed) changed = true;
-                    root = args.Root;
-                    args.Logger.Info("  >> After:  {0}{1}", (args.Changed ? "(Changed): " : ""), args.Root); // TODO: REMOVE
-                    ruleLogger.Info("Done {0}.", ruleName);
+                    if (args.Changed) {
+                        changed = true;
+                        root = args.Root;
+                        ruleLogger.Info("Done {0}: Changed => {1}", ruleName, args.Root);
+                    } else ruleLogger.Info("Done {0}", ruleName);
                 }
-                
+
                 i++;
                 if (i >= maxCycles)
                     throw new Message("Optimization took more than {0} cycles.", maxCycles).

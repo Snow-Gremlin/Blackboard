@@ -64,7 +64,7 @@ namespace Blackboard.Parser.Optimization.Rules {
             if (parents.Count <= 0) return identity;
 
             // Find all parents which are NOT constant.
-            List<IParent> remainder = parents.Nodes.
+            List<IParent> remainder = parents.
                 WhereNot(parent => parent.IsConstant()).
                 ToList();
 
@@ -72,7 +72,7 @@ namespace Blackboard.Parser.Optimization.Rules {
             if (remainder.Count == parents.Count) return null;
 
             // Find all parents which are constant, but skip any constants which are equal to the identity.
-            List<IParent> constants = parents.Nodes.
+            List<IParent> constants = parents.
                 Where(parent => parent.IsConstant()).
                 WhereNot(parent => parent.SameValue(identity)).
                 ToList();

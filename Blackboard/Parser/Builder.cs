@@ -383,7 +383,7 @@ namespace Blackboard.Parser {
                     With("Location", this.LastLocation).
                     With("Type", type);
 
-            INode castValue = (castGroup as IFuncGroup).Build(value);;
+            INode castValue = (castGroup as IFuncGroup).Build(value);
             return castValue;
         }
 
@@ -408,7 +408,7 @@ namespace Blackboard.Parser {
             
             // Continue up to all the parents.
             if (node is IChild child) {
-                foreach (IParent par in child.Parents.Nodes) {
+                foreach (IParent par in child.Parents) {
                     if (this.collectAndOrder(par, newNodes))
                         par.AddChildren(child);
                 }

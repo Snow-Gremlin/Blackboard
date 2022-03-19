@@ -47,7 +47,7 @@ namespace Blackboard.Core {
             this.pendingEval   = new LinkedList<IEvaluable>();
             this.needsReset    = new HashSet<ITrigger>();
             this.constants     = new HashSet<IConstant>(new NodeValueComparer<IConstant>());
-            this.Global = new Namespace();
+            this.Global        = new Namespace();
 
             this.addOperators();
             if (addFuncs)  this.addFunctions();
@@ -469,12 +469,13 @@ namespace Blackboard.Core {
         #endregion
         #region Update...
 
-        /// <summary> This indicates that the given nodes have had parents added or removed and need to be updated. </summary>
+        /// <summary>This indicates that the given nodes have had parents added or removed and need to be updated.</summary>
         /// <param name="nodes">The nodes to pend evaluation for.</param>
         public void PendUpdate(params INode[] nodes) =>
             this.PendUpdate(nodes as IEnumerable<INode>);
 
         /// <summaryThis indicates that the given nodes have had parents added or removed and need to be updated.</summary>
+        /// <remarks>This will pend the given nodes to update the depths prior to evaluation.</remarks>
         /// <param name="nodes">The nodes to pend evaluation for.</param>
         public void PendUpdate(IEnumerable<INode> nodes) =>
             this.pendingUpdate.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());

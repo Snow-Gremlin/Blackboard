@@ -22,7 +22,7 @@ namespace Blackboard.Parser {
 
         /// <summary>Prepares the parser's static variables before they are used.</summary>
         static Parser() => baseParser = PP.Loader.Loader.LoadParser(
-                PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
+            PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
 
         /// <summary>The Blackboard language base parser lazy singleton.</summary>
         static private readonly PP.Parser.Parser baseParser;

@@ -31,7 +31,7 @@ namespace Blackboard.Core.Inspect {
             Message copy = new(this.Format, this.Arguments.Clone());
             foreach ((string key, object value) in this.Data)
                 copy.Data[key] = value;
-            return null;
+            return copy;
         }
 
         /// <summary>The format text for the message.</summary>

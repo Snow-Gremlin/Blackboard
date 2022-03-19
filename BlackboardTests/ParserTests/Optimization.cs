@@ -14,7 +14,7 @@ namespace BlackboardTests.ParserTests {
                 "in A = 21.0 + (1.0 + 3.0*2.0)*3.0;");
             formula.Check(
                 "[",
-                "  Namespace.A := Input<double>[0] {};",
+                "  Global.A := Input<double>[0] {};",
                 "  Input<double>[0] = <double>[42] {};",
                 "  Finish",
                 "]");
@@ -28,7 +28,7 @@ namespace BlackboardTests.ParserTests {
                 "E := (A + B + 2) + ((C + D) + 3);");
             formula.Check(
                 "[",
-                "  Namespace.E := Sum<int>[0](A, B, C, D, 5);",
+                "  Global.E := Sum<int>[0](A[0], B[0], C[0], D[0], <int>[5]) {Sum<int>[0]};",
                 "  Finish",
                 "]");
         }

@@ -43,6 +43,15 @@ namespace Blackboard.Core.Extensions {
             foreach (Tin value in input) predicate(value);
         }
 
+        /// <summary>Runs all the key/value pairs on the given predicate.</summary>
+        /// <typeparam name="T1">The type of keys being used.</typeparam>
+        /// <typeparam name="T2">The type of values being used.</typeparam>
+        /// <param name="input">The key/value pairs to run.</param>
+        /// <param name="predicate">The predicate to run on each key/value pair.</param>
+        static public void Foreach<T1, T2>(this IEnumerable<KeyValuePair<T1, T2>> input, S.Action<T1, T2> predicate) {
+            foreach (KeyValuePair<T1, T2> pair in input) predicate(pair.Key, pair.Value);
+        }
+
         /// <summary>Adds an index with the items from the given input.</summary>
         /// <typeparam name="T">The type of the input elements.</typeparam>
         /// <param name="input">The input values to add indices to.</param>

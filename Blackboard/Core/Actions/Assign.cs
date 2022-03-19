@@ -5,6 +5,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using PetiteParser.Scanner;
 using System.Collections.Generic;
 using System.Linq;
+using S = System;
 
 namespace Blackboard.Core.Actions {
 
@@ -38,8 +39,8 @@ namespace Blackboard.Core.Actions {
         private readonly IValue<T> value;
 
         /// <summary>
-        /// This is a subset of all the node for the value which need to be pended
-        /// for evaluation in order to perform this assignment.
+        /// This is a subset of all the node for this node to write which need to be
+        /// added to parents their parents to make this node reactive to changes.
         /// </summary>
         private readonly IEvaluable[] needPending;
 
@@ -56,7 +57,7 @@ namespace Blackboard.Core.Actions {
 
             // Pre-sort the evaluable nodes.
             LinkedList<IEvaluable> nodes = new();
-            nodes.SortInsertUnique(allNewNodes.NotNull().OfType<IEvaluable>());
+            nodes.SortInsertUnique(allNewNodes.Illegitimates().OfType<IEvaluable>());
             this.needPending = nodes.ToArray();
         }
 

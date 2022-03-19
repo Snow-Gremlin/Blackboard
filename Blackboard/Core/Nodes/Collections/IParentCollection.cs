@@ -5,7 +5,12 @@ using S = System;
 namespace Blackboard.Core.Nodes.Collections {
 
     /// <summary>This is a collection of parent nodes for an IChild.</summary>
-    public interface IParentCollection {
+    /// <remarks>
+    /// This should not contain null parents, but it might contain repeat parents.
+    /// For example, if a number is the sum of itself (x + x), then the Sum node will return the 'x' parent twice.
+    /// Since null parents are removed, this list may not be the same as the Count even if fixed.
+    /// </remarks>
+    public interface IParentCollection: IEnumerable<IParent> {
 
         /// <summary>The child that this parent collection is from.</summary>
         public IChild Child { get; }
@@ -13,14 +18,6 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <summary>The set of type that each parent could have in this collection.</summary>
         /// <remarks>For N-ary nodes this can be very long so use this with zip or limit the enumerations.</remarks>
         public IEnumerable<S.Type> Types { get; }
-
-        /// <summary>The set of parent nodes to this node.</summary>
-        /// <remarks>
-        /// This should not contain null parents, but it might contain repeat parents.
-        /// For example, if a number is the sum of itself (x + x), then the Sum node will return the 'x' parent twice.
-        /// Since null parents are removed, this list may not be the same as the Count even if fixed.
-        /// </remarks>
-        public IEnumerable<IParent> Nodes { get; }
 
         /// <summary>
         /// Fixed indicates the number of parents may not change,

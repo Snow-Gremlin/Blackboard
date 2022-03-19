@@ -32,7 +32,7 @@ namespace Blackboard.Parser.Optimization.Rules {
                     // Step back the index, so that the new parents are checked.
                     args.Logger.Info("  Incorporating parent {0} into {1}.", i, node);
                     parents.Remove(i);
-                    parents.Insert(i, childParent.Parents.Nodes, childParent);
+                    parents.Insert(i, childParent.Parents, childParent);
                     args.Nodes.Remove(childParent);
                     --i;
                     args.Changed = true;

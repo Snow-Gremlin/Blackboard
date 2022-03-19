@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using S = System;
@@ -36,7 +37,9 @@ namespace Blackboard.Core.Nodes.Collections {
         /// This should not contain null parents, but it might contain repeat parents.
         /// For example, if a number is the sum of itself (x + x), then the Sum node will return the 'x' parent twice.
         /// </remarks>
-        public IEnumerable<IParent> Nodes => this.source.NotNull();
+        /// <returns>An enumerator for all the parents.</returns>
+        public IEnumerator<IParent> GetEnumerator() => this.source.NotNull().GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         /// <summary>Indicates that this collection is variable (not fixed).</summary>
         public bool Fixed => false;

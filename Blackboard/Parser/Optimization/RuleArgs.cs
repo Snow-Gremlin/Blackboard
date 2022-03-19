@@ -58,7 +58,7 @@ namespace Blackboard.Parser.Optimization {
             if (node is IChild child) {
                 // Copy parents into a list so they can be modified and
                 // filter from the list any which are no longer in the nodes.
-                foreach (INode parent in child.Parents.Nodes.ToList().
+                foreach (INode parent in child.Parents.ToList().
                     Where(this.Nodes.Contains).WhereNot(this.Removed.Contains).
                     Select(this.PostReachable).Expand())
                     yield return parent;
@@ -74,7 +74,7 @@ namespace Blackboard.Parser.Optimization {
             if (node is IChild child) {
                 // Copy parents into a list so they can be modified and
                 // filter from the list any which are no longer in the nodes.
-                foreach (INode parent in child.Parents.Nodes.ToList().
+                foreach (INode parent in child.Parents.ToList().
                     Where(this.Nodes.Contains).WhereNot(this.Removed.Contains).
                     Select(this.PreReachable).Expand())
                     yield return parent;

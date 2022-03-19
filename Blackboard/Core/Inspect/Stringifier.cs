@@ -137,7 +137,7 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Gets a deep string for the given formula.</summary>
         /// <param name="formula">The formula to stringify.</param>
         /// <returns>The deep string for the given formula.</returns>
-        static public string Deep(Formula formula) => Simple().Stringify(formula);
+        static public string Deep(Formula formula) => Deep().Stringify(formula);
 
         /// <summary>Gets a deep string for the given actions even any action which is null.</summary>
         /// <param name="actions">The actions to stringify.</param>
@@ -246,6 +246,14 @@ namespace Blackboard.Core.Inspect {
         /// <returns>The stringifier so that calls can be chained.</returns>
         public Stringifier SetNodeName(string name, INode node) {
             this.nodeNames[node] = name;
+            return this;
+        }
+
+        /// <summary>Sets the names to show for nodes.</summary>
+        /// <param name="other">The other stringifier to get the preloaded names from.</param>
+        /// <returns>The stringifier so that calls can be chained.</returns>
+        public Stringifier PreloadNames(Stringifier other) {
+            other.nodeNames.Foreach(this.nodeNames.Add);
             return this;
         }
 
@@ -370,17 +378,17 @@ namespace Blackboard.Core.Inspect {
         private string nodeDataValue(INode node, int depth, bool first) =>
             this.ShowAllDataValues ? getDataValue(node) :
             this.ShowFirstDataValues && first ? getDataValue(node) :
-            this.ShowLastDataValues && (depth <= 1 || node is not IChild child || !child.Parents.Nodes.Any()) ? getDataValue(node) : "";
+            this.ShowLastDataValues && (depth <= 1 || node is not IChild child || !child.Parents.Any()) ? getDataValue(node) : "";
 
         /// <summary>Gets a string for the parents of the given node</summary>
         /// <param name="node">The node to get the parents from.</param>
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <returns>The string for the parents of the given node.</returns>
         private string parents(INode node, int depth) =>
-            !this.ShowParents || depth <= 1 || node is not IChild child || !child.Parents.Nodes.Any() ? "" :
+            !this.ShowParents || depth <= 1 || node is not IChild child || !child.Parents.Any() ? "" :
             node switch {
                 IFuncDef => "",
-                _        => "(" + this.stringNode(child.Parents.Nodes, depth-1, true, false) + ")",
+                _        => "(" + this.stringNode(child.Parents, depth-1, true, false) + ")",
             };
 
         /// <summary>Gets a string for the tailing nodes.</summary>
@@ -429,6 +437,14 @@ namespace Blackboard.Core.Inspect {
             return string.IsNullOrEmpty(tail) ? "" : "{" + nl + tail + nl +"}";
         }
 
+        /// <summary>Gets a short string for the field reader. Typically used to stringify receivers.</summary>
+        /// <param name="node">The node to stringify.</param>
+        /// <returns>The string for the given field reader.</returns>
+        private string shortFieldReader(IFieldReader node) =>
+            node is null ? "null" :
+            this.nodeNames.ContainsKey(node) ? this.nodeNames[node] :
+            node.TypeName;
+
         #endregion
         #region Actions...
 
@@ -436,7 +452,8 @@ namespace Blackboard.Core.Inspect {
         /// <param name="formula">The formula to stringify.</param>
         /// <returns>The string for the given formula.</returns>
         public string Stringify(Formula formula) {
-            string nl = "\n";
+            this.PreloadNames(formula.Slate);
+            const string nl = "\n";
             return formula is null ? "null" : formula.Actions.Count <= 0 ? "[]" :
                 "[" + nl + this.Stringify(formula.Actions).Indent(this.Indent) + nl + "]";
         }
@@ -472,28 +489,28 @@ namespace Blackboard.Core.Inspect {
         /// <returns>The string for the given output action.</returns>
         private string stringGetter(IGetter getter) =>
             getter.Name + " <= " + this.Stringify(getter.Value) +
-                " {" + this.Stringify(getter.NeedPending) + "};";
+                " {" + Simple().PreloadNames(this).Stringify(getter.NeedPending) + "};";
 
         /// <summary>Get the string for the given assign action.</summary>
         /// <param name="assign">The assign action to stringify.</param>
         /// <returns>The string for the given assign action.</returns>
         private string stringAssign(IAssign assign) =>
             this.Stringify(assign.Target) + " = " + this.Stringify(assign.Value) +
-                " {" + this.Stringify(assign.NeedPending) + "};";
+                " {" + Simple().PreloadNames(this).Stringify(assign.NeedPending) + "};";
 
         /// <summary>Get the string for the given define action.</summary>
         /// <param name="define">The define action to stringify.</param>
         /// <returns>The string for the given define action.</returns>
         private string stringDefine(Define define) =>
-            this.Stringify(define.Receiver) + "." + define.Name + " := " + this.Stringify(define.Node) +
-                " {" + this.Stringify(define.NeedParents) + "};";
+            this.shortFieldReader(define.Receiver) + "." + define.Name + " := " + this.Stringify(define.Node) +
+                " {" + Simple().PreloadNames(this).Stringify(define.NeedParents) + "};";
 
         /// <summary>Get the string for the given provoke action.</summary>
         /// <param name="provoke">The provoke action to stringify.</param>
         /// <returns>The string for the given provoke action.</returns>
         private string stringProvoke(Provoke provoke) =>
             this.Stringify(provoke.Trigger) + " -> " + this.Stringify(provoke.Target) +
-                " {" + this.Stringify(provoke.NeedPending) + "};";
+                " {" + Simple().PreloadNames(this).Stringify(provoke.NeedPending) + "};";
 
         #endregion
         #region Other...

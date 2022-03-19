@@ -32,7 +32,7 @@ namespace Blackboard.Core.Extensions {
         /// <returns>True if constant, false otherwise.</returns>
         static public bool IsConstant(this INode node) =>
             node is IConstant ||
-            (node is not IInput && node is IChild child && child.Parents.Nodes.IsConstant());
+            (node is not IInput && node is IChild child && child.Parents.IsConstant());
 
         /// <summary>This determines if all the given nodes are constant.</summary>
         /// <param name="nodes">The nodes to check if constant.</param>
@@ -93,6 +93,14 @@ namespace Blackboard.Core.Extensions {
                 _            => S.HashCode.Combine(node.TypeName)
             };
 
+        /// <summary>This will find all the non-null illegitimate children in the given nodes.</summary>
+        /// <remarks>Illegitimate children are children where at least one parent doesn't know about the child.</remarks>
+        /// <param name="nodes">The nodes to find all illegitimate children in.</param>
+        /// <returns>The set of illegitimate children from the given nodes.</returns>
+        static public IEnumerable<IChild> Illegitimates(this IEnumerable<INode> nodes) =>
+            nodes is null ? S.Array.Empty<IChild>() :
+            nodes.NotNull().OfType<IChild>().Where(child => child.Illegitimate());
+
         #endregion
         #region IChild...
 
@@ -106,7 +114,7 @@ namespace Blackboard.Core.Extensions {
         /// <returns>True if this child was added to any parent.</returns>
         static public bool Legitimatize(this IChild child) {
             bool anyAdded = false;
-            foreach (IParent parent in child.Parents.Nodes)
+            foreach (IParent parent in child.Parents)
                 anyAdded = (parent?.AddChildren(child) ?? false) || anyAdded;
             return anyAdded;
         }
@@ -131,7 +139,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="child">The child to check all the parents of.</param>
         /// <returns>True if any parent doesn't contain this child, false otherwise.</returns>
         static public bool Illegitimate(this IChild child) =>
-            child.Parents.Nodes.Any(parent => !parent.Children.Contains(child));
+            child.Parents.Any(parent => !parent.Children.Contains(child));
 
         #endregion
         #region INaryChild...
@@ -198,7 +206,7 @@ namespace Blackboard.Core.Extensions {
                 if (targets.Contains(node)) return true;
 
                 if (node is IChild child) {
-                    foreach (IParent parent in child.Parents.Nodes.NotNull().WhereNot(reached.Contains)) {
+                    foreach (IParent parent in child.Parents.WhereNot(reached.Contains)) {
                         pending.Enqueue(parent);
                         reached.Add(parent);
                     }
@@ -329,7 +337,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="node">The evaluable node to get the minimum allowed depth.</param>
         /// <returns></returns>
         static public int MinimumAllowedDepth(this IEvaluable node) =>
-            node is not IChild child ? 0 : child.Parents.Nodes.OfType<IEvaluable>().MaxDepth() + 1;
+            node is not IChild child ? 0 : child.Parents.OfType<IEvaluable>().MaxDepth() + 1;
 
         #endregion
         #region Fields...

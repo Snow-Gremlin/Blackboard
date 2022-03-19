@@ -32,8 +32,7 @@ namespace Blackboard.Core.Actions {
             this.Receiver = receiver;
             this.Name = name;
             this.Node = node;
-            this.needParents = allNewNodes is null ? S.Array.Empty<IChild>() :
-                allNewNodes.NotNull().OfType<IChild>().Where(child => child.Illegitimate()).ToArray();
+            this.needParents = allNewNodes.Illegitimates().ToArray();
 
             // TODO: Need to validate these nodes, value, etc is ready for this type of action.
         }

@@ -9,6 +9,18 @@ two or more numbers are added together using a Sum node in the graph.
 ```mermaid
 flowchart TD
 
+IChild[/IChild/]
+    INode --> IChild
+ICoalescable[/ICoalescable/]
+    IChild --> ICoalescable
+IConstant[/IConstant/]
+    INode --> IConstant
+```
+
+
+```
+flowchart TD
+
 subgraph Interfaces
    IChild[/IChild/]
       IChild<--INode
@@ -59,6 +71,4 @@ subgraph Interfaces
    IValueParent[/IValueParent<T:IData>/]
       IValueParent<--IValue
       IValueParent<--IParent
-end
-
 ```

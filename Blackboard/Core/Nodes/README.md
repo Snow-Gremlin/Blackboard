@@ -7,7 +7,7 @@ Each node is an operation in the user defined equations. For example, if
 two or more numbers are added together using a Sum node in the graph.
 
 ```mermaid
-classDiagram
+flowchart TD
 
 subgraph Interfaces
    IChild[/IChild/]

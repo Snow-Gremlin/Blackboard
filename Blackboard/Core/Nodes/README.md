@@ -10,72 +10,17 @@ two or more numbers are added together using a Sum node in the graph.
 flowchart TD
 
 IChild[/IChild/]
-    click IChild href "./Interfaces/IChild.cs"
+    click IChild href "Interfaces/IChild.cs"
     INode --> IChild
 
 ICoalescable[/ICoalescable/]
-    click ICoalescable href "./Interfaces/ICoalescable.cs"
+    click ICoalescable href "Interfaces/ICoalescable.cs"
     IChild --> ICoalescable
 
 IConstant[/IConstant/]
-    click IConstant href "./Interfaces/IConstant.cs"
+    click IConstant href "Interfaces/IConstant.cs"
     INode --> IConstant
 
-
-```
-
-
-```
-flowchart TD
-
-subgraph Interfaces
-   IChild[/IChild/]
-      IChild<--INode
-   ICoalescable[/ICoalescable/]
-      ICoalescable<--IChild
-   IConstant[/IConstant/]
-      IConstant<--INode
-   IDataNode[/IDataNode/]
-      IDataNode<--INode
-   IEvaluable[/IEvaluable/]
-      IEvaluable<--IParent
-   IFieldReader[/IFieldReader/]
-      IFieldReader<--INode
-   IFieldWriter[/IFieldWriter/]
-      IFieldWriter<--IFieldReader
-   IFuncDef[/IFuncDef/]
-      IFuncDef<--INode
-   IFuncGroup[/IFuncGroup/]
-      IFuncGroup<--INode
-   IInput[/IInput/]
-      IInput<--IOutput
-   INaryChild[/INaryChild<T:IParent>/]
-      INaryChild<--IChild
-   INode[/INode/]
-   IOutput[/IOutput/]
-      IOutput<--INode
-   IParent[/IParent/]
-      IParent<--INode
-   ITrigger[/ITrigger/]
-      ITrigger<--INode
-   ITriggerInput[/ITriggerInput/]
-      ITriggerInput<--IInput
-      ITriggerInput<--ITriggerParent
-   ITriggerOutput[/ITriggerOutput/]
-      ITriggerOutput<--IOutput
-      ITriggerOutput<--ITrigger
-   ITriggerParent[/ITriggerParent/]
-      ITriggerParent<--ITrigger
-      ITriggerParent<--IParent
-   IValue[/IValue<T:IData>/]
-      IValue<--IDataNode
-   IValueInput[/IValueInput<T:IData>/]
-      IValueInput<--IValueParent
-      IValueInput<--IInput
-   IValueOutput[/IValueOutput<T:IData>/]
-      IValueOutput<--IValue
-      IValueOutput<--IOutput
-   IValueParent[/IValueParent<T:IData>/]
-      IValueParent<--IValue
-      IValueParent<--IParent
+INode[/INode/]
+    click INode href "Interfaces/INode.cs"
 ```

@@ -17,7 +17,12 @@
   <ItemGroup>
     <None Remove="Core\Cast.txt" />
     <None Remove="Core\Nodes\Cast.txt" />
+    <None Remove="Core\Nodes\README.md" />
     <None Remove="Parser\Parser.lang" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Core\Nodes\README.md" />
   </ItemGroup>
 
   <ItemGroup>

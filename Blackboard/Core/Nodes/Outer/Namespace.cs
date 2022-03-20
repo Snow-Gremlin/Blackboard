@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +12,15 @@ namespace Blackboard.Core.Nodes.Outer {
         private SortedDictionary<string, INode> fields;
 
         /// <summary>Creates a new namespace.</summary>
-        public Namespace() {
+        public Namespace() =>
             this.fields = new SortedDictionary<string, INode>();
-        }
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public INode NewInstance() => new Namespace();
 
         /// <summary>This is the type name of the node.</summary>
-        public string TypeName => "Namespace";
+        public string TypeName => nameof(Namespace);
 
         /// <summary>Gets or sets the field in this namespace.</summary>
         /// <param name="name">The name of the field.</param>
@@ -52,11 +54,11 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <param name="node">The node to write to the field.</param>
         public void WriteField(string name, INode node) {
             if (node is null)
-                throw new Exception("May not write a null node to a namespace.").
+                throw new Message("May not write a null node to a namespace.").
                     With("Name", name).
                     With("Namespace", this);
             if (this.fields.ContainsKey(name))
-                throw new Exception("A node by the given name already exists in the namespace.").
+                throw new Message("A node by the given name already exists in the namespace.").
                     With("Name", name).
                     With("Node", node).
                     With("Namespace", this);

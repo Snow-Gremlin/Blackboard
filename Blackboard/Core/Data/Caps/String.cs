@@ -8,13 +8,24 @@ using System.Text;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a string value such that it can be used in generics.</summary>
-    public struct String: IAdditive<String>, IComparable<String>,
+    public struct String:
+        IAdditive<String>,
+        IComparable<String>,
+        IData,
+        IEquatable<String>,
         IImplicit<Bool,   String>,
         IImplicit<Double, String>,
         IImplicit<Int,    String> {
 
+        #region Static...
+
         /// <summary>Gets an empty string. This is the same as default.</summary>
         static public readonly String Empty = new("");
+
+        /// <summary>The identity of summation for this data type.</summary>
+        static public readonly String SumIdentity = Empty;
+
+        #endregion
 
         /// <summary>The string value being stored.</summary>
         public readonly string Value;
@@ -23,13 +34,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="value">The string value to store.</param>
         public String(string value) => this.Value = value ?? "";
 
-        /// <summary>Gets the name for the type of data.</summary>
-        public string TypeName => Type.String.Name;
-
-        /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value;
-
-        #region Additive Math...
+        #region Additive...
 
         /// <summary>This will concatenate of the given other data.</summary>
         /// <remarks>The current value is not used in the concatenation.</remarks>
@@ -40,6 +45,52 @@ namespace Blackboard.Core.Data.Caps {
             other.Select(t => t.Value).Foreach(buf.Append);
             return new(buf.ToString());
         }
+
+        /// <summary>
+        /// Indicates that for this data type, summation is commutable,
+        /// meaning that the order of the parents makes no difference to the result.
+        /// </summary>
+        /// <remarks>String summation is concatenation which is not commutable.</remarks>
+        /// <see cref="https://en.wikipedia.org/wiki/Commutative_property"/>
+        public bool SumCommutable => false;
+
+        /// <summary>The identity of summation for this data type.</summary>
+        /// <remarks>Typically this is zero or empty.</remarks>
+        /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
+        public String SumIdentityValue => SumIdentity;
+
+        #endregion
+        #region Comparable...
+
+        public static bool operator < (String left, String right) => left.CompareTo(right) <  0;
+        public static bool operator <=(String left, String right) => left.CompareTo(right) <= 0;
+        public static bool operator > (String left, String right) => left.CompareTo(right) >  0;
+        public static bool operator >=(String left, String right) => left.CompareTo(right) >= 0;
+
+        /// <summary>Compares two strings together.</summary>
+        /// <param name="other">The other string to compare.</param>
+        /// <returns>The comparison result indicating which is greater than, less than, or equal.</returns>
+        public int CompareTo(String other) => string.Compare(this.Value, other.Value);
+
+        #endregion
+        #region Data...
+
+        /// <summary>Gets the name for the type of data.</summary>
+        public string TypeName => Type.String.Name;
+
+        /// <summary>Get the value of the data as a string.</summary>
+        public string ValueString => this.Value ?? "";
+
+        #endregion
+        #region Equatable...
+
+        public static bool operator ==(String left, String right) => left.Equals(right);
+        public static bool operator !=(String left, String right) => !left.Equals(right);
+
+        /// <summary>Checks if the given string is equal to this data type.</summary>
+        /// <param name="other">This is the string to test.</param>
+        /// <returns>True if they are equal, otherwise false.</returns>
+        public bool Equals(String other) => this.Value == other.Value;
 
         #endregion
         #region Casts...
@@ -60,47 +111,15 @@ namespace Blackboard.Core.Data.Caps {
         public String CastFrom(Int value) => new(value.ValueString);
 
         #endregion
-        #region Comparable...
 
-        /// <summary>Compares two strings together.</summary>
-        /// <param name="other">The other string to compare.</param>
-        /// <returns>The comparison result indicating which is greater than or equal.</returns>
-        public int CompareTo(String other) => string.Compare(this.Value, other.Value);
-
-        public static bool operator ==(String left, String right) => left.CompareTo(right) == 0;
-        public static bool operator !=(String left, String right) => left.CompareTo(right) != 0;
-        public static bool operator < (String left, String right) => left.CompareTo(right) <  0;
-        public static bool operator <=(String left, String right) => left.CompareTo(right) <= 0;
-        public static bool operator > (String left, String right) => left.CompareTo(right) >  0;
-        public static bool operator >=(String left, String right) => left.CompareTo(right) >= 0;
-
-        /// <summary>Checks if the given string is equal to this data type.</summary>
-        /// <param name="other">This is the string to test.</param>
-        /// <returns>True if they are equal, otherwise false.</returns>
-        public bool Equals(String other) => this.Value == other.Value;
+        /// <summary>Gets the hash code of the stored value.</summary>
+        /// <returns>The stored value's hash code.</returns>
+        public override int GetHashCode() => this.Value?.GetHashCode() ?? 0;
 
         /// <summary>Checks if the given object is equal to this data type.</summary>
         /// <param name="obj">This is the object to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
         public override bool Equals(object obj) => obj is String other && this.Equals(other);
-
-        /// <summary>Gets the maximum value from the given other values.</summary>
-        /// <remarks>The current value is not used in the maximum value.</remarks>
-        /// <param name="other">The values to find the maximum from.</param>
-        /// <returns>The maximum value from the given vales.</returns>
-        public String Max(IEnumerable<String> other) => new(other.Max(t => t.Value));
-
-        /// <summary>Gets the minimum value from given other values.</summary>
-        /// <remarks>The current value is not used in the minimum value.</remarks>
-        /// <param name="other">The values to find the minimum from.</param>
-        /// <returns>The minimum value from the given vales.</returns>
-        public String Min(IEnumerable<String> other) => new(other.Min(t => t.Value));
-
-        #endregion
-
-        /// <summary>Gets the hash code of the stored value.</summary>
-        /// <returns>The stored value's hash code.</returns>
-        public override int GetHashCode() => this.Value.GetHashCode();
 
         /// <summary>Gets the name of this data type and value.</summary>
         /// <returns>The name of the string type and value.</returns>

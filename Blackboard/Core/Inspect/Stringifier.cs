@@ -9,7 +9,6 @@ namespace Blackboard.Core.Inspect {
 
     /// <summary>This is a tool for making human readable strings from he nodes.</summary>
     sealed public class Stringifier {
-
         #region Simple...
 
         /// <summary>Creates a stringifier configured for simple strings.</summary>
@@ -138,7 +137,7 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Gets a deep string for the given formula.</summary>
         /// <param name="formula">The formula to stringify.</param>
         /// <returns>The deep string for the given formula.</returns>
-        static public string Deep(Formula formula) => Simple().Stringify(formula);
+        static public string Deep(Formula formula) => Deep().Stringify(formula);
 
         /// <summary>Gets a deep string for the given actions even any action which is null.</summary>
         /// <param name="actions">The actions to stringify.</param>
@@ -167,9 +166,11 @@ namespace Blackboard.Core.Inspect {
         /// <param name="showDataType">Indicates that data types for the nodes should be outputted.</param>
         /// <param name="showAllDataValues">Indicates that values should be outputted at each node.</param>
         /// <param name="showLastDataValues">Indicates that values should only be outputted at the deepest node.</param>
+        /// <param name="showFirstDataValues">Indicates that values should only be outputted at the shallowest node.</param>
         /// <param name="showParents">Indicates that parents/arguments should be outputted.</param>
         /// <param name="showTailingNodes">Indicates that fields and function definitions should be outputted.</param>
         /// <param name="showFuncs">Indicates that functions should be outputted.</param>
+        /// <param name="showSimpleConstants">Indicates that constants should be shown just as their value.</param>
         /// <param name="depth">The number of parent nodes to descend into to output.</param>
         /// <param name="indent">The string to indent with.</param>
         public Stringifier(
@@ -180,6 +181,7 @@ namespace Blackboard.Core.Inspect {
             bool showParents         = true,
             bool showTailingNodes    = true,
             bool showFuncs           = true,
+            bool showSimpleConstants = true,
             int  depth               = int.MaxValue,
             string indent            = "  ") {
             this.ShowDataType        = showDataType;
@@ -189,6 +191,7 @@ namespace Blackboard.Core.Inspect {
             this.ShowParents         = showParents;
             this.ShowTailingNodes    = showTailingNodes;
             this.ShowFuncs           = showFuncs;
+            this.ShowSimpleConstants = showSimpleConstants;
             this.Depth               = depth;
             this.Indent              = indent;
             this.readFieldNodes      = new HashSet<IFieldReader>();
@@ -217,7 +220,10 @@ namespace Blackboard.Core.Inspect {
 
         /// <summary>Indicates that functions should be outputted.</summary>
         public bool ShowFuncs;
-        
+
+        /// <summary>Indicates that constants should be shown just as their value.</summary>
+        public bool ShowSimpleConstants;
+
         /// <summary>The number of parent nodes to descend into to output.</summary>
         public int Depth;
 
@@ -228,7 +234,7 @@ namespace Blackboard.Core.Inspect {
         private HashSet<IFieldReader> readFieldNodes;
 
         /// <summary>A cache of named nodes used for replacing parent nodes with named ones.</summary>
-        /// <remarks>This will be automatically populated by namespaces.</remarks>
+        /// <remarks>This will be automatically populated by Namespaces.</remarks>
         private Dictionary<INode, string> nodeNames;
 
         #region Naming...
@@ -237,25 +243,39 @@ namespace Blackboard.Core.Inspect {
         /// <remarks>If the node is already named, the name is overwritten with this new name.</remarks>
         /// <param name="name">The name to show for the node.</param>
         /// <param name="node">The node to give a name to.</param>
-        public void SetNodeName(string name, INode node) =>
+        /// <returns>The stringifier so that calls can be chained.</returns>
+        public Stringifier SetNodeName(string name, INode node) {
             this.nodeNames[node] = name;
+            return this;
+        }
+
+        /// <summary>Sets the names to show for nodes.</summary>
+        /// <param name="other">The other stringifier to get the preloaded names from.</param>
+        /// <returns>The stringifier so that calls can be chained.</returns>
+        public Stringifier PreloadNames(Stringifier other) {
+            other.nodeNames.Foreach(this.nodeNames.Add);
+            return this;
+        }
 
         /// <summary>Preloads the node name to use when outputting using the namespaces reachable from global.</summary>
         /// <param name="slate">The slate containing the global namespace to load.</param>
-        public void PreloadNames(Slate slate) {
+        /// <returns>The stringifier so that calls can be chained.</returns>
+        public Stringifier PreloadNames(Slate slate) {
             this.SetNodeName("Global", slate.Global);
-            this.PreloadNames(slate.Global);
+            return this.PreloadNames(slate.Global);
         }
 
         /// <summary>Preloads the node names to use when outputting the parents of nodes.</summary>
         /// <param name="node">The node with the readers to start preloading names with.</param>
-        public void PreloadNames(IFieldReader node) {
-            if (this.readFieldNodes.Contains(node)) return;
+        /// <returns>The stringifier so that calls can be chained.</returns>
+        public Stringifier PreloadNames(IFieldReader node) {
+            if (this.readFieldNodes.Contains(node)) return this;
             this.readFieldNodes.Add(node);
             foreach (KeyValuePair<string, INode> pair in node.Fields) {
                 if (pair.Value is IFieldReader fieldReader) this.PreloadNames(fieldReader);
                 this.SetNodeName(pair.Key, pair.Value);
             }
+            return this;
         }
 
         #endregion
@@ -295,6 +315,10 @@ namespace Blackboard.Core.Inspect {
             // Check if a named parent which we can stop at with the name.
             if (useOnlyName && this.nodeNames.ContainsKey(node))
                 return this.nodeNames[node] + this.nodeDataValue(node, depth, first);
+
+            // Check if a constant which can be outputted as just the value.
+            if (this.ShowSimpleConstants && node is IConstant)
+                return this.nodeDataType(node) + getDataValue(node);
 
             // Construct the node and any of its children, if it is a first node and it has a name, show it.
             return (first && this.nodeNames.ContainsKey(node) ? this.nodeNames[node]+": " : "") +
@@ -413,6 +437,14 @@ namespace Blackboard.Core.Inspect {
             return string.IsNullOrEmpty(tail) ? "" : "{" + nl + tail + nl +"}";
         }
 
+        /// <summary>Gets a short string for the field reader. Typically used to stringify receivers.</summary>
+        /// <param name="node">The node to stringify.</param>
+        /// <returns>The string for the given field reader.</returns>
+        private string shortFieldReader(IFieldReader node) =>
+            node is null ? "null" :
+            this.nodeNames.ContainsKey(node) ? this.nodeNames[node] :
+            node.TypeName;
+
         #endregion
         #region Actions...
 
@@ -420,7 +452,8 @@ namespace Blackboard.Core.Inspect {
         /// <param name="formula">The formula to stringify.</param>
         /// <returns>The string for the given formula.</returns>
         public string Stringify(Formula formula) {
-            string nl = "\n";
+            this.PreloadNames(formula.Slate);
+            const string nl = "\n";
             return formula is null ? "null" : formula.Actions.Count <= 0 ? "[]" :
                 "[" + nl + this.Stringify(formula.Actions).Indent(this.Indent) + nl + "]";
         }
@@ -443,6 +476,7 @@ namespace Blackboard.Core.Inspect {
         private string stringAction(IAction action) =>
             action switch {
                 null            => "null",
+                IGetter getter  => this.stringGetter(getter),
                 IAssign assign  => this.stringAssign(assign),
                 Define  define  => this.stringDefine(define),
                 Provoke provoke => this.stringProvoke(provoke),
@@ -450,26 +484,33 @@ namespace Blackboard.Core.Inspect {
                 _               => "Unknown Action",
             };
 
+        /// <summary>Get the string for the given getter action.</summary>
+        /// <param name="getter">The getter action to stringify.</param>
+        /// <returns>The string for the given output action.</returns>
+        private string stringGetter(IGetter getter) =>
+            getter.Name + " <= " + this.Stringify(getter.Value) +
+                " {" + Simple().PreloadNames(this).Stringify(getter.NeedPending) + "};";
+
         /// <summary>Get the string for the given assign action.</summary>
         /// <param name="assign">The assign action to stringify.</param>
         /// <returns>The string for the given assign action.</returns>
         private string stringAssign(IAssign assign) =>
             this.Stringify(assign.Target) + " = " + this.Stringify(assign.Value) +
-                " {" + this.Stringify(assign.NeedPending) + "};";
+                " {" + Simple().PreloadNames(this).Stringify(assign.NeedPending) + "};";
 
         /// <summary>Get the string for the given define action.</summary>
         /// <param name="define">The define action to stringify.</param>
         /// <returns>The string for the given define action.</returns>
         private string stringDefine(Define define) =>
-            this.Stringify(define.Receiver) + "." + define.Name + " := " + this.Stringify(define.Node) +
-                " {" + this.Stringify(define.NeedParents) + "};";
+            this.shortFieldReader(define.Receiver) + "." + define.Name + " := " + this.Stringify(define.Node) +
+                " {" + Simple().PreloadNames(this).Stringify(define.NeedParents) + "};";
 
         /// <summary>Get the string for the given provoke action.</summary>
         /// <param name="provoke">The provoke action to stringify.</param>
         /// <returns>The string for the given provoke action.</returns>
         private string stringProvoke(Provoke provoke) =>
             this.Stringify(provoke.Trigger) + " -> " + this.Stringify(provoke.Target) +
-                " {" + this.Stringify(provoke.NeedPending) + "};";
+                " {" + Simple().PreloadNames(this).Stringify(provoke.NeedPending) + "};";
 
         #endregion
         #region Other...
@@ -480,11 +521,14 @@ namespace Blackboard.Core.Inspect {
         /// The string of the given action or node,
         /// or the original value if not an action or node.
         /// </returns>
-        private object stringifyObject(object value) =>
+        public object StringifyObject(object value) =>
             value switch {
-                INode   node   => this.Stringify(node),
-                IAction action => this.Stringify(action),
-                _              => value
+                INode               node   => this.Stringify(node),
+                IAction             action => this.Stringify(action),
+                Message             msg    => msg.Stringify(this),
+                Exception           e      => e.Stringify(this),
+                IEnumerable<object> list   => list.Select(this.StringifyObject).Join(", "),
+                _                          => value
             };
 
         /// <summary>Converts the given collection object with this stringifier.</summary>
@@ -493,8 +537,8 @@ namespace Blackboard.Core.Inspect {
         /// For each object this returns the string of a given action or node,
         /// or the original value if not an action or node.
         /// </returns>
-        public IEnumerable<object> Stringify(IEnumerable<object> values) =>
-            values.Select(this.stringifyObject);
+        public IEnumerable<object> StringifyObject(IEnumerable<object> values) =>
+            values.Select(this.StringifyObject);
 
         #endregion
     }

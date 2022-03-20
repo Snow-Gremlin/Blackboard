@@ -5,6 +5,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using PetiteParser.Scanner;
 using System.Collections.Generic;
 using System.Linq;
+using S = System;
 
 namespace Blackboard.Core.Actions {
 
@@ -25,7 +26,7 @@ namespace Blackboard.Core.Actions {
         static public Assign<T> Create(Location loc, INode target, INode value, IEnumerable<INode> allNewNodes) =>
             (target is IValueInput<T> input) && (value is IValue<T> data) ?
             new Assign<T>(input, data, allNewNodes) :
-            throw new Exception("Unexpected node types for assignment.").
+            throw new Message("Unexpected node types for assignment.").
                 With("Location", loc).
                 With("Type",     typeof(T)).
                 With("Target",   target).
@@ -38,8 +39,8 @@ namespace Blackboard.Core.Actions {
         private readonly IValue<T> value;
 
         /// <summary>
-        /// This is a subset of all the node for the value which need to be pended
-        /// for evaluation in order to perform this assignment.
+        /// This is a subset of all the node for this node to write which need to be
+        /// added to parents their parents to make this node reactive to changes.
         /// </summary>
         private readonly IEvaluable[] needPending;
 
@@ -48,9 +49,16 @@ namespace Blackboard.Core.Actions {
         /// <param name="value">The node to get the value from.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         public Assign(IValueInput<T> target, IValue<T> value, IEnumerable<INode> allNewNodes) {
+
+            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
+
             this.target = target;
             this.value  = value;
-            this.needPending = allNewNodes.NotNull().OfType<IEvaluable>().ToArray();
+
+            // Pre-sort the evaluable nodes.
+            LinkedList<IEvaluable> nodes = new();
+            nodes.SortInsertUnique(allNewNodes.Illegitimates().OfType<IEvaluable>());
+            this.needPending = nodes.ToArray();
         }
 
         /// <summary>The target input node to set the value of.</summary>
@@ -64,13 +72,14 @@ namespace Blackboard.Core.Actions {
 
         /// <summary>This will perform the action.</summary>
         /// <param name="slate">The slate for this action.</param>
+        /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, ILogger logger = null) {
-            logger?.Log("Assign: {0}", this);
+        public void Perform(Slate slate, Result result, Logger logger = null) {
+            logger.Info("Assign: {0}", this);
             slate.PendEval(this.needPending);
-            slate.PerformEvaluation(logger?.Sub);
+            slate.PerformEvaluation(logger);
             slate.SetValue(this.value.Value, this.target);
-            logger?.Log("Assign Done {0}", this.target);
+            logger.Info("Assign Done {0}", this.target);
         }
 
         /// <summary>Gets a human readable string for this assignment.</summary>

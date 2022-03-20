@@ -5,7 +5,7 @@ namespace Blackboard.Core.Data.Interfaces {
 
     /// <summary>This indicates that this Blackboard data type is a floating point value.</summary>
     /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
-    public interface IFloatingPoint<T>: IArithmetic<T>
+    public interface IFloatingPoint<T>: IData
         where T : IData {
 
         /// <summary>This gets the linear interpolation between to points using this value as a factor.</summary>
@@ -36,6 +36,14 @@ namespace Blackboard.Core.Data.Interfaces {
 
         /// <summary>Determines if this value is not a number.</summary>
         /// <returns>True if the number is not a number, false otherwise.</returns>
-        bool IsNAN();
+        bool IsNaN();
+
+        /// <summary>This gets the positive infinity value.</summary>
+        /// <remarks>The current value is not used when getting this identity.</remarks>
+        T InfinityValue { get; }
+
+        /// <summary>Determines if this value is not a number.</summary>
+        /// <remarks>The current value is not used when getting this identity.</remarks>
+        T NaNValue { get; }
     }
 }

@@ -87,7 +87,7 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         public void TestBasicParses_LiteralMath() {
             Slate slate = new();
-            slate.Read(
+            slate.LogRead(
                 "in double A = 3.0 + 0.07 * 2;",
                 "in double B = floor(A), C = round(A), D = round(A, 1);",
                 "in double E = (B ** C) / 2;",
@@ -184,11 +184,11 @@ namespace BlackboardTests.ParserTests {
             Parser parser = new(slate);
             TestTools.CheckException(() => parser.Read("in int A = 3.14;"),
                "Error occurred while parsing input code.",
-               "The value type can not be cast to the given type.",
-               "[Location: Unnamed:1, 15, 15]",
-               "[Target: int]",
-               "[Type: double]",
-               "[Value: Literal<double>[3.14]]");
+               "[Error: The value type can not be cast to the given type.",
+               "   [Location: Unnamed:1, 15, 15]",
+               "   [Target: int]",
+               "   [Type: double]",
+               "   [Value: <double>[3.14]]]");
         }
     }
 }

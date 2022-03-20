@@ -64,7 +64,7 @@ namespace BlackboardTests.CoreTests {
         public void TestCastBoolInput() {
             InputValue<Bool> node = new();
             checkInherit (Type.Node,          node, 1);
-            checkImplicit(Type.Trigger,       node, 0, "BoolAsTrigger<bool>(Input<bool>)");
+            checkImplicit(Type.Trigger,       node, 0, "BoolAsTrigger<trigger>(Input<bool>)");
             checkInherit (Type.Bool,          node, 0);
             checkNoCast  (Type.Int,           node);
             checkNoCast  (Type.Double,        node);

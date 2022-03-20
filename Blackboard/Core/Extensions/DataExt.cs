@@ -1,5 +1,7 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Outer;
 
 namespace Blackboard.Core.Extensions {
 
@@ -18,7 +20,7 @@ namespace Blackboard.Core.Extensions {
                 Double => default(T) is ICast<Double, T>,
                 Int    => default(T) is ICast<Int,    T>,
                 String => default(T) is ICast<String, T>,
-                _      => throw new Exception("Unexpected input type in cast").
+                _      => throw new Message("Unexpected input type in cast").
                              With("Input", value)
             };
 
@@ -34,7 +36,7 @@ namespace Blackboard.Core.Extensions {
                 Double => default(T) is IImplicit<Double, T>,
                 Int    => default(T) is IImplicit<Int,    T>,
                 String => default(T) is IImplicit<String, T>,
-                _      => throw new Exception("Unexpected input type in implicit cast").
+                _      => throw new Message("Unexpected input type in implicit cast").
                              With("Input", value)
             };
 
@@ -50,7 +52,7 @@ namespace Blackboard.Core.Extensions {
                 Double => default(T) is IExplicit<Double, T>,
                 Int    => default(T) is IExplicit<Int,    T>,
                 String => default(T) is IExplicit<String, T>,
-                _      => throw new Exception("Unexpected input type in explicit cast").
+                _      => throw new Message("Unexpected input type in explicit cast").
                              With("Input", value)
             };
 
@@ -66,7 +68,7 @@ namespace Blackboard.Core.Extensions {
             where Tout  : IData
             where TCast : ICast<Tin, Tout> =>
             default(Tout) is ICast<Tin, Tout> cast ? (Tout)cast.CastFrom(value) :
-                throw new Exception("Unable to cast from the given input into the given output.").
+                throw new Message("Unable to cast from the given input into the given output.").
                    With("Input",     value).
                    With("In Type",   typeof(Tin)).
                    With("Out Type",  typeof(Tout)).
@@ -84,7 +86,7 @@ namespace Blackboard.Core.Extensions {
                 Double vd => castTo<Double, T, ICast<Double, T>>(vd),
                 Int    vi => castTo<Int,    T, ICast<Int,    T>>(vi),
                 String vs => castTo<String, T, ICast<String, T>>(vs),
-                _         => throw new Exception("Unexpected input type in cast").
+                _         => throw new Message("Unexpected input type in cast").
                                 With("Input", value)
             };
 
@@ -100,7 +102,7 @@ namespace Blackboard.Core.Extensions {
                 Double vd => castTo<Double, T, IImplicit<Double, T>>(vd),
                 Int    vi => castTo<Int,    T, IImplicit<Int,    T>>(vi),
                 String vs => castTo<String, T, IImplicit<String, T>>(vs),
-                _         => throw new Exception("Unexpected input type in implicit cast").
+                _         => throw new Message("Unexpected input type in implicit cast").
                                 With("Input", value)
             };
 
@@ -116,8 +118,14 @@ namespace Blackboard.Core.Extensions {
                 Double vd => castTo<Double, T, IExplicit<Double, T>>(vd),
                 Int    vi => castTo<Int,    T, IExplicit<Int,    T>>(vi),
                 String vs => castTo<String, T, IExplicit<String, T>>(vs),
-                _         => throw new Exception("Unexpected input type in explicit cast").
+                _         => throw new Message("Unexpected input type in explicit cast").
                                 With("Input", value)
             };
+
+        /// <summary>Creates a literal for the value of this data.</summary>
+        /// <typeparam name="T">The type of data to create a literal with.</typeparam>
+        /// <param name="value">The value to create a literal with.</param>
+        /// <returns>The literal for the current data value.</returns>
+        static public Literal<T> ToLiteral<T>(this T value) where T : IEquatable<T> => new(value);
     }
 }

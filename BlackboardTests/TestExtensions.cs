@@ -104,20 +104,20 @@ namespace BlackboardTests {
 
         /// <summary>Will assign all the children reachable via parents to the parents.</summary>
         /// <param name="node">The node to start adding to the parents from.</param>
-        static public void AddToAllParents(this INode node) =>
-            node.GetAllParents().OfType<IChild>().Foreach(child => child.AddToParents());
+        static public void LegitimatizeAll(this INode node) =>
+            node.GetAllParents().OfType<IChild>().Foreach(child => child.Legitimatize());
 
         /// <summary>Will perform depth update on all the nodes reachable from the parents.</summary>
         /// <param name="node">The node to start updating from and to get all parents and parent parents from.</param>
         /// <param name="logger">Optional logger to use to debug the update with.</param>
-        static public void UpdateAllParents(this INode node, ILogger logger = null) =>
+        static public void UpdateAllParents(this INode node, Logger logger = null) =>
             GetAllParents(node).ToEvalList().UpdateDepths(logger);
 
         /// <summary>Will perform evaluation on all the nodes reachable from the parents.</summary>
         /// <param name="node">The node to start evaluate from and to get all parents and parent parents from.</param>
         /// <param name="logger">Optional logger to use to debug the update with.</param>
         /// <returns>All the triggers which have been provoked and need to be reset.</returns>
-        static public HashSet<ITrigger> EvaluateAllParents(this INode node, ILogger logger = null) =>
+        static public HashSet<ITrigger> EvaluateAllParents(this INode node, Logger logger = null) =>
             GetAllParents(node).ToEvalList().Evaluate(logger);
 
         #endregion
@@ -125,22 +125,19 @@ namespace BlackboardTests {
 
         /// <summary>Performs the formula and outputs the logs to the console.</summary>
         /// <param name="formula">The formula to perform.</param>
-        /// <returns>The formula that is passed in so this can be chained.</returns>
-        static public Formula LogPerform(this Formula formula) {
+        /// <returns>The result from the perform.</returns>
+        static public Result LogPerform(this Formula formula) =>
             formula.Perform(new ConsoleLogger());
-            return formula;
-        }
 
         /// <summary>Performs the formula and checks that the log output as expected..</summary>
         /// <param name="formula">The formula to perform.</param>
         /// <param name="lines">The expected evaluation log output.</param>
-        /// <returns>The formula that is passed in so this can be chained.</returns>
-        static public Formula CheckPerform(this Formula formula, params string[] lines) {
+        /// <returns>The result from the perform.</returns>
+        static public Result CheckPerform(this Formula formula, params string[] lines) {
             BufferLogger logger = new();
-            logger.Stringifier.PreloadNames(formula.Slate);
-            formula.Perform(logger);
+            Result result = formula.Perform(logger.Stringify(Stringifier.Shallow().PreloadNames(formula.Slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
-            return formula;
+            return result;
         }
 
         /// <summary>Checks the expected string for the given formula.</summary>
@@ -148,7 +145,7 @@ namespace BlackboardTests {
         /// <param name="lines">The lines for the expected string.</param>
         /// <returns>The formula that is passed in so this can be chained.</returns>
         static public Formula Check(this Formula formula, params string[] lines) {
-            TestTools.NoDiff(lines, Stringifier.Shallow(formula).Trim().Split("\n"));
+            TestTools.NoDiff(lines, Stringifier.Deep(formula).Trim().Split("\n"));
             return formula;
         }
 
@@ -219,9 +216,8 @@ namespace BlackboardTests {
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckEvaluate(this Slate slate, params string[] lines) {
-            BufferLogger logger = new();
-            logger.Stringifier.PreloadNames(slate);
-            slate.PerformEvaluation(logger);
+            BufferLogger logger = new(false);
+            slate.PerformEvaluation(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
         }
 
@@ -229,9 +225,8 @@ namespace BlackboardTests {
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
         static public void CheckUpdate(this Slate slate, params string[] lines) {
-            BufferLogger logger = new();
-            logger.Stringifier.PreloadNames(slate);
-            slate.PerformUpdates(logger);
+            BufferLogger logger = new(false);
+            slate.PerformUpdates(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
         }
 
@@ -260,8 +255,51 @@ namespace BlackboardTests {
         /// <summary>Performs a parse of the given input and logs the parse output.</summary>
         /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
-        static public Formula LogRead(this Slate slate, params string[] input) =>
-            new Parser(slate, new ConsoleLogger()).Read(input);
+        static public Formula LogRead(this Slate slate, params string[] input) {
+            Stringifier stringifier = Stringifier.Deep().PreloadNames(slate);
+            stringifier.ShowFuncs = false;
+            Logger logger = new ConsoleLogger().Stringify(stringifier).
+                SelectGroup("Parser", "Builder", "Optimize"); // TODO: REMOVE
+            return new Parser(slate, logger).Read(input);
+        }
+
+        #endregion
+        #region Action Result...
+
+        /// <summary>Gets the message for the CheckValues assertions.</summary>
+        /// <param name="type">The type of the value being checked.</param>
+        /// <param name="name">The name of the variable to get.</param>
+        /// <returns>The message to show in the assertion.</returns>
+        static private string checkValueMsg(string type, string name) =>
+            "Checking the " + type + " value of \"" + name + "\".";
+
+        /// <summary>Checks the boolean value of this node.</summary>
+        /// <param name="slate">This is the slate to check the value with.</param>
+        /// <param name="exp">The expected boolean value.</param>
+        /// <param name="name">The name of the variable to get.</param>
+        static public void CheckValue(this Result result, bool exp, string name) =>
+            Assert.AreEqual(exp, result.GetBool(name), checkValueMsg("bool", name));
+
+        /// <summary>Checks the integer value of this node.</summary>
+        /// <param name="slate">This is the slate to check the value with.</param>
+        /// <param name="exp">The expected integer value.</param>
+        /// <param name="name">The name of the variable to get.</param>
+        static public void CheckValue(this Result result, int exp, string name) =>
+            Assert.AreEqual(exp, result.GetInt(name), checkValueMsg("int", name));
+
+        /// <summary>Checks the double value of this node.</summary>
+        /// <param name="slate">This is the slate to check the value with.</param>
+        /// <param name="exp">The expected double value.</param>
+        /// <param name="name">The name of the variable to get.</param>
+        static public void CheckValue(this Result result, double exp, string name) =>
+            Assert.AreEqual(exp, result.GetDouble(name), checkValueMsg("double", name));
+
+        /// <summary>Checks the string value of this node.</summary>
+        /// <param name="slate">This is the slate to check the value with.</param>
+        /// <param name="exp">The expected string value.</param>
+        /// <param name="name">The name of the variable to get.</param>
+        static public void CheckValue(this Result result, string exp, string name) =>
+            Assert.AreEqual(exp, result.GetString(name), checkValueMsg("string", name));
 
         #endregion
         #region Other...

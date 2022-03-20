@@ -14,13 +14,20 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new GreaterThanOrEqual<T>(left, right));
 
         /// <summary>Creates a greater than or equal value node.</summary>
+        public GreaterThanOrEqual() { }
+
+        /// <summary>Creates a greater than or equal value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         public GreaterThanOrEqual(IValueParent<T> source1 = null, IValueParent<T> source2 = null) :
             base(source1, source2) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new GreaterThanOrEqual<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "GreaterThanOrEqual";
+        public override string TypeName => nameof(GreaterThanOrEqual<T>);
 
         /// <summary>Determine if the parent's values are greater than or equal during evaluation.</summary>
         /// <param name="value1">The first parent's value to compare.</param>

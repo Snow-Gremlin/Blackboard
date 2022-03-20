@@ -1,6 +1,6 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
-using S = System;
 
 namespace Blackboard.Core.Nodes.Outer {
 
@@ -26,8 +26,12 @@ namespace Blackboard.Core.Nodes.Outer {
             this.overrides = new Dictionary<string, INode>();
 
             if (receiver is null or VirtualNode)
-                throw new Exception("May not construct a virtual node with a null or virtual node receiver.");
+                throw new Message("May not construct a virtual node with a null or virtual node receiver.");
         }
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public INode NewInstance() => new VirtualNode(this.Name, this.Receiver);
 
         /// <summary>The receiver having children virtually added or removed from it.</summary>
         public readonly IFieldWriter Receiver;
@@ -36,7 +40,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public readonly string Name;
 
         /// <summary>This is the type name of the node without any type parameters.</summary>
-        public string TypeName => "VirtualNode";
+        public string TypeName => nameof(VirtualNode);
 
         /// <summary>Gets or sets the field in this namespace.</summary>
         /// <param name="name">The name of the field.</param>

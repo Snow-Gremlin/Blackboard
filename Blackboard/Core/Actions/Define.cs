@@ -12,7 +12,7 @@ namespace Blackboard.Core.Actions {
     /// This is an action to define a named node in a field writer.
     /// Typically this is for defining a new node into the namespaces reachable from global.
     /// </summary>
-    public class Define: IAction {
+    sealed public class Define: IAction {
 
         /// <summary>
         /// This is a subset of all the node for this node to write which need to be
@@ -27,13 +27,14 @@ namespace Blackboard.Core.Actions {
         /// <param name="allNewNodes">All the nodes which are new children of the node to write.</param>
         public Define(IFieldWriter receiver, string name, INode node, IEnumerable<INode> allNewNodes = null) {
             if (receiver is null or VirtualNode)
-                throw new Exception("May not use a null or virtual node as the receiver in a define.");
+                throw new Message("May not use a null or {0} as the receiver in a {1}.", nameof(VirtualNode), nameof(Define));
 
             this.Receiver = receiver;
             this.Name = name;
             this.Node = node;
-            this.needParents = allNewNodes is null ? S.Array.Empty<IChild>() :
-                allNewNodes.NotNull().OfType<IChild>().Where(child => child.NeedsToAddParents()).ToArray();
+            this.needParents = allNewNodes.Illegitimates().ToArray();
+
+            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
         }
 
         /// <summary>This is the receiver that will be written to.</summary>
@@ -50,11 +51,12 @@ namespace Blackboard.Core.Actions {
 
         /// <summary>This will perform the action.</summary>
         /// <param name="slate">The slate for this action.</param>
+        /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, ILogger logger = null) {
-            logger?.Log("Define: {0}", this);
+        public void Perform(Slate slate, Result result, Logger logger = null) {
+            logger.Info("Define: {0}", this);
             this.Receiver.WriteField(this.Name, this.Node);
-            List<IChild> changed = this.needParents.Where(child => child.AddToParents()).ToList();
+            List<IChild> changed = this.needParents.Where(child => child.Legitimatize()).ToList();
             slate.PendUpdate(changed);
             slate.PendEval(changed);
         }

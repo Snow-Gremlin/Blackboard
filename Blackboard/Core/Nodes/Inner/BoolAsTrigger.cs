@@ -1,10 +1,8 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Inner {
 
@@ -14,7 +12,7 @@ namespace Blackboard.Core.Nodes.Inner {
     /// a trigger (e.g. `Trigger && (10 > 3)`). However this trigger will only act provoked, i.e. update its children,
     /// when the boolean changes value. This means that you can get an update from this trigger when it is not provoked.
     /// </remarks>
-    sealed public class BoolAsTrigger: TriggerNode, IChild, IDataNode {
+    sealed public class BoolAsTrigger: TriggerNode, IChild {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
@@ -24,25 +22,28 @@ namespace Blackboard.Core.Nodes.Inner {
         private IValueParent<Bool> source;
 
         /// <summary>Creates a new bool value to trigger conversion.</summary>
+        public BoolAsTrigger() { }
+
+        /// <summary>Creates a new bool value to trigger conversion.</summary>
         /// <param name="source">The boolean parent to get the provoked state from.</param>
         public BoolAsTrigger(IValueParent<Bool> source = null) => this.Parent = source;
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new BoolAsTrigger();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "BoolAsTrigger";
+        public override string TypeName => nameof(BoolAsTrigger);
 
         /// <summary>The parent node to get the source value from.</summary>
         public IValueParent<Bool> Parent {
             get => this.source;
-            set => this.SetParent(ref this.source, value);
+            set => IChild.SetParent(this, ref this.source, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.source);
-
-        /// <summary>This gets the data being stored in this node.</summary>
-        /// <remarks>This returns the data from the source boolean value or null if not set.</remarks>
-        /// <returns>The data being stored.</returns>
-        public IData Data => this.source?.Data;
+        public IParentCollection Parents => new FixedParents(this).
+            With(() => this.source, (IValueParent<Bool> parent) => this.source = parent);
 
         /// <summary>
         /// This is called when the trigger is evaluated and updated.

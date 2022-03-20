@@ -11,6 +11,9 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory(inputs => new OnlyOne(inputs));
 
         /// <summary>Creates a one and only one trigger node.</summary>
+        public OnlyOne() { }
+
+        /// <summary>Creates a one and only one trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         public OnlyOne(params ITriggerParent[] parents) : base(parents) { }
 
@@ -18,8 +21,12 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="parents">The initial set of parents to use.</param>
         public OnlyOne(IEnumerable<ITriggerParent> parents = null) : base(parents) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new OnlyOne();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "OnlyOne";
+        public override string TypeName => nameof(OnlyOne);
 
         /// <summary>Updates this trigger during evaluation.</summary>
         /// <param name="provoked">The parent triggers to check.</param>

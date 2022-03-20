@@ -1,8 +1,7 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 using S = System;
 
 namespace Blackboard.Core.Nodes.Bases {
@@ -13,7 +12,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <see cref="https://en.wikipedia.org/wiki/Arity#Unary"/>
     public abstract class UnaryValue<T1, TResult>: ValueNode<TResult>, IChild
         where T1 : IData
-        where TResult : IComparable<TResult> {
+        where TResult : IEquatable<TResult> {
 
         /// <summary>This is a helper for creating unary node factories quickly.</summary>
         /// <param name="handle">The handler for calling the node constructor.</param>
@@ -31,11 +30,12 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>The parent node to get the source value from.</summary>
         public IValueParent<T1> Parent {
             get => this.source;
-            set => this.SetParent(ref this.source, value);
+            set => IChild.SetParent(this, ref this.source, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.source);
+        public IParentCollection Parents => new FixedParents(this).
+            With(() => this.source, (IValueParent<T1> parent) => this.source = parent);
 
         /// <summary>This handles updating this node's value given the parent's value during evaluation.</summary>
         /// <remarks>This will not be called if the parent is null.</remarks>

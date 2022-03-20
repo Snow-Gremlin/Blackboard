@@ -6,18 +6,25 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a right shifts the first parent the amount of the second parent.</summary>
     sealed public class RightShift<T>: BinaryValue<T, T, T>
-        where T : IBitwise<T>, IComparable<T> {
+        where T : IBitwise<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new RightShift<T>(left, right));
+
+        /// <summary>Creates a right shift value node.</summary>
+        public RightShift() { }
 
         /// <summary>Creates a right shift value node.</summary>
         /// <param name="left">This is the first parent for the source value.</param>
         /// <param name="right">This is the second parent for the source value.</param>
         public RightShift(IValueParent<T> left = null, IValueParent<T> right = null) : base(left, right) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new RightShift<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "RightShift";
+        public override string TypeName => nameof(RightShift<T>);
 
         /// <summary>Right shifts the value during evaluation.</summary>
         /// <param name="left">The integer value to right shift.</param>

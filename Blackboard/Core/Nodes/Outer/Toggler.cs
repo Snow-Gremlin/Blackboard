@@ -1,9 +1,8 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Outer {
 
@@ -36,31 +35,37 @@ namespace Blackboard.Core.Nodes.Outer {
             this.ResetValue = resetValue;
         }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Toggler();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Toggler";
+        public override string TypeName => nameof(Toggler);
 
         /// <summary>This is the parent to toggle the value.</summary>
         public ITriggerParent Toggle {
             get => this.toggle;
-            set => this.SetParent(ref this.toggle, value);
+            set => IChild.SetParent(this, ref this.toggle, value);
         }
 
         /// <summary>This is the parent reset the toggle to false.</summary>
         public ITriggerParent Reset {
             get => this.reset;
-            set => this.SetParent(ref this.reset, value);
+            set => IChild.SetParent(this, ref this.reset, value);
         }
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
         public IValueParent<Bool> ResetValue {
             get => this.resetValue;
-            set => this.SetParent(ref this.resetValue, value);
+            set => IChild.SetParent(this, ref this.resetValue, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.toggle, this.reset, this.resetValue);
-
+        public IParentCollection Parents => new FixedParents(this).
+            With(() => this.toggle,     (ITriggerParent     parent) => this.toggle     = parent).
+            With(() => this.reset,      (ITriggerParent     parent) => this.reset      = parent).
+            With(() => this.resetValue, (IValueParent<Bool> parent) => this.resetValue = parent);
 
         /// <summary>This will determine the new value the node should be set to.</summary>
         /// <returns>The new value that the node should be set to.</returns>

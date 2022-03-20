@@ -1,9 +1,8 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Inner {
 
@@ -18,22 +17,28 @@ namespace Blackboard.Core.Nodes.Inner {
         private IValueParent<Bool> source;
 
         /// <summary>Creates a trigger node which triggers when the boolean goes from false to false.</summary>
+        public OnFalse() => this.Parent = null;
+
+        /// <summary>Creates a trigger node which triggers when the boolean goes from false to false.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        public OnFalse(IValueParent<Bool> source = null) {
-            this.Parent = source;
-        }
+        public OnFalse(IValueParent<Bool> source = null) => this.Parent = source;
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new OnFalse();
 
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "OnFalse";
+        public override string TypeName => nameof(OnFalse);
 
         /// <summary>The parent node to get the source value from.</summary>
         public IValueParent<Bool> Parent {
             get => this.source;
-            set => this.SetParent(ref this.source, value);
+            set => IChild.SetParent(this, ref this.source, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.source);
+        public IParentCollection Parents => new FixedParents(this).
+            With(() => this.source, (IValueParent<Bool> parent) => this.source = parent);
 
         /// <summary>This updates the trigger during an evaluation.</summary>
         /// <returns>This always returns true so that any parent change will trigger this node.</returns>

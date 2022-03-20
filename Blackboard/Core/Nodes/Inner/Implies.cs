@@ -12,13 +12,20 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new Implies(left, right));
 
         /// <summary>Creates an implied value node.</summary>
+        public Implies() { }
+
+        /// <summary>Creates an implied value node.</summary>
         /// <param name="left">This is the first parent for the source value.</param>
         /// <param name="right">This is the second parent for the source value.</param>
         public Implies(IValueParent<Bool> left = null, IValueParent<Bool> right = null) :
             base(left, right) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Implies();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Implies";
+        public override string TypeName => nameof(Implies);
 
         /// <summary>Determines the boolean implies value of the two parents.</summary>
         /// <param name="left">The first parent being implied</param>

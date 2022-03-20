@@ -17,6 +17,10 @@ namespace Blackboard.Core.Nodes.Functions {
         private List<IFuncDef> defs;
 
         /// <summary>Creates a new function collection.</summary>
+        public FuncGroup() =>
+            this.defs = new List<IFuncDef>();
+
+        /// <summary>Creates a new function collection.</summary>
         /// <param name="defs">The function definitions to initially add.</param>
         public FuncGroup(params IFuncDef[] defs) =>
             this.defs = new List<IFuncDef>(defs);
@@ -26,8 +30,12 @@ namespace Blackboard.Core.Nodes.Functions {
         public FuncGroup(IEnumerable<IFuncDef> defs) =>
             this.defs = new List<IFuncDef>(defs);
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public INode NewInstance() => new FuncGroup();
+
         /// <summary>This is the type name of the node.</summary>
-        public string TypeName => "FuncGroup";
+        public string TypeName => nameof(FuncGroup);
 
         /// <summary>The set of function definitions for this group.</summary>
         public IEnumerable<IFuncDef> Definitions => this.defs;

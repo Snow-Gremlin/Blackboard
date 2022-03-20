@@ -82,7 +82,7 @@ namespace Blackboard.Core.Nodes.Bases {
             argTypes = argTypes.NotNull().ToArray();
 
             void throwExp(string message) =>
-                throw new Exception(message).
+                throw new Message(message).
                     With("Minimum", min).
                     With("Maximum", max).
                     With("Need one no cast", needsOneNoCast).
@@ -119,8 +119,12 @@ namespace Blackboard.Core.Nodes.Bases {
             this.PassthroughOne = passthroughOne;
         }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public abstract INode NewInstance();
+
         /// <summary>This is the type name of the node.</summary>
-        public string TypeName => "Function";
+        public abstract string TypeName { get; }
 
         /// <summary>The collection of argument types.</summary>
         /// <remarks>
@@ -155,7 +159,7 @@ namespace Blackboard.Core.Nodes.Bases {
         static private INode castParam(INode node, Type t) {
             INode cast = t.Implicit(node);
             return cast is not null ? cast :
-                throw new Exception("Error implicitly casting parameter").
+                throw new Message("Error implicitly casting parameter").
                     With("Node", node).
                     With("Implicit", t).
                     With("Result", cast);

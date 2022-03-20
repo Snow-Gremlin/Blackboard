@@ -7,9 +7,16 @@ namespace Blackboard.Core.Nodes.Outer {
     sealed public class InputTrigger: TriggerNode, ITriggerInput {
 
         /// <summary>Creates a new input trigger.</summary>
+        public InputTrigger() { }
+
+        /// <summary>Creates a new input trigger.</summary>
         /// <param name="provoked">The initial provoked state of the trigger.</param>
         public InputTrigger(bool provoked = false) :
             base(provoked) { }
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new InputTrigger();
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Input";

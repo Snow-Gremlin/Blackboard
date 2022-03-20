@@ -22,7 +22,7 @@ namespace Blackboard.Parser {
 
         /// <summary>Prepares the parser's static variables before they are used.</summary>
         static Parser() => baseParser = PP.Loader.Loader.LoadParser(
-                PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
+            PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
 
         /// <summary>The Blackboard language base parser lazy singleton.</summary>
         static private readonly PP.Parser.Parser baseParser;
@@ -34,15 +34,15 @@ namespace Blackboard.Parser {
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
         /// <summary>Optional logger to debugging and inspecting the parser.</summary>
-        private ILogger logger;
+        private Logger logger;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="slate">The slate to modify.</param>
         /// <param name="logger">An optional logger for debugging and inspecting the parser.</param>
-        public Parser(Slate slate, ILogger logger = null) {
+        public Parser(Slate slate, Logger logger = null) {
             this.slate   = slate;
             this.prompts = null;
-            this.logger  = logger;
+            this.logger  = logger.SubGroup(nameof(Parser));
 
             this.initPrompts();
             this.validatePrompts();
@@ -66,7 +66,8 @@ namespace Blackboard.Parser {
 
             // Check for parser errors.
             if (result.Errors.Length > 0)
-                throw new Exception(result.Errors.Join("\n"));
+                throw new Message("Errors while reading code source").
+                    With("Errors", result.Errors.Join("\n"));
 
             // process the resulting tree to build the formula.
             return this.read(result.Tree);
@@ -77,13 +78,14 @@ namespace Blackboard.Parser {
         /// <returns>The formula for performing the parsed actions.</returns>
         private Formula read(PP.ParseTree.ITreeNode node) {
             try {
-                this.logger?.Log("Parser Read");
-                Builder builder = new(this.slate, this.logger?.Sub);
+                this.logger.Info("Parser Read");
+                Builder builder = new(this.slate, this.logger);
                 node.Process(this.prompts, builder);
-                this.logger?.Log("Parser Done");
+                this.logger.Info("Parser Done");
                 return builder.Actions.Formula;
             } catch (S.Exception ex) {
-                throw new Exception("Error occurred while parsing input code.", ex);
+                throw new Message("Error occurred while parsing input code.").
+                    With("Error", ex);
             }
         }
 
@@ -159,7 +161,7 @@ namespace Blackboard.Parser {
         /// <param name="hndl">This is the handler to call on this prompt.</param>
         private void addHandler(string name, S.Action<Builder> hndl) =>
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
-                this.logger?.Log("Handle {0} [{1}]", name, args.LastLocation);
+                this.logger.Info("Handle {0} [{1}]", name, args.LastLocation);
                 hndl(args as Builder);
             };
 
@@ -168,18 +170,18 @@ namespace Blackboard.Parser {
         /// <param name="name">The name of the prompt to add to.</param>
         private void addProcess(int count, string name) {
             if (this.slate.Global.Find(Slate.OperatorNamespace, name) is not IFuncGroup funcGroup)
-                throw new Exception("Could not find the operation by the given name.").
+                throw new Message("Could not find the operation by the given name.").
                     With("Name", name);
 
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 Builder builder = args as Builder;
                 PP.Scanner.Location loc = args.LastLocation;
-                builder.Logger?.Log("Process {0}({1}) [{2}]", name, count, loc);
+                builder.Logger.Info("Process {0}({1}) [{2}]", name, count, loc);
 
                 INode[] inputs = builder.Nodes.Pop(count).Actualize().ToArray();
                 INode result = funcGroup.Build(inputs);
                 if (result is null)
-                    throw new Exception("Could not perform the operation with the given input.").
+                    throw new Message("Could not perform the operation with the given input.").
                         With("Operation", name).
                         With("Input", inputs.Types().Strings().Join(", "));
 
@@ -192,7 +194,7 @@ namespace Blackboard.Parser {
             string[] unneeded = baseParser.UnneededPrompts(this.prompts);
             string[] missing  = baseParser.MissingPrompts(this.prompts);
             if (unneeded.Length > 0 || missing.Length > 0)
-                throw new Exception("Blackboard's parser grammar has prompts which do not match prompt handlers.").
+                throw new Message("Blackboard's parser grammar has prompts which do not match prompt handlers.").
                     With("Not handled", unneeded.Join(", ")).
                     With("Not in grammar", missing.Join(", "));
         }
@@ -206,7 +208,8 @@ namespace Blackboard.Parser {
             try {
                 builder.Nodes.Push(parseMethod(text));
             } catch (S.Exception ex) {
-                throw new Exception("Failed to " + usage + ".", ex).
+                throw new Message("Failed to " + usage + ".").
+                    With("Error", ex).
                     With("Text", text).
                     With("Location", builder.LastLocation);
             }
@@ -237,7 +240,7 @@ namespace Blackboard.Parser {
             INode next = scope.ReadField(name);
             if (next is not null) {
                 if (next is not VirtualNode nextspace)
-                    throw new Exception("Can not open namespace. Another non-namespace exists by that name.").
+                    throw new Message("Can not open namespace. Another non-namespace exists by that name.").
                          With("Identifier", name).
                          With("Location", builder.LastLocation);
                 builder.Scope.Push(nextspace);
@@ -290,12 +293,7 @@ namespace Blackboard.Parser {
             INode value = builder.Nodes.Pop();
             Type type = builder.Types.Peek();
             string name = builder.Identifiers.Pop();
-            INode castValue = builder.PerformCast(type, value);
-
-            VirtualNode curScope = builder.Scope.Current;
-            IEnumerable<INode> allNewNodes = builder.PrepareTree(castValue);
-            builder.Actions.Add(new Define(curScope.Receiver, name, castValue, allNewNodes));
-            curScope.WriteField(name, castValue);
+            builder.AddDefine(value, type, name);
         }
 
         /// <summary>This handles defining a new untyped named node.</summary>
@@ -303,17 +301,14 @@ namespace Blackboard.Parser {
         static private void handleVarDefine(Builder builder) {
             INode value = builder.Nodes.Pop();
             string name = builder.Identifiers.Pop();
-
-            IEnumerable<INode> allNewNodes = builder.PrepareTree(value);
-            builder.Actions.Add(new Define(builder.Scope.Current.Receiver, name, value, allNewNodes));
-            builder.Scope.Current.WriteField(name, value);
+            builder.AddDefine(value, null, name);
         }
 
         /// <summary>This handles when a trigger is provoked unconditionally.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleProvokeTrigger(Builder builder) {
             INode target = builder.Nodes.Pop();
-            builder.Actions.Add(Provoke.Create(builder.LastLocation, target));
+            builder.AddProvokeTrigger(target, null);
         }
 
         /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
@@ -321,28 +316,30 @@ namespace Blackboard.Parser {
         static private void handleConditionalProvokeTrigger(Builder builder) {
             INode target = builder.Nodes.Pop();
             INode value  = builder.Nodes.Pop();
-            if (target is not ITriggerInput input)
-                throw new Exception("Target node is not an input trigger.").
-                    With("Target", target).
-                    With("Value", value).
-                    With("Location", builder.LastLocation);
-
-            INode castValue = builder.PerformCast(Type.Trigger, value);
-            IEnumerable<INode> allNewNodes = builder.PrepareTree(castValue);
-            builder.Actions.Add(new Provoke(input, castValue as ITrigger, allNewNodes));
+            INode root   = builder.AddProvokeTrigger(target, value);
 
             // Push the condition onto the stack for any following trigger pulls.
             // See comment in `handleAssignment` about pushing cast value back onto the stack.
-            builder.Nodes.Push(castValue);
+            builder.Nodes.Push(root);
+            builder.Existing.Add(root);
         }
 
+        /// <summary>This handles getting the typed left value and writing it out to the given name.</summary>
+        /// <param name="builder">The formula builder being worked on.</param>
         static private void handleTypeGet(Builder builder) {
-            // TODO: Implement, need to add a result argument to actions
-            //       and a new action to write the gotten value to that result.
+            INode  value = builder.Nodes.Pop();
+            Type   type  = builder.Types.Peek();
+            string name  = builder.Identifiers.Pop();
+            builder.AddGetter(type, name, value);
         }
 
+        /// <summary>This handles getting the variable type left value and writing it out to the given name.</summary>
+        /// <param name="builder">The formula builder being worked on.</param>
         static private void handleVarGet(Builder builder) {
-            // TODO: Implement
+            INode  value = builder.Nodes.Pop();
+            string name  = builder.Identifiers.Pop();
+            Type   type  = Type.TypeOf(value);
+            builder.AddGetter(type, name, value);
         }
 
         /// <summary>This handles assigning the left value to the right value.</summary>
@@ -350,7 +347,7 @@ namespace Blackboard.Parser {
         static private void handleAssignment(Builder builder) {
             INode value  = builder.Nodes.Pop();
             INode target = builder.Nodes.Pop();
-            INode castValue = builder.AddAssignment(target, value);
+            INode root   = builder.AddAssignment(target, value);
 
             // Push the cast value back onto the stack for any following assignments.
             // By using the cast it makes it more like `X=Y=Z` is `Y=Z; X=Y;` but means that if a double and an int are being set by
@@ -358,8 +355,10 @@ namespace Blackboard.Parser {
             // to a double but not be able to implicitly cast that double back to an int. For example: if `int X; double Y;` then
             // `Y=X=3;` works and `X=Y=3` will not. One drawback for this way is that if you assign an int to multiple doubles it will
             // construct multiple cast nodes, but with a little optimization to remove duplicate node paths, this isn't an issue. 
-            // Alternatively, if we push he value then `X=Y=Z` will be like `Y=Z; X=Z;`. 
-            builder.Nodes.Push(castValue);
+            // Alternatively, if we push he value then `X=Y=Z` will be like `Y=Z; X=Z;`, but we won't.
+            builder.Nodes.Push(root);
+            // Add to existing since the first assignment will handle preparing the tree being assigned.
+            builder.Existing.Add(root);
         }
 
         /// <summary>This handles performing a type cast of a node.</summary>
@@ -376,7 +375,7 @@ namespace Blackboard.Parser {
             string name = builder.LastText;
             INode rNode = builder.Nodes.Pop();
             if (rNode is not IFieldReader receiver)
-                throw new Exception("Unexpected node type for a member access. Expected a field reader.").
+                throw new Message("Unexpected node type for a member access. Expected a field reader.").
                     With("Node", rNode).
                     With("Name", name).
                     With("Location", builder.LastLocation);
@@ -387,7 +386,7 @@ namespace Blackboard.Parser {
                 return;
             }
 
-            throw new Exception("No identifier found in the receiver stack.").
+            throw new Message("No identifier found in the receiver stack.").
                 With("Identifier", name).
                 With("Location", builder.LastLocation);
         }
@@ -406,14 +405,14 @@ namespace Blackboard.Parser {
             INode[] args = builder.Arguments.End();
             INode node = builder.Nodes.Pop();
             if (node is not IFuncGroup group)
-                throw new Exception("Unexpected node type for a method call. Expected a function group.").
+                throw new Message("Unexpected node type for a method call. Expected a function group.").
                     With("Node", node).
                     With("Input", args.Types().Strings().Join(", ")).
                     With("Location", builder.LastLocation);
 
             INode result = group.Build(args);
             if (result is null)
-                throw new Exception("Could not perform the function with the given input.").
+                throw new Message("Could not perform the function with the given input.").
                     With("Function", group).
                     With("Input", args.Types().Strings().Join(", ")).
                     With("Location", builder.LastLocation);
@@ -425,7 +424,7 @@ namespace Blackboard.Parser {
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushId(Builder builder) {
             string name = builder.LastText;
-            builder.Logger?.Log("Id = \"{0}\"", name);
+            builder.Logger.Info("Id = \"{0}\"", name);
             foreach (VirtualNode scope in builder.Scope.Scopes) {
                 INode node = scope.ReadField(name);
                 if (node is not null) {
@@ -435,7 +434,7 @@ namespace Blackboard.Parser {
                 }
             }
 
-            throw new Exception("No identifier found in the scope stack.").
+            throw new Message("No identifier found in the scope stack.").
                 With("Identifier", name).
                 With("Location", builder.LastLocation);
         }
@@ -481,7 +480,7 @@ namespace Blackboard.Parser {
             string text = builder.LastText;
             Type t = Type.FromName(text);
             if (t is null)
-                throw new Exception("Unrecognized type name.").
+                throw new Message("Unrecognized type name.").
                     With("Text", text).
                     With("Location", builder.LastLocation);
             builder.Types.Push(t);

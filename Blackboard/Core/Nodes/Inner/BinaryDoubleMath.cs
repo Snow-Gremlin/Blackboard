@@ -7,14 +7,14 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This gets the double mathematical function value from two parents.</summary>
     sealed public class BinaryDoubleMath<T>: BinaryValue<T, T, T>
-        where T : IFloatingPoint<T>, IComparable<T> {
+        where T : IFloatingPoint<T>, IEquatable<T> {
 
         /// <summary>This is a factory for creating a new Atan2 instance of this node.</summary>
         /// <remarks>
         /// This returns the angle whose tangent is the quotient of two specified numbers
         /// where the first parent is the y value and the second parent is the x value.
         /// </remarks>
-        static public readonly IFuncDef Atan2 = Factory("Atan2", S.Math.Atan2);
+        static public readonly IFuncDef Atan2 = Factory(nameof(Atan2), S.Math.Atan2);
 
         /// <summary>This is a factory for creating a new IEEERemainder instance of this node.</summary>
         /// <remarks>
@@ -22,15 +22,15 @@ namespace Blackboard.Core.Nodes.Inner {
         /// specified number. The first parent is the dividend and the second parent is the divisor.
         /// This is different from a modulo because it uses the IEEE 754 standard remainder algorithm.
         /// </remarks>
-        static public readonly IFuncDef IEEERemainder = Factory("IEEERemainder", S.Math.IEEERemainder);
+        static public readonly IFuncDef IEEERemainder = Factory(nameof(IEEERemainder), S.Math.IEEERemainder);
 
         /// <summary>This is a factory for creating a new Log instance of this node.</summary>
         /// <remarks>This returns the log of the first parent with the base of the second parent.</remarks>
-        static public readonly IFuncDef Log = Factory("Log", S.Math.Log);
+        static public readonly IFuncDef Log = Factory(nameof(Log), S.Math.Log);
 
         /// <summary>This is a factory for creating a new Pow instance of this node.</summary>
         /// <remarks>This returns the first parent raised to the power of the second parent.</remarks>
-        static public readonly IFuncDef Pow = Factory("Pow", S.Math.Pow);
+        static public readonly IFuncDef Pow = Factory(nameof(Pow), S.Math.Pow);
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <param name="funcName">The display name for this function.</param>
@@ -55,6 +55,10 @@ namespace Blackboard.Core.Nodes.Inner {
             this.funcName = funcName;
             this.func = func;
         }
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new BinaryDoubleMath<T>(this.funcName, this.func);
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => this.funcName;

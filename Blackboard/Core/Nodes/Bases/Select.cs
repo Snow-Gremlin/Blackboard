@@ -1,9 +1,8 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Inspect;
-using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 using S = System;
 
 namespace Blackboard.Core.Nodes.Bases {
@@ -42,23 +41,26 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>The first parent node to get the boolean for selection between the other two parents.</summary>
         public IValueParent<Bool> Parent1 {
             get => this.source1;
-            set => this.SetParent(ref this.source1, value);
+            set => IChild.SetParent(this, ref this.source1, value);
         }
 
         /// <summary>The second parent node to get the second source value from.</summary>
         public T Parent2 {
             get => this.source2;
-            set => this.SetParent(ref this.source2, value);
+            set => IChild.SetParent(this, ref this.source2, value);
         }
 
         /// <summary>The third parent node to get the third source value from.</summary>
         public T Parent3 {
             get => this.source3;
-            set => this.SetParent(ref this.source3, value);
+            set => IChild.SetParent(this, ref this.source3, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.source1, this.source2, this.source3);
+        public IParentCollection Parents => new FixedParents(this).
+            With(() => this.source1, (IValueParent<Bool> parent) => this.source1 = parent).
+            With(() => this.source2, (T parent) => this.source2 = parent).
+            With(() => this.source3, (T parent) => this.source3 = parent);
 
         /// <summary>The node which is currently selected.</summary>
         public T Selected { get; private set; }
@@ -72,6 +74,9 @@ namespace Blackboard.Core.Nodes.Bases {
             this.Selected = newSelected;
             return true;
         }
+
+        /// <summary>This is the type name of the node.</summary>
+        public override string TypeName => "Select";
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>

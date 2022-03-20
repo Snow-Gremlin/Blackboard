@@ -1,8 +1,7 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 using S = System;
 
 namespace Blackboard.Core.Nodes.Bases {
@@ -15,7 +14,7 @@ namespace Blackboard.Core.Nodes.Bases {
     public abstract class BinaryValue<T1, T2, TResult>: ValueNode<TResult>, IChild
         where T1 : IData
         where T2 : IData
-        where TResult : IComparable<TResult> {
+        where TResult : IEquatable<TResult> {
 
         /// <summary>This is a helper for creating binary node factories quickly.</summary>
         /// <param name="handle">The handler for calling the node constructor.</param>
@@ -40,17 +39,19 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>The first parent node to get the first source value from.</summary>
         public IValueParent<T1> Parent1 {
             get => this.source1;
-            set => this.SetParent(ref this.source1, value);
+            set => IChild.SetParent(this, ref this.source1, value);
         }
 
         /// <summary>The second parent node to get the second source value from.</summary>
         public IValueParent<T2> Parent2 {
             get => this.source2;
-            set => this.SetParent(ref this.source2, value);
+            set => IChild.SetParent(this, ref this.source2, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.source1, this.source2);
+        public IParentCollection Parents => new FixedParents(this).
+            With(() => this.source1, (IValueParent<T1> parent) => this.source1 = parent).
+            With(() => this.source2, (IValueParent<T2> parent) => this.source2 = parent);
 
         /// <summary>This handles updating this node's value given the parents' values during evaluation.</summary>
         /// <remarks>This will not be called if any of the parents are null.</remarks>

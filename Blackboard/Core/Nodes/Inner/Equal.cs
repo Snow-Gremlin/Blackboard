@@ -8,18 +8,25 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <summary>Determines if the two values are equal.</summary>
     /// <typeparam name="T">The type being compared.</typeparam>
     sealed public class Equal<T>: BinaryValue<T, T, Bool>
-        where T : IComparable<T> {
+        where T : IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new Equal<T>(left, right));
+
+        /// <summary>Creates an equal value node.</summary>
+        public Equal() { }
 
         /// <summary>Creates an equal value node.</summary>
         /// <param name="left">This is the first parent for the source value.</param>
         /// <param name="right">This is the second parent for the source value.</param>
         public Equal(IValueParent<T> left = null, IValueParent<T> right = null) : base(left, right) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Equal<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Equal";
+        public override string TypeName => nameof(Equal<T>);
 
         /// <summary>Determine if the parent's values are equal during evaluation.</summary>
         /// <param name="left">The first parent's value to compare.</param>

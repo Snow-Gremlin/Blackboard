@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 
@@ -6,10 +7,13 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This will return the value limited to a range.</summary>
     sealed public class Clamp<T>: TernaryValue<T, T, T, T>
-        where T : IArithmetic<T>, IComparable<T> {
+        where T : IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((value, min, max) => new Clamp<T>(value, min, max));
+
+        /// <summary>Creates a clamped value node.</summary>
+        public Clamp() { }
 
         /// <summary>Creates a clamped value node.</summary>
         /// <param name="value">This is the value parent that is clamped.</param>
@@ -18,8 +22,12 @@ namespace Blackboard.Core.Nodes.Inner {
         public Clamp(IValueParent<T> value = null, IValueParent<T> min = null, IValueParent<T> max = null) :
             base(value, min, max) { }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Clamp<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Clamp";
+        public override string TypeName => nameof(Clamp<T>);
 
         /// <summary>Selects the value to return during evaluation.</summary>
         /// <param name="value">

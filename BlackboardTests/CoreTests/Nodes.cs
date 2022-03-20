@@ -20,7 +20,7 @@ namespace BlackboardTests.CoreTests {
             Or  or123  = new(and12, input3);
             Not not123 = new(or123);
 
-            not123.AddToAllParents();
+            not123.LegitimatizeAll();
             not123.UpdateAllParents();
             not123.EvaluateAllParents();
 
@@ -48,7 +48,7 @@ namespace BlackboardTests.CoreTests {
             Or  or123  = new(and12,  input3);
             Not not123 = new(or123);
 
-            not123.AddToAllParents();
+            not123.LegitimatizeAll();
             not123.UpdateAllParents();
             not123.EvaluateAllParents();
 
@@ -132,8 +132,8 @@ namespace BlackboardTests.CoreTests {
             OutputTrigger outTrig = new(over3);
             outTrig.OnProvoked += (object sender, S.EventArgs e) => high = true;
 
-            outTrig.AddToAllParents();
-            toggle.AddToAllParents();
+            outTrig.LegitimatizeAll();
+            toggle.LegitimatizeAll();
             outTrig.UpdateAllParents();
             toggle.UpdateAllParents();
 
@@ -161,5 +161,9 @@ namespace BlackboardTests.CoreTests {
             check(false, true,  true,  2, false, true);
             check(false, false, true,  3, true,  false);
         }
+
+        // TODO: Test for:
+        // - setting children to parent, legitimize children.
+        // - setting parents for sum(a, b, c, d) where a & c are legitimate and b & d are illegitimate.
     }
 }

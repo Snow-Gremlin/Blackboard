@@ -2,6 +2,7 @@
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
@@ -31,6 +32,13 @@ namespace Blackboard.Core {
         /// <summary>The set of provoked triggers which need to be reset.</summary>
         private HashSet<ITrigger> needsReset;
 
+        /// <summary>A collection of literals and constants used in the graph.</summary>
+        /// <remarks>
+        /// This is to help reduce overhead of duplicate constants and
+        /// help with optimization of constant branches in the graph.
+        /// </remarks>
+        private HashSet<IConstant> constants;
+
         /// <summary>Creates a new slate.</summary>
         /// <param name="addFuncs">Indicates that built-in functions should be added.</param>
         /// <param name="addConsts">Indicates that constants should be added.</param>
@@ -38,12 +46,16 @@ namespace Blackboard.Core {
             this.pendingUpdate = new LinkedList<IEvaluable>();
             this.pendingEval   = new LinkedList<IEvaluable>();
             this.needsReset    = new HashSet<ITrigger>();
-            this.Global = new Namespace();
+            this.constants     = new HashSet<IConstant>(new NodeValueComparer<IConstant>());
+            this.Global        = new Namespace();
 
             this.addOperators();
             if (addFuncs)  this.addFunctions();
             if (addConsts) this.addConstants();
         }
+
+        /// <summary>The base set of named nodes to access the total node structure.</summary>
+        public Namespace Global { get; }
 
         #region Built-in Functions and Constants...
 
@@ -78,24 +90,20 @@ namespace Blackboard.Core {
                 Equal<Double>.Factory,
                 Equal<String>.Factory);
             add("greater",
-                GreaterThan<Bool>.Factory,
                 GreaterThan<Int>.Factory,
                 GreaterThan<Double>.Factory,
                 GreaterThan<String>.Factory);
             add("greaterEqual",
-                GreaterThanOrEqual<Bool>.Factory,
                 GreaterThanOrEqual<Int>.Factory,
                 GreaterThanOrEqual<Double>.Factory,
                 GreaterThanOrEqual<String>.Factory);
             add("invert",
                 BitwiseNot<Int>.Factory);
             add("less",
-                LessThan<Bool>.Factory,
                 LessThan<Int>.Factory,
                 LessThan<Double>.Factory,
                 LessThan<String>.Factory);
             add("lessEqual",
-                LessThanOrEqual<Bool>.Factory,
                 LessThanOrEqual<Int>.Factory,
                 LessThanOrEqual<Double>.Factory,
                 LessThanOrEqual<String>.Factory);
@@ -400,7 +408,7 @@ namespace Blackboard.Core {
         #endregion
         #region Value Getters...
 
-        /// <summary>Gets the type of the value or trigger at the given node.</summary>
+        /// <summary>Gets the type of the value at the given node.</summary>
         /// <param name="names">The name of the node to get the type of.</param>
         /// <returns>The type of the node or null if doesn't exist or not a node type.</returns>
         public Type GetType(IEnumerable<string> names) {
@@ -408,53 +416,38 @@ namespace Blackboard.Core {
             return obj is null ? null : Type.FromType(obj.GetType());
         }
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
-        /// <returns>
-        /// The value from the node or the default value if the node
-        /// by that name doesn't exists and the found node is the incorrect type.
-        /// </returns>
+        /// <returns>The value from the node.</returns>
         public bool GetBool(params string[] names) =>
             this.GetValue<Bool>(names).Value;
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
-        /// <returns>
-        /// The value from the node or the default value if the node
-        /// by that name doesn't exists and the found node is the incorrect type.
-        /// </returns>
+        /// <returns>The value from the node.</returns>
         public int GetInt(params string[] names) =>
             this.GetValue<Int>(names).Value;
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
-        /// <returns>
-        /// The value from the node or the default value if the node
-        /// by that name doesn't exists and the found node is the incorrect type.
-        /// </returns>
+        /// <returns>The value from the node.</returns>
         public double GetDouble(params string[] names) =>
             this.GetValue<Double>(names).Value;
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
-        /// <returns>
-        /// The value from the node or the default value if the node
-        /// by that name doesn't exists and the found node is the incorrect type.
-        /// </returns>
+        /// <returns>The value from the node.</returns>
         public string GetString(params string[] names) =>
             this.GetValue<String>(names).Value;
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <typeparam name="T">The type of value to read.</typeparam>
         /// <param name="name">The name of the node to read the value from.</param>
-        /// <returns>
-        /// The value from the node or the default value if the node
-        /// by that name doesn't exists and the found node is the incorrect type.
-        /// </returns>
+        /// <returns>The value from the node.</returns>
         public T GetValue<T>(params string[] names) where T : IData =>
             this.GetValue<T>(names as IEnumerable<string>);
 
-        /// <summary>Gets the value of from an named node.</summary>
+        /// <summary>Gets the value from an named node.</summary>
         /// <remarks>This will throw an exception if no node by that name exists or the found node is the incorrect type.</remarks>
         /// <typeparam name="T">The type of value to read.</typeparam>
         /// <param name="name">The name of the node to read the value from.</param>
@@ -462,11 +455,11 @@ namespace Blackboard.Core {
         public T GetValue<T>(IEnumerable<string> names) where T : IData {
             object obj = this.Global.Find(names);
             return obj is null ?
-                    throw new Exception("Unable to get a value by the given name.").
+                    throw new Message("Unable to get a value by the given name.").
                         With("Name", names.Join(".")).
                         With("Value Type", typeof(T)) :
                 obj is not IValue<T> node ?
-                    throw new Exception("The value found by the given name is not the expected type.").
+                    throw new Message("The value found by the given name is not the expected type.").
                         With("Name", names.Join(".")).
                         With("Found Type", obj.GetType()).
                         With("Expected Type", typeof(T)) :
@@ -474,18 +467,15 @@ namespace Blackboard.Core {
         }
 
         #endregion
-
-        /// <summary>The base set of named nodes to access the total node structure.</summary>
-        public Namespace Global { get; }
-
         #region Update...
 
-        /// <summary> This indicates that the given nodes have had parents added or removed and need to be updated. </summary>
+        /// <summary>This indicates that the given nodes have had parents added or removed and need to be updated.</summary>
         /// <param name="nodes">The nodes to pend evaluation for.</param>
         public void PendUpdate(params INode[] nodes) =>
             this.PendUpdate(nodes as IEnumerable<INode>);
 
         /// <summaryThis indicates that the given nodes have had parents added or removed and need to be updated.</summary>
+        /// <remarks>This will pend the given nodes to update the depths prior to evaluation.</remarks>
         /// <param name="nodes">The nodes to pend evaluation for.</param>
         public void PendUpdate(IEnumerable<INode> nodes) =>
             this.pendingUpdate.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
@@ -502,8 +492,8 @@ namespace Blackboard.Core {
         /// </summary>
         /// <remarks>By performing the update the pending update list will be cleared.</remarks>
         /// <param name="logger">An optional logger for debugging this update.</param>
-        public void PerformUpdates(ILogger logger = null) =>
-            this.pendingUpdate.UpdateDepths(logger);
+        public void PerformUpdates(Logger logger = null) =>
+            this.pendingUpdate.UpdateDepths(logger.SubGroup(nameof(PerformUpdates)));
 
         #endregion
         #region Evaluate...
@@ -536,8 +526,8 @@ namespace Blackboard.Core {
         /// </summary>
         /// <remarks>By performing the update the pending evaluation list will be cleared.</remarks>
         /// <param name="logger">An optional logger for debugging this evaluation.</param>
-        public void PerformEvaluation(ILogger logger = null) =>
-            this.NeedsReset(this.pendingEval.Evaluate(logger));
+        public void PerformEvaluation(Logger logger = null) =>
+            this.NeedsReset(this.pendingEval.Evaluate(logger.SubGroup(nameof(PerformEvaluation))));
 
         #endregion
         #region Needs Reset...
@@ -561,6 +551,31 @@ namespace Blackboard.Core {
 
         /// <summary>Indicates if there are any provoked triggers which need results.</summary>
         public bool HasTriggersNeedingReset => this.needsReset.Count > 0;
+
+        #endregion
+        #region Constants...
+
+        /// <summary>Determines if the given constant reference is in the set of constants.</summary>
+        /// <typeparam name="T">The type of the constant to check for.</typeparam>
+        /// <param name="con">The constant to check for.</param>
+        /// <returns>True if the given constant reference is in the set, false otherwise.</returns>
+        public bool ConstainsConstant<T>(T con) where T : class, IConstant =>
+            this.constants.TryGetValue(con, out IConstant result) && ReferenceEquals(result, con);
+
+        /// <summary>Find or add the given constant in the set of constants.</summary>
+        /// <remarks>
+        /// Constants should only be checked like this if we know it is going to be used.
+        /// Constants with zero children should not exist in this storage.
+        /// </remarks>
+        /// <typeparam name="T">The type of the constant to add or find.</typeparam>
+        /// <param name="con">The constant to find already stored or to add.</param>
+        /// <returns>The already existing constant or the passed in constant if added.</returns>
+        public T FindAddConstant<T>(T con)
+            where T : class, IConstant {
+            if (this.constants.TryGetValue(con, out IConstant result)) return result as T;
+            this.constants.Add(con);
+            return con;
+        }
 
         #endregion
 

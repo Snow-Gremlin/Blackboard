@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This gets the double mathematical function value from the parent.</summary>
     sealed public class UnaryDoubleMath<T>: UnaryValue<T, T>
-        where T : IFloatingPoint<T>, IComparable<T> {
+        where T : IFloatingPoint<T>, IEquatable<T> {
 
         /// <summary>This is a factory for creating a new Acos instance of this node.</summary>
         /// <remarks>The angle whose cosine is the specified number.</remarks>
@@ -120,6 +120,10 @@ namespace Blackboard.Core.Nodes.Inner {
             this.funcName = funcName;
             this.func = func;
         }
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new UnaryDoubleMath<T>(this.funcName, this.func);
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => this.funcName;

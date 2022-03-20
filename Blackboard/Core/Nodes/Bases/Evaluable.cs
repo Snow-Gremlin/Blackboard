@@ -21,6 +21,10 @@ namespace Blackboard.Core.Nodes.Bases {
             this.Depth = 0;
         }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public abstract INode NewInstance();
+
         /// <summary>This is the type name of the node without any type parameters.</summary>
         public abstract string TypeName { get; }
 
@@ -47,7 +51,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <returns>True if any children were added, false otherwise.</returns>
         public bool AddChildren(IEnumerable<IChild> children) {
             if (this.CanReachAny(children.OfType<IParent>()))
-                throw new Exception("May not add children to a parent which would cause a loop").
+                throw new Message("May not add children to a parent which would cause a loop").
                     With("parent", this).
                     With("children", children);
 

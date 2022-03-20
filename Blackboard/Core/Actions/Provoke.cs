@@ -21,7 +21,7 @@ namespace Blackboard.Core.Actions {
         /// <returns>The provoke action.</returns>
         static public Provoke Create(Location loc, INode target, INode value, IEnumerable<INode> allNodes = null) =>
             (target is ITriggerInput input) && (value is ITrigger conditional) ? new Provoke(input, conditional, allNodes) :
-            throw new Exception("Unexpected node types for a conditional provoke.").
+            throw new Message("Unexpected node types for a conditional provoke.").
                 With("Location", loc).
                 With("Target",   target).
                 With("Value",    value);
@@ -36,7 +36,7 @@ namespace Blackboard.Core.Actions {
         /// <returns>The provoke action.</returns>
         static public Provoke Create(Location loc, INode target, IEnumerable<INode> allNodes = null) =>
             (target is ITriggerInput input) ? new Provoke(input, null, allNodes) :
-            throw new Exception("Unexpected node types for a unconditional provoke.").
+            throw new Message("Unexpected node types for a unconditional provoke.").
                 With("Location", loc).
                 With("Target",   target);
 
@@ -49,12 +49,18 @@ namespace Blackboard.Core.Actions {
         /// <summary>Creates a new provoke action.</summary>
         /// <param name="target">The input trigger to provoke.</param>
         /// <param name="trigger">The optional trigger to conditionally provoke with or null to always provoke.</param>
-        /// <param name="allNodes">All the nodes which are new children of the node to provoke.</param>
-        public Provoke(ITriggerInput target, ITrigger trigger, IEnumerable<INode> allNodes = null) {
+        /// <param name="allNewNodes">All the nodes which are new children of the trigger.</param>
+        public Provoke(ITriggerInput target, ITrigger trigger, IEnumerable<INode> allNewNodes = null) {
+
+            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
+
             this.Target  = target;
             this.Trigger = trigger;
-            this.needPending = allNodes is null ? S.Array.Empty<IEvaluable>() :
-                allNodes.NotNull().OfType<IEvaluable>().ToArray();
+
+            // Pre-sort the evaluable nodes.
+            LinkedList<IEvaluable> nodes = new();
+            nodes.SortInsertUnique(allNewNodes?.NotNull()?.OfType<IEvaluable>());
+            this.needPending = nodes.ToArray();
         }
 
         /// <summary>The target input trigger to provoke.</summary>
@@ -68,11 +74,12 @@ namespace Blackboard.Core.Actions {
 
         /// <summary>This will perform the action.</summary>
         /// <param name="slate">The slate for this action.</param>
+        /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, ILogger logger = null) {
-            logger?.Log("Provoke: {0}", this);
+        public void Perform(Slate slate, Result result, Logger logger = null) {
+            logger.Info("Provoke: {0}", this);
             slate.PendEval(this.needPending);
-            slate.PerformEvaluation(logger?.Sub);
+            slate.PerformEvaluation(logger.SubGroup(nameof(Provoke)));
             slate.Provoke(this.Target, this.Trigger?.Provoked ?? true);
         }
 

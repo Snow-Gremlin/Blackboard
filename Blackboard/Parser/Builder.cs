@@ -6,6 +6,7 @@ using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
+using Blackboard.Parser.Optimization;
 using System.Collections.Generic;
 using System.Linq;
 using PP = PetiteParser;
@@ -23,9 +24,9 @@ namespace Blackboard.Parser {
         /// <summary>Creates a new formula builder for parsing states.</summary>
         /// <param name="slate">The slate this stack is for.</param>
         /// <param name="logger">The optional logger to output the build steps.</param>
-        public Builder(Slate slate, ILogger logger = null) {
+        public Builder(Slate slate, Logger logger = null) {
             this.Slate  = slate;
-            this.Logger = logger;
+            this.Logger = logger.SubGroup(nameof(Builder));
 
             this.Actions     = new ActionCollection(this);
             this.Scope       = new ScopeStack(this);
@@ -34,6 +35,7 @@ namespace Blackboard.Parser {
             this.Identifiers = new BuilderStack<string>("Id", this);
             this.Existing    = new ExistingNodeSet(this);
             this.Arguments   = new ArgumentStack(this);
+            this.optimizer   = new Optimizer();
         }
 
         /// <summary>The slate for the Blackboard these stacks belongs too.</summary>
@@ -43,11 +45,11 @@ namespace Blackboard.Parser {
         /// The logger to help debug the parser and builder.
         /// This may be null if no logger is being used.
         /// </summary>
-        public readonly ILogger Logger;
+        public readonly Logger Logger;
 
         /// <summary>Resets the stack back to the initial state.</summary>
         public void Reset() {
-            this.Logger?.Log("Reset");
+            this.Logger.Info("Reset");
 
             this.Actions.Clear();
             this.Scope.Reset();
@@ -61,7 +63,7 @@ namespace Blackboard.Parser {
 
         /// <summary>Clears the node stack and type stack without changing pending actions nor scopes.</summary>
         public void Clear() {
-            this.Logger?.Log("Clear");
+            this.Logger.Info("Clear");
 
             this.Nodes.Clear();
             this.Types.Clear();
@@ -97,7 +99,7 @@ namespace Blackboard.Parser {
             /// <summary>Adds a pending action into this formula.</summary>
             /// <param name="performer">The performer to add.</param>
             public void Add(IAction action) {
-                this.builder.Logger?.Log("Add Action: {0}", action);
+                this.builder.Logger.Info("Add Action: {0}", action);
                 this.actions.AddLast(action);
             }
 
@@ -153,14 +155,14 @@ namespace Blackboard.Parser {
 
             /// <summary>Pops a top node from the scope.</summary>
             public void Pop() {
-                this.builder.Logger?.Log("Pop Scope");
+                this.builder.Logger.Info("Pop Scope");
                 this.scopes.RemoveFirst();
             }
 
             /// <summary>Pushes a new node onto the scope.</summary>
             /// <param name="node">The node to push on the scope.</param>
             public void Push(VirtualNode node) {
-                this.builder.Logger?.Log("Push Scope: {0}", node);
+                this.builder.Logger.Info("Push Scope: {0}", node);
                 this.scopes.AddFirst(node);
             }
 
@@ -196,7 +198,7 @@ namespace Blackboard.Parser {
             /// <summary>Pushes a value onto the stack.</summary>
             /// <param name="value">The value to push.</param>
             public void Push(T value) {
-                this.builder.Logger?.Log("Push {0}: {1}", this.usage, value);
+                this.builder.Logger.Info("Push {0}: {1}", this.usage, value);
                 this.stack.AddLast(value);
             }
 
@@ -207,7 +209,7 @@ namespace Blackboard.Parser {
             /// <summary>Pops off a value is on the top of the stack.</summary>
             /// <returns>The value which was on top of the stack.</returns>
             public T Pop() {
-                this.builder.Logger?.Log("Pop {0}", this.usage);
+                this.builder.Logger.Info("Pop {0}", this.usage);
                 T node = this.stack.Last.Value;
                 this.stack.RemoveLast();
                 return node;
@@ -217,7 +219,7 @@ namespace Blackboard.Parser {
             /// <param name="count">The number of values to pop.</param>
             /// <returns>The popped values in the order oldest to newest.</returns>
             public T[] Pop(int count) {
-                this.builder.Logger?.Log("Pop {1} {0}(s)", this.usage, count);
+                this.builder.Logger.Info("Pop {1} {0}(s)", this.usage, count);
                 T[] items = new T[count];
                 for (int i = count-1; i >= 0; i--) {
                     items[i] = this.stack.Last.Value;
@@ -269,21 +271,21 @@ namespace Blackboard.Parser {
 
             /// <summary>This starts a new argument list.</summary>
             public void Start() {
-                this.builder.Logger?.Log("Start Arguments");
+                this.builder.Logger.Info("Start Arguments");
                 this.argStacks.AddFirst(new LinkedList<INode>());
             }
 
             /// <summary>This adds the given node in to the newest argument list.</summary>
             /// <param name="node">The node to add to the argument list.</param>
             public void Add(INode node) {
-                this.builder.Logger?.Log("Add Argument: {0}", node);
+                this.builder.Logger.Info("Add Argument: {0}", node);
                 this.argStacks.First.Value.AddLast(node);
             }
 
             /// <summary>This gets all the nodes which are in the current argument list, then removes the list.</summary>
             /// <returns>The nodes which were in the current argument list.</returns>
             public INode[] End() {
-                this.builder.Logger?.Log("End Arguments");
+                this.builder.Logger.Info("End Arguments");
                 return this.argStacks.TakeFirst().ToArray();
             }
 
@@ -323,7 +325,7 @@ namespace Blackboard.Parser {
             /// <summary>Adds an existing node which has been referenced since the last clear.</summary>
             /// <param name="node">The existing node to add.</param>
             public void Add(INode node) {
-                this.builder.Logger?.Log("Add Existing: {0} ", node);
+                this.builder.Logger.Info("Add Existing: {0} ", node);
                 this.nodes.Add(node is VirtualNode virt ? virt.Receiver : node);
             }
 
@@ -364,7 +366,7 @@ namespace Blackboard.Parser {
             TypeMatch match = type.Match(valueType, explicitCasts);
             if (!match.IsAnyCast)
                 return match.IsMatch ? value :
-                    throw new Exception("The value type can not be cast to the given type.").
+                    throw new Message("The value type can not be cast to the given type.").
                         With("Location", this.LastLocation).
                         With("Target", type).
                         With("Type", valueType).
@@ -377,12 +379,22 @@ namespace Blackboard.Parser {
                 type == Type.Double  ? ops.Find("castDouble") :
                 type == Type.String  ? ops.Find("castString") :
                 type == Type.Trigger ? ops.Find("castTrigger") :
-                throw new Exception("Unsupported type for new definition cast").
+                throw new Message("Unsupported type for new definition cast").
                     With("Location", this.LastLocation).
                     With("Type", type);
 
-            INode castValue = (castGroup as IFuncGroup).Build(value);;
+            INode castValue = (castGroup as IFuncGroup).Build(value);
             return castValue;
+        }
+
+        /// <summary>Collects all the new nodes and apply depths.</summary>
+        /// <param name="root">The root node of the branch to check.</param>
+        /// <returns>The collection of new nodes.</returns>
+        private HashSet<INode> collectAndOrder(INode root) {
+            HashSet<INode> newNodes = new();
+            this.collectAndOrder(root, newNodes);
+            this.Existing.Clear();
+            return newNodes;
         }
 
         /// <summary>Recessively collect the new nodes and apply depths.</summary>
@@ -403,51 +415,120 @@ namespace Blackboard.Parser {
             }
 
             // Now that all parents are prepared, update the depth.
+            // During optimization the depths may change from this but this initial depth
+            // will help make all future depth updates perform efficiently.
             if (node is IEvaluable eval)
                 eval.Depth = eval.MinimumAllowedDepth();
             return true;
         }
 
-        /// <summary>Prepares the tree from the given node up to the old nodes from the builder.</summary>
-        /// <param name="root">The root node of the tree to prepare.</param>
-        /// <returns>All the nodes which are new node in the tree.</returns>
-        public IEnumerable<INode> PrepareTree(INode root) {
-            HashSet<INode> newNodes = new();
-            this.collectAndOrder(root, newNodes);
+        /// <summary>The optimizer being used to optimize nodes for new actions.</summary>
+        private readonly Optimizer optimizer;
 
-            // TODO: Add Optimization
+        /// <summary>Creates a define action and adds it to the builder.</summary>
+        /// <param name="value">The value to define the node with.</param>
+        /// <param name="type">The type of the node to define or null to use the value type.</param>
+        /// <param name="name">The name to write the node with to the current scope.</param>
+        /// <returns>The root of the value branch which was used in the assignment.</returns>
+        public INode AddDefine(INode value, Type type, string name) {
+            this.Logger.Info("Add Define:");
+            INode root = type is null ? value : this.PerformCast(type, value);
 
-            this.Existing.Clear();
-            return newNodes;
+            HashSet<INode> newNodes = this.collectAndOrder(root);
+            root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
+
+            VirtualNode curScope = this.Scope.Current;
+            this.Actions.Add(new Define(curScope.Receiver, name, root, newNodes));
+            curScope.WriteField(name, root);
+            return root;
+        }
+
+        /// <summary>Creates a trigger provoke action and adds it t the builder.</summary>
+        /// <param name="target">The target trigger to effect.</param>
+        /// <param name="value">The conditional value to trigger with or null if unconditional.</param>
+        /// <returns>The root of the value branch which was used in the assignment.</returns>
+        public INode AddProvokeTrigger(INode target, INode value) {
+            this.Logger.Info("Add Provoke Trigger:");
+            if (target is not ITriggerInput input)
+                throw new Message("Target node is not an input trigger.").
+                    With("Target", target).
+                    With("Value", value).
+                    With("Location", this.LastLocation);
+
+            // If there is no condition, add an unconditional provoke.
+            if (value is null) {
+                this.Actions.Add(Provoke.Create(this.LastLocation, target));
+                return null;
+            }
+
+            INode root = this.PerformCast(Type.Trigger, value);
+            HashSet<INode> newNodes = this.collectAndOrder(root);
+            root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
+
+            this.Actions.Add(Provoke.Create(this.LastLocation, input, root, newNodes));
+            return root;
         }
 
         /// <summary>Creates an assignment action and adds it to the builder if possible.</summary>
-        /// <param name="builder">The formula builder being used.</param>
         /// <param name="target">The node to assign the value to.</param>
         /// <param name="value">The value to assign to the given target node.</param>
-        /// <returns>The cast value or given value which was used in the assignment.</returns>
+        /// <returns>The root of the value branch which was used in the assignment.</returns>
         public INode AddAssignment(INode target, INode value) {
+            this.Logger.Info("Add Assignment:");
+
             // Check if the base types match. Don't need to check that the type is
             // a data type or trigger since only those can be reduced to constants.
             PP.Scanner.Location loc = this.LastLocation;
             Type targetType = Type.TypeOf(target);
-            INode castValue = this.PerformCast(targetType, value);
-            IEnumerable<INode> allNewNodes = this.PrepareTree(castValue);
+            INode root = this.PerformCast(targetType, value);
+
+            HashSet<INode> newNodes = this.collectAndOrder(root);
+            root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
             
             IAction assign =
-                targetType == Type.Bool    ? Assign<Bool>.  Create(loc, target, castValue, allNewNodes) :
-                targetType == Type.Int     ? Assign<Int>.   Create(loc, target, castValue, allNewNodes) :
-                targetType == Type.Double  ? Assign<Double>.Create(loc, target, castValue, allNewNodes) :
-                targetType == Type.String  ? Assign<String>.Create(loc, target, castValue, allNewNodes) :
-                targetType == Type.Trigger ? Provoke.       Create(loc, target, castValue, allNewNodes) :
-                throw new Exception("Unsupported type for an assignment").
+                targetType == Type.Bool    ? Assign<Bool>.  Create(loc, target, root, newNodes) :
+                targetType == Type.Int     ? Assign<Int>.   Create(loc, target, root, newNodes) :
+                targetType == Type.Double  ? Assign<Double>.Create(loc, target, root, newNodes) :
+                targetType == Type.String  ? Assign<String>.Create(loc, target, root, newNodes) :
+                targetType == Type.Trigger ? Provoke.       Create(loc, target, root, newNodes) :
+                throw new Message("Unsupported type for an assignment").
                     With("Location", loc).
                     With("Type", targetType).
                     With("Input", target).
                     With("Value", value);
 
             this.Actions.Add(assign);
-            return castValue;
+            return root;
+        }
+
+        /// <summary>Creates a getter action and adds it to the builder if possible.</summary>
+        /// <param name="targetType">The target type of the value to get.</param>
+        /// <param name="name">The name to output the value to.</param>
+        /// <param name="value">The value to get and write to the given name.</param>
+        /// <returns>The root of the value branch which was used in the assignment.</returns>
+        public INode AddGetter(Type targetType, string name, INode value) {
+            this.Logger.Info("Add Getter:");
+
+            // Check if the base types match. Don't need to check that the type is
+            // a data type or trigger since only those can be reduced to constants.
+            PP.Scanner.Location loc = this.LastLocation;
+            INode root = this.PerformCast(targetType, value);
+
+            HashSet<INode> newNodes = this.collectAndOrder(root);
+            root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
+            
+            IAction getter =
+                targetType == Type.Bool   ? Getter<Bool>.  Create(loc, name, root, newNodes) :
+                targetType == Type.Int    ? Getter<Int>.   Create(loc, name, root, newNodes) :
+                targetType == Type.Double ? Getter<Double>.Create(loc, name, root, newNodes) :
+                targetType == Type.String ? Getter<String>.Create(loc, name, root, newNodes) :
+                throw new Message("Unsupported type for an assignment").
+                    With("Location", loc).
+                    With("Type", targetType).
+                    With("Name", name).
+                    With("Value", value);
+            this.Actions.Add(getter);
+            return root;
         }
 
         /// <summary>Creates a new input node with the given name in the local scope.</summary>
@@ -455,9 +536,11 @@ namespace Blackboard.Parser {
         /// <param name="type">The type of input to create.</param>
         /// <returns>The newly created input.</returns>
         public INode CreateInput(string name, Type type) {
+            this.Logger.Info("Create Input:");
+
             VirtualNode scope = this.Scope.Current;
             if (scope.ContainsField(name))
-                throw new Exception("A node already exists with the given name.").
+                throw new Message("A node already exists with the given name.").
                     With("Name", name).
                     With("Type", type);
 
@@ -467,8 +550,9 @@ namespace Blackboard.Parser {
                 type == Type.Double  ? new InputValue<Double>() :
                 type == Type.String  ? new InputValue<String>() :
                 type == Type.Trigger ? new InputTrigger() :
-                throw new Exception("Unsupported type for new typed input").
+                throw new Message("Unsupported type for new typed input").
                     With("Location", this.LastLocation).
+                    With("Name", name).
                     With("Type", type);
 
             this.Actions.Add(new Define(scope.Receiver, name, node, Enumerable.Empty<INode>()));
@@ -497,14 +581,14 @@ namespace Blackboard.Parser {
             bool showExisting = true) {
             const string indent = "  ";
             List<string> parts = new();
-            if (showActions)   parts.Add("Actions: " + this.Actions.ToString(indent));
-            if (showGlobal)    parts.Add("Global: " + this.Scope.Global.ToString());
-            if (showScope)     parts.Add("Scope: " + this.Scope);
-            if (showNodes)     parts.Add("Stack: " + this.Nodes.ToString(indent, false));
-            if (showTypes)     parts.Add("Types: " + this.Types.ToString(indent, true));
-            if (showIds)       parts.Add("Ids: " + this.Identifiers.ToString(indent, true));
+            if (showActions)   parts.Add("Actions: "   + this.Actions.ToString(indent));
+            if (showGlobal)    parts.Add("Global: "    + this.Scope.Global.ToString());
+            if (showScope)     parts.Add("Scope: "     + this.Scope);
+            if (showNodes)     parts.Add("Stack: "     + this.Nodes.ToString(indent, false));
+            if (showTypes)     parts.Add("Types: "     + this.Types.ToString(indent, true));
+            if (showIds)       parts.Add("Ids: "       + this.Identifiers.ToString(indent, true));
             if (showArguments) parts.Add("Arguments: " + this.Arguments.ToString(indent));
-            if (showExisting)  parts.Add("Existing: " + this.Existing.ToString(indent));
+            if (showExisting)  parts.Add("Existing: "  + this.Existing.ToString(indent));
             return parts.Join("\n");
         }
     }

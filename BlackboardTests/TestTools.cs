@@ -1,5 +1,5 @@
-﻿using Blackboard.Core;
-using Blackboard.Core.Extensions;
+﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +14,8 @@ namespace BlackboardTests {
         /// <param name="hndl">The action to perform.</param>
         /// <param name="exp">The lines of the expected exception message.</param>
         static public void CheckException(S.Action hndl, params string[] exp) {
-            S.Exception ex = Assert.ThrowsException<Exception>(hndl);
-            List<string> messages = new();
-            while (ex != null) {
-                messages.Add(ex.Message);
-                ex = ex.InnerException;
-            }
-            NoDiff(exp, messages);
+            Exception ex = Assert.ThrowsException<Exception>(hndl);
+            NoDiff(exp, ex.Message.Split("\n"));
         }
 
         /// <summary>Asserts that all the given lines are equal, otherwise shows the diff.</summary>

@@ -1,8 +1,6 @@
-﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Functions;
+﻿using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 using S = System;
 
 namespace Blackboard.Core.Nodes.Outer {
@@ -14,8 +12,15 @@ namespace Blackboard.Core.Nodes.Outer {
         private ITriggerParent source;
 
         /// <summary>Creates a new output trigger.</summary>
+        public OutputTrigger() { }
+
+        /// <summary>Creates a new output trigger.</summary>
         /// <param name="source">The initial source trigger to listen to.</param>
         public OutputTrigger(ITriggerParent source = null) => this.Parent = source;
+
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new OutputTrigger();
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => "Output";
@@ -23,14 +28,15 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>The parent trigger node to listen to.</summary>
         public ITriggerParent Parent {
             get => this.source;
-            set => this.SetParent(ref this.source, value);
+            set => IChild.SetParent(this, ref this.source, value);
         }
 
         /// <summary>This event is emitted when the trigger has been provoked.</summary>
         public event S.EventHandler OnProvoked;
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<IParent> Parents => IChild.EnumerateParents(this.source);
+        public IParentCollection Parents => new FixedParents(this).
+            With(() => this.source, (ITriggerParent parent) => this.source = parent);
 
         /// <summary>This updates the trigger during the an evaluation.</summary>
         /// <returns>This returns the provoked value as it currently is.</returns>

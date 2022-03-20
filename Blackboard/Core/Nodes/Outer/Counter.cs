@@ -1,15 +1,14 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>Provides a node which can be used to count trigger events.</summary>
     sealed public class Counter<T>: ValueNode<T>, IValueInput<T>, IChild
-        where T : IArithmetic<T>, IComparable<T> {
+        where T : ISubtractive<T>, IAdditive<T>, IFinite<T>, IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <remarks>This will not initialize any sources except increment, the others can be set later.</remarks>
@@ -32,6 +31,9 @@ namespace Blackboard.Core.Nodes.Outer {
         private IValueParent<T> resetValue;
 
         /// <summary>Creates a new node for counting events.</summary>
+        public Counter() { }
+
+        /// <summary>Creates a new node for counting events.</summary>
         /// <param name="increment">The initial parent to trigger an increment.</param>
         /// <param name="decrement">The initial parent to trigger an decrement.</param>
         /// <param name="reset">The initial parent trigger to reset the counter.</param>
@@ -47,44 +49,52 @@ namespace Blackboard.Core.Nodes.Outer {
             this.ResetValue = resetValue;
         }
 
+        /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
+        /// <returns>The new instance of this node.</returns>
+        public override INode NewInstance() => new Counter<T>();
+
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Counter";
+        public override string TypeName => nameof(Counter<T>);
 
         /// <summary>This is the parent to increment the counter.</summary>
         public ITriggerParent Increment {
             get => this.increment;
-            set => this.SetParent(ref this.increment, value);
+            set => IChild.SetParent(this, ref this.increment, value);
         }
 
         /// <summary>This is the parent to decrement the counter.</summary>
         public ITriggerParent Decrement {
             get => this.decrement;
-            set => this.SetParent(ref this.decrement, value);
+            set => IChild.SetParent(this, ref this.decrement, value);
         }
 
         /// <summary>This is the parent reset the toggle to false.</summary>
         public ITriggerParent Reset {
             get => this.reset;
-            set => this.SetParent(ref this.reset, value);
+            set => IChild.SetParent(this, ref this.reset, value);
         }
 
         /// <summary>The value to step during an increment or decrement.</summary>
         /// <remarks>If this parent is null then the counter will increment and decrement by one.</remarks>
         public IValueParent<T> Delta {
             get => this.delta;
-            set => this.SetParent(ref this.delta, value);
+            set => IChild.SetParent(this, ref this.delta, value);
         }
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
         public IValueParent<T> ResetValue {
             get => this.resetValue;
-            set => this.SetParent(ref this.resetValue, value);
+            set => IChild.SetParent(this, ref this.resetValue, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IEnumerable<IParent> Parents =>
-            IChild.EnumerateParents(this.increment, this.decrement, this.reset, this.delta, this.resetValue);
+        public IParentCollection Parents => new FixedParents(this).
+            With(() => this.increment,  (ITriggerParent  parent) => this.increment  = parent).
+            With(() => this.decrement,  (ITriggerParent  parent) => this.decrement  = parent).
+            With(() => this.reset,      (ITriggerParent  parent) => this.reset      = parent).
+            With(() => this.delta,      (IValueParent<T> parent) => this.delta      = parent).
+            With(() => this.resetValue, (IValueParent<T> parent) => this.resetValue = parent);
 
         /// <summary>This sets the value of this node.</summary>
         /// <param name="value">The value to set.</param>
@@ -95,7 +105,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <returns>True if the value was changed, false otherwise.</returns>
         protected override T CalcuateValue() {
             T value = this.Value;
-            T delta = this.delta is null ? default(T).Inc() : this.delta.Value;
+            T delta = this.delta is null ? default(T).OneValue : this.delta.Value;
             if (this.increment?.Provoked ?? false) value = value.Sum(new T[] { value, delta });
             if (this.decrement?.Provoked ?? false) value = value.Sub(delta);
             if (this.reset?.Provoked     ?? false) value = this.resetValue is null ? default : this.resetValue.Value;

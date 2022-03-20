@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
-using System.Collections.Generic;
-using System.Linq;
+using Blackboard.Core.Nodes.Collections;
 
 namespace Blackboard.Core.Nodes.Interfaces {
 
@@ -12,14 +11,32 @@ namespace Blackboard.Core.Nodes.Interfaces {
     /// </remarks>
     public interface IChild: INode {
 
-        /// <summary>This will enumerate the given nodes which are not null.</summary>
-        /// <remarks>This is designed to be used to help return parents as an enumerator.</remarks>
-        /// <param name="values">The parent nodes to enumerate.</param>
-        /// <returns>The enumerator for the passed in nodes which are not null.</returns>
-        static protected IEnumerable<IParent> EnumerateParents(params INode[] values) =>
-            values.NotNull().OfType<IParent>();
+        /// <summary>This is a helper method for setting a parent to the given node.</summary>
+        /// <remarks>
+        /// This is only intended to be called by the given child internally.
+        /// Do not add this child to the new parent yet,
+        /// so we can read from the parents when only evaluating.
+        /// This allows nodes which aren't parents for nodes like select.
+        /// </remarks>
+        /// <typeparam name="T">The node type for the parent.</typeparam>
+        /// <param name="child">The child to set the parent to.</param>
+        /// <param name="node">The parent node variable being set.</param>
+        /// <param name="newParent">The new parent being set, or null</param>
+        /// <returns>True if the parent has changed, false otherwise.</returns>
+        static protected bool SetParent<T>(IChild child, ref T node, T newParent)
+            where T : IParent {
+            if (ReferenceEquals(node, newParent)) return false;
+            bool removed = node?.RemoveChildren(child) ?? false;
+            node = newParent;
+            if (removed) node?.AddChildren(child);
+            return true;
+        }
 
         /// <summary>The set of parent nodes to this node.</summary>
-        public IEnumerable<IParent> Parents { get; }
+        /// <remarks>
+        /// This should not contain null parents, but it might contain repeat parents.
+        /// For example, if a number is the sum of itself (x + x), then the Sum node will return the 'x' parent twice.
+        /// </remarks>
+        public IParentCollection Parents { get; }
     }
 }

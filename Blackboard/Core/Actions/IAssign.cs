@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Blackboard.Core.Actions {
 
-    /// <summary>The interface for all the typed assignment action.</summary>
+    /// <summary>The interface for all the typed assignment actions.</summary>
     public interface IAssign: IAction {
 
         /// <summary>The target input node to set the value of.</summary>

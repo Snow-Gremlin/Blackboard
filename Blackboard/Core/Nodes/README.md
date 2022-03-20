@@ -10,15 +10,15 @@ two or more numbers are added together using a Sum node in the graph.
 flowchart TD
 
 IChild[/IChild/]
-    click IChild href "./Interfaces/IChild.cs" _blank
+    click IChild href "./Interfaces/IChild.cs"
     INode --> IChild
 
 ICoalescable[/ICoalescable/]
-    click IChild href "./Interfaces/ICoalescable.cs" _blank
+    click ICoalescable href "./Interfaces/ICoalescable.cs"
     IChild --> ICoalescable
 
 IConstant[/IConstant/]
-    click IChild href "./Interfaces/IConstant.cs" _blank
+    click IConstant href "./Interfaces/IConstant.cs"
     INode --> IConstant
 
 

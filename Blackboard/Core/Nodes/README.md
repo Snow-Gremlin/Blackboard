@@ -8,19 +8,22 @@ two or more numbers are added together using a Sum node in the graph.
 
 ```mermaid
 flowchart TD
+subgraph Interfaces
 
 IChild[/IChild/]
-    click IChild href "Interfaces/IChild.cs"
+    click IChild href "/Blackboard/Core/Nodes/Interfaces/IChild.cs"
     INode --> IChild
 
 ICoalescable[/ICoalescable/]
-    click ICoalescable href "Interfaces/ICoalescable.cs"
+    click ICoalescable href "/Blackboard/Core/Nodes/Interfaces/ICoalescable.cs"
     IChild --> ICoalescable
 
 IConstant[/IConstant/]
-    click IConstant href "Interfaces/IConstant.cs"
+    click IConstant href "/Blackboard/Core/Nodes/Interfaces/IConstant.cs"
     INode --> IConstant
 
 INode[/INode/]
-    click INode href "Interfaces/INode.cs"
+    click INode href "/Blackboard/Core/Nodes/Interfaces/INode.cs"
 ```
+
+`TODO: Need to automatically generate the node inheritance graph`

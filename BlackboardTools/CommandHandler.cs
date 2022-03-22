@@ -32,9 +32,9 @@ namespace BlackboardTools {
                 CommandArgs args = new(this, command);
                 if (this.handlers.TryGetValue(args.Name, out ICommand handler))
                     handler.Run(args);
-                S.Console.WriteLine("No command found with the name "+args.Name+".");
+                else S.Console.WriteLine("No command found with the name "+args.Name+".");
             } catch (CommandException e) {
-                S.Console.WriteLine(e.Message);
+                S.Console.WriteLine(e.Message); // Don't show stack trace
             } catch (S.Exception e) {
                 S.Console.WriteLine(e);
             }

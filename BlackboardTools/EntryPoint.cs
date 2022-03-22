@@ -10,7 +10,8 @@ namespace BlackboardTools {
         static public void Main() {
             CommandHandler handler = new(
                 new Exit(),
-                new Help()
+                new Help(),
+                new Diagram()
             );
 
             S.Console.WriteLine("Enter command for the tool to run (type \"help\" to show help, type \"exit\" to leave):");

@@ -18,10 +18,10 @@ namespace BlackboardTools.Commands {
 
         private class Node {
             readonly public S.Type Type;
-            readonly public string Name;
+            readonly public string Label;
             public Node(S.Type type, int index) {
                 this.Type = type;
-                this.Name = "Node"+index;
+                this.Label = "Node"+index;
             }
         }
 
@@ -41,12 +41,15 @@ namespace BlackboardTools.Commands {
             S.Console.WriteLine(buf);
         }
 
+        static private string getTypeKey(S.Type type) =>
+            type.Namespace+"::"+type.Name;
+
         static private Dictionary<string, Node> getAllTypes(string nspace) =>
             S.AppDomain.CurrentDomain.GetAssemblies().SelectMany(t => t.GetTypes()).
             NotNull().Where(t => t.IsPublic).
             Where(t => t.IsClass || t.IsInterface || t.IsAbstract).
             Where(t => t.Namespace is not null && (t.Namespace == nspace || t.Namespace.StartsWith(nspace+"."))).
-            WithIndex().Select(pair => new Node(pair.item, pair.index)).ToDictionary(n => n.Type.FullName);
+            WithIndex().Select(pair => new Node(pair.item, pair.index)).ToDictionary(n => getTypeKey(n.Type));
 
         static private Dictionary<string, List<Node>> groupTypes(Dictionary<string, Node> allTypes) =>
             allTypes.Values.GroupBy(n => n.Type.Namespace).
@@ -54,31 +57,48 @@ namespace BlackboardTools.Commands {
 
         static private void addGroup(StringBuilder buf, int nspaceIndex, string group, List<Node> nodes, Dictionary<string, Node> allTypes) {
             buf.AppendLine("subgraph NSpace"+nspaceIndex+" ["+group+"]");
-            buf.AppendLine();
-            foreach (Node node in nodes) {
+            foreach (Node node in nodes)
                 addNode(buf, node, allTypes);
-                buf.AppendLine();
-            }
             buf.AppendLine("end");
         }
 
-        static private void addNode(StringBuilder buf, Node node, Dictionary<string, Node> allTypes) {
-            string name = node.Type.Name;
+        static private string getSimpleTypeName(S.Type type) {
+            string name = type.Name;
             int index = name.IndexOf('`');
             if (index > 0) name = name[..index];
+            return name;
+        }
 
-            if (node.Type.ContainsGenericParameters) {
-                buf.AppendLine(">"+node.Type.GetGenericArguments().Select(t => t.Name).Join(", "));
-                //buf.AppendLine(">"+node.Type.GetGenericParameterConstraints().Select(t => t.Name).Join(", "));
+        static private string getTypeName(S.Type type) {
+            string name = getSimpleTypeName(type);
+
+            if (type.ContainsGenericParameters) {
+                List<string> gens = new();
+
+                S.Type[] genTypes = type.GetGenericArguments();
+                foreach (S.Type genType in genTypes) {
+                    string gen = getSimpleTypeName(genType);
+                    // TODO: Constraints?
+                    gens.Add(gen);
+                }
+
+                name += "<"+gens.Join(", ")+">";
             }
+            return name;
+        }
 
+        static private void addNode(StringBuilder buf, Node node, Dictionary<string, Node> allTypes) {
+            string name = getTypeName(node.Type);
             if (node.Type.IsInterface)
-                buf.AppendLine(node.Name+"[/"+name+"/]");
+                buf.AppendLine("  "+node.Label+"[/"+name+"/]");
             else if (node.Type.IsAbstract)
-                buf.AppendLine(node.Name+"[/"+name+"]");
-            else buf.AppendLine(node.Name+"["+name+"]");
+                buf.AppendLine("  "+node.Label+"[/"+name+"]");
+            else buf.AppendLine("  "+node.Label+"["+name+"]");
 
-            // node.Type.GetInterfaces
+            foreach (S.Type inter in node.Type.GetInterfaces()) {
+                if (allTypes.TryGetValue(getTypeKey(inter), out Node other))
+                    buf.AppendLine("    "+other.Label+"-->"+node.Label);
+            }
         }
     }
 }

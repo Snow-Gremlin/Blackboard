@@ -1,11 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using S = System;
+using IO = System.IO;
+using System.Linq;
 
 namespace BlackboardTools {
 
     /// <summary>The console input handler for reading user commands.</summary>
     internal class Input {
+        private const string historyFile = "./history.txt";
+        private const int historyLimit = 100;
+
         private int index;
         private int priorWidth;
         private StringBuilder command;
@@ -19,6 +24,7 @@ namespace BlackboardTools {
             this.command = new StringBuilder();
             this.history = new List<string>();
             this.historyIndex = -1;
+            this.loadHistory();
         }
 
         /// <summary>Reads the user command from the console input.</summary>
@@ -48,11 +54,14 @@ namespace BlackboardTools {
         private void addToHistory(string text) {
             if (text.Length <= 0) return;
             else if (this.historyIndex >= 0) {
-                if (text == this.history[this.historyIndex]) return;
+                // If this is the old command, move it to the front.
+                if (text == this.history[this.historyIndex])
+                    this.history.RemoveAt(this.historyIndex);
             } else if (this.history.Count > 0) {
                 if (text == this.history[0]) return;
             }
             this.history.Insert(0, text);
+            this.saveHistory();
         }
 
         /// <summary>Finishes a user input, updates the history, and returns the command.</summary>
@@ -139,6 +148,16 @@ namespace BlackboardTools {
             this.command.Insert(index, value);
             this.index++;
             this.update();
+        }
+
+        /// <summary>Saves the history of commands to a file.</summary>
+        private void saveHistory() =>
+            IO.File.WriteAllLines(historyFile, this.history.Take(historyLimit));
+
+        /// <summary>Loads the history of command from a file.</summary>
+        private void loadHistory() {
+            if (IO.File.Exists(historyFile))
+                this.history.AddRange(IO.File.ReadAllLines(historyFile));
         }
     }
 }

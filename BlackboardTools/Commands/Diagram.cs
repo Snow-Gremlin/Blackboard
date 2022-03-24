@@ -91,8 +91,6 @@ namespace BlackboardTools.Commands {
             string name = getTypeName(node.Type);
             if (node.Type.IsInterface)
                 buf.AppendLine("  "+node.Label+"[/"+name+"/]");
-            else if (node.Type.IsAbstract)
-                buf.AppendLine("  "+node.Label+"[/"+name+"]");
             else buf.AppendLine("  "+node.Label+"["+name+"]");
 
             foreach (S.Type inter in node.Type.GetInterfaces()) {

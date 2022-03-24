@@ -54,7 +54,7 @@ subgraph NSpace0 [Blackboard.Core.Nodes.Outer]
     Node30-->Node4
     Node15-->Node4
     Node12-->Node4
-  Node5[/Literal]
+  Node5[Literal]
   Node6[Literal<T>]
     Node16-->Node6
     Node25-->Node6
@@ -571,7 +571,7 @@ subgraph NSpace4 [Blackboard.Core.Nodes.Collections]
   Node86[NodeValueComparer<T>]
 end
 subgraph NSpace5 [Blackboard.Core.Nodes.Bases]
-  Node87[/BinaryValue<T1, T2, TResult>]
+  Node87[BinaryValue<T1, T2, TResult>]
     Node16-->Node87
     Node25-->Node87
     Node23-->Node87
@@ -579,14 +579,14 @@ subgraph NSpace5 [Blackboard.Core.Nodes.Bases]
     Node30-->Node87
     Node15-->Node87
     Node12-->Node87
-  Node88[/Evaluable]
+  Node88[Evaluable]
     Node16-->Node88
     Node25-->Node88
     Node23-->Node88
-  Node89[/FuncDef<TReturn>]
+  Node89[FuncDef<TReturn>]
     Node19-->Node89
     Node23-->Node89
-  Node90[/NaryTrigger]
+  Node90[NaryTrigger]
     Node16-->Node90
     Node25-->Node90
     Node23-->Node90
@@ -595,7 +595,7 @@ subgraph NSpace5 [Blackboard.Core.Nodes.Bases]
     Node22-->Node90
     Node12-->Node90
     Node13-->Node90
-  Node91[/NaryValue<TIn, TResult>]
+  Node91[NaryValue<TIn, TResult>]
     Node16-->Node91
     Node25-->Node91
     Node23-->Node91
@@ -605,12 +605,12 @@ subgraph NSpace5 [Blackboard.Core.Nodes.Bases]
     Node22-->Node91
     Node12-->Node91
     Node13-->Node91
-  Node92[/Select<T>]
+  Node92[Select<T>]
     Node16-->Node92
     Node25-->Node92
     Node23-->Node92
     Node12-->Node92
-  Node93[/TernaryValue<T1, T2, T3, TResult>]
+  Node93[TernaryValue<T1, T2, T3, TResult>]
     Node16-->Node93
     Node25-->Node93
     Node23-->Node93
@@ -618,13 +618,13 @@ subgraph NSpace5 [Blackboard.Core.Nodes.Bases]
     Node30-->Node93
     Node15-->Node93
     Node12-->Node93
-  Node94[/TriggerNode]
+  Node94[TriggerNode]
     Node16-->Node94
     Node25-->Node94
     Node23-->Node94
     Node29-->Node94
     Node26-->Node94
-  Node95[/UnaryValue<T1, TResult>]
+  Node95[UnaryValue<T1, TResult>]
     Node16-->Node95
     Node25-->Node95
     Node23-->Node95
@@ -632,7 +632,7 @@ subgraph NSpace5 [Blackboard.Core.Nodes.Bases]
     Node30-->Node95
     Node15-->Node95
     Node12-->Node95
-  Node96[/ValueNode<T>]
+  Node96[ValueNode<T>]
     Node16-->Node96
     Node25-->Node96
     Node23-->Node96

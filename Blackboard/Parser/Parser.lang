@@ -167,7 +167,8 @@
     | <DefineVarRule>
     | <ProvokeTrigger>
     | <GetTypedValue>
-    | <GetVarValue>;
+    | <GetVarValue>
+    | <GetExisting>;
 
 #----------------------------------------------------------
 
@@ -213,6 +214,8 @@
 <GetTypedValue> := [DeclareGet] <RootType> [Identifier] {defineId} [Assign] <Conditional> {typeGet};
 
 <GetVarValue> := [DeclareGet] [Identifier] {defineId} [Assign] <Conditional> {varGet};
+
+<GetExisting> := [DeclareGet] [Identifier] {defineId} {pushId} {varGet};
 
 #==========================================================
 

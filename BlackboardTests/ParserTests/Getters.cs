@@ -38,5 +38,52 @@ namespace BlackboardTests.ParserTests {
             result.CheckValue(4.0, "C");
             result.CheckValue("Boom stick", "D");
         }
+
+        [TestMethod]
+        public void TestBasicParses_GetExisting() {
+            Slate slate = new();
+            slate.Read(
+                "in A = 3;",
+                "B := 4;",
+                "C := A + B;").
+                Perform();
+
+            // TODO: Add Comma (e.g. 'get A, B, C;') to all other getters
+            // TODO: Test error for the ID not existing
+            Result result = slate.Read(
+                "get A;",
+                "get B;",
+                "get C;"). 
+                Perform();
+
+            result.CheckValue(3, "A");
+            result.CheckValue(4, "B");
+            result.CheckValue(7, "C");
+        }
+
+        [TestMethod]
+        public void TestFormula_VarGetter() {
+            Slate slate = new();
+            slate.Read(
+                "in A = 3;",
+                "in B = 2;").
+                Perform();
+            Formula formula = slate.Read(
+                "get A;",
+                "get B = A + B;");
+
+            Result result = formula.Perform();
+            result.CheckValue(3, "A");
+            result.CheckValue(5, "B");
+
+            // Re-use formula
+            slate.Read(
+                "A = 5;",
+                "B = 8;").
+                Perform();
+            result = formula.Perform();
+            result.CheckValue(5, "A");
+            result.CheckValue(13, "B");
+        }
     }
 }

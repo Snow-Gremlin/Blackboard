@@ -83,6 +83,7 @@ namespace BlackboardTools {
             string line = (">"+text).PadRight(this.priorWidth);
             this.priorWidth = text.Length+1;
 
+            // TODO: Need to handle when the input is longer than the console width.
             S.Console.ForegroundColor = S.ConsoleColor.Cyan;
             S.Console.SetCursorPosition(0, S.Console.CursorTop);
             S.Console.Write(line);

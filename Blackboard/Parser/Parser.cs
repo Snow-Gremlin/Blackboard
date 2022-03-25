@@ -225,7 +225,7 @@ namespace Blackboard.Parser {
             builder.Clear();
         }
 
-        /// <summary></summary>
+        /// <summary>This is called when a new simple identifier has been defined.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleDefineId(Builder builder) =>
             builder.Identifiers.Push(builder.LastText);

@@ -32,5 +32,7 @@ namespace BlackboardTests.ParserTests {
                 "  Finish",
                 "]");
         }
+
+        // TODO: Test string reduction
     }
 }

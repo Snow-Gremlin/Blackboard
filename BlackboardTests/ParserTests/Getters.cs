@@ -22,7 +22,7 @@ namespace BlackboardTests.ParserTests {
             result.CheckValue(4.0, "C");
             result.CheckValue("Boom stick", "D");
         }
-        
+
         [TestMethod]
         public void TestBasicParses_VarGetter() {
             Slate slate = new();
@@ -53,7 +53,7 @@ namespace BlackboardTests.ParserTests {
             Result result = slate.Read(
                 "get A;",
                 "get B;",
-                "get C;"). 
+                "get C;").
                 Perform();
 
             result.CheckValue(3, "A");
@@ -85,5 +85,43 @@ namespace BlackboardTests.ParserTests {
             result.CheckValue(5, "A");
             result.CheckValue(13, "B");
         }
+
+        [TestMethod]
+        public void TestFormula_VarGetter_CommaSeparated() {
+            Slate slate = new();
+            slate.Read(
+                "in A = 3;",
+                "in B = 2;").
+                Perform();
+
+            Result result = slate.Read(
+                "get A, B, C = A + B;").
+                Perform();
+            result.CheckValue(3, "A");
+            result.CheckValue(2, "B");
+            result.CheckValue(5, "C");
+
+            result = slate.Read(
+                "get double A, B, C = (A + B)*2.0;").
+                Perform();
+            result.CheckValue(3.0, "A");
+            result.CheckValue(2.0, "B");
+            result.CheckValue(10.0, "C");
+
+            result = slate.Read(
+                "get string A, B, C = (A + B)*2.0;").
+                Perform();
+            result.CheckValue("3", "A");
+            result.CheckValue("2", "B");
+            result.CheckValue("10", "C");
+        }
+
+        [TestMethod]
+        public void TestFormula_VarGetter_Namespaced() {
+
+
+        }
+
+        // TODO: Check getters for non-existing and other errors
     }
 }

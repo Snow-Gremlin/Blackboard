@@ -15,6 +15,7 @@ namespace Blackboard.Core.Actions {
         /// Creates a conditional provoke from the given nodes after
         /// first checking that the nodes can be used in a provoke.
         /// </summary>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="loc">The location that this provoke was created.</param>
         /// <param name="target">The target node to provoke.</param>
         /// <param name="value">The value to use as the conditional.</param>v
@@ -30,6 +31,7 @@ namespace Blackboard.Core.Actions {
         /// Creates an unconditional provoke from the given nodes after
         /// first checking that the node can be provoked.
         /// </summary>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="loc">The location that this provoke was created.</param>
         /// <param name="target">The target node to provoke.</param>
         /// <param name="allNodes">All the nodes which are new children of the node to provoke.</param>
@@ -47,13 +49,11 @@ namespace Blackboard.Core.Actions {
         private readonly IEvaluable[] needPending;
 
         /// <summary>Creates a new provoke action.</summary>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="target">The input trigger to provoke.</param>
         /// <param name="trigger">The optional trigger to conditionally provoke with or null to always provoke.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the trigger.</param>
         public Provoke(ITriggerInput target, ITrigger trigger, IEnumerable<INode> allNewNodes = null) {
-
-            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
-
             this.Target  = target;
             this.Trigger = trigger;
 

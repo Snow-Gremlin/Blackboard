@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Inspect;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Actions {
 

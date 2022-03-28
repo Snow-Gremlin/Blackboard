@@ -4,6 +4,10 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Actions {
 
     /// <summary>The interface for all the typed getter actions.</summary>
+    /// <remarks>
+    /// This is only implemented by Getter but has no type parameter
+    /// so that all typed Getters can easily be used generically.
+    /// </remarks>
     public interface IGetter: IAction {
 
         /// <summary>The name to write the value to.</summary>

@@ -167,8 +167,7 @@
     | <DefineVarRule>
     | <ProvokeTrigger>
     | <GetTypedValue>
-    | <GetVarValue>
-    | <GetExisting>;
+    | <GetVarValue>;
 
 #----------------------------------------------------------
 
@@ -194,6 +193,8 @@
 
 <DefineTypedRule> := <RootType> [Identifier] {defineId} [Define] <Conditional> {typeDefine}
     | [DeclareDefine] <RootType> [Identifier] {defineId} [Assign] <Conditional> {typeDefine};
+    
+#----------------------------------------------------------
 
 <DefineVarRule> := [Identifier] {defineId} [Define] <Conditional> {varDefine}
     | [DeclareDefine] [Identifier] {defineId} [Assign] <Conditional> {varDefine};
@@ -210,18 +211,30 @@
     | [Trigger] <Conditional> {conditionalProvokeTrigger} <ConditionalProvokeTriggerTail>;
 
 #----------------------------------------------------------
+   
+<GetTypedValue> := [DeclareGet] <RootType> <GetTypedValuePart> <GetTypedValueTail>;
 
-<GetTypedValue> := [DeclareGet] <RootType> [Identifier] {defineId} [Assign] <Conditional> {typeGet};
+<GetTypedValueTail> := _
+    | [Comma] <GetTypedValuePart> <GetTypedValueTail>;
 
-<GetVarValue> := [DeclareGet] [Identifier] {defineId} [Assign] <Conditional> {varGet};
+<GetTypedValuePart> := [Identifier] {defineId} {pushId} {typeGet}
+    | [Identifier] {defineId} [Assign] <Conditional> {typeGet};
 
-<GetExisting> := [DeclareGet] [Identifier] {defineId} {pushId} {varGet};
+#----------------------------------------------------------
+   
+<GetVarValue> := [DeclareGet] <GetVarValuePart> <GetVarValueTail>;
+
+<GetVarValueTail> := _
+    | [Comma] <GetVarValuePart> <GetVarValueTail>;
+
+<GetVarValuePart> := [Identifier] {defineId} {pushId} {varGet}
+    | [Identifier] {defineId} [Assign] <Conditional> {varGet};
 
 #==========================================================
 
 <Declaration> := <Conditional>
     | <Conditional> [Assign] <Declaration> {assignment};
-
+    
 <Conditional> := <LogicalOr>
     | <Conditional> [Test] <Conditional> [Else] <Conditional> {ternary};
 

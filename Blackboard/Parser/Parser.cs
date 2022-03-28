@@ -113,7 +113,7 @@ namespace Blackboard.Parser {
 
             this.addHandler("typeGet", handleTypeGet);
             this.addHandler("varGet", handleVarGet);
-
+            
             this.addHandler("assignment", handleAssignment);
             this.addHandler("cast", handleCast);
             this.addHandler("memberAccess", handleMemberAccess);
@@ -425,18 +425,15 @@ namespace Blackboard.Parser {
         static private void handlePushId(Builder builder) {
             string name = builder.LastText;
             builder.Logger.Info("Id = \"{0}\"", name);
-            foreach (VirtualNode scope in builder.Scope.Scopes) {
-                INode node = scope.ReadField(name);
-                if (node is not null) {
-                    builder.Nodes.Push(node);
-                    builder.Existing.Add(node);
-                    return;
-                }
+            INode node = builder.Scope.FindID(name);
+            if (node is null) {
+                throw new Message("No identifier found in the scope stack.").
+                    With("Identifier", name).
+                    With("Location", builder.LastLocation);
             }
 
-            throw new Message("No identifier found in the scope stack.").
-                With("Identifier", name).
-                With("Location", builder.LastLocation);
+            builder.Nodes.Push(node);
+            builder.Existing.Add(node);
         }
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>

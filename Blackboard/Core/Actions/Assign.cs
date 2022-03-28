@@ -18,6 +18,7 @@ namespace Blackboard.Core.Actions {
         /// Creates an assignment from the given nodes after first checking
         /// that the nodes can be used in this type of assignment.
         /// </summary>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="loc">The location that this provoke was created.</param>
         /// <param name="target">The target node to assign to.</param>
         /// <param name="value">The value to assign to the given target.</param>
@@ -45,13 +46,11 @@ namespace Blackboard.Core.Actions {
         private readonly IEvaluable[] needPending;
 
         /// <summary>Creates a new assignment.</summary>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="target">The input node to assign.</param>
         /// <param name="value">The node to get the value from.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         public Assign(IValueInput<T> target, IValue<T> value, IEnumerable<INode> allNewNodes) {
-
-            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
-
             this.target = target;
             this.value  = value;
 

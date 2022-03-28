@@ -17,6 +17,7 @@ namespace Blackboard.Core.Actions {
         /// Creates a getter from the given nodes after first checking
         /// that the nodes can be used in this type of getter.
         /// </summary>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="loc">The location that this provoke was created.</param>
         /// <param name="name">The name to write the value to.</param>
         /// <param name="value">The value to get to the given target.</param>
@@ -40,13 +41,11 @@ namespace Blackboard.Core.Actions {
         private readonly IEvaluable[] needPending;
 
         /// <summary>Creates a new getter.</summary>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="name">The name to get to.</param>
         /// <param name="value">The node to get the value from.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         public Getter(string name, IValue<T> value, IEnumerable<INode> allNewNodes) {
-
-            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
-
             this.Name  = name;
             this.value = value;
             

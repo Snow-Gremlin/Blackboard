@@ -153,6 +153,17 @@ namespace Blackboard.Parser {
             /// <summary>Gets a copy of the current scopes.</summary>
             public VirtualNode[] Scopes => this.scopes.ToArray();
 
+            /// <summary>Finds the given ID in the current scopes.</summary>
+            /// <param name="name">The name of the node to find.</param>
+            /// <returns>The found node by that name or null if not found.</returns>
+            public INode FindID(string name) {
+                foreach (VirtualNode scope in this.Scopes) {
+                    INode node = scope.ReadField(name);
+                    if (node is not null) return node;
+                }
+                return null;
+            }
+
             /// <summary>Pops a top node from the scope.</summary>
             public void Pop() {
                 this.builder.Logger.Info("Pop Scope");
@@ -368,9 +379,9 @@ namespace Blackboard.Parser {
                 return match.IsMatch ? value :
                     throw new Message("The value type can not be cast to the given type.").
                         With("Location", this.LastLocation).
-                        With("Target", type).
-                        With("Type", valueType).
-                        With("Value", value);
+                        With("Target",   type).
+                        With("Type",     valueType).
+                        With("Value",    value);
 
             Namespace ops = this.Slate.Global.Find(Slate.OperatorNamespace) as Namespace;
             INode castGroup =
@@ -381,7 +392,7 @@ namespace Blackboard.Parser {
                 type == Type.Trigger ? ops.Find("castTrigger") :
                 throw new Message("Unsupported type for new definition cast").
                     With("Location", this.LastLocation).
-                    With("Type", type);
+                    With("Type",     type);
 
             INode castValue = (castGroup as IFuncGroup).Build(value);
             return castValue;
@@ -451,8 +462,8 @@ namespace Blackboard.Parser {
             this.Logger.Info("Add Provoke Trigger:");
             if (target is not ITriggerInput input)
                 throw new Message("Target node is not an input trigger.").
-                    With("Target", target).
-                    With("Value", value).
+                    With("Target",   target).
+                    With("Value",    value).
                     With("Location", this.LastLocation);
 
             // If there is no condition, add an unconditional provoke.
@@ -493,9 +504,9 @@ namespace Blackboard.Parser {
                 targetType == Type.Trigger ? Provoke.       Create(loc, target, root, newNodes) :
                 throw new Message("Unsupported type for an assignment").
                     With("Location", loc).
-                    With("Type", targetType).
-                    With("Input", target).
-                    With("Value", value);
+                    With("Type",     targetType).
+                    With("Input",    target).
+                    With("Value",    value);
 
             this.Actions.Add(assign);
             return root;
@@ -524,9 +535,9 @@ namespace Blackboard.Parser {
                 targetType == Type.String ? Getter<String>.Create(loc, name, root, newNodes) :
                 throw new Message("Unsupported type for an assignment").
                     With("Location", loc).
-                    With("Type", targetType).
-                    With("Name", name).
-                    With("Value", value);
+                    With("Type",     targetType).
+                    With("Name",     name).
+                    With("Value",    value);
             this.Actions.Add(getter);
             return root;
         }
@@ -552,8 +563,8 @@ namespace Blackboard.Parser {
                 type == Type.Trigger ? new InputTrigger() :
                 throw new Message("Unsupported type for new typed input").
                     With("Location", this.LastLocation).
-                    With("Name", name).
-                    With("Type", type);
+                    With("Name",     name).
+                    With("Type",     type);
 
             this.Actions.Add(new Define(scope.Receiver, name, node, Enumerable.Empty<INode>()));
             scope.WriteField(name, node);

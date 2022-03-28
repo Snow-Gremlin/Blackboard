@@ -4,6 +4,10 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Actions {
 
     /// <summary>The interface for all the typed assignment actions.</summary>
+    /// <remarks>
+    /// This is only implemented by Assign but has no type parameter
+    /// so that all typed Assigns can easily be used generically.
+    /// </remarks>
     public interface IAssign: IAction {
 
         /// <summary>The target input node to set the value of.</summary>

@@ -2,10 +2,8 @@
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
-using PetiteParser.Scanner;
 using System.Collections.Generic;
 using System.Linq;
-using S = System;
 
 namespace Blackboard.Core.Actions {
 
@@ -19,19 +17,13 @@ namespace Blackboard.Core.Actions {
         /// that the nodes can be used in this type of assignment.
         /// </summary>
         /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
-        /// <param name="loc">The location that this provoke was created.</param>
         /// <param name="target">The target node to assign to.</param>
         /// <param name="value">The value to assign to the given target.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         /// <returns>The assignment action.</returns>
-        static public Assign<T> Create(Location loc, INode target, INode value, IEnumerable<INode> allNewNodes) =>
+        static public Assign<T> Create(INode target, INode value, IEnumerable<INode> allNewNodes) =>
             (target is IValueInput<T> input) && (value is IValue<T> data) ?
-            new Assign<T>(input, data, allNewNodes) :
-            throw new Message("Unexpected node types for assignment.").
-                With("Location", loc).
-                With("Type",     typeof(T)).
-                With("Target",   target).
-                With("Value",    value);
+            new Assign<T>(input, data, allNewNodes) : null;
 
         /// <summary>The target input node to set the value of.</summary>
         private readonly IValueInput<T> target;

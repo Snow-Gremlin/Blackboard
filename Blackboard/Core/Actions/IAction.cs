@@ -18,6 +18,6 @@ namespace Blackboard.Core.Actions {
         // TODO: Add a method which can validate the action and check if it can still be performed.
         //       For things like define, it would check if the value hasn't been defined so that
         //       when it is performed the already-exists exception is thrown.
-        //       Optionally Log any warnings or errors but return a boolean indicating if if can be performed.
+        //       Optionally Log any warnings or errors but return a boolean indicating if it can be performed.
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Functions;
@@ -347,5 +348,7 @@ namespace Blackboard.Core.Types {
 
             addCast<IFuncDef>(FuncDef.imps, FuncGroup, (input) => new FuncGroup(input));
         }
+
+        internal static Type TypeOf<T>() where T : IData => throw new S.NotImplementedException();
     }
 }

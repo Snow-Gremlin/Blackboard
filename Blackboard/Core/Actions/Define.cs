@@ -4,7 +4,6 @@ using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
-using S = System;
 
 namespace Blackboard.Core.Actions {
 
@@ -34,8 +33,6 @@ namespace Blackboard.Core.Actions {
             this.Name = name;
             this.Node = node;
             this.needParents = allNewNodes.Illegitimates().ToArray();
-
-            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
         }
 
         /// <summary>This is the receiver that will be written to.</summary>

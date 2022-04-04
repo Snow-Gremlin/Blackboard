@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Actions;
-using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
@@ -46,6 +45,9 @@ namespace Blackboard.Parser {
         /// This may be null if no logger is being used.
         /// </summary>
         public readonly Logger Logger;
+
+        /// <summary>The optimizer being used to optimize nodes for new actions.</summary>
+        private readonly Optimizer optimizer;
 
         /// <summary>Resets the stack back to the initial state.</summary>
         public void Reset() {
@@ -383,13 +385,8 @@ namespace Blackboard.Parser {
                         With("Type",     valueType).
                         With("Value",    value);
 
-            Namespace ops = this.Slate.Global.Find(Slate.OperatorNamespace) as Namespace;
-            INode castGroup =
-                type == Type.Bool    ? ops.Find("castBool") :
-                type == Type.Int     ? ops.Find("castInt") :
-                type == Type.Double  ? ops.Find("castDouble") :
-                type == Type.String  ? ops.Find("castString") :
-                type == Type.Trigger ? ops.Find("castTrigger") :
+            IFuncGroup castGroup = Maker.GetCastMethod(this.Slate, type);
+            if (castGroup is null)
                 throw new Message("Unsupported type for new definition cast").
                     With("Location", this.LastLocation).
                     With("Type",     type);
@@ -433,9 +430,6 @@ namespace Blackboard.Parser {
             return true;
         }
 
-        /// <summary>The optimizer being used to optimize nodes for new actions.</summary>
-        private readonly Optimizer optimizer;
-
         /// <summary>Creates a define action and adds it to the builder.</summary>
         /// <param name="value">The value to define the node with.</param>
         /// <param name="type">The type of the node to define or null to use the value type.</param>
@@ -468,15 +462,27 @@ namespace Blackboard.Parser {
 
             // If there is no condition, add an unconditional provoke.
             if (value is null) {
-                this.Actions.Add(Provoke.Create(this.LastLocation, target));
+                IAction assign = Provoke.Create(target);
+                if (assign is null)
+                    throw new Message("Unexpected node types for a unconditional provoke.").
+                        With("Location", this.LastLocation).
+                        With("Target", target);
+
+                this.Actions.Add(assign);
                 return null;
             }
 
             INode root = this.PerformCast(Type.Trigger, value);
             HashSet<INode> newNodes = this.collectAndOrder(root);
             root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
+            IAction condAssign = Provoke.Create(input, root, newNodes);
+            if (condAssign is null)
+                throw new Message("Unexpected node types for a conditional provoke.").
+                   With("Location", this.LastLocation).
+                   With("Target", target).
+                   With("Value", value);
 
-            this.Actions.Add(Provoke.Create(this.LastLocation, input, root, newNodes));
+            this.Actions.Add(condAssign);
             return root;
         }
 
@@ -489,21 +495,14 @@ namespace Blackboard.Parser {
 
             // Check if the base types match. Don't need to check that the type is
             // a data type or trigger since only those can be reduced to constants.
-            PP.Scanner.Location loc = this.LastLocation;
             Type targetType = Type.TypeOf(target);
             INode root = this.PerformCast(targetType, value);
-
             HashSet<INode> newNodes = this.collectAndOrder(root);
             root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
-            
-            IAction assign =
-                targetType == Type.Bool    ? Assign<Bool>.  Create(loc, target, root, newNodes) :
-                targetType == Type.Int     ? Assign<Int>.   Create(loc, target, root, newNodes) :
-                targetType == Type.Double  ? Assign<Double>.Create(loc, target, root, newNodes) :
-                targetType == Type.String  ? Assign<String>.Create(loc, target, root, newNodes) :
-                targetType == Type.Trigger ? Provoke.       Create(loc, target, root, newNodes) :
-                throw new Message("Unsupported type for an assignment").
-                    With("Location", loc).
+            IAction assign = Maker.CreateAssignAction(targetType, target, root, newNodes);
+            if (assign is null)
+                throw new Message("Unsupported types for an assignment action.").
+                    With("Location", this.LastLocation).
                     With("Type",     targetType).
                     With("Input",    target).
                     With("Value",    value);
@@ -522,22 +521,17 @@ namespace Blackboard.Parser {
 
             // Check if the base types match. Don't need to check that the type is
             // a data type or trigger since only those can be reduced to constants.
-            PP.Scanner.Location loc = this.LastLocation;
             INode root = this.PerformCast(targetType, value);
-
             HashSet<INode> newNodes = this.collectAndOrder(root);
             root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
-            
-            IAction getter =
-                targetType == Type.Bool   ? Getter<Bool>.  Create(loc, name, root, newNodes) :
-                targetType == Type.Int    ? Getter<Int>.   Create(loc, name, root, newNodes) :
-                targetType == Type.Double ? Getter<Double>.Create(loc, name, root, newNodes) :
-                targetType == Type.String ? Getter<String>.Create(loc, name, root, newNodes) :
-                throw new Message("Unsupported type for an assignment").
-                    With("Location", loc).
+            IAction getter = Maker.CreateGetterAction(targetType, name, root, newNodes);
+            if (getter is null)
+                throw new Message("Unsupported type for a getter action.").
+                    With("Location", this.LastLocation).
                     With("Type",     targetType).
                     With("Name",     name).
                     With("Value",    value);
+
             this.Actions.Add(getter);
             return root;
         }
@@ -555,12 +549,8 @@ namespace Blackboard.Parser {
                     With("Name", name).
                     With("Type", type);
 
-            INode node =
-                type == Type.Bool    ? new InputValue<Bool>() :
-                type == Type.Int     ? new InputValue<Int>() :
-                type == Type.Double  ? new InputValue<Double>() :
-                type == Type.String  ? new InputValue<String>() :
-                type == Type.Trigger ? new InputTrigger() :
+            IInput node = Maker.CreateInputNode(type);
+            if (node is null)
                 throw new Message("Unsupported type for new typed input").
                     With("Location", this.LastLocation).
                     With("Name",     name).

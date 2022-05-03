@@ -13,8 +13,8 @@ namespace BlackboardTools {
 
         private int index;
         private int priorWidth;
-        private StringBuilder command;
-        private List<string> history;
+        private readonly StringBuilder command;
+        private readonly List<string> history;
         private int historyIndex;
 
         /// <summary>Creates a new input handler.</summary>
@@ -109,16 +109,16 @@ namespace BlackboardTools {
 
         /// <summary>Handles the user pressing backspace.</summary>
         private void backspace() {
-            if (this.command.Length <= 0 || index <= 0) return;
-            this.command.Remove(index-1, 1);
-            index--;
+            if (this.command.Length <= 0 || this.index <= 0) return;
+            this.command.Remove(this.index-1, 1);
+            this.index--;
             this.update();
         }
 
         /// <summary>Handles the user pressing delete.</summary>
         private void delete() {
-            if (index >= this.command.Length) return;
-            this.command.Remove(index, 1);
+            if (this.index >= this.command.Length) return;
+            this.command.Remove(this.index, 1);
             this.update();
         }
 
@@ -146,7 +146,7 @@ namespace BlackboardTools {
         /// <param name="value">The character value the user inputted.</param>
         private void addChar(char value) {
             if (char.IsControl(value)) return;
-            this.command.Insert(index, value);
+            this.command.Insert(this.index, value);
             this.index++;
             this.update();
         }

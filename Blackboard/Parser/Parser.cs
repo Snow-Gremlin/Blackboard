@@ -34,7 +34,7 @@ namespace Blackboard.Parser {
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
         /// <summary>Optional logger to debugging and inspecting the parser.</summary>
-        private Logger logger;
+        private readonly Logger logger;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="slate">The slate to modify.</param>

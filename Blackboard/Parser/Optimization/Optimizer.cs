@@ -12,10 +12,10 @@ namespace Blackboard.Parser.Optimization {
     /// comparisons faster, and improve performance of Blackboard's graph in slate.
     /// </summary>
     sealed internal class Optimizer {
-        private IReadOnlyList<IRule> rules;
+        private readonly IReadOnlyList<IRule> rules;
 
         /// <summary>Creates a new optimizer.</summary>
-        public Optimizer() {
+        public Optimizer() =>
             this.rules = new List<IRule>() {
                 new ConstantReduction(),
                 new ParentIncorporator(),
@@ -102,7 +102,6 @@ namespace Blackboard.Parser.Optimization {
                 new RemoveUnreachable(),
                 new Validator()
             };
-        }
 
         /// <summary>Performs optimization on the given nodes and surrounding nodes.</summary>
         /// <param name="slate">The slate the formula is for.</param>

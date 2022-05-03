@@ -6,7 +6,7 @@ namespace BlackboardTools {
 
     internal class CommandArgs {
 
-        static private Regex regex = new("^\\s* (\\w+) (?:\\s+ (\\S+))* \\s*$",
+        static private readonly Regex regex = new("^\\s* (\\w+) (?:\\s+ (\\S+))* \\s*$",
             RegexOptions.Compiled|RegexOptions.IgnorePatternWhitespace);
 
         public readonly CommandHandler Handler;

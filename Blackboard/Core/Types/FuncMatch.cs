@@ -48,7 +48,7 @@ namespace Blackboard.Core.Types {
         public readonly bool IsMatch;
 
         /// <summary>The type matched for the arguments for this function, maybe null.</summary>
-        private TypeMatch[] matches;
+        private readonly TypeMatch[] matches;
 
         /// <summary>Creates a new function match results.</summary>
         /// <param name="isMatch">True if this is a match, false otherwise.</param>

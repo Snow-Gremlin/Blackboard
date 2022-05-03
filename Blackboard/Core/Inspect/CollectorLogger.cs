@@ -9,7 +9,7 @@ namespace Blackboard.Core.Inspect {
     public class CollectorLogger: Logger {
 
         /// <summary>The string buffer to write to.</summary>
-        private List<Entry> entries;
+        private readonly List<Entry> entries;
 
         /// <summary>Creates a new message collector logger.</summary>
         /// <param name="next">The next logger the entry is passed to.</param>

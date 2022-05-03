@@ -12,7 +12,7 @@ namespace Blackboard.Core.Inspect {
     /// </remarks>
     public class Logger {
         private readonly Logger next;
-        private S.Func<Entry, bool> processor;
+        private readonly S.Func<Entry, bool> processor;
 
         /// <summary>Creates a new base logger.</summary>
         /// <param name="next">The next logger the entry is passed to.</param>

@@ -36,7 +36,7 @@ namespace Blackboard.Parser.Optimization.Rules {
 
             // If the reduced constant is valid, then replace the constants with the reduced constant.
             // If the reduced constant is the identity, then return no constants.
-            if (constant is not null && constant is IParent constParent) {
+            if (constant is not null and IParent constParent) {
                 constants.Clear();
                 if (!constParent.SameValue(identity)) {
                     constants.Add(constParent);

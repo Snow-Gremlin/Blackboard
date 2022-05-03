@@ -14,7 +14,7 @@ namespace Blackboard.Core.Nodes.Functions {
         /// The children functions of this group.
         /// These should be function definitions.
         /// </summary>
-        private List<IFuncDef> defs;
+        private readonly List<IFuncDef> defs;
 
         /// <summary>Creates a new function collection.</summary>
         public FuncGroup() =>

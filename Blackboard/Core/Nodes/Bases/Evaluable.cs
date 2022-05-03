@@ -13,7 +13,7 @@ namespace Blackboard.Core.Nodes.Bases {
     public abstract class Evaluable: IEvaluable {
 
         /// <summary>The collection of children nodes to this node.</summary>
-        private List<IChild> children;
+        private readonly List<IChild> children;
 
         /// <summary>Creates a new node.</summary>
         protected Evaluable() {

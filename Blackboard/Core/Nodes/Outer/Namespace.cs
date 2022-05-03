@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Outer {
     sealed public class Namespace: IFieldWriter {
 
         // These are the named children of this namespace.
-        private SortedDictionary<string, INode> fields;
+        private readonly SortedDictionary<string, INode> fields;
 
         /// <summary>Creates a new namespace.</summary>
         public Namespace() =>

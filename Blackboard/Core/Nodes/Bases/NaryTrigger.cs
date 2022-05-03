@@ -27,7 +27,7 @@ namespace Blackboard.Core.Nodes.Bases {
             new FunctionN<ITriggerParent, Tout>(handle, needsOneNoCast, passOne, min, max);
 
         /// <summary>This is the list of all the parent nodes to listen to.</summary>
-        private List<ITriggerParent> sources;
+        private readonly List<ITriggerParent> sources;
 
         /// <summary>Creates a multi-trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>

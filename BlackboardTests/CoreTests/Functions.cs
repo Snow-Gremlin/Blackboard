@@ -15,10 +15,10 @@ namespace BlackboardTests.CoreTests {
     public class Functions {
 
         private class Tester {
-            private Stringifier stringifier;
-            private FuncGroup group;
-            private string funcName;
-            private Dictionary<string, INode> nodes;
+            private readonly Stringifier stringifier;
+            private readonly FuncGroup group;
+            private readonly string funcName;
+            private readonly Dictionary<string, INode> nodes;
 
             public Tester(params string[] names) {
                 Slate slate = new();

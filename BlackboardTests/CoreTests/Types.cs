@@ -12,7 +12,7 @@ namespace BlackboardTests.CoreTests {
     [TestClass]
     public class Types {
 
-        static private Stringifier stringifier = new(
+        static private readonly Stringifier stringifier = new(
             showLastDataValues:  false,
             showFirstDataValues: false);
 

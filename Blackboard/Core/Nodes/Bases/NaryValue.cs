@@ -17,7 +17,7 @@ namespace Blackboard.Core.Nodes.Bases {
         where TResult : IEquatable<TResult> {
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
-        private List<IValueParent<TIn>> sources;
+        private readonly List<IValueParent<TIn>> sources;
 
         /// <summary>This is a helper for creating unary node factories quickly.</summary>
         /// <param name="handle">The handler for calling the node constructor.</param>

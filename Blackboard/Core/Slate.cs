@@ -24,20 +24,20 @@ namespace Blackboard.Core {
         public const string OperatorNamespace = "$operators";
 
         /// <summary>The nodes which have had one or more parent modified and they need to have their depth updated.</summary>
-        private LinkedList<IEvaluable> pendingUpdate;
+        private readonly LinkedList<IEvaluable> pendingUpdate;
 
         /// <summary>The nodes which have had one or more parent modified and they need to be reevaluated.</summary>
-        private LinkedList<IEvaluable> pendingEval;
+        private readonly LinkedList<IEvaluable> pendingEval;
 
         /// <summary>The set of provoked triggers which need to be reset.</summary>
-        private HashSet<ITrigger> needsReset;
+        private readonly HashSet<ITrigger> needsReset;
 
         /// <summary>A collection of literals and constants used in the graph.</summary>
         /// <remarks>
         /// This is to help reduce overhead of duplicate constants and
         /// help with optimization of constant branches in the graph.
         /// </remarks>
-        private HashSet<IConstant> constants;
+        private readonly HashSet<IConstant> constants;
 
         /// <summary>Creates a new slate.</summary>
         /// <param name="addFuncs">Indicates that built-in functions should be added.</param>

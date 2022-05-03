@@ -6,7 +6,7 @@ namespace BlackboardTools {
 
     /// <summary>The collection of commands and methods to run those commands.</summary>
     internal class CommandHandler {
-        private Dictionary<string, ICommand> handlers;
+        private readonly Dictionary<string, ICommand> handlers;
 
         /// <summary>Creates a new command handler.</summary>
         /// <param name="commands">All the commands to handle.</param>

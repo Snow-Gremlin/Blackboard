@@ -266,6 +266,12 @@ namespace BlackboardTests {
         #endregion
         #region Action Result...
 
+        /// <summary>Checks if the names in the output are what is expected.</summary>
+        /// <param name="result">The results to check the names with.</param>
+        /// <param name="names">The names to check against.</param>
+        static public void CheckNames(this Result result, string names) =>
+            Assert.AreEqual(names, result.OutputNames.Join(", "), "Checking the names in the output.");
+
         /// <summary>Gets the message for the CheckValues assertions.</summary>
         /// <param name="type">The type of the value being checked.</param>
         /// <param name="name">The name of the variable to get.</param>

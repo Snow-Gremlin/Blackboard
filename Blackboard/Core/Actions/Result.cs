@@ -15,6 +15,9 @@ namespace Blackboard.Core.Actions {
             this.outputData = new Dictionary<string, object>();
 
         #region Output Data...
+        
+        /// <summary>Gets the names for the set output.</summary>
+        public IEnumerable<string> OutputNames => this.outputData.Keys;
 
         /// <summary>Gets the type of the value at the given output.</summary>
         /// <param name="name">The name given to the output data.</param>

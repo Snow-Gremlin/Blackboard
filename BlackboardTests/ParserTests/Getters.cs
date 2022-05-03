@@ -55,10 +55,34 @@ namespace BlackboardTests.ParserTests {
                 "get B;",
                 "get C;").
                 Perform();
-
+            result.CheckNames("A, B, C");
             result.CheckValue(3, "A");
             result.CheckValue(4, "B");
             result.CheckValue(7, "C");
+
+            result = slate.Read(
+                "get A, B, C;").
+                Perform();
+            result.CheckNames("A, B, C");
+            result.CheckValue(3, "A");
+            result.CheckValue(4, "B");
+            result.CheckValue(7, "C");
+
+            result = slate.Read(
+                "get A, D = A*2.0 + B, B, E = 'Hello';").
+                Perform();
+            result.CheckNames("A, D, B, E");
+            result.CheckValue(3, "A");
+            result.CheckValue(4, "B");
+            result.CheckValue(10.0, "D");
+            result.CheckValue("Hello", "E");
+
+            TestTools.CheckException(() =>
+                slate.Read("get X;").Perform(),
+                "Error occurred while parsing input code.",
+                "[Error: No identifier found in the scope stack.",
+                "   [Identifier: X]",
+                "   [Location: Unnamed:1, 5, 5]]");
         }
 
         [TestMethod]

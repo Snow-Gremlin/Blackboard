@@ -48,8 +48,6 @@ namespace BlackboardTests.ParserTests {
                 "C := A + B;").
                 Perform();
 
-            // TODO: Add Comma (e.g. 'get A, B, C;') to all other getters
-            // TODO: Test error for the ID not existing
             Result result = slate.Read(
                 "get A;",
                 "get B;",
@@ -76,6 +74,12 @@ namespace BlackboardTests.ParserTests {
             result.CheckValue(4, "B");
             result.CheckValue(10.0, "D");
             result.CheckValue("Hello", "E");
+        }
+
+        [TestMethod]
+        public void TestBasicParses_GetErrors() {
+            Slate slate = new();
+            slate.Read("in A = 3;").Perform();
 
             TestTools.CheckException(() =>
                 slate.Read("get X;").Perform(),
@@ -83,6 +87,15 @@ namespace BlackboardTests.ParserTests {
                 "[Error: No identifier found in the scope stack.",
                 "   [Identifier: X]",
                 "   [Location: Unnamed:1, 5, 5]]");
+
+            TestTools.CheckException(() =>
+                slate.Read("get int X = A*2.0;").Perform(),
+                "Error occurred while parsing input code.",
+                "[Error: The value type can not be cast to the given type.",
+                "   [Location: Unnamed:1, 17, 17]",
+                "   [Target: int]",
+                "   [Type: double]",
+                "   [Value: Mul<double>[0](Implicit<double>(Input<int>), <double>[2])]]");
         }
 
         [TestMethod]
@@ -139,13 +152,5 @@ namespace BlackboardTests.ParserTests {
             result.CheckValue("2", "B");
             result.CheckValue("10", "C");
         }
-
-        [TestMethod]
-        public void TestFormula_VarGetter_Namespaced() {
-
-
-        }
-
-        // TODO: Check getters for non-existing and other errors
     }
 }

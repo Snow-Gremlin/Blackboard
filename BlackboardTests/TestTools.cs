@@ -3,6 +3,7 @@ using Blackboard.Core.Inspect;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using S = System;
 
 namespace BlackboardTests {
@@ -33,19 +34,25 @@ namespace BlackboardTests {
             string[] expLines = exp.Split("\n").ToArray();
             string[] gotLines = results.Split("\n").ToArray();
             if (!Enumerable.SequenceEqual(expLines, gotLines)) {
-                S.Console.WriteLine("Diff:");
-                gotLines.Diff(expLines).Indent("  ").Foreach(S.Console.WriteLine);
-                S.Console.WriteLine();
+                StringBuilder buf = new();
+                if (!string.IsNullOrEmpty(message)) {
+                    buf.AppendLine(message);
+                    buf.AppendLine();
+                }
 
-                S.Console.WriteLine("Expected:");
-                expLines.Indent("  ").Foreach(S.Console.WriteLine);
-                S.Console.WriteLine();
+                buf.AppendLine("Diff:");
+                gotLines.Diff(expLines).Indent("  ").Foreach(buf.AppendLine);
+                buf.AppendLine();
 
-                S.Console.WriteLine("Results:");
-                gotLines.Indent("  ").Foreach(S.Console.WriteLine);
-                S.Console.WriteLine();
+                buf.AppendLine("Expected:");
+                expLines.Indent("  ").Foreach(buf.AppendLine);
+                buf.AppendLine();
 
-                Assert.Fail(message);
+                buf.AppendLine("Results:");
+                gotLines.Indent("  ").Foreach(buf.AppendLine);
+                buf.AppendLine();
+
+                Assert.Fail(buf.ToString());
             }
         }
     }

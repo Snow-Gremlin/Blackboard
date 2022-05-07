@@ -258,8 +258,7 @@ namespace BlackboardTests {
         static public Formula LogRead(this Slate slate, params string[] input) {
             Stringifier stringifier = Stringifier.Deep().PreloadNames(slate);
             stringifier.ShowFuncs = false;
-            Logger logger = new ConsoleLogger().Stringify(stringifier).
-                SelectGroup("Parser", "Builder", "Optimize"); // TODO: REMOVE
+            Logger logger = new ConsoleLogger().Stringify(stringifier);
             return new Parser(slate, logger).Read(input);
         }
 

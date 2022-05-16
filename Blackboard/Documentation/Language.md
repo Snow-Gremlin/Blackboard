@@ -4,9 +4,19 @@
 - [Literals](#literals)
   - [Booleans](#booleans)
   - [Integers](#integers)
+    - [Binary](#binary)
+    - [Octal](#octal)
+    - [Decimal](#decimal)
+    - [Hexadecimal](#hexadecimal)
   - [Floats](#floats)
   - [Strings](#strings)
-- [Mathematics](#mathematics)
+- [Operators](#operators)
+- [Types](#types)
+  - [Bool](#bool)
+  - [Int](#int)
+  - [Double](#double)
+  - [String](#string)
+  - [Trigger](#trigger)
 
 ## Comments
 
@@ -113,22 +123,70 @@ Strings may have escape sequences to insert special characters
 | `\r`            | carriage return | 0x000D  |         |
 | `\t`            | horizontal tab  | 0x0009  |         |
 | `\v`            | vertical tab    | 0x000B  |         |
-| `\xAB`          |
-| `\uABCD`        |
+| `\xHH`          | Unicode Escape (UTF-8)  | 0x00 - 0xFF | |
+| `\uHHHH`        | Unicode Escape (UTF-16) | 0x0000 - 0xFFFF | |
+| `\UHHHHHHHH`    | Unicode Escape (UTF-32) | 0x00000000 - 0xFFFFFFFF | |
+
+## Operators
+
+Blackboard code is expressions which end with a `;`.
+An expression is made up of several operations.
+The following are in order of importance where the lowest order value will be performed last.
+Any operation with the same order of importance is per1formed from left to right,
+except for the assignment which performs right to left.
+
+oder | symbol       | example     | meaning
+----:|:------------:|:-----------:|:------
+  1  | `=`          | `a = b`     | Assignment of right hand value to the left hand variable.
+  2  | `?:`         | `a ? b : c` | Ternary; If the left hand value is true then the middle value is returned otherwise the right hand value is returned.
+  3  | `\|\|`       | `a \|\| b`  | Logical OR of the left hand value and right hand value.
+  4  | `^^`         | `a ^^ b`    | Logical XOR of the left hand value and right hand value.
+  5  | `&&`         | `a && b`    | Logical AND of the left hand value and right hand value.
+  6  | `==`         | `a == b`    | True if the left hand value and right hand value are equal, false otherwise.
+  6  | `!=`         | `a != b`    | True if the left hand value and right hand value are not equal, false otherwise.
+  7  | `>`          | `a > b`     | True if the left hand value is greater than the right hand value, false otherwise.
+  7  | `<`          | `a < b`     | True if the left hand value is less than the right hand value, false otherwise.
+  7  | `>=`         | `a >= b`    | True if the left hand value is greater than or equal to the right hand value, false otherwise.
+  7  | `<=`         | `a <= b`    | True if the left hand value is less than or equal to the right hand value, false otherwise.
+  8  | `\|`         | `a \| b`    | Bit-wise OR of the left hand value and right hand value.
+  9  | `^`          | `a ^ b`     | Bit-wise XOR of the left hand value and right hand value.
+ 10  | `&`          | `a & b`     | Bit-wise AND of the left hand value and right hand value.
+ 11  | `>>`         | `a >> b`    | Bit-wise shifts the left hand value to the right by the number of bit in the right hand value.
+ 11  | `<<`         | `a << b`    | Bit-wise shifts the left hand value to the left by the number of bit in the right hand value.
+ 12  | `+` (binary) | `a + b`     | The sum of the left hand value and the right hand value.
+ 12  | `-` (binary) | `a - b`     | The left hand value after the right hand value has been subtracted from it.
+ 13  | `*`          | `a * b`     | The product of the left hand value and the right hand value.
+ 13  | `/`          | `a / b`     | The left hand value divided by the right hand value.
+ 13  | `%`          | `a % b`     | The modulo (remainder) of the left hand value by the right hand value.
+ 14  | `**`         | `a ** b`    | The left hand value raised to the power of the right hand vale.
+ 15  | `-` (unary)  | `-a`        | Negates the value.
+ 15  | `+` (unary)  | `+a`        | The value unmodified.
+ 15  | `!`          | `!a`        | Logical NOT of the value.
+ 15  | `~`          | `~a`        | Bit-wise NOT of the value.
+ 15  | `()` (cast)  | `(a) b`     | Casts the right hand value into the [type](#types) given in the parenthesis.
+ 16  | `()` (group) | `(a)`       | Performs any operations internal to the parenthesis before operations outside of it.
+ 16  | `.`          | `a.b`       | Accesses the value in the right hand value specified by the left hand side.
+ 16  | `()` (call)  | `a(b)`      | Calls the right hand method with the zero or more parameters in the parenthesis.
+
+## Types
+
+There are currently only five build in types.
+In the current version no custom types can be created and there are not parameter types.
+
+### Bool
 
 
-\u 	Unicode escape sequence (UTF-16) 	\uHHHH (range: 0000 - FFFF; example: \u00E7 = "ç")
-\x 	Unicode escape sequence similar to "\u" except with variable length 	\xH[H][H][H] (range: 0 - FFFF; example: \x00E7 or \x0E7 or \xE7 = "ç")
-
-\U 	Unicode escape sequence (UTF-32) 	\U00HHHHHH (range: 000000 - 10FFFF; example: \U0001F47D = "👽")
+### Int
 
 
+### Double
+
+
+### String
 
 
 
-## Mathematics
-
-
+### Trigger
 
 
 

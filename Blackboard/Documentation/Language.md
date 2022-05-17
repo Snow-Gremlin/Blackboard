@@ -12,11 +12,18 @@
   - [Strings](#strings)
 - [Operators](#operators)
 - [Types](#types)
-  - [Bool](#bool)
-  - [Int](#int)
-  - [Double](#double)
-  - [String](#string)
-  - [Trigger](#trigger)
+  - [node](#node)
+  - [bool](#bool)
+  - [int](#int)
+  - [double](#double)
+  - [string](#string)
+  - [trigger](#trigger)
+  - [namespace](#namespace)
+  - [function-group](#function-group)
+  - [function-def](#function-def)
+  - [counter](#counter)
+  - [toggler](#toggler)
+  - [latch](#latch)
 
 ## Comments
 
@@ -170,26 +177,52 @@ oder | symbol       | example     | meaning
 
 ## Types
 
-There are currently only five build in types.
-In the current version no custom types can be created and there are not parameter types.
+There are currently only five main build-in types which are normally specified in definitions and casts:
+[`bool`](#bool), [`int`](#int), [`double`](#double), [`string`](#string), and [`trigger`](#trigger).
 
-### Bool
+There are also has several built-in types which are specified in specific ways or not yet definable:
+[`namespace`](#namespace), [function-group](#function-group), and [function-def](#function-def).
 
+There are three build-in complex types which can be created via methods:
+[`counter`](#counter), [`toggler`](#toggler), and [`latch`](#latch).
 
-### Int
+In the current version no custom types can be created.
 
+### node
 
-### Double
+The Blackboard is built out of nodes. Nodes is the root type of all other types.
 
-
-### String
-
-
-
-### Trigger
-
+### bool
 
 
+### int
+
+
+### double
+
+
+### string
+
+
+### trigger
+
+
+### namespace
+
+
+### function-group
+
+
+### function-def
+
+
+### counter
+
+
+### toggler
+
+
+### latch
 
 
 ===================================================================================================================================

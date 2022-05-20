@@ -301,7 +301,6 @@
 <Unary> := <Expression>
     | [Neg]    <Expression> {negate}
     | [Not]    <Expression> {not}
-    | [Pos]    <Expression>
     | [Invert] <Expression> {invert}
     | [ParOpen] <RootType> [ParClose] <Expression> {cast};
 

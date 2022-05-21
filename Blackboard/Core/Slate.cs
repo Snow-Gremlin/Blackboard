@@ -115,7 +115,7 @@ namespace Blackboard.Core {
                 Any.Factory);
             add("logicalXor",
                 Xor.Factory,
-                OnlyOne.Factory);
+                XorTrigger.Factory);
             add("modulo",
                 Mod<Int>.Factory,
                 Mod<Double>.Factory);
@@ -158,7 +158,7 @@ namespace Blackboard.Core {
             add("xor",
                 Xor.Factory,
                 BitwiseXor<Int>.Factory,
-                OnlyOne.Factory);
+                XorTrigger.Factory);
         }
 
         /// <summary>This adds all global initial methods for Blackboard.</summary>
@@ -276,7 +276,8 @@ namespace Blackboard.Core {
                 UnaryDoubleMath<Double>.Truncate);
             add("xor",
                 BitwiseXor<Int>.Factory,
-                Xor.Factory);
+                Xor.Factory,
+                XorTrigger.Factory);
         }
 
         /// <summary>This adds all the initial constants for Blackboard.</summary>

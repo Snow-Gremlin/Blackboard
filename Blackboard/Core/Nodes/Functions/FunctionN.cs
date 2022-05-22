@@ -29,9 +29,8 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <param name="max">The maximum allowed number of nodes.</param>
         public FunctionN(S.Func<IEnumerable<Tn>, TReturn> hndl,
             bool needsOneNoCast = false, bool passOne = true, int min = 1, int max = int.MaxValue) :
-            base(min, max, needsOneNoCast, passOne, Type.FromType<Tn>()) {
+            base(min, max, needsOneNoCast, passOne, Type.FromType<Tn>()) =>
             this.hndl = hndl;
-        }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

@@ -71,8 +71,7 @@ namespace Blackboard.Core.Inspect {
         /// <remarks>This is useful for logging and debugging exceptions which contain data.</remarks>
         /// <returns>The string for the whole message.</returns>
         public override string ToString() {
-            List<string> lines = new();
-            lines.Add(this.Text);
+            List<string> lines = new() { this.Text };
             foreach ((string key, object value) in this.Data) {
                 string strKey = key?.ToString() ?? "null";
                 string strVal = value switch {

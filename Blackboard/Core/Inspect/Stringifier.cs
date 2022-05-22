@@ -231,11 +231,11 @@ namespace Blackboard.Core.Inspect {
         public string Indent;
 
         /// <summary>The list of fields which have been added to node names.</summary>
-        private HashSet<IFieldReader> readFieldNodes;
+        private readonly HashSet<IFieldReader> readFieldNodes;
 
         /// <summary>A cache of named nodes used for replacing parent nodes with named ones.</summary>
         /// <remarks>This will be automatically populated by Namespaces.</remarks>
-        private Dictionary<INode, string> nodeNames;
+        private readonly Dictionary<INode, string> nodeNames;
 
         #region Naming...
 

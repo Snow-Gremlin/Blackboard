@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Functions;
@@ -17,7 +18,7 @@ namespace Blackboard.Core.Types {
         /// <summary>This is a delegate for a casting method.</summary>
         /// <param name="node">The node to cast.</param>
         /// <returns>The resulting casted value.</returns>
-        private delegate INode Caster(INode node);
+        private delegate INode caster(INode node);
 
         /// <summary>The base type for all other types.</summary>
         static public readonly Type Node;
@@ -125,13 +126,13 @@ namespace Blackboard.Core.Types {
         public readonly S.Type DataType;
 
         /// <summary>The types with base type of this type.</summary>
-        private List<Type> inheritors;
+        private readonly List<Type> inheritors;
 
         /// <summary>This is a dictionary of other types to an implicit cast.</summary>
-        private Dictionary<Type, Caster> imps;
+        private readonly Dictionary<Type, caster> imps;
 
         /// <summary>This is a dictionary of other types to an explicit cast.</summary>
-        private Dictionary<Type, Caster> exps;
+        private readonly Dictionary<Type, caster> exps;
 
         /// <summary>This creates a new type.</summary>
         /// <param name="name">The name of the type.</param>
@@ -182,7 +183,7 @@ namespace Blackboard.Core.Types {
         private int castMatchSteps(bool exp, Type t) {
             int steps = 0;
             do {
-                Dictionary<Type, Caster> dict = exp ? t.exps : t.imps;
+                Dictionary<Type, caster> dict = exp ? t.exps : t.imps;
                 if (dict.ContainsKey(this)) return steps;
                 t = t.BaseType;
                 steps++;
@@ -270,8 +271,8 @@ namespace Blackboard.Core.Types {
         static private INode cast(bool imp, INode node, Type src, Type dest) {
             if (src.RealType.IsAssignableTo(dest.RealType)) return node;
             do {
-                Dictionary<Type, Caster> dict = imp ? src.imps : src.exps;
-                if (dict.TryGetValue(dest, out Caster func)) return func(node);
+                Dictionary<Type, caster> dict = imp ? src.imps : src.exps;
+                if (dict.TryGetValue(dest, out caster func)) return func(node);
                 src = src.BaseType;
             } while (src is not null);
             return null;
@@ -314,7 +315,7 @@ namespace Blackboard.Core.Types {
         /// <param name="dict">Either the implicit or explicit dictionary for the type being added to.</param>
         /// <param name="dest">The destination type to cast to.</param>
         /// <param name="func">The function for performing the cast.</param>
-        static private void addCast<T>(Dictionary<Type, Caster> dict, Type dest, S.Func<T, INode> func) where T : INode =>
+        static private void addCast<T>(Dictionary<Type, caster> dict, Type dest, S.Func<T, INode> func) where T : INode =>
             dict[dest] = (INode input) => input is T value ? func(value) : null;
 
         /// <summary>Initializes the types before they are used.</summary>

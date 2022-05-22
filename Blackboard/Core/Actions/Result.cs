@@ -1,7 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 
@@ -9,13 +8,16 @@ namespace Blackboard.Core.Actions {
 
     /// <summary>The results from a formula being performed.</summary>
     sealed public class Result {
-        private Dictionary<string, object> outputData;
+        private readonly Dictionary<string, object> outputData;
 
         /// <summary>Creates a new results object.</summary>
         internal Result() =>
             this.outputData = new Dictionary<string, object>();
 
         #region Output Data...
+        
+        /// <summary>Gets the names for the set output.</summary>
+        public IEnumerable<string> OutputNames => this.outputData.Keys;
 
         /// <summary>Gets the type of the value at the given output.</summary>
         /// <param name="name">The name given to the output data.</param>

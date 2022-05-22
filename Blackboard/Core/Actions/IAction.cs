@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Inspect;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Actions {
 
@@ -15,5 +14,10 @@ namespace Blackboard.Core.Actions {
         /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>
         public void Perform(Slate slate, Result result, Logger logger = null);
+
+        // TODO: Add a method which can validate the action and check if it can still be performed.
+        //       For things like define, it would check if the value hasn't been defined so that
+        //       when it is performed the already-exists exception is thrown.
+        //       Optionally Log any warnings or errors but return a boolean indicating if it can be performed.
     }
 }

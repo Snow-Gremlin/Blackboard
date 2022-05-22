@@ -15,7 +15,7 @@ namespace Blackboard.Core.Nodes.Inner {
             new FunctionN<IParent, OnChange>((inputs) => new OnChange(inputs), passOne: false);
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
-        private List<IParent> sources;
+        private readonly List<IParent> sources;
 
         /// <summary>Creates an on change trigger node.</summary>
         public OnChange() : this(null) { }

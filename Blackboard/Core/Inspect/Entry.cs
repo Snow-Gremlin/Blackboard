@@ -20,7 +20,7 @@ namespace Blackboard.Core.Inspect {
             };
 
         private S.Func<Message> fetcher;
-        private List<string> groups;
+        private readonly List<string> groups;
 
         /// <summary>Creates a new entry for a deferred message.</summary>
         /// <param name="level">The level of this deferred message.</param>

@@ -6,7 +6,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>This is a trigger which can be provoked from user output.</summary>
-    sealed public class OutputTrigger: TriggerNode, ITriggerOutput, IChild {
+    sealed public class OutputTrigger: TriggerNode, ITriggerOutput {
 
         /// <summary>The parent source to listen to.</summary>
         private ITriggerParent source;

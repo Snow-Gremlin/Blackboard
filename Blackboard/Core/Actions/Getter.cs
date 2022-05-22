@@ -2,7 +2,6 @@
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
-using PetiteParser.Scanner;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,18 +16,13 @@ namespace Blackboard.Core.Actions {
         /// Creates a getter from the given nodes after first checking
         /// that the nodes can be used in this type of getter.
         /// </summary>
-        /// <param name="loc">The location that this provoke was created.</param>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="name">The name to write the value to.</param>
         /// <param name="value">The value to get to the given target.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         /// <returns>The getter action.</returns>
-        static public Getter<T> Create(Location loc, string name, INode value, IEnumerable<INode> allNewNodes) =>
-            (value is IValue<T> data) ? new Getter<T>(name, data, allNewNodes) :
-            throw new Message("Unexpected node types for getter.").
-                With("Location", loc).
-                With("Type",     typeof(T)).
-                With("Name",     name).
-                With("Value",    value);
+        static public Getter<T> Create(string name, INode value, IEnumerable<INode> allNewNodes) =>
+            (value is IValue<T> data) ? new Getter<T>(name, data, allNewNodes) : null;
 
         /// <summary>The data node to get the data from.</summary>
         private readonly IValue<T> value;
@@ -40,13 +34,11 @@ namespace Blackboard.Core.Actions {
         private readonly IEvaluable[] needPending;
 
         /// <summary>Creates a new getter.</summary>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="name">The name to get to.</param>
         /// <param name="value">The node to get the value from.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         public Getter(string name, IValue<T> value, IEnumerable<INode> allNewNodes) {
-
-            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
-
             this.Name  = name;
             this.value = value;
             

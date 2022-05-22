@@ -36,7 +36,7 @@ namespace Blackboard.Parser.Optimization.Rules {
 
             // If the reduced constant is valid, then replace the constants with the reduced constant.
             // If the reduced constant is the identity, then return no constants.
-            if (constant is not null && constant is IParent constParent) {
+            if (constant is not null and IParent constParent) {
                 constants.Clear();
                 if (!constParent.SameValue(identity)) {
                     constants.Add(constParent);
@@ -50,7 +50,7 @@ namespace Blackboard.Parser.Optimization.Rules {
 
         /// <summary>
         /// This attempts to remove as many parents as possible from the given node by finding constant parents.
-        /// The constant parents will be precomputed and any identity parents will be removed.
+        /// All the constant parents will be moved to the end, precomputed, and any identity parents will be removed.
         /// If there are no parents left then the identity will be returned.
         /// </summary>
         /// <param name="args">The arguments for the optimization rules.</param>
@@ -63,43 +63,85 @@ namespace Blackboard.Parser.Optimization.Rules {
             // If there are no parents then return the identity for this node.
             if (parents.Count <= 0) return identity;
 
-            // Find all parents which are NOT constant.
-            List<IParent> remainder = parents.
-                WhereNot(parent => parent.IsConstant()).
-                ToList();
+            // Find all parents which are NOT constant and all parents which are constant,
+            // but skip any constants which are equal to the identity.
+            List<IParent> remainder = new();
+            List<IParent> constants = new();
+            foreach (IParent parent in parents) {
+                if (parent.IsConstant()) {
+                    if (!parent.SameValue(identity)) constants.Add(parent);
+                } else remainder.Add(parent);
+            }
 
             // If the non-constant parents are all of the parents, then just leave, there is nothing to do.
             if (remainder.Count == parents.Count) return null;
 
-            // Find all parents which are constant, but skip any constants which are equal to the identity.
-            List<IParent> constants = parents.
-                Where(parent => parent.IsConstant()).
-                WhereNot(parent => parent.SameValue(identity)).
-                ToList();
-
             // Reduce the constants to the smallest set of constants.
             constants = reduceConstants(args, node, identity, constants);
+            remainder.AddRange(constants);
 
             // If the non-constant parents and the reduced constant parents equal the initial parents,
             // then no parents were able to be reduced, so just leave, there is nothing to do.
-            if (remainder.Count + constants.Count == parents.Count) return null;
+            if (remainder.Count == parents.Count) return null;
 
             // Add the constants into the list of non-constants as the new parents for this node.
             // If there are no parents left at all, then return the identity for the node.
-            remainder.AddRange(constants);
             if (remainder.Count <= 0) return identity;
             parents.SetAll(remainder);
             return null;
         }
 
-        /// <summary></summary>
+        /// <summary>
+        /// This attempts to remove as many parents as possible from the given node by finding constant parents.
+        /// The consecutive constant parents will be precomputed and any identity parents will be removed.
+        /// If there are no parents left then the identity will be returned.
+        /// </summary>
+        /// <remarks>
+        /// This will handle things like having a several literal strings being concatenated with a few variables.
+        /// The literals can all be pre-concatenated but they can not be moved, i.e. not commutable.
+        /// </remarks>
         /// <param name="args">The arguments for the optimization rules.</param>
         /// <param name="node">The node to try and reduce.</param>
         /// <returns>A node to replace this node with or null to not replace.</returns>
         static private INode notcommutableReduce(RuleArgs args, ICoalescable node) {
+            IConstant identity = node.Identity;
+            IParentCollection parents = node.Parents;
 
-            // TODO: Implement
+            // If there are no parents then return the identity for this node.
+            if (parents.Count <= 0) return identity;
 
+            // Find consecutive parents which are constant, but skip any constants which are equal to the identity,
+            // put reduced constants and parents which are NOT constant into the remainder.
+            List<IParent> remainder = new();
+            List<IParent> constants = new();
+            foreach (IParent parent in parents) {
+                if (parent.IsConstant()) {
+                    if (!parent.SameValue(identity)) constants.Add(parent);
+                } else {
+                    // Reduce the constants to the smallest set of constants.
+                    if (constants.Count > 0) {
+                        constants = reduceConstants(args, node, identity, constants);
+                        remainder.AddRange(constants);
+                        constants.Clear();
+                    }
+                    remainder.Add(parent);
+                }
+            }
+
+            // Reduce the constants to the smallest set of constants.
+            if (constants.Count > 0) {
+                constants = reduceConstants(args, node, identity, constants);
+                remainder.AddRange(constants);
+                constants.Clear();
+            }
+
+            // If there are no parents left at all, then return the identity for the node.
+            if (remainder.Count <= 0) return identity;
+
+            // If the non-constant parents and the reduced constant parents equal the initial parents,
+            // then no parents were able to be reduced, so just leave, there is nothing to do.
+            if (remainder.Count == parents.Count) return null;
+            parents.SetAll(remainder);
             return null;
         }
 

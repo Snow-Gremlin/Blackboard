@@ -63,6 +63,14 @@
                    (Unicode1_1): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Unicode1_2): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Unicode1_3): '0'..'9', 'a'..'f', 'A'..'F' => (String1Body);
+(Escaped1): 'U' => (Rune1_0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_1): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_2): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_3): '0'..'9', 'a'..'f', 'A'..'F' => 
+                   (Rune1_4): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_5): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_6): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_7): '0'..'9', 'a'..'f', 'A'..'F' => (String1Body);
 (String1Body): * => (String1Body);
 
 (Start): ^'"' => (String2Body): ^'"' => [String];
@@ -74,6 +82,14 @@
                    (Unicode2_1): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Unicode2_2): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Unicode2_3): '0'..'9', 'a'..'f', 'A'..'F' => (String2Body);
+(Escaped2): 'U' => (Rune2_0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_1): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_2): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_3): '0'..'9', 'a'..'f', 'A'..'F' => 
+                   (Rune2_4): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_5): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_6): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_7): '0'..'9', 'a'..'f', 'A'..'F' => (String2Body);
 (String2Body): * => (String2Body);
 
 # Symbols
@@ -193,6 +209,8 @@
 
 <DefineTypedRule> := <RootType> [Identifier] {defineId} [Define] <Conditional> {typeDefine}
     | [DeclareDefine] <RootType> [Identifier] {defineId} [Assign] <Conditional> {typeDefine};
+    
+#----------------------------------------------------------
 
 <DefineVarRule> := [Identifier] {defineId} [Define] <Conditional> {varDefine}
     | [DeclareDefine] [Identifier] {defineId} [Assign] <Conditional> {varDefine};
@@ -209,16 +227,30 @@
     | [Trigger] <Conditional> {conditionalProvokeTrigger} <ConditionalProvokeTriggerTail>;
 
 #----------------------------------------------------------
+   
+<GetTypedValue> := [DeclareGet] <RootType> <GetTypedValuePart> <GetTypedValueTail>;
 
-<GetTypedValue> := [DeclareGet] <RootType> [Identifier] {defineId} [Assign] <Conditional> {typeGet};
+<GetTypedValueTail> := _
+    | [Comma] <GetTypedValuePart> <GetTypedValueTail>;
 
-<GetVarValue> := [DeclareGet] [Identifier] {defineId} [Assign] <Conditional> {varGet};
+<GetTypedValuePart> := [Identifier] {defineId} {pushId} {typeGet}
+    | [Identifier] {defineId} [Assign] <Conditional> {typeGet};
+
+#----------------------------------------------------------
+   
+<GetVarValue> := [DeclareGet] <GetVarValuePart> <GetVarValueTail>;
+
+<GetVarValueTail> := _
+    | [Comma] <GetVarValuePart> <GetVarValueTail>;
+
+<GetVarValuePart> := [Identifier] {defineId} {pushId} {varGet}
+    | [Identifier] {defineId} [Assign] <Conditional> {varGet};
 
 #==========================================================
 
 <Declaration> := <Conditional>
     | <Conditional> [Assign] <Declaration> {assignment};
-
+    
 <Conditional> := <LogicalOr>
     | <Conditional> [Test] <Conditional> [Else] <Conditional> {ternary};
 
@@ -269,7 +301,6 @@
 <Unary> := <Expression>
     | [Neg]    <Expression> {negate}
     | [Not]    <Expression> {not}
-    | [Pos]    <Expression>
     | [Invert] <Expression> {invert}
     | [ParOpen] <RootType> [ParClose] <Expression> {cast};
 

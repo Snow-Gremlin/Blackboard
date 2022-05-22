@@ -1,19 +1,51 @@
-﻿# Design
+﻿# The Blackboard Language
 
+- [Comments](#comments)
+- [Inputs](#inputs)
+- [Rules](#rules)
+- [Constants](#constants)
+- [Outputting Items](#outputting-items)
+- [Triggers](#triggers)
+- [Namespace](#namespace)
+
+- [Operators](./Operators.md)
+- [Literals](./Literals.md)
+- [Types](./Types.md)
 
 ## Comments
 
+Comments can be added anywhere in the code and have no effect on the way the code runs.
+Comments are very important to describe why something exists in the code.
+
+Single line comments start with `//` and continue until the end of the line.
 
 ```
 // One line comment
-
-/*Multiline
-comment*/
 ```
+
+Multiline comments start with `/*` and continue until `*/`. This comment must be closed before the end of the file.
+
+```
+/*
+Multiline
+comment
+*/
+```
+
+### Comment Suggestions
+
+Let the code explain _what_ is being done and your comments explain _why_ you would bother writing that code.
+
+| Bad                                               | Good                                             |
+|:--------------------------------------------------|:-------------------------------------------------|
+| This function adds the prior value to the <br>    | Gets the Fibonacci value at the given iteration. |
+| current value for the given number of iterations. |                                                  |
+
+_Your future self will love your past self for leaving good comments_
 
 ## Inputs
 
-TODO:
+TODO: Finish and rework
 
 ```
 in A = 9;
@@ -27,9 +59,9 @@ B = C = 33;
 A = 2.14; // Error: May not assign a double to an int
 ```
 
-## Rule
+## Rules
 
-TODO:
+TODO: Finish and rework
 
 ```
 A := 12;
@@ -83,7 +115,7 @@ get A;
 
 ## Outputting Items
 
-TODO:
+TODO: Finish and rework
 
 ```
 get A, B, C;
@@ -93,7 +125,7 @@ get float F = 13.4;
 
 ## Triggers
 
-TODO:
+TODO: Finish and rework
 
 ```
 in trigger A, B;
@@ -109,15 +141,6 @@ D := on(C > 3);
 E := D || (A && B);
 ```
 
-
 ## Namespace
 
-TODO:
-
-
-## Ideas
-
-- Would it be possible to make an equation which does `min <= i < max`
-  where it converts to `min <= i && i < max` and not `(min <= i) < max`
-  which would resolve to `bool < max`? Maybe add a special symbol like a
-  ternary? And could it also support `a == b == c == d`?
+TODO: Start

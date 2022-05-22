@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Actions;
 using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -189,6 +190,44 @@ namespace BlackboardTests.ParserTests {
                "   [Target: int]",
                "   [Type: double]",
                "   [Value: <double>[3.14]]]");
+        }
+
+        [TestMethod]
+        public void TestFormula_Assignment() {
+            Slate slate = new();
+            slate.Read("in int A, B;").Perform();
+            Formula formula1 = slate.Read("A = 4;");
+            Formula formula2 = slate.Read("B = 7;");
+            Formula formula3 = slate.Read("A = 6; B = 2;");
+
+            // Initial values
+            slate.CheckValue(0, "A");
+            slate.CheckValue(0, "B");
+
+            formula1.Perform();
+            slate.CheckValue(4, "A");
+            slate.CheckValue(0, "B");
+
+            formula2.Perform();
+            slate.CheckValue(4, "A");
+            slate.CheckValue(7, "B");
+
+            formula3.Perform();
+            slate.CheckValue(6, "A");
+            slate.CheckValue(2, "B");
+
+            // Re-use assignment formulas
+            formula2.Perform();
+            slate.CheckValue(6, "A");
+            slate.CheckValue(7, "B");
+
+            formula3.Perform();
+            slate.CheckValue(6, "A");
+            slate.CheckValue(2, "B");
+
+            formula1.Perform();
+            slate.CheckValue(4, "A");
+            slate.CheckValue(2, "B");
         }
     }
 }

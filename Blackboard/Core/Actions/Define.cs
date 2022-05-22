@@ -4,7 +4,6 @@ using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
-using S = System;
 
 namespace Blackboard.Core.Actions {
 
@@ -21,6 +20,7 @@ namespace Blackboard.Core.Actions {
         private readonly IChild[] needParents;
 
         /// <summary>Creates a new define action.</summary>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="receiver">This is the receiver that will be written to.</param>
         /// <param name="name">The name to write the node with.</param>
         /// <param name="node">The node being set to the receiver with the given name.</param>
@@ -33,8 +33,6 @@ namespace Blackboard.Core.Actions {
             this.Name = name;
             this.Node = node;
             this.needParents = allNewNodes.Illegitimates().ToArray();
-
-            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
         }
 
         /// <summary>This is the receiver that will be written to.</summary>
@@ -50,6 +48,7 @@ namespace Blackboard.Core.Actions {
         public IReadOnlyList<IChild> NeedParents => this.needParents;
 
         /// <summary>This will perform the action.</summary>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="slate">The slate for this action.</param>
         /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>

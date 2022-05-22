@@ -24,20 +24,20 @@ namespace Blackboard.Core {
         public const string OperatorNamespace = "$operators";
 
         /// <summary>The nodes which have had one or more parent modified and they need to have their depth updated.</summary>
-        private LinkedList<IEvaluable> pendingUpdate;
+        private readonly LinkedList<IEvaluable> pendingUpdate;
 
         /// <summary>The nodes which have had one or more parent modified and they need to be reevaluated.</summary>
-        private LinkedList<IEvaluable> pendingEval;
+        private readonly LinkedList<IEvaluable> pendingEval;
 
         /// <summary>The set of provoked triggers which need to be reset.</summary>
-        private HashSet<ITrigger> needsReset;
+        private readonly HashSet<ITrigger> needsReset;
 
         /// <summary>A collection of literals and constants used in the graph.</summary>
         /// <remarks>
         /// This is to help reduce overhead of duplicate constants and
         /// help with optimization of constant branches in the graph.
         /// </remarks>
-        private HashSet<IConstant> constants;
+        private readonly HashSet<IConstant> constants;
 
         /// <summary>Creates a new slate.</summary>
         /// <param name="addFuncs">Indicates that built-in functions should be added.</param>
@@ -115,7 +115,7 @@ namespace Blackboard.Core {
                 Any.Factory);
             add("logicalXor",
                 Xor.Factory,
-                OnlyOne.Factory);
+                XorTrigger.Factory);
             add("modulo",
                 Mod<Int>.Factory,
                 Mod<Double>.Factory);
@@ -158,7 +158,7 @@ namespace Blackboard.Core {
             add("xor",
                 Xor.Factory,
                 BitwiseXor<Int>.Factory,
-                OnlyOne.Factory);
+                XorTrigger.Factory);
         }
 
         /// <summary>This adds all global initial methods for Blackboard.</summary>
@@ -210,6 +210,9 @@ namespace Blackboard.Core {
                 UnaryDoubleMath<Double>.Floor);
             add("implies",
                 Implies.Factory);
+            add("inRange",
+                InRange<Int>.Factory,
+                InRange<Double>.Factory);
             add("latch",
                 Latch<Bool>.Factory,
                 Latch<Int>.Factory,
@@ -273,7 +276,8 @@ namespace Blackboard.Core {
                 UnaryDoubleMath<Double>.Truncate);
             add("xor",
                 BitwiseXor<Int>.Factory,
-                Xor.Factory);
+                Xor.Factory,
+                XorTrigger.Factory);
         }
 
         /// <summary>This adds all the initial constants for Blackboard.</summary>
@@ -294,32 +298,28 @@ namespace Blackboard.Core {
         /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
-        /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
-        public bool SetBool(bool value, params string[] names) =>
+        public void SetBool(bool value, params string[] names) =>
             this.SetValue(new Bool(value), names);
 
         /// <summary>Sets a value for the given named input.</summary>
         /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
-        /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
-        public bool SetInt(int value, params string[] names) =>
+        public void SetInt(int value, params string[] names) =>
             this.SetValue(new Int(value), names);
 
         /// <summary>Sets a value for the given named input.</summary>
         /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
-        /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
-        public bool SetDouble(double value, params string[] names) =>
+        public void SetDouble(double value, params string[] names) =>
             this.SetValue(new Double(value), names);
 
         /// <summary>Sets a value for the given named input.</summary>
         /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
-        /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
-        public bool SetString(string value, params string[] names) =>
+        public void SetString(string value, params string[] names) =>
             this.SetValue(new String(value), names);
 
         /// <summary>Sets a value for the given named input.</summary>
@@ -327,23 +327,16 @@ namespace Blackboard.Core {
         /// <typeparam name="T">The type of the value to set to the input.</typeparam>
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
-        /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
-        public bool SetValue<T>(T value, params string[] names) where T : IData =>
-            this.SetValue<T>(value, names as IEnumerable<string>);
+        public void SetValue<T>(T value, params string[] names) where T : IData =>
+            this.SetValue(value, names as IEnumerable<string>);
 
         /// <summary>Sets a value for the given named input.</summary>
         /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
         /// <typeparam name="T">The type of the value to set to the input.</typeparam>
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
-        /// <returns>True if named input node is found and is the correct type, false otherwise.</returns>
-        public bool SetValue<T>(T value, IEnumerable<string> names) where T : IData {
-            if (this.Global.Find(names) is IValueInput<T> node) {
-                this.SetValue(value, node);
-                return true;
-            }
-            return false;
-        }
+        public void SetValue<T>(T value, IEnumerable<string> names) where T : IData =>
+            this.SetValue(value, this.GetNode<IValueInput<T>>(names));
 
         /// <summary>Sets the value of the given input node.</summary>
         /// <remarks>
@@ -358,25 +351,15 @@ namespace Blackboard.Core {
             if (input.SetValue(value)) this.PendEval(input.Children);
         }
 
-        #endregion
-        #region Provokers...
-
         /// <summary>This will provoke the node with the given name.</summary>
         /// <param name="names">The name of trigger node to provoke.</param>
-        /// <returns>True if a node by that name is found and it was a trigger, false otherwise.</returns>
-        public bool Provoke(params string[] names) =>
+        public void Provoke(params string[] names) =>
             this.Provoke(names as IEnumerable<string>);
 
         /// <summary>This will provoke the node with the given name.</summary>
         /// <param name="names">The name of trigger node to provoke.</param>
-        /// <returns>True if a node by that name is found and it was a trigger, false otherwise.</returns>
-        public bool Provoke(IEnumerable<string> names) {
-            if (this.Global.Find(names) is ITriggerInput node) {
-                this.Provoke(node);
-                return true;
-            }
-            return false;
-        }
+        public void Provoke(IEnumerable<string> names) =>
+            this.Provoke(this.GetNode<ITriggerInput>(names));
 
         /// <summary>This will provoke the given trigger node.</summary>
         /// <remarks>
@@ -392,18 +375,6 @@ namespace Blackboard.Core {
                 this.NeedsReset(input);
             }
         }
-
-        /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
-        /// <param name="names">The name of trigger node to get the state from.</param>
-        /// <returns>True if a node by that name is found and it is provoked, false otherwise.</returns>
-        public bool Provoked(params string[] names) =>
-            this.Provoked(names as IEnumerable<string>);
-
-        /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
-        /// <param name="names">The name of trigger node to get the state from.</param>
-        /// <returns>True if a node by that name is found and it is provoked, false otherwise.</returns>
-        public bool Provoked(IEnumerable<string> names) =>
-            this.Global.Find(names) is ITrigger node && node.Provoked;
 
         #endregion
         #region Value Getters...
@@ -448,24 +419,93 @@ namespace Blackboard.Core {
             this.GetValue<T>(names as IEnumerable<string>);
 
         /// <summary>Gets the value from an named node.</summary>
-        /// <remarks>This will throw an exception if no node by that name exists or the found node is the incorrect type.</remarks>
         /// <typeparam name="T">The type of value to read.</typeparam>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
-        public T GetValue<T>(IEnumerable<string> names) where T : IData {
+        public T GetValue<T>(IEnumerable<string> names) where T : IData =>
+            this.GetNode<IValue<T>>(names).Value;
+
+        /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
+        /// <param name="names">The name of trigger node to get the state from.</param>
+        /// <returns>True if a node by that name is found and it is provoked, false otherwise.</returns>
+        public bool Provoked(params string[] names) =>
+            this.Provoked(names as IEnumerable<string>);
+
+        /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
+        /// <param name="names">The name of trigger node to get the state from.</param>
+        /// <returns>True if a node by that name is found and it is provoked, false otherwise.</returns>
+        public bool Provoked(IEnumerable<string> names) =>
+            this.GetNode<ITrigger>(names).Provoked;
+
+        /// <summary>Gets the node with the given name.</summary>
+        /// <typeparam name="T">The expected type of node to get.</typeparam>
+        /// <param name="names">The name of the node to get.</param>
+        /// <returns>The node with the given name and type.</returns>
+        public T GetNode<T>(params string[] names) where T : INode =>
+            this.GetNode<T>(names as IEnumerable<string>);
+
+        /// <summary>Gets the node with the given name.</summary>
+        /// <remarks>This will throw an exception if no node by that name exists or the found node is the incorrect type.</remarks>
+        /// <typeparam name="T">The expected type of node to get.</typeparam>
+        /// <param name="names">The name of the node to get.</param>
+        /// <returns>The node with the given name and type.</returns>
+        public T GetNode<T>(IEnumerable<string> names) where T : INode {
             object obj = this.Global.Find(names);
             return obj is null ?
-                    throw new Message("Unable to get a value by the given name.").
+                    throw new Message("Unable to get a node by the given name.").
                         With("Name", names.Join(".")).
                         With("Value Type", typeof(T)) :
-                obj is not IValue<T> node ?
-                    throw new Message("The value found by the given name is not the expected type.").
+                obj is not T node ?
+                    throw new Message("The node found by the given name is not the expected type.").
                         With("Name", names.Join(".")).
                         With("Found Type", obj.GetType()).
                         With("Expected Type", typeof(T)) :
-                node.Value;
+                node;
         }
 
+        #endregion
+        #region Output...
+
+        /// <summary>Gets or creates a new output value on the node with the given name.</summary>
+        /// <typeparam name="T">The data type of the value to output.</typeparam>
+        /// <param name="names">The name of the node to look up.</param>
+        /// <returns>The new or existing value output.</returns>
+        public IValueOutput<T> GetOutputValue<T>(params string[] names) where T : IComparable<T> =>
+            this.GetOutputValue<T>(names as IEnumerable<string>);
+
+        /// <summary>Gets or creates a new output value on the node with the given name.</summary>
+        /// <typeparam name="T">The data type of the value to output.</typeparam>
+        /// <param name="names">The name of the node to look up.</param>
+        /// <returns>The new or existing value output.</returns>
+        public IValueOutput<T> GetOutputValue<T>(IEnumerable<string> names) where T : IComparable<T> {
+            IValueParent<T> parent = this.GetNode<IValueParent<T>>(names);
+            IValueOutput<T> output = parent.Children.OfType<IValueOutput<T>>().FirstOrDefault();
+            if (output is not null) return output;
+
+            output = new OutputValue<T>(parent);
+            output.Legitimatize();
+            return output;
+        }
+
+        /// <summary>Gets or creates a new output trigger on the node with the given name.</summary>
+        /// <param name="names">The name of the node to look up.</param>
+        /// <returns>The new or existing trigger output.</returns>
+        public ITriggerOutput GetOutputTrigger(params string[] names) =>
+            this.GetOutputTrigger(names as IEnumerable<string>);
+
+        /// <summary>Gets or creates a new output trigger on the node with the given name.</summary>
+        /// <param name="names">The name of the node to look up.</param>
+        /// <returns>The new or existing trigger output.</returns>
+        public ITriggerOutput GetOutputTrigger(IEnumerable<string> names) {
+            ITriggerParent parent = this.GetNode<ITriggerParent>(names);
+            ITriggerOutput output = parent.Children.OfType<ITriggerOutput>().FirstOrDefault();
+            if (output is not null) return output;
+
+            output = new OutputTrigger(parent);
+            output.Legitimatize();
+            return output;
+        }
+        
         #endregion
         #region Update...
 

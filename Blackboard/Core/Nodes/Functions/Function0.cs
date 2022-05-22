@@ -15,9 +15,8 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>Creates a new singular node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
         public Function(S.Func<TReturn> hndl) :
-            base(false, false) {
+            base(false, false) =>
             this.hndl = hndl;
-        }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

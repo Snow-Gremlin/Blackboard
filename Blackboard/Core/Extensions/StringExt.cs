@@ -69,7 +69,7 @@ namespace Blackboard.Core.Extensions {
             src.Split(separator).Select(name => name.Trim()).Where(name => !string.IsNullOrEmpty(name));
 
         /// <summary>The singleton to reuse any allocated diff memory.</summary>
-        static private System.Lazy<Diff> diffSingleton = new();
+        static private readonly System.Lazy<Diff> diffSingleton = new();
 
         /// <summary>This will create a diff between the two given lists of values.</summary>
         /// <param name="first">The first list of values (added).</param>

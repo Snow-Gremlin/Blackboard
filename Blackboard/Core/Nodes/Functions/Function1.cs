@@ -19,9 +19,8 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <param name="hndl">The factory handle.</param>
         /// <param name="needsOneNoCast">Indicates that at least one argument must not be a cast.</param>
         public Function(S.Func<T, TReturn> hndl, bool needsOneNoCast = false) :
-            base(needsOneNoCast, false, Type.FromType<T>()) {
+            base(needsOneNoCast, false, Type.FromType<T>()) =>
             this.hndl = hndl;
-        }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

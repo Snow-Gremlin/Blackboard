@@ -2,10 +2,8 @@
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
-using PetiteParser.Scanner;
 using System.Collections.Generic;
 using System.Linq;
-using S = System;
 
 namespace Blackboard.Core.Actions {
 
@@ -18,19 +16,14 @@ namespace Blackboard.Core.Actions {
         /// Creates an assignment from the given nodes after first checking
         /// that the nodes can be used in this type of assignment.
         /// </summary>
-        /// <param name="loc">The location that this provoke was created.</param>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="target">The target node to assign to.</param>
         /// <param name="value">The value to assign to the given target.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         /// <returns>The assignment action.</returns>
-        static public Assign<T> Create(Location loc, INode target, INode value, IEnumerable<INode> allNewNodes) =>
+        static public Assign<T> Create(INode target, INode value, IEnumerable<INode> allNewNodes) =>
             (target is IValueInput<T> input) && (value is IValue<T> data) ?
-            new Assign<T>(input, data, allNewNodes) :
-            throw new Message("Unexpected node types for assignment.").
-                With("Location", loc).
-                With("Type",     typeof(T)).
-                With("Target",   target).
-                With("Value",    value);
+            new Assign<T>(input, data, allNewNodes) : null;
 
         /// <summary>The target input node to set the value of.</summary>
         private readonly IValueInput<T> target;
@@ -45,13 +38,11 @@ namespace Blackboard.Core.Actions {
         private readonly IEvaluable[] needPending;
 
         /// <summary>Creates a new assignment.</summary>
+        /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
         /// <param name="target">The input node to assign.</param>
         /// <param name="value">The node to get the value from.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         public Assign(IValueInput<T> target, IValue<T> value, IEnumerable<INode> allNewNodes) {
-
-            // TODO: Need to validate these nodes, value, etc is ready for this type of action.
-
             this.target = target;
             this.value  = value;
 

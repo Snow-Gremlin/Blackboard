@@ -258,13 +258,18 @@ namespace BlackboardTests {
         static public Formula LogRead(this Slate slate, params string[] input) {
             Stringifier stringifier = Stringifier.Deep().PreloadNames(slate);
             stringifier.ShowFuncs = false;
-            Logger logger = new ConsoleLogger().Stringify(stringifier).
-                SelectGroup("Parser", "Builder", "Optimize"); // TODO: REMOVE
+            Logger logger = new ConsoleLogger().Stringify(stringifier);
             return new Parser(slate, logger).Read(input);
         }
 
         #endregion
         #region Action Result...
+
+        /// <summary>Checks if the names in the output are what is expected.</summary>
+        /// <param name="result">The results to check the names with.</param>
+        /// <param name="names">The names to check against.</param>
+        static public void CheckNames(this Result result, string names) =>
+            Assert.AreEqual(names, result.OutputNames.Join(", "), "Checking the names in the output.");
 
         /// <summary>Gets the message for the CheckValues assertions.</summary>
         /// <param name="type">The type of the value being checked.</param>

@@ -34,7 +34,7 @@ namespace Blackboard.Parser {
         private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
         /// <summary>Optional logger to debugging and inspecting the parser.</summary>
-        private Logger logger;
+        private readonly Logger logger;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="slate">The slate to modify.</param>
@@ -225,7 +225,7 @@ namespace Blackboard.Parser {
             builder.Clear();
         }
 
-        /// <summary></summary>
+        /// <summary>This is called when a new simple identifier has been defined.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handleDefineId(Builder builder) =>
             builder.Identifiers.Push(builder.LastText);
@@ -425,18 +425,15 @@ namespace Blackboard.Parser {
         static private void handlePushId(Builder builder) {
             string name = builder.LastText;
             builder.Logger.Info("Id = \"{0}\"", name);
-            foreach (VirtualNode scope in builder.Scope.Scopes) {
-                INode node = scope.ReadField(name);
-                if (node is not null) {
-                    builder.Nodes.Push(node);
-                    builder.Existing.Add(node);
-                    return;
-                }
+            INode node = builder.Scope.FindID(name);
+            if (node is null) {
+                throw new Message("No identifier found in the scope stack.").
+                    With("Identifier", name).
+                    With("Location", builder.LastLocation);
             }
 
-            throw new Message("No identifier found in the scope stack.").
-                With("Identifier", name).
-                With("Location", builder.LastLocation);
+            builder.Nodes.Push(node);
+            builder.Existing.Add(node);
         }
 
         /// <summary>This handles pushing a bool literal value onto the stack.</summary>

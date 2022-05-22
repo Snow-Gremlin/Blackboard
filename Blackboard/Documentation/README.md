@@ -23,22 +23,22 @@ Y = max(X, 10);
 Z = int(3.15); // Z = truncate(3.15);
 out Z;
 
-group N;
+namespace N;
 N.P := 19;
 
-group M {
+namespace M {
     A := 12;
     B := 4;
 }
 in int C = M.A + M.B;
 
-group N {
-    group M {
+namespace N {
+    namespace M {
         C := 5;
     }
 }
 
-group N.M {
+namespace N.M {
     C := 5;
 }
 ```

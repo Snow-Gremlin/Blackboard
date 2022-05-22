@@ -15,7 +15,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>The overridden nodes for this receiver.</summary>
         /// <remarks>If the node value is null, then the node has been deleted.</remarks>
-        private Dictionary<string, INode> overrides;
+        private readonly Dictionary<string, INode> overrides;
 
         /// <summary>Creates a new virtual node around the given receiver.</summary>
         /// <param name="name">The is the name for this virtual node.</param>

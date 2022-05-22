@@ -56,7 +56,7 @@ namespace Blackboard.Core.Nodes.Collections {
         }
 
         /// <summary>The parameters for each parent in this fixed collection.</summary>
-        private List<IParam> source;
+        private readonly List<IParam> source;
 
         /// <summary>Constructs a new fixed parent collection.</summary>
         /// <remarks>This is created with no parents. Use the `With` method to add a parent parameter.</remarks>

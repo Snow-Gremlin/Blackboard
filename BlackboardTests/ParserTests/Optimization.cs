@@ -32,5 +32,18 @@ namespace BlackboardTests.ParserTests {
                 "  Finish",
                 "]");
         }
+
+        [TestMethod]
+        public void TestParseOptimization_StringReduction() {
+            Slate slate = new();
+            slate.Read("in string A = '! '; B := 3;").Perform();
+            Formula formula = slate.LogRead(
+                "E := ('Hello' + ' ' + 'World') + A + ('The ' + B + ' hot dogs cost $' + 12.0 + '.');");
+            formula.Check(
+                "[",
+                "  Global.E := Sum<string>[](<string>[Hello World], A[! ], <string>[The 3 hot dogs cost $12.]) {Sum<string>[]};",
+                "  Finish",
+                "]");
+        }
     }
 }

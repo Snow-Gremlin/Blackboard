@@ -135,5 +135,14 @@ namespace Blackboard.Core.Extensions {
             value.CompareTo(min) < 0 ? min :
             value.CompareTo(max) > 0 ? max :
             value;
+
+        /// <summary>Determines if the given value is in the inclusive range of the given min and max.</summary>
+        /// <param name="value">The value to test.</param>
+        /// <param name="min">The minimum value of the range.</param>
+        /// <param name="max">The maximum value of the range.</param>
+        /// <returns>True if the value is in the given range, otherwise false.</returns>
+        static public bool InRange<T>(this T value, T min, T max)
+            where T : S.IComparable<T> =>
+            value.CompareTo(min) >= 0 && value.CompareTo(max) <= 0;
     }
 }

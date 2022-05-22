@@ -1,6 +1,13 @@
 ﻿# The Blackboard Language
 
 - [Comments](#comments)
+- [Inputs](#inputs)
+- [Rules](#rules)
+- [Constants](#constants)
+- [Outputting Items](#outputting-items)
+- [Triggers](#triggers)
+- [Namespace](#namespace)
+
 - [Operators](./Operators.md)
 - [Literals](./Literals.md)
 - [Types](./Types.md)
@@ -36,8 +43,6 @@ Let the code explain _what_ is being done and your comments explain _why_ you wo
 
 _Your future self will love your past self for leaving good comments_
 
-====================================================================
-
 ## Inputs
 
 TODO: Finish and rework
@@ -54,7 +59,7 @@ B = C = 33;
 A = 2.14; // Error: May not assign a double to an int
 ```
 
-## Rule
+## Rules
 
 TODO: Finish and rework
 
@@ -138,4 +143,4 @@ E := D || (A && B);
 
 ## Namespace
 
-TODO:
+TODO: Start

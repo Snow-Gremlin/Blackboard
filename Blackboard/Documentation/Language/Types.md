@@ -37,6 +37,7 @@ The `bool` type is a boolean value.
 This can be assigned to [boolean literals](#booleans).
 `bool` is returned from equality tests, such as `<`, `>=`, and `=`.
 They can use logical operations, such as `!`, `&`, and `|`.
+`bool` implicitly casts to [`trigger`](#trigger) and [`string`](#string).
 
 ```
 in a = true;
@@ -49,6 +50,7 @@ bool d = a == b;
 
 The `int` type is an 32-bit signed integer.
 This can be assigned to [integer literals](#integers).
+`int` implicitly casts to [`double`](#double) and [`string`](#string).
 
 ```
 in int a = 42;
@@ -61,6 +63,7 @@ c := a + b * 2;
 The `double` type is a floating point 64-bit finite real numbers with 1-bit sign, 53-bit mantissa,
 and 11-bit exponent, as defined by [IEEE-754](https://en.wikipedia.org/wiki/IEEE_754).
 This can be assigned to [double literals](#doubles).
+`double` implicitly casts to [`string`](#string) and explicitly casts to [`int`](#int).
 
 ### string
 
@@ -103,6 +106,7 @@ Currently there is no way to define function groups within the Blackboard langua
 The `function-def` is a single definition for a single function with a specific signature.
 Function definitions are predefined for a number of various usages.
 Currently there is no way to define function definitions within the Blackboard language.
+`function-def` can be implicitly cast to [`function-group`](#function-group).
 
 ### counter
 

@@ -90,7 +90,7 @@ For more information see [Order of Operations](https://en.wikipedia.org/wiki/Ord
 
 ## Action
 
-All action operations are performed with a [formula](./formula.md#assignment).
+All action operations are performed with a formula.
 This means that they will only run when the formula is performed.
 Actions are typically performed right to left.
 
@@ -274,13 +274,7 @@ Examples: `a - b`
 
 #### Multiplication
 
-13  | `*`          | `a * b`     | The product of the left hand value and the right hand value.
-
-
-
-
-
-
+A single astrix, `*`, can be used in a binary operation to get the product of the two values.
 For more information see [Multiplication](https://en.wikipedia.org/wiki/Multiplication).
 Implemented with the [`Sub`](../Core/Nodes/Inner/Sub.cs) node.
 
@@ -288,14 +282,8 @@ Examples: `a * b`
 
 #### Division
 
-13  | `/`          | `a / b`     | The left hand value divided by the right hand value.
-
-
-
-
-
-
-
+A single slash, `/`, can be used to divide the left hand value by the right hand value.
+If both sides are integers, the result will be truncated to an integer.
 For more information see [Division](https://en.wikipedia.org/wiki/Division_(mathematics)).
 Implemented with the [`Sub`](../Core/Nodes/Inner/Sub.cs) node.
 
@@ -303,15 +291,7 @@ Examples: `a / b`
 
 #### Modulo
 
-13  | `%`          |      | The modulo (remainder) of the left hand value by the right hand value.
-
-
-
-
-
-
-
-
+A `%` symbol can be used to get the modulo (remainder) of the left hand value by the right hand value.
 For more information see [Modulo](https://en.wikipedia.org/wiki/Modulo_(mathematics)).
 Implemented with the [`Sub`](../Core/Nodes/Inner/Sub.cs) node.
 

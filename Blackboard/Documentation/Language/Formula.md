@@ -1,6 +1,0 @@
-﻿# Formula
-
-- [Assignment](#assignment)
-
-## Assignment
-

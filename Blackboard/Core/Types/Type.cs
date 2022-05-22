@@ -348,7 +348,5 @@ namespace Blackboard.Core.Types {
 
             addCast<IFuncDef>(FuncDef.imps, FuncGroup, (input) => new FuncGroup(input));
         }
-
-        internal static Type TypeOf<T>() where T : IData => throw new S.NotImplementedException();
     }
 }

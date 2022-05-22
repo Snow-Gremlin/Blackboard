@@ -113,7 +113,7 @@ namespace Blackboard.Parser {
 
             this.addHandler("typeGet", handleTypeGet);
             this.addHandler("varGet", handleVarGet);
-            
+
             this.addHandler("assignment", handleAssignment);
             this.addHandler("cast", handleCast);
             this.addHandler("memberAccess", handleMemberAccess);

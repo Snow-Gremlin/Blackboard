@@ -139,6 +139,8 @@
 [Identifier] = 'in'     => [DeclareIn];
 [Identifier] = 'get'    => [DeclareGet];
 [Identifier] = 'define' => [DeclareDefine];
+[Identifier] = 'temp'   => [DeclareTemp];
+[Identifier] = 'proxy'  => [DeclareProxy];
 
 [Identifier] = 'counter' => [DeclareCounter];
 [Identifier] = 'latch'   => [DeclareLatch];
@@ -153,20 +155,26 @@
 # Reserved Identifiers (Keeping options open for future versions)
 [Identifier] = 'byte', 'char', 'enum', 'float', 'int8', 'int16', 'int32', 'int64',
                'list', 'long', 'map', 'set', 'short', 'struct', 'type', 'uint',
-               'uint8', 'uint16', 'uint32', 'uint64', 'ulong', 'ushort' => [ReservedTypes];
+               'uint8', 'uint16', 'uint32', 'uint64', 'ulong', 'ushort'
+             => [ReservedTypes];
 
 [Identifier] = 'internal', 'global', 'local',
-               'private', 'protected', 'public', 'static' => [ReservedScoping];
+               'private', 'protected', 'public', 'static'
+             => [ReservedScoping];
 
-[Identifier] = 'abstract', 'class', 'const', 'def', 'func', 'interface', 'operator',
-               'override', 'typedef', 'void', 'virtual' => [ReservedDefinitions];
+[Identifier] = 'abstract', 'class', 'const', 'def', 'func', 'interface',
+               'operator', 'override', 'typedef', 'void', 'virtual'
+             => [ReservedDefinitions];
 
 [Identifier] = 'as', 'break', 'catch', 'case', 'continue', 'default', 'else',
-               'finally', 'go', 'if', 'import', 'intersect', 'is', 'out', 'return', 'select',
-               'switch', 'then', 'try', 'typeof', 'union', 'using', 'when', 'yield' => [ReservedConstructs];
+               'finally', 'go', 'if', 'import', 'intersect', 'is', 'null', 'out',
+               'return', 'select', 'switch', 'then', 'try', 'typeof', 'union',
+               'using', 'when', 'yield'
+             => [ReservedConstructs];
 
 [Identifier] = 'complex', 'do', 'dynamic', 'for', 'foreach', 'goto',
-               'label', 'null', 'readonly', 'sealed', 'until', 'while' => [ReservedUnsupported];
+               'label', 'readonly', 'sealed', 'until', 'while'
+             => [ReservedUnsupported];
 
 #==========================================================
 # Grammar Rules

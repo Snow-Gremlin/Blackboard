@@ -1,20 +1,25 @@
-﻿using Blackboard.Core.Data.Interfaces;
+﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using S = System;
 
 namespace Blackboard.Core.Nodes.Inner {
 
-    /// <summary>This gets the double mathematical function value from two parents.</summary>
-    sealed public class BinaryDoubleMath<T>: BinaryValue<T, T, T>
-        where T : IFloatingPoint<T>, IEquatable<T> {
+    /// <summary>Unary nodes for floating point mathematics.</summary>
+    /// <typeparam name="T">The type of floating point to perform the math on.</typeparam>
+    static public class BinaryFloatingPoint<T> where T : IFloatingPoint<T>, IEquatable<T> {
+
+        /// <summary>This is a factory for creating a new Round instance of this node.</summary>
+        /// <remarks>This returns the rounded value from the parent at the given decimal point.</remarks>
+        static public readonly IFuncDef Round = BinaryFunc<T, Int, T>.Factory(nameof(Round), (v1, v2) => v1.Round(v2));
 
         /// <summary>This is a factory for creating a new Atan2 instance of this node.</summary>
         /// <remarks>
         /// This returns the angle whose tangent is the quotient of two specified numbers
         /// where the first parent is the y value and the second parent is the x value.
         /// </remarks>
-        static public readonly IFuncDef Atan2 = Factory(nameof(Atan2), S.Math.Atan2);
+        static public readonly IFuncDef Atan2 = factory(nameof(Atan2), S.Math.Atan2);
 
         /// <summary>This is a factory for creating a new IEEERemainder instance of this node.</summary>
         /// <remarks>
@@ -22,35 +27,53 @@ namespace Blackboard.Core.Nodes.Inner {
         /// specified number. The first parent is the dividend and the second parent is the divisor.
         /// This is different from a modulo because it uses the IEEE 754 standard remainder algorithm.
         /// </remarks>
-        static public readonly IFuncDef IEEERemainder = Factory(nameof(IEEERemainder), S.Math.IEEERemainder);
+        static public readonly IFuncDef IEEERemainder = factory(nameof(IEEERemainder), S.Math.IEEERemainder);
 
         /// <summary>This is a factory for creating a new Log instance of this node.</summary>
         /// <remarks>This returns the log of the first parent with the base of the second parent.</remarks>
-        static public readonly IFuncDef Log = Factory(nameof(Log), S.Math.Log);
+        static public readonly IFuncDef Log = factory(nameof(Log), S.Math.Log);
 
         /// <summary>This is a factory for creating a new Pow instance of this node.</summary>
         /// <remarks>This returns the first parent raised to the power of the second parent.</remarks>
-        static public readonly IFuncDef Pow = Factory(nameof(Pow), S.Math.Pow);
+        static public readonly IFuncDef Pow = factory(nameof(Pow), S.Math.Pow);
+
+        /// <summary>This is a generic factory for creating a new floating point math node around double math function.</summary>
+        /// <param name="name">The name of the node this factory creates.</param>
+        /// <param name="func">The double math function to perform for this node.</param>
+        /// <returns>The new factory function to create instances of this node.</returns>
+        static private IFuncDef factory(string name, S.Func<double, double, double> func) =>
+            BinaryFunc<T, T, T>.Factory(name, (v1, v2) => v1.DoubleMath(v2, func));
+    }
+
+    /// <summary>This gets the double mathematical function value from two parents.</summary>
+    /// <remarks>
+    /// This uses a little more computation time and more memory that hard coded nodes,
+    /// therefor this should be used to perform less commonly used nodes.
+    /// </remarks>
+    sealed public class BinaryFunc<T1, T2, TResult>: BinaryValue<T1, T2, TResult> 
+        where T1 : IEquatable<T1>
+        where T2 : IEquatable<T2>
+        where TResult : IEquatable<TResult> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <param name="funcName">The display name for this function.</param>
         /// <param name="func">The function to perform for this node.</param>
-        static public IFuncDef Factory(string funcName, S.Func<double, double, double> func) =>
-            CreateFactory((value1, value2) => new BinaryDoubleMath<T>(funcName, func, value1, value2));
+        static public IFuncDef Factory(string funcName, S.Func<T1, T2, TResult> func) =>
+            CreateFactory((value1, value2) => new BinaryFunc<T1, T2, TResult>(funcName, func, value1, value2));
 
         /// <summary>The name of the function for this mathematics.</summary>
         private readonly string funcName;
 
         /// <summary>The function to perform on this node's value.</summary>
-        private readonly S.Func<double, double, double> func;
+        private readonly S.Func<T1, T2, TResult> func;
 
         /// <summary>Creates a double mathematical function value node.</summary>
         /// <param name="funcName">The name of the function to perform.</param>
         /// <param name="func">This is the function to apply to the parents.</param>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
-        public BinaryDoubleMath(string funcName, S.Func<double, double, double> func,
-            IValueParent<T> source1 = null, IValueParent<T> source2 = null) :
+        public BinaryFunc(string funcName, S.Func<T1, T2, TResult> func,
+            IValueParent<T1> source1 = null, IValueParent<T2> source2 = null) :
             base(source1, source2) {
             this.funcName = funcName;
             this.func = func;
@@ -58,7 +81,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>
-        public override INode NewInstance() => new BinaryDoubleMath<T>(this.funcName, this.func);
+        public override INode NewInstance() => new BinaryFunc<T1, T2, TResult>(this.funcName, this.func);
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => this.funcName;
@@ -66,8 +89,8 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>The result of the double mathematical function the parents' value during evaluation.</summary>
         /// <param name="value1">The first value to evaluate.</param>
         /// <param name="value2">The second value to evaluate.</param>
-        /// <returns>The ceiling value.</returns>
-        protected override T OnEval(T value1, T value2) =>
-            this.func is null ? default : value1.DoubleMath(value2, this.func);
+        /// <returns>The new data with the double value.</returns>
+        protected override TResult OnEval(T1 value1, T2 value2) =>
+            this.func is null ? default : this.func(value1, value2);
     }
 }

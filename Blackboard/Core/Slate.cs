@@ -137,7 +137,7 @@ namespace Blackboard.Core {
                 BitwiseOr<Int>.Factory,
                 Any.Factory);
             add("power",
-                BinaryDoubleMath<Double>.Pow);
+                BinaryFloatingPoint<Double>.Pow);
             add("shiftLeft",
                 LeftShift<Int>.Factory);
             add("shiftRight",
@@ -170,9 +170,9 @@ namespace Blackboard.Core {
                 Abs<Int>.Factory,
                 Abs<Double>.Factory);
             add("acos",
-                UnaryDoubleMath<Double>.Acos);
+                UnaryFloatingPoint<Double>.Acos);
             add("acosh",
-                UnaryDoubleMath<Double>.Acosh);
+                UnaryFloatingPoint<Double>.Acosh);
             add("all",
                 All.Factory);
             add("and",
@@ -181,38 +181,55 @@ namespace Blackboard.Core {
             add("any",
                 Any.Factory);
             add("asin",
-                UnaryDoubleMath<Double>.Asin);
+                UnaryFloatingPoint<Double>.Asin);
             add("asinh",
-                UnaryDoubleMath<Double>.Asinh);
+                UnaryFloatingPoint<Double>.Asinh);
             add("atan",
-                BinaryDoubleMath<Double>.Atan2,
-                UnaryDoubleMath<Double>.Atan);
+                BinaryFloatingPoint<Double>.Atan2,
+                UnaryFloatingPoint<Double>.Atan);
             add("atanh",
-                UnaryDoubleMath<Double>.Atanh);
+                UnaryFloatingPoint<Double>.Atanh);
             add("average",
                 Average.Factory);
             add("cbrt",
-                UnaryDoubleMath<Double>.Cbrt);
+                UnaryFloatingPoint<Double>.Cbrt);
             add("ceiling",
-                UnaryDoubleMath<Double>.Ceiling);
+                UnaryFloatingPoint<Double>.Ceiling);
             add("clamp",
                 Clamp<Int>.Factory,
                 Clamp<Double>.Factory);
             add("cos",
-                UnaryDoubleMath<Double>.Cos);
+                UnaryFloatingPoint<Double>.Cos);
             add("cosh",
-                UnaryDoubleMath<Double>.Cosh);
+                UnaryFloatingPoint<Double>.Cosh);
             add("exp",
-                UnaryDoubleMath<Double>.Exp);
+                UnaryFloatingPoint<Double>.Exp);
             add("epsilon",
                 EpsilonEqual<Double>.Factory);
             add("floor",
-                UnaryDoubleMath<Double>.Floor);
+                UnaryFloatingPoint<Double>.Floor);
             add("implies",
                 Implies.Factory);
             add("inRange",
                 InRange<Int>.Factory,
                 InRange<Double>.Factory);
+            add("isFinite",
+                UnaryFloatingPoint<Double>.IsFinite);
+            add("isInf",
+                UnaryFloatingPoint<Double>.IsInfinity);
+            add("isNaN",
+                UnaryFloatingPoint<Double>.IsNaN);
+            add("isNeg",
+                UnarySigned<Int>.IsNegative,
+                UnarySigned<Double>.IsNegative);
+            add("isNegInf",
+                UnaryFloatingPoint<Double>.IsNegativeInfinity);
+            add("isNormal",
+                UnaryFloatingPoint<Double>.IsNormal);
+            add("isNegInf",
+                UnaryFloatingPoint<Double>.IsPositiveInfinity);
+            add("isSubnormal",
+                UnaryFloatingPoint<Double>.IsSubnormal);
             add("latch",
                 Latch<Bool>.Factory,
                 Latch<Int>.Factory,
@@ -221,12 +238,12 @@ namespace Blackboard.Core {
             add("lerp",
                 Lerp<Double>.Factory);
             add("log",
-                BinaryDoubleMath<Double>.Log,
-                UnaryDoubleMath<Double>.Log);
+                BinaryFloatingPoint<Double>.Log,
+                UnaryFloatingPoint<Double>.Log);
             add("log10",
-                UnaryDoubleMath<Double>.Log10);
+                UnaryFloatingPoint<Double>.Log10);
             add("log2",
-                UnaryDoubleMath<Double>.Log2);
+                UnaryFloatingPoint<Double>.Log2);
             add("max",
                 Max<Int>.Factory,
                 Max<Double>.Factory);
@@ -249,9 +266,13 @@ namespace Blackboard.Core {
             add("or",
                 BitwiseOr<Int>.Factory,
                 Or.Factory);
+            add("pow",
+                BinaryFloatingPoint<Double>.Pow);
+            add("remainder",
+                BinaryFloatingPoint<Double>.IEEERemainder);
             add("round",
-                UnaryDoubleMath<Double>.Round,
-                Round<Double>.Factory);
+                BinaryFloatingPoint<Double>.Round,
+                UnaryFloatingPoint<Double>.Round);
             add("select",
                 SelectValue<Bool>.Factory,
                 SelectValue<Int>.Factory,
@@ -259,21 +280,21 @@ namespace Blackboard.Core {
                 SelectValue<String>.Factory,
                 SelectTrigger.Factory);
             add("sin",
-                UnaryDoubleMath<Double>.Sin);
+                UnaryFloatingPoint<Double>.Sin);
             add("sinh",
-                UnaryDoubleMath<Double>.Sinh);
+                UnaryFloatingPoint<Double>.Sinh);
             add("sqrt",
-                UnaryDoubleMath<Double>.Sqrt);
+                UnaryFloatingPoint<Double>.Sqrt);
             add("sum",
                 Sum<Int>.Factory(),
                 Sum<Double>.Factory(),
                 Sum<String>.Factory(true));
             add("tan",
-                UnaryDoubleMath<Double>.Tan);
+                UnaryFloatingPoint<Double>.Tan);
             add("tanh",
-                UnaryDoubleMath<Double>.Tanh);
+                UnaryFloatingPoint<Double>.Tanh);
             add("trunc",
-                UnaryDoubleMath<Double>.Truncate);
+                UnaryFloatingPoint<Double>.Truncate);
             add("xor",
                 BitwiseXor<Int>.Factory,
                 Xor.Factory,

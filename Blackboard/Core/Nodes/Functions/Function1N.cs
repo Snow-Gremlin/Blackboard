@@ -7,15 +7,20 @@ using S = System;
 
 namespace Blackboard.Core.Nodes.Functions {
 
-    /// <summary>This is the factory for a node which has arbitrary number of parents as the source of the value.</summary>
-    /// <typeparam name="Tn">The type of the parents' values for this node.</typeparam>
+    /// <summary>
+    /// This is the factory for a node which has one specific parent
+    /// followed by an arbitrary number of parents as the source of the value.
+    /// </summary>
+    /// <typeparam name="T1">The type of the first parent value for this node.</typeparam>
+    /// <typeparam name="Tn">The type of the remaining parents' values for this node.</typeparam>
     /// <typeparam name="TReturn">The type of this function will return.</typeparam>
-    sealed public class FunctionN<Tn, TReturn>: FuncDef<TReturn>
+    sealed public class Function1N<T1, Tn, TReturn>: FuncDef<TReturn>
+        where T1 : class, INode
         where Tn : class, INode
         where TReturn : class, INode {
 
         /// <summary>The factory for creating the node.</summary>
-        private readonly S.Func<IEnumerable<Tn>, TReturn> hndl;
+        private readonly S.Func<T1, IEnumerable<Tn>, TReturn> hndl;
 
         /// <summary>Creates a new N-ary node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
@@ -24,24 +29,24 @@ namespace Blackboard.Core.Nodes.Functions {
         /// Indicates if there is only one argument for a new node, return the argument.
         /// By default a Nary function will pass one unless otherwise indicated.
         /// </param>
-        /// <param name="min">The minimum number of required nodes.</param>
+        /// <param name="min">The minimum number of required nodes. May not be less than 1.</param>
         /// <param name="max">The maximum allowed number of nodes.</param>
-        public FunctionN(S.Func<IEnumerable<Tn>, TReturn> hndl,
-            bool needsOneNoCast = false, bool passOne = true, int min = 1, int max = int.MaxValue) :
-            base(min, max, needsOneNoCast, passOne, Type.FromType<Tn>()) =>
+        public Function1N(S.Func<T1, IEnumerable<Tn>, TReturn> hndl,
+            bool needsOneNoCast = false, bool passOne = false, int min = 1, int max = int.MaxValue) :
+            base(S.Math.Max(1, min), max, needsOneNoCast, passOne, Type.FromType<T1>(), Type.FromType<Tn>()) =>
             this.hndl = hndl;
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>
-        public override INode NewInstance() => new FunctionN<Tn, TReturn>(this.hndl,
+        public override INode NewInstance() => new Function1N<T1, Tn, TReturn>(this.hndl,
             this.NeedsOneNoCast, this.PassthroughOne, this.MinArgs, this.MaxArgs);
 
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => nameof(FunctionN<Tn, TReturn>);
+        public override string TypeName => nameof(Function1N<T1, Tn, TReturn>);
 
         /// <summary>Builds and return the function node with the given arguments already casted.</summary>
         /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>
         /// <returns>The resulting function node.</returns>
-        protected override INode PostCastBuild(INode[] nodes) => this.hndl(nodes.Cast<Tn>());
+        protected override INode PostCastBuild(INode[] nodes) => this.hndl(nodes[0] as T1, nodes[1..].Cast<Tn>());
     }
 }

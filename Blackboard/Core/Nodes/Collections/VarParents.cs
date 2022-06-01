@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Collections {
     /// This is a parent collection for a child which has a
     /// variable number of parents (nary nodes).
     /// </summary>
-    internal class VarParents<T>: IParentCollection
+    internal class VarParents<T> : IParentCollection
             where T : class, IParent {
 
         private readonly List<T> source;
@@ -41,9 +41,6 @@ namespace Blackboard.Core.Nodes.Collections {
         public IEnumerator<IParent> GetEnumerator() => this.source.NotNull().GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        /// <summary>Indicates that this collection is variable (not fixed).</summary>
-        public bool Fixed => false;
-
         /// <summary>This is the number of parents in the collection.</summary>
         public int Count => this.source.Count;
 
@@ -69,18 +66,10 @@ namespace Blackboard.Core.Nodes.Collections {
             }
         }
 
-        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
-        /// <remarks>
-        /// The new parent must be able to take the place of the old parent,
-        /// otherwise this will throw an exception when attempting the replacement of the old parent.
-        /// </remarks>
-        /// <param name="oldParent">The old parent to find all instances with.</param>
-        /// <param name="newParent">The new parent to replace each instance with.</param>
-        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
-        public bool Replace(IParent oldParent, IParent newParent) {
-            bool changed = false;
+        internal bool PrepareReplace(IParent oldParent, IParent newParent) {
+            if (ReferenceEquals(oldParent, newParent)) return false;
+
             bool typeChecked = false;
-            bool removed = false;
             for (int i = this.source.Count - 1; i >= 0; --i) {
                 T node = this.source[i];
                 if (!ReferenceEquals(node, oldParent)) continue;
@@ -96,8 +85,18 @@ namespace Blackboard.Core.Nodes.Collections {
                         With("target type", typeof(T));
                 typeChecked = true;
 
-                // Replace parent in list of sources.
+                // Check if parent would be in list of sources.
                 if (ReferenceEquals(node, newParent)) continue;
+                return true;
+            }
+            return false;
+        }
+
+        internal bool PerformReplace(IParent oldParent, IParent newParent) {
+            bool changed = false, removed = false;
+            for (int i = this.source.Count - 1; i >= 0; --i) {
+                T node = this.source[i];
+                if (!ReferenceEquals(node, oldParent) || ReferenceEquals(node, newParent)) continue;
                 removed = node?.RemoveChildren(this.Child) ?? false;
                 this.source[i] = newParent as T;
                 changed = true;
@@ -106,11 +105,18 @@ namespace Blackboard.Core.Nodes.Collections {
             return changed;
         }
 
-        /// <summary>This will attempt to set all the parents in a node.</summary>
-        /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
-        /// <param name="newParents">The parents to set.</param>
-        /// <returns>True if any parents changed, false if they were all the same.</returns>
-        public bool SetAll(List<IParent> newParents) {
+        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
+        /// <remarks>
+        /// The new parent must be able to take the place of the old parent,
+        /// otherwise this will throw an exception when attempting the replacement of the old parent.
+        /// </remarks>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
+        public bool Replace(IParent oldParent, IParent newParent) =>
+            this.PrepareReplace(oldParent, newParent) && this.PerformReplace(oldParent, newParent);
+
+        internal bool PrepareSetAll(List<IParent> newParents) {
             int index = 0;
             foreach (IParent parent in newParents) {
                 if (parent is not T)
@@ -124,8 +130,19 @@ namespace Blackboard.Core.Nodes.Collections {
 
             int oldCount = this.source.Count;
             int newCount = newParents.Count;
-            int minCount = S.Math.Min(oldCount, newCount);
+            if (oldCount != newCount) return true;
 
+            int minCount = S.Math.Min(oldCount, newCount);
+            for (int i = 0; i < minCount; ++i) {
+                if (!ReferenceEquals(this.source[i], newParents[i])) return true;
+            }
+            return false;
+        }
+
+        internal bool PerformSetAll(List<IParent> newParents) {
+            int oldCount = this.source.Count;
+            int newCount = newParents.Count;
+            int minCount = S.Math.Min(oldCount, newCount);
             bool changed = oldCount != newCount;
             for (int i = 0; i < minCount; ++i) {
                 if (!ReferenceEquals(this.source[i], newParents[i])) {
@@ -142,17 +159,18 @@ namespace Blackboard.Core.Nodes.Collections {
             return changed;
         }
 
-        /// <summary>This inserts new parents into the given location.</summary>
+        /// <summary>This will attempt to set all the parents in a node.</summary>
+        /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
+        /// <param name="newParents">The parents to set.</param>
+        /// <returns>True if any parents changed, false if they were all the same.</returns>
+        public bool SetAll(List<IParent> newParents) =>
+            this.PrepareSetAll(newParents) && this.PerformSetAll(newParents);
+        
+        /// <summary>This tests if an insert of new parents into the given location would work and do anything.</summary>
         /// <param name="index">The index to insert the new parents into.</param>
         /// <param name="newParents">The set of new parents to insert.</param>
-        /// <param name="oldChild">
-        /// If the parents were being moved from one node onto another node,
-        /// then this is the old child to remove when applying the parents to this node.
-        /// If the old child has been removed from the parent, then this child is added to the parent.
-        /// If there is no old child then this child is not set to the new parents.
-        /// </param>
-        /// <returns>True if any parents were added, false otherwise.</returns>
-        public bool Insert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) {
+        /// <returns>True if any parents would be added, false otherwise.</returns>
+        internal bool PrepareInsert(int index, IEnumerable<IParent> newParents) {
             if (index < 0 || index > this.source.Count)
                 throw new Message("Invalid index to insert parents at.").
                     With("child", this.Child).
@@ -169,6 +187,10 @@ namespace Blackboard.Core.Nodes.Collections {
                         With("gotten type", parent.GetType());
             }
 
+            return newParents.Any();
+        }
+
+        internal bool PerformInsert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) {
             bool changed = false;
             foreach (IParent parent in newParents) {
                 bool removed = oldChild is not null && (parent?.RemoveChildren(oldChild) ?? false);
@@ -180,20 +202,40 @@ namespace Blackboard.Core.Nodes.Collections {
             return changed;
         }
 
-        /// <summary>This removes one or more parent at the given location.</summary>
-        /// <param name="index">The index to start removing the parents from.</param>
-        /// <param name="length">The number of parents to remove.</param>
-        public void Remove(int index, int length = 1) {
-            if (index < 0 || length < 0 || index+length >  this.source.Count)
+        /// <summary>This inserts new parents into the given location.</summary>
+        /// <param name="index">The index to insert the new parents into.</param>
+        /// <param name="newParents">The set of new parents to insert.</param>
+        /// <param name="oldChild">
+        /// If the parents were being moved from one node onto another node,
+        /// then this is the old child to remove when applying the parents to this node.
+        /// If the old child has been removed from the parent, then this child is added to the parent.
+        /// If there is no old child then this child is not set to the new parents.
+        /// </param>
+        /// <returns>True if any parents were added, false otherwise.</returns>
+        public bool Insert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) =>
+            this.PrepareInsert(index, newParents) && this.PerformInsert(index, newParents, oldChild);
+
+        internal void PrepareRemove(int index, int length = 1) {
+            if (index < 0 || length < 0 || index+length > this.source.Count)
                 throw new Message("Not a valid range of parents to remove.").
                     With("child", this.Child).
                     With("count", this.source.Count).
                     With("index", index).
                     With("length", length);
+        }
 
+        internal void PerformRemove(int index, int length = 1) {
             for (int i = index, j = 0; j < length; ++i, ++j)
                 this.source[i]?.RemoveChildren(this.Child);
             this.source.RemoveRange(index, length);
+        }
+
+        /// <summary>This removes one or more parent at the given location.</summary>
+        /// <param name="index">The index to start removing the parents from.</param>
+        /// <param name="length">The number of parents to remove.</param>
+        public void Remove(int index, int length = 1) {
+            this.PrepareRemove(index, length);
+            this.PerformRemove(index, length);
         }
 
         /// <summary>This creates a string for the given set of parents.</summary>

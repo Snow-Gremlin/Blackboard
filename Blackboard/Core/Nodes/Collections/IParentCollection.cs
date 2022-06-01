@@ -20,12 +20,6 @@ namespace Blackboard.Core.Nodes.Collections {
         public IEnumerable<S.Type> Types { get; }
 
         /// <summary>
-        /// Fixed indicates the number of parents may not change,
-        /// otherwise the parents may be variable length.
-        /// </summary>
-        public bool Fixed { get; }
-
-        /// <summary>
         /// The number of parents currently in the collection or the fixed length of parents.
         /// </summary>
         public int Count { get; }

@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="T2">The type of the second parent's value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
     /// <see cref="https://en.wikipedia.org/wiki/Arity#Binary"/>
-    public abstract class BinaryValue<T1, T2, TResult>: ValueNode<TResult>, IChild
+    public abstract class BinaryValue<T1, T2, TResult> : ValueNode<TResult>, IChild
         where T1 : IData
         where T2 : IData
         where TResult : IEquatable<TResult> {

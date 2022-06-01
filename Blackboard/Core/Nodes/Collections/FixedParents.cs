@@ -12,19 +12,21 @@ namespace Blackboard.Core.Nodes.Collections {
     /// This is a parent collection for a child which has a
     /// fixed number of parents (unary, binary, and ternary).
     /// </summary>
-    internal class FixedParents: IParentCollection {
+    internal class FixedParents : IParentCollection {
 
         /// <summary>The definition for a single parent parameter.</summary>
         private interface IParam {
 
             /// <summary>Gets the type of the parameter.</summary>
             public S.Type Type { get; }
+
+            /// <summary>Gets or set the parent.</summary>
             public IParent Node { get; set; }
         }
 
         /// <summary>This is a single parent parameter.</summary>
         /// <typeparam name="T">The type of the parent that is being set.</typeparam>
-        private class Param<T>: IParam
+        private class Param<T> : IParam
                 where T : class, IParent {
 
             private readonly S.Func<T> getParent;
@@ -85,7 +87,7 @@ namespace Blackboard.Core.Nodes.Collections {
         public IChild Child { get; }
 
         /// <summary>The set of type that each parent could have in this collection.</summary>
-        public IEnumerable<S.Type> Types => this.source.Select((p) => p.Type);
+        public IEnumerable<S.Type> Types => this.source.Select(p => p.Type);
 
         /// <summary>The set of parent nodes to this node.</summary>
         /// <remarks>
@@ -93,11 +95,8 @@ namespace Blackboard.Core.Nodes.Collections {
         /// For example, if a number is the sum of itself (x + x), then the Sum node will return the 'x' parent twice.
         /// </remarks>
         /// <returns>An enumerator for all the parents.</returns>
-        public IEnumerator<IParent> GetEnumerator() => this.source.Select((p) => p.Node).NotNull().GetEnumerator();
+        public IEnumerator<IParent> GetEnumerator() => this.source.Select(p => p.Node).NotNull().GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
-        /// <summary>Indicates that this collection is fixed.</summary>
-        public bool Fixed => true;
 
         /// <summary>This is the number of parents in the collection.</summary>
         /// <remarks>Nodes may return a smaller number if any parent is null.</remarks>
@@ -135,7 +134,7 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <param name="newParent">The new parent to replace each instance with.</param>
         /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
         public bool Replace(IParent oldParent, IParent newParent) {
-            if (!ReferenceEquals(oldParent, newParent)) return false;
+            if (ReferenceEquals(oldParent, newParent)) return false;
 
             for (int i = this.source.Count - 1; i >= 0; --i) {
                 IParam param = this.source[i];
@@ -194,7 +193,7 @@ namespace Blackboard.Core.Nodes.Collections {
                 IParent newParent = newParents[i];
                 IParam param = this.source[i];
                 IParent node = param.Node;
-                if (ReferenceEquals(node, newParent)) return false;
+                if (ReferenceEquals(node, newParent)) continue;
                 bool removed = node?.RemoveChildren(this.Child) ?? false;
                 param.Node = newParent;
                 if (removed) newParent?.AddChildren(this.Child);

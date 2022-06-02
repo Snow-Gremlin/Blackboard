@@ -69,13 +69,12 @@ namespace Blackboard.Core.Nodes.Collections {
         internal bool PrepareReplace(IParent oldParent, IParent newParent) {
             if (ReferenceEquals(oldParent, newParent)) return false;
 
-            bool typeChecked = false;
             for (int i = this.source.Count - 1; i >= 0; --i) {
                 T node = this.source[i];
-                if (!ReferenceEquals(node, oldParent)) continue;
+                if (!ReferenceEquals(node, oldParent) || ReferenceEquals(node, newParent)) continue;
 
                 // Now that at least one parent will be replaced, check that the new parent can be used.
-                if (!typeChecked && newParent is not null and not T)
+                if (newParent is not null and not T)
                     throw new Message("Unable to replace old parent with new parent in a list.").
                         With("child", this.Child).
                         With("index", i).
@@ -83,10 +82,8 @@ namespace Blackboard.Core.Nodes.Collections {
                         With("old parent", oldParent).
                         With("new parent", newParent).
                         With("target type", typeof(T));
-                typeChecked = true;
-
-                // Check if parent would be in list of sources.
-                if (ReferenceEquals(node, newParent)) continue;
+                
+                // A change would occur and all the types have been checked so leave.
                 return true;
             }
             return false;

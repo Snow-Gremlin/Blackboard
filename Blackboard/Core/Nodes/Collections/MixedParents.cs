@@ -85,16 +85,29 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <param name="newParent">The new parent to replace each instance with.</param>
         /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
         public bool Replace(IParent oldParent, IParent newParent) =>
-            this.fixedParents.Replace(oldParent, newParent) |
-            this.varParents.Replace(oldParent, newParent);
+            this.fixedParents.PrepareReplace(oldParent, newParent) && this.varParents.PrepareReplace(oldParent, newParent) &&
+            (this.fixedParents.PerformReplace(oldParent, newParent) | this.varParents.PerformReplace(oldParent, newParent));
 
         /// <summary>This will attempt to set all the parents in a node.</summary>
         /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
         /// <param name="newParents">The parents to set.</param>
         /// <returns>True if any parents changed, false if they were all the same.</returns>
-        public bool SetAll(List<IParent> newParents) =>
-            this.fixedParents.SetAll(newParents.GetRange(0, this.fixedParents.Count)) |
-            this.varParents.SetAll(newParents.GetRange(this.fixedParents.Count, newParents.Count));
+        public bool SetAll(List<IParent> newParents) {
+            int count = this.fixedParents.Count;
+            int min = S.Math.Min(count, newParents.Count);
+
+            // Use minimum of those counts to handle the case where there aren't enough parents,
+            // the prepare for fixed will handle this issue properly, we just don't want to error the GetRange.
+            List<IParent> fixedPart = newParents.GetRange(0, min);
+            if (!this.fixedParents.PrepareSetAll(fixedPart)) return false;
+
+            List<IParent> varPart = newParents.GetRange(count, newParents.Count-count);
+            if (!this.varParents.PrepareSetAll(varPart)) return false;
+            
+            // Not that we know both pass, run both.
+            // Use `|` instead of `||` so both run even if the fixed parents have no changed.
+            return this.fixedParents.PerformSetAll(newParents) | this.varParents.PerformSetAll(varPart);
+        }
 
         /// <summary>This throws an exception because the collection is fixed.</summary>
         /// <param name="index">The index to insert the parents at.</param>
@@ -102,14 +115,32 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <param name="oldChild">The old child these parents are being moved from.</param>
         /// <returns>Nothing is returned because this will throw an exception.</returns>
         public bool Insert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) {
-
+            int count = this.fixedParents.Count;
+            if (index < count) {
+                // Fixed parents can not have parents inserted into them but call it
+                // anyway to get the correct exception for the insert.
+                this.fixedParents.Insert(index, newParents, oldChild);
+                return false;
+            }
+            index -= count;
+            return this.varParents.PrepareInsert(index, newParents) &&
+                this.varParents.PerformInsert(index, newParents, oldChild);
         }
 
         /// <summary>This throws an exception because the collection is fixed.</summary>>
         /// <param name="index">The index to start removing the parents from.</param>
         /// <param name="length">The number of parents to remove.</param>
         public void Remove(int index, int length = 1) {
-
+            int count = this.fixedParents.Count;
+            if (index < count) {
+                // Fixed parents can not have parents removed into them but call it
+                // anyway to get the correct exception for the remove.
+                this.fixedParents.Remove(index, length);
+                return;
+            }
+            index -= count;
+            this.varParents.PrepareRemove(index, length);
+            this.varParents.PerformRemove(index, length);
         }
 
         /// <summary>This creates a string for the given set of parents.</summary>

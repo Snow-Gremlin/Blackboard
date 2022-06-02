@@ -125,21 +125,15 @@ namespace Blackboard.Core.Nodes.Collections {
             }
         }
 
-        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
-        /// <remarks>
-        /// The new parent must be able to take the place of the old parent,
-        /// otherwise this will throw an exception when attempting the replacement of the old parent.
-        /// </remarks>
-        /// <param name="oldParent">The old parent to find all instances with.</param>
-        /// <param name="newParent">The new parent to replace each instance with.</param>
-        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
-        public bool Replace(IParent oldParent, IParent newParent) {
+        internal bool PrepareReplace(IParent oldParent, IParent newParent) {
             if (ReferenceEquals(oldParent, newParent)) return false;
 
+            bool wouldChange = false;
             for (int i = this.source.Count - 1; i >= 0; --i) {
                 IParam param = this.source[i];
                 IParent node = param.Node;
-                if (!ReferenceEquals(node, oldParent)) continue;
+                if (!ReferenceEquals(node, oldParent) || ReferenceEquals(node, newParent)) continue;
+
                 if (newParent is not null && !newParent.GetType().IsAssignableTo(param.Type))
                     throw new Message("Unable to replace old parent with new parent.").
                         With("child", this.Child).
@@ -148,15 +142,19 @@ namespace Blackboard.Core.Nodes.Collections {
                         With("old parent", oldParent).
                         With("new parent", newParent).
                         With("target type", param.Type);
-            }
 
+                wouldChange = true;
+            }
+            return wouldChange;
+        }
+
+        internal bool PerformReplace(IParent oldParent, IParent newParent) {
             bool changed = false;
             bool removed = false;
             for (int i = this.source.Count - 1; i >= 0; --i) {
                 IParam param = this.source[i];
-                if (!ReferenceEquals(param.Node, oldParent)) continue;
                 IParent node = param.Node;
-                if (ReferenceEquals(node, newParent)) continue;
+                if (!ReferenceEquals(node, oldParent) || ReferenceEquals(node, newParent)) continue;
                 removed = node?.RemoveChildren(this.Child) ?? false;
                 param.Node = newParent;
                 changed = true;
@@ -165,11 +163,18 @@ namespace Blackboard.Core.Nodes.Collections {
             return changed;
         }
 
-        /// <summary>This will attempt to set all the parents in a node.</summary>
-        /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
-        /// <param name="newParents">The parents to set.</param>
-        /// <returns>True if any parents changed, false if they were all the same.</returns>
-        public bool SetAll(List<IParent> newParents) {
+        /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
+        /// <remarks>
+        /// The new parent must be able to take the place of the old parent,
+        /// otherwise this will throw an exception when attempting the replacement of the old parent.
+        /// </remarks>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
+        public bool Replace(IParent oldParent, IParent newParent) =>
+            this.PrepareReplace(oldParent, newParent) && this.PerformReplace(oldParent, newParent);
+
+        internal bool PrepareSetAll(List<IParent> newParents) {
             int count = newParents.Count;
             if (this.source.Count != count)
                 throw new Message("Incorrect number of parents in the list of parents to set to a node.").
@@ -188,6 +193,14 @@ namespace Blackboard.Core.Nodes.Collections {
                         With("gotten type", newParent.GetType());
             }
 
+            for (int i = 0; i < count; ++i) {
+                if (ReferenceEquals(this.source[i].Node, newParents[i])) return true;
+            }
+            return false;
+        }
+
+        internal bool PerformSetAll(List<IParent> newParents) {
+            int count = newParents.Count;
             bool changed = false;
             for (int i = 0; i < count; ++i) {
                 IParent newParent = newParents[i];
@@ -201,6 +214,13 @@ namespace Blackboard.Core.Nodes.Collections {
             }
             return changed;
         }
+
+        /// <summary>This will attempt to set all the parents in a node.</summary>
+        /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
+        /// <param name="newParents">The parents to set.</param>
+        /// <returns>True if any parents changed, false if they were all the same.</returns>
+        public bool SetAll(List<IParent> newParents) =>
+            this.PrepareSetAll(newParents) && this.PerformSetAll(newParents);
 
         /// <summary>This throws an exception because the collection is fixed.</summary>
         /// <param name="index">The index to insert the parents at.</param>

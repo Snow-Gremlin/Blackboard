@@ -66,6 +66,13 @@ namespace Blackboard.Core.Nodes.Collections {
             }
         }
 
+        /// <summary>
+        /// This prepares for a replacement of all instances of the given old parent with the given
+        /// new parent by checking if it could be performed and determine if it would have any change.
+        /// </summary>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent that will replace each instance with.</param>
+        /// <returns>True if any parent would be replaced, false if that old parent wasn't found.</returns>
         internal bool PrepareReplace(IParent oldParent, IParent newParent) {
             if (ReferenceEquals(oldParent, newParent)) return false;
 
@@ -89,6 +96,11 @@ namespace Blackboard.Core.Nodes.Collections {
             return false;
         }
 
+        /// <summary>This performs a replacement of all instances of the given old parent with the given new parent.</summary>
+        /// <remarks>PrepareReplace must return true prior to calling this method.</remarks>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
         internal bool PerformReplace(IParent oldParent, IParent newParent) {
             bool changed = false, removed = false;
             for (int i = this.source.Count - 1; i >= 0; --i) {
@@ -113,6 +125,10 @@ namespace Blackboard.Core.Nodes.Collections {
         public bool Replace(IParent oldParent, IParent newParent) =>
             this.PrepareReplace(oldParent, newParent) && this.PerformReplace(oldParent, newParent);
 
+        /// <summary>This test if setting all the parents in a node will work and if it will make a change..</summary>
+        /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
+        /// <param name="newParents">The parents that would be set.</param>
+        /// <returns>True if any parents would changed, false if they were all the same.</returns>
         internal bool PrepareSetAll(List<IParent> newParents) {
             int index = 0;
             foreach (IParent parent in newParents) {
@@ -136,6 +152,10 @@ namespace Blackboard.Core.Nodes.Collections {
             return false;
         }
 
+        /// <summary>This will perform to set all the parents in a node.</summary>
+        /// <remarks>PrepareSetAll must return true prior to calling this method.</remarks>
+        /// <param name="newParents">The parents to set.</param>
+        /// <returns>True if any parents changed, false if they were all the same.</returns>
         internal bool PerformSetAll(List<IParent> newParents) {
             int oldCount = this.source.Count;
             int newCount = newParents.Count;
@@ -187,6 +207,12 @@ namespace Blackboard.Core.Nodes.Collections {
             return newParents.Any();
         }
 
+        /// <summary>This performs an insert of new parents into the given location.</summary>
+        /// <remarks>PrepareInsert must return true prior to calling this method.</remarks>
+        /// <param name="index">The index to insert the new parents into.</param>
+        /// <param name="newParents">The set of new parents to insert.</param>
+        /// <param name="oldChild">The optional old child being replaced. See Insert for more information.</param>
+        /// <returns>True if any parents were added, false otherwise.</returns>
         internal bool PerformInsert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) {
             bool changed = false;
             foreach (IParent parent in newParents) {
@@ -212,6 +238,9 @@ namespace Blackboard.Core.Nodes.Collections {
         public bool Insert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) =>
             this.PrepareInsert(index, newParents) && this.PerformInsert(index, newParents, oldChild);
 
+        /// <summary>This will check if removing one or more parent at the given location will work.</summary>
+        /// <param name="index">The index to start removing the parents from.</param>
+        /// <param name="length">The number of parents to remove.</param>
         internal void PrepareRemove(int index, int length = 1) {
             if (index < 0 || length < 0 || index+length > this.source.Count)
                 throw new Message("Not a valid range of parents to remove.").
@@ -221,6 +250,10 @@ namespace Blackboard.Core.Nodes.Collections {
                     With("length", length);
         }
 
+        /// <summary>This performs the removal one or more parent at the given location.</summary>
+        /// <remarks>PrepareRemove must pass without an exception prior to calling this method.</remarks>
+        /// <param name="index">The index to start removing the parents from.</param>
+        /// <param name="length">The number of parents to remove.</param>
         internal void PerformRemove(int index, int length = 1) {
             for (int i = index, j = 0; j < length; ++i, ++j)
                 this.source[i]?.RemoveChildren(this.Child);

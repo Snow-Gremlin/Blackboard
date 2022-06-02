@@ -84,9 +84,15 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <param name="oldParent">The old parent to find all instances with.</param>
         /// <param name="newParent">The new parent to replace each instance with.</param>
         /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
-        public bool Replace(IParent oldParent, IParent newParent) =>
-            this.fixedParents.PrepareReplace(oldParent, newParent) && this.varParents.PrepareReplace(oldParent, newParent) &&
-            (this.fixedParents.PerformReplace(oldParent, newParent) | this.varParents.PerformReplace(oldParent, newParent));
+        public bool Replace(IParent oldParent, IParent newParent) {
+            bool fixedUpdated = this.fixedParents.PrepareReplace(oldParent, newParent);
+            bool varUpdated   = this.varParents.PrepareReplace(oldParent, newParent);
+            if (!(fixedUpdated || varUpdated)) return false;
+
+            if (fixedUpdated) fixedUpdated = this.fixedParents.PerformReplace(oldParent, newParent);
+            if (varUpdated)   varUpdated   = this.varParents.PerformReplace(oldParent, newParent);
+            return fixedUpdated || varUpdated;
+        }
 
         /// <summary>This will attempt to set all the parents in a node.</summary>
         /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>

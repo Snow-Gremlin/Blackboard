@@ -125,6 +125,13 @@ namespace Blackboard.Core.Nodes.Collections {
             }
         }
 
+        /// <summary>
+        /// This prepares for a replacement of all instances of the given old parent with the given
+        /// new parent by checking if it could be performed and determine if it would have any change.
+        /// </summary>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent that will replace each instance with.</param>
+        /// <returns>True if any parent would be replaced, false if that old parent wasn't found.</returns>
         internal bool PrepareReplace(IParent oldParent, IParent newParent) {
             if (ReferenceEquals(oldParent, newParent)) return false;
 
@@ -148,6 +155,11 @@ namespace Blackboard.Core.Nodes.Collections {
             return wouldChange;
         }
 
+        /// <summary>This performs a replacement of all instances of the given old parent with the given new parent.</summary>
+        /// <remarks>PrepareReplace must return true prior to calling this method.</remarks>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
         internal bool PerformReplace(IParent oldParent, IParent newParent) {
             bool changed = false;
             bool removed = false;
@@ -174,6 +186,10 @@ namespace Blackboard.Core.Nodes.Collections {
         public bool Replace(IParent oldParent, IParent newParent) =>
             this.PrepareReplace(oldParent, newParent) && this.PerformReplace(oldParent, newParent);
 
+        /// <summary>This test if setting all the parents in a node will work and if it will make a change..</summary>
+        /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
+        /// <param name="newParents">The parents that would be set.</param>
+        /// <returns>True if any parents would changed, false if they were all the same.</returns>
         internal bool PrepareSetAll(List<IParent> newParents) {
             int count = newParents.Count;
             if (this.source.Count != count)
@@ -199,6 +215,9 @@ namespace Blackboard.Core.Nodes.Collections {
             return false;
         }
 
+        /// <summary>This will perform to set all the parents in a node.</summary>
+        /// <param name="newParents">The parents to set.</param>
+        /// <returns>True if any parents changed, false if they were all the same.</returns>
         internal bool PerformSetAll(List<IParent> newParents) {
             int count = newParents.Count;
             bool changed = false;

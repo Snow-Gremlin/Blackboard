@@ -74,18 +74,19 @@ namespace Blackboard.Core.Extensions {
         /// <param name="comparer">The type of comparer to use, if null the default comparer will be used.</param>
         /// <returns>True if any value is contained in both, false otherwise.</returns>
         static public bool ContainsAny<T>(this IEnumerable<T> a, IEnumerable<T> b, IEqualityComparer<T> comparer = null) =>
-            a.Any((value) => b.Contains(value, comparer));
+            a.Any(value => b.Contains(value, comparer));
 
         /// <summary>Determines if the given enumerator has the given count.</summary>
         /// <remarks>
         /// This is faster than `a.Count() == count` because it will shortcut
-        /// if the enumerator is over the count t check against.
+        /// if the enumerator is over the count to check against.
         /// </remarks>
         /// <typeparam name="T">The types of the value to count.</typeparam>
         /// <param name="a">The values to check the count with.</param>
         /// <param name="count">The count to check against.</param>
         /// <returns>True if there are the same number of given values as the given count</returns>
         static public bool IsCount<T>(this IEnumerable<T> a, int count) {
+            if (a is ICollection<T> b) return b.Count == count;
             foreach (T value in a) {
                 count--;
                 if (count < 0) return false;
@@ -105,13 +106,8 @@ namespace Blackboard.Core.Extensions {
         /// <param name="maxLoops">The maximum number of times the last value is repeated.</param>
         /// <returns>The enumeration of the values and repeated last. If no input values then default is returned.</returns>
         static public IEnumerable<T> RepeatLast<T>(this IEnumerable<T> values, int maxLoops = 1000) {
-            T prev = default;
-            foreach (T value in values) {
-                prev = value;
-                yield return value;
-            }
-            for (int i = 0; i < maxLoops; ++i)
-                yield return prev;
+            T last = default;
+            return values.Select(v => { last = v; return v; }).Concat(Enumerable.Repeat(last, maxLoops));
         }
 
         /// <summary>This will expand several enumerable sets into one joined enumerable.</summary>
@@ -119,11 +115,8 @@ namespace Blackboard.Core.Extensions {
         /// <typeparam name="T">The type of the list to enumerate.</typeparam>
         /// <param name="input">The set of enumerable sets to join together.</param>
         /// <returns>The single enumerable set with all the values from the input.</returns>
-        static public IEnumerable<T> Expand<T>(this IEnumerable<IEnumerable<T>> input) {
-            foreach (IEnumerable<T> inner in input) {
-                foreach (T value in inner) yield return value;
-            }
-        }
+        static public IEnumerable<T> Expand<T>(this IEnumerable<IEnumerable<T>> input) =>
+            input.SelectMany(i => i);
 
         /// <summary>Gets the given value clamped to the inclusive range of the given min and max.</summary>
         /// <param name="value">The value to clamp.</param>

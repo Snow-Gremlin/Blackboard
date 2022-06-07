@@ -15,7 +15,6 @@ namespace Blackboard.Core.Nodes.Collections {
     /// Since null parents are removed, this list may not be the same as the Count even if fixed.
     /// </remarks>
     public class ParentCollection : IEnumerable<IParent> {
-
         #region Parent Parameters...
 
         /// <summary>The definition for a single fixed parent container.</summary>
@@ -32,6 +31,7 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <typeparam name="T">The type of the parent that is being set.</typeparam>
         private class FixedParent<T> : IFixedParent
                 where T : class, IParent {
+            private IParent cachedParent;
             private readonly S.Func<T> getParent;
             private readonly S.Action<T> setParent;
 
@@ -39,6 +39,7 @@ namespace Blackboard.Core.Nodes.Collections {
             /// <param name="getParent">The getter to get the parent value from the child.</param>
             /// <param name="setParent">The setter to set a parent value to the child.</param>
             public FixedParent(S.Func<T> getParent, S.Action<T> setParent) {
+                this.cachedParent = null;
                 this.getParent = getParent;
                 this.setParent = setParent;
             }
@@ -47,10 +48,16 @@ namespace Blackboard.Core.Nodes.Collections {
             public S.Type Type => typeof(T);
 
             /// <summary>Gets or sets the parent.</summary>
-            /// <remarks>This parent must be able to case to the container type.</remarks>
+            /// <remarks>
+            /// This parent must be able to case to the container type.
+            /// It is known that if the parent is null, then the cache can not provide improvement.
+            /// </remarks>
             public IParent Node {
-                get => this.getParent();
-                set => this.setParent(value as T);
+                get => this.cachedParent ??= this.getParent();
+                set {
+                    this.cachedParent = value;
+                    this.setParent(value as T);
+                }
             }
         }
 
@@ -60,24 +67,40 @@ namespace Blackboard.Core.Nodes.Collections {
             /// <summary>Gets the type of the container.</summary>
             public S.Type Type { get; }
 
+            /// <summary>The inclusive minimum allowed number of variable parents.</summary>
+            public int Mininum { get; }
+
+            /// <summary>The inclusive maximum allowed number of variable parents.</summary>
+            public int Maximum { get; }
+
             /// <summary>This gets the number of variable parents.</summary>
             public int Count { get; }
 
             /// <summary>This gets or sets the parent at the given index.</summary>
+            /// <remarks>When setting the parent, the parent must be the type of this collection.</remarks>
             /// <param name="index">The index for the parent to get or set.</param>
             /// <returns>The parent at the given index.</returns>
             public IParent this[int index] { get; set; }
 
             /// <summary>This adds a new parent to the end of the variable parents.</summary>
+            /// <remarks>
+            /// This will NOT check if this will make the list go above the maximum value.
+            /// When setting the parent, the parent must be the type of this collection.
+            /// </remarks>
             /// <param name="item">This is the parent to add.</param>
             public void Add(IParent item);
 
             /// <summary>This inserts a parent into the list at the given index.</summary>
+            /// <remarks>
+            /// This will NOT check if this will make the list go above the maximum value.
+            /// When setting the parent, the parent must be the type of this collection.
+            /// </remarks>
             /// <param name="index">The index to insert the parent at.</param>
             /// <param name="parent">The parent to insert into the list.</param>
             public void Insert(int index, IParent parent);
 
             /// <summary>This removes a parent from the given index.</summary>
+            /// <remarks>This will NOT check if this will make the list go below the minimum value.</remarks>
             /// <param name="index">The index of the parent to remove.</param>
             public void RemoveAt(int index);
         }
@@ -90,15 +113,33 @@ namespace Blackboard.Core.Nodes.Collections {
 
             /// <summary>Creates a new variable parent container using the given list.</summary>
             /// <param name="source">The list of parents to read from and modify.</param>
-            public VarParent(List<T> source) => this.source = source;
+            /// <param name="min">The optional inclusive minimum allowed number of variable parents.</param>
+            /// <param name="max">The optional inclusive maximum allowed number of variable parents.</param>
+            public VarParent(List<T> source, int min = 0, int max = int.MaxValue) {
+                this.source = source;
+                this.Type = typeof(T);
+                if (min < 0 || max < min)
+                    throw new Message("Invalid minimum and maximum range for variable parents collection.").
+                        With("min", min).
+                        With("max", max);
+                this.Mininum = min;
+                this.Maximum = max;
+            }
 
             /// <summary>Gets the type of the parents.</summary>
-            public S.Type Type => typeof(T);
+            public S.Type Type { get; }
+
+            /// <summary>The inclusive minimum allowed number of variable parents.</summary>
+            public int Mininum { get; }
+
+            /// <summary>The inclusive maximum allowed number of variable parents.</summary>
+            public int Maximum { get; }
 
             /// <summary>This gets the number of variable parents.</summary>
             public int Count => this.source.Count;
 
             /// <summary>This gets or sets the parent at the given index.</summary>
+            /// <remarks>When setting the parent, the parent must be the type of this collection.</remarks>
             /// <param name="index">The index for the parent to get or set.</param>
             /// <returns>The parent at the given index.</returns>
             public IParent this[int index] {
@@ -107,15 +148,24 @@ namespace Blackboard.Core.Nodes.Collections {
             }
 
             /// <summary>This adds a new parent to the end of the variable parents.</summary>
+            /// <remarks>
+            /// This will NOT check if this will make the list go above the maximum value.
+            /// When setting the parent, the parent must be the type of this collection.
+            /// </remarks>
             /// <param name="item">This is the parent to add.</param>
             public void Add(IParent item) => this.source.Add(item as T);
 
             /// <summary>This inserts a parent into the list at the given index.</summary>
+            /// <remarks>
+            /// This will NOT check if this will make the list go above the maximum value.
+            /// When setting the parent, the parent must be the type of this collection.
+            /// </remarks>
             /// <param name="index">The index to insert the parent at.</param>
             /// <param name="parent">The parent to insert into the list.</param>
             public void Insert(int index, IParent parent) => this.source.Insert(index, parent as T);
 
             /// <summary>This removes a parent from the given index.</summary>
+            /// <remarks>This will NOT check if this will make the list go below the minimum value.</remarks>
             /// <param name="index">The index of the parent to remove.</param>
             public void RemoveAt(int index) => this.source.RemoveAt(index);
 
@@ -133,6 +183,8 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <summary>The list of variable parents.</summary>
         /// <remarks>This will be null if there are no variable parents.</remarks>
         private IVarParent varParents;
+
+        #region Constructor and Setup Methods...
 
         /// <summary>Creates a new parent collection.</summary>
         /// <param name="child">The child node that this collection is for.</param>
@@ -171,19 +223,31 @@ namespace Blackboard.Core.Nodes.Collections {
         /// The source for all the variable parents. This list will be read from and modified
         /// so should be the list inside of the variable parent node.
         /// </param>
+        /// <param name="min">The optional inclusive minimum allowed number of variable parents.</param>
+        /// <param name="max">The optional inclusive maximum allowed number of variable parents.</param>
         /// <returns>This returns the fixed parent which this was called on so that calls can be chained.</returns>
-        internal ParentCollection With<T>(List<T> source)
+        internal ParentCollection With<T>(List<T> source, int min = 0, int max = int.MaxValue)
             where T : class, IParent {
-            if (this.IsVariable)
-                throw new Message("May only have a single variable parent section in the parent collection.").
-                    With("child", this.Child).
-                    With("fixed count", this.FixedCount);
-            this.varParents = new VarParent<T>(source);
+            if (this.HasVariable)
+                throw this.message("May not set a variable parent part after one has already been set.");
+            this.varParents = new VarParent<T>(source, min, max);
             return this;
         }
 
-        /// <summary>Indicates if this collection has a variable parent part.</summary>
-        public bool IsVariable => this.varParents is not null;
+        #endregion
+
+        /// <summary>Creates a message with information about this parent collection already added to it.</summary>
+        /// <param name="format">The format for the message to create.</param>
+        /// <param name="args">The arguments to fill out the format for the message.</param>
+        /// <returns>The new message with the parent context.</returns>
+        private Message message(string format, params object[] args) {
+            Message m = new Message(format, args).
+                    With("child", this.Child);
+            if (this.HasVariable) m.With("variable count", this.VarCount);
+            if (this.HasFixed) m.With("fixed count", this.VarCount);
+            if (this.HasFixed && this.HasVariable) m.With("total count", this.Count);
+            return m;
+        }
 
         /// <summary>The child that this parent collection is from.</summary>
         public IChild Child { get; }
@@ -210,6 +274,13 @@ namespace Blackboard.Core.Nodes.Collections {
         public IEnumerator<IParent> GetEnumerator() => this.Parents.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
+        /// <summary>Indicates if this collection has a fixed parent part.</summary>
+        public bool HasFixed => this.fixedParents.Count > 0;
+
+        /// <summary>Indicates if this collection has a variable parent part.</summary>
+        /// <remarks>The parent collection may still have a variable part even if that part is empty.</remarks>
+        public bool HasVariable => this.varParents is not null;
+
         /// <summary>The number of parents currently in the fixed part of the collection.</summary>
         public int FixedCount => this.fixedParents.Count;
 
@@ -223,14 +294,11 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <param name="index">The index to get the parent's type of.</param>
         /// <returns>The type of the parent at the given index.s</returns>
         public S.Type TypeAt(int index) =>
-            index < 0 && !this.IsVariable && index >= this.FixedCount ?
-                throw new Message("Index out of bounds of node's parent types.").
-                    With("child", this.Child).
-                    With("index", index).
-                    With("fixed count", this.FixedCount).
-                    With("has var", this.IsVariable) :
-                index < this.FixedCount ? this.fixedParents[index].Type :
-                this.varParents.Type;
+            index < 0 || (!this.HasVariable && index >= this.FixedCount) ?
+            throw this.message("Index out of bounds of node's parent types.").
+                With("index", index) :
+            index < this.FixedCount ? this.fixedParents[index].Type :
+            this.varParents.Type;
 
         /// <summary>This gets or sets the parent at the given location.</summary>
         /// <remarks>This will throw an exception if out-of-bounds or wrong type.</remarks>
@@ -238,29 +306,20 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <returns>The parent gotten from the given index.</returns>
         public IParent this[int index] {
             get => index < 0 || index >= this.Count ?
-                    throw new Message("Index out of bounds of node's parents.").
-                        With("child", this.Child).
-                        With("index", index).
-                        With("total", this.Count).
-                        With("fixed count", this.FixedCount).
-                        With("has var", this.IsVariable).
-                        With("var count", this.VarCount) :
-                    index < this.FixedCount ? this.fixedParents[index].Node :
-                    this.varParents[index - this.FixedCount];
+                throw this.message("Index out of bounds of node's parents.").
+                    With("index", index) :
+                index < this.FixedCount ? this.fixedParents[index].Node :
+                this.varParents[index - this.FixedCount];
             set {
                 IParent parent = this[index]; // This also will check bounds
                 if (ReferenceEquals(parent, value)) return;
 
                 S.Type type = this.TypeAt(index);
                 if (value.GetType().IsAssignableTo(type))
-                    throw new Message("Incorrect type of a parent being set to a node.").
-                        With("child", this.Child).
+                    throw this.message("Incorrect type of a parent being set to a node.").
                         With("index", index).
                         With("expected type", type).
-                        With("fixed count", this.FixedCount).
-                        With("has var", this.IsVariable).
-                        With("var count", this.VarCount).
-                        With("gotten type", value.GetType());
+                        With("new parent", value);
 
                 bool removed = parent?.RemoveChildren(this.Child) ?? false;
                 if (index < this.FixedCount)
@@ -270,35 +329,80 @@ namespace Blackboard.Core.Nodes.Collections {
             }
         }
 
-        /// <summary>This will check if a replace would work and would make a change.</summary>
+        #region Replace Method...
+
+        /// <summary>This will check if a replace would work and would make a change in the fixed parent parts.</summary>
         /// <param name="oldParent">The old parent to find all instances with.</param>
         /// <param name="newParent">The new parent to replace each instance with.</param>
         /// <returns>True if any parents would be replaced, false otherwise.</returns>
-        private bool checkReplace(IParent oldParent, IParent newParent) {
-            if (ReferenceEquals(oldParent, newParent)) return false;
-
+        private bool checkFixReplace(IParent oldParent, IParent newParent) {
             bool wouldChange = false;
-            foreach ((int index, S.Type type, IParent parent) in
-                this.Types.Zip(this.Parents).Select((pair, index) => (index, pair.First, pair.Second))) {
-                if (!ReferenceEquals(parent, oldParent) || ReferenceEquals(parent, newParent)) continue;
-                wouldChange = true;
-
-                if (newParent is not null && !newParent.GetType().IsAssignableTo(type))
-                    throw new Message("Unable to replace old parent with new parent.").
-                        With("child", this.Child).
-                        With("node", parent).
-                        With("index", index).
-                        With("fixed count", this.FixedCount).
-                        With("has var", this.IsVariable).
-                        With("var count", this.VarCount).
+            for (int i = this.FixedCount-1; i >= 0; --i) {
+                IFixedParent param = this.fixedParents[i];
+                if (!ReferenceEquals(param.Node, oldParent) || ReferenceEquals(param.Node, newParent)) continue;
+                
+                if (newParent is not null && !newParent.GetType().IsAssignableTo(param.Type))
+                    throw this.message("Unable to replace old parent with new parent in fixed parent part.").
+                        With("index", i).
                         With("old parent", oldParent).
                         With("new parent", newParent).
-                        With("target type", type);
-
-                // If we've checked one of the variable nodes, then we don't have to check anymore.
-                if (index >= this.FixedCount) break;
+                        With("target type", param.Type);
+                wouldChange = true;
             }
             return wouldChange;
+        }
+
+        /// <summary>This will check if a replace would work and would make a change in the variable parent part.</summary>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if any parents would be replaced, false otherwise.</returns>
+        private bool checkVarReplace(IParent oldParent, IParent newParent) {
+            for (int i = this.VarCount-1; i >= 0; --i) {
+                IParent parent = this.varParents[i];
+                if (!ReferenceEquals(parent, oldParent) || ReferenceEquals(parent, newParent)) continue;
+
+                if (newParent is not null && !newParent.GetType().IsAssignableTo(this.varParents.Type))
+                    throw this.message("Unable to replace old parent with new parent in variable parent part.").
+                        With("index", i + this.FixedCount).
+                        With("old parent", oldParent).
+                        With("new parent", newParent).
+                        With("target type", this.varParents.Type);
+
+                // Since the type doesn't change across a variable parent list,
+                // once we know one will be replaced we no longer need to check the rest, so leave.
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>This performs replace on the fixed parents.</summary>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if the parent had this child when it was replaced, false otherwise.</returns>
+        private bool replaceFix(IParent oldParent, IParent newParent) {
+            bool removed = false;
+            for (int i = this.fixedParents.Count - 1; i >= 0; --i) {
+                IFixedParent parent = this.fixedParents[i];
+                if (!ReferenceEquals(parent.Node, oldParent)) continue;
+                removed = (parent.Node?.RemoveChildren(this.Child) ?? false) || removed;
+                parent.Node = newParent;
+            }
+            return removed;
+        }
+
+        /// <summary>This performs replace on the variable parents.</summary>
+        /// <param name="oldParent">The old parent to find all instances with.</param>
+        /// <param name="newParent">The new parent to replace each instance with.</param>
+        /// <returns>True if the parent had this child when it was replaced, false otherwise.</returns>
+        private bool replaceVar(IParent oldParent, IParent newParent) {
+            bool removed = false;
+            for (int i = this.varParents.Count - 1; i >= 0; --i) {
+                IParent node = this.varParents[i];
+                if (!ReferenceEquals(node, oldParent)) continue;
+                removed = (node?.RemoveChildren(this.Child) ?? false) || removed;
+                this.varParents[i] = newParent;
+            }
+            return removed;
         }
 
         /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
@@ -310,59 +414,109 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <param name="newParent">The new parent to replace each instance with.</param>
         /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
         public bool Replace(IParent oldParent, IParent newParent) {
-            if (!this.checkReplace(oldParent, newParent)) return false;
+            if (!ReferenceEquals(oldParent, newParent)) return false;
+            bool fixChange = this.checkFixReplace(oldParent, newParent);
+            bool varChange = this.checkVarReplace(oldParent, newParent);
+            if (!fixChange && !varChange) return false;
 
-            bool changed = false, removed = false;
-            for (int i = this.fixedParents.Count - 1; i >= 0; --i) {
-                IFixedParent parent = this.fixedParents[i];
-                IParent node = parent.Node;
-                if (!ReferenceEquals(node, oldParent) || ReferenceEquals(node, newParent)) continue;
-                removed = node?.RemoveChildren(this.Child) ?? false;
-                parent.Node = newParent;
-                changed = true;
-            }
-
-            for (int i = this.varParents.Count - 1; i >= 0; --i) {
-                IParent node = this.varParents[i];
-                if (!ReferenceEquals(node, oldParent) || ReferenceEquals(node, newParent)) continue;
-                removed = node?.RemoveChildren(this.Child) ?? false;
-                this.varParents[i] = newParent;
-                changed = true;
-            }
-
+            bool removed = false;
+            if (fixChange) removed = this.replaceFix(oldParent, newParent) || removed;
+            if (varChange) removed = this.replaceVar(oldParent, newParent) || removed;
             if (removed) newParent?.AddChildren(this.Child);
-            return changed;
+            return true;
         }
 
-        /// <summary>This checks if the setting all the parents would work and cause a change.</summary>
+        #endregion
+        #region SetAll Method...
+
+        /// <summary>This checks if the setting all the fixed parents would work and cause a change.</summary>
         /// <param name="newParents">The new parents that would be set.</param>
         /// <returns>True if any parent was changed, false otherwise.</returns>
-        private bool checkSetAll(List<IParent> newParents) {
-            int count = newParents.Count;
-            if (count < this.FixedCount || (!this.IsVariable && count > this.FixedCount))
-                throw new Message("Incorrect number of parents in the list of parents to set to a node.").
-                    With("child", this.Child).
-                    With("expected count", count).
-                    With("given count", this.fixedParents.Count);
-
+        private bool checkFixSetAll(List<IParent> newParents) {
             bool wouldChange = false;
-            foreach ((int index, S.Type type, IParent newParent, IParent curParent) in
-                this.Types.Zip(this.Parents, newParents).Select((pair, index) => (index, pair.First, pair.Second, pair.Third))) {
-                if (newParent.GetType().IsAssignableTo(type))
-                    throw new Message("Incorrect type of a parent in the list of parents to set to a node.").
-                        With("child", this.Child).
-                        With("index", index).
-                        With("fixed count", this.FixedCount).
-                        With("has var", this.IsVariable).
+            for (int i = this.FixedCount-1; i >= 0; --i) {
+                IParent newParent = newParents[i];
+                S.Type type = this.fixedParents[i].Type;
+                if (!newParent.GetType().IsAssignableTo(type))
+                    throw this.message("Incorrect type of a parent in the list of fixed parents to set to a node.").
+                        With("index", i).
                         With("expected type", type).
-                        With("gotten type", newParent.GetType());
+                        With("new parent", newParent);
+                wouldChange = wouldChange || !ReferenceEquals(this.fixedParents[i].Node, newParent);
+            }
+            return wouldChange;
+        }
 
-                wouldChange = wouldChange || !ReferenceEquals(curParent, newParent);
+        /// <summary>This checks if the setting all the variable parents would work and cause a change.</summary>
+        /// <param name="newParents">The new parents that would be set.</param>
+        /// <returns>True if any parent was changed, false otherwise.</returns>
+        private bool checkVarSetAll(List<IParent> newParents) {
+            bool wouldChange = newParents.Count != this.Count;
+            int minCount = S.Math.Min(newParents.Count, this.VarCount);
+            for (int i = this.FixedCount, j = 0; i < minCount; ++i, ++j) {
+                IParent newParent = newParents[i];
+                if (!newParent.GetType().IsAssignableTo(this.varParents.Type))
+                    throw this.message("Incorrect type of a parent in the list of parents to set to a node.").
+                        With("index", i).
+                        With("expected type", this.varParents.Type).
+                        With("new parent", newParent);
+                wouldChange = wouldChange || !ReferenceEquals(this.varParents[j], newParent);
             }
 
-            // TODO: Check all new parents that don't overlap with the old parents
-
+            // Check any new parents past the currently set parents.
+            for (int i = minCount; i < newParents.Count; i++) {
+                IParent newParent = newParents[i];
+                if (!newParent.GetType().IsAssignableTo(this.varParents.Type))
+                    throw this.message("Incorrect type of a parent in the list of parents to set to a node.").
+                        With("index", i).
+                        With("expected type", this.varParents.Type).
+                        With("new parent", newParent);
+            }
             return wouldChange;
+        }
+
+        // TODO: Comment
+        private void setAllFix(List<IParent> newParents) {
+            for (int i = 0; i < this.FixedCount; ++i) {
+                IParent newParent = newParents[i];
+                IFixedParent param = this.fixedParents[i];
+                IParent node = param.Node;
+                if (ReferenceEquals(node, newParent)) continue;
+
+                bool removed = node?.RemoveChildren(this.Child) ?? false;
+                param.Node = newParent;
+                if (removed) newParent?.AddChildren(this.Child);
+            }
+        }
+
+        // TODO: Comment
+        private void setAllVar(List<IParent> newParents) {
+            int count = newParents.Count;
+
+            // Update variable parents which overlap with new parents
+            int minCount = S.Math.Min(count, this.VarCount);
+            for (int i = this.FixedCount, j = 0; i < minCount; ++i, ++j) {
+                IParent newParent = newParents[i];
+                IParent oldParent = this.varParents[i];
+                if (ReferenceEquals(oldParent, newParent)) continue;
+
+                bool removed = oldParent?.RemoveChildren(this.Child) ?? false;
+                if (removed) newParent?.AddChildren(this.Child);
+                this.varParents[i] = newParent;
+            }
+
+            // Remove any old variable parents which are beyond the new parents
+            for (int i = this.FixedCount - 1; i >= minCount; --i) { // TODO: WRONG!!!
+                this.varParents[i]?.RemoveChildren(this.Child);
+                this.varParents.RemoveAt(i);
+            }
+
+            // Add any new parents which are beyond the old variable parents
+            for (int i = this.FixedCount; i < minCount; ++i) { // TODO: WRONG!!!
+                IParent newParent = newParents[i];
+                newParent?.AddChildren(this.Child);
+                this.varParents.Add(newParent);
+            }
         }
 
         /// <summary>This attempts to set all the parents in a node.</summary>
@@ -370,49 +524,21 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <param name="newParents">The parents to set.</param>
         /// <returns>True if any parents changed, false if they were all the same.</returns>
         public bool SetAll(List<IParent> newParents) {
-            if (!this.checkSetAll(newParents)) return false;
-            bool changed = false;
+            if (newParents.Count < this.FixedCount || (!this.HasVariable && newParents.Count > this.FixedCount))
+                throw this.message("Incorrect number of parents in the list of parents to set to a node.").
+                    With("new parent count", newParents.Count);
 
-            // Update fixed parents
-            int count = newParents.Count;
-            for (int i = 0; i < this.FixedCount; ++i) {
-                IParent newParent = newParents[i];
-                IFixedParent param = this.fixedParents[i];
-                IParent node = param.Node;
-                if (ReferenceEquals(node, newParent)) continue;
-                bool removed = node?.RemoveChildren(this.Child) ?? false;
-                param.Node = newParent;
-                if (removed) newParent?.AddChildren(this.Child);
-                changed = true;
-            }
+            bool fixChange = this.checkFixSetAll(newParents);
+            bool varChange = this.checkVarSetAll(newParents);
+            if (!fixChange && !varChange) return false;
 
-            // Update variable parents which overlap with new parents
-            int minCount = S.Math.Min(count, this.VarCount);
-            for (int i = this.FixedCount, j = 0; i < minCount; ++i, ++j) {
-                IParent newParent = newParents[i];
-                IParent oldParent = this.varParents[i];
-                if (!ReferenceEquals(oldParent, newParent)) {
-                    bool removed = oldParent?.RemoveChildren(this.Child) ?? false;
-                    if (removed) newParent?.AddChildren(this.Child);
-                    this.varParents[i] = newParent;
-                    changed = true;
-                }
-            }
-
-            // Remove any old variable parents which are beyond the new parents
-            for (int i = this.VarCount - 1; i >= minCount; --i) {
-                this.varParents[i]?.RemoveChildren(this.Child);
-                this.varParents.RemoveAt(i);
-            }
-
-            // Add any new parents which are beyond the old variable parents
-            for (int i = this.VarCount; i < minCount; ++i) {
-                IParent newParent = newParents[i];
-                newParent?.AddChildren(this.Child);
-                this.varParents.Add(newParent);
-            }
-            return changed;
+            if (fixChange) this.setAllFix(newParents);
+            if (varChange) this.setAllVar(newParents);
+            return true;
         }
+
+        #endregion
+        #region Insert Method...
 
         /// <summary>This inserts new parents into the given location.</summary>
         /// <remarks>This will throw an exception for fixed parent collections.</remarks>
@@ -432,6 +558,9 @@ namespace Blackboard.Core.Nodes.Collections {
             return false;
         }
 
+        #endregion
+        #region Remove Method...
+
         /// <summary>This remove one or more parent at the given location.</summary>
         /// <remarks>This will throw an exception for fixed parent collections.</remarks>>
         /// <param name="index">The index to start removing the parents from.</param>
@@ -441,5 +570,7 @@ namespace Blackboard.Core.Nodes.Collections {
 
 
         }
+
+        #endregion
     }
 }

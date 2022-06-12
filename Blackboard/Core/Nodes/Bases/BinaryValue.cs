@@ -49,7 +49,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new FixedParents(this).
+        public ParentCollection Parents => new ParentCollection(this, 2).
             With(() => this.source1, (IValueParent<T1> parent) => this.source1 = parent).
             With(() => this.source2, (IValueParent<T2> parent) => this.source2 = parent);
 

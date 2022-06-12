@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="T1">The type of the parent's value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
     /// <see cref="https://en.wikipedia.org/wiki/Arity#Unary"/>
-    public abstract class UnaryValue<T1, TResult>: ValueNode<TResult>, IChild
+    public abstract class UnaryValue<T1, TResult> : ValueNode<TResult>, IChild
         where T1 : IData
         where TResult : IEquatable<TResult> {
 
@@ -34,7 +34,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new FixedParents(this).
+        public ParentCollection Parents => new ParentCollection(this, 1).
             With(() => this.source, (IValueParent<T1> parent) => this.source = parent);
 
         /// <summary>This handles updating this node's value given the parent's value during evaluation.</summary>

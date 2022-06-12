@@ -7,7 +7,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>Provides a node which can be used to count trigger events.</summary>
-    sealed public class Counter<T>: ValueNode<T>, IValueInput<T>, IChild
+    sealed public class Counter<T> : ValueNode<T>, IValueInput<T>, IChild
         where T : ISubtractive<T>, IAdditive<T>, IFinite<T>, IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
@@ -89,7 +89,7 @@ namespace Blackboard.Core.Nodes.Outer {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new FixedParents(this).
+        public ParentCollection Parents => new ParentCollection(this, 5).
             With(() => this.increment,  (ITriggerParent  parent) => this.increment  = parent).
             With(() => this.decrement,  (ITriggerParent  parent) => this.decrement  = parent).
             With(() => this.reset,      (ITriggerParent  parent) => this.reset      = parent).

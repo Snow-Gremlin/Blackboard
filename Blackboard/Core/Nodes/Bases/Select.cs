@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <summary>This will return the value of one of two parents based on a boolean parent.</summary>
     /// <remarks>This functions just like a typical ternary (i.e. `test ? left : right`) statement.</remarks>
     /// <typeparam name="T">The parent type to select between and return.</typeparam>
-    public abstract class Select<T>: Evaluable, IChild
+    public abstract class Select<T> : Evaluable, IChild
         where T : class, IParent {
 
         /// <summary>This is a helper for creating a select node factories quickly.</summary>
@@ -57,7 +57,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new FixedParents(this).
+        public ParentCollection Parents => new ParentCollection(this).
             With(() => this.source1, (IValueParent<Bool> parent) => this.source1 = parent).
             With(() => this.source2, (T parent) => this.source2 = parent).
             With(() => this.source3, (T parent) => this.source3 = parent);

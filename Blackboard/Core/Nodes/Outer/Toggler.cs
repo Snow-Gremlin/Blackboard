@@ -7,7 +7,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>This is a boolean value which can be toggled by triggers.</summary>
-    sealed public class Toggler: ValueNode<Bool>, IChild {
+    sealed public class Toggler : ValueNode<Bool>, IChild {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <remarks>This will not initialize a reset or resetValue sources which can be set later.</remarks>
@@ -62,7 +62,7 @@ namespace Blackboard.Core.Nodes.Outer {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new FixedParents(this).
+        public ParentCollection Parents => new ParentCollection(this, 3).
             With(() => this.toggle,     (ITriggerParent     parent) => this.toggle     = parent).
             With(() => this.reset,      (ITriggerParent     parent) => this.reset      = parent).
             With(() => this.resetValue, (IValueParent<Bool> parent) => this.resetValue = parent);

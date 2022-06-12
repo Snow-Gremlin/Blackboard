@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="T3">The type of the third parent's value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
     /// <see cref="https://en.wikipedia.org/wiki/Arity#Ternary"/>
-    public abstract class TernaryValue<T1, T2, T3, TResult>: ValueNode<TResult>, IChild
+    public abstract class TernaryValue<T1, T2, T3, TResult> : ValueNode<TResult>, IChild
         where T1 : IData
         where T2 : IData
         where T3 : IData
@@ -62,7 +62,7 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new FixedParents(this).
+        public ParentCollection Parents => new ParentCollection(this, 3).
             With(() => this.source1, (IValueParent<T1> parent) => this.source1 = parent).
             With(() => this.source2, (IValueParent<T2> parent) => this.source2 = parent).
             With(() => this.source3, (IValueParent<T3> parent) => this.source3 = parent);

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a trigger when any parent is changed.</summary>
-    sealed public class OnChange: TriggerNode, IChild {
+    sealed public class OnChange : TriggerNode, IChild {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
@@ -51,7 +51,8 @@ namespace Blackboard.Core.Nodes.Inner {
             this.sources.RemoveParents(this, parents);
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new VarParents<IParent>(this, this.sources);
+        public ParentCollection Parents => new ParentCollection(this).
+            With(this.sources);
 
         /// <summary>This updates the trigger during an evaluation.</summary>
         /// <returns>This always returns true so that any parent change will trigger this node.</returns>

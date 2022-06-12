@@ -347,7 +347,7 @@ namespace Blackboard.Core.Nodes.Collections {
             for (int i = this.FixedCount-1; i >= 0; --i) {
                 IFixedParent param = this.fixedParents[i];
                 if (!ReferenceEquals(param.Node, oldParent) || ReferenceEquals(param.Node, newParent)) continue;
-                
+
                 if (newParent is not null && !newParent.GetType().IsAssignableTo(param.Type))
                     throw this.message("Unable to replace old parent with new parent in fixed parent part.").
                         With("index", i).

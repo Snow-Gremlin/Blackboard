@@ -14,7 +14,7 @@ namespace Blackboard.Core.Nodes.Collections {
     /// For example, if a number is the sum of itself (x + x), then the Sum node will return the 'x' parent twice.
     /// Since null parents are removed, this list may not be the same as the Count even if fixed.
     /// </remarks>
-    public class ParentCollection : IEnumerable<IParent> {
+    sealed public class ParentCollection : IEnumerable<IParent> {
         #region Parent Parameters...
 
         /// <summary>The definition for a single fixed parent container.</summary>
@@ -68,7 +68,7 @@ namespace Blackboard.Core.Nodes.Collections {
             public S.Type Type { get; }
 
             /// <summary>The inclusive minimum allowed number of variable parents.</summary>
-            public int Mininum { get; }
+            public int Minimum { get; }
 
             /// <summary>The inclusive maximum allowed number of variable parents.</summary>
             public int Maximum { get; }
@@ -90,19 +90,20 @@ namespace Blackboard.Core.Nodes.Collections {
             /// <param name="item">This is the parent to add.</param>
             public void Add(IParent item);
 
-            /// <summary>This inserts a parent into the list at the given index.</summary>
+            /// <summary>This inserts parents into the list at the given index.</summary>
             /// <remarks>
             /// This will NOT check if this will make the list go above the maximum value.
             /// When setting the parent, the parent must be the type of this collection.
             /// </remarks>
-            /// <param name="index">The index to insert the parent at.</param>
-            /// <param name="parent">The parent to insert into the list.</param>
-            public void Insert(int index, IParent parent);
+            /// <param name="index">The index to insert the parents at.</param>
+            /// <param name="parents">The parents to insert into the list.</param>
+            public void Insert(int index, IEnumerable<IParent> parents);
 
-            /// <summary>This removes a parent from the given index.</summary>
+            /// <summary>This removes parents starting from the given index.</summary>
             /// <remarks>This will NOT check if this will make the list go below the minimum value.</remarks>
-            /// <param name="index">The index of the parent to remove.</param>
-            public void RemoveAt(int index);
+            /// <param name="index">The index of the parents to remove.</param>
+            /// <param name="count">The number of parents to remove.</param>
+            public void Remove(int index, int count);
         }
 
         /// <summary>This is a variable parent container.</summary>
@@ -122,7 +123,7 @@ namespace Blackboard.Core.Nodes.Collections {
                     throw new Message("Invalid minimum and maximum range for variable parents collection.").
                         With("min", min).
                         With("max", max);
-                this.Mininum = min;
+                this.Minimum = min;
                 this.Maximum = max;
             }
 
@@ -130,7 +131,7 @@ namespace Blackboard.Core.Nodes.Collections {
             public S.Type Type { get; }
 
             /// <summary>The inclusive minimum allowed number of variable parents.</summary>
-            public int Mininum { get; }
+            public int Minimum { get; }
 
             /// <summary>The inclusive maximum allowed number of variable parents.</summary>
             public int Maximum { get; }
@@ -155,19 +156,20 @@ namespace Blackboard.Core.Nodes.Collections {
             /// <param name="item">This is the parent to add.</param>
             public void Add(IParent item) => this.source.Add(item as T);
 
-            /// <summary>This inserts a parent into the list at the given index.</summary>
+            /// <summary>This inserts parents into the list at the given index.</summary>
             /// <remarks>
             /// This will NOT check if this will make the list go above the maximum value.
             /// When setting the parent, the parent must be the type of this collection.
             /// </remarks>
-            /// <param name="index">The index to insert the parent at.</param>
-            /// <param name="parent">The parent to insert into the list.</param>
-            public void Insert(int index, IParent parent) => this.source.Insert(index, parent as T);
+            /// <param name="index">The index to insert the parents at.</param>
+            /// <param name="parents">The parent to insert into the list.</param>
+            public void Insert(int index, IEnumerable<IParent> parents) => this.source.InsertRange(index, parents.OfType<T>());
 
-            /// <summary>This removes a parent from the given index.</summary>
+            /// <summary>This removes parents starting from the given index.</summary>
             /// <remarks>This will NOT check if this will make the list go below the minimum value.</remarks>
-            /// <param name="index">The index of the parent to remove.</param>
-            public void RemoveAt(int index) => this.source.RemoveAt(index);
+            /// <param name="index">The index of the parents to remove.</param>
+            /// <param name="count">The number of parents to remove.</param>
+            public void Remove(int index, int count) => this.source.RemoveRange(index, count);
 
             /// <summary>Gets the enumerator of the variable parents.</summary>
             /// <returns>The enumerator of the variable parents.</returns>
@@ -183,8 +185,6 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <summary>The list of variable parents.</summary>
         /// <remarks>This will be null if there are no variable parents.</remarks>
         private IVarParent varParents;
-
-        #region Constructor and Setup Methods...
 
         /// <summary>Creates a new parent collection.</summary>
         /// <param name="child">The child node that this collection is for.</param>
@@ -234,8 +234,6 @@ namespace Blackboard.Core.Nodes.Collections {
             return this;
         }
 
-        #endregion
-
         /// <summary>Creates a message with information about this parent collection already added to it.</summary>
         /// <param name="format">The format for the message to create.</param>
         /// <param name="args">The arguments to fill out the format for the message.</param>
@@ -243,7 +241,10 @@ namespace Blackboard.Core.Nodes.Collections {
         private Message message(string format, params object[] args) {
             Message m = new Message(format, args).
                     With("child", this.Child);
-            if (this.HasVariable) m.With("variable count", this.VarCount);
+            if (this.HasVariable)
+                m.With("variable count", this.VarCount).
+                    With("maximum count", this.MinimumCount).
+                    With("minimum count", this.MaximumCount);
             if (this.HasFixed) m.With("fixed count", this.VarCount);
             if (this.HasFixed && this.HasVariable) m.With("total count", this.Count);
             return m;
@@ -289,6 +290,12 @@ namespace Blackboard.Core.Nodes.Collections {
 
         /// <summary>The number of parents currently in the collection.</summary>
         public int Count => this.FixedCount + this.VarCount;
+
+        /// <summary>The maximum allowed number of parents in this collection.</summary>
+        public int MaximumCount => this.FixedCount + this.varParents?.Maximum ?? 0;
+
+        /// <summary>The minimum allowed number of parents in this collection.</summary>
+        public int MinimumCount => this.FixedCount + this.varParents?.Minimum ?? 0;
 
         /// <summary>This gets the type of the parent at the given index.</summary>
         /// <param name="index">The index to get the parent's type of.</param>
@@ -475,7 +482,8 @@ namespace Blackboard.Core.Nodes.Collections {
             return wouldChange;
         }
 
-        // TODO: Comment
+        /// <summary>This changes the fixed parents by setting the given new parents.</summary>
+        /// <param name="newParents">The new parents that would be set.</param>
         private void setAllFix(List<IParent> newParents) {
             for (int i = 0; i < this.FixedCount; ++i) {
                 IParent newParent = newParents[i];
@@ -489,30 +497,36 @@ namespace Blackboard.Core.Nodes.Collections {
             }
         }
 
-        // TODO: Comment
+        /// <summary>This changes the variable parents by setting the given new parents.</summary>
+        /// <param name="newParents">The new parents that would be set.</param>
         private void setAllVar(List<IParent> newParents) {
             int count = newParents.Count;
+            int remaining = count - this.FixedCount;
 
             // Update variable parents which overlap with new parents
-            int minCount = S.Math.Min(count, this.VarCount);
-            for (int i = this.FixedCount, j = 0; i < minCount; ++i, ++j) {
+            int minCount = S.Math.Min(remaining, this.VarCount);
+            for (int i = this.FixedCount, j = 0; j < minCount; ++i, ++j) {
                 IParent newParent = newParents[i];
                 IParent oldParent = this.varParents[i];
                 if (ReferenceEquals(oldParent, newParent)) continue;
 
+                // TODO: Need to check if the oldParent is used anywhere in rest of newParents
                 bool removed = oldParent?.RemoveChildren(this.Child) ?? false;
                 if (removed) newParent?.AddChildren(this.Child);
                 this.varParents[i] = newParent;
             }
 
             // Remove any old variable parents which are beyond the new parents
-            for (int i = this.FixedCount - 1; i >= minCount; --i) { // TODO: WRONG!!!
-                this.varParents[i]?.RemoveChildren(this.Child);
-                this.varParents.RemoveAt(i);
+            int extraCount = this.VarCount - minCount;
+            if (extraCount > 0) {
+                // TODO: Need to check if the parent is used for more than the one being removed
+                for (int i = this.VarCount - 1; i >= minCount; --i)
+                    this.varParents[i]?.RemoveChildren(this.Child);
+                this.varParents.Remove(minCount, extraCount);
             }
 
             // Add any new parents which are beyond the old variable parents
-            for (int i = this.FixedCount; i < minCount; ++i) { // TODO: WRONG!!!
+            for (int i = minCount; i < remaining; ++i) {
                 IParent newParent = newParents[i];
                 newParent?.AddChildren(this.Child);
                 this.varParents.Add(newParent);
@@ -526,6 +540,10 @@ namespace Blackboard.Core.Nodes.Collections {
         public bool SetAll(List<IParent> newParents) {
             if (newParents.Count < this.FixedCount || (!this.HasVariable && newParents.Count > this.FixedCount))
                 throw this.message("Incorrect number of parents in the list of parents to set to a node.").
+                    With("new parent count", newParents.Count);
+
+            if (newParents.Count < this.MinimumCount || newParents.Count > this.MaximumCount)
+                throw this.message("The number of parents to set is not within the allowed maximum and minimum counts.").
                     With("new parent count", newParents.Count);
 
             bool fixChange = this.checkFixSetAll(newParents);
@@ -552,10 +570,39 @@ namespace Blackboard.Core.Nodes.Collections {
         /// </param>
         /// <returns>True if any parents were added, false otherwise.</returns>
         public bool Insert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) {
+            if (index < 0 || index > this.Count)
+                throw this.message("Index out of bounds of node's parents.").
+                    With("index", index);
 
+            if (index < this.FixedCount)
+                throw this.message("May not insert a parent into the fixed parent part.").
+                    With("index", index);
 
+            int newCount = newParents.Count();
+            if (newCount <= 0) return false;
 
-            return false;
+            if (this.Count + newCount > this.MaximumCount)
+                throw this.message("Inserting the given number of parents would cause there to be more than the maximum allowed count.").
+                    With("new total count", this.Count + newCount).
+                    With("new parent count", newCount);
+
+            S.Type type = this.varParents.Type;
+            foreach ((IParent newParent, int i) in newParents.WithIndex()) {
+                if (!newParent.GetType().IsAssignableTo(type))
+                    throw new Message("Incorrect type of a parent in the list of parents to insert into a node.").
+                        With("insert index", index).
+                        With("new parent index", i).
+                        With("expected type", type).
+                        With("new parent", newParent);
+            }
+
+            foreach (IParent parent in newParents) {
+                bool removed = oldChild is not null && (parent?.RemoveChildren(oldChild) ?? false);
+                if (removed) parent?.AddChildren(this.Child);
+            }
+
+            this.varParents.Insert(index, newParents);
+            return true;
         }
 
         #endregion
@@ -565,10 +612,33 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <remarks>This will throw an exception for fixed parent collections.</remarks>>
         /// <param name="index">The index to start removing the parents from.</param>
         /// <param name="length">The number of parents to remove.</param>
-        public void Remove(int index, int length = 1) {
+        /// <returns>True if any parents were removed, false otherwise.</returns>
+        public bool Remove(int index, int length = 1) {
+            if (length <= 0) return false;
 
+            if (index < 0 || index + length > this.Count)
+                throw this.message("Index, with length taken into account, is out of bounds of node's parents.").
+                    With("index", index).
+                    With("length", length);
 
+            if (index < this.FixedCount)
+                throw this.message("May not remove a parent from the fixed parent part.").
+                    With("index", index).
+                    With("length", length);
 
+            if (this.Count - length < this.MinimumCount)
+                throw this.message("Removing the given number of parents would cause there to be fewer than the minimum allowed count.").
+                    With("index", index).
+                    With("length", length);
+
+            // TODO: Need to check if the parent is used for more than the one being removed
+            for (int i = 0, j = index-this.FixedCount; i < length; ++i, ++j) {
+                IParent parent = this.varParents[j];
+                parent?.RemoveChildren(this.Child);
+            }
+
+            this.varParents.Remove(index-this.FixedCount, length);
+            return true;
         }
 
         #endregion

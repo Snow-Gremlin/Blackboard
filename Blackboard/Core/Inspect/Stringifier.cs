@@ -300,7 +300,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="first">Indicates this is a first node and if it has a name, it should show it.</param>
         /// <returns>The string for these nodes.</returns>
         private string stringNode(IEnumerable<INode> nodes, int depth, bool useOnlyName, bool first) =>
-            nodes.Select((INode node) => this.stringNode(node, depth, useOnlyName, first)).Join(", ");
+            nodes.Select(node => this.stringNode(node, depth, useOnlyName, first)).Join(", ");
 
         /// <summary>Creates a string for a single node.</summary>
         /// <param name="node">The node to stringify.</param>

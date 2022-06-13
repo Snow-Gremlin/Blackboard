@@ -88,8 +88,8 @@ namespace BlackboardTests.CoreTests {
             checkNoCast  (Type.Trigger,       node);
             checkNoCast  (Type.Bool,          node);
             checkInherit (Type.Int,           node, 1);
-            checkImplicit(Type.Double,        node, 1, "Implicit<double>(Latch<int>)");
-            checkImplicit(Type.String,        node, 1, "Implicit<string>(Latch<int>)");
+            checkImplicit(Type.Double,        node, 1, "Implicit<double>(Latch<int>(null, null))");
+            checkImplicit(Type.String,        node, 1, "Implicit<string>(Latch<int>(null, null))");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);
@@ -108,9 +108,9 @@ namespace BlackboardTests.CoreTests {
             checkInherit (Type.Node,          node, 2);
             checkNoCast  (Type.Trigger,       node);
             checkNoCast  (Type.Bool,          node);
-            checkExplicit(Type.Int,           node, "Explicit<int>(Counter<double>)");
+            checkExplicit(Type.Int,           node, "Explicit<int>(Counter<double>(null, null, null, null, null))");
             checkInherit (Type.Double,        node, 1);
-            checkImplicit(Type.String,        node, 1, "Implicit<string>(Counter<double>)");
+            checkImplicit(Type.String,        node, 1, "Implicit<string>(Counter<double>(null, null, null, null, null))");
             checkNoCast  (Type.FuncGroup,     node);
             checkNoCast  (Type.FuncDef,       node);
             checkNoCast  (Type.Namespace,     node);

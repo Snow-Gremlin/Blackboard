@@ -258,12 +258,22 @@ namespace Blackboard.Core.Nodes.Collections {
         /// For nodes with variable length parents, this can be very long
         /// so use this with zip or limit the enumerations.
         /// </remarks>
-        public IEnumerable<S.Type> Types =>
-            this.fixedParents.Select(p => p.Type).Concat(Enumerable.Repeat(this.varParents.Type, 1000));
+        public IEnumerable<S.Type> Types {
+            get {
+                IEnumerable<S.Type> e = this.fixedParents.Select(p => p.Type);
+                if (this.varParents is not null) e = e.Concat(Enumerable.Repeat(this.varParents.Type, 1000));
+                return e;
+            }
+        }
 
         /// <summary>This gets the enumerator for all the parents currently set.</summary>
-        public IEnumerable<IParent> Parents =>
-            this.fixedParents.Select(p => p.Node).Concat(this.varParents ?? Enumerable.Empty<IParent>());
+        public IEnumerable<IParent> Parents {
+            get {
+                IEnumerable<IParent> e = this.fixedParents.Select(p => p.Node);
+                if (this.varParents is not null) e = e.Concat(this.varParents);
+                return e;
+            }
+        }
 
         /// <summary>The set of parent nodes to this node.</summary>
         /// <remarks>

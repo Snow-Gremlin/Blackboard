@@ -226,7 +226,7 @@ namespace Blackboard.Core {
                 UnaryFloatingPoint<Double>.IsNegativeInfinity);
             add("isNormal",
                 UnaryFloatingPoint<Double>.IsNormal);
-            add("isNegInf",
+            add("isPosInf",
                 UnaryFloatingPoint<Double>.IsPositiveInfinity);
             add("isSubnormal",
                 UnaryFloatingPoint<Double>.IsSubnormal);

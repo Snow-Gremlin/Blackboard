@@ -107,7 +107,12 @@ namespace Blackboard.Core.Extensions {
         /// <returns>The enumeration of the values and repeated last. If no input values then default is returned.</returns>
         static public IEnumerable<T> RepeatLast<T>(this IEnumerable<T> values, int maxLoops = 1000) {
             T last = default;
-            return values.Select(v => { last = v; return v; }).Concat(Enumerable.Repeat(last, maxLoops));
+            foreach (T value in values) {
+                last = value;
+                yield return value;
+            }
+            for (int i = 0; i < maxLoops; ++i)
+                yield return last;
         }
 
         /// <summary>This will expand several enumerable sets into one joined enumerable.</summary>

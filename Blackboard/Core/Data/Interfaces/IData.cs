@@ -9,5 +9,8 @@
 
         /// <summary>Get the value of the data as a string.</summary>
         public string ValueString { get; }
+
+        /// <summary>Get the value of the data as an object.</summary>
+        public object ValueObject { get; }
     }
 }

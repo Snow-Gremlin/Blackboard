@@ -55,6 +55,9 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Get the value of the data as a string.</summary>
         public string ValueString => this.Value ? TrueString : FalseString;
 
+        /// <summary>Get the value of the data as an object.</summary>
+        public object ValueObject => this.Value;
+
         #endregion
         #region Equatable...
 

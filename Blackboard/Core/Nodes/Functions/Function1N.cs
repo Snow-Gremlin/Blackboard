@@ -14,7 +14,7 @@ namespace Blackboard.Core.Nodes.Functions {
     /// <typeparam name="T1">The type of the first parent value for this node.</typeparam>
     /// <typeparam name="Tn">The type of the remaining parents' values for this node.</typeparam>
     /// <typeparam name="TReturn">The type of this function will return.</typeparam>
-    sealed public class Function1N<T1, Tn, TReturn>: FuncDef<TReturn>
+    sealed public class Function1N<T1, Tn, TReturn> : FuncDef<TReturn>
         where T1 : class, INode
         where Tn : class, INode
         where TReturn : class, INode {
@@ -22,7 +22,7 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>The factory for creating the node.</summary>
         private readonly S.Func<T1, IEnumerable<Tn>, TReturn> hndl;
 
-        /// <summary>Creates a new N-ary node factory.</summary>
+        /// <summary>Creates a new one type followed by N-ary node factory.</summary>
         /// <param name="hndl">The factory handle.</param>
         /// <param name="needsOneNoCast">Indicates that at least one argument must not be a cast.</param>
         /// <param name="passOne">

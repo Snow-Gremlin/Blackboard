@@ -35,7 +35,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public ParentCollection Parents => new ParentCollection(this, 1).
-            With(() => this.source, (IValueParent<T1> parent) => this.source = parent);
+            With(() => this.source, parent => this.source = parent);
 
         /// <summary>This handles updating this node's value given the parent's value during evaluation.</summary>
         /// <remarks>This will not be called if the parent is null.</remarks>

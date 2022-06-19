@@ -11,7 +11,7 @@ using System.Diagnostics;
 using System.Linq;
 using S = System;
 
-namespace BlackboardTests {
+namespace BlackboardTests.Tools {
 
     /// <summary>These are extensions to Blackboard objects for testing.</summary>
     static class TestExtensions {
@@ -20,59 +20,78 @@ namespace BlackboardTests {
         /// <summary>Checks the string of a node.</summary>
         /// <param name="node">The node to check the sting of.</param>
         /// <param name="exp">This is the expected string name.</param>
-        static public void CheckString(this INode node, string exp) =>
+        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        static public INode CheckString(this INode node, string exp) {
             Assert.AreEqual(exp, Stringifier.Shallow(node));
+            return node;
+        }
 
         /// <summary>Checks the depth of the node.</summary>
         /// <param name="node">The node to check the depth of.</param>
         /// <param name="exp">This is the expected depth.</param>
-        static public void CheckDepth(this IEvaluable node, int exp) =>
+        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        static public IEvaluable CheckDepth(this IEvaluable node, int exp) {
             Assert.AreEqual(exp, node.Depth);
+            return node;
+        }
 
         /// <summary>Checks the list of parents of a node.</summary>
         /// <param name="node">The node to check the parents of.</param>
         /// <param name="exp">The comma separated list of parent strings.</param>
-        static public void CheckParents(this IChild node, string exp) =>
+        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        static public IChild CheckParents(this IChild node, string exp) {
             Assert.AreEqual(exp, node.Parents.Join(", "));
+            return node;
+        }
 
         /// <summary>Checks the boolean value of this node.</summary>
         /// <param name="node">This is the boolean node to check the value of.</param>
         /// <param name="exp">The expected boolean value.</param>
-        static public void CheckValue(this INode node, bool exp) {
+        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        static public INode CheckValue(this INode node, bool exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<Bool>));
             Assert.AreEqual(exp, (node as IValue<Bool>).Value.Value);
+            return node;
         }
 
         /// <summary>Checks the integer value of this node.</summary>
         /// <param name="node">This is the integer node to check the value of.</param>
         /// <param name="exp">The expected integer value.</param>
-        static public void CheckValue(this INode node, int exp) {
+        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        static public INode CheckValue(this INode node, int exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<Int>));
             Assert.AreEqual(exp, (node as IValue<Int>).Value.Value);
+            return node;
         }
 
         /// <summary>Checks the double value of this node.</summary>
         /// <param name="node">This is the double node to check the value of.</param>
         /// <param name="exp">The expected double value.</param>
-        static public void CheckValue(this INode node, double exp) {
+        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        static public INode CheckValue(this INode node, double exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<Double>));
             Assert.AreEqual(exp, (node as IValue<Double>).Value.Value);
+            return node;
         }
 
         /// <summary>Checks the string value of this node.</summary>
         /// <param name="node">This is the string node to check the value of.</param>
         /// <param name="exp">The expected string value.</param>
-        static public void CheckValue(this INode node, string exp) {
+        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        static public INode CheckValue(this INode node, string exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<String>));
             Assert.AreEqual(exp, (node as IValue<String>).Value.Value);
+            return node;
         }
 
         /// <summary>Checks the provoked state of this node.</summary>
         /// <param name="node">This is the trigger node to check the state of.</param>
         /// <param name="exp">The expected provoked state of the node.</param>
-        static public void CheckProvoked(this INode node, bool exp) {
+        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        static public INode CheckProvoked(this INode node, bool exp) {
             Assert.IsInstanceOfType(node, typeof(ITrigger));
             Assert.AreEqual(exp, (node as ITrigger).Provoked);
+            return node;
         }
 
         /// <summary>Gets all reachable nodes by walking up the parents.</summary>
@@ -104,21 +123,27 @@ namespace BlackboardTests {
 
         /// <summary>Will assign all the children reachable via parents to the parents.</summary>
         /// <param name="node">The node to start adding to the parents from.</param>
-        static public void LegitimatizeAll(this INode node) =>
+        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        static public INode LegitimatizeAll(this INode node) {
             node.GetAllParents().OfType<IChild>().Foreach(child => child.Legitimatize());
+            return node;
+        }
 
         /// <summary>Will perform depth update on all the nodes reachable from the parents.</summary>
         /// <param name="node">The node to start updating from and to get all parents and parent parents from.</param>
         /// <param name="logger">Optional logger to use to debug the update with.</param>
-        static public void UpdateAllParents(this INode node, Logger logger = null) =>
-            GetAllParents(node).ToEvalList().UpdateDepths(logger);
+        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        static public INode UpdateAllParents(this INode node, Logger logger = null) {
+            node.GetAllParents().ToEvalList().UpdateDepths(logger);
+            return node;
+        }
 
         /// <summary>Will perform evaluation on all the nodes reachable from the parents.</summary>
         /// <param name="node">The node to start evaluate from and to get all parents and parent parents from.</param>
         /// <param name="logger">Optional logger to use to debug the update with.</param>
         /// <returns>All the triggers which have been provoked and need to be reset.</returns>
         static public HashSet<ITrigger> EvaluateAllParents(this INode node, Logger logger = null) =>
-            GetAllParents(node).ToEvalList().Evaluate(logger);
+            node.GetAllParents().ToEvalList().Evaluate(logger);
 
         #endregion
         #region Formula...
@@ -169,86 +194,152 @@ namespace BlackboardTests {
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected boolean value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        static public void CheckValue(this Slate slate, bool exp, params string[] names) =>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckValue(this Slate slate, bool exp, params string[] names) {
             Assert.AreEqual(exp, slate.GetBool(names), checkValueMsg("bool", names));
+            return slate;
+        }
 
         /// <summary>Checks the integer value of this node.</summary>
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected integer value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        static public void CheckValue(this Slate slate, int exp, params string[] names) =>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckValue(this Slate slate, int exp, params string[] names) {
             Assert.AreEqual(exp, slate.GetInt(names), checkValueMsg("int", names));
+            return slate;
+        }
 
         /// <summary>Checks the double value of this node.</summary>
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected double value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        static public void CheckValue(this Slate slate, double exp, params string[] names) =>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckValue(this Slate slate, double exp, params string[] names) {
             Assert.AreEqual(exp, slate.GetDouble(names), checkValueMsg("double", names));
+            return slate;
+        }
 
         /// <summary>Checks the string value of this node.</summary>
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected string value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        static public void CheckValue(this Slate slate, string exp, params string[] names) =>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckValue(this Slate slate, string exp, params string[] names) {
             Assert.AreEqual(exp, slate.GetString(names), checkValueMsg("string", names));
+            return slate;
+        }
+
+        /// <summary>Checks the object value of this node.</summary>
+        /// <param name="slate">This is the slate to check the object with.</param>
+        /// <param name="exp">The expected object value.</param>
+        /// <param name="names">The name of the variable to look up.</param>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckValueObject(this Slate slate, object exp, params string[] names) {
+            Assert.AreEqual(exp, slate.GetValueObject(names), checkValueMsg("object", names));
+            return slate;
+        }
 
         /// <summary>Checks the provoked state of this node.</summary>
         /// <param name="slate">This is the slate to check the state with.</param>
         /// <param name="exp">The expected provoked state of the node.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        static public void CheckProvoked(this Slate slate, bool exp, params string[] names) =>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckProvoked(this Slate slate, bool exp, params string[] names) {
             Assert.AreEqual(exp, slate.Provoked(names), "Checking the provoked state of \"" + names.Join(".") + "\".");
+            return slate;
+        }
 
         /// <summary>Checks the pending nodes to evaluate are as expected.</summary>
         /// <param name="slate">This is the slate to check the pending of.</param>
         /// <param name="exp">The expected names of the pending nodes.</param>
-        static public void CheckPendingEval(this Slate slate, params string[] exp) =>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckPendingEval(this Slate slate, params string[] exp) {
             TestTools.NoDiff(exp, slate.PendingEval.Strings(), "Checking the pending nodes.");
+            return slate;
+        }
 
         /// <summary>Checks the pending nodes to update are as expected.</summary>
         /// <param name="slate">This is the slate to check the pending of.</param>
         /// <param name="exp">The expected names of the pending nodes.</param>
-        static public void CheckPendingUpdate(this Slate slate, params string[] exp) =>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckPendingUpdate(this Slate slate, params string[] exp) {
             TestTools.NoDiff(exp, slate.PendingUpdate.Strings(), "Checking the pending nodes.");
+            return slate;
+        }
 
         /// <summary>Runs the slate evaluation and checks that evaluation performed as expected.</summary>
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
-        static public void CheckEvaluate(this Slate slate, params string[] lines) {
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckEvaluate(this Slate slate, params string[] lines) {
             BufferLogger logger = new(false);
             slate.PerformEvaluation(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
+            return slate;
         }
 
         /// <summary>Runs the slate update and checks that evaluation performed as expected.</summary>
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
-        static public void CheckUpdate(this Slate slate, params string[] lines) {
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckUpdate(this Slate slate, params string[] lines) {
             BufferLogger logger = new(false);
             slate.PerformUpdates(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
+            return slate;
         }
+
+        /// <summary>Checks the string for the given node using the names from the given slate.</summary>
+        /// <param name="slate">The slate to load the names for the nodes from.</param>
+        /// <param name="stringifier">The stringifier to stringify with.</param>
+        /// <param name="node">The node to get the string for.</param>
+        /// <param name="lines">The line to compare the node's string against.</param>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckNodeString(this Slate slate, Stringifier stringifier, INode node, params string[] lines) {
+            stringifier.PreloadNames(slate);
+            TestTools.NoDiff(lines.Join("\n"), stringifier.Stringify(node));
+            return slate;
+        }
+
+        /// <summary>Checks the string for the given node using the names from the given slate.</summary>
+        /// <param name="slate">The slate to load the names for the nodes from.</param>
+        /// <param name="stringifier">The stringifier to stringify with.</param>
+        /// <param name="nodeName">The name of the node to get the string for.</param>
+        /// <param name="lines">The line to compare the node's string against.</param>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckNodeString(this Slate slate, Stringifier stringifier, string nodeName, params string[] lines) =>
+            slate.CheckNodeString(stringifier, slate.GetNode<INode>(nodeName), lines);
 
         /// <summary>Checks the deep string for the given node using the names from the given slate.</summary>
         /// <param name="slate">The slate to load the names for the nodes from.</param>
-        /// <param name="node">The node to get the deep string for.</param>
+        /// <param name="nodeName">The name of the node to get the deep string for.</param>
         /// <param name="lines">The line to compare the node's string against.</param>
-        static public void CheckNodeString(this Slate slate, INode node, params string[] lines) {
-            Stringifier stringifier = Stringifier.Deep();
-            stringifier.PreloadNames(slate);
-            TestTools.NoDiff(lines.Join("\n"), stringifier.Stringify(node));
-        }
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckNodeString(this Slate slate, INode node, params string[] lines) =>
+            slate.CheckNodeString(Stringifier.Deep(), node, lines);
+
+        /// <summary>Checks the deep string for the given node using the names from the given slate.</summary>
+        /// <param name="slate">The slate to load the names for the nodes from.</param>
+        /// <param name="nodeName">The name of the node to get the deep string for.</param>
+        /// <param name="lines">The line to compare the node's string against.</param>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckNodeString(this Slate slate, string nodeName, params string[] lines) =>
+            slate.CheckNodeString(slate.GetNode<INode>(nodeName), lines);
 
         /// <summary>Checks the namespace string for the whole graph and compares against the given lines.</summary>
         /// <param name="slate">The slate to compare against.</param>
         /// <param name="lines">The expected lines of the returned string.</param>
-        static public void CheckGraphString(this Slate slate, params string[] lines) =>
+        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        static public Slate CheckGraphString(this Slate slate, params string[] lines) {
             TestTools.NoDiff(lines.Join("\n"), Stringifier.GraphString(slate));
+            return slate;
+        }
 
-        /// <summary>Performs a parse of the given input.</summary>
+        /// <summary>Performs a parse of the given input and returns the formula for the input.</summary>
         /// <param name="slate">The slate to apply the parsed formula to.</param>
-        /// <param name="input">The lines of the code to read and commit.</param>
+        /// <param name="input">The lines of the code to read and get the formula for.</param>
+        /// <remarks>Returns the formula for the read input.</remarks>
         static public Formula Read(this Slate slate, params string[] input) =>
             new Parser(slate).Read(input);
 
@@ -262,14 +353,46 @@ namespace BlackboardTests {
             return new Parser(slate, logger).Read(input);
         }
 
+        /// <summary>Performs a parse of the given input and performs the formula.</summary>
+        /// <param name="slate">The slate to apply the parsed formula to.</param>
+        /// <param name="input">The lines of the code to read and perform.</param>
+        /// <returns>The given slate so that method calls can be chained.</returns>
+        static public Slate Perform(this Slate slate, params string[] input) {
+            slate.Read(input).Perform();
+            return slate;
+        }
+
+        /// <summary>Performs the given input and evaluates but doesn't reset the triggers.</summary>
+        /// <param name="slate">The slate to apply the parsed formula to.</param>
+        /// <param name="input">The lines of the code to read and perform.</param>
+        /// <returns>The given slate so that method calls can be chained.</returns>
+        static public Slate PerformWithoutReset(this Slate slate, string input) {
+            slate.Read(input).NoFinish().Perform();
+            slate.PerformEvaluation();
+            return slate;
+        }
+
+        /// <summary>Performs a parse using the given comparison input and checks if the result it true.</summary>
+        /// <param name="slate">The slate to perform this comparison on.</param>
+        /// <param name="comparison">The comparison to perform and check if true.</param>
+        /// <returns>The given slate so that method calls can be chained.</returns>
+        static public Slate IsTrue(this Slate slate, string comparison) {
+            const string returnName = "comparisonResult";
+            Result result = slate.Read("get bool " + returnName + " = " + comparison + ";").Perform();
+            Assert.IsTrue(result.GetBool(returnName), "Expected " + comparison + " to return true.");
+            return slate;
+        }
+
         #endregion
         #region Action Result...
 
         /// <summary>Checks if the names in the output are what is expected.</summary>
         /// <param name="result">The results to check the names with.</param>
         /// <param name="names">The names to check against.</param>
-        static public void CheckNames(this Result result, string names) =>
+        static public Result CheckNames(this Result result, string names) {
             Assert.AreEqual(names, result.OutputNames.Join(", "), "Checking the names in the output.");
+            return result;
+        }
 
         /// <summary>Gets the message for the CheckValues assertions.</summary>
         /// <param name="type">The type of the value being checked.</param>
@@ -282,29 +405,37 @@ namespace BlackboardTests {
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected boolean value.</param>
         /// <param name="name">The name of the variable to get.</param>
-        static public void CheckValue(this Result result, bool exp, string name) =>
+        static public Result CheckValue(this Result result, bool exp, string name) {
             Assert.AreEqual(exp, result.GetBool(name), checkValueMsg("bool", name));
+            return result;
+        }
 
         /// <summary>Checks the integer value of this node.</summary>
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected integer value.</param>
         /// <param name="name">The name of the variable to get.</param>
-        static public void CheckValue(this Result result, int exp, string name) =>
+        static public Result CheckValue(this Result result, int exp, string name) {
             Assert.AreEqual(exp, result.GetInt(name), checkValueMsg("int", name));
+            return result;
+        }
 
         /// <summary>Checks the double value of this node.</summary>
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected double value.</param>
         /// <param name="name">The name of the variable to get.</param>
-        static public void CheckValue(this Result result, double exp, string name) =>
+        static public Result CheckValue(this Result result, double exp, string name) {
             Assert.AreEqual(exp, result.GetDouble(name), checkValueMsg("double", name));
+            return result;
+        }
 
         /// <summary>Checks the string value of this node.</summary>
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected string value.</param>
         /// <param name="name">The name of the variable to get.</param>
-        static public void CheckValue(this Result result, string exp, string name) =>
+        static public Result CheckValue(this Result result, string exp, string name) {
             Assert.AreEqual(exp, result.GetString(name), checkValueMsg("string", name));
+            return result;
+        }
 
         #endregion
         #region Other...

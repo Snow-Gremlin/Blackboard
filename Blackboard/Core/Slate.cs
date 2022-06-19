@@ -208,6 +208,8 @@ namespace Blackboard.Core {
                 EpsilonEqual<Double>.Factory);
             add("floor",
                 UnaryFloatingPoint<Double>.Floor);
+            add("format",
+                Format.Factory);
             add("implies",
                 Implies.Factory);
             add("inRange",
@@ -408,43 +410,55 @@ namespace Blackboard.Core {
             return obj is null ? null : Type.FromType(obj.GetType());
         }
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public bool GetBool(params string[] names) =>
             this.GetValue<Bool>(names).Value;
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public int GetInt(params string[] names) =>
             this.GetValue<Int>(names).Value;
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public double GetDouble(params string[] names) =>
             this.GetValue<Double>(names).Value;
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public string GetString(params string[] names) =>
             this.GetValue<String>(names).Value;
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
         /// <typeparam name="T">The type of value to read.</typeparam>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public T GetValue<T>(params string[] names) where T : IData =>
             this.GetValue<T>(names as IEnumerable<string>);
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
         /// <typeparam name="T">The type of value to read.</typeparam>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public T GetValue<T>(IEnumerable<string> names) where T : IData =>
             this.GetNode<IValue<T>>(names).Value;
+
+        /// <summary>Gets the value as an object from a named node</summary>
+        /// <param name="name">The name of the node to read the value from.</param>
+        /// <returns>The value as an object from the node.</returns>
+        public object GetValueObject(params string[] names) =>
+            this.GetValueObject(names as IEnumerable<string>);
+
+        /// <summary>Gets the value as an object from a named node</summary>
+        /// <param name="name">The name of the node to read the value from.</param>
+        /// <returns>The value as an object from the node.</returns>
+        public object GetValueObject(IEnumerable<string> names) =>
+            this.GetNode<IDataNode>(names).Data.ValueObject;
 
         /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
         /// <param name="names">The name of trigger node to get the state from.</param>

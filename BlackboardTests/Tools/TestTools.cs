@@ -3,10 +3,11 @@ using Blackboard.Core.Inspect;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using S = System;
 
-namespace BlackboardTests {
+namespace BlackboardTests.Tools {
 
     /// <summary>A collection of testing tools.</summary>
     static public class TestTools {
@@ -33,7 +34,7 @@ namespace BlackboardTests {
         static public void NoDiff(IEnumerable<string> exp, IEnumerable<string> results, string message = "") {
             string[] expLines = exp.Split("\n").ToArray();
             string[] gotLines = results.Split("\n").ToArray();
-            if (!Enumerable.SequenceEqual(expLines, gotLines)) {
+            if (!expLines.SequenceEqual(gotLines)) {
                 StringBuilder buf = new();
                 if (!string.IsNullOrEmpty(message)) {
                     buf.AppendLine(message);
@@ -54,6 +55,18 @@ namespace BlackboardTests {
 
                 Assert.Fail(buf.ToString());
             }
+        }
+
+        /// <summary>Enumerates all the methods tagged with the TestTag attribute.</summary>
+        /// <param name="type">The type of the class to collect tags from.</param>
+        /// <returns>The list of all tag values from the given class.</returns>
+        static public HashSet<string> TestTags(S.Type type) {
+            HashSet<string> tags = new();
+            foreach (MethodInfo info in type.GetMethods()) {
+                TestTagAttribute tag = info.GetCustomAttribute<TestTagAttribute>();
+                if (tag is not null) tags.Add(tag.Value);
+            }
+            return tags;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Actions;
 using Blackboard.Parser;
+using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BlackboardTests.ParserTests {

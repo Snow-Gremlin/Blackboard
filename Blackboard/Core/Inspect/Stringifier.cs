@@ -4,6 +4,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
+using S = System;
 
 namespace Blackboard.Core.Inspect {
 
@@ -50,10 +51,12 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Creates a stringifier configured for basic strings.</summary>
         /// <returns>The basic stringifier.</returns>
         static public Stringifier Basic() => new(
-            showAllDataValues:  false,
-            showLastDataValues: false,
-            showParents:        false,
-            showTailingNodes:   false);
+            showAllDataValues:   false,
+            showLastDataValues:  false,
+            showFirstDataValues: false,
+            showParents:         false,
+            showFuncs:           false,
+            showTailingNodes:    false);
 
         /// <summary>Gets a basic string for the given nodes even any node which is null.</summary>
         /// <param name="nodes">The set of nodes which may contain nulls.</param>
@@ -528,6 +531,7 @@ namespace Blackboard.Core.Inspect {
                 Message             msg    => msg.Stringify(this),
                 Exception           e      => e.Stringify(this),
                 IEnumerable<object> list   => list.Select(this.StringifyObject).Join(", "),
+                S.Type              type   => type.FormattedTypeName(),
                 _                          => value
             };
 

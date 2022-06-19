@@ -2,6 +2,7 @@ using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Outer;
+using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using S = System;
 

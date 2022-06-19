@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using S = System;
 
 namespace Blackboard.Core.Extensions {
@@ -142,5 +143,31 @@ namespace Blackboard.Core.Extensions {
         static public bool InRange<T>(this T value, T min, T max)
             where T : S.IComparable<T> =>
             value.CompareTo(min) >= 0 && value.CompareTo(max) <= 0;
+
+        /// <summary>Gets a formatted type name for the given generic type.</summary>
+        /// <param name="type">The type to get the formatted name for.</param>
+        /// <returns>The formatted name of the given type.</returns>
+        static public string FormattedTypeName(this S.Type type) {
+            static void getTypeNamePart(StringBuilder buf, S.Type type) {
+                if (type.IsGenericType) {
+                    string name = type.Name;
+                    int iBacktick = name.IndexOf('`');
+                    if (iBacktick > 0) name = name[..iBacktick];
+                    buf.Append(name);
+                    buf.Append('<');
+                    S.Type[] typeParameters = type.GetGenericArguments();
+                    getTypeNamePart(buf, typeParameters[0]);
+                    for (int i = 1; i < typeParameters.Length; ++i) {
+                        buf.Append(", ");
+                        getTypeNamePart(buf, typeParameters[i]);
+                    }
+                    buf.Append('>');
+                } else buf.Append(type.Name);
+            }
+
+            StringBuilder buf = new();
+            getTypeNamePart(buf, type);
+            return buf.ToString();
+        }
     }
 }

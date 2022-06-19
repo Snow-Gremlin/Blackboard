@@ -24,7 +24,10 @@ namespace Blackboard.Core.Nodes.Inner {
         private readonly List<IValueParent<IData>> args;
 
         /// <summary>Creates a string formatter node.</summary>
-        public Format() { }
+        public Format() {
+            this.format = null;
+            this.args = new List<IValueParent<IData>>();
+        }
 
         /// <summary>Creates a string formatter node.</summary>
         /// <param name="fmt">The parent which provides the format string.</param>

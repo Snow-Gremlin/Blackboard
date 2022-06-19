@@ -62,11 +62,11 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_castInt_Explicit_Double_Int() {
             Slate slate = new Slate().Perform("in double A; B := (int)A;");
             slate.CheckNodeString(Stringifier.Basic(), "B", "B: Explicit<int>");
-            slate.PerformWithoutReset("A =  0.1;").CheckValue( 0, "B").ResetTriggers();
-            slate.PerformWithoutReset("A =  0.9;").CheckValue( 0, "B").ResetTriggers();
-            slate.PerformWithoutReset("A =  2.1;").CheckValue( 2, "B").ResetTriggers();
-            slate.PerformWithoutReset("A =  2.9;").CheckValue( 2, "B").ResetTriggers();
-            slate.PerformWithoutReset("A = -4.2;").CheckValue(-4, "B").ResetTriggers();
+            slate.Perform("A =  0.1;").CheckValue( 0, "B");
+            slate.Perform("A =  0.9;").CheckValue( 0, "B");
+            slate.Perform("A =  2.1;").CheckValue( 2, "B");
+            slate.Perform("A =  2.9;").CheckValue( 2, "B");
+            slate.Perform("A = -4.2;").CheckValue(-4, "B");
         }
 
         [TestMethod]
@@ -74,10 +74,43 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_castDouble_Implicit_Int_Double() {
             Slate slate = new Slate().Perform("in int A; double B := A;");
             slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<double>");
-            slate.PerformWithoutReset("A =  0;").CheckValue( 0.0, "B").ResetTriggers();
-            slate.PerformWithoutReset("A =  1;").CheckValue( 1.0, "B").ResetTriggers();
-            slate.PerformWithoutReset("A =  2;").CheckValue( 2.0, "B").ResetTriggers();
-            slate.PerformWithoutReset("A = -1;").CheckValue(-1.0, "B").ResetTriggers();
+            slate.Perform("A =  0;").CheckValue( 0.0, "B");
+            slate.Perform("A =  1;").CheckValue( 1.0, "B");
+            slate.Perform("A =  2;").CheckValue( 2.0, "B");
+            slate.Perform("A = -1;").CheckValue(-1.0, "B");
+        }
+
+        [TestMethod]
+        [TestTag("castString:Implicit<Bool, String>")]
+        public void TestOperators_castString_Implicit_Bool_String() {
+            Slate slate = new Slate().Perform("in bool A; string B := A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<string>");
+            slate.Perform("A = true; ").CheckValue("true",  "B");
+            slate.Perform("A = false;").CheckValue("false", "B");
+        }
+
+        [TestMethod]
+        [TestTag("castString:Implicit<Int, String>")]
+        public void TestOperators_castString_Implicit_Int_String() {
+            Slate slate = new Slate().Perform("in int A; string B := A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<string>");
+            slate.Perform("A =  0;").CheckValue("0",  "B");
+            slate.Perform("A =  1;").CheckValue("1",  "B");
+            slate.Perform("A =  2;").CheckValue("2" , "B");
+            slate.Perform("A = -1;").CheckValue("-1", "B");
+        }
+
+        [TestMethod]
+        [TestTag("castString:Implicit<Double, String>")]
+        public void TestOperators_castString_Implicit_Double_String() {
+            Slate slate = new Slate().Perform("in double A; string B := A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<string>");
+            slate.Perform("A =  0.0;     ").CheckValue("0",        "B");
+            slate.Perform("A =  1.0;     ").CheckValue("1",        "B");
+            slate.Perform("A =  2.1;     ").CheckValue("2.1",      "B");
+            slate.Perform("A = -1.24;    ").CheckValue("-1.24",    "B");
+            slate.Perform("A =  1e3;     ").CheckValue("1000",     "B");
+            slate.Perform("A =  0.123e-9;").CheckValue("1.23E-10", "B");
         }
 
         [TestMethod]
@@ -98,8 +131,8 @@ namespace BlackboardTests.ParserTests {
 
             if (notAnOp.Count > 0 || notTested.Count > 0) {
                 Assert.Fail("Tests do not match the existing operations:\n" +
-                    "Not Tested: [" + notTested.Join(", ") + "]\n" +
-                    "Not an Op:  [" + notAnOp.Join(", ") + "]");
+                    "Not Tested:\n  " + notTested.Join("\n  ") + "\n" +
+                    "Not an Op:\n  " + notAnOp.Join("\n  "));
             }
         }
     }

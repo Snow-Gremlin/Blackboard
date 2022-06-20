@@ -32,7 +32,7 @@ namespace BlackboardTests.ParserTests {
             if (notAnOp.Count > 0 || notTested.Count > 0) {
                 Assert.Fail("Tests do not match the existing operations:\n" +
                     "Not Tested (" + notTested.Count + "):\n  " + notTested.Join("\n  ") + "\n" +
-                    "Not an Op (" + notAnOp.Count + "):\n  " + notAnOp.Join("\n  "));
+                    "Not an Operation (" + notAnOp.Count + "):\n  " + notAnOp.Join("\n  "));
             }
         }
 
@@ -216,6 +216,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("greater:GreaterThan<Int>")]
         public void TestOperators_greater_GreaterThan_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A > B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThan<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -223,6 +226,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("greater:GreaterThan<Double>")]
         public void TestOperators_greater_GreaterThan_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A > B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThan<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -230,6 +236,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("greater:GreaterThan<String>")]
         public void TestOperators_greater_GreaterThan_String() {
+            Slate slate = new Slate().Perform("in string A, B; C := A > B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThan<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -237,6 +246,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("greaterEqual:GreaterThanOrEqual<Int>")]
         public void TestOperators_greaterEqual_GreaterThanOrEqual_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A >= B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThanOrEqual<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -244,6 +256,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("greaterEqual:GreaterThanOrEqual<Double>")]
         public void TestOperators_greaterEqual_GreaterThanOrEqual_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A >= B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThanOrEqual<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -251,6 +266,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("greaterEqual:GreaterThanOrEqual<String>")]
         public void TestOperators_greaterEqual_GreaterThanOrEqual_String() {
+            Slate slate = new Slate().Perform("in string A, B; C := A >= B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThanOrEqual<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -258,6 +276,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("invert:BitwiseNot<Int>")]
         public void TestOperators_invert_BitwiseNot_Int() {
+            Slate slate = new Slate().Perform("in int A; B := ~A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: BitwiseNot<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -265,6 +286,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("less:LessThan<Int>")]
         public void TestOperators_less_LessThan_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A < B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThan<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -272,6 +296,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("less:LessThan<Double>")]
         public void TestOperators_less_LessThan_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A < B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThan<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -279,6 +306,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("less:LessThan<String>")]
         public void TestOperators_less_LessThan_String() {
+            Slate slate = new Slate().Perform("in string A, B; C := A < B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThan<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -286,6 +316,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("lessEqual:LessThanOrEqual<Int>")]
         public void TestOperators_lessEqual_LessThanOrEqual_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A <= B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThanOrEqual<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -293,6 +326,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("lessEqual:LessThanOrEqual<Double>")]
         public void TestOperators_lessEqual_LessThanOrEqual_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A <= B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThanOrEqual<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -300,6 +336,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("lessEqual:LessThanOrEqual<String>")]
         public void TestOperators_lessEqual_LessThanOrEqual_String() {
+            Slate slate = new Slate().Perform("in string A, B; C := A <= B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThanOrEqual<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -307,6 +346,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("logicalAnd:And")]
         public void TestOperators_logicalAnd_And() {
+            Slate slate = new Slate().Perform("in bool A, B; C := A && B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: And<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -314,6 +356,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("logicalAnd:All")]
         public void TestOperators_logicalAnd_All() {
+            Slate slate = new Slate().Perform("in trigger A, B; C := A && B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: All<trigger>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -321,6 +366,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("logicalOr:Or")]
         public void TestOperators_logicalOr_Or() {
+            Slate slate = new Slate().Perform("in bool A, B; C := A || B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Or<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -328,6 +376,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("logicalOr:Any")]
         public void TestOperators_logicalOr_Any() {
+            Slate slate = new Slate().Perform("in trigger A, B; C := A || B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Any<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -335,6 +386,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("logicalXor:Xor")]
         public void TestOperators_logicalXor_Xor() {
+            Slate slate = new Slate().Perform("in bool A, B; C := A ^^ B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Xor<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -342,6 +396,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("logicalXor:XorTrigger")]
         public void TestOperators_logicalXor_XorTrigger() {
+            Slate slate = new Slate().Perform("in trigger A, B; C := A ^^ B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: XorTrigger<trigger>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -349,6 +406,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("modulo:Mod<Int>")]
         public void TestOperators_modulo_Mod_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A % B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mod<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -356,6 +416,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("modulo:Mod<Double>")]
         public void TestOperators_modulo_Mod_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A % B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mod<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -363,6 +426,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("multiply:Mul<Int>")]
         public void TestOperators_multiply_Mul_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A * B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mul<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -370,6 +436,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("multiply:Mul<Double>")]
         public void TestOperators_multiply_Mul_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A * B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mul<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -377,6 +446,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("negate:Neg<Int>")]
         public void TestOperators_negate_Neg_Int() {
+            Slate slate = new Slate().Perform("in int A; B := -A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Neg<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -384,6 +456,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("negate:Neg<Double>")]
         public void TestOperators_negate_Neg_Double() {
+            Slate slate = new Slate().Perform("in double A; B := -A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Neg<double>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -391,6 +466,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("not:Not")]
         public void TestOperators_not_Not() {
+            Slate slate = new Slate().Perform("in bool A; B := !A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Not");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -398,6 +476,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("notEqual:NotEqual<Bool>")]
         public void TestOperators_notEqual_NotEqual_Bool() {
+            Slate slate = new Slate().Perform("in bool A, B; C := A != B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: NotEqual<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -405,6 +486,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("notEqual:NotEqual<Int>")]
         public void TestOperators_notEqual_NotEqual_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A != B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: NotEqual<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -412,6 +496,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("notEqual:NotEqual<Double>")]
         public void TestOperators_notEqual_NotEqual_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A != B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: NotEqual<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -419,6 +506,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("notEqual:NotEqual<String>")]
         public void TestOperators_notEqual_NotEqual_String() {
+            Slate slate = new Slate().Perform("in string A, B; C := A != B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: NotEqual<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -426,6 +516,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("or:Or")]
         public void TestOperators_or_Or() {
+            Slate slate = new Slate().Perform("in bool A, B; C := A | B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Or<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -433,6 +526,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("or:BitwiseOr<Int>")]
         public void TestOperators_or_BitwiseOr_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A | B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: BitwiseOr<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -440,6 +536,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("or:Any")]
         public void TestOperators_or_Any() {
+            Slate slate = new Slate().Perform("in trigger A, B; C := A | B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Any<trigger>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -447,6 +546,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("power:BinaryFunc<Double, Double, Double>")]
         public void TestOperators_power_BinaryFunc_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A ** B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: BinaryFunc<double>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -454,6 +556,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("shiftLeft:LeftShift<Int>")]
         public void TestOperators_shiftLeft_LeftShift_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A << B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: LeftShift<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -461,6 +566,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("shiftRight:RightShift<Int>")]
         public void TestOperators_shiftRight_RightShift_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A >> B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: RightShift<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -468,6 +576,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("subtract:Sub<Int>")]
         public void TestOperators_subtract_Sub_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A - B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sub<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -475,6 +586,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("subtract:Sub<Double>")]
         public void TestOperators_subtract_Sub_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A - B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sub<double>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -482,6 +596,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("sum:Sum<Int>")]
         public void TestOperators_sum_Sum_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A + B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sum<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -489,6 +606,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("sum:Sum<Double>")]
         public void TestOperators_sum_Sum_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A + B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sum<double>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -496,6 +616,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("sum:Sum<String>")]
         public void TestOperators_sum_Sum_String() {
+            Slate slate = new Slate().Perform("in string A, B; C := A + B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sum<string>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -503,6 +626,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("ternary:SelectValue<Bool>")]
         public void TestOperators_ternary_SelectValue_Bool() {
+            Slate slate = new Slate().Perform("in bool A, B, C; D := A ? B : C;");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: SelectValue<bool>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -510,6 +636,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("ternary:SelectValue<Int>")]
         public void TestOperators_ternary_SelectValue_Int() {
+            Slate slate = new Slate().Perform("in bool A; in int B, C; D := A ? B : C;");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: SelectValue<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -517,6 +646,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("ternary:SelectValue<Double>")]
         public void TestOperators_ternary_SelectValue_Doule() {
+            Slate slate = new Slate().Perform("in bool A; in double B, C; D := A ? B : C;");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: SelectValue<double>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -524,6 +656,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("ternary:SelectValue<String>")]
         public void TestOperators_ternary_SelectValue_String() {
+            Slate slate = new Slate().Perform("in bool A; in string B, C; D := A ? B : C;");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: SelectValue<string>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -531,6 +666,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("ternary:SelectTrigger")]
         public void TestOperators_ternary_SelectTrigger() {
+            Slate slate = new Slate().Perform("in bool A; in trigger B, C; D := A ? B : C;");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: SelectTrigger");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -538,6 +676,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("xor:Xor")]
         public void TestOperators_xor_Xor() {
+            Slate slate = new Slate().Perform("in bool A, B; C := A ^ B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Xor");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -545,6 +686,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("xor:BitwiseXor<Int>")]
         public void TestOperators_xor_BitwiseXor_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A ^ B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: BitwiseXor<int>");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }
@@ -552,6 +696,9 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("xor:XorTrigger")]
         public void TestOperators_xor_XorTrigger() {
+            Slate slate = new Slate().Perform("in trigger A, B; C := A ^ B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: XorTrigger");
+
             // TODO: Implement
             throw new System.NotImplementedException();
         }

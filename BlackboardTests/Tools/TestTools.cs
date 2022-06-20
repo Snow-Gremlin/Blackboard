@@ -1,5 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Nodes.Outer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,15 +60,57 @@ namespace BlackboardTests.Tools {
         }
 
         /// <summary>Enumerates all the methods tagged with the TestTag attribute.</summary>
-        /// <param name="type">The type of the class to collect tags from.</param>
-        /// <returns>The list of all tag values from the given class.</returns>
-        static public HashSet<string> TestTags(S.Type type) {
-            HashSet<string> tags = new();
+        /// <remarks>
+        /// This method with the other "tag" methods (e.g. ConstTags) is designed to automatically
+        /// check for new constants, function, or whatever which are added or removed from the slate.
+        /// This helps ensure that unit-tests are written for all nodes defaulted in the slate.
+        /// </remarks>
+        /// <param name="type">The type of the class to get tags from.</param>
+        /// <returns>All tag values from the given class.</returns>
+        static public IEnumerable<string> TestTags(S.Type type) {
             foreach (MethodInfo info in type.GetMethods()) {
                 TestTagAttribute tag = info.GetCustomAttribute<TestTagAttribute>();
-                if (tag is not null) tags.Add(tag.Value);
+                if (tag is not null) yield return tag.Value;
             }
-            return tags;
+        }
+
+        /// <summary>
+        /// Enumerates all the constants reachable from the given
+        /// namespace group and returns string tags for them.
+        /// </summary>
+        /// <param name="group">The namespace to look for constants within.</param>
+        /// <param name="prefix">Any prefix namespace to add to the tags.</param>
+        /// <returns>All tags for constants reachable from the given namespace.</returns>
+        static public IEnumerable<string> ConstTags(Namespace group, string prefix = "") {
+            foreach (KeyValuePair<string, INode> pair in group.Fields) {
+                if (pair.Value is IConstant)
+                    yield return prefix+pair.Key;
+                else if (pair.Value is Namespace inner) {
+                    foreach (string tag in ConstTags(inner, prefix+pair.Key+"."))
+                        yield return tag;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enumerates all the function definitions reachable from the given
+        /// namespace group and returns string tags for them.
+        /// </summary>
+        /// <param name="group">The namespace to look for function definitions within.</param>
+        /// <param name="prefix">Any prefix namespace to add to the tags.</param>
+        /// <returns>All tags for function definitions reachable from the given namespace.</returns>
+        static public IEnumerable<string> FuncDefTags(Namespace group, string prefix = "") {
+            foreach (KeyValuePair<string, INode> pair in group.Fields) {
+                if (pair.Value is IFuncGroup funcGroup) {
+                    foreach (IFuncDef def in funcGroup.Definitions)
+                        yield return prefix+pair.Key+":"+def.ReturnType.FormattedTypeName();
+                } else if (pair.Value is IFuncDef funcDef) {
+                    yield return prefix+pair.Key+":"+funcDef.ReturnType.FormattedTypeName();
+                } else if (pair.Value is Namespace inner) {
+                    foreach (string tag in FuncDefTags(inner, prefix+pair.Key+"."))
+                        yield return tag;
+                }
+            }
         }
     }
 }

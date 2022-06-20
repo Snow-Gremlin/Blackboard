@@ -1,7 +1,6 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,16 +14,8 @@ namespace BlackboardTests.ParserTests {
 
         [TestMethod]
         public void CheckAllOperatorsAreTested() {
-            HashSet<string> testedTags = TestTools.TestTags(typeof(Operators));
-
-            HashSet<string> opTags = new();
-            Slate slate = new();
-            Namespace opList = slate.Global[Slate.OperatorNamespace] as Namespace;
-            foreach (KeyValuePair<string, INode> pair in opList.Fields) {
-                IFuncGroup group = pair.Value as IFuncGroup;
-                foreach (IFuncDef def in group.Definitions)
-                    opTags.Add(pair.Key+":"+def.ReturnType.FormattedTypeName());
-            }
+            HashSet<string> testedTags = TestTools.TestTags(typeof(Operators)).ToHashSet();
+            HashSet<string> opTags = TestTools.FuncDefTags(new Slate().Global[Slate.OperatorNamespace] as Namespace).ToHashSet();
 
             List<string> notTested = opTags.WhereNot(testedTags.Contains).ToList();
             List<string> notAnOp = testedTags.WhereNot(opTags.Contains).ToList();

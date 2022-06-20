@@ -14,6 +14,29 @@ namespace BlackboardTests.ParserTests {
     public class Operators {
 
         [TestMethod]
+        public void CheckAllOperatorsAreTested() {
+            HashSet<string> testedTags = TestTools.TestTags(typeof(Operators));
+
+            HashSet<string> opTags = new();
+            Slate slate = new();
+            Namespace opList = slate.Global[Slate.OperatorNamespace] as Namespace;
+            foreach (KeyValuePair<string, INode> pair in opList.Fields) {
+                IFuncGroup group = pair.Value as IFuncGroup;
+                foreach (IFuncDef def in group.Definitions)
+                    opTags.Add(pair.Key+":"+def.ReturnType.FormattedTypeName());
+            }
+
+            List<string> notTested = opTags.WhereNot(testedTags.Contains).ToList();
+            List<string> notAnOp = testedTags.WhereNot(opTags.Contains).ToList();
+
+            if (notAnOp.Count > 0 || notTested.Count > 0) {
+                Assert.Fail("Tests do not match the existing operations:\n" +
+                    "Not Tested (" + notTested.Count + "):\n  " + notTested.Join("\n  ") + "\n" +
+                    "Not an Op (" + notAnOp.Count + "):\n  " + notAnOp.Join("\n  "));
+            }
+        }
+
+        [TestMethod]
         [TestTag("and:And")]
         public void TestOperators_and_And() {
             Slate slate = new Slate().Perform("in bool A, B; C := A & B;");
@@ -114,26 +137,87 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
-        public void CheckAllOperatorsAreTested() {
-            HashSet<string> testedTags = TestTools.TestTags(typeof(Operators));
-
-            HashSet<string> opTags = new();
-            Slate slate = new();
-            Namespace opList = slate.Global[Slate.OperatorNamespace] as Namespace;
-            foreach (KeyValuePair<string, INode> pair in opList.Fields) {
-                IFuncGroup group = pair.Value as IFuncGroup;
-                foreach (IFuncDef def in group.Definitions)
-                    opTags.Add(pair.Key+":"+def.ReturnType.FormattedTypeName());
-            }
-
-            List<string> notTested = opTags.WhereNot(testedTags.Contains).ToList();
-            List<string> notAnOp = testedTags.WhereNot(opTags.Contains).ToList();
-
-            if (notAnOp.Count > 0 || notTested.Count > 0) {
-                Assert.Fail("Tests do not match the existing operations:\n" +
-                    "Not Tested:\n  " + notTested.Join("\n  ") + "\n" +
-                    "Not an Op:\n  " + notAnOp.Join("\n  "));
-            }
+        [TestTag("divide:Div<Int>")]
+        public void TestOperators_divide_Div_Int() {
+            Slate slate = new Slate().Perform("in int A, B = 1; C := A/B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Div<int>");
+            slate.Perform("A =  4; B =  2;").CheckValue( 2, "C");
+            slate.Perform("A =  3; B =  2;").CheckValue( 1, "C");
+            slate.Perform("A =  9; B =  3;").CheckValue( 3, "C");
+            slate.Perform("A =  1; B =  3;").CheckValue( 0, "C");
+            slate.Perform("A =  8; B =  3;").CheckValue( 2, "C");
+            slate.Perform("A =  8; B = -3;").CheckValue(-2, "C");
+            slate.Perform("A = -8; B =  3;").CheckValue(-2, "C");
+            slate.Perform("A = -8; B = -3;").CheckValue( 2, "C");
+            Assert.ThrowsException<System.DivideByZeroException>(() => slate.Perform("B = 0;"));
         }
+
+        [TestMethod]
+        [TestTag("divide:Div<Double>")]
+        public void TestOperators_divide_Div_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A/B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Div<double>");
+            slate.Perform("A =  4.0; B =  2.0;").CheckValue( 2.0,     "C");
+            slate.Perform("A =  1.0; B =  4.0;").CheckValue( 0.25,    "C");
+            slate.Perform("A =  8.0; B =  3.0;").CheckValue( 8.0/3.0, "C");
+            slate.Perform("A =  8.0; B = -3.0;").CheckValue(-8.0/3.0, "C");
+            slate.Perform("A = -8.0; B =  3.0;").CheckValue(-8.0/3.0, "C");
+            slate.Perform("A = -8.0; B = -3.0;").CheckValue( 8.0/3.0, "C");
+            slate.Perform("A =  1.0; B =  0.0;").CheckValue(double.PositiveInfinity, "C");
+            slate.Perform("A =  0.0; B =  0.0;").CheckValue(double.NaN, "C");
+            slate.Perform("A = -1.0; B =  0.0;").CheckValue(double.NegativeInfinity, "C");
+        }
+
+        [TestMethod]
+        [TestTag("equal:Equal<Bool>")]
+        public void TestOperators_equal_Equal_Bool() {
+            Slate slate = new Slate().Perform("in bool A, B; C := A == B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Equal<bool>");
+            slate.Perform("A = false; B = false;").CheckValue(true,  "C");
+            slate.Perform("A = false; B = true; ").CheckValue(false, "C");
+            slate.Perform("A = true;  B = false;").CheckValue(false, "C");
+            slate.Perform("A = true;  B = true; ").CheckValue(true,  "C");
+        }
+
+        [TestMethod]
+        [TestTag("equal:Equal<Int>")]
+        public void TestOperators_equal_Equal_Int() {
+            Slate slate = new Slate().Perform("in int A, B; C := A == B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Equal<bool>");
+            slate.Perform("A =  0; B =  0;").CheckValue(true,  "C");
+            slate.Perform("A = -1; B =  1;").CheckValue(false, "C");
+            slate.Perform("A =  1; B = -1;").CheckValue(false, "C");
+            slate.Perform("A = 42; B = 42;").CheckValue(true,  "C");
+        }
+
+        [TestMethod]
+        [TestTag("equal:Equal<Double>")]
+        public void TestOperators_equal_Equal_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := A == B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Equal<bool>");
+            slate.Perform("A =  0.0;     B = 0.0;    ").CheckValue(true,  "C");
+            slate.Perform("A = -1.0;     B = 1.0;    ").CheckValue(false, "C");
+            slate.Perform("A =  1.00004; B = 1.00005;").CheckValue(false, "C");
+            slate.Perform("A =  0.001;   B = 1.0e-3; ").CheckValue(true,  "C");
+        }
+
+        [TestMethod]
+        [TestTag("equal:Equal<String>")]
+        public void TestOperators_equal_Equal_String() {
+            Slate slate = new Slate().Perform("in string A, B; C := A == B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Equal<bool>");
+            slate.Perform("A = '';            B = '';           ").CheckValue(true,  "C");
+            slate.Perform("A = 'Hello World'; B = 'Hello World';").CheckValue(true,  "C");
+            slate.Perform("A = 'mop';         B = 'pop';        ").CheckValue(false, "C");
+            slate.Perform("A = 'mop';         B = 'map';        ").CheckValue(false, "C");
+            slate.Perform("A = 'mop';         B = 'Mop';        ").CheckValue(false, "C");
+        }
+
+
+
+
+
+
+
     }
 }

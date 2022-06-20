@@ -1,12 +1,6 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Actions;
-using Blackboard.Core.Extensions;
-using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Core.Nodes.Outer;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using System.Linq;
 using S = System;
 
 namespace BlackboardTests.ParserTests {
@@ -15,19 +9,11 @@ namespace BlackboardTests.ParserTests {
     public class Constants {
 
         [TestMethod]
-        public void CheckAllConstantsAreTested() {
-            HashSet<string> testedTags = TestTools.TestTags(typeof(Constants)).ToHashSet();
-            HashSet<string> constTags = TestTools.ConstTags(new Slate().Global).ToHashSet();
-
-            List<string> notTested = constTags.WhereNot(testedTags.Contains).ToList();
-            List<string> notAnConst = testedTags.WhereNot(constTags.Contains).ToList();
-
-            if (notAnConst.Count > 0 || notTested.Count > 0) {
-                Assert.Fail("Tests do not match the existing constant:\n" +
-                    "Not Tested (" + notTested.Count + "):\n  " + notTested.Join("\n  ") + "\n" +
-                    "Not a Constant (" + notAnConst.Count + "):\n  " + notAnConst.Join("\n  "));
-            }
-        }
+        public void CheckAllConstantsAreTested() =>
+            TestTools.SetEntriesMatch(
+                TestTools.ConstTags(new Slate().Global),
+                TestTools.TestTags(typeof(Constants)),
+                "Tests do not match the existing constant");
 
         /// <summary>
         /// Checks if the given constant name can be gotten from a new slate

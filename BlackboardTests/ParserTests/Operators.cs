@@ -1,11 +1,8 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Outer;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace BlackboardTests.ParserTests {
 
@@ -13,19 +10,11 @@ namespace BlackboardTests.ParserTests {
     public class Operators {
 
         [TestMethod]
-        public void CheckAllOperatorsAreTested() {
-            HashSet<string> testedTags = TestTools.TestTags(typeof(Operators)).ToHashSet();
-            HashSet<string> opTags = TestTools.FuncDefTags(new Slate().Global[Slate.OperatorNamespace] as Namespace).ToHashSet();
-
-            List<string> notTested = opTags.WhereNot(testedTags.Contains).ToList();
-            List<string> notAnOp = testedTags.WhereNot(opTags.Contains).ToList();
-
-            if (notAnOp.Count > 0 || notTested.Count > 0) {
-                Assert.Fail("Tests do not match the existing operations:\n" +
-                    "Not Tested (" + notTested.Count + "):\n  " + notTested.Join("\n  ") + "\n" +
-                    "Not an Operation (" + notAnOp.Count + "):\n  " + notAnOp.Join("\n  "));
-            }
-        }
+        public void CheckAllOperatorsAreTested() =>
+            TestTools.SetEntriesMatch(
+                TestTools.FuncDefTags(new Slate().Global[Slate.OperatorNamespace] as Namespace),
+                TestTools.TestTags(typeof(Functions)),
+                "Tests do not match the existing operators");
 
         [TestMethod]
         [TestTag("and:And")]

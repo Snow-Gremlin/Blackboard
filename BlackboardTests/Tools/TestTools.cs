@@ -59,6 +59,37 @@ namespace BlackboardTests.Tools {
             }
         }
 
+        /// <summary>Check if the entries in the given sets of information match each other (repeats are ignored).</summary>
+        /// <typeparam name="T">The type of the value to compare.</typeparam>
+        /// <param name="exp">The set of expected values.</param>
+        /// <param name="results">The results to check against the given values.</param>
+        /// <param name="message">The message to go along with the test.</param>
+        static public void SetEntriesMatch<T>(IEnumerable<T> exp, IEnumerable<T> results, string message = "") {
+            HashSet<T> resultSet = results.ToHashSet();
+            HashSet<T> expSet    = exp.ToHashSet();
+            List<T> extra   = resultSet.WhereNot(expSet.Contains).ToList();
+            List<T> missing = expSet.WhereNot(resultSet.Contains).ToList();
+            if (extra.Count > 0 || missing.Count > 0) {
+                StringBuilder buf = new();
+                if (!string.IsNullOrEmpty(message))
+                    buf.AppendLine(message);
+
+                if (extra.Count > 0) {
+                    extra.Sort();
+                    buf.AppendLine("Extra:");
+                    extra.Strings().Indent("  ").Foreach(buf.AppendLine);
+                }
+
+                if (missing.Count > 0) {
+                    missing.Sort();
+                    buf.AppendLine("Missing:");
+                    missing.Strings().Indent("  ").Foreach(buf.AppendLine);
+                }
+
+                Assert.Fail(buf.ToString());
+            }
+        }
+
         /// <summary>Enumerates all the methods tagged with the TestTag attribute.</summary>
         /// <remarks>
         /// This method with the other "tag" methods (e.g. ConstTags) is designed to automatically

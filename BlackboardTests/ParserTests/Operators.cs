@@ -175,10 +175,17 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_equal_Equal_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := A == B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: Equal<bool>");
-            slate.Perform("A =  0.0;     B = 0.0;    ").CheckValue(true,  "C");
-            slate.Perform("A = -1.0;     B = 1.0;    ").CheckValue(false, "C");
-            slate.Perform("A =  1.00004; B = 1.00005;").CheckValue(false, "C");
-            slate.Perform("A =  0.001;   B = 1.0e-3; ").CheckValue(true,  "C");
+            slate.Perform("A =  0.0;     B =  0.0;    ").CheckValue(true,  "C");
+            slate.Perform("A = -1.0;     B =  1.0;    ").CheckValue(false, "C");
+            slate.Perform("A =  1.00004; B =  1.00005;").CheckValue(false, "C");
+            slate.Perform("A =  0.001;   B =  1.0e-3; ").CheckValue(true,  "C");
+
+            // NAN is never equal to anything including other NAN, use isNAN instead.
+            slate.Perform("A =  nan;     B =  nan;    ").CheckValue(false, "C");
+            slate.Perform("A =  nan;     B =  1.0;    ").CheckValue(false, "C");
+            slate.Perform("A = -inf;     B =  inf;    ").CheckValue(false, "C");
+            slate.Perform("A =  inf;     B =  inf;    ").CheckValue(true,  "C");
+            slate.Perform("A =  inf;     B = -inf;    ").CheckValue(false, "C");
         }
 
         [TestMethod]
@@ -198,9 +205,10 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_greater_GreaterThan_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A > B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThan<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0; B =  0;").CheckValue(false, "C");
+            slate.Perform("A = -1; B =  1;").CheckValue(false, "C");
+            slate.Perform("A =  1; B = -1;").CheckValue(true,  "C");
+            slate.Perform("A = 42; B = 42;").CheckValue(false, "C");
         }
 
         [TestMethod]
@@ -230,9 +238,10 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_greaterEqual_GreaterThanOrEqual_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A >= B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThanOrEqual<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0; B =  0;").CheckValue(true,  "C");
+            slate.Perform("A = -1; B =  1;").CheckValue(false, "C");
+            slate.Perform("A =  1; B = -1;").CheckValue(true,  "C");
+            slate.Perform("A = 42; B = 42;").CheckValue(true,  "C");
         }
 
         [TestMethod]
@@ -275,9 +284,10 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_less_LessThan_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A < B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThan<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0; B =  0;").CheckValue(false, "C");
+            slate.Perform("A = -1; B =  1;").CheckValue(true,  "C");
+            slate.Perform("A =  1; B = -1;").CheckValue(false, "C");
+            slate.Perform("A = 42; B = 42;").CheckValue(false, "C");
         }
 
         [TestMethod]
@@ -307,9 +317,10 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_lessEqual_LessThanOrEqual_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A <= B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThanOrEqual<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0; B =  0;").CheckValue(true,  "C");
+            slate.Perform("A = -1; B =  1;").CheckValue(true,  "C");
+            slate.Perform("A =  1; B = -1;").CheckValue(false, "C");
+            slate.Perform("A = 42; B = 42;").CheckValue(true,  "C");
         }
 
         [TestMethod]
@@ -442,9 +453,10 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_negate_Neg_Int() {
             Slate slate = new Slate().Perform("in int A; B := -A;");
             slate.CheckNodeString(Stringifier.Basic(), "B", "B: Neg<int>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0;").CheckValue( 0,  "B");
+            slate.Perform("A = -1;").CheckValue( 1,  "B");
+            slate.Perform("A =  1;").CheckValue(-1,  "B");
+            slate.Perform("A = 42;").CheckValue(-42, "B");
         }
 
         [TestMethod]
@@ -452,9 +464,13 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_negate_Neg_Double() {
             Slate slate = new Slate().Perform("in double A; B := -A;");
             slate.CheckNodeString(Stringifier.Basic(), "B", "B: Neg<double>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0.0;    ").CheckValue( 0.0,     "B");
+            slate.Perform("A = -1.0;    ").CheckValue( 1.0,     "B");
+            slate.Perform("A =  1.00004;").CheckValue(-1.00004, "B");
+            slate.Perform("A =  0.001;  ").CheckValue(-0.001,   "B");
+            slate.Perform("A =  nan;    ").CheckValue(double.NaN, "B");
+            slate.Perform("A =  inf;    ").CheckValue(double.NegativeInfinity, "B");
+            slate.Perform("A = -inf;    ").CheckValue(double.PositiveInfinity, "B");
         }
 
         [TestMethod]
@@ -471,9 +487,10 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_notEqual_NotEqual_Bool() {
             Slate slate = new Slate().Perform("in bool A, B; C := A != B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: NotEqual<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A = false; B = false;").CheckValue(false, "C");
+            slate.Perform("A = false; B = true; ").CheckValue(true,  "C");
+            slate.Perform("A = true;  B = false;").CheckValue(true,  "C");
+            slate.Perform("A = true;  B = true; ").CheckValue(false, "C");
         }
 
         [TestMethod]
@@ -481,9 +498,10 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_notEqual_NotEqual_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A != B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: NotEqual<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0; B =  0;").CheckValue(false, "C");
+            slate.Perform("A = -1; B =  1;").CheckValue(true,  "C");
+            slate.Perform("A =  1; B = -1;").CheckValue(true,  "C");
+            slate.Perform("A = 42; B = 42;").CheckValue(false, "C");
         }
 
         [TestMethod]

@@ -76,13 +76,13 @@ namespace BlackboardTests.Tools {
 
                 if (extra.Count > 0) {
                     extra.Sort();
-                    buf.AppendLine("Extra:");
+                    buf.AppendLine("Extra (" + extra.Count + "):");
                     extra.Strings().Indent("  ").Foreach(buf.AppendLine);
                 }
 
                 if (missing.Count > 0) {
                     missing.Sort();
-                    buf.AppendLine("Missing:");
+                    buf.AppendLine("Missing (" + missing.Count + "):");
                     missing.Strings().Indent("  ").Foreach(buf.AppendLine);
                 }
 

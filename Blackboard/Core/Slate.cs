@@ -308,10 +308,12 @@ namespace Blackboard.Core {
             void add(string name, double value) =>
                 this.Global[name] = Literal.Double(value);
 
-            add("e", S.Math.E);
-            add("pi", S.Math.PI);
-            add("tau", S.Math.Tau);
+            add("e",     S.Math.E);
+            add("pi",    S.Math.PI);
+            add("tau",   S.Math.Tau);
             add("sqrt2", S.Math.Sqrt(2.0));
+            add("nan",   double.NaN);
+            add("inf",   double.PositiveInfinity);
         }
 
         #endregion

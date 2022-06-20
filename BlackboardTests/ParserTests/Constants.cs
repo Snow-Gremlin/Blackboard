@@ -38,6 +38,14 @@ namespace BlackboardTests.ParserTests {
 
         [TestMethod]
         [TestTag("sqrt2")]
-        public void TestOperators_and_And() => checkConstant("sqrt2", S.Math.Sqrt(2.0));
+        public void TestOperators_sqrt2() => checkConstant("sqrt2", S.Math.Sqrt(2.0));
+
+        [TestMethod]
+        [TestTag("inf")]
+        public void TestOperators_inf() => checkConstant("inf", double.PositiveInfinity);
+
+        [TestMethod]
+        [TestTag("nan")]
+        public void TestOperators_nan() => checkConstant("nan", double.NaN);
     }
 }

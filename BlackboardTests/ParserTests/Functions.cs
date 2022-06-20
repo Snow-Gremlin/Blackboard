@@ -12,7 +12,7 @@ namespace BlackboardTests.ParserTests {
         public void CheckAllFunctionsAreTested() =>
             TestTools.SetEntriesMatch(
                 TestTools.FuncDefTags(new Slate().Global).WhereNot(tag => tag.StartsWith(Slate.OperatorNamespace)),
-                TestTools.TestTags(typeof(Functions)),
+                TestTools.TestTags(this.GetType()),
                 "Tests do not match the existing function");
 
 

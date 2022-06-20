@@ -13,7 +13,7 @@ namespace BlackboardTests.ParserTests {
         public void CheckAllOperatorsAreTested() =>
             TestTools.SetEntriesMatch(
                 TestTools.FuncDefTags(new Slate().Global[Slate.OperatorNamespace] as Namespace),
-                TestTools.TestTags(typeof(Functions)),
+                TestTools.TestTags(this.GetType()),
                 "Tests do not match the existing operators");
 
         [TestMethod]

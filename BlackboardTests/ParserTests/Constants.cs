@@ -12,7 +12,7 @@ namespace BlackboardTests.ParserTests {
         public void CheckAllConstantsAreTested() =>
             TestTools.SetEntriesMatch(
                 TestTools.ConstTags(new Slate().Global),
-                TestTools.TestTags(typeof(Constants)),
+                TestTools.TestTags(this.GetType()),
                 "Tests do not match the existing constant");
 
         /// <summary>

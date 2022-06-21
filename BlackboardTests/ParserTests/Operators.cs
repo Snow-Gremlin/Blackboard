@@ -216,9 +216,14 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_greater_GreaterThan_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := A > B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThan<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0.0;     B =  0.0;    ").CheckValue(false, "C");
+            slate.Perform("A = -1.0;     B =  1.0;    ").CheckValue(false, "C");
+            slate.Perform("A =  1.0;     B = -1.0;    ").CheckValue(true,  "C");
+            slate.Perform("A =  1.00004; B =  1.00005;").CheckValue(false, "C");
+            slate.Perform("A =  1.00005; B =  1.00004;").CheckValue(true,  "C");
+            slate.Perform("A = -inf;     B =  inf;    ").CheckValue(false, "C");
+            slate.Perform("A =  inf;     B =  inf;    ").CheckValue(false, "C");
+            slate.Perform("A =  inf;     B = -inf;    ").CheckValue(true,  "C");
         }
 
         [TestMethod]
@@ -249,9 +254,14 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_greaterEqual_GreaterThanOrEqual_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := A >= B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThanOrEqual<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0.0;     B =  0.0;    ").CheckValue(true,  "C");
+            slate.Perform("A = -1.0;     B =  1.0;    ").CheckValue(false, "C");
+            slate.Perform("A =  1.0;     B = -1.0;    ").CheckValue(true,  "C");
+            slate.Perform("A =  1.00004; B =  1.00005;").CheckValue(false, "C");
+            slate.Perform("A =  1.00005; B =  1.00004;").CheckValue(true,  "C");
+            slate.Perform("A = -inf;     B =  inf;    ").CheckValue(false, "C");
+            slate.Perform("A =  inf;     B =  inf;    ").CheckValue(true,  "C");
+            slate.Perform("A =  inf;     B = -inf;    ").CheckValue(true,  "C");
         }
 
         [TestMethod]
@@ -271,12 +281,14 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_invert_BitwiseNot_Int() {
             Slate slate = new Slate().Perform("in int A; B := ~A;");
             slate.CheckNodeString(Stringifier.Basic(), "B", "B: BitwiseNot<int>");
-            slate.Perform("A = 0x00000000;").CheckValue(-1, "B");
-            slate.Perform("A = 0x00000001;").CheckValue(-2, "B");
-            slate.Perform("A = 0x00001100;").CheckValue(0x1111_0011, "B");
-            slate.Perform("A = 0x10001111;").CheckValue(0x0111_0000, "B");
-            slate.Perform("A = 0x10101010;").CheckValue(0x0101_0101, "B");
-            slate.Perform("A = 0x01010101;").CheckValue(0x1010_1010, "B");
+            slate.Perform("A = 0x00000000;").CheckValue(unchecked((int)0xFFFF_FFFF), "B");
+            slate.Perform("A = 0x00000001;").CheckValue(unchecked((int)0xFFFF_FFFE), "B");
+            slate.Perform("A = 0x66666666;").CheckValue(unchecked((int)0x9999_9999), "B");
+            slate.Perform("A = 0x0F0F0F0F;").CheckValue(unchecked((int)0xF0F0_F0F0), "B");
+            slate.Perform("A = 0xF0F0F0F0;").CheckValue(unchecked((int)0x0F0F_0F0F), "B");
+            slate.Perform("A = 0x80000000;").CheckValue(unchecked((int)0x7FFF_FFFF), "B");
+            slate.Perform("A = 0x88888888;").CheckValue(unchecked((int)0x7777_7777), "B");
+            slate.Perform("A = 0x77777777;").CheckValue(unchecked((int)0x8888_8888), "B");
         }
 
         [TestMethod]
@@ -295,9 +307,14 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_less_LessThan_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := A < B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThan<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0.0;     B =  0.0;    ").CheckValue(false, "C");
+            slate.Perform("A = -1.0;     B =  1.0;    ").CheckValue(true,  "C");
+            slate.Perform("A =  1.0;     B = -1.0;    ").CheckValue(false, "C");
+            slate.Perform("A =  1.00004; B =  1.00005;").CheckValue(true,  "C");
+            slate.Perform("A =  1.00005; B =  1.00004;").CheckValue(false, "C");
+            slate.Perform("A = -inf;     B =  inf;    ").CheckValue(true,  "C");
+            slate.Perform("A =  inf;     B =  inf;    ").CheckValue(false, "C");
+            slate.Perform("A =  inf;     B = -inf;    ").CheckValue(false, "C");
         }
 
         [TestMethod]
@@ -328,9 +345,14 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_lessEqual_LessThanOrEqual_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := A <= B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThanOrEqual<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0.0;     B =  0.0;    ").CheckValue(true,  "C");
+            slate.Perform("A = -1.0;     B =  1.0;    ").CheckValue(true,  "C");
+            slate.Perform("A =  1.0;     B = -1.0;    ").CheckValue(false, "C");
+            slate.Perform("A =  1.00004; B =  1.00005;").CheckValue(true,  "C");
+            slate.Perform("A =  1.00005; B =  1.00004;").CheckValue(false, "C");
+            slate.Perform("A = -inf;     B =  inf;    ").CheckValue(true,  "C");
+            slate.Perform("A =  inf;     B =  inf;    ").CheckValue(true,  "C");
+            slate.Perform("A =  inf;     B = -inf;    ").CheckValue(false, "C");
         }
 
         [TestMethod]
@@ -361,9 +383,10 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_logicalAnd_All() {
             Slate slate = new Slate().Perform("in trigger A, B; C := A && B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: All<trigger>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
+            slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(false, "C").ResetTriggers();
+            slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
+            slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
         }
 
         [TestMethod]
@@ -381,10 +404,11 @@ namespace BlackboardTests.ParserTests {
         [TestTag("logicalOr:Any")]
         public void TestOperators_logicalOr_Any() {
             Slate slate = new Slate().Perform("in trigger A, B; C := A || B;");
-            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Any<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Any<trigger>");
+            slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
+            slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
+            slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").ResetTriggers();
+            slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
         }
 
         [TestMethod]
@@ -403,29 +427,44 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_logicalXor_XorTrigger() {
             Slate slate = new Slate().Perform("in trigger A, B; C := A ^^ B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: XorTrigger<trigger>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
+            slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
+            slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").ResetTriggers();
+            slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(false, "C").ResetTriggers();
         }
 
         [TestMethod]
         [TestTag("modulo:Mod<Int>")]
         public void TestOperators_modulo_Mod_Int() {
-            Slate slate = new Slate().Perform("in int A, B; C := A % B;");
+            Slate slate = new Slate().Perform("in int A, B = 1; C := A % B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mod<int>");
+            slate.Perform("A =  4; B =  2;").CheckValue( 0, "C");
+            slate.Perform("A =  3; B =  2;").CheckValue( 1, "C");
+            slate.Perform("A =  9; B =  3;").CheckValue( 0, "C");
+            slate.Perform("A =  1; B =  3;").CheckValue( 1, "C");
+            slate.Perform("A =  8; B =  3;").CheckValue( 2, "C");
+            slate.Perform("A =  8; B = -3;").CheckValue( 2, "C");
+            slate.Perform("A = -8; B =  3;").CheckValue(-2, "C");
+            slate.Perform("A = -8; B = -3;").CheckValue(-2, "C");
+            Assert.ThrowsException<System.DivideByZeroException>(() => slate.Perform("B = 0;"));
 
-            // TODO: Implement
-            throw new System.NotImplementedException();
         }
 
         [TestMethod]
         [TestTag("modulo:Mod<Double>")]
         public void TestOperators_modulo_Mod_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := A % B;");
-            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mod<int>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mod<double>");
+            slate.Perform("A =  4.0;  B =  2.0; ").CheckValue( 0.0, "C");
+            slate.Perform("A =  1.0;  B =  4.0; ").CheckValue( 1.0, "C");
+            slate.Perform("A =  8.0;  B =  3.0; ").CheckValue( 2.0, "C");
+            slate.Perform("A =  8.0;  B = -3.0; ").CheckValue( 2.0, "C");
+            slate.Perform("A = -8.0;  B =  3.0; ").CheckValue(-2.0, "C");
+            slate.Perform("A = -8.0;  B = -3.0; ").CheckValue(-2.0, "C");
+            slate.Perform("A =  1.0;  B =  0.0; ").CheckValue(double.NaN, "C");
+            slate.Perform("A =  0.0;  B =  0.0; ").CheckValue(double.NaN, "C");
+            slate.Perform("A = -1.0;  B =  0.0; ").CheckValue(double.NaN, "C");
+            slate.Perform("A =  3.13; B =  0.25;").CheckValue(3.13%0.25, "C");
         }
 
         [TestMethod]
@@ -433,19 +472,29 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_multiply_Mul_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A * B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mul<int>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0; B =  0;").CheckValue(  0, "C");
+            slate.Perform("A =  3; B =  0;").CheckValue(  0, "C");
+            slate.Perform("A =  9; B =  1;").CheckValue(  9, "C");
+            slate.Perform("A =  3; B =  4;").CheckValue( 12, "C");
+            slate.Perform("A =  8; B =  3;").CheckValue( 24, "C");
+            slate.Perform("A =  8; B = -3;").CheckValue(-24, "C");
+            slate.Perform("A = -8; B =  3;").CheckValue(-24, "C");
+            slate.Perform("A = -8; B = -3;").CheckValue( 24, "C");
         }
 
         [TestMethod]
         [TestTag("multiply:Mul<Double>")]
         public void TestOperators_multiply_Mul_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := A * B;");
-            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mul<int>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mul<double>");
+            slate.Perform("A =  0.0;  B =  0.0; ").CheckValue( 0.0,     "C");
+            slate.Perform("A =  1.0;  B =  0.0; ").CheckValue( 0.0,     "C");
+            slate.Perform("A =  1.0;  B =  4.0; ").CheckValue( 4.0,     "C");
+            slate.Perform("A =  2.0;  B =  4.0; ").CheckValue( 8.0,     "C");
+            slate.Perform("A =  8.0;  B = -3.0; ").CheckValue(-24.0,    "C");
+            slate.Perform("A = -8.0;  B =  3.0; ").CheckValue(-24.0,    "C");
+            slate.Perform("A = -8.0;  B = -3.0; ").CheckValue( 24.0,    "C");
+            slate.Perform("A =  1.02; B =  0.03;").CheckValue(  0.0306, "C");
         }
 
         [TestMethod]
@@ -477,7 +526,7 @@ namespace BlackboardTests.ParserTests {
         [TestTag("not:Not")]
         public void TestOperators_not_Not() {
             Slate slate = new Slate().Perform("in bool A; B := !A;");
-            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Not");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Not<bool>");
             slate.Perform("A = false;").CheckValue(true,  "B");
             slate.Perform("A = true; ").CheckValue(false, "B");
         }
@@ -509,9 +558,14 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_notEqual_NotEqual_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := A != B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: NotEqual<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0.0;     B =  0.0;    ").CheckValue(false, "C");
+            slate.Perform("A = -1.0;     B =  1.0;    ").CheckValue(true,  "C");
+            slate.Perform("A =  1.0;     B = -1.0;    ").CheckValue(true,  "C");
+            slate.Perform("A =  1.00004; B =  1.00005;").CheckValue(true,  "C");
+            slate.Perform("A =  1.00005; B =  1.00004;").CheckValue(true,  "C");
+            slate.Perform("A = -inf;     B =  inf;    ").CheckValue(true,  "C");
+            slate.Perform("A =  inf;     B =  inf;    ").CheckValue(false, "C");
+            slate.Perform("A =  inf;     B = -inf;    ").CheckValue(true,  "C");
         }
 
         [TestMethod]
@@ -542,9 +596,10 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_or_BitwiseOr_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A | B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: BitwiseOr<int>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A = 0x00000000; B = 0x00000000;").CheckValue(unchecked((int)0x0000_0000), "C");
+            slate.Perform("A = 0x11112222; B = 0x22221111;").CheckValue(unchecked((int)0x3333_3333), "C");
+            slate.Perform("A = 0xFF00FF00; B = 0x00FF00FF;").CheckValue(unchecked((int)0xFFFF_FFFF), "C");
+            slate.Perform("A = 0xC3C3C3C3; B = 0x0033CCFF;").CheckValue(unchecked((int)0xC3F3_CFFF), "C");
         }
 
         [TestMethod]
@@ -552,19 +607,28 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_or_Any() {
             Slate slate = new Slate().Perform("in trigger A, B; C := A | B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: Any<trigger>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
+            slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
+            slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").ResetTriggers();
+            slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
         }
 
         [TestMethod]
         [TestTag("power:BinaryFunc<Double, Double, Double>")]
         public void TestOperators_power_BinaryFunc_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := A ** B;");
-            slate.CheckNodeString(Stringifier.Basic(), "C", "C: BinaryFunc<double>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Pow<double>");
+            slate.Perform("A =  0.0; B =  0.0;").CheckValue(1.0, "C");
+            slate.Perform("A =  0.0; B =  1.0;").CheckValue(0.0, "C");
+            slate.Perform("A =  1.2; B =  0.0;").CheckValue(1.0, "C");
+            slate.Perform("A =  1.2; B =  1.0;").CheckValue(1.2, "C");
+            slate.Perform("A =  1.0; B =  1.2;").CheckValue(1.0, "C");
+            slate.Perform("A =  2.0; B =  1.2;").CheckValue(System.Math.Pow(2.0, 1.2), "C");
+            slate.Perform("A = 10.0; B =  2.0;").CheckValue( 100.0,  "C");
+            slate.Perform("A = 10.0; B = -2.0;").CheckValue(   0.01, "C");
+            slate.Perform("A =  2.0; B =  9.0;").CheckValue( 512.0,  "C");
+            slate.Perform("A = -2.0; B =  8.0;").CheckValue( 256.0,  "C");
+            slate.Perform("A = -2.0; B =  9.0;").CheckValue(-512.0,  "C");
         }
 
         [TestMethod]
@@ -572,9 +636,19 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_shiftLeft_LeftShift_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A << B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: LeftShift<int>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A = 0x00000000; B =  3;").CheckValue(unchecked((int)0x0000_0000), "C");
+            slate.Perform("A = 0xFFFFFFFF; B =  0;").CheckValue(unchecked((int)0xFFFF_FFFF), "C");
+            slate.Perform("A = 0xFFFFFFFF; B =  1;").CheckValue(unchecked((int)0xFFFF_FFFE), "C");
+            slate.Perform("A = 0xFFFFFFFF; B =  3;").CheckValue(unchecked((int)0xFFFF_FFF8), "C");
+            slate.Perform("A = 0x12345678; B =  4;").CheckValue(unchecked((int)0x2345_6780), "C");
+            slate.Perform("A = 0xFEDCBA98; B =  4;").CheckValue(unchecked((int)0xEDCB_A980), "C");
+            slate.Perform("A = 0x12345678; B = 24;").CheckValue(unchecked((int)0x7800_0000), "C");
+            // Left shifting will change signs as bit is pushed into the sign bit.
+            slate.Perform("A = 0x7FFFFFFF; B =  1;").CheckValue(unchecked((int)0xFFFF_FFFE), "C");
+            slate.Perform("A = 0x80000001; B =  4;").CheckValue(unchecked((int)0x0000_0010), "C");
+            slate.Perform("A = 0x88000000; B =  4;").CheckValue(unchecked((int)0x8000_0000), "C");
+            // Left shifting by a negative value is undefined,
+            // See: https://en.wikipedia.org/wiki/Bitwise_operation#C-family_and_Python
         }
 
         [TestMethod]
@@ -582,9 +656,17 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_shiftRight_RightShift_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A >> B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: RightShift<int>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A = 0x00000000; B =  3;").CheckValue(unchecked((int)0x0000_0000), "C");
+            slate.Perform("A = 0xFFFFFFFF; B =  0;").CheckValue(unchecked((int)0xFFFF_FFFF), "C");
+            slate.Perform("A = 0x12345678; B =  4;").CheckValue(unchecked((int)0x0123_4567), "C");
+            slate.Perform("A = 0x12345678; B = 24;").CheckValue(unchecked((int)0x0000_0012), "C");
+            // Right shifting a negative value will push in 1's in the highest bit to keep the same sign.
+            slate.Perform("A = 0x80000001; B =  4;").CheckValue(unchecked((int)0xF800_0000), "C");
+            slate.Perform("A = 0x88000000; B =  4;").CheckValue(unchecked((int)0xF880_0000), "C");
+            slate.Perform("A = 0xFFFFFFFF; B =  1;").CheckValue(unchecked((int)0xFFFF_FFFF), "C");
+            slate.Perform("A = 0xFFFFFFFF; B =  3;").CheckValue(unchecked((int)0xFFFF_FFFF), "C");
+            // Right shifting by a negative value is undefined,
+            // See: https://en.wikipedia.org/wiki/Bitwise_operation#C-family_and_Python
         }
 
         [TestMethod]
@@ -592,9 +674,13 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_subtract_Sub_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A - B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sub<int>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =   0; B =   0;").CheckValue(   0, "C");
+            slate.Perform("A =   1; B =   0;").CheckValue(   1, "C");
+            slate.Perform("A =   0; B =   1;").CheckValue(  -1, "C");
+            slate.Perform("A =   1; B =   1;").CheckValue(   0, "C");
+            slate.Perform("A =   0; B =  -1;").CheckValue(   1, "C");
+            slate.Perform("A = 136; B =  24;").CheckValue( 112, "C");
+            slate.Perform("A =  24; B = 136;").CheckValue(-112, "C");
         }
 
         [TestMethod]
@@ -602,9 +688,12 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_subtract_Sub_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := A - B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sub<double>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0.0; B =  0.0;").CheckValue(  0.0,    "C");
+            slate.Perform("A =  0.0; B = -1.0;").CheckValue(  1.0,    "C");
+            slate.Perform("A =  1.2; B =  0.4;").CheckValue(1.2-0.4,  "C");
+            slate.Perform("A =  0.4; B =  1.2;").CheckValue(0.4-1.2,  "C");
+            slate.Perform("A = -1.4; B =  1.2;").CheckValue(-1.4-1.2, "C");
+            slate.Perform("A = -1.4; B = -1.2;").CheckValue(-1.4+1.2, "C");
         }
 
         [TestMethod]
@@ -612,9 +701,13 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_sum_Sum_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A + B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sum<int>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =   0; B =   0;").CheckValue(  0, "C");
+            slate.Perform("A =   1; B =   0;").CheckValue(  1, "C");
+            slate.Perform("A =   0; B =   1;").CheckValue(  1, "C");
+            slate.Perform("A =   1; B =   1;").CheckValue(  2, "C");
+            slate.Perform("A =   0; B =  -1;").CheckValue( -1, "C");
+            slate.Perform("A = 136; B =  24;").CheckValue(160, "C");
+            slate.Perform("A =  24; B = 136;").CheckValue(160, "C");
         }
 
         [TestMethod]
@@ -622,9 +715,11 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_sum_Sum_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := A + B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sum<double>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A =  0.0; B =  0.0; ").CheckValue( 0.0,  "C");
+            slate.Perform("A = -1.0; B =  0.25;").CheckValue(-0.75, "C");
+            slate.Perform("A =  1.0; B =  0.25;").CheckValue( 1.25, "C");
+            slate.Perform("A =  inf; B =  -inf;").CheckValue(double.NaN, "C");
+            slate.Perform("A =  inf; B =  1e12;").CheckValue(double.PositiveInfinity, "C");
         }
 
         [TestMethod]
@@ -632,66 +727,73 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_sum_Sum_String() {
             Slate slate = new Slate().Perform("in string A, B; C := A + B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sum<string>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A = ''; B = '';").CheckValue("", "C");
+            slate.Perform("A = 'Hello'; B = 'World';").CheckValue("HelloWorld", "C");
+            slate.Perform("A = 'A'; B = 'B';").CheckValue("AB", "C");
         }
 
         [TestMethod]
         [TestTag("ternary:SelectValue<Bool>")]
         public void TestOperators_ternary_SelectValue_Bool() {
             Slate slate = new Slate().Perform("in bool A, B, C; D := A ? B : C;");
-            slate.CheckNodeString(Stringifier.Basic(), "D", "D: SelectValue<bool>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<bool>");
+            slate.Perform("A = false; B = false; C = false;").CheckValue(false, "D");
+            slate.Perform("A = false; B = false; C = true; ").CheckValue(true,  "D");
+            slate.Perform("A = false; B = true;  C = false;").CheckValue(false, "D");
+            slate.Perform("A = false; B = true;  C = true; ").CheckValue(true,  "D");
+            slate.Perform("A = true;  B = false; C = false;").CheckValue(false, "D");
+            slate.Perform("A = true;  B = false; C = true; ").CheckValue(false, "D");
+            slate.Perform("A = true;  B = true;  C = false;").CheckValue(true,  "D");
+            slate.Perform("A = true;  B = true;  C = true; ").CheckValue(true,  "D");
         }
 
         [TestMethod]
         [TestTag("ternary:SelectValue<Int>")]
         public void TestOperators_ternary_SelectValue_Int() {
             Slate slate = new Slate().Perform("in bool A; in int B, C; D := A ? B : C;");
-            slate.CheckNodeString(Stringifier.Basic(), "D", "D: SelectValue<int>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<int>");
+            slate.Perform("A = false; B = 10; C = 32;").CheckValue(32, "D");
+            slate.Perform("A = true;  B = 42; C = 87;").CheckValue(42, "D");
         }
 
         [TestMethod]
         [TestTag("ternary:SelectValue<Double>")]
         public void TestOperators_ternary_SelectValue_Doule() {
             Slate slate = new Slate().Perform("in bool A; in double B, C; D := A ? B : C;");
-            slate.CheckNodeString(Stringifier.Basic(), "D", "D: SelectValue<double>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<double>");
+            slate.Perform("A = false; B =  1.23; C = 32.1;").CheckValue(32.1, "D");
+            slate.Perform("A = true;  B = 42.5;  C = 55.3;").CheckValue(42.5, "D");
         }
 
         [TestMethod]
         [TestTag("ternary:SelectValue<String>")]
         public void TestOperators_ternary_SelectValue_String() {
             Slate slate = new Slate().Perform("in bool A; in string B, C; D := A ? B : C;");
-            slate.CheckNodeString(Stringifier.Basic(), "D", "D: SelectValue<string>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<string>");
+            slate.Perform("A = false; B = 'Goodbye'; C = 'Moon'; ").CheckValue("Moon",  "D");
+            slate.Perform("A = true;  B = 'Hello';   C = 'World';").CheckValue("Hello", "D");
         }
 
         [TestMethod]
         [TestTag("ternary:SelectTrigger")]
         public void TestOperators_ternary_SelectTrigger() {
             Slate slate = new Slate().Perform("in bool A; in trigger B, C; D := A ? B : C;");
-            slate.CheckNodeString(Stringifier.Basic(), "D", "D: SelectTrigger");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<trigger>");
+            slate.PerformWithoutReset("A = false; B = false; C = false;").CheckProvoked(false, "D").ResetTriggers();
+            slate.PerformWithoutReset("A = false; B = false; C = true; ").CheckProvoked(true,  "D").ResetTriggers();
+            slate.PerformWithoutReset("A = false; B = true;  C = false;").CheckProvoked(false, "D").ResetTriggers();
+            slate.PerformWithoutReset("A = false; B = true;  C = true; ").CheckProvoked(true,  "D").ResetTriggers();
+            slate.PerformWithoutReset("A = true;  B = false; C = false;").CheckProvoked(false, "D").ResetTriggers();
+            slate.PerformWithoutReset("A = true;  B = false; C = true; ").CheckProvoked(false, "D").ResetTriggers();
+            slate.PerformWithoutReset("A = true;  B = true;  C = false;").CheckProvoked(true,  "D").ResetTriggers();
+            slate.PerformWithoutReset("A = true;  B = true;  C = true; ").CheckProvoked(true,  "D").ResetTriggers();
         }
 
         [TestMethod]
         [TestTag("xor:Xor")]
         public void TestOperators_xor_Xor() {
             Slate slate = new Slate().Perform("in bool A, B; C := A ^ B;");
-            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Xor");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Xor<bool>");
             slate.Perform("A = false; B = false;").CheckValue(false, "C");
             slate.Perform("A = false; B = true; ").CheckValue(true,  "C");
             slate.Perform("A = true;  B = false;").CheckValue(true,  "C");
@@ -703,19 +805,22 @@ namespace BlackboardTests.ParserTests {
         public void TestOperators_xor_BitwiseXor_Int() {
             Slate slate = new Slate().Perform("in int A, B; C := A ^ B;");
             slate.CheckNodeString(Stringifier.Basic(), "C", "C: BitwiseXor<int>");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.Perform("A = 0x00000000; B = 0x00000000;").CheckValue(unchecked((int)0x0000_0000), "C");
+            slate.Perform("A = 0x11112222; B = 0x22221111;").CheckValue(unchecked((int)0x3333_3333), "C");
+            slate.Perform("A = 0xFF00FF00; B = 0x00FF00FF;").CheckValue(unchecked((int)0xFFFF_FFFF), "C");
+            slate.Perform("A = 0xFF00FF00; B = 0xFFFFFFFF;").CheckValue(unchecked((int)0x00FF_00FF), "C");
+            slate.Perform("A = 0xC3C3C3C3; B = 0x0033CCFF;").CheckValue(unchecked((int)0xC3F0_0F3C), "C");
         }
 
         [TestMethod]
         [TestTag("xor:XorTrigger")]
         public void TestOperators_xor_XorTrigger() {
             Slate slate = new Slate().Perform("in trigger A, B; C := A ^ B;");
-            slate.CheckNodeString(Stringifier.Basic(), "C", "C: XorTrigger");
-
-            // TODO: Implement
-            throw new System.NotImplementedException();
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: XorTrigger<trigger>");
+            slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
+            slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
+            slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").ResetTriggers();
+            slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(false, "C").ResetTriggers();
         }
     }
 }

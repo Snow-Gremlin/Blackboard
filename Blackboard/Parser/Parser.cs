@@ -349,13 +349,15 @@ namespace Blackboard.Parser {
             INode target = builder.Nodes.Pop();
             INode root   = builder.AddAssignment(target, value);
 
+            // TODO: Reevaluate this statement and make sure we're doing it correctly.
+            //
             // Push the cast value back onto the stack for any following assignments.
             // By using the cast it makes it more like `X=Y=Z` is `Y=Z; X=Y;` but means that if a double and an int are being set by
-            // an int the int must be assigned first then it can cast to a double for the double assignment, otherwise it will cast
+            // an int, the int must be assigned first then it can cast to a double for the double assignment, otherwise it will cast
             // to a double but not be able to implicitly cast that double back to an int. For example: if `int X; double Y;` then
             // `Y=X=3;` works and `X=Y=3` will not. One drawback for this way is that if you assign an int to multiple doubles it will
             // construct multiple cast nodes, but with a little optimization to remove duplicate node paths, this isn't an issue. 
-            // Alternatively, if we push he value then `X=Y=Z` will be like `Y=Z; X=Z;`, but we won't.
+            // Alternatively, if we push the value then `X=Y=Z` will be like `Y=Z; X=Z;`, but we won't.
             builder.Nodes.Push(root);
             // Add to existing since the first assignment will handle preparing the tree being assigned.
             builder.Existing.Add(root);
@@ -411,11 +413,16 @@ namespace Blackboard.Parser {
                     With("Location", builder.LastLocation);
 
             INode result = group.Build(args);
-            if (result is null)
-                throw new Message("Could not perform the function with the given input.").
+            if (result is null) {
+                if (args.Length <= 0)
+                    throw new Message("Could not perform the function without any inputs.").
+                        With("Function", group).
+                        With("Location", builder.LastLocation);
+                throw new Message("Could not perform the function with the given input types.").
                     With("Function", group).
                     With("Input", args.Types().Strings().Join(", ")).
                     With("Location", builder.LastLocation);
+            }
 
             builder.Nodes.Push(result);
         }

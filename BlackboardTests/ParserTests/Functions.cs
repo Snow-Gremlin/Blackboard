@@ -352,10 +352,10 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("format:Format")]
         public void TestFunctions_format_Format() {
-            Slate slate = new Slate().Perform("in double A, B, C; D := format(A, B, C);");
+            Slate slate = new Slate().Perform("in string A; in double B, C, D; D := format(A, B, C, D);");
             slate.CheckNodeString(Stringifier.Basic(), "D", "D: Floor<double>");
 
-            // TODO: Finish
+            // TODO: Fix case error when casting InputValue<Double> to IValueParent<IData>.
         }
 
 

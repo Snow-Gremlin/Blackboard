@@ -161,8 +161,13 @@ namespace Blackboard.Parser {
         /// <param name="hndl">This is the handler to call on this prompt.</param>
         private void addHandler(string name, S.Action<Builder> hndl) =>
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
-                this.logger.Info("Handle {0} [{1}]", name, args.LastLocation);
-                hndl(args as Builder);
+                try {
+                    this.logger.Info("Handle {0} [{1}]", name, args.LastLocation);
+                    hndl(args as Builder);
+                } catch(Exception ex) {
+                    this.logger.Error("Error while handling {0} [{1}]: {2}", name, args.LastLocation, ex);
+                    throw;
+                }
             };
 
         /// <summary>This adds a prompt for an operator handler.</summary>

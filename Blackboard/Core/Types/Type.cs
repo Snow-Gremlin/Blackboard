@@ -20,11 +20,14 @@ namespace Blackboard.Core.Types {
         /// <returns>The resulting casted value.</returns>
         private delegate INode caster(INode node);
 
-        /// <summary>The base type for all other types.</summary>
+        /// <summary>The base type for all other types, not just value types.</summary>
         static public readonly Type Node;
 
         /// <summary>The trigger type.</summary>
         static public readonly Type Trigger;
+
+        /// <summary>The base of all value types</summary>
+        static public readonly Type Object;
 
         /// <summary>The boolean value type.</summary>
         static public readonly Type Bool;
@@ -322,6 +325,7 @@ namespace Blackboard.Core.Types {
         static Type() {
             Node          = new Type("node",           typeof(INode),           null,   null);
             Trigger       = new Type("trigger",        typeof(ITrigger),        Node,   null);
+            Object        = new Type("object",         typeof(IValue<Bool>),    Object, typeof(Object));
             Bool          = new Type("bool",           typeof(IValue<Bool>),    Node,   typeof(Bool));
             Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int));
             Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double));

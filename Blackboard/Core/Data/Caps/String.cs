@@ -15,7 +15,8 @@ namespace Blackboard.Core.Data.Caps {
         IEquatable<String>,
         IImplicit<Bool,   String>,
         IImplicit<Double, String>,
-        IImplicit<Int,    String> {
+        IImplicit<Int,    String>,
+        IImplicit<Object, String> {
 
         #region Static...
 
@@ -112,6 +113,11 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="value">The integer value to cast.</param>
         /// <returns>The resulting string value.</returns>
         public String CastFrom(Int value) => new(value.ValueString);
+
+        /// <summary>Casts an object into a string for an implicit cast.</summary>
+        /// <param name="value">The object value to cast.</param>
+        /// <returns>The resulting string value.</returns>
+        public String CastFrom(Object value) => new(value.ValueString);
 
         #endregion
 

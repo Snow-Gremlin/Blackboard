@@ -1,6 +1,8 @@
 using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Inner;
+using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -166,5 +168,16 @@ namespace BlackboardTests.CoreTests {
         // - setting children to parent, legitimize children.
         // - setting parents for sum(a, b, c, d) where a & c are legitimate and b & d are illegitimate.
         // - setting and updating parents, i.e. test parent collection
+
+
+        [TestMethod]
+        public void TestBaseClassCasting() {
+            InputValue<Double> input = new();
+            InputValue<IData> input2 = input;
+            //IValueParent<IData> par = (IValueParent<IData>)input;
+
+            // TODO: Fix case error when casting InputValue<Double> to IValueParent<IData>.
+
+        }
     }
 }

@@ -18,7 +18,8 @@ namespace Blackboard.Core.Data.Caps {
         IMultiplicative<Double>,
         ISigned<Double>,
         ISubtractive<Double>,
-        IImplicit<Int, Double> {
+        IImplicit<Int, Double>,
+        IExplicit<Object, Double> {
 
         #region Static...
 
@@ -263,6 +264,11 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="value">The integer value to cast.</param>
         /// <returns>The resulting double value.</returns>
         public Double CastFrom(Int value) => new(value.Value);
+
+        /// <summary>Casts an object into a double for an implicit cast.</summary>
+        /// <param name="value">The object value to cast.</param>
+        /// <returns>The resulting double value.</returns>
+        public Double CastFrom(Object value) => new((double)value.Value);
 
         #endregion
 

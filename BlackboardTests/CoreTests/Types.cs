@@ -41,6 +41,10 @@ namespace BlackboardTests.CoreTests {
         static private void checkExplicit(Type t, INode node, string expExplicit) =>
             checkCasts(t, node, "Explicit", "null", expExplicit);
 
+        // TODO: Add similar mechanism as in Operation and Functions to keep track of which types have been tested or not.
+        // TODO: Add in tests for Maker methods for each type.
+        // TODO: Test Object type
+
         [TestMethod]
         public void TestTypeOf() {
             checkTypeOf(new InputTrigger(),       Type.Trigger);

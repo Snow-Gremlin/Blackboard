@@ -72,15 +72,24 @@ namespace Blackboard.Core {
                 All.Factory);
             add("castTrigger",
                 BoolAsTrigger.Factory);
-            add("castBool");
+            add("castBool",
+                Explicit<Object, Bool>.Factory);
             add("castInt",
-                Explicit<Double, Int>.Factory);
+                Explicit<Double, Int>.Factory,
+                Explicit<Object, Int>.Factory);
             add("castDouble",
-                Implicit<Int, Double>.Factory);
+                Implicit<Int, Double>.Factory,
+                Explicit<Object, Double>.Factory);
+            add("castObject",
+                Implicit<Bool, Object>.Factory,
+                Implicit<Int, Object>.Factory,
+                Implicit<Double, Object>.Factory,
+                Implicit<String, Object>.Factory);
             add("castString",
                 Implicit<Bool, String>.Factory,
                 Implicit<Int, String>.Factory,
-                Implicit<Double, String>.Factory);
+                Implicit<Double, String>.Factory,
+                Implicit<Object, String>.Factory);
             add("divide",
                 Div<Int>.Factory,
                 Div<Double>.Factory);

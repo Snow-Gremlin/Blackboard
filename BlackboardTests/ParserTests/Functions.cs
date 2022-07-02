@@ -352,13 +352,39 @@ namespace BlackboardTests.ParserTests {
         [TestMethod]
         [TestTag("format:Format")]
         public void TestFunctions_format_Format() {
-            Slate slate = new Slate().Perform("in string A; in double B, C, D; D := format(A, B, C, D);");
-            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Floor<double>");
+            Slate slate = new Slate().Perform("in string A; B := format(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Format<string>");
+            slate.Perform("A = \"Hello World\";").CheckValue("Hello World", "B");
 
-            // TODO: Fix case error when casting InputValue<Double> to IValueParent<IData>.
+            slate = new Slate().Perform("in string A; in bool B; C := format(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Format<string>");
+            slate.Perform("A = \"Answer is {0}\"; B = true;").CheckValue("Answer is True", "C");
+            slate.Perform("B = false;").CheckValue("Answer is False", "C");
+            slate.Perform("A = \"{0} was the answer!\";").CheckValue("False was the answer!", "C");
+
+            slate = new Slate().Perform("in string A; in int B; C := format(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Format<string>");
+            slate.Perform("A = \"Answer is {0}\"; B = 42;").CheckValue("Answer is 42", "C");
+            slate.Perform("B = -1234567;").CheckValue("Answer is -1234567", "C");
+            slate.Perform("A = \"{0:#,##0} was the answer!\";").CheckValue("-1,234,567 was the answer!", "C");
+
+            slate = new Slate().Perform("in string A; in double B; C := format(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Format<string>");
+            slate.Perform("A = \"Answer is {0}\"; B = 42.0;").CheckValue("Answer is 42", "C");
+            slate.Perform("B = 123.456789;").CheckValue("Answer is 123.456789", "C");
+            slate.Perform("A = \"{0:#.000} was the answer!\";").CheckValue("123.457 was the answer!", "C");
+            slate.Perform("B = 12;").CheckValue("12.000 was the answer!", "C");
+
+            slate = new Slate().Perform("in string A; in string B; C := format(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Format<string>");
+            slate.Perform("A = \"Answer is {0}\"; B = \"Sleep\";").CheckValue("Answer is Sleep", "C");
+            slate.Perform("A = \"!{0,12}!\"; B = \"Caffeine\";").CheckValue("!    Caffeine!", "C");
+
+            slate = new Slate().Perform("in string A; in double B; in int C; in bool D; in string E; F := format(A, B, C, D, E);");
+            slate.CheckNodeString(Stringifier.Basic(), "F", "F: Format<string>");
+            slate.Perform("A = \"[{0}, {1}, {2}, {3}]\"; B = 3.14; C = 320; D = false; E = \"Cat\";").CheckValue("[3.14, 320, False, Cat]", "F");
+            slate.Perform("A = \"<<{0}>> <<{1}>> <<{2}>> <<{3}>> <<{2}>> <<{1}>> <<{0}>>\";").
+                CheckValue("<<3.14>> <<320>> <<False>> <<Cat>> <<False>> <<320>> <<3.14>>", "F");
         }
-
-
-
     }
 }

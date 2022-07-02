@@ -7,7 +7,8 @@ namespace Blackboard.Core.Data.Caps {
     public struct Bool:
         IComparable<Bool>,
         IData,
-        IEquatable<Bool> {
+        IEquatable<Bool>,
+        IExplicit<Object, Bool> {
 
         #region Static...
 
@@ -68,6 +69,14 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="other">This is the bool to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
         public bool Equals(Bool other) => this.Value == other.Value;
+
+        #endregion
+        #region Casts...
+
+        /// <summary>Casts an object into a bool for an explicit cast.</summary>
+        /// <param name="value">The object value to cast.</param>
+        /// <returns>The resulting boolean value.</returns>
+        public Bool CastFrom(Object value) => new((bool)value.Value);
 
         #endregion
 

@@ -5,41 +5,22 @@ using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
+using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 
 namespace BlackboardTests.CoreTests {
 
     [TestClass]
     public class Types {
 
-        static private readonly Stringifier stringifier = new(
-            showLastDataValues:  false,
-            showFirstDataValues: false);
-
-        static private void checkTypeOf(INode node, Type exp) =>
-            Assert.AreEqual(exp, Type.TypeOf(node));
-
-        static private void checkCasts(Type t, INode node, string expMatch, string expImplicit, string expExplicit) {
-            string msg = "Checking if " + t + " matches " + node + ".";
-            string resultMatch    = t.Match(Type.TypeOf(node), true).ToString();
-            Assert.AreEqual(expMatch, resultMatch, msg);
-            string resultImplicit = stringifier.Stringify(t.Implicit(node));
-            Assert.AreEqual(expImplicit, resultImplicit, msg);
-            string resultExplicit = stringifier.Stringify(t.Explicit(node));
-            Assert.AreEqual(expExplicit, resultExplicit, msg);
+        [TestMethod]
+        public void CheckAllFunctionsAreTested() {
+            TestTools.SetEntriesMatch(
+                Type.AllTypes.Select(t => t.Name),
+                TestTools.TestTags(this.GetType()),
+                "Tests do not match the existing types");
         }
-
-        static private void checkImplicit(Type t, INode node, int steps, string expImplicit) =>
-            checkCasts(t, node, "Implicit("+steps+")", expImplicit, "null");
-
-        static private void checkInherit(Type t, INode node, int steps) =>
-            checkCasts(t, node, "Inherit("+steps+")", stringifier.Stringify(node), stringifier.Stringify(node));
-
-        static private void checkNoCast(Type t, INode node) =>
-            checkCasts(t, node, "None", "null", "null");
-
-        static private void checkExplicit(Type t, INode node, string expExplicit) =>
-            checkCasts(t, node, "Explicit", "null", expExplicit);
 
         // TODO: Add similar mechanism as in Operation and Functions to keep track of which types have been tested or not.
         // TODO: Add in tests for Maker methods for each type.
@@ -47,84 +28,89 @@ namespace BlackboardTests.CoreTests {
 
         [TestMethod]
         public void TestTypeOf() {
-            checkTypeOf(new InputTrigger(),       Type.Trigger);
-            checkTypeOf(new InputValue<Bool>(),   Type.Bool);
-            checkTypeOf(new InputValue<Int>(),    Type.Int);
-            checkTypeOf(new InputValue<Double>(), Type.Double);
-            checkTypeOf(new InputValue<String>(), Type.String);
-            checkTypeOf(new FuncGroup(),          Type.FuncGroup);
-            checkTypeOf(Sum<Int>.Factory(),       Type.FuncDef);
-            checkTypeOf(new Namespace(),          Type.Namespace);
-            checkTypeOf(new Counter<Int>(),       Type.CounterInt);
-            checkTypeOf(new Counter<Double>(),    Type.CounterDouble);
-            checkTypeOf(new Toggler(),            Type.Toggler);
-            checkTypeOf(new Latch<Bool>(),        Type.LatchBool);
-            checkTypeOf(new Latch<Int>(),         Type.LatchInt);
-            checkTypeOf(new Latch<Double>(),      Type.LatchDouble);
-            checkTypeOf(new Latch<String>(),      Type.LatchString);
+            new InputTrigger().      CheckTypeOf(Type.Trigger);
+            new InputValue<Object>().CheckTypeOf(Type.Object);
+            new InputValue<Bool>().  CheckTypeOf(Type.Bool);
+            new InputValue<Int>().   CheckTypeOf(Type.Int);
+            new InputValue<Double>().CheckTypeOf(Type.Double);
+            new InputValue<String>().CheckTypeOf(Type.String);
+            new FuncGroup().         CheckTypeOf(Type.FuncGroup);
+            Sum<Int>.Factory().      CheckTypeOf(Type.FuncDef);
+            new Namespace().         CheckTypeOf(Type.Namespace);
+            new Counter<Int>().      CheckTypeOf(Type.CounterInt);
+            new Counter<Double>().   CheckTypeOf(Type.CounterDouble);
+            new Toggler().           CheckTypeOf(Type.Toggler);
+            new Latch<Object>().     CheckTypeOf(Type.LatchObject);
+            new Latch<Bool>().       CheckTypeOf(Type.LatchBool);
+            new Latch<Int>().        CheckTypeOf(Type.LatchInt);
+            new Latch<Double>().     CheckTypeOf(Type.LatchDouble);
+            new Latch<String>().     CheckTypeOf(Type.LatchString);
         }
 
         [TestMethod]
         public void TestCastBoolInput() {
             InputValue<Bool> node = new();
-            checkInherit (Type.Node,          node, 1);
-            checkImplicit(Type.Trigger,       node, 0, "BoolAsTrigger<trigger>(Input<bool>)");
-            checkInherit (Type.Bool,          node, 0);
-            checkNoCast  (Type.Int,           node);
-            checkNoCast  (Type.Double,        node);
-            checkImplicit(Type.String,        node, 0, "Implicit<string>(Input<bool>)");
-            checkNoCast  (Type.FuncGroup,     node);
-            checkNoCast  (Type.FuncDef,       node);
-            checkNoCast  (Type.Namespace,     node);
-            checkNoCast  (Type.CounterInt,    node);
-            checkNoCast  (Type.CounterDouble, node);
-            checkNoCast  (Type.Toggler,       node);
-            checkNoCast  (Type.LatchBool,     node);
-            checkNoCast  (Type.LatchInt,      node);
-            checkNoCast  (Type.LatchDouble,   node);
-            checkNoCast  (Type.LatchString,   node);
+            node.CheckInherit (Type.Node, 1);
+            node.CheckImplicit(Type.Trigger, 0, "BoolAsTrigger<trigger>[](Input<bool>)");
+            node.CheckImplicit(Type.Object, 0, "Implicit<object>[null](Input<bool>)");
+            node.CheckInherit (Type.Bool, 0);
+            node.CheckNoCast  (Type.Int);
+            node.CheckNoCast  (Type.Double);
+            node.CheckImplicit(Type.String, 0, "Implicit<string>[](Input<bool>)");
+            node.CheckNoCast  (Type.FuncGroup);
+            node.CheckNoCast  (Type.FuncDef);
+            node.CheckNoCast  (Type.Namespace);
+            node.CheckNoCast  (Type.CounterInt);
+            node.CheckNoCast  (Type.CounterDouble);
+            node.CheckNoCast  (Type.Toggler);
+            node.CheckNoCast  (Type.LatchBool);
+            node.CheckNoCast  (Type.LatchInt);
+            node.CheckNoCast  (Type.LatchDouble);
+            node.CheckNoCast  (Type.LatchString);
         }
         
         [TestMethod]
         public void TestCastIntLatch() {
             Latch<Int> node = new();
-            checkInherit (Type.Node,          node, 2);
-            checkNoCast  (Type.Trigger,       node);
-            checkNoCast  (Type.Bool,          node);
-            checkInherit (Type.Int,           node, 1);
-            checkImplicit(Type.Double,        node, 1, "Implicit<double>(Latch<int>(null, null))");
-            checkImplicit(Type.String,        node, 1, "Implicit<string>(Latch<int>(null, null))");
-            checkNoCast  (Type.FuncGroup,     node);
-            checkNoCast  (Type.FuncDef,       node);
-            checkNoCast  (Type.Namespace,     node);
-            checkNoCast  (Type.CounterInt,    node);
-            checkNoCast  (Type.CounterDouble, node);
-            checkNoCast  (Type.Toggler,       node);
-            checkNoCast  (Type.LatchBool,     node);
-            checkInherit (Type.LatchInt,      node, 0);
-            checkNoCast  (Type.LatchDouble,   node);
-            checkNoCast  (Type.LatchString,   node);
+            node.CheckInherit (Type.Node, 2);
+            node.CheckNoCast  (Type.Trigger);
+            node.CheckImplicit(Type.Object, 1, "Implicit<object>[null](Latch<int>(null, null))");
+            node.CheckNoCast  (Type.Bool);
+            node.CheckInherit (Type.Int, 1);
+            node.CheckImplicit(Type.Double, 1, "Implicit<double>[0](Latch<int>(null, null))");
+            node.CheckImplicit(Type.String, 1, "Implicit<string>[](Latch<int>(null, null))");
+            node.CheckNoCast  (Type.FuncGroup);
+            node.CheckNoCast  (Type.FuncDef);
+            node.CheckNoCast  (Type.Namespace);
+            node.CheckNoCast  (Type.CounterInt);
+            node.CheckNoCast  (Type.CounterDouble);
+            node.CheckNoCast  (Type.Toggler);
+            node.CheckNoCast  (Type.LatchBool);
+            node.CheckInherit (Type.LatchInt, 0);
+            node.CheckNoCast  (Type.LatchDouble);
+            node.CheckNoCast  (Type.LatchString);
         }
         
         [TestMethod]
         public void TestCastDoubleCounter() {
             Counter<Double> node = new();
-            checkInherit (Type.Node,          node, 2);
-            checkNoCast  (Type.Trigger,       node);
-            checkNoCast  (Type.Bool,          node);
-            checkExplicit(Type.Int,           node, "Explicit<int>(Counter<double>(null, null, null, null, null))");
-            checkInherit (Type.Double,        node, 1);
-            checkImplicit(Type.String,        node, 1, "Implicit<string>(Counter<double>(null, null, null, null, null))");
-            checkNoCast  (Type.FuncGroup,     node);
-            checkNoCast  (Type.FuncDef,       node);
-            checkNoCast  (Type.Namespace,     node);
-            checkNoCast  (Type.CounterInt,    node);
-            checkInherit (Type.CounterDouble, node, 0);
-            checkNoCast  (Type.Toggler,       node);
-            checkNoCast  (Type.LatchBool,     node);
-            checkNoCast  (Type.LatchInt,      node);
-            checkNoCast  (Type.LatchDouble,   node);
-            checkNoCast  (Type.LatchString,   node);
+            node.CheckInherit (Type.Node, 2);
+            node.CheckNoCast  (Type.Trigger);
+            node.CheckImplicit(Type.Object, 1, "Implicit<object>[null](Counter<double>(null, null, null, null, null))");
+            node.CheckNoCast  (Type.Bool);
+            node.CheckExplicit(Type.Int, "Explicit<int>[0](Counter<double>(null, null, null, null, null))");
+            node.CheckInherit (Type.Double, 1);
+            node.CheckImplicit(Type.String, 1, "Implicit<string>[](Counter<double>(null, null, null, null, null))");
+            node.CheckNoCast  (Type.FuncGroup);
+            node.CheckNoCast  (Type.FuncDef);
+            node.CheckNoCast  (Type.Namespace);
+            node.CheckNoCast  (Type.CounterInt);
+            node.CheckInherit (Type.CounterDouble, 0);
+            node.CheckNoCast  (Type.Toggler);
+            node.CheckNoCast  (Type.LatchBool);
+            node.CheckNoCast  (Type.LatchInt);
+            node.CheckNoCast  (Type.LatchDouble);
+            node.CheckNoCast  (Type.LatchString);
         }
     }
 }

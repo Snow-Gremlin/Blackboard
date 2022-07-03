@@ -4,6 +4,7 @@ using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Types;
 using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
@@ -15,12 +16,50 @@ namespace BlackboardTests.Tools {
 
     /// <summary>These are extensions to Blackboard objects for testing.</summary>
     static class TestExtensions {
+        #region Types...
+
+        static private void checkCasts(INode node, Type t, string expMatch, string expImplicit, string expExplicit) {
+            string msg = "Checking if " + t + " matches " + node + ".";
+            
+            string resultMatch = t.Match(Type.TypeOf(node), true).ToString();
+            Assert.AreEqual(expMatch, resultMatch, msg);
+            
+            string resultImplicit = Stringifier.Shallow(t.Implicit(node));
+            Assert.AreEqual(expImplicit, resultImplicit, msg);
+
+            string resultExplicit = Stringifier.Shallow(t.Explicit(node));
+            Assert.AreEqual(expExplicit, resultExplicit, msg);
+        }
+
+        static public void CheckImplicit(this INode node, Type t, int steps, string expImplicit) =>
+            checkCasts(node, t, "Implicit("+steps+")", expImplicit, "null");
+
+        static public void CheckInherit(this INode node, Type t, int steps) =>
+            checkCasts(node, t, "Inherit("+steps+")", Stringifier.Shallow(node), Stringifier.Shallow(node));
+
+        static public void CheckNoCast(this INode node, Type t) =>
+            checkCasts(node, t, "None", "null", "null");
+
+        static public void CheckExplicit(this INode node, Type t, string expExplicit) =>
+            checkCasts(node, t, "Explicit", "null", expExplicit);
+
+
+        #endregion
         #region Node...
+
+        /// <summary>This will check that the underlying type of the given node is as expected.</summary>
+        /// <param name="node">The node to check the type of.</param>
+        /// <param name="exp">The expected type of the given node.</param>
+        /// <returns>The given node so that method calls can be chained.</returns>
+        static public INode CheckTypeOf(this INode node, Type exp) {
+            Assert.AreEqual(exp, Type.TypeOf(node));
+            return node;
+        }
 
         /// <summary>Checks the string of a node.</summary>
         /// <param name="node">The node to check the sting of.</param>
         /// <param name="exp">This is the expected string name.</param>
-        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        /// <returns>The given node so that method calls can be chained.</returns>
         static public INode CheckString(this INode node, string exp) {
             Assert.AreEqual(exp, Stringifier.Shallow(node));
             return node;
@@ -29,7 +68,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Checks the depth of the node.</summary>
         /// <param name="node">The node to check the depth of.</param>
         /// <param name="exp">This is the expected depth.</param>
-        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        /// <returns>The given node so that method calls can be chained.</returns>
         static public IEvaluable CheckDepth(this IEvaluable node, int exp) {
             Assert.AreEqual(exp, node.Depth);
             return node;
@@ -38,7 +77,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Checks the list of parents of a node.</summary>
         /// <param name="node">The node to check the parents of.</param>
         /// <param name="exp">The comma separated list of parent strings.</param>
-        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        /// <returns>The given node so that method calls can be chained.</returns>
         static public IChild CheckParents(this IChild node, string exp) {
             Assert.AreEqual(exp, node.Parents.Join(", "));
             return node;
@@ -47,7 +86,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Checks the boolean value of this node.</summary>
         /// <param name="node">This is the boolean node to check the value of.</param>
         /// <param name="exp">The expected boolean value.</param>
-        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        /// <returns>The given node so that method calls can be chained.</returns>
         static public INode CheckValue(this INode node, bool exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<Bool>));
             Assert.AreEqual(exp, (node as IValue<Bool>).Value.Value);
@@ -57,7 +96,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Checks the integer value of this node.</summary>
         /// <param name="node">This is the integer node to check the value of.</param>
         /// <param name="exp">The expected integer value.</param>
-        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        /// <returns>The given node so that method calls can be chained.</returns>
         static public INode CheckValue(this INode node, int exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<Int>));
             Assert.AreEqual(exp, (node as IValue<Int>).Value.Value);
@@ -67,7 +106,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Checks the double value of this node.</summary>
         /// <param name="node">This is the double node to check the value of.</param>
         /// <param name="exp">The expected double value.</param>
-        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        /// <returns>The given node so that method calls can be chained.</returns>
         static public INode CheckValue(this INode node, double exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<Double>));
             Assert.AreEqual(exp, (node as IValue<Double>).Value.Value);
@@ -77,7 +116,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Checks the string value of this node.</summary>
         /// <param name="node">This is the string node to check the value of.</param>
         /// <param name="exp">The expected string value.</param>
-        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        /// <returns>The given node so that method calls can be chained.</returns>
         static public INode CheckValue(this INode node, string exp) {
             Assert.IsInstanceOfType(node, typeof(IValue<String>));
             Assert.AreEqual(exp, (node as IValue<String>).Value.Value);
@@ -87,7 +126,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Checks the provoked state of this node.</summary>
         /// <param name="node">This is the trigger node to check the state of.</param>
         /// <param name="exp">The expected provoked state of the node.</param>
-        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        /// <returns>The given node so that method calls can be chained.</returns>
         static public INode CheckProvoked(this INode node, bool exp) {
             Assert.IsInstanceOfType(node, typeof(ITrigger));
             Assert.AreEqual(exp, (node as ITrigger).Provoked);
@@ -123,7 +162,7 @@ namespace BlackboardTests.Tools {
 
         /// <summary>Will assign all the children reachable via parents to the parents.</summary>
         /// <param name="node">The node to start adding to the parents from.</param>
-        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        /// <returns>The given node so that method calls can be chained.</returns>
         static public INode LegitimatizeAll(this INode node) {
             node.GetAllParents().OfType<IChild>().Foreach(child => child.Legitimatize());
             return node;
@@ -132,7 +171,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Will perform depth update on all the nodes reachable from the parents.</summary>
         /// <param name="node">The node to start updating from and to get all parents and parent parents from.</param>
         /// <param name="logger">Optional logger to use to debug the update with.</param>
-        /// <returns>Returns the given node so that method calls can be chained.</returns>
+        /// <returns>The given node so that method calls can be chained.</returns>
         static public INode UpdateAllParents(this INode node, Logger logger = null) {
             node.GetAllParents().ToEvalList().UpdateDepths(logger);
             return node;
@@ -194,7 +233,7 @@ namespace BlackboardTests.Tools {
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected boolean value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckValue(this Slate slate, bool exp, params string[] names) {
             Assert.AreEqual(exp, slate.GetBool(names), checkValueMsg("bool", names));
             return slate;
@@ -204,7 +243,7 @@ namespace BlackboardTests.Tools {
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected integer value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckValue(this Slate slate, int exp, params string[] names) {
             Assert.AreEqual(exp, slate.GetInt(names), checkValueMsg("int", names));
             return slate;
@@ -214,7 +253,7 @@ namespace BlackboardTests.Tools {
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected double value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckValue(this Slate slate, double exp, params string[] names) {
             Assert.AreEqual(exp, slate.GetDouble(names), checkValueMsg("double", names));
             return slate;
@@ -224,7 +263,7 @@ namespace BlackboardTests.Tools {
         /// <param name="slate">This is the slate to check the value with.</param>
         /// <param name="exp">The expected string value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckValue(this Slate slate, string exp, params string[] names) {
             Assert.AreEqual(exp, slate.GetString(names), checkValueMsg("string", names));
             return slate;
@@ -234,7 +273,7 @@ namespace BlackboardTests.Tools {
         /// <param name="slate">This is the slate to check the object with.</param>
         /// <param name="exp">The expected object value.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckValueObject(this Slate slate, object exp, params string[] names) {
             Assert.AreEqual(exp, slate.GetValueObject(names), checkValueMsg("object", names));
             return slate;
@@ -244,7 +283,7 @@ namespace BlackboardTests.Tools {
         /// <param name="slate">This is the slate to check the state with.</param>
         /// <param name="exp">The expected provoked state of the node.</param>
         /// <param name="names">The name of the variable to look up.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckProvoked(this Slate slate, bool exp, params string[] names) {
             Assert.AreEqual(exp, slate.Provoked(names), "Checking the provoked state of \"" + names.Join(".") + "\".");
             return slate;
@@ -253,7 +292,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Checks the pending nodes to evaluate are as expected.</summary>
         /// <param name="slate">This is the slate to check the pending of.</param>
         /// <param name="exp">The expected names of the pending nodes.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckPendingEval(this Slate slate, params string[] exp) {
             TestTools.NoDiff(exp, slate.PendingEval.Strings(), "Checking the pending nodes.");
             return slate;
@@ -262,7 +301,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Checks the pending nodes to update are as expected.</summary>
         /// <param name="slate">This is the slate to check the pending of.</param>
         /// <param name="exp">The expected names of the pending nodes.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckPendingUpdate(this Slate slate, params string[] exp) {
             TestTools.NoDiff(exp, slate.PendingUpdate.Strings(), "Checking the pending nodes.");
             return slate;
@@ -271,7 +310,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Runs the slate evaluation and checks that evaluation performed as expected.</summary>
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckEvaluate(this Slate slate, params string[] lines) {
             BufferLogger logger = new(false);
             slate.PerformEvaluation(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
@@ -282,7 +321,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Runs the slate update and checks that evaluation performed as expected.</summary>
         /// <param name="slate">The slate to evaluate.</param>
         /// <param name="lines">The expected evaluation log output.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckUpdate(this Slate slate, params string[] lines) {
             BufferLogger logger = new(false);
             slate.PerformUpdates(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
@@ -295,7 +334,7 @@ namespace BlackboardTests.Tools {
         /// <param name="stringifier">The stringifier to stringify with.</param>
         /// <param name="node">The node to get the string for.</param>
         /// <param name="lines">The line to compare the node's string against.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckNodeString(this Slate slate, Stringifier stringifier, INode node, params string[] lines) {
             stringifier.PreloadNames(slate);
             TestTools.NoDiff(lines.Join("\n"), stringifier.Stringify(node));
@@ -307,7 +346,7 @@ namespace BlackboardTests.Tools {
         /// <param name="stringifier">The stringifier to stringify with.</param>
         /// <param name="nodeName">The name of the node to get the string for.</param>
         /// <param name="lines">The line to compare the node's string against.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckNodeString(this Slate slate, Stringifier stringifier, string nodeName, params string[] lines) =>
             slate.CheckNodeString(stringifier, slate.GetNode<INode>(nodeName), lines);
 
@@ -315,7 +354,7 @@ namespace BlackboardTests.Tools {
         /// <param name="slate">The slate to load the names for the nodes from.</param>
         /// <param name="nodeName">The name of the node to get the deep string for.</param>
         /// <param name="lines">The line to compare the node's string against.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckNodeString(this Slate slate, INode node, params string[] lines) =>
             slate.CheckNodeString(Stringifier.Deep(), node, lines);
 
@@ -323,14 +362,14 @@ namespace BlackboardTests.Tools {
         /// <param name="slate">The slate to load the names for the nodes from.</param>
         /// <param name="nodeName">The name of the node to get the deep string for.</param>
         /// <param name="lines">The line to compare the node's string against.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckNodeString(this Slate slate, string nodeName, params string[] lines) =>
             slate.CheckNodeString(slate.GetNode<INode>(nodeName), lines);
 
         /// <summary>Checks the namespace string for the whole graph and compares against the given lines.</summary>
         /// <param name="slate">The slate to compare against.</param>
         /// <param name="lines">The expected lines of the returned string.</param>
-        /// <returns>Returns the slate so that method calls can be chained together.</returns>
+        /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckGraphString(this Slate slate, params string[] lines) {
             TestTools.NoDiff(lines.Join("\n"), Stringifier.GraphString(slate));
             return slate;
@@ -339,7 +378,7 @@ namespace BlackboardTests.Tools {
         /// <summary>Performs a parse of the given input and returns the formula for the input.</summary>
         /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and get the formula for.</param>
-        /// <remarks>Returns the formula for the read input.</remarks>
+        /// <remarks>The formula for the read input.</remarks>
         static public Formula Read(this Slate slate, params string[] input) =>
             new Parser(slate).Read(input);
 

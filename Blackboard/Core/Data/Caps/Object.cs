@@ -47,7 +47,7 @@ namespace Blackboard.Core.Data.Caps {
         public string TypeName => Type.Object.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value.ToString();
+        public string ValueString => this.Value?.ToString() ?? "null";
 
         /// <summary>Get the value of the data as an object.</summary>
         public object ValueObject => this.Value;

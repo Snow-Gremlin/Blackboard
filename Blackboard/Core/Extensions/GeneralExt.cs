@@ -116,14 +116,6 @@ namespace Blackboard.Core.Extensions {
                 yield return last;
         }
 
-        /// <summary>This will expand several enumerable sets into one joined enumerable.</summary>
-        /// <remarks>This is useful for using after a `Select` which returns an enumerable.</remarks>
-        /// <typeparam name="T">The type of the list to enumerate.</typeparam>
-        /// <param name="input">The set of enumerable sets to join together.</param>
-        /// <returns>The single enumerable set with all the values from the input.</returns>
-        static public IEnumerable<T> Expand<T>(this IEnumerable<IEnumerable<T>> input) =>
-            input.SelectMany(i => i);
-
         /// <summary>Gets the given value clamped to the inclusive range of the given min and max.</summary>
         /// <param name="value">The value to clamp.</param>
         /// <param name="min">The minimum allowed value.</param>

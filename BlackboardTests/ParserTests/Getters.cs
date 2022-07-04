@@ -82,14 +82,14 @@ namespace BlackboardTests.ParserTests {
             Slate slate = new();
             slate.Read("in A = 3;").Perform();
 
-            TestTools.CheckException(() =>
+            Tools.TestTools.CheckException(() =>
                 slate.Read("get X;").Perform(),
                 "Error occurred while parsing input code.",
                 "[Error: No identifier found in the scope stack.",
                 "   [Identifier: X]",
                 "   [Location: Unnamed:1, 5, 5]]");
 
-            TestTools.CheckException(() =>
+            Tools.TestTools.CheckException(() =>
                 slate.Read("get int X = A*2.0;").Perform(),
                 "Error occurred while parsing input code.",
                 "[Error: The value type can not be cast to the given type.",

@@ -89,7 +89,7 @@ namespace Blackboard.Core.Types {
         static public Type FromName(string name) =>
             AllTypes.Where((t) => t.Name == name).FirstOrDefault();
 
-        /// <summary>This gets the type given a node.</summary>s
+        /// <summary>This gets the type given a node.</summary>
         /// <param name="node">The node to get the type of.</param>
         /// <returns>The type for the given node or null if not found.</returns>
         static public Type TypeOf(INode node) => FromType(node.GetType());

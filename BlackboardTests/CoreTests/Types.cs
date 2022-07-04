@@ -1,8 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Inner;
-using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
 using BlackboardTests.Tools;
@@ -15,40 +13,20 @@ namespace BlackboardTests.CoreTests {
     public class Types {
 
         [TestMethod]
-        public void CheckAllFunctionsAreTested() {
+        public void CheckAllTypesAreTested() =>
             TestTools.SetEntriesMatch(
                 Type.AllTypes.Select(t => t.Name),
                 TestTools.TestTags(this.GetType()),
                 "Tests do not match the existing types");
-        }
 
-        // TODO: Add similar mechanism as in Operation and Functions to keep track of which types have been tested or not.
         // TODO: Add in tests for Maker methods for each type.
-        // TODO: Test Object type
 
         [TestMethod]
-        public void TestTypeOf() {
-            new InputTrigger().      CheckTypeOf(Type.Trigger);
-            new InputValue<Object>().CheckTypeOf(Type.Object);
-            new InputValue<Bool>().  CheckTypeOf(Type.Bool);
-            new InputValue<Int>().   CheckTypeOf(Type.Int);
-            new InputValue<Double>().CheckTypeOf(Type.Double);
-            new InputValue<String>().CheckTypeOf(Type.String);
-            new FuncGroup().         CheckTypeOf(Type.FuncGroup);
-            Sum<Int>.Factory().      CheckTypeOf(Type.FuncDef);
-            new Namespace().         CheckTypeOf(Type.Namespace);
-            new Counter<Int>().      CheckTypeOf(Type.CounterInt);
-            new Counter<Double>().   CheckTypeOf(Type.CounterDouble);
-            new Toggler().           CheckTypeOf(Type.Toggler);
-            new Latch<Object>().     CheckTypeOf(Type.LatchObject);
-            new Latch<Bool>().       CheckTypeOf(Type.LatchBool);
-            new Latch<Int>().        CheckTypeOf(Type.LatchInt);
-            new Latch<Double>().     CheckTypeOf(Type.LatchDouble);
-            new Latch<String>().     CheckTypeOf(Type.LatchString);
-        }
+        [TestTag("bool")]
+        public void TestTypes_bool() {
+            new InputValue<Bool>().CheckTypeOf(Type.Bool);
+            Type.Bool.CheckInheritors("toggler, latch-bool");
 
-        [TestMethod]
-        public void TestCastBoolInput() {
             InputValue<Bool> node = new();
             node.CheckInherit (Type.Node, 1);
             node.CheckImplicit(Type.Trigger, 0, "BoolAsTrigger<trigger>[](Input<bool>)");
@@ -68,9 +46,88 @@ namespace BlackboardTests.CoreTests {
             node.CheckNoCast  (Type.LatchDouble);
             node.CheckNoCast  (Type.LatchString);
         }
-        
+
         [TestMethod]
-        public void TestCastIntLatch() {
+        [TestTag("counter-double")]
+        public void TestTypes_counter_double() {
+            new Counter<Double>().CheckTypeOf(Type.CounterDouble);
+            Type.CounterDouble.CheckInheritors("");
+
+            Counter<Double> node = new();
+            node.CheckInherit (Type.Node, 2);
+            node.CheckNoCast  (Type.Trigger);
+            node.CheckImplicit(Type.Object, 1, "Implicit<object>[null](Counter<double>(null, null, null, null, null))");
+            node.CheckNoCast  (Type.Bool);
+            node.CheckExplicit(Type.Int, "Explicit<int>[0](Counter<double>(null, null, null, null, null))");
+            node.CheckInherit (Type.Double, 1);
+            node.CheckImplicit(Type.String, 1, "Implicit<string>[](Counter<double>(null, null, null, null, null))");
+            node.CheckNoCast  (Type.FuncGroup);
+            node.CheckNoCast  (Type.FuncDef);
+            node.CheckNoCast  (Type.Namespace);
+            node.CheckNoCast  (Type.CounterInt);
+            node.CheckInherit (Type.CounterDouble, 0);
+            node.CheckNoCast  (Type.Toggler);
+            node.CheckNoCast  (Type.LatchBool);
+            node.CheckNoCast  (Type.LatchInt);
+            node.CheckNoCast  (Type.LatchDouble);
+            node.CheckNoCast  (Type.LatchString);
+        }
+
+        [TestMethod]
+        [TestTag("counter-int")]
+        public void TestTypes_counter_int() {
+            new Counter<Int>().CheckTypeOf(Type.CounterInt);
+            Type.CounterInt.CheckInheritors("");
+        }
+
+        [TestMethod]
+        [TestTag("double")]
+        public void TestTypes_double() {
+            new InputValue<Double>().CheckTypeOf(Type.Double);
+            Type.Double.CheckInheritors("counter-double, latch-double");
+        }
+
+        [TestMethod]
+        [TestTag("function-def")]
+        public void TestTypes_function_def() {
+            Sum<Int>.Factory().CheckTypeOf(Type.FuncDef);
+            Type.FuncDef.CheckInheritors("");
+        }
+
+        [TestMethod]
+        [TestTag("function-group")]
+        public void TestTypes_function_group() {
+            new FuncGroup().CheckTypeOf(Type.FuncGroup);
+            Type.FuncGroup.CheckInheritors("");
+        }
+
+        [TestMethod]
+        [TestTag("int")]
+        public void TestTypes_int() {
+            new InputValue<Int>().CheckTypeOf(Type.Int);
+            Type.Int.CheckInheritors("counter-int, latch-int");
+        }
+
+        [TestMethod]
+        [TestTag("latch-bool")]
+        public void TestTypes_latch_bool() {
+            new Latch<Bool>().CheckTypeOf(Type.LatchBool);
+            Type.LatchBool.CheckInheritors("");
+        }
+
+        [TestMethod]
+        [TestTag("latch-double")]
+        public void TestTypes_latch_double() {
+            new Latch<Double>().CheckTypeOf(Type.LatchDouble);
+            Type.LatchDouble.CheckInheritors("");
+        }
+
+        [TestMethod]
+        [TestTag("latch-int")]
+        public void TestTypes_latch_int() {
+            new Latch<Int>().CheckTypeOf(Type.LatchInt);
+            Type.LatchInt.CheckInheritors("");
+
             Latch<Int> node = new();
             node.CheckInherit (Type.Node, 2);
             node.CheckNoCast  (Type.Trigger);
@@ -90,27 +147,59 @@ namespace BlackboardTests.CoreTests {
             node.CheckNoCast  (Type.LatchDouble);
             node.CheckNoCast  (Type.LatchString);
         }
-        
+
         [TestMethod]
-        public void TestCastDoubleCounter() {
-            Counter<Double> node = new();
-            node.CheckInherit (Type.Node, 2);
-            node.CheckNoCast  (Type.Trigger);
-            node.CheckImplicit(Type.Object, 1, "Implicit<object>[null](Counter<double>(null, null, null, null, null))");
-            node.CheckNoCast  (Type.Bool);
-            node.CheckExplicit(Type.Int, "Explicit<int>[0](Counter<double>(null, null, null, null, null))");
-            node.CheckInherit (Type.Double, 1);
-            node.CheckImplicit(Type.String, 1, "Implicit<string>[](Counter<double>(null, null, null, null, null))");
-            node.CheckNoCast  (Type.FuncGroup);
-            node.CheckNoCast  (Type.FuncDef);
-            node.CheckNoCast  (Type.Namespace);
-            node.CheckNoCast  (Type.CounterInt);
-            node.CheckInherit (Type.CounterDouble, 0);
-            node.CheckNoCast  (Type.Toggler);
-            node.CheckNoCast  (Type.LatchBool);
-            node.CheckNoCast  (Type.LatchInt);
-            node.CheckNoCast  (Type.LatchDouble);
-            node.CheckNoCast  (Type.LatchString);
+        [TestTag("latch-object")]
+        public void TestTypes_latch_object() {
+            new Latch<Object>().CheckTypeOf(Type.LatchObject);
+            Type.LatchObject.CheckInheritors("");
+        }
+
+        [TestMethod]
+        [TestTag("latch-string")]
+        public void TestTypes_latch_string() {
+            new Latch<String>().CheckTypeOf(Type.LatchString);
+            Type.LatchString.CheckInheritors("");
+        }
+
+        [TestMethod]
+        [TestTag("namespace")]
+        public void TestTypes_namespace() {
+            new Namespace().CheckTypeOf(Type.Namespace);
+            Type.Namespace.CheckInheritors("");
+        }
+
+        [TestMethod]
+        [TestTag("node")]
+        public void TestTypes_node() =>
+            Type.Node.CheckInheritors("trigger, object, bool, int, double, string, namespace, function-group, function-def");
+
+        [TestMethod]
+        [TestTag("object")]
+        public void TestTypes_object() {
+            new InputValue<Object>().CheckTypeOf(Type.Object);
+            Type.Object.CheckInheritors("latch-object");
+        }
+
+        [TestMethod]
+        [TestTag("string")]
+        public void TestTypes_string() {
+            new InputValue<String>().CheckTypeOf(Type.String);
+            Type.String.CheckInheritors("latch-string");
+        }
+
+        [TestMethod]
+        [TestTag("toggler")]
+        public void TestTypes_toggler() {
+            new Toggler().CheckTypeOf(Type.Toggler);
+            Type.Toggler.CheckInheritors("");
+        }
+
+        [TestMethod]
+        [TestTag("trigger")]
+        public void TestTypes_trigger() {
+            new InputTrigger().CheckTypeOf(Type.Trigger);
+            Type.Trigger.CheckInheritors("");
         }
     }
 }

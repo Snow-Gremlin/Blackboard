@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Extensions;
-using System.Collections.Generic;
 using System.Linq;
 using S = System;
 
@@ -12,37 +11,14 @@ namespace Blackboard.Core.Types {
         /// <summary>Indicates there was no match for this function.</summary>
         static public readonly FuncMatch NoMatch = new(false, null);
 
-        /// <summary>Creates a new function match and checking if it has no matches.</summary>
-        /// <param name="needOneNoCast">Indicates if there must be at least one non-cast argument.</param>
+        /// <summary>Creates a new function match.</summary>
+        /// <remarks>
+        /// These matches are expected to already have been matched against the functions rules.
+        /// For example these matches must all actually be matching results.
+        /// </remarks>
         /// <param name="matches">The type matches for all the arguments of the function.</param>
-        /// <returns>The new function match or no match if no match could be made.</returns>
-        static public FuncMatch Create(bool needOneNoCast, params TypeMatch[] matches) =>
-            Create(needOneNoCast, matches as IEnumerable<TypeMatch>);
-
-        /// <summary>Creates a new function match and checking if it has no matches.</summary>
-        /// <param name="needOneNoCast">Indicates if there must be at least one non-cast argument.</param>
-        /// <param name="matches">The type matches for all the arguments of the function.</param>
-        /// <returns>The new function match or no match if no match could be made.</returns>
-        static public FuncMatch Create(bool needOneNoCast, IEnumerable<TypeMatch> matches) {
-            int length = 0;
-            foreach (TypeMatch match in matches) {
-                if (!match.IsMatch) return NoMatch;
-                length++;
-            }
-
-            if (length > 0 && needOneNoCast) {
-                bool hasOnlyCasts = true;
-                foreach (TypeMatch match in matches) {
-                    if (!match.IsImplicit) {
-                        hasOnlyCasts = false;
-                        break;
-                    }
-                }
-                if (hasOnlyCasts) return NoMatch;
-            }
-
-            return new(true, matches.ToArray());
-        }
+        /// <returns>The new function match.</returns>
+        static public FuncMatch Match(TypeMatch[] matches) => new(true, matches);
 
         /// <summary>True indicates there is a match, false otherwise.</summary>
         public readonly bool IsMatch;

@@ -147,10 +147,27 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Determines how closely matching the given nodes are for this match.</summary>
         /// <param name="types">The input types to match against the function signatures with.</param>
         /// <returns>The matching results for this function.</returns>
-        public virtual FuncMatch Match(Type[] types) =>
-            types.Length < this.MinArgs ? FuncMatch.NoMatch :
-            types.Length > this.MaxArgs ? FuncMatch.NoMatch :
-            FuncMatch.Create(this.NeedsOneNoCast, types.Zip(this.argTypes.RepeatLast(), Type.Match));
+        public virtual FuncMatch Match(Type[] types) {
+            int count = types.Length;
+
+            // Check that the arguments are with-in range.
+            if (count < this.MinArgs || count > this.MaxArgs) return FuncMatch.NoMatch;
+
+            // Check that the types match or can be implicitly cast into the correct types.
+            TypeMatch[] matches = new TypeMatch[count];
+            for (int i = 0; i < count; i++) {
+                TypeMatch match = types[i].Match(this.argTypes[i]);
+                if (!match.IsMatch) return FuncMatch.NoMatch;
+                matches[i] = match;
+            }
+            
+            // Check if there are anything specific requirements.
+            if (this.NeedsOneNoCast && count > 0 &&
+                matches.Any(m => m.IsImplicit)) return FuncMatch.NoMatch;
+
+            // Function types matched the arguments.
+            return FuncMatch.Match(matches);
+        }
 
         /// <summary>This will implicitly cast the given parameter,</summary>
         /// <param name="node">The node to cast.</param>

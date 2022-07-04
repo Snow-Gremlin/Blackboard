@@ -76,7 +76,7 @@ namespace BlackboardTests.ParserTests {
             slate.PerformWithoutReset("A = true;  B = true;  C = true;  D = true; ").CheckProvoked(true,  "E").ResetTriggers();
             slate.Perform("F := all(A);"); // Single pass through, F is set to A. 
             slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<trigger>");
-            TestTools.CheckException(() => slate.Perform("G := all();"),
+            Tools.TestTools.CheckException(() => slate.Perform("G := all();"),
                 "Error occurred while parsing input code.",
                 "[Error: Could not perform the function without any inputs.",
                 "   [Function: FuncGroup]",
@@ -96,7 +96,7 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A = true;  B = true;  C = true;  D = true; ").CheckValue(true,  "E");
             slate.Perform("F := and(A);"); // Single pass through, F is set to A. 
             slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<bool>");
-            TestTools.CheckException(() => slate.Perform("G := and();"),
+            Tools.TestTools.CheckException(() => slate.Perform("G := and();"),
                 "Error occurred while parsing input code.",
                 "[Error: Could not perform the function without any inputs.",
                 "   [Function: FuncGroup]",
@@ -135,7 +135,7 @@ namespace BlackboardTests.ParserTests {
             slate.PerformWithoutReset("A = true;  B = true;  C = true;  D = true; ").CheckProvoked(true,  "E").ResetTriggers();
             slate.Perform("F := any(A);"); // Single pass through, F is set to A. 
             slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<trigger>");
-            TestTools.CheckException(() => slate.Perform("G := any();"),
+            Tools.TestTools.CheckException(() => slate.Perform("G := any();"),
                 "Error occurred while parsing input code.",
                 "[Error: Could not perform the function without any inputs.",
                 "   [Function: FuncGroup]",
@@ -213,7 +213,7 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A =  5.0; B =  1.0; C = 5.0; D = 1.0;").CheckValue(3.0, "E");
             slate.Perform("F := average(A);"); // Single pass through, F is set to A. 
             slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<double>");
-            TestTools.CheckException(() => slate.Perform("G := average();"),
+            Tools.TestTools.CheckException(() => slate.Perform("G := average();"),
                 "Error occurred while parsing input code.",
                 "[Error: Could not perform the function without any inputs.",
                 "   [Function: FuncGroup]",

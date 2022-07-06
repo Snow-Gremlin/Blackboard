@@ -155,15 +155,18 @@ namespace Blackboard.Core.Nodes.Bases {
 
             // Check that the types match or can be implicitly cast into the correct types.
             TypeMatch[] matches = new TypeMatch[count];
-            for (int i = 0; i < count; i++) {
-                TypeMatch match = types[i].Match(this.argTypes[i]);
-                if (!match.IsMatch) return FuncMatch.NoMatch;
-                matches[i] = match;
+            if (count > 0) {
+                for (int i = 0; i < count; i++) {
+                    Type typeArg  = types[i];
+                    Type typeParam = i < this.argTypes.Length ? this.argTypes[i] : this.argTypes[^1];
+                    TypeMatch match = typeParam.Match(typeArg);
+                    if (!match.IsMatch) return FuncMatch.NoMatch;
+                    matches[i] = match;
+                }
+
+                // Check if there are anything specific requirements.
+                if (this.NeedsOneNoCast && matches.All(m => m.IsImplicit)) return FuncMatch.NoMatch;
             }
-            
-            // Check if there are anything specific requirements.
-            if (this.NeedsOneNoCast && count > 0 &&
-                matches.Any(m => m.IsImplicit)) return FuncMatch.NoMatch;
 
             // Function types matched the arguments.
             return FuncMatch.Match(matches);

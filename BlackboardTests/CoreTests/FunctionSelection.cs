@@ -107,8 +107,10 @@ namespace BlackboardTests.CoreTests {
         public void TestFunctionSelection_Atan() {
             Tester t = new("atan");
             t.Test("",        "null");
+            t.Test("O",       "null");
             t.Test("I",       "Atan<double>(Implicit<double>(I))");
             t.Test("D",       "Atan<double>(D)");
+            t.Test("O, O",    "null");
             t.Test("I, I",    "Atan2<double>(Implicit<double>(I), Implicit<double>(I))");
             t.Test("I, D",    "Atan2<double>(Implicit<double>(I), D)");
             t.Test("D, I",    "Atan2<double>(D, Implicit<double>(I))");
@@ -121,8 +123,8 @@ namespace BlackboardTests.CoreTests {
         public void TestFunctionSelection_Format() {
             Tester t = new("format");
             t.Test("",        "null");
-            t.Test("I",       "null");
-            t.Test("D",       "null");
+            t.Test("I",       "Format<string>(Implicit<string>(I))");
+            t.Test("D",       "Format<string>(Implicit<string>(D))");
             t.Test("I, I",    "Atan2<double>(Implicit<double>(I), Implicit<double>(I))");
             t.Test("I, D",    "Atan2<double>(Implicit<double>(I), D)");
             t.Test("D, I",    "Atan2<double>(D, Implicit<double>(I))");

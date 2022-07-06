@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Functions;
@@ -243,6 +242,12 @@ namespace Blackboard.Core.Types {
                 }
             }
         }
+
+        /// <summary>The types which this type can directly implicitly cast into.</summary>
+        public IReadOnlyCollection<Type> Implicits => this.imps.Keys;
+
+        /// <summary>The types which this type can directly explicitly cast into.</summary>
+        public IReadOnlyCollection<Type> Explicits => this.exps.Keys;
 
         /// <summary>Performs an implicit cast of the given node into this type.</summary>
         /// <param name="node">The node to implicitly cast.</param>

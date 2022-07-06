@@ -25,7 +25,10 @@ namespace BlackboardTests.CoreTests {
         [TestTag("bool")]
         public void TestTypes_bool() {
             new InputValue<Bool>().CheckTypeOf(Type.Bool);
-            Type.Bool.CheckInheritors("toggler, latch-bool");
+            Type.Bool.
+                CheckInheritors("toggler, latch-bool").
+                CheckImplicits("trigger, object, string").
+                CheckExplicits("");
 
             InputValue<Bool> node = new();
             node.CheckInherit (Type.Node, 1);
@@ -51,7 +54,10 @@ namespace BlackboardTests.CoreTests {
         [TestTag("counter-double")]
         public void TestTypes_counter_double() {
             new Counter<Double>().CheckTypeOf(Type.CounterDouble);
-            Type.CounterDouble.CheckInheritors("");
+            Type.CounterDouble.
+                CheckInheritors("").
+                CheckImplicits("").
+                CheckExplicits("");
 
             Counter<Double> node = new();
             node.CheckInherit (Type.Node, 2);
@@ -77,56 +83,80 @@ namespace BlackboardTests.CoreTests {
         [TestTag("counter-int")]
         public void TestTypes_counter_int() {
             new Counter<Int>().CheckTypeOf(Type.CounterInt);
-            Type.CounterInt.CheckInheritors("");
+            Type.CounterInt.
+                CheckInheritors("").
+                CheckImplicits("").
+                CheckExplicits("");
         }
 
         [TestMethod]
         [TestTag("double")]
         public void TestTypes_double() {
             new InputValue<Double>().CheckTypeOf(Type.Double);
-            Type.Double.CheckInheritors("counter-double, latch-double");
+            Type.Double.
+                CheckInheritors("counter-double, latch-double").
+                CheckImplicits("object, string").
+                CheckExplicits("int");
         }
 
         [TestMethod]
         [TestTag("function-def")]
         public void TestTypes_function_def() {
             Sum<Int>.Factory().CheckTypeOf(Type.FuncDef);
-            Type.FuncDef.CheckInheritors("");
+            Type.FuncDef.
+                CheckInheritors("").
+                CheckImplicits("function-group").
+                CheckExplicits("");
         }
 
         [TestMethod]
         [TestTag("function-group")]
         public void TestTypes_function_group() {
             new FuncGroup().CheckTypeOf(Type.FuncGroup);
-            Type.FuncGroup.CheckInheritors("");
+            Type.FuncGroup.
+                CheckInheritors("").
+                CheckImplicits("").
+                CheckExplicits("");
         }
 
         [TestMethod]
         [TestTag("int")]
         public void TestTypes_int() {
             new InputValue<Int>().CheckTypeOf(Type.Int);
-            Type.Int.CheckInheritors("counter-int, latch-int");
+            Type.Int.
+                CheckInheritors("counter-int, latch-int").
+                CheckImplicits("object, double, string").
+                CheckExplicits("");
         }
 
         [TestMethod]
         [TestTag("latch-bool")]
         public void TestTypes_latch_bool() {
             new Latch<Bool>().CheckTypeOf(Type.LatchBool);
-            Type.LatchBool.CheckInheritors("");
+            Type.LatchBool.
+                CheckInheritors("").
+                CheckImplicits("").
+                CheckExplicits("");
         }
 
         [TestMethod]
         [TestTag("latch-double")]
         public void TestTypes_latch_double() {
             new Latch<Double>().CheckTypeOf(Type.LatchDouble);
-            Type.LatchDouble.CheckInheritors("");
+            Type.LatchDouble.
+                CheckInheritors("").
+                CheckImplicits("").
+                CheckExplicits("");
         }
 
         [TestMethod]
         [TestTag("latch-int")]
         public void TestTypes_latch_int() {
             new Latch<Int>().CheckTypeOf(Type.LatchInt);
-            Type.LatchInt.CheckInheritors("");
+            Type.LatchInt.
+                CheckInheritors("").
+                CheckImplicits("").
+                CheckExplicits("");
 
             Latch<Int> node = new();
             node.CheckInherit (Type.Node, 2);
@@ -152,54 +182,78 @@ namespace BlackboardTests.CoreTests {
         [TestTag("latch-object")]
         public void TestTypes_latch_object() {
             new Latch<Object>().CheckTypeOf(Type.LatchObject);
-            Type.LatchObject.CheckInheritors("");
+            Type.LatchObject.
+                CheckInheritors("").
+                CheckImplicits("").
+                CheckExplicits("");
         }
 
         [TestMethod]
         [TestTag("latch-string")]
         public void TestTypes_latch_string() {
             new Latch<String>().CheckTypeOf(Type.LatchString);
-            Type.LatchString.CheckInheritors("");
+            Type.LatchString.
+                CheckInheritors("").
+                CheckImplicits("").
+                CheckExplicits("");
         }
 
         [TestMethod]
         [TestTag("namespace")]
         public void TestTypes_namespace() {
             new Namespace().CheckTypeOf(Type.Namespace);
-            Type.Namespace.CheckInheritors("");
+            Type.Namespace.
+                CheckInheritors("").
+                CheckImplicits("").
+                CheckExplicits("");
         }
 
         [TestMethod]
         [TestTag("node")]
         public void TestTypes_node() =>
-            Type.Node.CheckInheritors("trigger, object, bool, int, double, string, namespace, function-group, function-def");
+            Type.Node.
+                CheckInheritors("trigger, object, bool, int, double, string, namespace, function-group, function-def").
+                CheckImplicits("").
+                CheckExplicits("");
 
         [TestMethod]
         [TestTag("object")]
         public void TestTypes_object() {
             new InputValue<Object>().CheckTypeOf(Type.Object);
-            Type.Object.CheckInheritors("latch-object");
+            Type.Object.
+                CheckInheritors("latch-object").
+                CheckImplicits("string").
+                CheckExplicits("bool, int, double");
         }
 
         [TestMethod]
         [TestTag("string")]
         public void TestTypes_string() {
             new InputValue<String>().CheckTypeOf(Type.String);
-            Type.String.CheckInheritors("latch-string");
+            Type.String.
+                CheckInheritors("latch-string").
+                CheckImplicits("object").
+                CheckExplicits("");
         }
 
         [TestMethod]
         [TestTag("toggler")]
         public void TestTypes_toggler() {
             new Toggler().CheckTypeOf(Type.Toggler);
-            Type.Toggler.CheckInheritors("");
+            Type.Toggler.
+                CheckInheritors("").
+                CheckImplicits("").
+                CheckExplicits("");
         }
 
         [TestMethod]
         [TestTag("trigger")]
         public void TestTypes_trigger() {
             new InputTrigger().CheckTypeOf(Type.Trigger);
-            Type.Trigger.CheckInheritors("");
+            Type.Trigger.
+                CheckInheritors("").
+                CheckImplicits("").
+                CheckExplicits("");
         }
     }
 }

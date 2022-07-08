@@ -6,7 +6,7 @@ using System.Linq;
 namespace BlackboardTests.Tools {
 
     /// <summary>These are extensions to Blackboard Action's Result for testing.</summary>
-    static class ResultExp {
+    static class ResultExt {
 
         /// <summary>Checks if the names in the output are what is expected.</summary>
         /// <param name="result">The results to check the names with.</param>
@@ -24,7 +24,7 @@ namespace BlackboardTests.Tools {
             "Checking the " + type + " value of \"" + name + "\".";
 
         /// <summary>Checks the boolean value of this node.</summary>
-        /// <param name="slate">This is the slate to check the value with.</param>
+        /// <param name="result">This is the parse result to check the value with.</param>
         /// <param name="exp">The expected boolean value.</param>
         /// <param name="name">The name of the variable to get.</param>
         static public Result CheckValue(this Result result, bool exp, string name) {
@@ -33,7 +33,7 @@ namespace BlackboardTests.Tools {
         }
 
         /// <summary>Checks the integer value of this node.</summary>
-        /// <param name="slate">This is the slate to check the value with.</param>
+        /// <param name="result">This is the parse result to check the value with.</param>
         /// <param name="exp">The expected integer value.</param>
         /// <param name="name">The name of the variable to get.</param>
         static public Result CheckValue(this Result result, int exp, string name) {
@@ -42,7 +42,7 @@ namespace BlackboardTests.Tools {
         }
 
         /// <summary>Checks the double value of this node.</summary>
-        /// <param name="slate">This is the slate to check the value with.</param>
+        /// <param name="result">This is the parse result to check the value with.</param>
         /// <param name="exp">The expected double value.</param>
         /// <param name="name">The name of the variable to get.</param>
         static public Result CheckValue(this Result result, double exp, string name) {
@@ -51,11 +51,20 @@ namespace BlackboardTests.Tools {
         }
 
         /// <summary>Checks the string value of this node.</summary>
-        /// <param name="slate">This is the slate to check the value with.</param>
+        /// <param name="result">This is the parse result to check the value with.</param>
         /// <param name="exp">The expected string value.</param>
         /// <param name="name">The name of the variable to get.</param>
         static public Result CheckValue(this Result result, string exp, string name) {
             Assert.AreEqual(exp, result.GetString(name), checkValueMsg("string", name));
+            return result;
+        }
+
+        /// <summary>Checks the string value of this node.</summary>
+        /// <param name="result">This is the parse result to check the value with.</param>
+        /// <param name="exp">The expected string value.</param>
+        /// <param name="name">The name of the variable to get.</param>
+        static public Result CheckObject(this Result result, object exp, string name) {
+            Assert.AreEqual(exp, result.GetObject(name), checkValueMsg("object", name));
             return result;
         }
     }

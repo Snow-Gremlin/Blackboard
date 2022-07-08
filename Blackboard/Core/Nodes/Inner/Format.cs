@@ -80,7 +80,7 @@ namespace Blackboard.Core.Nodes.Inner {
         protected override String CalcuateValue() =>
             this.format is null ? default :
             new(string.Format(this.format.Value.Value ?? "",
-                this.args.Select(n => n?.Value.ValueObject ?? null).ToArray()));
+                this.args.Select(n => n?.Value.ValueAsObject ?? null).ToArray()));
 
         // TODO: Optimize this node if the string is constant,
         //       then any constant arguments can be pre-formatted into the string.

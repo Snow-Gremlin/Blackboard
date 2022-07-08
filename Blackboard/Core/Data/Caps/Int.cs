@@ -138,10 +138,10 @@ namespace Blackboard.Core.Data.Caps {
         public string TypeName => Type.Int.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value.ToString();
+        public string ValueAsString => this.Value.ToString();
 
         /// <summary>Get the value of the data as an object.</summary>
-        public object ValueObject => this.Value;
+        public object ValueAsObject => this.Value;
 
         #endregion
         #region Divisible...
@@ -260,6 +260,6 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Gets the name of this data type and value.</summary>
         /// <returns>The name of the integer type and value.</returns>
-        public override string ToString() => this.TypeName+"("+this.ValueString+")";
+        public override string ToString() => this.TypeName+"("+this.ValueAsString+")";
     }
 }

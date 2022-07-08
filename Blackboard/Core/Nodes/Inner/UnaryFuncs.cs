@@ -138,12 +138,21 @@ namespace Blackboard.Core.Nodes.Inner {
     }
 
     /// <summary>Unary nodes for signed value mathematics.</summary>
-    /// <typeparam name="T">The type of floating point to perform the math on.</typeparam>
+    /// <typeparam name="T">The type of signed number to perform the methods on.</typeparam>
     static public class UnarySigned<T> where T : ISigned<T>, IEquatable<T> {
 
         /// <summary>This is a factory for creating a new IsNegative instance of this node.</summary>
         /// <remarks>Determines if the value is negative.</remarks>
         static public readonly IFuncDef IsNegative = UnaryFuncs<T, Bool>.Factory(nameof(IsNegative), v => v.IsNegative());
+    }
+
+    /// <summary>Unary nodes for nullable values.</summary>
+    /// <typeparam name="T">The type of nullable object to perform the methods on.</typeparam>
+    static public class UnaryNullable<T> where T: INullable, IEquatable<T> {
+
+        /// <summary>This is a factory for creating a new IsNaN instance of this node.</summary>
+        /// <remarks>Determines if the double is not a number, such as when something is divided by zero.</remarks>
+        static public readonly IFuncDef IsNull = UnaryFuncs<T, Bool>.Factory(nameof(IsNull), v => v.IsNull());
     }
 
     /// <summary>This gets the mathematical function for performing some function on the value from the parent.</summary>

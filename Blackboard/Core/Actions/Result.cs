@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
@@ -28,31 +27,37 @@ namespace Blackboard.Core.Actions {
             return obj is null ? null : Type.FromType(obj.GetType());
         }
 
-        /// <summary>Gets the value from an named output.</summary>
+        /// <summary>Gets the value from a named output.</summary>
         /// <param name="name">The name given to the output data.</param>
-        /// <returns>The value from the output.</returns>
+        /// <returns>The boolean from the output.</returns>
         public bool GetBool(string name) =>
             this.GetValue<Bool>(name).Value;
 
-        /// <summary>Gets the value from an named output.</summary>
+        /// <summary>Gets the value from a named output.</summary>
         /// <param name="name">The name given to the output data.</param>
-        /// <returns>The value from the output.</returns>
+        /// <returns>The integer from the output.</returns>
         public int GetInt(string name) =>
             this.GetValue<Int>(name).Value;
 
-        /// <summary>Gets the value from an named output.</summary>
+        /// <summary>Gets the value from a named output.</summary>
         /// <param name="name">The name given to the output data.</param>
-        /// <returns>The value from the output.</returns>
+        /// <returns>The double from the output.</returns>
         public double GetDouble(string name) =>
             this.GetValue<Double>(name).Value;
 
-        /// <summary>Gets the value from an named output.</summary>
+        /// <summary>Gets the value from a named output.</summary>
         /// <param name="name">The name given to the output data.</param>
-        /// <returns>The GetValue from the output.</returns>
+        /// <returns>The string from the output.</returns>
         public string GetString(string name) =>
             this.GetValue<String>(name).Value;
 
-        /// <summary>Gets the value from an named output.</summary>
+        /// <summary>Gets the value from a named output.</summary>
+        /// <param name="name">The name given to the output data.</param>
+        /// <returns>The object from the output.</returns>
+        public object GetObject(string name) =>
+            this.GetValue<Object>(name).Value;
+
+        /// <summary>Gets the value from a named output.</summary>
         /// <typeparam name="T">The type of value to read.</typeparam>
         /// <param name="name">The name given to the output data.</param>
         /// <returns>The value from the output.</returns>

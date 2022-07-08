@@ -12,7 +12,8 @@ namespace Blackboard.Core.Data.Caps {
         IImplicit<Bool,   Object>,
         IImplicit<Double, Object>,
         IImplicit<Int,    Object>,
-        IImplicit<String, Object> {
+        IImplicit<String, Object>,
+        INullable {
 
         #region Static...
 
@@ -38,7 +39,11 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Compares two objects together.</summary>
         /// <param name="other">The other object to compare.</param>
         /// <returns>The comparison result indicating which is greater than, less than, or equal.</returns>
-        public int CompareTo(Object other) => this.Value.CompareTo(other.Value);
+        public int CompareTo(Object other) =>
+            this.Value is null ?
+                other.Value is null ? 0 : 1 :
+            other.Value is null ? -1 :
+            this.Value.CompareTo(other.Value);
 
         #endregion
         #region Data...
@@ -47,15 +52,15 @@ namespace Blackboard.Core.Data.Caps {
         public string TypeName => Type.Object.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value?.ToString() ?? "null";
+        public string ValueAsString => this.Value?.ToString() ?? "null";
 
         /// <summary>Get the value of the data as an object.</summary>
-        public object ValueObject => this.Value;
+        public object ValueAsObject => this.Value;
 
         #endregion
         #region Equatable...
 
-        public static bool operator ==(Object left, Object right) => left.Equals(right);
+        public static bool operator ==(Object left, Object right) =>  left.Equals(right);
         public static bool operator !=(Object left, Object right) => !left.Equals(right);
 
         /// <summary>Checks if the given double is equal to this data type.</summary>
@@ -87,10 +92,17 @@ namespace Blackboard.Core.Data.Caps {
         public Object CastFrom(String value) => new(value.Value);
 
         #endregion
+        #region Nullable...
+
+        /// <summary>Determines if the this value is null.</summary>
+        /// <returns>True if null, false otherwise.</returns>
+        public Bool IsNull() => new(this.Value is null);
+
+        #endregion
 
         /// <summary>Gets the hash code of the stored value.</summary>
         /// <returns>The stored value's hash code.</returns>
-        public override int GetHashCode() => this.Value.GetHashCode();
+        public override int GetHashCode() => this.Value?.GetHashCode() ?? 0;
 
         /// <summary>Checks if the given object is equal to this data type.</summary>
         /// <param name="obj">This is the object to test.</param>
@@ -99,6 +111,6 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Gets the name of this data type and value.</summary>
         /// <returns>The name of the double type and value.</returns>
-        public override string ToString() => this.TypeName+"("+this.ValueString+")";
+        public override string ToString() => this.TypeName+"("+this.ValueAsString+")";
     }
 }

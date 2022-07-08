@@ -123,14 +123,17 @@ namespace BlackboardTests.CoreTests {
         public void TestFunctionSelection_Format() {
             Tester t = new("format");
             t.Test("",        "null");
+            t.Test("T",       "null");
+            t.Test("O",       "Format<string>(Implicit<string>(O))");
+            t.Test("B",       "Format<string>(Implicit<string>(B))");
             t.Test("I",       "Format<string>(Implicit<string>(I))");
             t.Test("D",       "Format<string>(Implicit<string>(D))");
-            t.Test("I, I",    "Atan2<double>(Implicit<double>(I), Implicit<double>(I))");
-            t.Test("I, D",    "Atan2<double>(Implicit<double>(I), D)");
-            t.Test("D, I",    "Atan2<double>(D, Implicit<double>(I))");
-            t.Test("D, D",    "Atan2<double>(D, D)");
-            t.Test("I, I, I", "null");
-            t.Test("D, D, D", "null");
+            t.Test("S",       "Format<string>(S)");
+            t.Test("I, I",    "Format<string>(Implicit<string>(I), Implicit<object>(I))");
+            t.Test("S, I, D", "Format<string>(S, Implicit<object>(I), Implicit<object>(D))");
+            t.Test("S, O, S", "Format<string>(S, O, Implicit<object>(S))");
+            t.Test("S, B",    "Format<string>(S, Implicit<object>(B))");
+            t.Test("S, T",    "null");
         }
     }
 }

@@ -60,12 +60,22 @@ namespace BlackboardTests.Tools {
         }
 
         /// <summary>Checks the object value of this node.</summary>
+        /// <param name="slate">This is the slate to check the value with.</param>
+        /// <param name="exp">The expected object value.</param>
+        /// <param name="names">The name of the variable to look up.</param>
+        /// <returns>The slate so that method calls can be chained together.</returns>
+        static public Slate CheckObject(this Slate slate, object exp, params string[] names) {
+            Assert.AreEqual(exp, slate.GetObject(names), checkValueMsg("object", names));
+            return slate;
+        }
+
+        /// <summary>Checks the object value of this node.</summary>
         /// <param name="slate">This is the slate to check the object with.</param>
         /// <param name="exp">The expected object value.</param>
         /// <param name="names">The name of the variable to look up.</param>
         /// <returns>The slate so that method calls can be chained together.</returns>
-        static public Slate CheckValueObject(this Slate slate, object exp, params string[] names) {
-            Assert.AreEqual(exp, slate.GetValueObject(names), checkValueMsg("object", names));
+        static public Slate CheckValueAsObject(this Slate slate, object exp, params string[] names) {
+            Assert.AreEqual(exp, slate.GetValueAsObject(names), checkValueMsg("object", names));
             return slate;
         }
 

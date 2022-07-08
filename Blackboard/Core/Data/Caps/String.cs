@@ -80,10 +80,10 @@ namespace Blackboard.Core.Data.Caps {
         public string TypeName => Type.String.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value ?? "";
+        public string ValueAsString => this.Value ?? "";
 
         /// <summary>Get the value of the data as an object.</summary>
-        public object ValueObject => this.Value;
+        public object ValueAsObject => this.Value;
 
         #endregion
         #region Equatable...
@@ -102,22 +102,22 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Casts a boolean into a string for an implicit cast.</summary>
         /// <param name="value">The boolean value to cast.</param>
         /// <returns>The resulting string value.</returns>
-        public String CastFrom(Bool value) => new(value.ValueString);
+        public String CastFrom(Bool value) => new(value.ValueAsString);
 
         /// <summary>Casts a double into a string for an implicit cast.</summary>
         /// <param name="value">The double value to cast.</param>
         /// <returns>The resulting string value.</returns>
-        public String CastFrom(Double value) => new(value.ValueString);
+        public String CastFrom(Double value) => new(value.ValueAsString);
 
         /// <summary>Casts an integer into a string for an implicit cast.</summary>
         /// <param name="value">The integer value to cast.</param>
         /// <returns>The resulting string value.</returns>
-        public String CastFrom(Int value) => new(value.ValueString);
+        public String CastFrom(Int value) => new(value.ValueAsString);
 
         /// <summary>Casts an object into a string for an implicit cast.</summary>
         /// <param name="value">The object value to cast.</param>
         /// <returns>The resulting string value.</returns>
-        public String CastFrom(Object value) => new(value.ValueString);
+        public String CastFrom(Object value) => new(value.ValueAsString);
 
         #endregion
 
@@ -132,6 +132,6 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Gets the name of this data type and value.</summary>
         /// <returns>The name of the string type and value.</returns>
-        public override string ToString() => this.TypeName+"("+this.ValueString+")";
+        public override string ToString() => this.TypeName+"("+this.ValueAsString+")";
     }
 }

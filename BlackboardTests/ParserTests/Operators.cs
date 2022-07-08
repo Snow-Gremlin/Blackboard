@@ -52,6 +52,17 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
+        [TestTag("castBool:Explicit<Object, Bool>")]
+        public void TestOperators_castBool_Explicit_Object_Bool() {
+            Slate slate = new Slate().Perform("in object A = true; B := (bool)A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Explicit<bool>");
+            slate.Perform("A = false;").CheckValue(false, "B");
+            slate.Perform("A = true; ").CheckValue(true,  "B");
+            TestTools.CheckException(() => slate.Perform("A = 'Hello';"),
+                "Unable to cast object of type 'System.String' to type 'System.Boolean'.");
+        }
+
+        [TestMethod]
         [TestTag("castTrigger:BoolAsTrigger")]
         public void TestOperators_castTrigger_BoolAsTrigger() {
             Slate slate = new Slate().Perform("in bool A; trigger B := A;");
@@ -73,6 +84,22 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
+        [TestTag("castInt:Explicit<Object, Int>")]
+        public void TestOperators_castInt_Explicit_Object_Int() {
+            Slate slate = new Slate().Perform("in object A = 0; B := (int)A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Explicit<int>");
+            slate.Perform("A =  0;").CheckValue( 0, "B");
+            slate.Perform("A =  0;").CheckValue( 0, "B");
+            slate.Perform("A =  2;").CheckValue( 2, "B");
+            slate.Perform("A =  2;").CheckValue( 2, "B");
+            slate.Perform("A = -4;").CheckValue(-4, "B");
+
+            // TODO: Should probably make the implicit and explicit casts have better exception messages.
+            TestTools.CheckException(() => slate.Perform("A = 'Hello';"),
+                "Unable to cast object of type 'System.String' to type 'System.Int32'.");
+        }
+
+        [TestMethod]
         [TestTag("castDouble:Implicit<Int, Double>")]
         public void TestOperators_castDouble_Implicit_Int_Double() {
             Slate slate = new Slate().Perform("in int A; double B := A;");
@@ -81,6 +108,23 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A =  1;").CheckValue( 1.0, "B");
             slate.Perform("A =  2;").CheckValue( 2.0, "B");
             slate.Perform("A = -1;").CheckValue(-1.0, "B");
+        }
+
+        [TestMethod]
+        [TestTag("castDouble:Explicit<Object, Double>")]
+        public void TestOperators_castDouble_Explicit_Object_Double() {
+            Slate slate = new Slate().Perform("in object A = 0.0; B := (double)A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Explicit<double>");
+            slate.Perform("A =  0.1;").CheckValue( 0.1, "B");
+            slate.Perform("A =  0.9;").CheckValue( 0.9, "B");
+            slate.Perform("A =  2.1;").CheckValue( 2.1, "B");
+            slate.Perform("A =  2.9;").CheckValue( 2.9, "B");
+            slate.Perform("A = -4.2;").CheckValue(-4.2, "B");
+            slate.Perform("A =  inf;").CheckValue(double.PositiveInfinity, "B");
+            slate.Perform("A = -inf;").CheckValue(double.NegativeInfinity, "B");
+            slate.Perform("A =  nan;").CheckValue(double.NaN, "B");
+            TestTools.CheckException(() => slate.Perform("A = 'Hello';"),
+                "Unable to cast object of type 'System.String' to type 'System.Double'.");
         }
 
         [TestMethod]
@@ -117,6 +161,63 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
+        [TestTag("castString:Implicit<Object, String>")]
+        public void TestOperators_castString_Implicit_Object_String() {
+            Slate slate = new Slate().Perform("in object A = ''; string B := A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<string>");
+            slate.Perform("A = 'Hello';").CheckValue("Hello", "B");
+            slate.Perform("A = 'World';").CheckValue("World", "B");
+            slate.Perform("A = 3.14;   ").CheckValue("3.14",  "B");
+            slate.Perform("A = true;   ").CheckValue("True",  "B");
+        }
+
+        [TestMethod]
+        [TestTag("castObject:Implicit<Bool, Object>")]
+        public void TestOperators_castObject_Implicit_Bool_Object() {
+            Slate slate = new Slate().Perform("in bool A; object B := A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<object>");
+            slate.Perform("A = true; ").CheckObject(true,  "B");
+            slate.Perform("A = false;").CheckObject(false, "B");
+        }
+
+        [TestMethod]
+        [TestTag("castObject:Implicit<Int, Object>")]
+        public void TestOperators_castObject_Implicit_Int_Object() {
+            Slate slate = new Slate().Perform("in int A; object B := A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<object>");
+            slate.Perform("A =  0;").CheckObject( 0, "B");
+            slate.Perform("A =  1;").CheckObject( 1, "B");
+            slate.Perform("A =  2;").CheckObject( 2, "B");
+            slate.Perform("A = -1;").CheckObject(-1, "B");
+        }
+
+        [TestMethod]
+        [TestTag("castObject:Implicit<Double, Object>")]
+        public void TestOperators_castObject_Implicit_Double_Object() {
+            Slate slate = new Slate().Perform("in double A; object B := A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<object>");
+            slate.Perform("A =  0.0;     ").CheckObject(  0.0,      "B");
+            slate.Perform("A =  1.0;     ").CheckObject(  1.0,      "B");
+            slate.Perform("A =  2.1;     ").CheckObject(  2.1,      "B");
+            slate.Perform("A = -1.24;    ").CheckObject( -1.24,     "B");
+            slate.Perform("A =  1e3;     ").CheckObject(  1e3,      "B");
+            slate.Perform("A =  0.123e-9;").CheckObject(  0.123e-9, "B");
+            slate.Perform("A =  inf;     ").CheckObject(double.PositiveInfinity, "B");
+            slate.Perform("A = -inf;     ").CheckObject(double.NegativeInfinity, "B");
+            slate.Perform("A =  nan;     ").CheckObject(double.NaN,              "B");
+        }
+
+        [TestMethod]
+        [TestTag("castObject:Implicit<String, Object>")]
+        public void TestOperators_castObject_Implicit_String_Object() {
+            Slate slate = new Slate().Perform("in string A; object B := A;");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<object>");
+            slate.Perform("A = 'Hello';").CheckObject("Hello", "B");
+            slate.Perform("A = 'World';").CheckObject("World", "B");
+            slate.Perform("A = '';     ").CheckObject("",      "B");
+        }
+
+        [TestMethod]
         [TestTag("divide:Div<Int>")]
         public void TestOperators_divide_Div_Int() {
             Slate slate = new Slate().Perform("in int A, B = 1; C := A/B;");
@@ -129,7 +230,8 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A =  8; B = -3;").CheckValue(-2, "C");
             slate.Perform("A = -8; B =  3;").CheckValue(-2, "C");
             slate.Perform("A = -8; B = -3;").CheckValue( 2, "C");
-            Assert.ThrowsException<System.DivideByZeroException>(() => slate.Perform("B = 0;"));
+            TestTools.CheckException(() => slate.Perform("B = 0;"),
+                "Attempted to divide by zero.");
         }
 
         [TestMethod]
@@ -446,8 +548,8 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A =  8; B = -3;").CheckValue( 2, "C");
             slate.Perform("A = -8; B =  3;").CheckValue(-2, "C");
             slate.Perform("A = -8; B = -3;").CheckValue(-2, "C");
-            Assert.ThrowsException<System.DivideByZeroException>(() => slate.Perform("B = 0;"));
-
+            TestTools.CheckException(() => slate.Perform("B = 0;"),
+                "Attempted to divide by zero.");
         }
 
         [TestMethod]

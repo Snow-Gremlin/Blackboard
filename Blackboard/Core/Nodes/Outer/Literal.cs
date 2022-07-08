@@ -4,6 +4,7 @@ using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
+using S = System;
 
 namespace Blackboard.Core.Nodes.Outer {
 
@@ -30,6 +31,11 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <returns>The new literal node.</returns>
         static public Literal<String> String(string value) => new(new String(value));
 
+        /// <summary>Creates a new object literal.</summary>
+        /// <param name="value">The value to use for the literal.</param>
+        /// <returns>The new literal node.</returns>
+        static public Literal<Object> Object(S.IComparable value) => new(new Object(value));
+
         /// <summary>Tries to create a new literal for the given data.</summary>
         /// <param name="value">The value to use for the literal.</param>
         /// <returns>The new literal node for the given data.</returns>
@@ -39,6 +45,7 @@ namespace Blackboard.Core.Nodes.Outer {
                 Int    i => new Literal<Int>   (i),
                 Double d => new Literal<Double>(d),
                 String s => new Literal<String>(s),
+                Object o => new Literal<Object>(o),
                 _        => throw new Message("Unexpected value type in literal creation").
                                With("Value", value)
             };

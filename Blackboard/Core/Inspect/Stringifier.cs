@@ -368,7 +368,7 @@ namespace Blackboard.Core.Inspect {
         /// <returns>The string for the data value.</returns>
         private static string getDataValue(INode node) =>
             node switch {
-                IDataNode dat => "[" + dat.Data.ValueString + "]",
+                IDataNode dat => "[" + dat.Data.ValueAsString + "]",
                 ITrigger trig => (trig.Provoked ? "[provoked]" : "[]"),
                 _             => "",
             };

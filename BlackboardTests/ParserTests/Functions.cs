@@ -386,5 +386,192 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A = \"<<{0}>> <<{1}>> <<{2}>> <<{3}>> <<{2}>> <<{1}>> <<{0}>>\";").
                 CheckValue("<<3.14>> <<320>> <<False>> <<Cat>> <<False>> <<320>> <<3.14>>", "F");
         }
+
+        [TestMethod]
+        [TestTag("implies:Implies")]
+        public void TestFunctions_implies_Implies() {
+            Slate slate = new Slate().Perform("in bool A, B; C := implies(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Implies<bool>");
+            slate.Perform("A = false; B = false;").CheckValue(true,  "C");
+            slate.Perform("A = false; B = true; ").CheckValue(true,  "C");
+            slate.Perform("A = true;  B = false;").CheckValue(false, "C");
+            slate.Perform("A = true;  B = true; ").CheckValue(true,  "C");
+        }
+
+        [TestMethod]
+        [TestTag("inRange:InRange<Double>")]
+        public void TestFunctions_inRange_InRange_Double() {
+            Slate slate = new Slate().Perform("in double A, Min, Max; B := inRange(A, Min, Max);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: InRange<bool>");
+            slate.Perform("A = 0.0; Min = 0.0; Max = 0.0;").CheckValue(true,  "B");
+            slate.Perform("A = 0.5; Min = 1.0; Max = 2.0;").CheckValue(false, "B");
+            slate.Perform("A = 1.0; Min = 1.0; Max = 2.0;").CheckValue(true,  "B");
+            slate.Perform("A = 1.5; Min = 1.0; Max = 2.0;").CheckValue(true,  "B");
+            slate.Perform("A = 2.0; Min = 1.0; Max = 2.0;").CheckValue(true,  "B");
+            slate.Perform("A = 2.5; Min = 1.0; Max = 2.0;").CheckValue(false, "B");
+            slate.Perform("A = 2.0; Min = 3.0; Max = 1.0;").CheckValue(false, "B"); // Min/max reversed
+        }
+
+        [TestMethod]
+        [TestTag("inRange:InRange<Int>")]
+        public void TestFunctions_inRange_InRange_Int() {
+            Slate slate = new Slate().Perform("in int A, Min, Max; B := inRange(A, Min, Max);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: InRange<bool>");
+            slate.Perform("A = 0; Min = 0; Max = 0;").CheckValue(true,  "B");
+            slate.Perform("A = 0; Min = 1; Max = 3;").CheckValue(false, "B");
+            slate.Perform("A = 1; Min = 1; Max = 3;").CheckValue(true,  "B");
+            slate.Perform("A = 2; Min = 1; Max = 3;").CheckValue(true,  "B");
+            slate.Perform("A = 3; Min = 1; Max = 3;").CheckValue(true,  "B");
+            slate.Perform("A = 4; Min = 1; Max = 3;").CheckValue(false, "B");
+            slate.Perform("A = 2; Min = 3; Max = 1;").CheckValue(false, "B"); // Min/max reversed
+        }
+
+        [TestMethod]
+        [TestTag("isFinite:UnaryFuncs<Double, Bool>")]
+        public void TestFunctions_isFinite_UnaryFuncs_Double_Bool() {
+            Slate slate = new Slate().Perform("in double A; B := isFinite(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: IsFinite<bool>");
+            slate.Perform("A =  0.0; ").CheckValue(true,  "B");
+            slate.Perform("A =  9e13;").CheckValue(true,  "B");
+            slate.Perform("A = -9e13;").CheckValue(true,  "B");
+            slate.Perform("A =  inf; ").CheckValue(false, "B");
+            slate.Perform("A = -inf; ").CheckValue(false, "B");
+            slate.Perform("A =  nan; ").CheckValue(false, "B");
+        }
+
+        [TestMethod]
+        [TestTag("isInf:UnaryFuncs<Double, Bool>")]
+        public void TestFunctions_isInf_UnaryFuncs_Double_Bool() {
+            Slate slate = new Slate().Perform("in double A; B := isInf(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: IsInfinity<bool>");
+            slate.Perform("A =  0.0; ").CheckValue(false, "B");
+            slate.Perform("A =  9e13;").CheckValue(false, "B");
+            slate.Perform("A = -9e13;").CheckValue(false, "B");
+            slate.Perform("A =  inf; ").CheckValue(true,  "B");
+            slate.Perform("A = -inf; ").CheckValue(true,  "B");
+            slate.Perform("A =  nan; ").CheckValue(false, "B");
+        }
+
+        [TestMethod]
+        [TestTag("isNaN:UnaryFuncs<Double, Bool>")]
+        public void TestFunctions_isNaN_UnaryFuncs_Double_Bool() {
+            Slate slate = new Slate().Perform("in double A; B := isNaN(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: IsNaN<bool>");
+            slate.Perform("A =  0.0; ").CheckValue(false, "B");
+            slate.Perform("A =  9e13;").CheckValue(false, "B");
+            slate.Perform("A = -9e13;").CheckValue(false, "B");
+            slate.Perform("A =  inf; ").CheckValue(false, "B");
+            slate.Perform("A = -inf; ").CheckValue(false, "B");
+            slate.Perform("A =  nan; ").CheckValue(true,  "B");
+        }
+
+        [TestMethod]
+        [TestTag("isNeg:UnaryFuncs<Double, Bool>")]
+        public void TestFunctions_isNeg_UnaryFuncs_Double_Bool() {
+            Slate slate = new Slate().Perform("in double A; B := isNeg(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: IsNegative<bool>");
+            slate.Perform("A =  0.0; ").CheckValue(false, "B");
+            slate.Perform("A =  1.0; ").CheckValue(false, "B");
+            slate.Perform("A = -1.0; ").CheckValue(true,  "B");
+            slate.Perform("A =  9e13;").CheckValue(false, "B");
+            slate.Perform("A = -9e13;").CheckValue(true,  "B");
+            slate.Perform("A =  inf; ").CheckValue(false, "B");
+            slate.Perform("A = -inf; ").CheckValue(true,  "B");
+            slate.Perform("A =  nan; ").CheckValue(true,  "B");
+        }
+
+        [TestMethod]
+        [TestTag("isNeg:UnaryFuncs<Int, Bool>")]
+        public void TestFunctions_isNeg_UnaryFuncs_Int_Bool() {
+            Slate slate = new Slate().Perform("in int A; B := isNeg(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: IsNegative<bool>");
+            slate.Perform("A = -1234567;").CheckValue(true,  "B");
+            slate.Perform("A =      -42;").CheckValue(true,  "B");
+            slate.Perform("A =       -1;").CheckValue(true,  "B");
+            slate.Perform("A =        0;").CheckValue(false, "B");
+            slate.Perform("A =        1;").CheckValue(false, "B");
+            slate.Perform("A =       42;").CheckValue(false, "B");
+            slate.Perform("A =  1234567;").CheckValue(false, "B");
+        }
+
+        [TestMethod]
+        [TestTag("isNegInf:UnaryFuncs<Double, Bool>")]
+        public void TestFunctions_isNegInf_UnaryFuncs_Double_Bool() {
+            Slate slate = new Slate().Perform("in double A; B := isNegInf(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: IsNegativeInfinity<bool>");
+            slate.Perform("A =  0.0; ").CheckValue(false, "B");
+            slate.Perform("A =  9e13;").CheckValue(false, "B");
+            slate.Perform("A = -9e13;").CheckValue(false, "B");
+            slate.Perform("A =  inf; ").CheckValue(false, "B");
+            slate.Perform("A = -inf; ").CheckValue(true,  "B");
+            slate.Perform("A =  nan; ").CheckValue(false, "B");
+        }
+
+        [TestMethod]
+        [TestTag("isNormal:UnaryFuncs<Double, Bool>")]
+        public void TestFunctions_isNormal_UnaryFuncs_Double_Bool() {
+            Slate slate = new Slate().Perform("in double A; B := isNormal(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: IsNormal<bool>");
+            slate.Perform("A =  0.0;   ").CheckValue(false, "B");
+            slate.Perform("A =  1e96;  ").CheckValue(true,  "B");
+            slate.Perform("A = -1e-96; ").CheckValue(true,  "B");
+            slate.Perform("A =  1e-307;").CheckValue(true,  "B");
+            slate.Perform("A = -1e-307;").CheckValue(true,  "B");
+            slate.Perform("A =  1e-308;").CheckValue(false, "B");
+            slate.Perform("A = -1e-308;").CheckValue(false, "B");
+            slate.Perform("A =  1e308; ").CheckValue(true,  "B");
+            slate.Perform("A = -1e308; ").CheckValue(true,  "B");
+            slate.Perform("A =  1e309; ").CheckValue(false, "B");
+            slate.Perform("A = -1e309; ").CheckValue(false, "B");
+            slate.Perform("A =  inf;   ").CheckValue(false, "B");
+            slate.Perform("A = -inf;   ").CheckValue(false, "B");
+            slate.Perform("A =  nan;   ").CheckValue(false, "B");
+        }
+
+        [TestMethod]
+        [TestTag("isNull:UnaryFuncs<Object, Bool>")]
+        public void TestFunctions_isNull_UnaryFuncs_Object_Bool() {
+            Slate slate = new Slate().Perform("in object A; B := isNull(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: IsNull<bool>");
+            slate.Perform("A = true;   ").CheckValue(false, "B");
+            slate.Perform("A = 10;     ").CheckValue(false, "B");
+            slate.Perform("A = 12.34;  ").CheckValue(false, "B");
+            slate.Perform("A = 'Hello';").CheckValue(false, "B");
+            slate.Perform("A = null;   ").CheckValue(true,  "B");
+        }
+
+        [TestMethod]
+        [TestTag("isPosInf:UnaryFuncs<Double, Bool>")]
+        public void TestFunctions_isPosInf_UnaryFuncs_Double_Bool() {
+            Slate slate = new Slate().Perform("in double A; B := isPosInf(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: IsPositiveInfinity<bool>");
+            slate.Perform("A =  0.0; ").CheckValue(false, "B");
+            slate.Perform("A =  9e13;").CheckValue(false, "B");
+            slate.Perform("A = -9e13;").CheckValue(false, "B");
+            slate.Perform("A =  inf; ").CheckValue(true,  "B");
+            slate.Perform("A = -inf; ").CheckValue(false, "B");
+            slate.Perform("A =  nan; ").CheckValue(false, "B");
+        }
+
+        [TestMethod]
+        [TestTag("isSubnormal:UnaryFuncs<Double, Bool>")]
+        public void TestFunctions_isSubnormal_UnaryFuncs_Double_Bool() {
+            Slate slate = new Slate().Perform("in double A; B := isSubnormal(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: IsSubnormal<bool>");
+            slate.Perform("A =  0.0;   ").CheckValue(false, "B");
+            slate.Perform("A =  1e96;  ").CheckValue(false, "B");
+            slate.Perform("A = -1e-96; ").CheckValue(false, "B");
+            slate.Perform("A =  1e-307;").CheckValue(false, "B");
+            slate.Perform("A = -1e-307;").CheckValue(false, "B");
+            slate.Perform("A =  1e-308;").CheckValue(true,  "B");
+            slate.Perform("A = -1e-308;").CheckValue(true,  "B");
+            slate.Perform("A =  1e308; ").CheckValue(false, "B");
+            slate.Perform("A = -1e308; ").CheckValue(false, "B");
+            slate.Perform("A =  1e309; ").CheckValue(false, "B");
+            slate.Perform("A = -1e309; ").CheckValue(false, "B");
+            slate.Perform("A =  inf;   ").CheckValue(false, "B");
+            slate.Perform("A = -inf;   ").CheckValue(false, "B");
+            slate.Perform("A =  nan;   ").CheckValue(false, "B");
+        }
     }
 }

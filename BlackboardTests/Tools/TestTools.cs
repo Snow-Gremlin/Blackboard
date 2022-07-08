@@ -18,8 +18,13 @@ namespace BlackboardTests.Tools {
         /// <param name="hndl">The action to perform.</param>
         /// <param name="exp">The lines of the expected exception message.</param>
         static public void CheckException(S.Action hndl, params string[] exp) {
-            Exception ex = Assert.ThrowsException<Exception>(hndl);
-            NoDiff(exp, ex.Message.Split("\n"));
+            try {
+                hndl();
+            } catch (S.Exception ex) {
+                NoDiff(exp, ex.Message.Split("\n"));
+                return;
+            }
+            Assert.Fail("Expected an exception to be thrown.\n%s", exp.Join("\n"));
         }
 
         /// <summary>Asserts that all the given lines are equal, otherwise shows the diff.</summary>

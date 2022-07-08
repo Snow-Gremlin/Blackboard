@@ -168,7 +168,7 @@
              => [ReservedDefinitions];
 
 [Identifier] = 'as', 'break', 'catch', 'case', 'continue', 'default', 'else',
-               'finally', 'go', 'if', 'import', 'intersect', 'is', 'null', 'out',
+               'finally', 'go', 'if', 'import', 'intersect', 'is', 'out',
                'return', 'select', 'switch', 'then', 'try', 'typeof', 'union',
                'using', 'when', 'yield'
              => [ReservedConstructs];

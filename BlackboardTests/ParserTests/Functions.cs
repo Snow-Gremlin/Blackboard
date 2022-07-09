@@ -660,5 +660,57 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A = 0.5; Min = 6.0; Max = 8.0;").CheckValue(7.0, "B");
         }
 
+        [TestMethod]
+        [TestTag("log:BinaryFunc<Double, Double, Double>")]
+        public void TestFunctions_log_BinaryFunc_Double_Double_Double() {
+            Slate slate = new Slate().Perform("in double A, B; C := log(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Log<double>");
+            slate.Perform("A =  4.0; B = 2.0;").CheckValue(2.0, "C");
+            slate.Perform("A =  8.0; B = 2.0;").CheckValue(3.0, "C");
+            slate.Perform("A =  9.0; B = 3.0;").CheckValue(2.0, "C");
+            slate.Perform("A =  3.0; B = 9.0;").CheckValue(0.5, "C");
+            slate.Perform("A = 12.2; B = 4.3;").CheckValue(S.Math.Log(12.2, 4.3), "C");
+        }
+
+        [TestMethod]
+        [TestTag("log:UnaryFuncs<Double, Double>")]
+        public void TestFunctions_log_UnaryFunc_Double_Double() {
+            Slate slate = new Slate().Perform("in double A; B := log(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Log<double>");
+            slate.Perform("A =  4.0;").CheckValue(S.Math.Log( 4.0), "B");
+            slate.Perform("A =  8.0;").CheckValue(S.Math.Log( 8.0), "B");
+            slate.Perform("A =  9.0;").CheckValue(S.Math.Log( 9.0), "B");
+            slate.Perform("A =  3.0;").CheckValue(S.Math.Log( 3.0), "B");
+            slate.Perform("A = 12.3;").CheckValue(S.Math.Log(12.3), "B");
+        }
+
+        [TestMethod]
+        [TestTag("log10:UnaryFuncs<Double, Double>")]
+        public void TestFunctions_log10_UnaryFunc_Double_Double() {
+            Slate slate = new Slate().Perform("in double A; B := log10(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Log10<double>");
+            slate.Perform("A =  4.0;").CheckValue(S.Math.Log10( 4.0), "B");
+            slate.Perform("A =  8.0;").CheckValue(S.Math.Log10( 8.0), "B");
+            slate.Perform("A =  9.0;").CheckValue(S.Math.Log10( 9.0), "B");
+            slate.Perform("A =  3.0;").CheckValue(S.Math.Log10( 3.0), "B");
+            slate.Perform("A = 12.3;").CheckValue(S.Math.Log10(12.3), "B");
+        }
+
+        [TestMethod]
+        [TestTag("log2:UnaryFuncs<Double, Double>")]
+        public void TestFunctions_log2_UnaryFunc_Double_Double() {
+            Slate slate = new Slate().Perform("in double A; B := log2(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Log2<double>");
+            slate.Perform("A =  4.0;").CheckValue(S.Math.Log2( 4.0), "B");
+            slate.Perform("A =  8.0;").CheckValue(S.Math.Log2( 8.0), "B");
+            slate.Perform("A =  9.0;").CheckValue(S.Math.Log2( 9.0), "B");
+            slate.Perform("A =  3.0;").CheckValue(S.Math.Log2( 3.0), "B");
+            slate.Perform("A = 12.3;").CheckValue(S.Math.Log2(12.3), "B");
+        }
+
+
+
+
+
     }
 }

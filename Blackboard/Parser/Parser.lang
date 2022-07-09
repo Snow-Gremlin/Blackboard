@@ -142,10 +142,6 @@
 [Identifier] = 'temp'   => [DeclareTemp];
 [Identifier] = 'proxy'  => [DeclareProxy];
 
-[Identifier] = 'counter' => [DeclareCounter];
-[Identifier] = 'latch'   => [DeclareLatch];
-[Identifier] = 'toggle'  => [DeclareToggle];
-
 [Identifier] = 'bool'    => [TypeBool];
 [Identifier] = 'int'     => [TypeInt];
 [Identifier] = 'double'  => [TypeDouble];

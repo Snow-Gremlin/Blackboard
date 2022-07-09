@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>Provides a node which can be used to count trigger events.</summary>
     sealed public class Counter<T> : ValueNode<T>, IValueInput<T>, IChild
-        where T : ISubtractive<T>, IAdditive<T>, IFinite<T>, IComparable<T> {
+        where T : ISubtractive<T>, IAdditive<T>, IFinite<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <remarks>This will not initialize any sources except increment, the others can be set later.</remarks>

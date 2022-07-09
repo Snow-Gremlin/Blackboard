@@ -166,7 +166,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Checks if the given integer is equal to this data type.</summary>
         /// <param name="other">This is the integer to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public bool Equals(Int other) => this.Value == other.Value;
+        public bool Equals(Int other) => this.Value.Equals(other.Value);
 
         #endregion
         #region Finite...

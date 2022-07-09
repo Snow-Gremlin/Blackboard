@@ -573,5 +573,92 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A = -inf;   ").CheckValue(false, "B");
             slate.Perform("A =  nan;   ").CheckValue(false, "B");
         }
+
+        [TestMethod]
+        [TestTag("latch:Latch<Bool>")]
+        public void TestFunctions_latch_Latch_Bool() {
+            Slate slate = new Slate().Perform("in trigger A; in bool B; C := latch(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Latch<bool>");
+            slate.Perform("true  -> A; B = true; ").CheckValue(true,  "C");
+            slate.Perform("true  -> A; B = false;").CheckValue(false, "C");
+            slate.Perform("false -> A; B = true; ").CheckValue(false, "C");
+            slate.Perform("true  -> A;           ").CheckValue(true,  "C");
+            slate.Perform("false -> A; B = false;").CheckValue(true,  "C");
+            slate.Perform("            B = false;").CheckValue(true,  "C");
+            slate.Perform("true  -> A; B = false;").CheckValue(false, "C");
+        }
+
+        [TestMethod]
+        [TestTag("latch:Latch<Double>")]
+        public void TestFunctions_latch_Latch_Double() {
+            Slate slate = new Slate().Perform("in trigger A; in double B; C := latch(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Latch<double>");
+            slate.Perform("true -> A; B = 0.0;").CheckValue(0.0, "C");
+            slate.Perform("true -> A; B = 1.1;").CheckValue(1.1, "C");
+            slate.Perform("true -> A; B = 2.2;").CheckValue(2.2, "C");
+            slate.Perform("           B = 1.1;").CheckValue(2.2, "C");
+            slate.Perform("           B = 0.0;").CheckValue(2.2, "C");
+            slate.Perform("true -> A;         ").CheckValue(0.0, "C");
+        }
+
+        [TestMethod]
+        [TestTag("latch:Latch<Int>")]
+        public void TestFunctions_latch_Latch_Int() {
+            Slate slate = new Slate().Perform("in trigger A; in int B; C := latch(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Latch<int>");
+            slate.Perform("true -> A; B = 0;").CheckValue(0, "C");
+            slate.Perform("true -> A; B = 1;").CheckValue(1, "C");
+            slate.Perform("true -> A; B = 2;").CheckValue(2, "C");
+            slate.Perform("           B = 1;").CheckValue(2, "C");
+            slate.Perform("           B = 0;").CheckValue(2, "C");
+            slate.Perform("true -> A;       ").CheckValue(0, "C");
+        }
+
+        [TestMethod]
+        [TestTag("latch:Latch<Object>")]
+        public void TestFunctions_latch_Latch_Object() {
+            Slate slate = new Slate().Perform("in trigger A; in object B; C := latch(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Latch<object>");
+            slate.Perform("true -> A; B = 'Hello';").CheckObject("Hello", "C");
+            slate.Perform("true -> A; B = 2;      ").CheckObject(2,       "C");
+            slate.Perform("true -> A; B = false;  ").CheckObject(false,   "C");
+            slate.Perform("           B = 'World';").CheckObject(false,   "C");
+            slate.Perform("           B = 3.14;   ").CheckObject(false,   "C");
+            slate.Perform("true -> A;             ").CheckObject(3.14,    "C");
+        }
+
+        [TestMethod]
+        [TestTag("latch:Latch<String>")]
+        public void TestFunctions_latch_Latch_String() {
+            Slate slate = new Slate().Perform("in trigger A; in string B; C := latch(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Latch<string>");
+            slate.Perform("true -> A; B = 'A';").CheckValue("A", "C");
+            slate.Perform("true -> A; B = 'B';").CheckValue("B", "C");
+            slate.Perform("true -> A; B = 'C';").CheckValue("C", "C");
+            slate.Perform("           B = 'D';").CheckValue("C", "C");
+            slate.Perform("           B = 'E';").CheckValue("C", "C");
+            slate.Perform("true -> A;         ").CheckValue("E", "C");
+        }
+
+        [TestMethod]
+        [TestTag("lerp:Lerp<Double>")]
+        public void TestFunctions_lerp_Lerp_Double() {
+            Slate slate = new Slate().Perform("in double A, Min, Max; B := lerp(A, Min, Max);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Lerp<double>");
+            slate.Perform("A = -1.0; Min = 0.0; Max = 1.0;").CheckValue(0.0, "B");
+            slate.Perform("A =  0.0; Min = 0.0; Max = 1.0;").CheckValue(0.0, "B");
+            slate.Perform("A =  0.5; Min = 0.0; Max = 1.0;").CheckValue(0.5, "B");
+            slate.Perform("A =  1.0; Min = 0.0; Max = 1.0;").CheckValue(1.0, "B");
+            slate.Perform("A =  2.0; Min = 0.0; Max = 1.0;").CheckValue(1.0, "B");
+
+            slate.Perform("A = -1.0; Min = -10.0; Max = 10.0;").CheckValue(-10.0, "B");
+            slate.Perform("A =  0.0; Min = -10.0; Max = 10.0;").CheckValue(-10.0, "B");
+            slate.Perform("A =  0.5; Min = -10.0; Max = 10.0;").CheckValue(  0.0, "B");
+            slate.Perform("A =  1.0; Min = -10.0; Max = 10.0;").CheckValue( 10.0, "B");
+            slate.Perform("A =  2.0; Min = -10.0; Max = 10.0;").CheckValue( 10.0, "B");
+
+            slate.Perform("A = 0.5; Min = 6.0; Max = 8.0;").CheckValue(7.0, "B");
+        }
+
     }
 }

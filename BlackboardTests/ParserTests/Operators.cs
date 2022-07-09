@@ -282,12 +282,42 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A =  1.00004; B =  1.00005;").CheckValue(false, "C");
             slate.Perform("A =  0.001;   B =  1.0e-3; ").CheckValue(true,  "C");
 
-            // NAN is never equal to anything including other NAN, use isNAN instead.
-            slate.Perform("A =  nan;     B =  nan;    ").CheckValue(false, "C");
+            slate.Perform("A =  nan;     B =  nan;    ").CheckValue(true,  "C");
             slate.Perform("A =  nan;     B =  1.0;    ").CheckValue(false, "C");
             slate.Perform("A = -inf;     B =  inf;    ").CheckValue(false, "C");
             slate.Perform("A =  inf;     B =  inf;    ").CheckValue(true,  "C");
             slate.Perform("A =  inf;     B = -inf;    ").CheckValue(false, "C");
+        }
+
+        [TestMethod]
+        [TestTag("equal:Equal<Object>")]
+        public void TestOperators_equal_Equal_Object() {
+            Slate slate = new Slate().Perform("in object A, B; C := A == B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Equal<bool>");
+            slate.Perform("A = '';      B = '';     ").CheckValue(true,  "C");
+            slate.Perform("A = 'World'; B = 'Hello';").CheckValue(false, "C");
+            slate.Perform("A = false;   B = false;  ").CheckValue(true,  "C");
+            slate.Perform("A = false;   B = true;   ").CheckValue(false, "C");
+            slate.Perform("A = true;    B = false;  ").CheckValue(false, "C");
+            slate.Perform("A = true;    B = true;   ").CheckValue(true,  "C");
+            slate.Perform("A = 1;       B = 1;      ").CheckValue(true,  "C");
+            slate.Perform("A = 1;       B = 2;      ").CheckValue(false, "C");
+            slate.Perform("A = 2;       B = 1;      ").CheckValue(false, "C");
+            slate.Perform("A = 1.0;     B = 1;      ").CheckValue(false, "C");
+            slate.Perform("A = 1.0;     B = 1.0;    ").CheckValue(true,  "C");
+            slate.Perform("A = 1.0;     B = 1.1;    ").CheckValue(false, "C");
+            slate.Perform("A = 1.1;     B = 1.0;    ").CheckValue(false, "C");
+
+            slate.Perform("A = 1.0;     B = nan;    ").CheckValue(false, "C");
+            slate.Perform("A = nan;     B = nan;    ").CheckValue(true,  "C");
+            slate.Perform("A = 1.1;     B = inf;    ").CheckValue(false, "C");
+            slate.Perform("A = inf;     B = inf;    ").CheckValue(true,  "C");
+            slate.Perform("A = inf;     B = 1.0;    ").CheckValue(false, "C");
+            slate.Perform("A = 'inf';   B = inf;    ").CheckValue(false, "C");
+            slate.Perform("A = false;   B = null;   ").CheckValue(false, "C");
+            slate.Perform("A = 0;       B = null;   ").CheckValue(false, "C");
+            slate.Perform("A = '';      B = null;   ").CheckValue(false, "C");
+            slate.Perform("A = null;    B = null;   ").CheckValue(true,  "C");
         }
 
         [TestMethod]
@@ -671,6 +701,37 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
+        [TestTag("notEqual:NotEqual<Object>")]
+        public void TestOperators_notEqual_NotEqual_Object() {
+            Slate slate = new Slate().Perform("in object A, B; C := A != B;");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: NotEqual<bool>");
+            slate.Perform("A = '';      B = '';     ").CheckValue(false, "C");
+            slate.Perform("A = 'World'; B = 'Hello';").CheckValue(true,  "C");
+            slate.Perform("A = false;   B = false;  ").CheckValue(false, "C");
+            slate.Perform("A = false;   B = true;   ").CheckValue(true,  "C");
+            slate.Perform("A = true;    B = false;  ").CheckValue(true,  "C");
+            slate.Perform("A = true;    B = true;   ").CheckValue(false, "C");
+            slate.Perform("A = 1;       B = 1;      ").CheckValue(false, "C");
+            slate.Perform("A = 1;       B = 2;      ").CheckValue(true,  "C");
+            slate.Perform("A = 2;       B = 1;      ").CheckValue(true,  "C");
+            slate.Perform("A = 1.0;     B = 1;      ").CheckValue(true,  "C");
+            slate.Perform("A = 1.0;     B = 1.0;    ").CheckValue(false, "C");
+            slate.Perform("A = 1.0;     B = 1.1;    ").CheckValue(true,  "C");
+            slate.Perform("A = 1.1;     B = 1.0;    ").CheckValue(true,  "C");
+
+            slate.Perform("A = 1.0;     B = nan;    ").CheckValue(true,  "C");
+            slate.Perform("A = nan;     B = nan;    ").CheckValue(false, "C");
+            slate.Perform("A = 1.1;     B = inf;    ").CheckValue(true,  "C");
+            slate.Perform("A = inf;     B = inf;    ").CheckValue(false, "C");
+            slate.Perform("A = inf;     B = 1.0;    ").CheckValue(true,  "C");
+            slate.Perform("A = 'inf';   B = inf;    ").CheckValue(true,  "C");
+            slate.Perform("A = false;   B = null;   ").CheckValue(true,  "C");
+            slate.Perform("A = 0;       B = null;   ").CheckValue(true,  "C");
+            slate.Perform("A = '';      B = null;   ").CheckValue(true,  "C");
+            slate.Perform("A = null;    B = null;   ").CheckValue(false, "C");
+        }
+
+        [TestMethod]
         [TestTag("notEqual:NotEqual<String>")]
         public void TestOperators_notEqual_NotEqual_String() {
             Slate slate = new Slate().Perform("in string A, B; C := A != B;");
@@ -865,6 +926,19 @@ namespace BlackboardTests.ParserTests {
             slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<double>");
             slate.Perform("A = false; B =  1.23; C = 32.1;").CheckValue(32.1, "D");
             slate.Perform("A = true;  B = 42.5;  C = 55.3;").CheckValue(42.5, "D");
+        }
+
+        [TestMethod]
+        [TestTag("ternary:SelectValue<Object>")]
+        public void TestOperators_ternary_SelectValue_Object() {
+            Slate slate = new Slate().Perform("in bool A; in object B, C; D := A ? B : C;");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<object>");
+            slate.Perform("A = false; B = 'Goodbye'; C = 'Moon'; ").CheckObject("Moon",  "D");
+            slate.Perform("A = true;  B = 'Hello';   C = 'World';").CheckObject("Hello", "D");
+            slate.Perform("A = false; B = 'Goodbye'; C = 2;      ").CheckObject(2,       "D");
+            slate.Perform("A = true;  B = false;     C = 0.2;    ").CheckObject(false,   "D");
+            slate.Perform("A = false; B = true;      C = 0.4;    ").CheckObject(0.4,     "D");
+            slate.Perform("A = true;  B = null;      C = 42;     ").CheckObject(null,    "D");
         }
 
         [TestMethod]

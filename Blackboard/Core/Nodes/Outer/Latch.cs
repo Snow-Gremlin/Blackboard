@@ -38,7 +38,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public override INode NewInstance() => new Latch<T>();
 
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Latch";
+        public override string TypeName => nameof(Latch<T>);
 
         /// <summary>The parent node to indicate when the value should be set to the other parent.</summary>
         public ITriggerParent Trigger {

@@ -124,7 +124,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Checks if the given double is equal to this data type.</summary>
         /// <param name="other">This is the double to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public bool Equals(Double other) => this.Value == other.Value;
+        public bool Equals(Double other) => this.Value.Equals(other.Value);
 
         #endregion
         #region Finite...

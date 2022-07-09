@@ -23,7 +23,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public override INode NewInstance() => new OutputTrigger();
 
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Output";
+        public override string TypeName => "Output"; // So that it is Output<bool> and Output<trigger>.
 
         /// <summary>The parent trigger node to listen to.</summary>
         public ITriggerParent Parent {

@@ -5,7 +5,6 @@ namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a boolean value such that it can be used in generics.</summary>
     public struct Bool:
-        IComparable<Bool>,
         IData,
         IEquatable<Bool>,
         IExplicit<Object, Bool> {
@@ -35,19 +34,6 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="value">The boolean value to store.</param>
         public Bool(bool value) => this.Value = value;
 
-        #region Comparable...
-
-        public static bool operator < (Bool left, Bool right) => left.CompareTo(right) <  0;
-        public static bool operator <=(Bool left, Bool right) => left.CompareTo(right) <= 0;
-        public static bool operator > (Bool left, Bool right) => left.CompareTo(right) >  0;
-        public static bool operator >=(Bool left, Bool right) => left.CompareTo(right) >= 0;
-
-        /// <summary>Compares two integers together.</summary>
-        /// <param name="other">The other integer to compare.</param>
-        /// <returns>The comparison result indicating which is greater than, less than, or equal.</returns>
-        public int CompareTo(Bool other) => this.Value.CompareTo(other.Value);
-
-        #endregion
         #region Data...
 
         /// <summary>Gets the name for the type of data.</summary>
@@ -68,7 +54,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Checks if the given bool is equal to this data type.</summary>
         /// <param name="other">This is the bool to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public bool Equals(Bool other) => this.Value == other.Value;
+        public bool Equals(Bool other) => this.Value.Equals(other.Value);
 
         #endregion
         #region Casts...

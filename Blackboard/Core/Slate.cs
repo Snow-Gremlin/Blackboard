@@ -97,20 +97,16 @@ namespace Blackboard.Core {
                 Equal<Bool>.Factory,
                 Equal<Int>.Factory,
                 Equal<Double>.Factory,
-                Equal<String>.Factory,
-                Equal<Object>.Factory);
+                Equal<Object>.Factory,
+                Equal<String>.Factory);
             add("greater",
-                GreaterThan<Bool>.Factory,
                 GreaterThan<Int>.Factory,
                 GreaterThan<Double>.Factory,
-                GreaterThan<String>.Factory,
-                GreaterThan<Object>.Factory);
+                GreaterThan<String>.Factory);
             add("greaterEqual",
-                GreaterThanOrEqual<Bool>.Factory,
                 GreaterThanOrEqual<Int>.Factory,
                 GreaterThanOrEqual<Double>.Factory,
-                GreaterThanOrEqual<String>.Factory,
-                GreaterThanOrEqual<Object>.Factory);
+                GreaterThanOrEqual<String>.Factory);
             add("invert",
                 BitwiseNot<Int>.Factory);
             add("less",
@@ -118,11 +114,9 @@ namespace Blackboard.Core {
                 LessThan<Double>.Factory,
                 LessThan<String>.Factory);
             add("lessEqual",
-                LessThanOrEqual<Bool>.Factory,
                 LessThanOrEqual<Int>.Factory,
                 LessThanOrEqual<Double>.Factory,
-                LessThanOrEqual<String>.Factory,
-                LessThanOrEqual<Object>.Factory);
+                LessThanOrEqual<String>.Factory);
             add("logicalAnd",
                 And.Factory,
                 All.Factory);
@@ -147,8 +141,8 @@ namespace Blackboard.Core {
                 NotEqual<Bool>.Factory,
                 NotEqual<Int>.Factory,
                 NotEqual<Double>.Factory,
-                NotEqual<String>.Factory,
-                NotEqual<Object>.Factory);
+                NotEqual<Object>.Factory,
+                NotEqual<String>.Factory);
             add("or",
                 Or.Factory,
                 BitwiseOr<Int>.Factory,
@@ -170,8 +164,8 @@ namespace Blackboard.Core {
                 SelectValue<Bool>.Factory,
                 SelectValue<Int>.Factory,
                 SelectValue<Double>.Factory,
-                SelectValue<String>.Factory,
                 SelectValue<Object>.Factory,
+                SelectValue<String>.Factory,
                 SelectTrigger.Factory);
             add("xor",
                 Xor.Factory,
@@ -371,7 +365,7 @@ namespace Blackboard.Core {
         /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
         /// <param name="value">The value to set to that node.</param>
         /// <param name="names">The name of the input node to set.</param>
-        public void SetObject(S.IComparable value, params string[] names) =>
+        public void SetObject(object value, params string[] names) =>
             this.SetValue(new Object(value), names);
 
         /// <summary>Sets a value for the given named input.</summary>
@@ -540,14 +534,14 @@ namespace Blackboard.Core {
         /// <typeparam name="T">The data type of the value to output.</typeparam>
         /// <param name="names">The name of the node to look up.</param>
         /// <returns>The new or existing value output.</returns>
-        public IValueOutput<T> GetOutputValue<T>(params string[] names) where T : IComparable<T> =>
+        public IValueOutput<T> GetOutputValue<T>(params string[] names) where T : IEquatable<T> =>
             this.GetOutputValue<T>(names as IEnumerable<string>);
 
         /// <summary>Gets or creates a new output value on the node with the given name.</summary>
         /// <typeparam name="T">The data type of the value to output.</typeparam>
         /// <param name="names">The name of the node to look up.</param>
         /// <returns>The new or existing value output.</returns>
-        public IValueOutput<T> GetOutputValue<T>(IEnumerable<string> names) where T : IComparable<T> {
+        public IValueOutput<T> GetOutputValue<T>(IEnumerable<string> names) where T : IEquatable<T> {
             IValueParent<T> parent = this.GetNode<IValueParent<T>>(names);
             IValueOutput<T> output = parent.Children.OfType<IValueOutput<T>>().FirstOrDefault();
             if (output is not null) return output;

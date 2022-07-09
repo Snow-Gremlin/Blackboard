@@ -34,7 +34,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>Creates a new object literal.</summary>
         /// <param name="value">The value to use for the literal.</param>
         /// <returns>The new literal node.</returns>
-        static public Literal<Object> Object(S.IComparable value) => new(new Object(value));
+        static public Literal<Object> Object(object value) => new(new Object(value));
 
         /// <summary>Tries to create a new literal for the given data.</summary>
         /// <param name="value">The value to use for the literal.</param>

@@ -1,12 +1,10 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Types;
-using S = System;
 
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a base value type, object, such that it can be used in generics.</summary>
     public struct Object:
-        IComparable<Object>,
         IData,
         IEquatable<Object>, 
         IImplicit<Bool,   Object>,
@@ -23,29 +21,12 @@ namespace Blackboard.Core.Data.Caps {
         #endregion
 
         /// <summary>The object value being stored.</summary>
-        public readonly S.IComparable Value;
+        public readonly object Value;
 
         /// <summary>Creates a new object data value.</summary>
         /// <param name="value">The object value to store.</param>
-        public Object(S.IComparable value) => this.Value = value;
+        public Object(object value) => this.Value = value;
 
-        #region Comparable...
-
-        public static bool operator < (Object left, Object right) => left.CompareTo(right) <  0;
-        public static bool operator <=(Object left, Object right) => left.CompareTo(right) <= 0;
-        public static bool operator > (Object left, Object right) => left.CompareTo(right) >  0;
-        public static bool operator >=(Object left, Object right) => left.CompareTo(right) >= 0;
-
-        /// <summary>Compares two objects together.</summary>
-        /// <param name="other">The other object to compare.</param>
-        /// <returns>The comparison result indicating which is greater than, less than, or equal.</returns>
-        public int CompareTo(Object other) =>
-            this.Value is null ?
-                other.Value is null ? 0 : 1 :
-            other.Value is null ? -1 :
-            this.Value.CompareTo(other.Value);
-
-        #endregion
         #region Data...
 
         /// <summary>Gets the name for the type of data.</summary>
@@ -66,7 +47,8 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Checks if the given double is equal to this data type.</summary>
         /// <param name="other">This is the double to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public bool Equals(Object other) => this.Value == other.Value;
+        public bool Equals(Object other) =>
+            this.Value is null ? other.Value is null : this.Value.Equals(other.Value);
 
         #endregion
         #region Casts...

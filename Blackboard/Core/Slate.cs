@@ -317,6 +317,9 @@ namespace Blackboard.Core {
                 BitwiseXor<Int>.Factory,
                 Xor.Factory,
                 XorTrigger.Factory);
+            add("zener",
+                Zener<Int>.Factory,
+                Zener<Double>.Factory);
         }
 
         /// <summary>This adds all the initial constants for Blackboard.</summary>

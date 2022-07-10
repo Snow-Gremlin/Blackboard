@@ -247,7 +247,7 @@ namespace BlackboardTests.ParserTests {
                 "  Evaluated (changed: True, depth: 0, node: B: Input<trigger>[provoked], remaining: 3)",
                 "  Evaluated (changed: True, depth: 1, node: D: All<trigger>[provoked](A, B), remaining: 2)",
                 "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
-                "  Evaluated (changed: False, depth: 2, node: E: XorTrigger<trigger>[](C, D), remaining: 0)",
+                "  Evaluated (changed: False, depth: 2, node: E: Xor<trigger>[](C, D), remaining: 0)",
                 "End Eval (provoked: 4)");
             slate.ResetTriggers();
 
@@ -259,7 +259,7 @@ namespace BlackboardTests.ParserTests {
                 "  Evaluated (changed: True, depth: 0, node: A: Input<trigger>[provoked], remaining: 2)",
                 "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
                 "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
-                "  Evaluated (changed: True, depth: 2, node: E: XorTrigger<trigger>[provoked](C, D), remaining: 0)",
+                "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
                 "End Eval (provoked: 3)");
             slate.ResetTriggers();
 
@@ -271,7 +271,7 @@ namespace BlackboardTests.ParserTests {
                 "  Evaluated (changed: True, depth: 0, node: B: Input<trigger>[provoked], remaining: 2)",
                 "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
                 "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
-                "  Evaluated (changed: True, depth: 2, node: E: XorTrigger<trigger>[provoked](C, D), remaining: 0)",
+                "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
                 "End Eval (provoked: 3)");
             slate.ResetTriggers();
 

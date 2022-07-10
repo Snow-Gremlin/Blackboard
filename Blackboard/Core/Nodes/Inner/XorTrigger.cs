@@ -27,7 +27,7 @@ namespace Blackboard.Core.Nodes.Inner {
         public override INode NewInstance() => new XorTrigger();
 
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => nameof(XorTrigger);
+        public override string TypeName => "Xor"; // So that it is Xor<bool> and Xor<trigger>.
 
         /// <summary>Updates this trigger during evaluation.</summary>
         /// <param name="provoked">The parent triggers to check.</param>

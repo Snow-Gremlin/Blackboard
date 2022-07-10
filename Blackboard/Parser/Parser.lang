@@ -165,7 +165,7 @@
 
 [Identifier] = 'as', 'break', 'catch', 'case', 'continue', 'default', 'else',
                'finally', 'go', 'if', 'import', 'intersect', 'is', 'out',
-               'return', 'select', 'switch', 'then', 'try', 'typeof', 'union',
+               'return', 'switch', 'then', 'try', 'typeof', 'union',
                'using', 'when', 'yield'
              => [ReservedConstructs];
 

@@ -558,7 +558,7 @@ namespace BlackboardTests.ParserTests {
         [TestTag("logicalXor:XorTrigger")]
         public void TestOperators_logicalXor_XorTrigger() {
             Slate slate = new Slate().Perform("in trigger A, B; C := A ^^ B;");
-            slate.CheckNodeString(Stringifier.Basic(), "C", "C: XorTrigger<trigger>");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Xor<trigger>");
             slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
             slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
             slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").ResetTriggers();
@@ -896,6 +896,21 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
+        [TestTag("ternary:SelectTrigger")]
+        public void TestOperators_ternary_SelectTrigger() {
+            Slate slate = new Slate().Perform("in bool A; in trigger B, C; D := A ? B : C;");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<trigger>");
+            slate.PerformWithoutReset("A = false; B = false; C = false;").CheckProvoked(false, "D").ResetTriggers();
+            slate.PerformWithoutReset("A = false; B = false; C = true; ").CheckProvoked(true, "D").ResetTriggers();
+            slate.PerformWithoutReset("A = false; B = true;  C = false;").CheckProvoked(false, "D").ResetTriggers();
+            slate.PerformWithoutReset("A = false; B = true;  C = true; ").CheckProvoked(true, "D").ResetTriggers();
+            slate.PerformWithoutReset("A = true;  B = false; C = false;").CheckProvoked(false, "D").ResetTriggers();
+            slate.PerformWithoutReset("A = true;  B = false; C = true; ").CheckProvoked(false, "D").ResetTriggers();
+            slate.PerformWithoutReset("A = true;  B = true;  C = false;").CheckProvoked(true, "D").ResetTriggers();
+            slate.PerformWithoutReset("A = true;  B = true;  C = true; ").CheckProvoked(true, "D").ResetTriggers();
+        }
+
+        [TestMethod]
         [TestTag("ternary:SelectValue<Bool>")]
         public void TestOperators_ternary_SelectValue_Bool() {
             Slate slate = new Slate().Perform("in bool A, B, C; D := A ? B : C;");
@@ -951,21 +966,6 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
-        [TestTag("ternary:SelectTrigger")]
-        public void TestOperators_ternary_SelectTrigger() {
-            Slate slate = new Slate().Perform("in bool A; in trigger B, C; D := A ? B : C;");
-            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<trigger>");
-            slate.PerformWithoutReset("A = false; B = false; C = false;").CheckProvoked(false, "D").ResetTriggers();
-            slate.PerformWithoutReset("A = false; B = false; C = true; ").CheckProvoked(true,  "D").ResetTriggers();
-            slate.PerformWithoutReset("A = false; B = true;  C = false;").CheckProvoked(false, "D").ResetTriggers();
-            slate.PerformWithoutReset("A = false; B = true;  C = true; ").CheckProvoked(true,  "D").ResetTriggers();
-            slate.PerformWithoutReset("A = true;  B = false; C = false;").CheckProvoked(false, "D").ResetTriggers();
-            slate.PerformWithoutReset("A = true;  B = false; C = true; ").CheckProvoked(false, "D").ResetTriggers();
-            slate.PerformWithoutReset("A = true;  B = true;  C = false;").CheckProvoked(true,  "D").ResetTriggers();
-            slate.PerformWithoutReset("A = true;  B = true;  C = true; ").CheckProvoked(true,  "D").ResetTriggers();
-        }
-
-        [TestMethod]
         [TestTag("xor:Xor")]
         public void TestOperators_xor_Xor() {
             Slate slate = new Slate().Perform("in bool A, B; C := A ^ B;");
@@ -992,7 +992,7 @@ namespace BlackboardTests.ParserTests {
         [TestTag("xor:XorTrigger")]
         public void TestOperators_xor_XorTrigger() {
             Slate slate = new Slate().Perform("in trigger A, B; C := A ^ B;");
-            slate.CheckNodeString(Stringifier.Basic(), "C", "C: XorTrigger<trigger>");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Xor<trigger>");
             slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
             slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
             slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").ResetTriggers();

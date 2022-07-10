@@ -45,6 +45,51 @@ namespace Blackboard.Core.Nodes.Inner {
             BinaryFunc<T, T, T>.Factory(name, (v1, v2) => v1.DoubleMath(v2, func));
     }
 
+    /// <summary>Binary nodes for specific hard-coded data types.</summary>
+    static public class Binary {
+
+        /// <summary>This is a factory for creating a new StartsWith instance of this node.</summary>
+        /// <remarks>Determines if a string starts with another string.</remarks>
+        static public readonly IFuncDef StartsWith = BinaryFunc<String, String, Bool>.
+            Factory(nameof(StartsWith), (v1, v2) => new Bool(v2.Value is not null && v1.Value is not null && v1.Value.StartsWith(v2.Value)));
+
+        /// <summary>This is a factory for creating a new EndsWith instance of this node.</summary>
+        /// <remarks>Determines if a string ends with another string.</remarks>
+        static public readonly IFuncDef EndsWith = BinaryFunc<String, String, Bool>.
+            Factory(nameof(EndsWith), (v1, v2) => new Bool(v2.Value is not null && v1.Value is not null && v1.Value.EndsWith(v2.Value)));
+
+        /// <summary>This is a factory for creating a new Contains instance of this node.</summary>
+        /// <remarks>Determines if a string contains with another string.</remarks>
+        static public readonly IFuncDef Contains = BinaryFunc<String, String, Bool>.
+            Factory(nameof(Contains), (v1, v2) => new Bool(v2.Value is not null && v1.Value is not null && v1.Value.Contains(v2.Value)));
+
+        /// <summary>This is a factory for creating a new IndexOf instance of this node.</summary>
+        /// <remarks>Determines the index of a string within another string or -1 if not found.</remarks>
+        static public readonly IFuncDef IndexOf = BinaryFunc<String, String, Int>.
+            Factory(nameof(IndexOf), (v1, v2) => new Int((v2.Value is null || v1.Value is null) ? -1 : v1.Value.IndexOf(v2.Value)));
+
+        /// <summary>This is a factory for creating a new Trim instance of this node.</summary>
+        /// <remarks>Trims the given string with the characters from the given string or whitespace.</remarks>
+        static public readonly IFuncDef Trim = BinaryFunc<String, String, String>.
+            Factory(nameof(Trim), (v1, v2) => new String(v1.Value?.Trim(v2.Value?.ToCharArray())));
+
+        /// <summary>This is a factory for creating a new TrimStart instance of this node.</summary>
+        /// <remarks>Trims the start of the given string with the characters from the given string or whitespace.</remarks>
+        static public readonly IFuncDef TrimStart = BinaryFunc<String, String, String>.
+            Factory(nameof(TrimStart), (v1, v2) => new String(v1.Value?.TrimStart(v2.Value?.ToCharArray())));
+
+        /// <summary>This is a factory for creating a new TrimEnd instance of this node.</summary>
+        /// <remarks>Trims the end of the given string with the characters from the given string or whitespace.</remarks>
+        static public readonly IFuncDef TrimEnd = BinaryFunc<String, String, String>.
+            Factory(nameof(TrimEnd), (v1, v2) => new String(v1.Value?.TrimEnd(v2.Value?.ToCharArray())));
+
+
+
+
+        // TODO: Add Pad Start/End binary which will use space, \x20.
+
+    }
+
     /// <summary>This gets the double mathematical function value from two parents.</summary>
     /// <remarks>
     /// This uses a little more computation time and more memory that hard coded nodes,

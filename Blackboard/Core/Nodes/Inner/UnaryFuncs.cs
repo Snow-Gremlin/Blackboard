@@ -25,11 +25,13 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This is a factory for creating a new IsPositiveInfinity instance of this node.</summary>
         /// <remarks>Determines if the value is positive infinity.</remarks>
-        static public readonly IFuncDef IsPositiveInfinity = UnaryFuncs<T, Bool>.Factory(nameof(IsPositiveInfinity), v => v.IsPositiveInfinity());
+        static public readonly IFuncDef IsPositiveInfinity = UnaryFuncs<T, Bool>.
+            Factory(nameof(IsPositiveInfinity), v => v.IsPositiveInfinity());
 
         /// <summary>This is a factory for creating a new IsNegativeInfinity instance of this node.</summary>
         /// <remarks>Determines if the value is negative infinity.</remarks>
-        static public readonly IFuncDef IsNegativeInfinity = UnaryFuncs<T, Bool>.Factory(nameof(IsNegativeInfinity), v => v.IsNegativeInfinity());
+        static public readonly IFuncDef IsNegativeInfinity = UnaryFuncs<T, Bool>.
+            Factory(nameof(IsNegativeInfinity), v => v.IsNegativeInfinity());
 
         /// <summary>This is a factory for creating a new IsNormal instance of this node.</summary>
         /// <remarks>Determines if the value is in the normal range of doubles with full precision.</remarks>
@@ -102,7 +104,10 @@ namespace Blackboard.Core.Nodes.Inner {
         static public readonly IFuncDef Log2 = factoryDoubleMath(nameof(Log2), S.Math.Log2);
 
         /// <summary>This is a factory for creating a new Round instance of this node.</summary>
-        /// <remarks>The value to the nearest integral value and rounds midpoint values to the nearest even number.</remarks>
+        /// <remarks>
+        /// The value to the nearest integral value and
+        /// rounds midpoint values to the nearest even number.
+        /// </remarks>
         static public readonly IFuncDef Round =factoryDoubleMath(nameof(Round), S.Math.Round);
 
         /// <summary>This is a factory for creating a new Sin instance of this node.</summary>
@@ -150,9 +155,38 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <typeparam name="T">The type of nullable object to perform the methods on.</typeparam>
     static public class UnaryNullable<T> where T: INullable, IEquatable<T> {
 
-        /// <summary>This is a factory for creating a new IsNaN instance of this node.</summary>
-        /// <remarks>Determines if the double is not a number, such as when something is divided by zero.</remarks>
+        /// <summary>This is a factory for creating a new IsNull instance of this node.</summary>
+        /// <remarks>Determines if the object is null or not.</remarks>
         static public readonly IFuncDef IsNull = UnaryFuncs<T, Bool>.Factory(nameof(IsNull), v => v.IsNull());
+    }
+
+    /// <summary>Unary nodes for specific hard-coded data types.</summary>
+    static public class Unary {
+
+        /// <summary>This is a factory for creating a new IsEmpty instance of this node.</summary>
+        /// <remarks>Determines if the string is empty.</remarks>
+        static public readonly IFuncDef IsEmpty = UnaryFuncs<String, Bool>.
+            Factory(nameof(IsEmpty), v => new Bool(string.IsNullOrEmpty(v.Value)));
+
+        /// <summary>This is a factory for creating a new Length instance of this node.</summary>
+        /// <remarks>Determines if the length of the string.</remarks>
+        static public readonly IFuncDef Length = UnaryFuncs<String, Int>.
+            Factory(nameof(Length), v => new Int(v.Value?.Length ?? 0 ));
+
+        /// <summary>This is a factory for creating a new Trim instance of this node.</summary>
+        /// <remarks>Trims the given string of whitespace.</remarks>
+        static public readonly IFuncDef Trim = UnaryFuncs<String, String>.
+            Factory(nameof(Trim), v => new String(v.Value?.Trim()));
+
+        /// <summary>This is a factory for creating a new TrimStart instance of this node.</summary>
+        /// <remarks>Trims the start of the given string of whitespace.</remarks>
+        static public readonly IFuncDef TrimStart = UnaryFuncs<String, String>.
+            Factory(nameof(TrimStart), v => new String(v.Value?.TrimStart()));
+
+        /// <summary>This is a factory for creating a new TrimEnd instance of this node.</summary>
+        /// <remarks>Trims the end of the given string of whitespace.</remarks>
+        static public readonly IFuncDef TrimEnd = UnaryFuncs<String, String>.
+            Factory(nameof(TrimEnd), v => new String(v.Value?.TrimEnd()));
     }
 
     /// <summary>This gets the mathematical function for performing some function on the value from the parent.</summary>

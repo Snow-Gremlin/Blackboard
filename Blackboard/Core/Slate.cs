@@ -210,23 +210,31 @@ namespace Blackboard.Core {
             add("clamp",
                 Clamp<Int>.Factory,
                 Clamp<Double>.Factory);
+            add("contains",
+                Binary.Contains);
             add("cos",
                 UnaryFloatingPoint<Double>.Cos);
             add("cosh",
                 UnaryFloatingPoint<Double>.Cosh);
-            add("exp",
-                UnaryFloatingPoint<Double>.Exp);
+            add("endsWith",
+                Binary.EndsWith);
             add("epsilon",
                 EpsilonEqual<Double>.Factory);
+            add("exp",
+                UnaryFloatingPoint<Double>.Exp);
             add("floor",
                 UnaryFloatingPoint<Double>.Floor);
             add("format",
                 Format.Factory);
             add("implies",
                 Implies.Factory);
+            add("indexOf",
+                Binary.IndexOf);
             add("inRange",
                 InRange<Int>.Factory,
                 InRange<Double>.Factory);
+            add("isEmpty",
+                Unary.IsEmpty);
             add("isFinite",
                 UnaryFloatingPoint<Double>.IsFinite);
             add("isInf",
@@ -254,6 +262,8 @@ namespace Blackboard.Core {
                 Latch<Object>.Factory);
             add("lerp",
                 Lerp<Double>.Factory);
+            add("length",
+                Unary.Length);
             add("log",
                 BinaryFloatingPoint<Double>.Log,
                 UnaryFloatingPoint<Double>.Log);
@@ -303,6 +313,8 @@ namespace Blackboard.Core {
                 UnaryFloatingPoint<Double>.Sinh);
             add("sqrt",
                 UnaryFloatingPoint<Double>.Sqrt);
+            add("startsWith",
+                Binary.StartsWith);
             add("sum",
                 Sum<Int>.Factory(),
                 Sum<Double>.Factory(),
@@ -311,6 +323,15 @@ namespace Blackboard.Core {
                 UnaryFloatingPoint<Double>.Tan);
             add("tanh",
                 UnaryFloatingPoint<Double>.Tanh);
+            add("trim",
+                Unary.Trim,
+                Binary.Trim);
+            add("trimEnd",
+                Unary.TrimEnd,
+                Binary.TrimEnd);
+            add("trimStart",
+                Unary.TrimStart,
+                Binary.TrimStart);
             add("trunc",
                 UnaryFloatingPoint<Double>.Truncate);
             add("xor",

@@ -427,6 +427,16 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
+        [TestTag("isEmpty:UnaryFuncs<String, Bool>")]
+        public void TestFunctions_isEmpty_UnaryFuncs_String_Bool() {
+            Slate slate = new Slate().Perform("in string A; B := isEmpty(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: IsEmpty<bool>");
+            slate.Perform("A = 'Cat';").CheckValue(false, "B");
+            slate.Perform("A = '';   ").CheckValue(true,  "B");
+            slate.Perform("A = 'A';  ").CheckValue(false, "B");
+        }
+
+        [TestMethod]
         [TestTag("isFinite:UnaryFuncs<Double, Bool>")]
         public void TestFunctions_isFinite_UnaryFuncs_Double_Bool() {
             Slate slate = new Slate().Perform("in double A; B := isFinite(A);");
@@ -638,6 +648,17 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("           B = 'D';").CheckValue("C", "C");
             slate.Perform("           B = 'E';").CheckValue("C", "C");
             slate.Perform("true -> A;         ").CheckValue("E", "C");
+        }
+
+        [TestMethod]
+        [TestTag("length:UnaryFuncs<String, Int>")]
+        public void TestFunctions_length_UnaryFuncs_String_Int() {
+            Slate slate = new Slate().Perform("in string A; B := length(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Length<int>");
+            slate.Perform("A = '';     ").CheckValue(0, "B");
+            slate.Perform("A = 'a';    ").CheckValue(1, "B");
+            slate.Perform("A = 'cat';  ").CheckValue(3, "B");
+            slate.Perform("A = 'hello';").CheckValue(5, "B");
         }
 
         [TestMethod]

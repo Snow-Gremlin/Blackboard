@@ -246,8 +246,8 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
-        [TestTag("clamp:Clamp<Double>")]
-        public void TestFunctions_clamp_Clamp_Double() {
+        [TestTag("clamp:TernaryFunc<Double, Double, Double, Double>")]
+        public void TestFunctions_clamp_TernaryFunc_Double_Double_Double_Double() {
             Slate slate = new Slate().Perform("in double A, B, C; D := clamp(A, B, C);");
             slate.CheckNodeString(Stringifier.Basic(), "D", "D: Clamp<double>");
             slate.Perform("A =  0.0; B =  0.0; C =  0.0;").CheckValue( 0.0, "D");
@@ -263,8 +263,8 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
-        [TestTag("clamp:Clamp<Int>")]
-        public void TestFunctions_clamp_Clamp_Int() {
+        [TestTag("clamp:TernaryFunc<Int, Int, Int, Int>")]
+        public void TestFunctions_clamp_TernaryFunc_Int_Int_Int_Int() {
             Slate slate = new Slate().Perform("in int A, B, C; D := clamp(A, B, C);");
             slate.CheckNodeString(Stringifier.Basic(), "D", "D: Clamp<int>");
             slate.Perform("A =  0; B =  0; C = 0;").CheckValue( 0, "D");
@@ -275,6 +275,19 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A =  4; B =  1; C = 3;").CheckValue( 3, "D");
             slate.Perform("A =  2; B = -1; C = 0;").CheckValue( 0, "D");
             slate.Perform("A = -2; B = -1; C = 0;").CheckValue(-1, "D");
+        }
+
+        [TestMethod]
+        [TestTag("contains:BinaryFunc<String, String, Bool>")]
+        public void TestFunctions_contains_BinaryFunc_String_String_Bool() {
+            Slate slate = new Slate().Perform("in string A, B; C := contains(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Contains<bool>");
+            slate.Perform("A = 'Hello'; B = 'H';   ").CheckValue(true,  "C");
+            slate.Perform("A = 'Hello'; B = 'l';   ").CheckValue(true,  "C");
+            slate.Perform("A = 'Hello'; B = 'Hell';").CheckValue(true,  "C");
+            slate.Perform("A = 'Hello'; B = 'Help';").CheckValue(false, "C");
+            slate.Perform("A = 'Hello'; B = '';    ").CheckValue(true,  "C");
+            slate.Perform("A = '';      B = '';    ").CheckValue(true,  "C");
         }
 
         [TestMethod]
@@ -300,6 +313,19 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A = -1.0;").CheckValue(S.Math.Cosh(-1.0), "B");
             slate.Perform("A =  3.0;").CheckValue(S.Math.Cosh( 3.0), "B");
             slate.Perform("A = 12.3;").CheckValue(S.Math.Cosh(12.3), "B");
+        }
+
+        [TestMethod]
+        [TestTag("endsWith:BinaryFunc<String, String, Bool>")]
+        public void TestFunctions_endsWith_BinaryFunc_String_String_Bool() {
+            Slate slate = new Slate().Perform("in string A, B; C := endsWith(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: EndsWith<bool>");
+            slate.Perform("A = '';      B = '';  ").CheckValue(true,  "C");
+            slate.Perform("A = 'Hello'; B = '';  ").CheckValue(true,  "C");
+            slate.Perform("A = 'Hello'; B = 'He';").CheckValue(false, "C");
+            slate.Perform("A = 'Hello'; B = 'lo';").CheckValue(true,  "C");
+            slate.Perform("A = 'Hello'; B = 'do';").CheckValue(false, "C");
+            slate.Perform("A = 'Hello'; B = 'o'; ").CheckValue(true,  "C");
         }
 
         [TestMethod]
@@ -399,8 +425,34 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
-        [TestTag("inRange:InRange<Double>")]
-        public void TestFunctions_inRange_InRange_Double() {
+        [TestTag("indexOf:BinaryFunc<String, String, Int>")]
+        public void TestFunctions_indexOf_BinaryFunc_String_String_Int() {
+            Slate slate = new Slate().Perform("in string A, B; C := indexOf(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: IndexOf<int>");
+            slate.Perform("A = '';      B = '';  ").CheckValue( 0, "C");
+            slate.Perform("A = 'Hello'; B = 'l'; ").CheckValue( 2, "C");
+            slate.Perform("A = 'Hello'; B = 'lo';").CheckValue( 3, "C");
+            slate.Perform("A = 'Hello'; B = 'x'; ").CheckValue(-1, "C");
+        }
+
+        [TestMethod]
+        [TestTag("indexOf:TernaryFunc<String, String, Int, Int>")]
+        public void TestFunctions_indexOf_TernaryFunc_String_String_Int_Int() {
+            Slate slate = new Slate().Perform("in string A, B; in int C; D := indexOf(A, B, C);");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: IndexOf<int>");
+            slate.Perform("A = '';      B = '';   C = 0;").CheckValue( 0, "D");
+            slate.Perform("A = 'Hello'; B = 'l';  C = 0;").CheckValue( 2, "D");
+            slate.Perform("A = 'Hello'; B = 'l';  C = 1;").CheckValue( 2, "D");
+            slate.Perform("A = 'Hello'; B = 'l';  C = 2;").CheckValue( 2, "D");
+            slate.Perform("A = 'Hello'; B = 'l';  C = 3;").CheckValue( 3, "D");
+            slate.Perform("A = 'Hello'; B = 'l';  C = 4;").CheckValue(-1, "D");
+            slate.Perform("A = 'Hello'; B = 'lo'; C = 0;").CheckValue( 3, "D");
+            slate.Perform("A = 'Hello'; B = 'x';  C = 0;").CheckValue(-1, "D");
+        }
+
+        [TestMethod]
+        [TestTag("inRange:TernaryFunc<Double, Double, Double, Bool>")]
+        public void TestFunctions_inRange_TernaryFunc_Double_Double_Double_Bool() {
             Slate slate = new Slate().Perform("in double A, Min, Max; B := inRange(A, Min, Max);");
             slate.CheckNodeString(Stringifier.Basic(), "B", "B: InRange<bool>");
             slate.Perform("A = 0.0; Min = 0.0; Max = 0.0;").CheckValue(true,  "B");
@@ -413,8 +465,8 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
-        [TestTag("inRange:InRange<Int>")]
-        public void TestFunctions_inRange_InRange_Int() {
+        [TestTag("inRange:TernaryFunc<Int, Int, Int, Bool>")]
+        public void TestFunctions_inRange_TernaryFunc_Int_Int_Int_Bool() {
             Slate slate = new Slate().Perform("in int A, Min, Max; B := inRange(A, Min, Max);");
             slate.CheckNodeString(Stringifier.Basic(), "B", "B: InRange<bool>");
             slate.Perform("A = 0; Min = 0; Max = 0;").CheckValue(true,  "B");

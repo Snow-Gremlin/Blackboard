@@ -161,5 +161,33 @@ namespace Blackboard.Core.Extensions {
             getTypeNamePart(buf, type);
             return buf.ToString();
         }
+
+        /// <summary>
+        /// Pads the given string with a padding string until the total length is at the given target total length.
+        /// This will cut the padding to be at the total length but will not trim the given string such that
+        /// if the given string starts out longer than the target length, the given string is returned unmodified.
+        /// </summary>
+        /// <param name="str">The string to pad.</param>
+        /// <param name="totalLength">The target total length to pad up to.</param>
+        /// <param name="padding">The padding string to repeat until the string is long enough.</param>
+        /// <param name="left">True to indicate to pad the left side, False to pad the right.</param>
+        /// <returns>The padded string.</returns>
+        static public string PadString(this string str, int totalLength, string padding, bool left) {
+            int count = str.Length;
+            if (count >= totalLength) return str;
+
+            StringBuilder buf = new(totalLength);
+            if (left) buf.Append(str);
+
+            int padSize = padding.Length;
+            for (int i = (totalLength - count) / padSize - 1; i >= 0; i--)
+                buf.Append(padding);
+
+            int diff = (totalLength - count) % padSize;
+            if (diff > 0) buf.Append(padding[0..diff]);
+            
+            if (!left) buf.Append(str);
+            return buf.ToString();
+        }
     }
 }

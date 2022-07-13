@@ -208,8 +208,8 @@ namespace Blackboard.Core {
             add("ceiling",
                 UnaryFloatingPoint<Double>.Ceiling);
             add("clamp",
-                Clamp<Int>.Factory,
-                Clamp<Double>.Factory);
+                TernaryComparable<Int>.Clamp,
+                TernaryComparable<Double>.Clamp);
             add("contains",
                 Binary.Contains);
             add("cos",
@@ -229,10 +229,13 @@ namespace Blackboard.Core {
             add("implies",
                 Implies.Factory);
             add("indexOf",
-                Binary.IndexOf);
+                Binary.IndexOf,
+                Ternary.IndexOf);
             add("inRange",
-                InRange<Int>.Factory,
-                InRange<Double>.Factory);
+                TernaryComparable<Int>.InRange,
+                TernaryComparable<Double>.InRange);
+            add("insert",
+                Ternary.Insert);
             add("isEmpty",
                 Unary.IsEmpty);
             add("isFinite",
@@ -293,10 +296,16 @@ namespace Blackboard.Core {
             add("or",
                 BitwiseOr<Int>.Factory,
                 Or.Factory);
+            add("padLeft",
+                Ternary.PadLeft);
+            add("padRight",
+                Ternary.PadRight);
             add("pow",
                 BinaryFloatingPoint<Double>.Pow);
             add("remainder",
                 BinaryFloatingPoint<Double>.IEEERemainder);
+            add("remove",
+                Ternary.Remove);
             add("round",
                 BinaryFloatingPoint<Double>.Round,
                 UnaryFloatingPoint<Double>.Round);
@@ -315,6 +324,8 @@ namespace Blackboard.Core {
                 UnaryFloatingPoint<Double>.Sqrt);
             add("startsWith",
                 Binary.StartsWith);
+            add("substring",
+                Ternary.Substring);
             add("sum",
                 Sum<Int>.Factory(),
                 Sum<Double>.Factory(),

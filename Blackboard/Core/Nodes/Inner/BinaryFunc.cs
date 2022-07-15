@@ -89,9 +89,6 @@ namespace Blackboard.Core.Nodes.Inner {
         // TODO: Add Pad Start/End binary which will use space, \x20.
         // -  `padLeft`
         // -  `padRight`
-        // -  `trimLeft`
-        // -  `trimRight`
-        // -  `indexOf`
 
        
 

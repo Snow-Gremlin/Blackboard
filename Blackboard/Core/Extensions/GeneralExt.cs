@@ -173,20 +173,20 @@ namespace Blackboard.Core.Extensions {
         /// <param name="left">True to indicate to pad the left side, False to pad the right.</param>
         /// <returns>The padded string.</returns>
         static public string PadString(this string str, int totalLength, string padding, bool left) {
-            int count = str.Length;
-            if (count >= totalLength) return str;
+            int count = str?.Length ?? 0;
+            int padSize = padding?.Length ?? 0;
+            if (count >= totalLength || padSize <= 0) return str;
 
             StringBuilder buf = new(totalLength);
-            if (left) buf.Append(str);
+            if (!left) buf.Append(str);
 
-            int padSize = padding.Length;
             for (int i = (totalLength - count) / padSize - 1; i >= 0; i--)
                 buf.Append(padding);
 
             int diff = (totalLength - count) % padSize;
             if (diff > 0) buf.Append(padding[0..diff]);
             
-            if (!left) buf.Append(str);
+            if (left) buf.Append(str);
             return buf.ToString();
         }
     }

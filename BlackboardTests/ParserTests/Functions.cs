@@ -479,6 +479,20 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
+        [TestTag("insert:TernaryFunc<String, Int, String, String>")]
+        public void TestFunctions_insert_TernaryFunc_String_Int_String_String() {
+            Slate slate = new Slate().Perform("in string A, C; in int B; D := insert(A, B, C);");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Insert<string>");
+            slate.Perform("A = '';      B = 0; C = '';   ").CheckValue("",         "D");
+            slate.Perform("A = '';      B = 0; C = 'a';  ").CheckValue("a",        "D");
+            slate.Perform("A = 'Cat';   B = 0; C = '';   ").CheckValue("Cat",      "D");
+            slate.Perform("A = 'ab';    B = 0; C = 'c';  ").CheckValue("cab",      "D");
+            slate.Perform("A = 'ab';    B = 1; C = 'c';  ").CheckValue("acb",      "D");
+            slate.Perform("A = 'ab';    B = 2; C = 'c';  ").CheckValue("abc",      "D");
+            slate.Perform("A = 'hello'; B = 3; C = 'p, ';").CheckValue("help, lo", "D");
+        }
+
+        [TestMethod]
         [TestTag("isEmpty:UnaryFuncs<String, Bool>")]
         public void TestFunctions_isEmpty_UnaryFuncs_String_Bool() {
             Slate slate = new Slate().Perform("in string A; B := isEmpty(A);");
@@ -1018,6 +1032,38 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
+        [TestTag("padLeft:TernaryFunc<String, Int, String, String>")]
+        public void TestFunctions_padLeft_TernaryFunc_String_Int_String_String() {
+            Slate slate = new Slate().Perform("in string A, C; in int B; D := padLeft(A, B, C);");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: PadLeft<string>");
+            slate.Perform("A = '';      B =  0; C = '';     ").CheckValue("",            "D");
+            slate.Perform("A = 'yo';    B = 10; C = '';     ").CheckValue("yo",          "D");
+            slate.Perform("A = '';      B =  4; C = 'a';    ").CheckValue("aaaa",        "D");
+            slate.Perform("A = '';      B =  4; C = 'ab';   ").CheckValue("abab",        "D");
+            slate.Perform("A = '';      B =  3; C = 'ab';   ").CheckValue("aba",         "D");
+            slate.Perform("A = '';      B = 11; C = 'abc';  ").CheckValue("abcabcabcab", "D");
+            slate.Perform("A = 'hello'; B =  3; C = '-';    ").CheckValue("hello",       "D");
+            slate.Perform("A = 'hello'; B =  5; C = '-';    ").CheckValue("hello",       "D");
+            slate.Perform("A = 'hello'; B =  7; C = '-';    ").CheckValue("--hello",     "D");
+            slate.Perform("A = 'hello'; B =  7; C = 'world';").CheckValue("wohello",     "D");
+            slate.Perform("A = 'hello'; B = 10; C = 'world';").CheckValue("worldhello",  "D");
+        }
+
+        [TestMethod]
+        [TestTag("padRight:TernaryFunc<String, Int, String, String>")]
+        public void TestFunctions_padRight_TernaryFunc_String_Int_String_String() {
+            Slate slate = new Slate().Perform("in string A, C; in int B; D := padRight(A, B, C);");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: PadRight<string>");
+            // Many of these scenarios are checked in TestFunctions_padLeft_TernaryFunc_String_Int_String_String.
+            slate.Perform("A = '';      B =  0; C = '';     ").CheckValue("",           "D");
+            slate.Perform("A = 'hello'; B =  3; C = '-';    ").CheckValue("hello",      "D");
+            slate.Perform("A = 'hello'; B =  5; C = '-';    ").CheckValue("hello",      "D");
+            slate.Perform("A = 'hello'; B =  7; C = '-';    ").CheckValue("hello--",    "D");
+            slate.Perform("A = 'hello'; B =  7; C = 'world';").CheckValue("hellowo",    "D");
+            slate.Perform("A = 'hello'; B = 10; C = 'world';").CheckValue("helloworld", "D");
+        }
+
+        [TestMethod]
         [TestTag("pow:BinaryFunc<Double, Double, Double>")]
         public void TestFunctions_pow_BinaryFunc_Double_Double_Double() {
             Slate slate = new Slate().Perform("in double A, B; C := pow(A, B);");
@@ -1044,6 +1090,18 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A =  0.0;  B =  0.0; ").CheckValue(double.NaN, "C");
             slate.Perform("A = -1.0;  B =  0.0; ").CheckValue(double.NaN, "C");
             slate.Perform("A =  3.13; B =  0.25;").CheckValue(S.Math.IEEERemainder(3.13, 0.25), "C");
+        }
+
+        [TestMethod]
+        [TestTag("remove:TernaryFunc<String, Int, Int, String>")]
+        public void TestFunctions_remove_TernaryFunc_String_Int_Int_String() {
+            Slate slate = new Slate().Perform("in string A; in int B, C; D := remove(A, B, C);");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Remove<string>");
+            slate.Perform("A = '';      B = 0; C = 0;").CheckValue("",     "D");
+            slate.Perform("A = 'hello'; B = 0; C = 1;").CheckValue("ello", "D");
+            slate.Perform("A = 'hello'; B = 4; C = 1;").CheckValue("hell", "D");
+            slate.Perform("A = 'hello'; B = 0; C = 4;").CheckValue("o",    "D");
+            slate.Perform("A = 'hello'; B = 0; C = 5;").CheckValue("",     "D");
         }
 
         [TestMethod]
@@ -1180,6 +1238,32 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
+        [TestTag("startsWith:BinaryFunc<String, String, Bool>")]
+        public void TestFunctions_startsWith_BinaryFunc_String_String_Bool_() {
+            Slate slate = new Slate().Perform("in string A, B; C := startsWith(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: StartsWith<bool>");
+            slate.Perform("A = ''; B = '';").CheckValue(true, "C");
+            slate.Perform("A = 'Hello'; B = '';   ").CheckValue(true,  "C");
+            slate.Perform("A = 'Hello'; B = 'a';  ").CheckValue(false, "C");
+            slate.Perform("A = 'Hello'; B = 'H';  ").CheckValue(true,  "C");
+            slate.Perform("A = 'Hello'; B = 'He'; ").CheckValue(true,  "C");
+            slate.Perform("A = 'Hello'; B = 'Hee';").CheckValue(false, "C");
+            slate.Perform("A = 'Hello'; B = 'o';  ").CheckValue(false, "C");
+        }
+
+        [TestMethod]
+        [TestTag("substring:TernaryFunc<String, Int, Int, String>")]
+        public void TestFunctions_substring_TernaryFunc_String_Int_Int_String() {
+            Slate slate = new Slate().Perform("in string A; in int B, C; D := substring(A, B, C);");
+            slate.CheckNodeString(Stringifier.Basic(), "D", "D: Substring<string>");
+            slate.Perform("A = 'Hello'; B = 0; C = 0;").CheckValue("",      "D");
+            slate.Perform("A = 'Hello'; B = 0; C = 1;").CheckValue("H",     "D");
+            slate.Perform("A = 'Hello'; B = 1; C = 1;").CheckValue("e",     "D");
+            slate.Perform("A = 'Hello'; B = 3; C = 2;").CheckValue("lo",    "D");
+            slate.Perform("A = 'Hello'; B = 0; C = 5;").CheckValue("Hello", "D");
+        }
+
+        [TestMethod]
         [TestTag("sum:Sum<Double>")]
         public void TestFunctions_sum_Sum_Double() {
             Slate slate = new Slate().Perform("in double A, B, C, D; E := sum(A, B, C, D);");
@@ -1252,6 +1336,90 @@ namespace BlackboardTests.ParserTests {
             slate.Perform("A = -1.0;").CheckValue(S.Math.Tanh(-1.0), "B");
             slate.Perform("A =  3.0;").CheckValue(S.Math.Tanh( 3.0), "B");
             slate.Perform("A = 12.3;").CheckValue(S.Math.Tanh(12.3), "B");
+        }
+
+        [TestMethod]
+        [TestTag("trim:BinaryFunc<String, String, String>")]
+        public void TestFunctions_trim_BinaryFunc_String_String_String() {
+            Slate slate = new Slate().Perform("in string A, B; C := trim(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: Trim<string>");
+            slate.Perform("A = '';          B = '';  ").CheckValue("",      "C");
+            slate.Perform("A = '';          B = ' '; ").CheckValue("",      "C");
+            slate.Perform("A = 'Hello';     B = '';  ").CheckValue("Hello", "C");
+            slate.Perform("A = 'Hello';     B = ' '; ").CheckValue("Hello", "C");
+            slate.Perform("A = '  Hello';   B = ' '; ").CheckValue("Hello", "C");
+            slate.Perform("A = 'Hello  ';   B = ' '; ").CheckValue("Hello", "C");
+            slate.Perform("A = '  Hello  '; B = ' '; ").CheckValue("Hello", "C");
+            slate.Perform("A = 'Hello';     B = 'lo';").CheckValue("He",    "C");
+            slate.Perform("A = 'Hello';     B = 'oH';").CheckValue("ell",   "C");
+        }
+
+        [TestMethod]
+        [TestTag("trim:UnaryFuncs<String, String>")]
+        public void TestFunctions_trim_UnaryFuncs_String_String() {
+            Slate slate = new Slate().Perform("in string A; B := trim(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: Trim<string>");
+            slate.Perform("A = '';         ").CheckValue("",      "B");
+            slate.Perform("A = 'Hello';    ").CheckValue("Hello", "B");
+            slate.Perform("A = '  Hello';  ").CheckValue("Hello", "B");
+            slate.Perform("A = 'Hello  ';  ").CheckValue("Hello", "B");
+            slate.Perform("A = '  Hello  ';").CheckValue("Hello", "B");
+        }
+
+        [TestMethod]
+        [TestTag("trimEnd:BinaryFunc<String, String, String>")]
+        public void TestFunctions_trimEnd_BinaryFunc_String_String_String() {
+            Slate slate = new Slate().Perform("in string A, B; C := trimEnd(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: TrimEnd<string>");
+            slate.Perform("A = '';          B = '';  ").CheckValue("",        "C");
+            slate.Perform("A = '';          B = ' '; ").CheckValue("",        "C");
+            slate.Perform("A = 'Hello';     B = '';  ").CheckValue("Hello",   "C");
+            slate.Perform("A = 'Hello';     B = ' '; ").CheckValue("Hello",   "C");
+            slate.Perform("A = '  Hello';   B = ' '; ").CheckValue("  Hello", "C");
+            slate.Perform("A = 'Hello  ';   B = ' '; ").CheckValue("Hello",   "C");
+            slate.Perform("A = '  Hello  '; B = ' '; ").CheckValue("  Hello", "C");
+            slate.Perform("A = 'Hello';     B = 'lo';").CheckValue("He",      "C");
+            slate.Perform("A = 'Hello';     B = 'oH';").CheckValue("Hell",    "C");
+        }
+
+        [TestMethod]
+        [TestTag("trimEnd:UnaryFuncs<String, String>")]
+        public void TestFunctions_trimEnd_UnaryFuncs_String_String() {
+            Slate slate = new Slate().Perform("in string A; B := trimEnd(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: TrimEnd<string>");
+            slate.Perform("A = '';         ").CheckValue("",        "B");
+            slate.Perform("A = 'Hello';    ").CheckValue("Hello",   "B");
+            slate.Perform("A = '  Hello';  ").CheckValue("  Hello", "B");
+            slate.Perform("A = 'Hello  ';  ").CheckValue("Hello",   "B");
+            slate.Perform("A = '  Hello  ';").CheckValue("  Hello", "B");
+        }
+
+        [TestMethod]
+        [TestTag("trimStart:BinaryFunc<String, String, String>")]
+        public void TestFunctions_trimStart_BinaryFunc_String_String_String() {
+            Slate slate = new Slate().Perform("in string A, B; C := trimStart(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: TrimStart<string>");
+            slate.Perform("A = '';          B = '';  ").CheckValue("",        "C");
+            slate.Perform("A = '';          B = ' '; ").CheckValue("",        "C");
+            slate.Perform("A = 'Hello';     B = '';  ").CheckValue("Hello",   "C");
+            slate.Perform("A = 'Hello';     B = ' '; ").CheckValue("Hello",   "C");
+            slate.Perform("A = '  Hello';   B = ' '; ").CheckValue("Hello",   "C");
+            slate.Perform("A = 'Hello  ';   B = ' '; ").CheckValue("Hello  ", "C");
+            slate.Perform("A = '  Hello  '; B = ' '; ").CheckValue("Hello  ", "C");
+            slate.Perform("A = 'Hello';     B = 'lo';").CheckValue("Hello",   "C");
+            slate.Perform("A = 'Hello';     B = 'oH';").CheckValue("ello",    "C");
+        }
+
+        [TestMethod]
+        [TestTag("trimStart:UnaryFuncs<String, String>")]
+        public void TestFunctions_trimStart_UnaryFuncs_String_String() {
+            Slate slate = new Slate().Perform("in string A; B := trimStart(A);");
+            slate.CheckNodeString(Stringifier.Basic(), "B", "B: TrimStart<string>");
+            slate.Perform("A = '';         ").CheckValue("",        "B");
+            slate.Perform("A = 'Hello';    ").CheckValue("Hello",   "B");
+            slate.Perform("A = '  Hello';  ").CheckValue("Hello",   "B");
+            slate.Perform("A = 'Hello  ';  ").CheckValue("Hello  ", "B");
+            slate.Perform("A = '  Hello  ';").CheckValue("Hello  ", "B");
         }
 
         [TestMethod]

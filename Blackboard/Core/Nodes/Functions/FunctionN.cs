@@ -23,7 +23,6 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <param name="passOne">
         /// Indicates if there is only one argument for a new node, return the argument.
         /// By default a Nary function will pass one unless otherwise indicated.
-        /// For 
         /// </param>
         /// <param name="min">The minimum number of required nodes.</param>
         /// <param name="max">The maximum allowed number of nodes.</param>

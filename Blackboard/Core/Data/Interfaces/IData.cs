@@ -8,6 +8,9 @@
         public string TypeName { get; }
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString { get; }
+        public string ValueAsString { get; }
+
+        /// <summary>Get the value of the data as an object.</summary>
+        public object ValueAsObject { get; }
     }
 }

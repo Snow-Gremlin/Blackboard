@@ -42,6 +42,11 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>The set of children nodes to this node in the graph.</summary>
         public IEnumerable<IChild> Children => this.children;
 
+        /// <summary>Checks if this parent knows about the given child.</summary>
+        /// <param name="child">The child to check for.</param>
+        /// <returns>True if the parent has the child, false otherwise.</returns>
+        public bool HasChild(IChild child) => this.children.Contains(child);
+
         /// <summary>Adds children nodes onto this node.</summary>
         /// <remarks>
         /// The parent will only keep a single copy of any child

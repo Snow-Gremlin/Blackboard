@@ -18,7 +18,8 @@ namespace Blackboard.Core.Data.Caps {
         IMultiplicative<Double>,
         ISigned<Double>,
         ISubtractive<Double>,
-        IImplicit<Int, Double> {
+        IImplicit<Int, Double>,
+        IExplicit<Object, Double> {
 
         #region Static...
 
@@ -95,7 +96,10 @@ namespace Blackboard.Core.Data.Caps {
         public string TypeName => Type.Double.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value.ToString();
+        public string ValueAsString => this.Value.ToString();
+
+        /// <summary>Get the value of the data as an object.</summary>
+        public object ValueAsObject => this.Value;
 
         #endregion
         #region Divisible...
@@ -120,7 +124,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Checks if the given double is equal to this data type.</summary>
         /// <param name="other">This is the double to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public bool Equals(Double other) => this.Value == other.Value;
+        public bool Equals(Double other) => this.Value.Equals(other.Value);
 
         #endregion
         #region Finite...
@@ -173,11 +177,33 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Determines if this value is positive or negative infinity.</summary>
         /// <returns>True if the number is either positive or negative infinity, false otherwise.</returns>
-        public bool IsInfinity() => double.IsInfinity(this.Value);
+        public Bool IsInfinity() => new(double.IsInfinity(this.Value));
 
         /// <summary>Determines if this value is not a number.</summary>
         /// <returns>True if the number is not a number, false otherwise.</returns>
-        public bool IsNaN() => double.IsNaN(this.Value);
+        public Bool IsNaN() => new(double.IsNaN(this.Value));
+
+        /// <summary>Determines if the value is not infinite.</summary>
+        /// <returns>True if the number is finite, false otherwise.</returns>
+        public Bool IsFinite() => new(double.IsFinite(this.Value));
+
+        /// <summary>Determines if the value is positive infinity.</summary>
+        /// <returns>True if the number is positive infinity, false otherwise.</returns>
+        public Bool IsPositiveInfinity() => new(double.IsPositiveInfinity(this.Value));
+
+        /// <summary>Determines if the value is negative infinity.</summary>
+        /// <returns>True if the number is negative infinity, false otherwise.</returns>
+        public Bool IsNegativeInfinity() => new(double.IsNegativeInfinity(this.Value));
+
+        /// <summary>Determines if the value is in the normal range of doubles with full precision.</summary>
+        /// <returns>True if the number is normal, false otherwise.</returns>
+        /// <see cref="https://en.wikipedia.org/wiki/Subnormal_number"/>
+        public Bool IsNormal() => new(double.IsNormal(this.Value));
+
+        /// <summary>Determines if the value is not in the normal range of double so have reduced precision.</summary>
+        /// <returns>True if the subnormal is normal, false otherwise.</returns>
+        /// <see cref="https://en.wikipedia.org/wiki/Subnormal_number"/>
+        public Bool IsSubnormal() => new(double.IsSubnormal(this.Value));
 
         /// <summary>This gets the positive infinity value.</summary>
         /// <remarks>The current value is not used when getting this identity.</remarks>
@@ -221,7 +247,7 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Determines if the this value is negative.</summary>
         /// <returns>True if below zero, false if zero or more.</returns>
-        public bool IsNegative() => double.IsNegative(this.Value);
+        public Bool IsNegative() => new(double.IsNegative(this.Value));
 
         #endregion
         #region Subtractive...
@@ -239,6 +265,11 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The resulting double value.</returns>
         public Double CastFrom(Int value) => new(value.Value);
 
+        /// <summary>Casts an object into a double for an implicit cast.</summary>
+        /// <param name="value">The object value to cast.</param>
+        /// <returns>The resulting double value.</returns>
+        public Double CastFrom(Object value) => new((double)value.Value);
+
         #endregion
 
         /// <summary>Gets the hash code of the stored value.</summary>
@@ -252,6 +283,6 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Gets the name of this data type and value.</summary>
         /// <returns>The name of the double type and value.</returns>
-        public override string ToString() => this.TypeName+"("+this.ValueString+")";
+        public override string ToString() => this.TypeName+"("+this.ValueAsString+")";
     }
 }

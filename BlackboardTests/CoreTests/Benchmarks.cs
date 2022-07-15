@@ -4,6 +4,7 @@ using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
+using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using S = System;

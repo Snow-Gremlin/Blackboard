@@ -72,15 +72,24 @@ namespace Blackboard.Core {
                 All.Factory);
             add("castTrigger",
                 BoolAsTrigger.Factory);
-            add("castBool");
+            add("castBool",
+                Explicit<Object, Bool>.Factory);
             add("castInt",
-                Explicit<Double, Int>.Factory);
+                Explicit<Double, Int>.Factory,
+                Explicit<Object, Int>.Factory);
             add("castDouble",
-                Implicit<Int, Double>.Factory);
+                Implicit<Int, Double>.Factory,
+                Explicit<Object, Double>.Factory);
+            add("castObject",
+                Implicit<Bool, Object>.Factory,
+                Implicit<Int, Object>.Factory,
+                Implicit<Double, Object>.Factory,
+                Implicit<String, Object>.Factory);
             add("castString",
                 Implicit<Bool, String>.Factory,
                 Implicit<Int, String>.Factory,
-                Implicit<Double, String>.Factory);
+                Implicit<Double, String>.Factory,
+                Implicit<Object, String>.Factory);
             add("divide",
                 Div<Int>.Factory,
                 Div<Double>.Factory);
@@ -88,6 +97,7 @@ namespace Blackboard.Core {
                 Equal<Bool>.Factory,
                 Equal<Int>.Factory,
                 Equal<Double>.Factory,
+                Equal<Object>.Factory,
                 Equal<String>.Factory);
             add("greater",
                 GreaterThan<Int>.Factory,
@@ -131,13 +141,14 @@ namespace Blackboard.Core {
                 NotEqual<Bool>.Factory,
                 NotEqual<Int>.Factory,
                 NotEqual<Double>.Factory,
+                NotEqual<Object>.Factory,
                 NotEqual<String>.Factory);
             add("or",
                 Or.Factory,
                 BitwiseOr<Int>.Factory,
                 Any.Factory);
             add("power",
-                BinaryDoubleMath<Double>.Pow);
+                BinaryFloatingPoint<Double>.Pow);
             add("shiftLeft",
                 LeftShift<Int>.Factory);
             add("shiftRight",
@@ -153,6 +164,7 @@ namespace Blackboard.Core {
                 SelectValue<Bool>.Factory,
                 SelectValue<Int>.Factory,
                 SelectValue<Double>.Factory,
+                SelectValue<Object>.Factory,
                 SelectValue<String>.Factory,
                 SelectTrigger.Factory);
             add("xor",
@@ -170,9 +182,9 @@ namespace Blackboard.Core {
                 Abs<Int>.Factory,
                 Abs<Double>.Factory);
             add("acos",
-                UnaryDoubleMath<Double>.Acos);
+                UnaryFloatingPoint<Double>.Acos);
             add("acosh",
-                UnaryDoubleMath<Double>.Acosh);
+                UnaryFloatingPoint<Double>.Acosh);
             add("all",
                 All.Factory);
             add("and",
@@ -181,52 +193,87 @@ namespace Blackboard.Core {
             add("any",
                 Any.Factory);
             add("asin",
-                UnaryDoubleMath<Double>.Asin);
+                UnaryFloatingPoint<Double>.Asin);
             add("asinh",
-                UnaryDoubleMath<Double>.Asinh);
+                UnaryFloatingPoint<Double>.Asinh);
             add("atan",
-                BinaryDoubleMath<Double>.Atan2,
-                UnaryDoubleMath<Double>.Atan);
+                BinaryFloatingPoint<Double>.Atan2,
+                UnaryFloatingPoint<Double>.Atan);
             add("atanh",
-                UnaryDoubleMath<Double>.Atanh);
+                UnaryFloatingPoint<Double>.Atanh);
             add("average",
                 Average.Factory);
             add("cbrt",
-                UnaryDoubleMath<Double>.Cbrt);
+                UnaryFloatingPoint<Double>.Cbrt);
             add("ceiling",
-                UnaryDoubleMath<Double>.Ceiling);
+                UnaryFloatingPoint<Double>.Ceiling);
             add("clamp",
-                Clamp<Int>.Factory,
-                Clamp<Double>.Factory);
+                TernaryComparable<Int>.Clamp,
+                TernaryComparable<Double>.Clamp);
+            add("contains",
+                Binary.Contains);
             add("cos",
-                UnaryDoubleMath<Double>.Cos);
+                UnaryFloatingPoint<Double>.Cos);
             add("cosh",
-                UnaryDoubleMath<Double>.Cosh);
-            add("exp",
-                UnaryDoubleMath<Double>.Exp);
+                UnaryFloatingPoint<Double>.Cosh);
+            add("endsWith",
+                Binary.EndsWith);
             add("epsilon",
                 EpsilonEqual<Double>.Factory);
+            add("exp",
+                UnaryFloatingPoint<Double>.Exp);
             add("floor",
-                UnaryDoubleMath<Double>.Floor);
+                UnaryFloatingPoint<Double>.Floor);
+            add("format",
+                Format.Factory);
             add("implies",
                 Implies.Factory);
+            add("indexOf",
+                Binary.IndexOf,
+                Ternary.IndexOf);
             add("inRange",
-                InRange<Int>.Factory,
-                InRange<Double>.Factory);
+                TernaryComparable<Int>.InRange,
+                TernaryComparable<Double>.InRange);
+            add("insert",
+                Ternary.Insert);
+            add("isEmpty",
+                Unary.IsEmpty);
+            add("isFinite",
+                UnaryFloatingPoint<Double>.IsFinite);
+            add("isInf",
+                UnaryFloatingPoint<Double>.IsInfinity);
+            add("isNaN",
+                UnaryFloatingPoint<Double>.IsNaN);
+            add("isNeg",
+                UnarySigned<Int>.IsNegative,
+                UnarySigned<Double>.IsNegative);
+            add("isNegInf",
+                UnaryFloatingPoint<Double>.IsNegativeInfinity);
+            add("isNormal",
+                UnaryFloatingPoint<Double>.IsNormal);
+            add("isNull",
+                UnaryNullable<Object>.IsNull);
+            add("isPosInf",
+                UnaryFloatingPoint<Double>.IsPositiveInfinity);
+            add("isSubnormal",
+                UnaryFloatingPoint<Double>.IsSubnormal);
             add("latch",
                 Latch<Bool>.Factory,
                 Latch<Int>.Factory,
                 Latch<Double>.Factory,
-                Latch<String>.Factory);
+                Latch<String>.Factory,
+                Latch<Object>.Factory);
             add("lerp",
                 Lerp<Double>.Factory);
+            add("length",
+                Unary.Length);
             add("log",
-                BinaryDoubleMath<Double>.Log,
-                UnaryDoubleMath<Double>.Log);
+                BinaryFloatingPoint<Double>.Log,
+                UnaryFloatingPoint<Double>.Log);
             add("log10",
-                UnaryDoubleMath<Double>.Log10);
+                UnaryFloatingPoint<Double>.Log10);
             add("log2",
-                UnaryDoubleMath<Double>.Log2);
+                UnaryFloatingPoint<Double>.Log2);
             add("max",
                 Max<Int>.Factory,
                 Max<Double>.Factory);
@@ -249,46 +296,75 @@ namespace Blackboard.Core {
             add("or",
                 BitwiseOr<Int>.Factory,
                 Or.Factory);
+            add("padLeft",
+                Binary.PadLeft,
+                Ternary.PadLeft);
+            add("padRight",
+                Binary.PadRight,
+                Ternary.PadRight);
+            add("pow",
+                BinaryFloatingPoint<Double>.Pow);
+            add("remainder",
+                BinaryFloatingPoint<Double>.IEEERemainder);
+            add("remove",
+                Ternary.Remove);
             add("round",
-                UnaryDoubleMath<Double>.Round,
-                Round<Double>.Factory);
+                BinaryFloatingPoint<Double>.Round,
+                UnaryFloatingPoint<Double>.Round);
             add("select",
                 SelectValue<Bool>.Factory,
                 SelectValue<Int>.Factory,
                 SelectValue<Double>.Factory,
                 SelectValue<String>.Factory,
+                SelectValue<Object>.Factory,
                 SelectTrigger.Factory);
             add("sin",
-                UnaryDoubleMath<Double>.Sin);
+                UnaryFloatingPoint<Double>.Sin);
             add("sinh",
-                UnaryDoubleMath<Double>.Sinh);
+                UnaryFloatingPoint<Double>.Sinh);
             add("sqrt",
-                UnaryDoubleMath<Double>.Sqrt);
+                UnaryFloatingPoint<Double>.Sqrt);
+            add("startsWith",
+                Binary.StartsWith);
+            add("substring",
+                Ternary.Substring);
             add("sum",
                 Sum<Int>.Factory(),
                 Sum<Double>.Factory(),
                 Sum<String>.Factory(true));
             add("tan",
-                UnaryDoubleMath<Double>.Tan);
+                UnaryFloatingPoint<Double>.Tan);
             add("tanh",
-                UnaryDoubleMath<Double>.Tanh);
+                UnaryFloatingPoint<Double>.Tanh);
+            add("trim",
+                Unary.Trim,
+                Binary.Trim);
+            add("trimEnd",
+                Unary.TrimEnd,
+                Binary.TrimEnd);
+            add("trimStart",
+                Unary.TrimStart,
+                Binary.TrimStart);
             add("trunc",
-                UnaryDoubleMath<Double>.Truncate);
+                UnaryFloatingPoint<Double>.Truncate);
             add("xor",
                 BitwiseXor<Int>.Factory,
                 Xor.Factory,
                 XorTrigger.Factory);
+            add("zener",
+                Zener<Int>.Factory,
+                Zener<Double>.Factory);
         }
 
         /// <summary>This adds all the initial constants for Blackboard.</summary>
         private void addConstants() {
-            void add(string name, double value) =>
-                this.Global[name] = Literal.Double(value);
-
-            add("e", S.Math.E);
-            add("pi", S.Math.PI);
-            add("tau", S.Math.Tau);
-            add("sqrt2", S.Math.Sqrt(2.0));
+            this.Global["e"    ] = Literal.Double(S.Math.E);
+            this.Global["pi"   ] = Literal.Double(S.Math.PI);
+            this.Global["tau"  ] = Literal.Double(S.Math.Tau);
+            this.Global["sqrt2"] = Literal.Double(S.Math.Sqrt(2.0));
+            this.Global["nan"  ] = Literal.Data(Double.NaN);
+            this.Global["inf"  ] = Literal.Data(Double.Infinity);
+            this.Global["null" ] = Literal.Data(Object.Null);
         }
 
         #endregion
@@ -321,6 +397,13 @@ namespace Blackboard.Core {
         /// <param name="names">The name of the input node to set.</param>
         public void SetString(string value, params string[] names) =>
             this.SetValue(new String(value), names);
+
+        /// <summary>Sets a value for the given named input.</summary>
+        /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
+        /// <param name="value">The value to set to that node.</param>
+        /// <param name="names">The name of the input node to set.</param>
+        public void SetObject(object value, params string[] names) =>
+            this.SetValue(new Object(value), names);
 
         /// <summary>Sets a value for the given named input.</summary>
         /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
@@ -387,43 +470,61 @@ namespace Blackboard.Core {
             return obj is null ? null : Type.FromType(obj.GetType());
         }
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public bool GetBool(params string[] names) =>
             this.GetValue<Bool>(names).Value;
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public int GetInt(params string[] names) =>
             this.GetValue<Int>(names).Value;
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public double GetDouble(params string[] names) =>
             this.GetValue<Double>(names).Value;
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public string GetString(params string[] names) =>
             this.GetValue<String>(names).Value;
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
+        /// <param name="name">The name of the node to read the value from.</param>
+        /// <returns>The value from the node.</returns>
+        public object GetObject(params string[] names) =>
+            this.GetValue<Object>(names).Value;
+
+        /// <summary>Gets the value from a named node.</summary>
         /// <typeparam name="T">The type of value to read.</typeparam>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public T GetValue<T>(params string[] names) where T : IData =>
             this.GetValue<T>(names as IEnumerable<string>);
 
-        /// <summary>Gets the value from an named node.</summary>
+        /// <summary>Gets the value from a named node.</summary>
         /// <typeparam name="T">The type of value to read.</typeparam>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
         public T GetValue<T>(IEnumerable<string> names) where T : IData =>
             this.GetNode<IValue<T>>(names).Value;
+
+        /// <summary>Gets the value as an object from a named node</summary>
+        /// <param name="name">The name of the node to read the value from.</param>
+        /// <returns>The value as an object from the node.</returns>
+        public object GetValueAsObject(params string[] names) =>
+            this.GetValueAsObject(names as IEnumerable<string>);
+
+        /// <summary>Gets the value as an object from a named node</summary>
+        /// <param name="name">The name of the node to read the value from.</param>
+        /// <returns>The value as an object from the node.</returns>
+        public object GetValueAsObject(IEnumerable<string> names) =>
+            this.GetNode<IDataNode>(names).Data.ValueAsObject;
 
         /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
         /// <param name="names">The name of trigger node to get the state from.</param>
@@ -470,14 +571,14 @@ namespace Blackboard.Core {
         /// <typeparam name="T">The data type of the value to output.</typeparam>
         /// <param name="names">The name of the node to look up.</param>
         /// <returns>The new or existing value output.</returns>
-        public IValueOutput<T> GetOutputValue<T>(params string[] names) where T : IComparable<T> =>
+        public IValueOutput<T> GetOutputValue<T>(params string[] names) where T : IEquatable<T> =>
             this.GetOutputValue<T>(names as IEnumerable<string>);
 
         /// <summary>Gets or creates a new output value on the node with the given name.</summary>
         /// <typeparam name="T">The data type of the value to output.</typeparam>
         /// <param name="names">The name of the node to look up.</param>
         /// <returns>The new or existing value output.</returns>
-        public IValueOutput<T> GetOutputValue<T>(IEnumerable<string> names) where T : IComparable<T> {
+        public IValueOutput<T> GetOutputValue<T>(IEnumerable<string> names) where T : IEquatable<T> {
             IValueParent<T> parent = this.GetNode<IValueParent<T>>(names);
             IValueOutput<T> output = parent.Children.OfType<IValueOutput<T>>().FirstOrDefault();
             if (output is not null) return output;

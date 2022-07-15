@@ -4,6 +4,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
+using S = System;
 
 namespace Blackboard.Core.Inspect {
 
@@ -50,10 +51,12 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Creates a stringifier configured for basic strings.</summary>
         /// <returns>The basic stringifier.</returns>
         static public Stringifier Basic() => new(
-            showAllDataValues:  false,
-            showLastDataValues: false,
-            showParents:        false,
-            showTailingNodes:   false);
+            showAllDataValues:   false,
+            showLastDataValues:  false,
+            showFirstDataValues: false,
+            showParents:         false,
+            showFuncs:           false,
+            showTailingNodes:    false);
 
         /// <summary>Gets a basic string for the given nodes even any node which is null.</summary>
         /// <param name="nodes">The set of nodes which may contain nulls.</param>
@@ -300,7 +303,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="first">Indicates this is a first node and if it has a name, it should show it.</param>
         /// <returns>The string for these nodes.</returns>
         private string stringNode(IEnumerable<INode> nodes, int depth, bool useOnlyName, bool first) =>
-            nodes.Select((INode node) => this.stringNode(node, depth, useOnlyName, first)).Join(", ");
+            nodes.Select(node => this.stringNode(node, depth, useOnlyName, first)).Join(", ");
 
         /// <summary>Creates a string for a single node.</summary>
         /// <param name="node">The node to stringify.</param>
@@ -365,7 +368,7 @@ namespace Blackboard.Core.Inspect {
         /// <returns>The string for the data value.</returns>
         private static string getDataValue(INode node) =>
             node switch {
-                IDataNode dat => "[" + dat.Data.ValueString + "]",
+                IDataNode dat => "[" + dat.Data.ValueAsString + "]",
                 ITrigger trig => (trig.Provoked ? "[provoked]" : "[]"),
                 _             => "",
             };
@@ -528,6 +531,7 @@ namespace Blackboard.Core.Inspect {
                 Message             msg    => msg.Stringify(this),
                 Exception           e      => e.Stringify(this),
                 IEnumerable<object> list   => list.Select(this.StringifyObject).Join(", "),
+                S.Type              type   => type.FormattedTypeName(),
                 _                          => value
             };
 

@@ -7,7 +7,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a trigger when the parent becomes true.</summary>
-    sealed public class OnTrue: TriggerNode, IChild {
+    sealed public class OnTrue : TriggerNode, IChild {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory =
@@ -37,7 +37,7 @@ namespace Blackboard.Core.Nodes.Inner {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new FixedParents(this).
+        public ParentCollection Parents => new ParentCollection(this, 1).
             With(() => this.source, (IValueParent<Bool> parent) => this.source = parent);
 
         /// <summary>This updates the trigger during an evaluation.</summary>

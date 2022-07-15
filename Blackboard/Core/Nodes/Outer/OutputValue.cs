@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Outer {
     /// <summary>A node for listening for changes in values used for outputting to the user.</summary>
     /// <typeparam name="T">The type of the value to hold.</typeparam>
     sealed public class OutputValue<T>: UnaryValue<T, T>, IValueOutput<T>
-        where T : IComparable<T> {
+        where T : IEquatable<T> {
 
         /// <summary>Creates a new output value node.</summary>
         public OutputValue() { }
@@ -22,7 +22,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public override INode NewInstance() => new OutputValue<T>();
 
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Output";
+        public override string TypeName => "Output"; // So that it is Output<bool> and Output<trigger>.
 
         /// <summary>This event is emitted when the value is changed.</summary>
         public event S.EventHandler<OutputValueEventArgs<T>> OnChanged;

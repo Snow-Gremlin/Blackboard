@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="TIn">The type of the all the parents' value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
     /// <see cref="https://en.wikipedia.org/wiki/Arity#n-ary"/>
-    public abstract class NaryValue<TIn, TResult>: ValueNode<TResult>, INaryChild<IValueParent<TIn>>, ICoalescable
+    public abstract class NaryValue<TIn, TResult> : ValueNode<TResult>, INaryChild<IValueParent<TIn>>, ICoalescable
         where TIn : IData
         where TResult : IEquatable<TResult> {
 
@@ -61,7 +61,8 @@ namespace Blackboard.Core.Nodes.Bases {
             this.sources.RemoveParents(this, parents);
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new VarParents<IValueParent<TIn>>(this, this.sources);
+        public ParentCollection Parents => new ParentCollection(this).
+            With(this.sources); // TODO: Set the min and max
 
         /// <summary>This handles updating this node's value given the parents' values during evaluation.</summary>
         /// <remarks>Any null parents are ignored.</remarks>

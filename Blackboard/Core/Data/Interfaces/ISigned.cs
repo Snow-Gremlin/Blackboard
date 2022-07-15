@@ -1,8 +1,10 @@
-﻿namespace Blackboard.Core.Data.Interfaces {
+﻿using Blackboard.Core.Data.Caps;
+
+namespace Blackboard.Core.Data.Interfaces {
 
     /// <summary>This indicates that this Blackboard data type is signed so can be negative.</summary>
     /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
-    public interface ISigned<T>: IData
+    public interface ISigned<out T>: IData
         where T : IData {
 
         /// <summary>Gets the absolute value of this data value.</summary>
@@ -15,6 +17,6 @@
 
         /// <summary>Determines if the this value is negative.</summary>
         /// <returns>True if below zero, false if zero or more.</returns>
-        bool IsNegative();
+        Bool IsNegative();
     }
 }

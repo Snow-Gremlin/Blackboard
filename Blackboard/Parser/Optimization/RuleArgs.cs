@@ -60,7 +60,7 @@ namespace Blackboard.Parser.Optimization {
                 // filter from the list any which are no longer in the nodes.
                 foreach (INode parent in child.Parents.ToList().
                     Where(this.Nodes.Contains).WhereNot(this.Removed.Contains).
-                    Select(this.PostReachable).Expand())
+                    SelectMany(this.PostReachable))
                     yield return parent;
             }
             yield return node;
@@ -76,7 +76,7 @@ namespace Blackboard.Parser.Optimization {
                 // filter from the list any which are no longer in the nodes.
                 foreach (INode parent in child.Parents.ToList().
                     Where(this.Nodes.Contains).WhereNot(this.Removed.Contains).
-                    Select(this.PreReachable).Expand())
+                    SelectMany(this.PreReachable))
                     yield return parent;
             }
         }

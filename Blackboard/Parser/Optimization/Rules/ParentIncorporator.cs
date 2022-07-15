@@ -19,7 +19,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// </summary>
         /// <param name="node">The node to incorporate parents into.</param>
         static private void incorporateParents(RuleArgs args, ICoalescable node) {
-            IParentCollection parents = node.Parents;
+            ParentCollection parents = node.Parents;
             for (int i = 0; i < parents.Count; ++i) {
                 IParent parent = parents[i];
 

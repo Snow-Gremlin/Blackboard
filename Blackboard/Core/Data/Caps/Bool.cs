@@ -5,9 +5,9 @@ namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a boolean value such that it can be used in generics.</summary>
     public struct Bool:
-        IComparable<Bool>,
         IData,
-        IEquatable<Bool> {
+        IEquatable<Bool>,
+        IExplicit<Object, Bool> {
 
         #region Static...
 
@@ -34,26 +34,16 @@ namespace Blackboard.Core.Data.Caps {
         /// <param name="value">The boolean value to store.</param>
         public Bool(bool value) => this.Value = value;
 
-        #region Comparable...
-
-        public static bool operator < (Bool left, Bool right) => left.CompareTo(right) <  0;
-        public static bool operator <=(Bool left, Bool right) => left.CompareTo(right) <= 0;
-        public static bool operator > (Bool left, Bool right) => left.CompareTo(right) >  0;
-        public static bool operator >=(Bool left, Bool right) => left.CompareTo(right) >= 0;
-
-        /// <summary>Compares two integers together.</summary>
-        /// <param name="other">The other integer to compare.</param>
-        /// <returns>The comparison result indicating which is greater than, less than, or equal.</returns>
-        public int CompareTo(Bool other) => this.Value.CompareTo(other.Value);
-
-        #endregion
         #region Data...
 
         /// <summary>Gets the name for the type of data.</summary>
         public string TypeName => Type.Bool.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value ? TrueString : FalseString;
+        public string ValueAsString => this.Value ? TrueString : FalseString;
+
+        /// <summary>Get the value of the data as an object.</summary>
+        public object ValueAsObject => this.Value;
 
         #endregion
         #region Equatable...
@@ -64,7 +54,15 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Checks if the given bool is equal to this data type.</summary>
         /// <param name="other">This is the bool to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public bool Equals(Bool other) => this.Value == other.Value;
+        public bool Equals(Bool other) => this.Value.Equals(other.Value);
+
+        #endregion
+        #region Casts...
+
+        /// <summary>Casts an object into a bool for an explicit cast.</summary>
+        /// <param name="value">The object value to cast.</param>
+        /// <returns>The resulting boolean value.</returns>
+        public Bool CastFrom(Object value) => new((bool)value.Value);
 
         #endregion
 
@@ -79,6 +77,6 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Gets the name of this data type and value.</summary>
         /// <returns>The name of the boolean type and value.</returns>
-        public override string ToString() => this.TypeName+"("+this.ValueString+")";
+        public override string ToString() => this.TypeName+"("+this.ValueAsString+")";
     }
 }

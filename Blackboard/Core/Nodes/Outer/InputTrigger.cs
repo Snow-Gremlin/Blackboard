@@ -19,7 +19,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public override INode NewInstance() => new InputTrigger();
 
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Input";
+        public override string TypeName => "Input"; // So that it is Input<bool> and Input<trigger>.
 
         /// <summary>Provokes this trigger so that this node is provoked during the next evaluation.</summary>
         /// <remarks>This is not intended to be called directly, it should be called via the slate or action.</remarks>

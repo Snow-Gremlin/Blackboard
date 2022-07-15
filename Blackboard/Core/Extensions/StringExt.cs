@@ -52,7 +52,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="separator">The separator to split with.</param>
         /// <returns>All the string separated by the parts.</returns>
         static public IEnumerable<string> Split(this IEnumerable<string> src, string separator) =>
-            src.Select(part => part.Split(separator)).Expand();
+            src.SelectMany(part => part.Split(separator));
 
         /// <summary>This will split and trim the string by the give separator. It will filter out empty strings.</summary>
         /// <param name="src">The source string to split and trim.</param>

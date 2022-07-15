@@ -6,7 +6,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>This is a trigger which can be provoked from user output.</summary>
-    sealed public class OutputTrigger: TriggerNode, ITriggerOutput {
+    sealed public class OutputTrigger : TriggerNode, ITriggerOutput {
 
         /// <summary>The parent source to listen to.</summary>
         private ITriggerParent source;
@@ -23,7 +23,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public override INode NewInstance() => new OutputTrigger();
 
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Output";
+        public override string TypeName => "Output"; // So that it is Output<bool> and Output<trigger>.
 
         /// <summary>The parent trigger node to listen to.</summary>
         public ITriggerParent Parent {
@@ -35,7 +35,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public event S.EventHandler OnProvoked;
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new FixedParents(this).
+        public ParentCollection Parents => new ParentCollection(this, 1).
             With(() => this.source, (ITriggerParent parent) => this.source = parent);
 
         /// <summary>This updates the trigger during the an evaluation.</summary>

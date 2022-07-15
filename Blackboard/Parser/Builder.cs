@@ -492,6 +492,11 @@ namespace Blackboard.Parser {
         /// <returns>The root of the value branch which was used in the assignment.</returns>
         public INode AddAssignment(INode target, INode value) {
             this.Logger.Info("Add Assignment:");
+            if (target is not IInput)
+                throw new Message("May not assign to a node which is not an input.").
+                    With("Location", this.LastLocation).
+                    With("Input", target).
+                    With("Value", value);
 
             // Check if the base types match. Don't need to check that the type is
             // a data type or trigger since only those can be reduced to constants.

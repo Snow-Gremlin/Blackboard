@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>This is a latching value node.</summary>
     /// <typeparam name="T">The type of the value for this node.</typeparam>
-    sealed public class Latch<T>: ValueNode<T>, IChild
+    sealed public class Latch<T> : ValueNode<T>, IChild
         where T : IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
@@ -38,7 +38,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public override INode NewInstance() => new Latch<T>();
 
         /// <summary>This is the type name of the node.</summary>
-        public override string TypeName => "Latch";
+        public override string TypeName => nameof(Latch<T>);
 
         /// <summary>The parent node to indicate when the value should be set to the other parent.</summary>
         public ITriggerParent Trigger {
@@ -53,9 +53,9 @@ namespace Blackboard.Core.Nodes.Outer {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new FixedParents(this).
-            With(() => this.trigger, (ITriggerParent  parent) => this.trigger = parent).
-            With(() => this.source,  (IValueParent<T> parent) => this.source  = parent);
+        public ParentCollection Parents => new ParentCollection(this, 2).
+            With(() => this.trigger, (ITriggerParent parent) => this.trigger = parent).
+            With(() => this.source, (IValueParent<T> parent) => this.source  = parent);
 
         /// <summary>This sets the value of this node.</summary>
         /// <param name="value">The value to set.</param>

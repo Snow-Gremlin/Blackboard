@@ -8,7 +8,7 @@ using System.Linq;
 namespace Blackboard.Parser.Optimization.Rules {
 
     /// <summary>An optimizer rule for consolidating constants in nodes which implement ICoalescable.</summary>
-    sealed internal class ConstantConsolidator: IRule {
+    sealed internal class ConstantConsolidator : IRule {
 
         /// <summary>Gets the name of this rule.</summary>
         /// <returns>The string for this class used as the name of the rule.</returns>
@@ -58,7 +58,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <returns>A node to replace this node with or null to not replace.</returns>
         static private INode commutativeReduce(RuleArgs args, ICoalescable node) {
             IConstant identity = node.Identity;
-            IParentCollection parents = node.Parents;
+            ParentCollection parents = node.Parents;
 
             // If there are no parents then return the identity for this node.
             if (parents.Count <= 0) return identity;
@@ -105,7 +105,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <returns>A node to replace this node with or null to not replace.</returns>
         static private INode notcommutableReduce(RuleArgs args, ICoalescable node) {
             IConstant identity = node.Identity;
-            IParentCollection parents = node.Parents;
+            ParentCollection parents = node.Parents;
 
             // If there are no parents then return the identity for this node.
             if (parents.Count <= 0) return identity;

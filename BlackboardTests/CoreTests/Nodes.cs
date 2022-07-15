@@ -1,8 +1,10 @@
 using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Inner;
+using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
+using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using S = System;
 
@@ -165,5 +167,7 @@ namespace BlackboardTests.CoreTests {
         // TODO: Test for:
         // - setting children to parent, legitimize children.
         // - setting parents for sum(a, b, c, d) where a & c are legitimate and b & d are illegitimate.
+        // - setting and updating parents, i.e. test parent collection
+
     }
 }

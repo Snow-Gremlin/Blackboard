@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="T2">The type of the second parent's value for this node.</typeparam>
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
     /// <see cref="https://en.wikipedia.org/wiki/Arity#Binary"/>
-    public abstract class BinaryValue<T1, T2, TResult>: ValueNode<TResult>, IChild
+    public abstract class BinaryValue<T1, T2, TResult> : ValueNode<TResult>, IChild
         where T1 : IData
         where T2 : IData
         where TResult : IEquatable<TResult> {
@@ -49,9 +49,9 @@ namespace Blackboard.Core.Nodes.Bases {
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
-        public IParentCollection Parents => new FixedParents(this).
-            With(() => this.source1, (IValueParent<T1> parent) => this.source1 = parent).
-            With(() => this.source2, (IValueParent<T2> parent) => this.source2 = parent);
+        public ParentCollection Parents => new ParentCollection(this, 2).
+            With(() => this.source1, parent => this.source1 = parent).
+            With(() => this.source2, parent => this.source2 = parent);
 
         /// <summary>This handles updating this node's value given the parents' values during evaluation.</summary>
         /// <remarks>This will not be called if any of the parents are null.</remarks>

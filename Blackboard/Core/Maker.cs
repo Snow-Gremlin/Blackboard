@@ -18,6 +18,7 @@ namespace Blackboard.Core {
         static public IFuncGroup GetCastMethod(Slate slate, Type type) {
             Namespace ops = slate.Global.Find(Slate.OperatorNamespace) as Namespace;
             INode castGroup =
+                type == Type.Object  ? ops.Find("castObject") :
                 type == Type.Bool    ? ops.Find("castBool") :
                 type == Type.Int     ? ops.Find("castInt") :
                 type == Type.Double  ? ops.Find("castDouble") :
@@ -34,6 +35,7 @@ namespace Blackboard.Core {
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         /// <returns>The newly created assignment action or null if an unexpected type.</returns>
         static public IAction CreateAssignAction(Type type, INode target, INode root, IEnumerable<INode> allNewNodes) =>
+            type == Type.Object  ? Assign<Object>.Create(target, root, allNewNodes) :
             type == Type.Bool    ? Assign<Bool>.  Create(target, root, allNewNodes) :
             type == Type.Int     ? Assign<Int>.   Create(target, root, allNewNodes) :
             type == Type.Double  ? Assign<Double>.Create(target, root, allNewNodes) :
@@ -48,6 +50,7 @@ namespace Blackboard.Core {
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         /// <returns>The newly created getter action or null if an unexpected type.</returns>
         static public IAction CreateGetterAction(Type type, string name, INode root, IEnumerable<INode> allNewNodes) =>
+            type == Type.Object ? Getter<Object>.Create(name, root, allNewNodes) :
             type == Type.Bool   ? Getter<Bool>.  Create(name, root, allNewNodes) :
             type == Type.Int    ? Getter<Int>.   Create(name, root, allNewNodes) :
             type == Type.Double ? Getter<Double>.Create(name, root, allNewNodes) :
@@ -58,6 +61,7 @@ namespace Blackboard.Core {
         /// <param name="type">The type of value to create an input node for.</param>
         /// <returns>The newly created input or null if an unexpected type.</returns>
         static public IInput CreateInputNode(Type type) =>
+            type == Type.Object  ? new InputValue<Object>() :
             type == Type.Bool    ? new InputValue<Bool>() :
             type == Type.Int     ? new InputValue<Int>() :
             type == Type.Double  ? new InputValue<Double>() :

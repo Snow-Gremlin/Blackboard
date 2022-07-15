@@ -55,6 +55,15 @@ namespace Blackboard.Core.Inspect {
             return this;
         }
 
+        /// <summary>Adds a collection of additional key value pair of data to this message.</summary>
+        /// <param name="data">The collection of key value pairs to add.</param>
+        /// <returns>This message so that these calls can be chained.</returns>
+        public Message With(IEnumerable<(string key, object value)> data) {
+            foreach ((string key, object value) in data)
+                this.Data.Add(key, value);
+            return this;
+        }
+
         /// <summary>This applies the given stringifier to the arguments and data.</summary>
         /// <param name="stringifier">The stringifier to apply or null to use shallow.</param>
         /// <returns>The logger which will stringify values in the message.</returns>

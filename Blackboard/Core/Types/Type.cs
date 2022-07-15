@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Functions;
@@ -20,11 +19,14 @@ namespace Blackboard.Core.Types {
         /// <returns>The resulting casted value.</returns>
         private delegate INode caster(INode node);
 
-        /// <summary>The base type for all other types.</summary>
+        /// <summary>The base type for all other types, not just value types.</summary>
         static public readonly Type Node;
 
         /// <summary>The trigger type.</summary>
         static public readonly Type Trigger;
+
+        /// <summary>The base of all value types</summary>
+        static public readonly Type Object;
 
         /// <summary>The boolean value type.</summary>
         static public readonly Type Bool;
@@ -61,6 +63,9 @@ namespace Blackboard.Core.Types {
         /// <summary>The Toggler type which is an extension of the boolean value type.</summary>
         static public readonly Type Toggler;
 
+        /// <summary>The object latch which is an extension of the object value type.</summary>
+        static public readonly Type LatchObject;
+
         /// <summary>The boolean latch which is an extension of the boolean value type.</summary>
         static public readonly Type LatchBool;
 
@@ -83,7 +88,7 @@ namespace Blackboard.Core.Types {
         static public Type FromName(string name) =>
             AllTypes.Where((t) => t.Name == name).FirstOrDefault();
 
-        /// <summary>This gets the type given a node.</summary>s
+        /// <summary>This gets the type given a node.</summary>
         /// <param name="node">The node to get the type of.</param>
         /// <returns>The type for the given node or null if not found.</returns>
         static public Type TypeOf(INode node) => FromType(node.GetType());
@@ -238,6 +243,12 @@ namespace Blackboard.Core.Types {
             }
         }
 
+        /// <summary>The types which this type can directly implicitly cast into.</summary>
+        public IReadOnlyCollection<Type> Implicits => this.imps.Keys;
+
+        /// <summary>The types which this type can directly explicitly cast into.</summary>
+        public IReadOnlyCollection<Type> Explicits => this.exps.Keys;
+
         /// <summary>Performs an implicit cast of the given node into this type.</summary>
         /// <param name="node">The node to implicitly cast.</param>
         /// <returns>The node cast into this type or null if the cast is not possible.</returns>
@@ -322,6 +333,7 @@ namespace Blackboard.Core.Types {
         static Type() {
             Node          = new Type("node",           typeof(INode),           null,   null);
             Trigger       = new Type("trigger",        typeof(ITrigger),        Node,   null);
+            Object        = new Type("object",         typeof(IValue<Object>),  Node,   typeof(Object));
             Bool          = new Type("bool",           typeof(IValue<Bool>),    Node,   typeof(Bool));
             Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int));
             Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double));
@@ -332,19 +344,30 @@ namespace Blackboard.Core.Types {
             CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int));
             CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double));
             Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool));
+            LatchObject   = new Type("latch-object",   typeof(Latch<Object>),   Object, typeof(Object));
             LatchBool     = new Type("latch-bool",     typeof(Latch<Bool>),     Bool,   typeof(Bool));
             LatchInt      = new Type("latch-int",      typeof(Latch<Int>),      Int,    typeof(Int));
             LatchDouble   = new Type("latch-double",   typeof(Latch<Double>),   Double, typeof(Double));
             LatchString   = new Type("latch-string",   typeof(Latch<String>),   String, typeof(String));
 
             addCast<IValueParent<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
+            addCast<IValueParent<Bool>>(Bool.imps, Object,  (input) => new Implicit<Bool, Object>(input));
             addCast<IValueParent<Bool>>(Bool.imps, String,  (input) => new Implicit<Bool, String>(input));
 
+            addCast<IValueParent<Int>>(Int.imps, Object, (input) => new Implicit<Int, Object>(input));
             addCast<IValueParent<Int>>(Int.imps, Double, (input) => new Implicit<Int, Double>(input));
             addCast<IValueParent<Int>>(Int.imps, String, (input) => new Implicit<Int, String>(input));
 
+            addCast<IValueParent<Double>>(Double.imps, Object, (input) => new Implicit<Double, Object>(input));
             addCast<IValueParent<Double>>(Double.exps, Int,    (input) => new Explicit<Double, Int>(input));
             addCast<IValueParent<Double>>(Double.imps, String, (input) => new Implicit<Double, String>(input));
+            
+            addCast<IValueParent<Object>>(Object.exps, Bool,   (input) => new Explicit<Object, Bool>(input));
+            addCast<IValueParent<Object>>(Object.exps, Int,    (input) => new Explicit<Object, Int>(input));
+            addCast<IValueParent<Object>>(Object.exps, Double, (input) => new Explicit<Object, Double>(input));
+            addCast<IValueParent<Object>>(Object.imps, String, (input) => new Implicit<Object, String>(input));
+
+            addCast<IValueParent<String>>(String.imps, Object, (input) => new Implicit<String, Object>(input));
 
             addCast<IFuncDef>(FuncDef.imps, FuncGroup, (input) => new FuncGroup(input));
         }

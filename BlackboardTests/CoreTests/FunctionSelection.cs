@@ -12,7 +12,7 @@ using System.Linq;
 namespace BlackboardTests.CoreTests {
 
     [TestClass]
-    public class Functions {
+    public class FunctionSelection {
 
         private class Tester {
             private readonly Stringifier stringifier;
@@ -32,6 +32,7 @@ namespace BlackboardTests.CoreTests {
 
                 this.nodes = new Dictionary<string, INode>();
                 this.addNode("T", new InputTrigger());
+                this.addNode("O", new InputValue<Object>());
                 this.addNode("B", new InputValue<Bool>());
                 this.addNode("I", new InputValue<Int>());
                 this.addNode("D", new InputValue<Double>());
@@ -51,13 +52,14 @@ namespace BlackboardTests.CoreTests {
         }
 
         [TestMethod]
-        public void TestFunctionsOr() {
+        public void TestFunctionSelection_Or() {
             Tester t = new(Slate.OperatorNamespace, "or");
             t.Test("T, T",    "Any<trigger>(T, T)");
             t.Test("B, B",    "Or<bool>(B, B)");
             t.Test("B, B, B", "Or<bool>(B, B, B)");
             t.Test("B",       "B: Input<bool>");
             t.Test("",        "null");
+            t.Test("O, O",    "null");
             t.Test("I, I",    "BitwiseOr<int>(I, I)");
             t.Test("D, D",    "null");
             t.Test("I, B",    "null");
@@ -67,9 +69,10 @@ namespace BlackboardTests.CoreTests {
         }
 
         [TestMethod]
-        public void TestFunctionsRound() {
+        public void TestFunctionSelection_Round() {
             Tester t = new("round");
             t.Test("B, B",    "null");
+            t.Test("O, O",    "null");
             t.Test("I, I",    "Round<double>(Implicit<double>(I), I)");
             t.Test("D, I",    "Round<double>(D, I)");
             t.Test("I, D",    "null");
@@ -80,10 +83,11 @@ namespace BlackboardTests.CoreTests {
         }
 
         [TestMethod]
-        public void TestFunctionsSum() {
+        public void TestFunctionSelection_Sum() {
             Tester t = new(Slate.OperatorNamespace, "sum");
             t.Test("B, B",       "null");
             t.Test("B, I",       "null");
+            t.Test("O, O",       "null");
             t.Test("I, I",       "Sum<int>(I, I)");
             t.Test("D, I",       "Sum<double>(D, Implicit<double>(I))");
             t.Test("I, D",       "Sum<double>(Implicit<double>(I), D)");
@@ -100,17 +104,36 @@ namespace BlackboardTests.CoreTests {
         }
 
         [TestMethod]
-        public void TestFunctionsAtan() {
+        public void TestFunctionSelection_Atan() {
             Tester t = new("atan");
             t.Test("",        "null");
+            t.Test("O",       "null");
             t.Test("I",       "Atan<double>(Implicit<double>(I))");
             t.Test("D",       "Atan<double>(D)");
+            t.Test("O, O",    "null");
             t.Test("I, I",    "Atan2<double>(Implicit<double>(I), Implicit<double>(I))");
             t.Test("I, D",    "Atan2<double>(Implicit<double>(I), D)");
             t.Test("D, I",    "Atan2<double>(D, Implicit<double>(I))");
             t.Test("D, D",    "Atan2<double>(D, D)");
             t.Test("I, I, I", "null");
             t.Test("D, D, D", "null");
+        }
+
+        [TestMethod]
+        public void TestFunctionSelection_Format() {
+            Tester t = new("format");
+            t.Test("",        "null");
+            t.Test("T",       "null");
+            t.Test("O",       "Format<string>(Implicit<string>(O))");
+            t.Test("B",       "Format<string>(Implicit<string>(B))");
+            t.Test("I",       "Format<string>(Implicit<string>(I))");
+            t.Test("D",       "Format<string>(Implicit<string>(D))");
+            t.Test("S",       "Format<string>(S)");
+            t.Test("I, I",    "Format<string>(Implicit<string>(I), Implicit<object>(I))");
+            t.Test("S, I, D", "Format<string>(S, Implicit<object>(I), Implicit<object>(D))");
+            t.Test("S, O, S", "Format<string>(S, O, Implicit<object>(S))");
+            t.Test("S, B",    "Format<string>(S, Implicit<object>(B))");
+            t.Test("S, T",    "null");
         }
     }
 }

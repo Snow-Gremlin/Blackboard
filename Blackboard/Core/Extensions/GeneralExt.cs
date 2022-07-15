@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using S = System;
 
 namespace Blackboard.Core.Extensions {
@@ -74,18 +75,19 @@ namespace Blackboard.Core.Extensions {
         /// <param name="comparer">The type of comparer to use, if null the default comparer will be used.</param>
         /// <returns>True if any value is contained in both, false otherwise.</returns>
         static public bool ContainsAny<T>(this IEnumerable<T> a, IEnumerable<T> b, IEqualityComparer<T> comparer = null) =>
-            a.Any((value) => b.Contains(value, comparer));
+            a.Any(value => b.Contains(value, comparer));
 
         /// <summary>Determines if the given enumerator has the given count.</summary>
         /// <remarks>
         /// This is faster than `a.Count() == count` because it will shortcut
-        /// if the enumerator is over the count t check against.
+        /// if the enumerator is over the count to check against.
         /// </remarks>
         /// <typeparam name="T">The types of the value to count.</typeparam>
         /// <param name="a">The values to check the count with.</param>
         /// <param name="count">The count to check against.</param>
         /// <returns>True if there are the same number of given values as the given count</returns>
         static public bool IsCount<T>(this IEnumerable<T> a, int count) {
+            if (a is ICollection<T> b) return b.Count == count;
             foreach (T value in a) {
                 count--;
                 if (count < 0) return false;
@@ -105,24 +107,13 @@ namespace Blackboard.Core.Extensions {
         /// <param name="maxLoops">The maximum number of times the last value is repeated.</param>
         /// <returns>The enumeration of the values and repeated last. If no input values then default is returned.</returns>
         static public IEnumerable<T> RepeatLast<T>(this IEnumerable<T> values, int maxLoops = 1000) {
-            T prev = default;
+            T last = default;
             foreach (T value in values) {
-                prev = value;
+                last = value;
                 yield return value;
             }
             for (int i = 0; i < maxLoops; ++i)
-                yield return prev;
-        }
-
-        /// <summary>This will expand several enumerable sets into one joined enumerable.</summary>
-        /// <remarks>This is useful for using after a `Select` which returns an enumerable.</remarks>
-        /// <typeparam name="T">The type of the list to enumerate.</typeparam>
-        /// <param name="input">The set of enumerable sets to join together.</param>
-        /// <returns>The single enumerable set with all the values from the input.</returns>
-        static public IEnumerable<T> Expand<T>(this IEnumerable<IEnumerable<T>> input) {
-            foreach (IEnumerable<T> inner in input) {
-                foreach (T value in inner) yield return value;
-            }
+                yield return last;
         }
 
         /// <summary>Gets the given value clamped to the inclusive range of the given min and max.</summary>
@@ -144,5 +135,59 @@ namespace Blackboard.Core.Extensions {
         static public bool InRange<T>(this T value, T min, T max)
             where T : S.IComparable<T> =>
             value.CompareTo(min) >= 0 && value.CompareTo(max) <= 0;
+
+        /// <summary>Gets a formatted type name for the given generic type.</summary>
+        /// <param name="type">The type to get the formatted name for.</param>
+        /// <returns>The formatted name of the given type.</returns>
+        static public string FormattedTypeName(this S.Type type) {
+            static void getTypeNamePart(StringBuilder buf, S.Type type) {
+                if (type.IsGenericType) {
+                    string name = type.Name;
+                    int iBacktick = name.IndexOf('`');
+                    if (iBacktick > 0) name = name[..iBacktick];
+                    buf.Append(name);
+                    buf.Append('<');
+                    S.Type[] typeParameters = type.GetGenericArguments();
+                    getTypeNamePart(buf, typeParameters[0]);
+                    for (int i = 1; i < typeParameters.Length; ++i) {
+                        buf.Append(", ");
+                        getTypeNamePart(buf, typeParameters[i]);
+                    }
+                    buf.Append('>');
+                } else buf.Append(type.Name);
+            }
+
+            StringBuilder buf = new();
+            getTypeNamePart(buf, type);
+            return buf.ToString();
+        }
+
+        /// <summary>
+        /// Pads the given string with a padding string until the total length is at the given target total length.
+        /// This will cut the padding to be at the total length but will not trim the given string such that
+        /// if the given string starts out longer than the target length, the given string is returned unmodified.
+        /// </summary>
+        /// <param name="str">The string to pad.</param>
+        /// <param name="totalLength">The target total length to pad up to.</param>
+        /// <param name="padding">The padding string to repeat until the string is long enough.</param>
+        /// <param name="left">True to indicate to pad the left side, False to pad the right.</param>
+        /// <returns>The padded string.</returns>
+        static public string PadString(this string str, int totalLength, string padding, bool left) {
+            int count = str?.Length ?? 0;
+            int padSize = padding?.Length ?? 0;
+            if (count >= totalLength || padSize <= 0) return str;
+
+            StringBuilder buf = new(totalLength);
+            if (!left) buf.Append(str);
+
+            for (int i = (totalLength - count) / padSize - 1; i >= 0; i--)
+                buf.Append(padding);
+
+            int diff = (totalLength - count) % padSize;
+            if (diff > 0) buf.Append(padding[0..diff]);
+            
+            if (left) buf.Append(str);
+            return buf.ToString();
+        }
     }
 }

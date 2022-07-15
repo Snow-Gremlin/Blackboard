@@ -32,11 +32,33 @@ namespace Blackboard.Core.Data.Interfaces {
 
         /// <summary>Determines if this value is positive or negative infinity.</summary>
         /// <returns>True if the number is either positive or negative infinity, false otherwise.</returns>
-        bool IsInfinity();
+        Bool IsInfinity();
 
         /// <summary>Determines if this value is not a number.</summary>
         /// <returns>True if the number is not a number, false otherwise.</returns>
-        bool IsNaN();
+        Bool IsNaN();
+
+        /// <summary>Determines if the value is not infinite.</summary>
+        /// <returns>True if the number is finite, false otherwise.</returns>
+        Bool IsFinite();
+
+        /// <summary>Determines if the value is positive infinity.</summary>
+        /// <returns>True if the number is positive infinity, false otherwise.</returns>
+        Bool IsPositiveInfinity();
+
+        /// <summary>Determines if the value is negative infinity.</summary>
+        /// <returns>True if the number is negative infinity, false otherwise.</returns>
+        Bool IsNegativeInfinity();
+
+        /// <summary>Determines if the value is in the normal range of doubles with full precision.</summary>
+        /// <returns>True if the number is normal, false otherwise.</returns>
+        /// <see cref="https://en.wikipedia.org/wiki/Subnormal_number"/>
+        Bool IsNormal();
+
+        /// <summary>Determines if the value is not in the normal range of double so have reduced precision.</summary>
+        /// <returns>True if the subnormal is normal, false otherwise.</returns>
+        /// <see cref="https://en.wikipedia.org/wiki/Subnormal_number"/>
+        Bool IsSubnormal();
 
         /// <summary>This gets the positive infinity value.</summary>
         /// <remarks>The current value is not used when getting this identity.</remarks>

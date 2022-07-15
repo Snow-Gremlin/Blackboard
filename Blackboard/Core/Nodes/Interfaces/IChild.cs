@@ -37,6 +37,6 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// This should not contain null parents, but it might contain repeat parents.
         /// For example, if a number is the sum of itself (x + x), then the Sum node will return the 'x' parent twice.
         /// </remarks>
-        public IParentCollection Parents { get; }
+        public ParentCollection Parents { get; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Actions;
 using Blackboard.Parser;
+using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BlackboardTests.ParserTests {
@@ -183,7 +184,7 @@ namespace BlackboardTests.ParserTests {
         public void TestBasicParses_DoubleToIntAssignError() {
             Slate slate = new();
             Parser parser = new(slate);
-            TestTools.CheckException(() => parser.Read("in int A = 3.14;"),
+            Tools.TestTools.CheckException(() => parser.Read("in int A = 3.14;"),
                "Error occurred while parsing input code.",
                "[Error: The value type can not be cast to the given type.",
                "   [Location: Unnamed:1, 15, 15]",

@@ -18,7 +18,8 @@ namespace Blackboard.Core.Data.Caps {
         IMultiplicative<Int>,
         ISigned<Int>,
         ISubtractive<Int>,
-        IExplicit<Double, Int> {
+        IExplicit<Double, Int>,
+        IExplicit<Object, Int> {
 
         #region Static...
 
@@ -137,7 +138,10 @@ namespace Blackboard.Core.Data.Caps {
         public string TypeName => Type.Int.Name;
 
         /// <summary>Get the value of the data as a string.</summary>
-        public string ValueString => this.Value.ToString();
+        public string ValueAsString => this.Value.ToString();
+
+        /// <summary>Get the value of the data as an object.</summary>
+        public object ValueAsObject => this.Value;
 
         #endregion
         #region Divisible...
@@ -162,7 +166,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Checks if the given integer is equal to this data type.</summary>
         /// <param name="other">This is the integer to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public bool Equals(Int other) => this.Value == other.Value;
+        public bool Equals(Int other) => this.Value.Equals(other.Value);
 
         #endregion
         #region Finite...
@@ -220,7 +224,7 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Determines if the this value is negative.</summary>
         /// <returns>True if below zero, false if zero or more.</returns>
-        public bool IsNegative() => this.Value < 0;
+        public Bool IsNegative() => new(this.Value < 0);
 
         #endregion
         #region Subtractive...
@@ -238,6 +242,11 @@ namespace Blackboard.Core.Data.Caps {
         /// <returns>The resulting integer value.</returns>
         public Int CastFrom(Double value) => new((int)value.Value);
 
+        /// <summary>Casts an object into an int for an explicit cast.</summary>
+        /// <param name="value">The object value to cast.</param>
+        /// <returns>The resulting integer value.</returns>
+        public Int CastFrom(Object value) => new((int)value.Value);
+
         #endregion
 
         /// <summary>Gets the hash code of the stored value.</summary>
@@ -251,6 +260,6 @@ namespace Blackboard.Core.Data.Caps {
 
         /// <summary>Gets the name of this data type and value.</summary>
         /// <returns>The name of the integer type and value.</returns>
-        public override string ToString() => this.TypeName+"("+this.ValueString+")";
+        public override string ToString() => this.TypeName+"("+this.ValueAsString+")";
     }
 }

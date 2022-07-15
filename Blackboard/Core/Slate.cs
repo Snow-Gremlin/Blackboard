@@ -297,8 +297,10 @@ namespace Blackboard.Core {
                 BitwiseOr<Int>.Factory,
                 Or.Factory);
             add("padLeft",
+                Binary.PadLeft,
                 Ternary.PadLeft);
             add("padRight",
+                Binary.PadRight,
                 Ternary.PadRight);
             add("pow",
                 BinaryFloatingPoint<Double>.Pow);

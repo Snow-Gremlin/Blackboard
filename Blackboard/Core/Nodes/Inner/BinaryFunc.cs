@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using S = System;
@@ -48,6 +49,24 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <summary>Binary nodes for specific hard-coded data types.</summary>
     static public class Binary {
 
+        /// <summary>This is a factory for creating a new PadLeft instance of this node.</summary>
+        /// <remarks>
+        /// This will return a string padded to the left side with spaces
+        /// until the result string is at minimum the given total width.
+        /// </remarks>
+        static public readonly IFuncDef PadLeft = BinaryFunc<String, Int, String>.
+            Factory(nameof(PadLeft), (value, totalWidth) =>
+                new((value.Value ?? "").PadString(totalWidth.Value, " ", true)));
+
+        /// <summary>This is a factory for creating a new PadRight instance of this node.</summary>
+        /// <remarks>
+        /// This will return a string padded to the right side with spaces
+        /// until the result string is at minimum the given total width.
+        /// </remarks>
+        static public readonly IFuncDef PadRight = BinaryFunc<String, Int, String>.
+            Factory(nameof(PadRight), (value, totalWidth) =>
+                new((value.Value ?? "").PadString(totalWidth.Value, " ", false)));
+
         /// <summary>This is a factory for creating a new StartsWith instance of this node.</summary>
         /// <remarks>Determines if a string starts with another string.</remarks>
         static public readonly IFuncDef StartsWith = BinaryFunc<String, String, Bool>.
@@ -82,16 +101,6 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <remarks>Trims the end of the given string with the characters from the given string or whitespace.</remarks>
         static public readonly IFuncDef TrimEnd = BinaryFunc<String, String, String>.
             Factory(nameof(TrimEnd), (v1, v2) => new String(v1.Value?.TrimEnd(v2.Value?.ToCharArray())));
-
-
-
-
-        // TODO: Add Pad Start/End binary which will use space, \x20.
-        // -  `padLeft`
-        // -  `padRight`
-
-       
-
     }
 
     /// <summary>This gets the double mathematical function value from two parents.</summary>

@@ -1032,6 +1032,18 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
+        [TestTag("padLeft:BinaryFunc<String, Int, String>")]
+        public void TestFunctions_padLeft_BinaryFunc_String_Int_String() {
+            Slate slate = new Slate().Perform("in string A; in int B; C := padLeft(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: PadLeft<string>");
+            slate.Perform("A = '';      B =  0;").CheckValue("",            "C");
+            slate.Perform("A = 'hello'; B =  3;").CheckValue("hello",       "C");
+            slate.Perform("A = 'hello'; B =  5;").CheckValue("hello",       "C");
+            slate.Perform("A = 'hello'; B =  7;").CheckValue("  hello",     "C");
+            slate.Perform("A = 'hello'; B = 10;").CheckValue("     hello",  "C");
+        }
+
+        [TestMethod]
         [TestTag("padLeft:TernaryFunc<String, Int, String, String>")]
         public void TestFunctions_padLeft_TernaryFunc_String_Int_String_String() {
             Slate slate = new Slate().Perform("in string A, C; in int B; D := padLeft(A, B, C);");
@@ -1050,11 +1062,23 @@ namespace BlackboardTests.ParserTests {
         }
 
         [TestMethod]
+        [TestTag("padRight:BinaryFunc<String, Int, String>")]
+        public void TestFunctions_padRight_BinaryFunc_String_Int_String() {
+            Slate slate = new Slate().Perform("in string A; in int B; C := padRight(A, B);");
+            slate.CheckNodeString(Stringifier.Basic(), "C", "C: PadRight<string>");
+            slate.Perform("A = '';      B =  0;").CheckValue("",           "C");
+            slate.Perform("A = 'hello'; B =  3;").CheckValue("hello",      "C");
+            slate.Perform("A = 'hello'; B =  5;").CheckValue("hello",      "C");
+            slate.Perform("A = 'hello'; B =  7;").CheckValue("hello  ",    "C");
+            slate.Perform("A = 'hello'; B = 10;").CheckValue("hello     ", "C");
+        }
+
+        [TestMethod]
         [TestTag("padRight:TernaryFunc<String, Int, String, String>")]
         public void TestFunctions_padRight_TernaryFunc_String_Int_String_String() {
             Slate slate = new Slate().Perform("in string A, C; in int B; D := padRight(A, B, C);");
             slate.CheckNodeString(Stringifier.Basic(), "D", "D: PadRight<string>");
-            // Many of these scenarios are checked in TestFunctions_padLeft_TernaryFunc_String_Int_String_String.
+            // Several other scenarios are checked in TestFunctions_padLeft_TernaryFunc_String_Int_String_String.
             slate.Perform("A = '';      B =  0; C = '';     ").CheckValue("",           "D");
             slate.Perform("A = 'hello'; B =  3; C = '-';    ").CheckValue("hello",      "D");
             slate.Perform("A = 'hello'; B =  5; C = '-';    ").CheckValue("hello",      "D");

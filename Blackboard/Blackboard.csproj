@@ -17,11 +17,15 @@
   <ItemGroup>
     <None Remove="Core\Cast.txt" />
     <None Remove="Core\Nodes\Cast.txt" />
+    <None Remove="Parser\Language\Keywords.lang" />
+    <None Remove="Parser\Language\Tokens.lang" />
     <None Remove="Parser\Parser.lang" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Parser\Parser.lang" />
+    <EmbeddedResource Include="Parser\Language\Keywords.lang" />
+    <EmbeddedResource Include="Parser\Language\Tokens.lang" />
+    <EmbeddedResource Include="Parser\Language\Grammar.lang" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,7 +35,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

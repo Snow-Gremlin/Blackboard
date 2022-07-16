@@ -17,12 +17,13 @@ namespace Blackboard.Parser {
     /// <summary>This will parse the Blackboard language into actions and nodes to apply to the slate.</summary>
     sealed public class Parser {
 
-        /// <summary>The resource file for the Blackboard language definition.</summary>
-        private const string resourceName = "Blackboard.Parser.Parser.lang";
-
         /// <summary>Prepares the parser's static variables before they are used.</summary>
         static Parser() => baseParser = PP.Loader.Loader.LoadParser(
-            PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), resourceName));
+            new PP.Scanner.Joiner(
+                PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Grammar.lang"),
+                PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Keywords.lang"),
+                PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Tokens.lang")
+            ));
 
         /// <summary>The Blackboard language base parser lazy singleton.</summary>
         static private readonly PP.Parser.Parser baseParser;

@@ -1,0 +1,44 @@
+﻿# Blackboard Parser Language v1.0
+#----------------------------------------------------------
+# Specific Keywords
+
+[Identifier] = 'true', 'false' => [Bool];
+[Identifier] = 'namespace' => [Namespace];
+[Identifier] = 'var' => [Var];
+
+[Identifier] = 'in'     => [DeclareIn];
+[Identifier] = 'get'    => [DeclareGet];
+[Identifier] = 'define' => [DeclareDefine];
+[Identifier] = 'temp'   => [DeclareTemp];
+[Identifier] = 'proxy'  => [DeclareProxy];
+
+[Identifier] = 'bool'    => [TypeBool];
+[Identifier] = 'int'     => [TypeInt];
+[Identifier] = 'double'  => [TypeDouble];
+[Identifier] = 'string'  => [TypeString];
+[Identifier] = 'trigger' => [TypeTrigger];
+[Identifier] = 'object'  => [TypeObject];
+
+# Reserved Identifiers (Keeping options open for future versions)
+[Identifier] = 'byte', 'char', 'enum', 'float', 'int8', 'int16', 'int32', 'int64',
+               'list', 'long', 'map', 'set', 'short', 'struct', 'type', 'uint',
+               'uint8', 'uint16', 'uint32', 'uint64', 'ulong', 'ushort'
+             => [ReservedTypes];
+
+[Identifier] = 'internal', 'global', 'local',
+               'private', 'protected', 'public', 'static'
+             => [ReservedScoping];
+
+[Identifier] = 'abstract', 'class', 'const', 'def', 'func', 'interface',
+               'operator', 'override', 'typedef', 'void', 'virtual'
+             => [ReservedDefinitions];
+
+[Identifier] = 'as', 'break', 'catch', 'case', 'continue', 'default', 'else',
+               'finally', 'go', 'if', 'import', 'intersect', 'is', 'out',
+               'return', 'switch', 'then', 'try', 'typeof', 'union',
+               'using', 'when', 'yield'
+             => [ReservedConstructs];
+
+[Identifier] = 'complex', 'do', 'dynamic', 'for', 'foreach', 'goto',
+               'label', 'readonly', 'sealed', 'until', 'while'
+             => [ReservedUnsupported];

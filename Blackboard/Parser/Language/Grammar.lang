@@ -1,0 +1,199 @@
+﻿# Blackboard Parser Language v1.0
+#----------------------------------------------------------
+# Grammar Rules
+
+> <Code> := _
+    | {clear} <Statement> <Code>;
+
+<Statement> := <Namespace>
+    | <NewInput>
+    | <DefineRule>
+    | <ProvokeTrigger>
+    | <GetValue>
+    #| <Declaration> [End]
+    ;
+    
+#=========================================================#
+# Namespace                                               #
+#=========================================================#
+# Namespace and nested namespaces.                        #
+#   - namespace A { ... }                                 #
+#=========================================================#
+
+<Namespace> := [Namespace] [Identifier] {pushNamespace} [CurlOpen] <Code> [CurlClose] {popNamespace};
+
+#=========================================================#
+# New Input                                               #
+#=========================================================#
+# New input with type and optional initial assignment.    #
+#   - in bool A;                                          #
+#   - in double A, B, C;                                  #
+#   - in int A = 3, B = 4, C;                             #
+# New input without type and required initial assignment. #
+#   - in A = 3;                                           #
+#   - in A = true, B = "cat";                             #
+#   - in var A = false;                                   #
+# New input group.                                        #
+#   - in { int A, B; C = true; }                          #
+#=========================================================#
+
+<NewInput> := [DeclareIn] <NewInputHead> [End]
+    | [DeclareIn] [CurlOpen] <NewInputGroup> [CurlClose];
+
+<NewInputHead> := <RootType> <NewTypedInputPart> <NewTypedInputTail>
+    |       <NewVarInputPart> <NewVarInputTail>
+    | [Var] <NewVarInputPart> <NewVarInputTail>;
+
+<NewTypedInputTail> := _
+    | [Comma] <NewTypedInputPart> <NewTypedInputTail>;
+
+<NewTypedInputPart> := [Identifier] {defineId} {newTypeInputNoAssign}
+    | [Identifier] {defineId} [Assign] <Declaration> {newTypeInputWithAssign};
+
+<NewVarInputTail> := _
+    | [Comma] <NewVarInputPart> <NewVarInputTail>;
+
+<NewVarInputPart> := [Identifier] {defineId} [Assign] <Declaration> {newVarInputWithAssign};
+
+<NewInputGroup> := _
+    | <NewInputHead> [End] <NewInputGroup>;
+
+#=========================================================#
+# Define                                                  #
+#=========================================================#
+#
+#=========================================================#
+
+<DefineRule> := <DefineTypedRule> [End]
+    | <DefineVarRule> [End];
+
+<DefineTypedRule> :=  <RootType> [Identifier] {defineId} [Define] <Conditional> {typeDefine}
+    | [DeclareDefine] <RootType> [Identifier] {defineId} [Assign] <Conditional> {typeDefine};
+
+<DefineVarRule> :=          [Identifier] {defineId} [Define] <Conditional> {varDefine}
+    | [DeclareDefine]       [Identifier] {defineId} [Assign] <Conditional> {varDefine}
+    | [DeclareDefine] [Var] [Identifier] {defineId} [Assign] <Conditional> {varDefine};
+
+#=========================================================#
+# Provoke                                                 #
+#=========================================================#
+#
+#=========================================================#
+
+<ProvokeTrigger> := [Trigger] <Conditional> {provokeTrigger} <ProvokeTriggerTail> [End]
+    | <Conditional> [Trigger] <Conditional> {conditionalProvokeTrigger} <ConditionalProvokeTriggerTail> [End];
+    
+<ProvokeTriggerTail> := _
+    | [Trigger] <Conditional> {provokeTrigger} <ProvokeTriggerTail>;
+
+<ConditionalProvokeTriggerTail> := _
+    | [Trigger] <Conditional> {conditionalProvokeTrigger} <ConditionalProvokeTriggerTail>;
+
+#=========================================================#
+# Get Value                                               #
+#=========================================================#
+
+<GetValue> := [DeclareGet] <RootType> <GetTypedValuePart> <GetTypedValueTail> [End]
+    | [DeclareGet] <GetVarValuePart> <GetVarValueTail> [End]
+    | [DeclareGet] [Var] <GetVarValuePart> <GetVarValueTail> [End];
+
+<GetTypedValueTail> := _
+    | [Comma] <GetTypedValuePart> <GetTypedValueTail>;
+
+<GetTypedValuePart> := [Identifier] {defineId} {pushId} {typeGet}
+    | [Identifier] {defineId} [Assign] <Conditional> {typeGet};
+
+<GetVarValueTail> := _
+    | [Comma] <GetVarValuePart> <GetVarValueTail>;
+
+<GetVarValuePart> := [Identifier] {defineId} {pushId} {varGet}
+    | [Identifier] {defineId} [Assign] <Conditional> {varGet};
+
+#=========================================================#
+# Declarations                                            #
+#=========================================================#
+
+<Declaration> := <Conditional>
+    | <Conditional> [Assign] <Declaration> {assignment};
+    
+<Conditional> := <LogicalOr>
+    | <Conditional> [Test] <Conditional> [Else] <Conditional> {ternary};
+
+<LogicalOr> := <LogicalXor>
+    | <LogicalOr> [LogicalOr] <LogicalXor> {logicalOr};
+    
+<LogicalXor> := <LogicalAnd>
+    | <LogicalXor> [LogicalXor] <LogicalAnd> {logicalXor};
+
+<LogicalAnd> := <Equality>
+    | <LogicalAnd> [LogicalAnd] <Equality> {logicalAnd};
+
+<Equality> := <Relational>
+    | <Equality> [Equal]    <Relational> {equal}
+    | <Equality> [NotEqual] <Relational> {notEqual};
+
+<Relational> := <BitwiseOr>
+    | <Relational> [Greater]      <BitwiseOr> {greater}
+    | <Relational> [Less]         <BitwiseOr> {less}
+    | <Relational> [GreaterEqual] <BitwiseOr> {greaterEqual}
+    | <Relational> [LessEqual]    <BitwiseOr> {lessEqual};
+
+<BitwiseOr> := <BitwiseXor>
+    | <BitwiseOr> [Or] <BitwiseXor> {or};
+    
+<BitwiseXor> := <BitwiseAnd>
+    | <BitwiseXor> [Xor] <BitwiseAnd> {xor};
+
+<BitwiseAnd> := <BitwiseShift>
+    | <BitwiseAnd> [And] <BitwiseShift> {and};
+
+<BitwiseShift> := <Additive>
+    | <BitwiseShift> [ShiftRight] <Additive> {shiftRight}
+    | <BitwiseShift> [ShiftLeft]  <Additive> {shiftLeft};
+
+<Additive> := <Multiplicative>
+    | <Additive> [Pos] <Multiplicative> {sum}
+    | <Additive> [Neg] <Multiplicative> {subtract};
+
+<Multiplicative> := <Exponent>
+    | <Multiplicative> [Mul] <Exponent> {multiply}
+    | <Multiplicative> [Div] <Exponent> {divide}
+    | <Multiplicative> [Mod] <Exponent> {modulo};
+
+<Exponent> := <Unary>
+    | <Exponent> [Power] <Unary> {power};
+
+<Unary> := <Expression>
+    | [Neg]    <Expression> {negate}
+    | [Not]    <Expression> {not}
+    | [Invert] <Expression> {invert}
+    | [ParOpen] <RootType> [ParClose] <Expression> {cast};
+
+<Expression> := <Value>
+    | [ParOpen] <Conditional> [ParClose]
+    | <Expression> [Dot] [Identifier] {memberAccess}
+    | <Expression> <Call>;
+
+<Call> := [ParOpen] {startCall} <Args> {endCall} [ParClose];
+
+<Args> := _
+    | <Conditional> {addArg} <ArgsTail>;
+
+<ArgsTail> := _
+    | [Comma] <Conditional> {addArg} <ArgsTail>;
+
+<Value> := [Identifier] {pushId}
+    | [Bool]   {pushBool}
+    | [Bin]    {pushBin}
+    | [Oct]    {pushOct}
+    | [Int]    {pushInt}
+    | [Hex]    {pushHex}
+    | [Double] {pushDouble}
+    | [String] {pushString};
+
+<RootType> := [TypeBool] {pushType}
+    | [TypeInt]     {pushType}
+    | [TypeDouble]  {pushType}
+    | [TypeString]  {pushType}
+    | [TypeTrigger] {pushType}
+    | [TypeObject]  {pushType};

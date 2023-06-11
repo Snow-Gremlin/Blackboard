@@ -33,10 +33,10 @@ namespace Blackboard.Core.Nodes.Bases {
         /// It will determine the new value the node should be set to.
         /// </summary>
         /// <returns>The new value that the node should be set to.</returns>
-        abstract protected T CalcuateValue();
+        abstract protected T CalculateValue();
 
         /// <summary>Updates the node's value, usually based on current parents.</summary>
         /// <returns>True indicates that the value has been changed, false otherwise.</returns>
-        public override bool Evaluate() => this.UpdateValue(this.CalcuateValue());
+        public override bool Evaluate() => this.UpdateValue(this.CalculateValue());
     }
 }

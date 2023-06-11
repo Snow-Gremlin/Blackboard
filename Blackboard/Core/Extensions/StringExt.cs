@@ -33,18 +33,18 @@ namespace Blackboard.Core.Extensions {
         /// <summary>This is short hand to make joining strings into one.</summary>
         /// <typeparam name="T">The types of values to convert into strings and join.</typeparam>
         /// <param name="parts">The strings to join together into one.</param>
-        /// <param name="seperator">The separator to put between the parts.</param>
+        /// <param name="separator">The separator to put between the parts.</param>
         /// <returns>The string from the joined parts.</returns>
-        static public string Join<T>(this IEnumerable<T> parts, string seperator = null) =>
-            string.Join(seperator, parts);
+        static public string Join<T>(this IEnumerable<T> parts, string separator = null) =>
+            string.Join(separator, parts);
 
         /// <summary>This is short hand to make joining strings into one.</summary>
         /// <typeparam name="T">The types of values to convert into strings and join.</typeparam>
         /// <param name="parts">The strings to join together into one.</param>
-        /// <param name="seperator">The separator to put between the parts.</param>
+        /// <param name="separator">The separator to put between the parts.</param>
         /// <returns>The string from the joined parts.</returns>
-        static public string Join<T>(this IEnumerable<T> parts, char seperator) =>
-            string.Join(seperator, parts);
+        static public string Join<T>(this IEnumerable<T> parts, char separator) =>
+            string.Join(separator, parts);
 
         /// <summary>This will split all of the strings by the given separator and return all of the strings.</summary>
         /// <remarks>This is useful for dealing with a collection of lines as strings which might be multi-lined.</remarks>

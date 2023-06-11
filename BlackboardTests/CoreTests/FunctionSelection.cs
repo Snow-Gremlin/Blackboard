@@ -23,7 +23,7 @@ namespace BlackboardTests.CoreTests {
             public Tester(params string[] names) {
                 Slate slate = new();
                 this.stringifier = Stringifier.Shallow();
-                this.stringifier.PreloadNames(slate);
+                this.stringifier.PreLoadNames(slate);
                 this.stringifier.ShowFirstDataValues = false;
                 
                 this.group = slate.Global.Find(names) as FuncGroup;

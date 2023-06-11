@@ -1,4 +1,6 @@
-﻿using Blackboard.Core.Extensions;
+﻿// Ignore Spelling: Implicits
+
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;

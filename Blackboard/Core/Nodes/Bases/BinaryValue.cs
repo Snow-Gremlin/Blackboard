@@ -62,7 +62,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>
-        protected override TResult CalcuateValue() =>
+        protected override TResult CalculateValue() =>
             this.source1 is null || this.source2 is null ? default :
             this.OnEval(this.source1.Value, this.source2.Value);
     }

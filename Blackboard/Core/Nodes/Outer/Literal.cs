@@ -83,7 +83,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>This is called when the value is evaluated and updated.</summary>
         /// <returns>The new value that the node should be set to.</returns>
-        protected override T CalcuateValue() => this.Value;
+        protected override T CalculateValue() => this.Value;
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => nameof(Literal<T>);

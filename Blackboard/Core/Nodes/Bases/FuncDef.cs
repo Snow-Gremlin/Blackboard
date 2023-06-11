@@ -43,7 +43,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// This will not be allowed if the first argument type is not or
         /// can not be implicitly cast to the returned value.
         /// </remarks>
-        public readonly bool PassthroughOne;
+        public readonly bool PassThroughOne;
 
         /// <summary>All the argument types.</summary>
         private readonly Type[] argTypes;
@@ -116,7 +116,7 @@ namespace Blackboard.Core.Nodes.Bases {
             this.MaxArgs = max;
             this.NeedsOneNoCast = needsOneNoCast;
             this.argTypes = argTypes;
-            this.PassthroughOne = passthroughOne;
+            this.PassThroughOne = passthroughOne;
         }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
@@ -190,7 +190,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new function.</returns>
         public virtual INode Build(INode[] nodes) =>
-            this.PassthroughOne && nodes.Length == 1 ? castParam(nodes[0], Type.FromType<TReturn>()) :
+            this.PassThroughOne && nodes.Length == 1 ? castParam(nodes[0], Type.FromType<TReturn>()) :
             this.PostCastBuild(nodes.Zip(this.argTypes.RepeatLast(), castParam).ToArray());
 
         /// <summary>Builds and return the function node with the given arguments already casted.</summary>

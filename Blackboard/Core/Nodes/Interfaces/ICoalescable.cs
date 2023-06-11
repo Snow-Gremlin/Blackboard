@@ -1,4 +1,6 @@
-﻿namespace Blackboard.Core.Nodes.Interfaces {
+﻿// Ignore Spelling: Coalescable
+
+namespace Blackboard.Core.Nodes.Interfaces {
 
     /// <summary>
     /// This interface indicates a node can be coalesced while optimizing.
@@ -53,6 +55,6 @@
         /// String(a + "" + b) => String(a + b);
         /// String() => "";
         /// </example>
-        public bool ParentReducable { get; }
+        public bool ParentReducible { get; }
     }
 }

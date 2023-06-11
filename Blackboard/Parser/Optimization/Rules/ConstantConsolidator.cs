@@ -148,7 +148,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <summary>Reduce the parents and coalesce constant nodes as much as possible.</summary>
         /// <param name="args">The arguments for the optimization rules.</param>
         public void Perform(RuleArgs args) {
-            foreach (ICoalescable node in args.Nodes.OfType<ICoalescable>().WhereNot(args.Removed.Contains).Where(node => node.ParentReducable)) {
+            foreach (ICoalescable node in args.Nodes.OfType<ICoalescable>().WhereNot(args.Removed.Contains).Where(node => node.ParentReducible)) {
                 INode newNode = node.Commutative ? commutativeReduce(args, node) : notcommutableReduce(args, node);
                 if (newNode is null) continue;
                 args.Replace(node, newNode);

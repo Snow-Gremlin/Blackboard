@@ -18,21 +18,21 @@ namespace Blackboard.Parser {
     sealed public class Parser {
 
         /// <summary>Prepares the parser's static variables before they are used.</summary>
-        static Parser() => baseParser = PP.Loader.Loader.LoadParser(
+        static Parser() => BaseParser = PP.Loader.Loader.LoadParser(
             new PP.Scanner.Joiner(
-                PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Grammar.lang"),
-                PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Keywords.lang"),
-                PP.Scanner.Default.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Tokens.lang")
+                PP.Scanner.DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Grammar.lang"),
+                PP.Scanner.DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Keywords.lang"),
+                PP.Scanner.DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Tokens.lang")
             ));
 
-        /// <summary>The Blackboard language base parser lazy singleton.</summary>
-        static private readonly PP.Parser.Parser baseParser;
+        /// <summary>The Blackboard language base parser singleton.</summary>
+        static public readonly PP.Parser.Parser BaseParser;
 
         /// <summary>The slate that this Blackboard is to create the actions for.</summary>
         private readonly Slate slate;
 
         /// <summary>The list of prompt handlers for running the Blackboard grammar with.</summary>
-        private Dictionary<string, PP.ParseTree.PromptHandle> prompts;
+        private readonly Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
         /// <summary>Optional logger to debugging and inspecting the parser.</summary>
         private readonly Logger logger;
@@ -42,8 +42,10 @@ namespace Blackboard.Parser {
         /// <param name="logger">An optional logger for debugging and inspecting the parser.</param>
         public Parser(Slate slate, Logger logger = null) {
             this.slate   = slate;
-            this.prompts = null;
+            this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>();
             this.logger  = logger.SubGroup(nameof(Parser));
+
+            // Console.WriteLine(PP.Parser.Parser.GetDebugStateString(BaseParser.Grammar));
 
             this.initPrompts();
             this.validatePrompts();
@@ -63,7 +65,7 @@ namespace Blackboard.Parser {
         /// <param name="input">The input code to parse.</param>
         /// <returns>The formula for performing the parsed actions.</returns>
         public Formula Read(IEnumerable<string> input, string name = "Unnamed") {
-            PP.Parser.Result result = baseParser.Parse(new PP.Scanner.Default(input, name));
+            PP.Parser.Result result = BaseParser.Parse(new PP.Scanner.DefaultScanner(input, name));
 
             // Check for parser errors.
             if (result.Errors.Length > 0)
@@ -95,8 +97,6 @@ namespace Blackboard.Parser {
 
         /// <summary>Initializes the prompts and operators for this parser.</summary>
         private void initPrompts() {
-            this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>();
-
             this.addHandler("clear", handleClear);
             this.addHandler("defineId", handleDefineId);
             this.addHandler("pushNamespace", handlePushNamespace);
@@ -181,7 +181,7 @@ namespace Blackboard.Parser {
 
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
                 Builder builder = args as Builder;
-                PP.Scanner.Location loc = args.LastLocation;
+                PP.Scanner.Location? loc = args.LastLocation;
                 builder.Logger.Info("Process {0}({1}) [{2}]", name, count, loc);
 
                 INode[] inputs = builder.Nodes.Pop(count).Actualize().ToArray();
@@ -197,8 +197,8 @@ namespace Blackboard.Parser {
 
         /// <summary>Validates that all prompts in the grammar are handled.</summary>
         private void validatePrompts() {
-            string[] unneeded = baseParser.UnneededPrompts(this.prompts);
-            string[] missing  = baseParser.MissingPrompts(this.prompts);
+            string[] unneeded = BaseParser.UnneededPrompts(this.prompts);
+            string[] missing  = BaseParser.MissingPrompts(this.prompts);
             if (unneeded.Length > 0 || missing.Length > 0)
                 throw new Message("Blackboard's parser grammar has prompts which do not match prompt handlers.").
                     With("Not handled", unneeded.Join(", ")).
@@ -482,7 +482,7 @@ namespace Blackboard.Parser {
         /// <summary>This handles pushing a string literal value onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushString(Builder builder) =>
-            parseLiteral(builder, "decode escaped sequences", (string text) => Literal.String(PP.Misc.Text.Unescape(text)));
+            parseLiteral(builder, "decode escaped sequences", (string text) => Literal.String(PP.Formatting.Text.Unescape(text)));
 
         /// <summary>This handles pushing a type onto the stack.</summary>
         /// <param name="builder">The formula builder being worked on.</param>

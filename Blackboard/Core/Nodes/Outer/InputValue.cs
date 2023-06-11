@@ -35,6 +35,6 @@ namespace Blackboard.Core.Nodes.Outer {
         /// then the slate should pend evaluation for the children so that they will be updated.
         /// </remarks>
         /// <returns>This will always return the current value.</returns>
-        protected override T CalcuateValue() => this.Value;
+        protected override T CalculateValue() => this.Value;
     }
 }

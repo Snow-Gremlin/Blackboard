@@ -14,21 +14,21 @@ namespace Blackboard.Core.Nodes.Functions {
         /// The children functions of this group.
         /// These should be function definitions.
         /// </summary>
-        private readonly List<IFuncDef> defs;
+        private readonly List<IFuncDef> definitions;
 
         /// <summary>Creates a new function collection.</summary>
         public FuncGroup() =>
-            this.defs = new List<IFuncDef>();
+            this.definitions = new List<IFuncDef>();
 
         /// <summary>Creates a new function collection.</summary>
-        /// <param name="defs">The function definitions to initially add.</param>
-        public FuncGroup(params IFuncDef[] defs) =>
-            this.defs = new List<IFuncDef>(defs);
+        /// <param name="definitions">The function definitions to initially add.</param>
+        public FuncGroup(params IFuncDef[] definitions) =>
+            this.definitions = new List<IFuncDef>(definitions);
 
         /// <summary>Creates a new function collection.</summary>
-        /// <param name="defs">The function definitions to initially add.</param>
-        public FuncGroup(IEnumerable<IFuncDef> defs) =>
-            this.defs = new List<IFuncDef>(defs);
+        /// <param name="definitions">The function definitions to initially add.</param>
+        public FuncGroup(IEnumerable<IFuncDef> definitions) =>
+            this.definitions = new List<IFuncDef>(definitions);
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>
@@ -38,29 +38,29 @@ namespace Blackboard.Core.Nodes.Functions {
         public string TypeName => nameof(FuncGroup);
 
         /// <summary>The set of function definitions for this group.</summary>
-        public IEnumerable<IFuncDef> Definitions => this.defs;
+        public IEnumerable<IFuncDef> Definitions => this.definitions;
 
         /// <summary>Adds function definitions onto this group.</summary>
-        /// <param name="defs">The function definitions to add.</param>
-        public void AddDefs(params IFuncDef[] defs) =>
-            this.AddDefs(defs as IEnumerable<IFuncDef>);
+        /// <param name="definitions">The function definitions to add.</param>
+        public void Add(params IFuncDef[] definitions) =>
+            this.Add(definitions as IEnumerable<IFuncDef>);
 
         /// <summary>Adds function definitions onto this group.</summary>
-        /// <param name="defs">The function definitions to add.</param>
-        public void AddDefs(IEnumerable<IFuncDef> defs) =>
-            this.defs.AddRange(defs.NotNull().WhereNot(this.defs.Contains));
+        /// <param name="definitions">The function definitions to add.</param>
+        public void Add(IEnumerable<IFuncDef> definitions) =>
+            this.definitions.AddRange(definitions.NotNull().WhereNot(this.definitions.Contains));
+
+        /// <summary>Removes all the given function definitions from this node if they exist.</summary>
+        /// <param name="definitions">The function definitions to remove.</param>
+        public void Remove(params IFuncDef[] definitions) =>
+            this.Remove(definitions as IEnumerable<IFuncDef>);
 
         /// <summary>Removes all the given function definitions from this node if they exist.</summary>
         /// <param name="defs">The function definitions to remove.</param>
-        public void RemoveDefs(params IFuncDef[] defs) =>
-            this.RemoveDefs(defs as IEnumerable<IFuncDef>);
-
-        /// <summary>Removes all the given function definitions from this node if they exist.</summary>
-        /// <param name="defs">The function definitions to remove.</param>
-        public void RemoveDefs(IEnumerable<IFuncDef> defs) {
-            foreach (IFuncDef def in defs.NotNull()) {
-                int index = this.defs.IndexOf(def);
-                if (index >= 0) this.defs.RemoveAt(index);
+        public void Remove(IEnumerable<IFuncDef> definitions) {
+            foreach (IFuncDef definition in definitions.NotNull()) {
+                int index = this.definitions.IndexOf(definition);
+                if (index >= 0) this.definitions.RemoveAt(index);
             }
         }
 
@@ -70,7 +70,7 @@ namespace Blackboard.Core.Nodes.Functions {
         public IFuncDef Find(params Type[] types) {
             FuncMatch minMatch = null;
             IFuncDef minFunc = null;
-            foreach (IFuncDef func in this.defs) {
+            foreach (IFuncDef func in this.definitions) {
                 FuncMatch match = func.Match(types);
                 if (!match.IsMatch) continue;
 

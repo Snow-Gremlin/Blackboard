@@ -936,7 +936,7 @@ namespace BlackboardTests.ParserTests {
 
         [TestMethod]
         [TestTag("ternary:SelectValue<Double>")]
-        public void TestOperators_ternary_SelectValue_Doule() {
+        public void TestOperators_ternary_SelectValue_Double() {
             Slate slate = new Slate().Perform("in bool A; in double B, C; D := A ? B : C;");
             slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<double>");
             slate.Perform("A = false; B =  1.23; C = 32.1;").CheckValue(32.1, "D");

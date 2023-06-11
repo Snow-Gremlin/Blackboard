@@ -10,9 +10,13 @@
     | <DefineRule>
     | <ProvokeTrigger>
     | <GetValue>
-    #| <Declaration> [End]
-    ;
-    
+    | <Declaration> [End];
+
+# TODO: Why does two grammar rules one with [Var] and one without work but <OptionalVar> doesn't?
+#       It looks like the state table doesn't handle the lambda correctly for some reason.
+<OptionalVar> := _
+    | [Var];
+
 #=========================================================#
 # Namespace                                               #
 #=========================================================#
@@ -41,8 +45,7 @@
     | [DeclareIn] [CurlOpen] <NewInputGroup> [CurlClose];
 
 <NewInputHead> := <RootType> <NewTypedInputPart> <NewTypedInputTail>
-    |       <NewVarInputPart> <NewVarInputTail>
-    | [Var] <NewVarInputPart> <NewVarInputTail>;
+    | <OptionalVar> <NewVarInputPart> <NewVarInputTail>;
 
 <NewTypedInputTail> := _
     | [Comma] <NewTypedInputPart> <NewTypedInputTail>;
@@ -61,18 +64,36 @@
 #=========================================================#
 # Define                                                  #
 #=========================================================#
-#
+# New define with type and sets the required rule.        #
+#   - bool A := B & C;                                    #
+#   - int A := B + C;                                     #
+# New define without type and sets the required rule.     #
+#   - A := B & C;                                         #
+#   - var A := B + C;                                     #
+# New define using the keyword and assignment of rule.    #
+#   - define double A = B * 0.5;                          #
+#   - define A = B * 0.5;                                 #
+#   - define var A = B + "cat";                           #
+# New define group                                        #
+#   - define { int A = B + C; D = E + "cat"; }            #
 #=========================================================#
 
-<DefineRule> := <DefineTypedRule> [End]
-    | <DefineVarRule> [End];
+<DefineRule> := <DefineDefine> [End]
+    | [DeclareDefine] <DefineAssign> [End]
+    | [DeclareDefine] [CurlOpen] <DefineGroup> [CurlClose];
 
-<DefineTypedRule> :=  <RootType> [Identifier] {defineId} [Define] <Conditional> {typeDefine}
-    | [DeclareDefine] <RootType> [Identifier] {defineId} [Assign] <Conditional> {typeDefine};
+<DefineDefine> := <RootType> <DefineDefinePart> {typeDefine}
+    | <OptionalVar> <DefineDefinePart> {varDefine};
 
-<DefineVarRule> :=          [Identifier] {defineId} [Define] <Conditional> {varDefine}
-    | [DeclareDefine]       [Identifier] {defineId} [Assign] <Conditional> {varDefine}
-    | [DeclareDefine] [Var] [Identifier] {defineId} [Assign] <Conditional> {varDefine};
+<DefineDefinePart> := [Identifier] {defineId} [Define] <Conditional>;
+
+<DefineAssign> := <RootType> <DefineAssignPart> {typeDefine}
+    | <OptionalVar> <DefineAssignPart> {varDefine};
+
+<DefineAssignPart> := [Identifier] {defineId} [Assign] <Conditional>;
+
+<DefineGroup> := _
+    | <DefineAssign> [End] <DefineGroup>;
 
 #=========================================================#
 # Provoke                                                 #
@@ -94,8 +115,7 @@
 #=========================================================#
 
 <GetValue> := [DeclareGet] <RootType> <GetTypedValuePart> <GetTypedValueTail> [End]
-    | [DeclareGet] <GetVarValuePart> <GetVarValueTail> [End]
-    | [DeclareGet] [Var] <GetVarValuePart> <GetVarValueTail> [End];
+    | [DeclareGet] <OptionalVar> <GetVarValuePart> <GetVarValueTail> [End];
 
 <GetTypedValueTail> := _
     | [Comma] <GetTypedValuePart> <GetTypedValueTail>;

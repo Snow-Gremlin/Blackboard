@@ -1195,7 +1195,7 @@ namespace BlackboardTests.ParserTests {
 
         [TestMethod]
         [TestTag("select:SelectValue<Double>")]
-        public void TestFunctions_select_SelectValue_Doule() {
+        public void TestFunctions_select_SelectValue_Double() {
             Slate slate = new Slate().Perform("in bool A; in double B, C; D := select(A, B, C);");
             slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<double>");
             slate.Perform("A = false; B =  1.23; C = 32.1;").CheckValue(32.1, "D");

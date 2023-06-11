@@ -20,7 +20,7 @@ namespace BlackboardTests.Tools {
         /// <returns>The result from the perform.</returns>
         static public Result CheckPerform(this Formula formula, params string[] lines) {
             BufferLogger logger = new();
-            Result result = formula.Perform(logger.Stringify(Stringifier.Shallow().PreloadNames(formula.Slate)));
+            Result result = formula.Perform(logger.Stringify(Stringifier.Shallow().PreLoadNames(formula.Slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
             return result;
         }

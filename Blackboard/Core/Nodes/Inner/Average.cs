@@ -56,6 +56,6 @@ namespace Blackboard.Core.Nodes.Inner {
         public override bool ParentIncorporate => false;
 
         /// <summary>Indicates that the parents may be reduced to the smallest set.</summary>
-        public override bool ParentReducable => false;
+        public override bool ParentReducible => false;
     }
 }

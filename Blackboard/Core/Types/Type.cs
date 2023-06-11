@@ -1,4 +1,6 @@
-﻿using Blackboard.Core.Data.Caps;
+﻿// Ignore Spelling: Implicits
+
+using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Functions;

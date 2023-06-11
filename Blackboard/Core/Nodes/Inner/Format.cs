@@ -77,7 +77,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>
-        protected override String CalcuateValue() =>
+        protected override String CalculateValue() =>
             this.format is null ? default :
             new(string.Format(this.format.Value.Value ?? "",
                 this.args.Select(n => n?.Value.ValueAsObject ?? null).ToArray()));

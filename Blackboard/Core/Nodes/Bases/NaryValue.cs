@@ -72,7 +72,7 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>
-        protected override TResult CalcuateValue() =>
+        protected override TResult CalculateValue() =>
             this.OnEval(this.sources.NotNull().Values());
 
         /// <summary>
@@ -101,6 +101,6 @@ namespace Blackboard.Core.Nodes.Bases {
         /// If true then constant parents will be precomputed
         /// and constant parents equal to the identity will be removed.
         /// </remarks>
-        virtual public bool ParentReducable => true;
+        virtual public bool ParentReducible => true;
     }
 }

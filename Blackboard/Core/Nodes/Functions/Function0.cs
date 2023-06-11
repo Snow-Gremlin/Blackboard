@@ -10,17 +10,17 @@ namespace Blackboard.Core.Nodes.Functions {
         where TReturn : class, INode {
 
         /// <summary>The factory for creating the node.</summary>
-        readonly private S.Func<TReturn> hndl;
+        readonly private S.Func<TReturn> handle;
 
         /// <summary>Creates a new singular node factory.</summary>
-        /// <param name="hndl">The factory handle.</param>
-        public Function(S.Func<TReturn> hndl) :
+        /// <param name="handle">The factory handle.</param>
+        public Function(S.Func<TReturn> handle) :
             base(false, false) =>
-            this.hndl = hndl;
+            this.handle = handle;
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>
-        public override INode NewInstance() => new Function<TReturn>(this.hndl);
+        public override INode NewInstance() => new Function<TReturn>(this.handle);
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => nameof(Function<TReturn>);
@@ -28,6 +28,6 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>Builds and return the function node with the given arguments already casted.</summary>
         /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>
         /// <returns>The resulting function node.</returns>
-        protected override INode PostCastBuild(INode[] nodes) => this.hndl();
+        protected override INode PostCastBuild(INode[] nodes) => this.handle();
     }
 }

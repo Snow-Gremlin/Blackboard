@@ -113,7 +113,7 @@ namespace BlackboardTests.Tools {
         /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckEvaluate(this Slate slate, params string[] lines) {
             BufferLogger logger = new(false);
-            slate.PerformEvaluation(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
+            slate.PerformEvaluation(logger.Stringify(Stringifier.Shallow().PreLoadNames(slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
             return slate;
         }
@@ -124,7 +124,7 @@ namespace BlackboardTests.Tools {
         /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckUpdate(this Slate slate, params string[] lines) {
             BufferLogger logger = new(false);
-            slate.PerformUpdates(logger.Stringify(Stringifier.Shallow().PreloadNames(slate)));
+            slate.PerformUpdates(logger.Stringify(Stringifier.Shallow().PreLoadNames(slate)));
             TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
             return slate;
         }
@@ -136,7 +136,7 @@ namespace BlackboardTests.Tools {
         /// <param name="lines">The line to compare the node's string against.</param>
         /// <returns>The slate so that method calls can be chained together.</returns>
         static public Slate CheckNodeString(this Slate slate, Stringifier stringifier, INode node, params string[] lines) {
-            stringifier.PreloadNames(slate);
+            stringifier.PreLoadNames(slate);
             TestTools.NoDiff(lines.Join("\n"), stringifier.Stringify(node));
             return slate;
         }
@@ -186,7 +186,7 @@ namespace BlackboardTests.Tools {
         /// <param name="slate">The slate to apply the parsed formula to.</param>
         /// <param name="input">The lines of the code to read and commit.</param>
         static public Formula LogRead(this Slate slate, params string[] input) {
-            Stringifier stringifier = Stringifier.Deep().PreloadNames(slate);
+            Stringifier stringifier = Stringifier.Deep().PreLoadNames(slate);
             stringifier.ShowFuncs = false;
             Logger logger = new ConsoleLogger().Stringify(stringifier);
             return new Parser(slate, logger).Read(input);

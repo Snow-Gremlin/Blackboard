@@ -98,6 +98,6 @@ namespace Blackboard.Core.Nodes.Bases {
         /// If true then constant parents will be precomputed
         /// and constant parents equal to the identity will be removed.
         /// </remarks>
-        virtual public bool ParentReducable => true;
+        virtual public bool ParentReducible => true;
     }
 }

@@ -69,7 +69,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>This will determine the new value the node should be set to.</summary>
         /// <returns>The new value that the node should be set to.</returns>
-        protected override Bool CalcuateValue() {
+        protected override Bool CalculateValue() {
             Bool value = this.Value;
             if (this.toggle?.Provoked ?? false) value = new(!value.Value);
             if (this.reset?.Provoked  ?? false) value = this.resetValue?.Value ?? Bool.False;

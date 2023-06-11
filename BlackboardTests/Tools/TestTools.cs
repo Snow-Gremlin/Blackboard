@@ -15,11 +15,11 @@ namespace BlackboardTests.Tools {
     static public class TestTools {
 
         /// <summary>Check an exception from the given action.</summary>
-        /// <param name="hndl">The action to perform.</param>
+        /// <param name="handle">The action to perform.</param>
         /// <param name="exp">The lines of the expected exception message.</param>
-        static public void CheckException(S.Action hndl, params string[] exp) {
+        static public void CheckException(S.Action handle, params string[] exp) {
             try {
-                hndl();
+                handle();
             } catch (S.Exception ex) {
                 NoDiff(exp, ex.Message.Split("\n"));
                 return;

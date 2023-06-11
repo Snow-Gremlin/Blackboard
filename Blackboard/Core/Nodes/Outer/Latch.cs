@@ -64,7 +64,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>This updates the value during evaluation.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>
-        protected override T CalcuateValue() =>
+        protected override T CalculateValue() =>
             this.trigger is null || this.source is null ? default :
             this.trigger.Provoked ? this.source.Value : this.Value;
     }

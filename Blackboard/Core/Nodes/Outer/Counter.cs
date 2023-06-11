@@ -103,7 +103,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>This is called when the value is evaluated and updated.</summary>
         /// <returns>True if the value was changed, false otherwise.</returns>
-        protected override T CalcuateValue() {
+        protected override T CalculateValue() {
             T value = this.Value;
             T delta = this.delta is null ? default(T).OneValue : this.delta.Value;
             if (this.increment?.Provoked ?? false) value = value.Sum(new T[] { value, delta });

@@ -700,7 +700,7 @@ namespace Blackboard.Core {
         /// <typeparam name="T">The type of the constant to check for.</typeparam>
         /// <param name="con">The constant to check for.</param>
         /// <returns>True if the given constant reference is in the set, false otherwise.</returns>
-        public bool ConstainsConstant<T>(T con) where T : class, IConstant =>
+        public bool ContainsConstant<T>(T con) where T : class, IConstant =>
             this.constants.TryGetValue(con, out IConstant result) && ReferenceEquals(result, con);
 
         /// <summary>Find or add the given constant in the set of constants.</summary>

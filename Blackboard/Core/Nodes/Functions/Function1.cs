@@ -13,18 +13,18 @@ namespace Blackboard.Core.Nodes.Functions {
         where TReturn : class, INode {
 
         /// <summary>The factory for creating the node.</summary>
-        readonly private S.Func<T, TReturn> hndl;
+        readonly private S.Func<T, TReturn> handle;
 
         /// <summary>Creates a new singular node factory.</summary>
-        /// <param name="hndl">The factory handle.</param>
+        /// <param name="handle">The factory handle.</param>
         /// <param name="needsOneNoCast">Indicates that at least one argument must not be a cast.</param>
-        public Function(S.Func<T, TReturn> hndl, bool needsOneNoCast = false) :
+        public Function(S.Func<T, TReturn> handle, bool needsOneNoCast = false) :
             base(needsOneNoCast, false, Type.FromType<T>()) =>
-            this.hndl = hndl;
+            this.handle = handle;
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>
-        public override INode NewInstance() => new Function<T, TReturn>(this.hndl, this.NeedsOneNoCast);
+        public override INode NewInstance() => new Function<T, TReturn>(this.handle, this.NeedsOneNoCast);
 
         /// <summary>This is the type name of the node.</summary>
         public override string TypeName => nameof(Function<T, TReturn>);
@@ -32,6 +32,6 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>Builds and return the function node with the given arguments already casted.</summary>
         /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>
         /// <returns>The resulting function node.</returns>
-        protected override INode PostCastBuild(INode[] nodes) => this.hndl(nodes[0] as T);
+        protected override INode PostCastBuild(INode[] nodes) => this.handle(nodes[0] as T);
     }
 }

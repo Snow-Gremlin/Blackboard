@@ -14,14 +14,14 @@ namespace Blackboard.Core.Nodes.Inner {
             new Function<IValueParent<Bool>, OnFalse>((input) => new OnFalse(input));
 
         /// <summary>This is the parent node to read from.</summary>
-        private IValueParent<Bool> source;
+        private IValueParent<Bool>? source;
 
         /// <summary>Creates a trigger node which triggers when the boolean goes from false to false.</summary>
         public OnFalse() => this.Parent = null;
 
         /// <summary>Creates a trigger node which triggers when the boolean goes from false to false.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        public OnFalse(IValueParent<Bool> source = null) => this.Parent = source;
+        public OnFalse(IValueParent<Bool>? source) => this.Parent = source;
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>
@@ -31,17 +31,17 @@ namespace Blackboard.Core.Nodes.Inner {
         public override string TypeName => nameof(OnFalse);
 
         /// <summary>The parent node to get the source value from.</summary>
-        public IValueParent<Bool> Parent {
+        public IValueParent<Bool>? Parent {
             get => this.source;
             set => IChild.SetParent(this, ref this.source, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public ParentCollection Parents => new ParentCollection(this, 1).
-            With(() => this.source, (IValueParent<Bool> parent) => this.source = parent);
+            With(() => this.source, (IValueParent<Bool>? parent) => this.source = parent);
 
         /// <summary>This updates the trigger during an evaluation.</summary>
         /// <returns>This always returns true so that any parent change will trigger this node.</returns>
-        protected override bool ShouldProvoke() => !this.source.Value.Value;
+        protected override bool ShouldProvoke() => !(this.source?.Value.Value ?? true);
     }
 }

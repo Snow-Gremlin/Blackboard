@@ -19,14 +19,14 @@ namespace Blackboard.Core.Nodes.Inner {
             new Function<IValueParent<Bool>, BoolAsTrigger>((value) => new BoolAsTrigger(value));
 
         /// <summary>This is the parent node to read from.</summary>
-        private IValueParent<Bool> source;
+        private IValueParent<Bool>? source;
 
         /// <summary>Creates a new bool value to trigger conversion.</summary>
         public BoolAsTrigger() { }
 
         /// <summary>Creates a new bool value to trigger conversion.</summary>
         /// <param name="source">The boolean parent to get the provoked state from.</param>
-        public BoolAsTrigger(IValueParent<Bool> source = null) => this.Parent = source;
+        public BoolAsTrigger(IValueParent<Bool>? source) => this.Parent = source;
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>
@@ -43,7 +43,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public ParentCollection Parents => new ParentCollection(this, 1).
-            With(() => this.source, (IValueParent<Bool> parent) => this.source = parent);
+            With(() => this.source, (IValueParent<Bool>? parent) => this.source = parent);
 
         /// <summary>
         /// This is called when the trigger is evaluated and updated.

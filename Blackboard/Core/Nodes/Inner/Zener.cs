@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Inner {
     /// </summary>
     /// <see cref="https://en.wikipedia.org/wiki/Zener_diode"/>
     sealed public class Zener<T> : TernaryValue<T, T, T, Bool>
-        where T : IComparable<T> {
+        where T : struct, IComparable<T> {
 
         // TODO: Think about allowing Zener be assignable so that it can be set true or false while within the range.
         // TODO: While we are at making the Zener assignable, does it have to be a custom type like Latch, or can Latch not be a type?
@@ -26,7 +26,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="value">This is the value parent that is checked against the range.</param>
         /// <param name="min">This is the minimum value parent for the lower edge of the range.</param>
         /// <param name="max">This is the maximum value parent for the upper edge of the range.</param>
-        public Zener(IValueParent<T> value = null, IValueParent<T> min = null, IValueParent<T> max = null) :
+        public Zener(IValueParent<T>? value = null, IValueParent<T>? min = null, IValueParent<T>? max = null) :
             base(value, min, max) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>

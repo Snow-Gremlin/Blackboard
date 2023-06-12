@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
     /// <summary>Provides a node which can be used to count trigger events.</summary>
     sealed public class Counter<T> : ValueNode<T>, IValueInput<T>, IChild
-        where T : ISubtractive<T>, IAdditive<T>, IFinite<T>, IEquatable<T> {
+        where T : struct, ISubtractive<T>, IAdditive<T>, IFinite<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <remarks>This will not initialize any sources except increment, the others can be set later.</remarks>
@@ -16,19 +16,19 @@ namespace Blackboard.Core.Nodes.Outer {
             new Function<ITriggerParent, Counter<T>>((ITriggerParent increment) => new Counter<T>(increment));
 
         /// <summary>This is the parent to increment the counter.</summary>
-        private ITriggerParent increment;
+        private ITriggerParent? increment;
 
         /// <summary>This is the parent to decrement the counter.</summary>
-        private ITriggerParent decrement;
+        private ITriggerParent? decrement;
 
         /// <summary>This is the parent reset the counter to the reset value.</summary>
-        private ITriggerParent reset;
+        private ITriggerParent? reset;
 
         /// <summary>The value to step during an increment or decrement.</summary>
-        private IValueParent<T> delta;
+        private IValueParent<T>? delta;
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
-        private IValueParent<T> resetValue;
+        private IValueParent<T>? resetValue;
 
         /// <summary>Creates a new node for counting events.</summary>
         public Counter() { }
@@ -40,8 +40,8 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <param name="delta">The initial parent for the step value.</param>
         /// <param name="resetValue">The initial reset value parent.</param>
         /// <param name="value">The initial value for this node.</param>
-        public Counter(ITriggerParent increment = null, ITriggerParent decrement = null, ITriggerParent reset = null,
-            IValueParent<T> delta = null, IValueParent<T> resetValue = null, T value = default) : base(value) {
+        public Counter(ITriggerParent? increment = null, ITriggerParent? decrement = null, ITriggerParent? reset = null,
+            IValueParent<T>? delta = null, IValueParent<T>? resetValue = null, T value = default) : base(value) {
             this.Increment = increment;
             this.Decrement = decrement;
             this.Reset = reset;
@@ -57,33 +57,33 @@ namespace Blackboard.Core.Nodes.Outer {
         public override string TypeName => nameof(Counter<T>);
 
         /// <summary>This is the parent to increment the counter.</summary>
-        public ITriggerParent Increment {
+        public ITriggerParent? Increment {
             get => this.increment;
             set => IChild.SetParent(this, ref this.increment, value);
         }
 
         /// <summary>This is the parent to decrement the counter.</summary>
-        public ITriggerParent Decrement {
+        public ITriggerParent? Decrement {
             get => this.decrement;
             set => IChild.SetParent(this, ref this.decrement, value);
         }
 
         /// <summary>This is the parent reset the toggle to false.</summary>
-        public ITriggerParent Reset {
+        public ITriggerParent? Reset {
             get => this.reset;
             set => IChild.SetParent(this, ref this.reset, value);
         }
 
         /// <summary>The value to step during an increment or decrement.</summary>
         /// <remarks>If this parent is null then the counter will increment and decrement by one.</remarks>
-        public IValueParent<T> Delta {
+        public IValueParent<T>? Delta {
             get => this.delta;
             set => IChild.SetParent(this, ref this.delta, value);
         }
 
         /// <summary>The value to reset this toggle to when the toggle is reset.</summary>
         /// <remarks>If this parent is null then the toggle is reset to false.</remarks>
-        public IValueParent<T> ResetValue {
+        public IValueParent<T>? ResetValue {
             get => this.resetValue;
             set => IChild.SetParent(this, ref this.resetValue, value);
         }

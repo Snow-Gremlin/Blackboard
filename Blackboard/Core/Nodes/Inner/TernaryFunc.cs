@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Binary nodes for specific hard-coded data types.</summary>
     static public class TernaryComparable<T>
-        where T : IComparable<T> {
+        where T : struct, IComparable<T> {
 
         /// <summary>This is a factory for creating a new InRange instance of this node.</summary>
         /// <remarks>This will determine if the given value is inclusively with a range.</remarks>
@@ -32,7 +32,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// </remarks>
         static public readonly IFuncDef PadLeft = TernaryFunc<String, Int, String, String>.
             Factory(nameof(PadLeft), (value, totalWidth, padding) =>
-                new((value.Value ?? "").PadString(totalWidth.Value, padding.Value ?? " ", true)));
+                new(value.Value.PadString(totalWidth.Value, padding.Value ?? " ", true)));
 
         /// <summary>This is a factory for creating a new PadRight instance of this node.</summary>
         /// <remarks>
@@ -41,31 +41,31 @@ namespace Blackboard.Core.Nodes.Inner {
         /// </remarks>
         static public readonly IFuncDef PadRight = TernaryFunc<String, Int, String, String>.
             Factory(nameof(PadRight), (value, totalWidth, padding) =>
-                new((value.Value ?? "").PadString(totalWidth.Value, padding.Value ?? " ", false)));
+                new(value.Value.PadString(totalWidth.Value, padding.Value ?? " ", false)));
 
         /// <summary>This is a factory for creating a new IndexOf instance of this node.</summary>
         /// <remarks>This will return the index of a substring or -1 if not found.</remarks>
         static public readonly IFuncDef IndexOf = TernaryFunc<String, String, Int, Int>.
             Factory(nameof(IndexOf), (value, gram, index) =>
-                new((value.Value ?? "").IndexOf(gram.Value ?? "", index.Value)));
+                new(value.Value.IndexOf(gram.Value ?? "", index.Value)));
 
         /// <summary>This is a factory for creating a new Substring instance of this node.</summary>
         /// <remarks>This will return a substring for the given range from a source string.</remarks>
         static public readonly IFuncDef Substring = TernaryFunc<String, Int, Int, String>.
             Factory(nameof(Substring), (value, index, length) =>
-                new((value.Value ?? "").Substring(index.Value, length.Value)));
+                new(value.Value.Substring(index.Value, length.Value)));
 
         /// <summary>This is a factory for creating a new Remove instance of this node.</summary>
         /// <remarks>This will return a string with the given range removed from it.</remarks>
         static public readonly IFuncDef Remove = TernaryFunc<String, Int, Int, String>.
             Factory(nameof(Remove), (value, index, length) =>
-                new((value.Value ?? "").Remove(index.Value, length.Value)));
+                new(value.Value.Remove(index.Value, length.Value)));
 
         /// <summary>This is a factory for creating a new Insert instance of this node.</summary>
         /// <remarks>This will return a string with the given new string inserted at the given index.</remarks>
         static public readonly IFuncDef Insert = TernaryFunc<String, Int, String, String>.
             Factory(nameof(Insert), (value, index, gram) =>
-                new((value.Value ?? "").Insert(index.Value, gram.Value ?? "")));
+                new(value.Value.Insert(index.Value, gram.Value)));
     }
 
     /// <summary>This gets the double mathematical function value from two parents.</summary>
@@ -74,10 +74,10 @@ namespace Blackboard.Core.Nodes.Inner {
     /// therefor this should be used to perform less commonly used nodes.
     /// </remarks>
     sealed public class TernaryFunc<T1, T2, T3, TResult> : TernaryValue<T1, T2, T3, TResult>
-        where T1 : IEquatable<T1>
-        where T2 : IEquatable<T2>
-        where T3 : IEquatable<T3>
-        where TResult : IEquatable<TResult> {
+        where T1 : struct, IEquatable<T1>
+        where T2 : struct, IEquatable<T2>
+        where T3 : struct, IEquatable<T3>
+        where TResult : struct, IEquatable<TResult> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <param name="funcName">The display name for this function.</param>
@@ -97,7 +97,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         public TernaryFunc(string funcName, S.Func<T1, T2, T3, TResult> func,
-            IValueParent<T1> source1 = null, IValueParent<T2> source2 = null, IValueParent<T3> source3 = null) :
+            IValueParent<T1>? source1 = null, IValueParent<T2>? source2 = null, IValueParent<T3>? source3 = null) :
             base(source1, source2, source3) {
             this.funcName = funcName;
             this.func = func;

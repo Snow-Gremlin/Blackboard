@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <summary>Determines if the two values are not equal.</summary>
     /// <typeparam name="T">The type being compared.</typeparam>
     sealed public class NotEqual<T>: BinaryValue<T, T, Bool>
-        where T : IEquatable<T> {
+        where T : struct, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new NotEqual<T>(left, right));
@@ -19,7 +19,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Creates a not equal value node.</summary>
         /// <param name="left">This is the first parent for the source value.</param>
         /// <param name="right">This is the second parent for the source value.</param>
-        public NotEqual(IValueParent<T> left = null, IValueParent<T> right = null) : base(left, right) { }
+        public NotEqual(IValueParent<T>? left = null, IValueParent<T>? right = null) : base(left, right) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

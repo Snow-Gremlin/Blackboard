@@ -20,7 +20,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates an any trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Any(IEnumerable<ITriggerParent> parents = null) : base(parents) { }
+        public Any(IEnumerable<ITriggerParent> parents) : base(parents) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

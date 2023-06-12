@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Negates the given parents value.</summary>
     sealed public class Neg<T>: UnaryValue<T, T>
-        where T : ISigned<T>, IEquatable<T> {
+        where T : struct, ISigned<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((input) => new Neg<T>(input));
@@ -16,7 +16,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates a negated value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        public Neg(IValueParent<T> source = null) : base(source) { }
+        public Neg(IValueParent<T>? source) : base(source) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

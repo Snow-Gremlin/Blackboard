@@ -16,7 +16,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates an absolute value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        public Abs(IValueParent<T> source = null) : base(source) { }
+        public Abs(IValueParent<T>? source) : base(source) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

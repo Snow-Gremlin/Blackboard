@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This will return the linear interpolation between two parent values.</summary>
     sealed public class Lerp<T>: TernaryValue<T, T, T, T>
-        where T : IFloatingPoint<T>, IEquatable<T> {
+        where T : struct, IFloatingPoint<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((value, min, max) => new Lerp<T>(value, min, max));
@@ -18,7 +18,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="value">This is the first parent for the source value.</param>
         /// <param name="min">This is the second parent for the minimum value.</param>
         /// <param name="max">This is the third parent for the maximum value.</param>
-        public Lerp(IValueParent<T> value = null, IValueParent<T> min = null, IValueParent<T> max = null) :
+        public Lerp(IValueParent<T>? value = null, IValueParent<T>? min = null, IValueParent<T>? max = null) :
             base(value, min, max) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>

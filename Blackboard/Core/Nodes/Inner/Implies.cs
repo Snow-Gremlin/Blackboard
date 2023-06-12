@@ -17,7 +17,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Creates an implied value node.</summary>
         /// <param name="left">This is the first parent for the source value.</param>
         /// <param name="right">This is the second parent for the source value.</param>
-        public Implies(IValueParent<Bool> left = null, IValueParent<Bool> right = null) :
+        public Implies(IValueParent<Bool>? left = null, IValueParent<Bool>? right = null) :
             base(left, right) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>

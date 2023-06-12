@@ -21,7 +21,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates an average value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Average(IEnumerable<IValueParent<Double>> parents = null) : base(parents) { }
+        public Average(IEnumerable<IValueParent<Double>> parents) : base(parents) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

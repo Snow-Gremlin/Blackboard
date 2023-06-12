@@ -17,7 +17,7 @@ namespace Blackboard.Core.Nodes.Inner {
             new Function1N<IValueParent<String>, IValueParent<Object>, Format>((fmt, args) => new Format(fmt, args));
 
         /// <summary>This is the parent to increment the counter.</summary>
-        private IValueParent<String> format;
+        private IValueParent<String>? format;
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
         private readonly List<IValueParent<Object>> args;
@@ -31,7 +31,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Creates a string formatter node.</summary>
         /// <param name="fmt">The parent which provides the format string.</param>
         /// <param name="args">The parents which provide all the arguments to fill the format with.</param>
-        public Format(IValueParent<String> fmt, params IValueParent<Object>[] args) : base() {
+        public Format(IValueParent<String>? fmt, params IValueParent<Object>[] args) : base() {
             this.format = fmt;
             this.args = args.ToList();
         }
@@ -39,13 +39,13 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Creates a string formatter node.</summary>
         /// <param name="fmt">The parent which provides the format string.</param>
         /// <param name="args">The parents which provide all the arguments to fill the format with.</param>
-        public Format(IValueParent<String> fmt, IEnumerable<IValueParent<Object>> args) : base() {
+        public Format(IValueParent<String>? fmt, IEnumerable<IValueParent<Object>> args) : base() {
             this.format = fmt;
             this.args = args.ToList();
         }
 
         /// <summary>The parent node to get the format string from.</summary>
-        public IValueParent<String> FormatParent {
+        public IValueParent<String>? FormatParent {
             get => this.format;
             set => IChild.SetParent(this, ref this.format, value);
         }

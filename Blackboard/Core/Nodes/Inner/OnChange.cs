@@ -18,7 +18,8 @@ namespace Blackboard.Core.Nodes.Inner {
         private readonly List<IParent> sources;
 
         /// <summary>Creates an on change trigger node.</summary>
-        public OnChange() : this(null) { }
+        public OnChange() =>
+            this.sources = new List<IParent>();
 
         /// <summary>Creates an on change trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
@@ -27,7 +28,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates an on change trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public OnChange(IEnumerable<IParent> parents = null) {
+        public OnChange(IEnumerable<IParent> parents) {
             this.sources = new List<IParent>();
             this.AddParents(parents);
         }

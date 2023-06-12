@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Gets the sum of all of the parent values.</summary>
     sealed public class Sum<T>: NaryValue<T, T>
-        where T : IAdditive<T>, IEquatable<T>, new() {
+        where T : struct, IAdditive<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <param name="needsOneNoCast">
@@ -28,7 +28,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates a sum value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Sum(IEnumerable<IValueParent<T>> parents = null) : base(parents) { }
+        public Sum(IEnumerable<IValueParent<T>> parents) : base(parents) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

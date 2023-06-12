@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Performs a left shifts the first parent the amount of the second parent.</summary>
     sealed public class LeftShift<T>: BinaryValue<T, T, T>
-        where T : IBitwise<T>, IEquatable<T> {
+        where T : struct, IBitwise<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((left, right) => new LeftShift<T>(left, right));
@@ -17,8 +17,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Creates a left shift value node.</summary>
         /// <param name="left">This is the first parent for the source value.</param>
         /// <param name="right">This is the second parent for the source value.</param>
-        public LeftShift(IValueParent<T> left = null, IValueParent<T> right = null) :
-            base(left, right) { }
+        public LeftShift(IValueParent<T>? left = null, IValueParent<T>? right = null) : base(left, right) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

@@ -17,7 +17,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="test">This is the first parent for the boolean for selection between the other two parents.</param>
         /// <param name="left">This is the second parent to select when the test boolean is true.</param>
         /// <param name="right">This is the third parent to select when the test boolean is false.</param>
-        public SelectTrigger(IValueParent<Bool> test = null, ITriggerParent left = null, ITriggerParent right = null) :
+        public SelectTrigger(IValueParent<Bool>? test = null, ITriggerParent? left = null, ITriggerParent? right = null) :
             base(test, left, right) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>

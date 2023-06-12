@@ -36,9 +36,9 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>Creates a multi-trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public NaryTrigger(IEnumerable<ITriggerParent>? parents = null) {
+        public NaryTrigger(IEnumerable<ITriggerParent> parents) {
             this.sources = new List<ITriggerParent>();
-            if (parents is not null) this.AddParents(parents);
+            this.AddParents(parents);
         }
 
         /// <summary>This adds parents to this node.</summary>

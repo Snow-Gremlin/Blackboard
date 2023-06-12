@@ -41,7 +41,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Creates a N-ary value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public NaryValue(IEnumerable<IValueParent<TIn>>? parents = null, TResult? value = default) : base(value) {
+        public NaryValue(IEnumerable<IValueParent<TIn>> parents, TResult value = default) : base(value) {
             this.sources = new List<IValueParent<TIn>>();
             if (parents is not null) this.AddParents(parents);
             // UpdateValue already called by AddParents.

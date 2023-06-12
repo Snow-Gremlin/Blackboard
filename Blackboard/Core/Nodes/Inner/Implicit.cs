@@ -6,8 +6,8 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Implicit casts a value node into another value node.</summary>
     sealed public class Implicit<T1, T2>: UnaryValue<T1, T2>
-        where T1 : IData
-        where T2 : IImplicit<T1, T2>, IEquatable<T2> {
+        where T1 : struct, IData
+        where T2 : struct, IImplicit<T1, T2>, IEquatable<T2> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((value) => new Implicit<T1, T2>(value));
@@ -17,7 +17,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates a node implicit cast.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        public Implicit(IValueParent<T1> source = null) : base(source) { }
+        public Implicit(IValueParent<T1>? source = null) : base(source) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

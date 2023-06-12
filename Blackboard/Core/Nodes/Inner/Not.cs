@@ -16,7 +16,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates a boolean NOT value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        public Not(IValueParent<Bool> source = null) : base(source) { }
+        public Not(IValueParent<Bool>? source) : base(source) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

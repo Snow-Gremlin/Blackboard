@@ -132,7 +132,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
         public BinaryFunc(string funcName, S.Func<T1, T2, TResult> func,
-            IValueParent<T1> source1 = null, IValueParent<T2> source2 = null) :
+            IValueParent<T1>? source1 = null, IValueParent<T2>? source2 = null) :
             base(source1, source2) {
             this.funcName = funcName;
             this.func = func;

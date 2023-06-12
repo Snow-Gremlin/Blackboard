@@ -9,7 +9,8 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Unary nodes for floating point mathematics.</summary>
     /// <typeparam name="T">The type of floating point to perform the math on.</typeparam>
-    static public class UnaryFloatingPoint<T> where T : IFloatingPoint<T>, IEquatable<T> {
+    static public class UnaryFloatingPoint<T>
+        where T : struct, IFloatingPoint<T>, IEquatable<T> {
 
         /// <summary>This is a factory for creating a new IsNaN instance of this node.</summary>
         /// <remarks>Determines if the double is not a number, such as when something is divided by zero.</remarks>
@@ -144,7 +145,8 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Unary nodes for signed value mathematics.</summary>
     /// <typeparam name="T">The type of signed number to perform the methods on.</typeparam>
-    static public class UnarySigned<T> where T : ISigned<T>, IEquatable<T> {
+    static public class UnarySigned<T>
+        where T : struct, ISigned<T>, IEquatable<T> {
 
         /// <summary>This is a factory for creating a new IsNegative instance of this node.</summary>
         /// <remarks>Determines if the value is negative.</remarks>
@@ -153,7 +155,8 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Unary nodes for nullable values.</summary>
     /// <typeparam name="T">The type of nullable object to perform the methods on.</typeparam>
-    static public class UnaryNullable<T> where T: INullable, IEquatable<T> {
+    static public class UnaryNullable<T>
+        where T: struct, INullable, IEquatable<T> {
 
         /// <summary>This is a factory for creating a new IsNull instance of this node.</summary>
         /// <remarks>Determines if the object is null or not.</remarks>
@@ -176,17 +179,17 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>This is a factory for creating a new Trim instance of this node.</summary>
         /// <remarks>Trims the given string of whitespace.</remarks>
         static public readonly IFuncDef Trim = UnaryFuncs<String, String>.
-            Factory(nameof(Trim), v => new String(v.Value?.Trim()));
+            Factory(nameof(Trim), v => new String(v.Value.Trim()));
 
         /// <summary>This is a factory for creating a new TrimStart instance of this node.</summary>
         /// <remarks>Trims the start of the given string of whitespace.</remarks>
         static public readonly IFuncDef TrimStart = UnaryFuncs<String, String>.
-            Factory(nameof(TrimStart), v => new String(v.Value?.TrimStart()));
+            Factory(nameof(TrimStart), v => new String(v.Value.TrimStart()));
 
         /// <summary>This is a factory for creating a new TrimEnd instance of this node.</summary>
         /// <remarks>Trims the end of the given string of whitespace.</remarks>
         static public readonly IFuncDef TrimEnd = UnaryFuncs<String, String>.
-            Factory(nameof(TrimEnd), v => new String(v.Value?.TrimEnd()));
+            Factory(nameof(TrimEnd), v => new String(v.Value.TrimEnd()));
     }
 
     /// <summary>This gets the mathematical function for performing some function on the value from the parent.</summary>
@@ -195,8 +198,8 @@ namespace Blackboard.Core.Nodes.Inner {
     /// therefor this should be used to perform less commonly used nodes.
     /// </remarks>
     sealed public class UnaryFuncs<T1, TResult> : UnaryValue<T1, TResult>
-        where T1 : IEquatable<T1>
-        where TResult : IEquatable<TResult> {
+        where T1 : struct, IEquatable<T1>
+        where TResult : struct, IEquatable<TResult> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <param name="funcName">The display name for this function.</param>
@@ -215,7 +218,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="funcName">The name of the function to perform.</param>
         /// <param name="func">This is the function to apply to the parent.</param>
         /// <param name="source">This is the single parent for the source value.</param>
-        public UnaryFuncs(string funcName, S.Func<T1, TResult> func, IValueParent<T1> source = null) :
+        public UnaryFuncs(string funcName, S.Func<T1, TResult> func, IValueParent<T1>? source = null) :
             base(source) {
             this.funcName = funcName;
             this.func = func;
@@ -231,6 +234,6 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>The result of the double mathematical function the parent's value during evaluation.</summary>
         /// <param name="value">The value to evaluate.</param>
         /// <returns>The new data with the double value.</returns>
-        protected override TResult OnEval(T1 value) => this.func is null ? default : this.func(value);
+        protected override TResult OnEval(T1 value) => this.func(value);
     }
 }

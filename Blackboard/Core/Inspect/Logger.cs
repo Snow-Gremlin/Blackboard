@@ -11,17 +11,17 @@ namespace Blackboard.Core.Inspect {
     /// a logger which writes the message to some output.
     /// </remarks>
     public class Logger {
-        private readonly Logger next;
-        private readonly S.Func<Entry, bool> processor;
+        private readonly Logger? next;
+        private readonly S.Func<Entry, bool>? processor;
 
         /// <summary>Creates a new base logger.</summary>
         /// <param name="next">The next logger the entry is passed to.</param>
-        public Logger(Logger next = null) : this(next, null) { }
+        public Logger(Logger? next = null) : this(next, null) { }
 
         /// <summary>Creates a new base logger.</summary>
         /// <param name="next">The next logger the entry is passed to.</param>
         /// <param name="processor">The processor that this logger should run on an entry.</param>
-        internal Logger(Logger next = null, S.Func<Entry, bool> processor = null) {
+        internal Logger(Logger? next = null, S.Func<Entry, bool>? processor = null) {
             this.next = next;
             this.processor = processor;
         }

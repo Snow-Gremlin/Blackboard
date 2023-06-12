@@ -279,7 +279,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Checks if the given object is equal to this data type.</summary>
         /// <param name="obj">This is the object to test.</param>
         /// <returns>True if they are equal, otherwise false.</returns>
-        public override bool Equals(object obj) => obj is Double other && this.Equals(other);
+        public override bool Equals(object? obj) => obj is Double other && this.Equals(other);
 
         /// <summary>Gets the name of this data type and value.</summary>
         /// <returns>The name of the double type and value.</returns>

@@ -67,7 +67,7 @@ namespace Blackboard.Core.Inspect {
         /// <summary>This applies the given stringifier to the arguments and data.</summary>
         /// <param name="stringifier">The stringifier to apply or null to use shallow.</param>
         /// <returns>The logger which will stringify values in the message.</returns>
-        public Message Stringify(Stringifier stringifier = null) {
+        public Message Stringify(Stringifier? stringifier = null) {
             stringifier ??= Stringifier.Shallow();
             for( int i = this.Arguments.Length-1; i >= 0; --i)
                 this.Arguments[i] = stringifier.StringifyObject(this.Arguments[i]);
@@ -81,13 +81,13 @@ namespace Blackboard.Core.Inspect {
         /// <returns>The string for the whole message.</returns>
         public override string ToString() {
             List<string> lines = new() { this.Text };
-            foreach ((string key, object value) in this.Data) {
+            foreach ((string key, object? value) in this.Data) {
                 string strKey = key?.ToString() ?? "null";
                 string strVal = value switch {
                     null          => "null",
                     Exception e   => e.FullMessage.ToString(),
                     Message   msg => msg.ToString(),
-                    _             => value.ToString(),
+                    _             => value.ToString() ?? "null",
                 };
                 strVal = strVal.Replace("\n", "\n   ");
                 lines.Add("[" + strKey + ": " + strVal + "]");

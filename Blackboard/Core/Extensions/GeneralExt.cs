@@ -74,7 +74,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="b">The second input set of values to check against.</param>
         /// <param name="comparer">The type of comparer to use, if null the default comparer will be used.</param>
         /// <returns>True if any value is contained in both, false otherwise.</returns>
-        static public bool ContainsAny<T>(this IEnumerable<T> a, IEnumerable<T> b, IEqualityComparer<T> comparer = null) =>
+        static public bool ContainsAny<T>(this IEnumerable<T> a, IEnumerable<T> b, IEqualityComparer<T>? comparer = null) =>
             a.Any(value => b.Contains(value, comparer));
 
         /// <summary>Determines if the given enumerator has the given count.</summary>

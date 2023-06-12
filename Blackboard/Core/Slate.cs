@@ -667,8 +667,8 @@ namespace Blackboard.Core {
         /// </summary>
         /// <remarks>By performing the update the pending evaluation list will be cleared.</remarks>
         /// <param name="logger">An optional logger for debugging this evaluation.</param>
-        public void PerformEvaluation(Logger logger = null) =>
-            this.NeedsReset(this.pendingEval.Evaluate(logger.SubGroup(nameof(PerformEvaluation))));
+        public void PerformEvaluation(Logger? logger = null) =>
+            this.NeedsReset(this.pendingEval.Evaluate(logger?.SubGroup(nameof(PerformEvaluation))));
 
         #endregion
         #region Needs Reset...
@@ -701,7 +701,7 @@ namespace Blackboard.Core {
         /// <param name="con">The constant to check for.</param>
         /// <returns>True if the given constant reference is in the set, false otherwise.</returns>
         public bool ContainsConstant<T>(T con) where T : class, IConstant =>
-            this.constants.TryGetValue(con, out IConstant result) && ReferenceEquals(result, con);
+            this.constants.TryGetValue(con, out IConstant? result) && ReferenceEquals(result, con);
 
         /// <summary>Find or add the given constant in the set of constants.</summary>
         /// <remarks>
@@ -711,9 +711,9 @@ namespace Blackboard.Core {
         /// <typeparam name="T">The type of the constant to add or find.</typeparam>
         /// <param name="con">The constant to find already stored or to add.</param>
         /// <returns>The already existing constant or the passed in constant if added.</returns>
-        public T FindAddConstant<T>(T con)
+        public T? FindAddConstant<T>(T con)
             where T : class, IConstant {
-            if (this.constants.TryGetValue(con, out IConstant result)) return result as T;
+            if (this.constants.TryGetValue(con, out IConstant? result)) return result as T;
             this.constants.Add(con);
             return con;
         }

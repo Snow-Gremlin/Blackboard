@@ -13,7 +13,7 @@ namespace Blackboard.Core.Inspect {
 
         /// <summary>Creates a new message collector logger.</summary>
         /// <param name="next">The next logger the entry is passed to.</param>
-        public CollectorLogger(Logger next = null) : base(next) =>
+        public CollectorLogger(Logger? next = null) : base(next) =>
             this.entries = new List<Entry>();
 
         /// <summary>Clears this collection.</summary>

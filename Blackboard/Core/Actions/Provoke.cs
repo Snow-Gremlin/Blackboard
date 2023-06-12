@@ -17,7 +17,7 @@ namespace Blackboard.Core.Actions {
         /// <param name="target">The target node to provoke.</param>
         /// <param name="value">The value to use as the conditional.</param>v
         /// <returns>The provoke action.</returns>
-        static public Provoke Create(INode target, INode value, IEnumerable<INode> allNodes = null) =>
+        static public Provoke? Create(INode target, INode value, IEnumerable<INode>? allNodes = null) =>
             (target is ITriggerInput input) && (value is ITrigger conditional) ?
             new Provoke(input, conditional, allNodes) : null;
 
@@ -29,7 +29,7 @@ namespace Blackboard.Core.Actions {
         /// <param name="target">The target node to provoke.</param>
         /// <param name="allNodes">All the nodes which are new children of the node to provoke.</param>
         /// <returns>The provoke action.</returns>
-        static public Provoke Create(INode target, IEnumerable<INode> allNodes = null) =>
+        static public Provoke? Create(INode target, IEnumerable<INode>? allNodes = null) =>
             (target is ITriggerInput input) ?
             new Provoke(input, null, allNodes) : null;
 
@@ -44,7 +44,7 @@ namespace Blackboard.Core.Actions {
         /// <param name="target">The input trigger to provoke.</param>
         /// <param name="trigger">The optional trigger to conditionally provoke with or null to always provoke.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the trigger.</param>
-        public Provoke(ITriggerInput target, ITrigger trigger, IEnumerable<INode> allNewNodes = null) {
+        public Provoke(ITriggerInput target, ITrigger? trigger, IEnumerable<INode>? allNewNodes = null) {
             this.Target  = target;
             this.Trigger = trigger;
 
@@ -58,7 +58,7 @@ namespace Blackboard.Core.Actions {
         public readonly ITriggerInput Target;
 
         /// <summary>The optional trigger to conditionally provoke with.</summary>
-        public readonly ITrigger Trigger;
+        public readonly ITrigger? Trigger;
 
         /// <summary>All the nodes which are new children of the node to provoke.</summary>
         public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
@@ -67,10 +67,10 @@ namespace Blackboard.Core.Actions {
         /// <param name="slate">The slate for this action.</param>
         /// <param name="result">The result being created and added to.</param>
         /// <param name="logger">The optional logger to debug with.</param>
-        public void Perform(Slate slate, Result result, Logger logger = null) {
-            logger.Info("Provoke: {0}", this);
+        public void Perform(Slate slate, Result result, Logger? logger = null) {
+            logger?.Info("Provoke: {0}", this);
             slate.PendEval(this.needPending);
-            slate.PerformEvaluation(logger.SubGroup(nameof(Provoke)));
+            slate.PerformEvaluation(logger?.SubGroup(nameof(Provoke)));
             slate.Provoke(this.Target, this.Trigger?.Provoked ?? true);
         }
 

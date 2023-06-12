@@ -23,27 +23,27 @@ namespace Blackboard.Core.Nodes.Bases {
             new Function<IValueParent<T1>, IValueParent<T2>, Tout>(handle);
 
         /// <summary>This is the first parent node to read from.</summary>
-        private IValueParent<T1> source1;
+        private IValueParent<T1>? source1;
 
         /// <summary>This is the second parent node to read from.</summary>
-        private IValueParent<T2> source2;
+        private IValueParent<T2>? source2;
 
         /// <summary>Creates a binary value node.</summary>
         /// <param name="source1">This is the first parent for the source value.</param>
         /// <param name="source2">This is the second parent for the source value.</param>
-        public BinaryValue(IValueParent<T1> source1 = null, IValueParent<T2> source2 = null) {
+        public BinaryValue(IValueParent<T1>? source1 = null, IValueParent<T2>? source2 = null) {
             this.Parent1 = source1;
             this.Parent2 = source2;
         }
 
         /// <summary>The first parent node to get the first source value from.</summary>
-        public IValueParent<T1> Parent1 {
+        public IValueParent<T1>? Parent1 {
             get => this.source1;
             set => IChild.SetParent(this, ref this.source1, value);
         }
 
         /// <summary>The second parent node to get the second source value from.</summary>
-        public IValueParent<T2> Parent2 {
+        public IValueParent<T2>? Parent2 {
             get => this.source2;
             set => IChild.SetParent(this, ref this.source2, value);
         }

@@ -20,11 +20,11 @@ namespace Blackboard.Core.Inspect {
         /// <param name="showLevel">Indicates the message should shows the level string for the message.</param>
         /// <param name="showGroup">Indicates the message should show the group of the message.</param>
         /// <param name="next">The next logger the entry is passed to.</param>
-        public BufferLogger(bool indent = true, bool showLevel = false, bool showGroup = false, Logger next = null) : base(next) {
+        public BufferLogger(bool indent = true, bool showLevel = false, bool showGroup = false, Logger? next = null) : base(next) {
             this.Indent    = indent;
             this.ShowLevel = showLevel;
             this.ShowGroup = showGroup;
-            this.Clear();
+            this.fout      = new StringWriter();
         }
 
         /// <summary>Indicates the message should be indented by group depth.<</summary>

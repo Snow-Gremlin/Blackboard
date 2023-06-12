@@ -23,7 +23,7 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// <param name="node">The parent node variable being set.</param>
         /// <param name="newParent">The new parent being set, or null</param>
         /// <returns>True if the parent has changed, false otherwise.</returns>
-        static protected bool SetParent<T>(IChild child, ref T node, T newParent)
+        static protected bool SetParent<T>(IChild child, ref T? node, T newParent)
             where T : IParent {
             if (ReferenceEquals(node, newParent)) return false;
             bool removed = node?.RemoveChildren(child) ?? false;

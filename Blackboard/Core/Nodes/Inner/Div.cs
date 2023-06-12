@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This will divide the first parent value by the second parent value.</summary>
     sealed public class Div<T>: BinaryValue<T, T, T>
-        where T : IDivisible<T>, IEquatable<T> {
+        where T : struct, IDivisible<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((dividend, divisor) => new Div<T>(dividend, divisor));
@@ -17,7 +17,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Creates a divided value node.</summary>
         /// <param name="dividend">This is the first parent for the dividend value.</param>
         /// <param name="divisor">This is the second parent for the divisor value.</param>
-        public Div(IValueParent<T> dividend = null, IValueParent<T> divisor = null) : base(dividend, divisor) { }
+        public Div(IValueParent<T>? dividend = null, IValueParent<T>? divisor = null) : base(dividend, divisor) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

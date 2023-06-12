@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,21 +25,21 @@ namespace Blackboard.Core.Nodes.Collections {
             public S.Type Type { get; }
 
             /// <summary>Gets or set the parent.</summary>
-            public IParent Node { get; set; }
+            public IParent? Node { get; set; }
         }
 
         /// <summary>This is a single fixed parent container.</summary>
         /// <typeparam name="T">The type of the parent that is being set.</typeparam>
         private class FixedParent<T> : IFixedParent
                 where T : class, IParent {
-            private IParent cachedParent;
-            private readonly S.Func<T> getParent;
-            private readonly S.Action<T> setParent;
+            private IParent? cachedParent;
+            private readonly S.Func<T?> getParent;
+            private readonly S.Action<T?> setParent;
 
             /// <summary>Creates a new fixed parent container using the given getter or setter.</summary>
             /// <param name="getParent">The getter to get the parent value from the child.</param>
             /// <param name="setParent">The setter to set a parent value to the child.</param>
-            public FixedParent(S.Func<T> getParent, S.Action<T> setParent) {
+            public FixedParent(S.Func<T?> getParent, S.Action<T?> setParent) {
                 this.cachedParent = null;
                 this.getParent = getParent;
                 this.setParent = setParent;
@@ -52,7 +53,7 @@ namespace Blackboard.Core.Nodes.Collections {
             /// This parent must be able to case to the container type.
             /// It is known that if the parent is null, then the cache can not provide improvement.
             /// </remarks>
-            public IParent Node {
+            public IParent? Node {
                 get => this.cachedParent ??= this.getParent();
                 set {
                     this.cachedParent = value;
@@ -145,7 +146,11 @@ namespace Blackboard.Core.Nodes.Collections {
             /// <returns>The parent at the given index.</returns>
             public IParent this[int index] {
                 get => this.source[index];
-                set => this.source[index] = value as T;
+                set => this.source[index] = value as T ??
+                    throw new Message("Given parent can not be cast into variable parent type.").
+                        With("index", index).
+                        With("type", typeof(T)).
+                        With("parent", value);
             }
 
             /// <summary>This adds a new parent to the end of the variable parents.</summary>
@@ -154,7 +159,10 @@ namespace Blackboard.Core.Nodes.Collections {
             /// When setting the parent, the parent must be the type of this collection.
             /// </remarks>
             /// <param name="item">This is the parent to add.</param>
-            public void Add(IParent item) => this.source.Add(item as T);
+            public void Add(IParent item) => this.source.Add(item as T ??
+                throw new Message("Given parent can not be cast into variable parent type.").
+                    With("type", typeof(T)).
+                    With("parent", item));
 
             /// <summary>This inserts parents into the list at the given index.</summary>
             /// <remarks>
@@ -184,7 +192,7 @@ namespace Blackboard.Core.Nodes.Collections {
 
         /// <summary>The list of variable parents.</summary>
         /// <remarks>This will be null if there are no variable parents.</remarks>
-        private IVarParent varParents;
+        private IVarParent? varParents;
 
         /// <summary>Creates a new parent collection.</summary>
         /// <param name="child">The child node that this collection is for.</param>
@@ -211,7 +219,7 @@ namespace Blackboard.Core.Nodes.Collections {
         /// The current and new parent will have already been processes as needed before being set.
         /// </param>
         /// <returns>This returns the fixed parent which this was called on so that calls can be chained.</returns>
-        internal ParentCollection With<T>(S.Func<T> getParent, S.Action<T> setParent)
+        internal ParentCollection With<T>(S.Func<T?> getParent, S.Action<T?> setParent)
             where T : class, IParent {
             this.fixedParents.Add(new FixedParent<T>(getParent, setParent));
             return this;
@@ -269,7 +277,7 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <summary>This gets the enumerator for all the parents currently set.</summary>
         public IEnumerable<IParent> Parents {
             get {
-                IEnumerable<IParent> e = this.fixedParents.Select(p => p.Node);
+                IEnumerable<IParent> e = this.fixedParents.Select(p => p.Node).NotNull();
                 if (this.varParents is not null) e = e.Concat(this.varParents);
                 return e;
             }

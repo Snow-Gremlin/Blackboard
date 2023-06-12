@@ -126,6 +126,6 @@ namespace Blackboard.Core.Extensions {
         /// <typeparam name="T">The type of data to create a literal with.</typeparam>
         /// <param name="value">The value to create a literal with.</param>
         /// <returns>The literal for the current data value.</returns>
-        static public Literal<T> ToLiteral<T>(this T value) where T : IEquatable<T> => new(value);
+        static public Literal<T> ToLiteral<T>(this T value) where T : struct, IEquatable<T> => new(value);
     }
 }

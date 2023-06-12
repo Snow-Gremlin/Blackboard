@@ -6,8 +6,8 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Explicit casts a value node into another value node.</summary>
     sealed public class Explicit<T1, T2>: UnaryValue<T1, T2>
-        where T1 : IData
-        where T2 : IExplicit<T1, T2>, IEquatable<T2> {
+        where T1 : struct, IData
+        where T2 : struct, IExplicit<T1, T2>, IEquatable<T2> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((value) => new Explicit<T1, T2>(value));
@@ -18,7 +18,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>Creates a node explicit cast.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
         /// <param name="value">The default value for this node.</param>
-        public Explicit(IValueParent<T1> source = null) : base(source) { }
+        public Explicit(IValueParent<T1>? source = null) : base(source) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

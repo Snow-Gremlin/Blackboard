@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <summary>Determines if the two values are equal with an allowed variance called the epsilon.</summary>
     /// <typeparam name="T">The type being compared.</typeparam>
     sealed public class EpsilonEqual<T>: TernaryValue<T, T, T, Bool>
-        where T : ISubtractive<T>, ISigned<T>, IComparable<T> {
+        where T : struct, ISubtractive<T>, ISigned<T>, IComparable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((left, right, epsilon) => new EpsilonEqual<T>(left, right, epsilon));
@@ -20,7 +20,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="left">This is the first parent for the left value.</param>
         /// <param name="right">This is the second parent for the right value.</param>
         /// <param name="epsilon">This is the third parent which is used as the epsilon in the comparison.</param>
-        public EpsilonEqual(IValueParent<T> left = null, IValueParent<T> right = null, IValueParent<T> epsilon = null) :
+        public EpsilonEqual(IValueParent<T>? left = null, IValueParent<T>? right = null, IValueParent<T>? epsilon = null) :
             base(left, right, epsilon) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>

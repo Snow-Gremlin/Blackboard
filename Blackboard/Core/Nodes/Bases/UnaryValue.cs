@@ -11,8 +11,8 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
     /// <see cref="https://en.wikipedia.org/wiki/Arity#Unary"/>
     public abstract class UnaryValue<T1, TResult> : ValueNode<TResult>, IChild
-        where T1 : IData
-        where TResult : IEquatable<TResult> {
+        where T1 : struct, IData
+        where TResult : struct, IEquatable<TResult> {
 
         /// <summary>This is a helper for creating unary node factories quickly.</summary>
         /// <param name="handle">The handler for calling the node constructor.</param>
@@ -25,10 +25,10 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>Creates a unary value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>
-        public UnaryValue(IValueParent<T1> source = null) => this.Parent = source;
+        public UnaryValue(IValueParent<T1>? source = null) => this.Parent = source;
 
         /// <summary>The parent node to get the source value from.</summary>
-        public IValueParent<T1> Parent {
+        public IValueParent<T1>? Parent {
             get => this.source;
             set => IChild.SetParent(this, ref this.source, value);
         }

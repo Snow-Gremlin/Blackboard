@@ -64,7 +64,7 @@ namespace Blackboard.Core.Extensions {
         /// <typeparam name="T">The type of the values to check.</typeparam>
         /// <param name="input">The input to get all the values from.</param>
         /// <returns>The input values without any null values.</returns>
-        static public IEnumerable<T> NotNull<T>(this IEnumerable<T> input)
+        static public IEnumerable<T> NotNull<T>(this IEnumerable<T?> input)
             where T : class =>
             from value in input where value is not null select value;
 
@@ -106,8 +106,8 @@ namespace Blackboard.Core.Extensions {
         /// <param name="values">The values to enumerate and then repeat the last of.</param>
         /// <param name="maxLoops">The maximum number of times the last value is repeated.</param>
         /// <returns>The enumeration of the values and repeated last. If no input values then default is returned.</returns>
-        static public IEnumerable<T> RepeatLast<T>(this IEnumerable<T> values, int maxLoops = 1000) {
-            T last = default;
+        static public IEnumerable<T?> RepeatLast<T>(this IEnumerable<T> values, int maxLoops = 1000) {
+            T? last = default;
             foreach (T value in values) {
                 last = value;
                 yield return value;
@@ -173,8 +173,8 @@ namespace Blackboard.Core.Extensions {
         /// <param name="left">True to indicate to pad the left side, False to pad the right.</param>
         /// <returns>The padded string.</returns>
         static public string PadString(this string str, int totalLength, string padding, bool left) {
-            int count = str?.Length ?? 0;
-            int padSize = padding?.Length ?? 0;
+            int count = str.Length;
+            int padSize = padding.Length;
             if (count >= totalLength || padSize <= 0) return str;
 
             StringBuilder buf = new(totalLength);

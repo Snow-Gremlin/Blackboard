@@ -12,9 +12,9 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
     /// <see cref="https://en.wikipedia.org/wiki/Arity#Binary"/>
     public abstract class BinaryValue<T1, T2, TResult> : ValueNode<TResult>, IChild
-        where T1 : IData
-        where T2 : IData
-        where TResult : IEquatable<TResult> {
+        where T1 : struct, IData
+        where T2 : struct, IData
+        where TResult : struct, IEquatable<TResult> {
 
         /// <summary>This is a helper for creating binary node factories quickly.</summary>
         /// <param name="handle">The handler for calling the node constructor.</param>

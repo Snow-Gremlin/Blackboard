@@ -6,11 +6,11 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <summary>A base node for a node which has a value.</summary>
     /// <typeparam name="T">The type of the value being held.</typeparam>
     public abstract class ValueNode<T>: Evaluable, IValueParent<T>
-        where T : IEquatable<T> {
+        where T : struct, IEquatable<T> {
 
         /// <summary>Creates a new value node.</summary>
         /// <param name="value">The initial value of the node.</param>
-        public ValueNode(T value = default) => this.Value = value ?? default;
+        public ValueNode(T value = default) => this.Value = value;
 
         /// <summary>This gets the data being stored in this node.</summary>
         /// <returns>The data being stored.</returns>

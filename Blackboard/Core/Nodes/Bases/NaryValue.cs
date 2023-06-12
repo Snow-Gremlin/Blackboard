@@ -13,8 +13,8 @@ namespace Blackboard.Core.Nodes.Bases {
     /// <typeparam name="TResult">The type of value this node holds.</typeparam>
     /// <see cref="https://en.wikipedia.org/wiki/Arity#n-ary"/>
     public abstract class NaryValue<TIn, TResult> : ValueNode<TResult>, INaryChild<IValueParent<TIn>>, ICoalescable
-        where TIn : IData
-        where TResult : IEquatable<TResult> {
+        where TIn : struct, IData
+        where TResult : struct, IEquatable<TResult> {
 
         /// <summary>This is the list of all the parent nodes to read from.</summary>
         private readonly List<IValueParent<TIn>> sources;
@@ -41,9 +41,9 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <summary>Creates a N-ary value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
         /// <param name="value">The default value for this node.</param>
-        public NaryValue(IEnumerable<IValueParent<TIn>> parents = null, TResult value = default) : base(value) {
+        public NaryValue(IEnumerable<IValueParent<TIn>>? parents = null, TResult? value = default) : base(value) {
             this.sources = new List<IValueParent<TIn>>();
-            this.AddParents(parents);
+            if (parents is not null) this.AddParents(parents);
             // UpdateValue already called by AddParents.
         }
 

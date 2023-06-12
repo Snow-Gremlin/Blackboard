@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner {
     /// <summary>Performs a bitwise AND of all the integer parents.</summary>
     /// <see cref="https://mathworld.wolfram.com/AND.html"/>
     sealed public class BitwiseAnd<T>: NaryValue<T, T>
-        where T : IBitwise<T>, IEquatable<T>, new() {
+        where T : struct, IBitwise<T>, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((values) => new BitwiseAnd<T>(values));
@@ -23,7 +23,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates a bitwise AND value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public BitwiseAnd(IEnumerable<IValueParent<T>> parents = null) : base(parents) { }
+        public BitwiseAnd(IEnumerable<IValueParent<T>>? parents = null) : base(parents) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

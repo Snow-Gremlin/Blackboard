@@ -9,7 +9,8 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>Unary nodes for floating point mathematics.</summary>
     /// <typeparam name="T">The type of floating point to perform the math on.</typeparam>
-    static public class BinaryFloatingPoint<T> where T : IFloatingPoint<T>, IEquatable<T> {
+    static public class BinaryFloatingPoint<T>
+        where T : struct, IFloatingPoint<T>, IEquatable<T> {
 
         /// <summary>This is a factory for creating a new Round instance of this node.</summary>
         /// <remarks>This returns the rounded value from the parent at the given decimal point.</remarks>
@@ -90,17 +91,17 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <summary>This is a factory for creating a new Trim instance of this node.</summary>
         /// <remarks>Trims the given string with the characters from the given string or whitespace.</remarks>
         static public readonly IFuncDef Trim = BinaryFunc<String, String, String>.
-            Factory(nameof(Trim), (v1, v2) => new String(v1.Value?.Trim(v2.Value?.ToCharArray())));
+            Factory(nameof(Trim), (v1, v2) => new String(v1.Value.Trim(v2.Value.ToCharArray())));
 
         /// <summary>This is a factory for creating a new TrimStart instance of this node.</summary>
         /// <remarks>Trims the start of the given string with the characters from the given string or whitespace.</remarks>
         static public readonly IFuncDef TrimStart = BinaryFunc<String, String, String>.
-            Factory(nameof(TrimStart), (v1, v2) => new String(v1.Value?.TrimStart(v2.Value?.ToCharArray())));
+            Factory(nameof(TrimStart), (v1, v2) => new String(v1.Value.TrimStart(v2.Value.ToCharArray())));
 
         /// <summary>This is a factory for creating a new TrimEnd instance of this node.</summary>
         /// <remarks>Trims the end of the given string with the characters from the given string or whitespace.</remarks>
         static public readonly IFuncDef TrimEnd = BinaryFunc<String, String, String>.
-            Factory(nameof(TrimEnd), (v1, v2) => new String(v1.Value?.TrimEnd(v2.Value?.ToCharArray())));
+            Factory(nameof(TrimEnd), (v1, v2) => new String(v1.Value.TrimEnd(v2.Value.ToCharArray())));
     }
 
     /// <summary>This gets the double mathematical function value from two parents.</summary>
@@ -109,9 +110,9 @@ namespace Blackboard.Core.Nodes.Inner {
     /// therefor this should be used to perform less commonly used nodes.
     /// </remarks>
     sealed public class BinaryFunc<T1, T2, TResult>: BinaryValue<T1, T2, TResult> 
-        where T1 : IEquatable<T1>
-        where T2 : IEquatable<T2>
-        where TResult : IEquatable<TResult> {
+        where T1 : struct, IEquatable<T1>
+        where T2 : struct, IEquatable<T2>
+        where TResult : struct, IEquatable<TResult> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         /// <param name="funcName">The display name for this function.</param>

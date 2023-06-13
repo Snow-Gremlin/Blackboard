@@ -9,7 +9,7 @@ namespace Blackboard.Core.Types {
     public class FuncMatch: S.IComparable<FuncMatch> {
 
         /// <summary>Indicates there was no match for this function.</summary>
-        static public readonly FuncMatch NoMatch = new(false, null);
+        static public readonly FuncMatch NoMatch = new(false, S.Array.Empty<TypeMatch>());
 
         /// <summary>Creates a new function match.</summary>
         /// <remarks>
@@ -46,7 +46,8 @@ namespace Blackboard.Core.Types {
         /// </remarks>
         /// <param name="other">The other match to compare with.</param>
         /// <returns>-1 if match if this is less than the other, 0 if they match, 1 if this is greater than the other.</returns>
-        public int CompareTo(FuncMatch other) {
+        public int CompareTo(FuncMatch? other) {
+            if (other is null) return 1;
             int length = this.matches.Length;
             int sum = 0;
             for (int i = 0; i < length; i++) {
@@ -59,7 +60,7 @@ namespace Blackboard.Core.Types {
         /// <summary>Checks if this match is equal to the given object.</summary>
         /// <param name="obj">The object to check.</param>
         /// <returns>True if they are equal, false otherwise.</returns>
-        public override bool Equals(object obj) =>
+        public override bool Equals(object? obj) =>
             obj is FuncMatch other && this.CompareTo(other) == 0;
 
         /// <summary>Gets the hash code for this match.</summary>

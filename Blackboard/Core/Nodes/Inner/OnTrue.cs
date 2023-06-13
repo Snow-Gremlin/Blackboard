@@ -38,7 +38,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public ParentCollection Parents => new ParentCollection(this, 1).
-            With(() => this.source, (IValueParent<Bool>? parent) => this.source = parent);
+            With(() => this.source, parent => this.source = parent);
 
         /// <summary>This updates the trigger during an evaluation.</summary>
         /// <returns>This always returns true so that any parent change will trigger this node.</returns>

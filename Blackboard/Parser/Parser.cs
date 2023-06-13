@@ -35,12 +35,12 @@ namespace Blackboard.Parser {
         private readonly Dictionary<string, PP.ParseTree.PromptHandle> prompts;
 
         /// <summary>Optional logger to debugging and inspecting the parser.</summary>
-        private readonly Logger logger;
+        private readonly Logger? logger;
 
         /// <summary>Creates a new Blackboard language parser.</summary>
         /// <param name="slate">The slate to modify.</param>
         /// <param name="logger">An optional logger for debugging and inspecting the parser.</param>
-        public Parser(Slate slate, Logger logger = null) {
+        public Parser(Slate slate, Logger? logger = null) {
             this.slate   = slate;
             this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>();
             this.logger  = logger.SubGroup(nameof(Parser));
@@ -180,7 +180,7 @@ namespace Blackboard.Parser {
                     With("Name", name);
 
             this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
-                Builder builder = args as Builder;
+                Builder? builder = args as Builder;
                 PP.Scanner.Location? loc = args.LastLocation;
                 builder.Logger.Info("Process {0}({1}) [{2}]", name, count, loc);
 

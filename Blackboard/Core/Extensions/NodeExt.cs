@@ -306,7 +306,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="logger">The logger to debug the evaluate with.</param>
         /// <returns>The list of provoked triggers</returns>
         static public HashSet<ITrigger> Evaluate(this LinkedList<IEvaluable> pending, Logger? logger = null) {
-            logger?.Info("Start Eval (pending: {0})", pending.Count);
+            logger.Info("Start Eval (pending: {0})", pending.Count);
 
             HashSet<ITrigger> provoked = new();
             while (pending.Count > 0) {
@@ -320,10 +320,10 @@ namespace Blackboard.Core.Extensions {
                     changed = true;
                 }
 
-                logger?.Info("  Evaluated (changed: {0}, depth: {1}, node: {2}, remaining: {3})", changed, node.Depth, node, pending.Count);
+                logger.Info("  Evaluated (changed: {0}, depth: {1}, node: {2}, remaining: {3})", changed, node.Depth, node, pending.Count);
             }
 
-            logger?.Info("End Eval (provoked: {0})", provoked.Count);
+            logger.Info("End Eval (provoked: {0})", provoked.Count);
             return provoked;
         }
 

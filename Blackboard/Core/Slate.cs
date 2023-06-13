@@ -635,7 +635,7 @@ namespace Blackboard.Core {
         /// </summary>
         /// <remarks>By performing the update the pending update list will be cleared.</remarks>
         /// <param name="logger">An optional logger for debugging this update.</param>
-        public void PerformUpdates(Logger logger = null) =>
+        public void PerformUpdates(Logger? logger = null) =>
             this.pendingUpdate.UpdateDepths(logger.SubGroup(nameof(PerformUpdates)));
 
         #endregion
@@ -670,7 +670,7 @@ namespace Blackboard.Core {
         /// <remarks>By performing the update the pending evaluation list will be cleared.</remarks>
         /// <param name="logger">An optional logger for debugging this evaluation.</param>
         public void PerformEvaluation(Logger? logger = null) =>
-            this.NeedsReset(this.pendingEval.Evaluate(logger?.SubGroup(nameof(PerformEvaluation))));
+            this.NeedsReset(this.pendingEval.Evaluate(logger.SubGroup(nameof(PerformEvaluation))));
 
         #endregion
         #region Needs Reset...

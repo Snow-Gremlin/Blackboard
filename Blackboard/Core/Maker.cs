@@ -15,9 +15,10 @@ namespace Blackboard.Core {
         /// <param name="slate">The slate to look up the casts with.</param>
         /// <param name="type">The type the cast returns.</param>
         /// <returns>The function group for casting a value to the given type or null if an unexpected type./returns>
-        static public IFuncGroup GetCastMethod(Slate slate, Type type) {
-            Namespace ops = slate.Global.Find(Slate.OperatorNamespace) as Namespace;
-            INode castGroup =
+        static public IFuncGroup? GetCastMethod(Slate slate, Type type) {
+            Namespace? ops = slate.Global.Find(Slate.OperatorNamespace) as Namespace;
+            if (ops is null) return null;
+            INode? castGroup =
                 type == Type.Object  ? ops.Find("castObject") :
                 type == Type.Bool    ? ops.Find("castBool") :
                 type == Type.Int     ? ops.Find("castInt") :
@@ -34,7 +35,7 @@ namespace Blackboard.Core {
         /// <param name="root">The root node to assign to the given target.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         /// <returns>The newly created assignment action or null if an unexpected type.</returns>
-        static public IAction CreateAssignAction(Type type, INode target, INode root, IEnumerable<INode> allNewNodes) =>
+        static public IAction? CreateAssignAction(Type type, INode target, INode root, IEnumerable<INode> allNewNodes) =>
             type == Type.Object  ? Assign<Object>.Create(target, root, allNewNodes) :
             type == Type.Bool    ? Assign<Bool>.  Create(target, root, allNewNodes) :
             type == Type.Int     ? Assign<Int>.   Create(target, root, allNewNodes) :
@@ -49,7 +50,7 @@ namespace Blackboard.Core {
         /// <param name="root">The root node to get to the given target.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
         /// <returns>The newly created getter action or null if an unexpected type.</returns>
-        static public IAction CreateGetterAction(Type type, string name, INode root, IEnumerable<INode> allNewNodes) =>
+        static public IAction? CreateGetterAction(Type type, string name, INode root, IEnumerable<INode> allNewNodes) =>
             type == Type.Object ? Getter<Object>.Create(name, root, allNewNodes) :
             type == Type.Bool   ? Getter<Bool>.  Create(name, root, allNewNodes) :
             type == Type.Int    ? Getter<Int>.   Create(name, root, allNewNodes) :
@@ -60,7 +61,7 @@ namespace Blackboard.Core {
         /// <summary>Creates a new input node of the given type.</summary>
         /// <param name="type">The type of value to create an input node for.</param>
         /// <returns>The newly created input or null if an unexpected type.</returns>
-        static public IInput CreateInputNode(Type type) =>
+        static public IInput? CreateInputNode(Type type) =>
             type == Type.Object  ? new InputValue<Object>() :
             type == Type.Bool    ? new InputValue<Bool>() :
             type == Type.Int     ? new InputValue<Int>() :

@@ -76,7 +76,8 @@ namespace Blackboard.Core.Types {
         ///  0 if they match,
         ///  1 if this is greater than the other.
         /// </returns>
-        public int CompareTo(TypeMatch other) {
+        public int CompareTo(TypeMatch? other) {
+            if (other is null) return 1;
             int cmp = this.IsImplicit.CompareTo(other.IsImplicit);
             if (cmp == 0) cmp = this.Steps.CompareTo(other.Steps);
             return cmp;
@@ -85,7 +86,7 @@ namespace Blackboard.Core.Types {
         /// <summary>Checks if this match is equal to the given object.</summary>
         /// <param name="obj">The object to check.</param>
         /// <returns>True if they are equal, false otherwise.</returns>
-        public override bool Equals(object obj) =>
+        public override bool Equals(object? obj) =>
             obj is TypeMatch other && this.matchKind == other.matchKind && this.Steps == other.Steps;
 
         /// <summary>Gets the hash code for this match.</summary>

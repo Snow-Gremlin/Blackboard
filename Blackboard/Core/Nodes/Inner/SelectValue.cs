@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
     /// <summary>This is a node for a ternary selection between two values.</summary>
     sealed public class SelectValue<T>: Select<IValueParent<T>>, IValueParent<T>
-        where T : IData {
+        where T : struct, IData {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = CreateFactory((test, left, right) => new SelectValue<T>(test, left, right));
@@ -19,7 +19,7 @@ namespace Blackboard.Core.Nodes.Inner {
         /// <param name="test">This is the first parent for the boolean for selection between the other two parents.</param>
         /// <param name="left">This is the second parent to select when the test boolean is true.</param>
         /// <param name="right">This is the third parent to select when the test boolean is false.</param>
-        public SelectValue(IValueParent<Bool> test = null, IValueParent<T> left = null, IValueParent<T> right = null) :
+        public SelectValue(IValueParent<Bool>? test = null, IValueParent<T>? left = null, IValueParent<T>? right = null) :
             base(test, left, right) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>

@@ -23,7 +23,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates a boolean Exclusive OR value node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public Xor(IEnumerable<IValueParent<Bool>> parents = null) : base(parents) { }
+        public Xor(IEnumerable<IValueParent<Bool>> parents) : base(parents) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

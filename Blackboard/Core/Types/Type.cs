@@ -19,7 +19,7 @@ namespace Blackboard.Core.Types {
         /// <summary>This is a delegate for a casting method.</summary>
         /// <param name="node">The node to cast.</param>
         /// <returns>The resulting casted value.</returns>
-        private delegate INode caster(INode node);
+        private delegate INode? caster(INode node);
 
         /// <summary>The base type for all other types, not just value types.</summary>
         static public readonly Type Node;
@@ -87,27 +87,27 @@ namespace Blackboard.Core.Types {
         /// <summary>Finds the type given the type name.</summary>
         /// <param name="name">The name of the type to get.</param>
         /// <returns>The type for the given name or null if name isn't found.</returns>
-        static public Type FromName(string name) =>
+        static public Type? FromName(string name) =>
             AllTypes.Where((t) => t.Name == name).FirstOrDefault();
 
         /// <summary>This gets the type given a node.</summary>
         /// <param name="node">The node to get the type of.</param>
         /// <returns>The type for the given node or null if not found.</returns>
-        static public Type TypeOf(INode node) => FromType(node.GetType());
+        static public Type? TypeOf(INode node) => FromType(node.GetType());
 
         /// <summary>This gets the type from the given generic.</summary>
         /// <typeparam name="T">The generic type to get the type of.</typeparam>
         /// <returns>The type for the given generic or null if not found.</returns>
-        static public Type FromType<T>() where T : INode => FromType(typeof(T));
+        static public Type? FromType<T>() where T : INode => FromType(typeof(T));
 
         /// <summary>This get the type from the given C# type.</summary>
         /// <param name="type">The C# type to get this type of.</param>
         /// <returns>The type for the given C# type or null if not found.</returns>
-        static public Type FromType(S.Type type) {
+        static public Type? FromType(S.Type type) {
             if (!type.IsAssignableTo(Node.RealType)) return null;
             Type current = Node;
             while (true) {
-                Type next = current.Inheritors.FirstAssignable(type);
+                Type? next = current.Inheritors.FirstAssignable(type);
                 if (next is null) return current;
                 current = next;
             }
@@ -127,11 +127,11 @@ namespace Blackboard.Core.Types {
 
         /// <summary>This is the base type this type inherits from.</summary>
         /// <remarks>This is only null for Node type since it doesn't inherit from anything.</remarks>
-        public readonly Type BaseType;
+        public readonly Type? BaseType;
 
         /// <summary>The underlying IData type for this node, or null if no data.</summary>
-        public readonly S.Type DataType;
-
+        public readonly S.Type? DataType;
+        
         /// <summary>The types with base type of this type.</summary>
         private readonly List<Type> inheritors;
 
@@ -146,7 +146,7 @@ namespace Blackboard.Core.Types {
         /// <param name="realType">The C# type for this type.</param>
         /// <param name="baseType">The base type this type inherits from.</param>
         /// <param name="dataType">The IData type underlying this type.</param>
-        private Type(string name, S.Type realType, Type baseType, S.Type dataType) {
+        private Type(string name, S.Type realType, Type? baseType, S.Type? dataType) {
             this.Name = name;
             this.RealType = realType;
             this.BaseType = baseType;
@@ -160,7 +160,7 @@ namespace Blackboard.Core.Types {
                     With("Name",     name).
                     With("RealType", realType).
                     With("DataType", dataType);
-            if (baseType is not null) baseType.inheritors.Add(this);
+            baseType?.inheritors.Add(this);
         }
 
         /// <summary>
@@ -172,10 +172,11 @@ namespace Blackboard.Core.Types {
         private int inheritMatchSteps(Type t) {
             int steps = -1;
             if (t.RealType.IsAssignableTo(this.RealType)) {
+                Type? nt = t;
                 do {
-                    t = t.BaseType;
+                    nt = nt.BaseType;
                     steps++;
-                } while (t is not null && t.RealType.IsAssignableTo(this.RealType));
+                } while (nt is not null && nt.RealType.IsAssignableTo(this.RealType));
             }
             return steps;
         }
@@ -189,12 +190,13 @@ namespace Blackboard.Core.Types {
         /// <returns>The implicit or explicit cast steps or -1 if no cast match.</returns>
         private int castMatchSteps(bool exp, Type t) {
             int steps = 0;
+            Type? nt = t;
             do {
-                Dictionary<Type, caster> dict = exp ? t.exps : t.imps;
+                Dictionary<Type, caster> dict = exp ? nt.exps : nt.imps;
                 if (dict.ContainsKey(this)) return steps;
-                t = t.BaseType;
+                nt = nt.BaseType;
                 steps++;
-            } while (t is not null);
+            } while (nt is not null);
             return -1;
         }
 
@@ -207,8 +209,8 @@ namespace Blackboard.Core.Types {
         /// <summary>This determines the implicit and inheritance match.</summary>
         /// <param name="t">The type to try casting from.</param>
         /// <returns>The result of the match.</returns>
-        static public TypeMatch Match<T>(Type t) where T : INode =>
-            FromType<T>().Match(t);
+        static public TypeMatch Match<T>(Type? t) where T : INode =>
+            FromType<T>()?.Match(t) ?? TypeMatch.NoMatch;
 
         /// <summary>This determines the implicit and inheritance match.</summary>
         /// <param name="t">The type to try casting from.</param>
@@ -216,7 +218,9 @@ namespace Blackboard.Core.Types {
         /// True to also check if it can be cast explicitly, false to ignore explicit casts.
         /// </param>
         /// <returns>The result of the match.</returns>
-        public TypeMatch Match(Type t, bool explicitCasts = false) {
+        public TypeMatch Match(Type? t, bool explicitCasts = false) {
+            if (t is null) return TypeMatch.NoMatch;
+
             int steps = this.inheritMatchSteps(t);
             if (steps >= 0) return TypeMatch.Inherit(steps);
 
@@ -254,25 +258,25 @@ namespace Blackboard.Core.Types {
         /// <summary>Performs an implicit cast of the given node into this type.</summary>
         /// <param name="node">The node to implicitly cast.</param>
         /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-        static public T Implicit<T>(INode node) where T : class, INode =>
-            FromType<T>().Implicit(node) as T;
+        static public T? Implicit<T>(INode node) where T : class, INode =>
+            FromType<T>()?.Implicit(node) as T;
 
         /// <summary>Performs an implicit cast of the given node into this type.</summary>
         /// <param name="node">The node to implicitly cast.</param>
         /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-        public INode Implicit(INode node) =>
+        public INode? Implicit(INode node) =>
             cast(true, node, TypeOf(node), this);
 
         /// <summary>Performs an explicit cast of the given node into this type.</summary>
         /// <param name="node">The node to explicitly cast.</param>
         /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-        static public T Explicit<T>(INode node) where T : class, INode =>
-            FromType<T>().Explicit(node) as T;
+        static public T? Explicit<T>(INode node) where T : class, INode =>
+            FromType<T>()?.Explicit(node) as T;
 
         /// <summary>Performs an explicit cast of the given node into this type.</summary>
         /// <param name="node">The node to explicitly cast.</param>
         /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-        public INode Explicit(INode node) =>
+        public INode? Explicit(INode node) =>
             cast(false, node, TypeOf(node), this);
 
         /// <summary>Performs a cast of the given node into the destination type.</summary>
@@ -281,11 +285,12 @@ namespace Blackboard.Core.Types {
         /// <param name="src">The type of the given node.</param>
         /// <param name="dest">The destination type to cast into.</param>
         /// <returns>The node cast into the destination type or null if it can not be cast.</returns>
-        static private INode cast(bool imp, INode node, Type src, Type dest) {
+        static private INode? cast(bool imp, INode node, Type? src, Type dest) {
+            if (src is null) return null;
             if (src.RealType.IsAssignableTo(dest.RealType)) return node;
             do {
                 Dictionary<Type, caster> dict = imp ? src.imps : src.exps;
-                if (dict.TryGetValue(dest, out caster func)) return func(node);
+                if (dict.TryGetValue(dest, out caster? func)) return func(node);
                 src = src.BaseType;
             } while (src is not null);
             return null;
@@ -313,7 +318,7 @@ namespace Blackboard.Core.Types {
         /// <summary>Checks if the given object is equal to this type.</summary>
         /// <param name="obj">The object to check.</param>
         /// <returns>True if they are equal, false otherwise.</returns>
-        public override bool Equals(object obj) => ReferenceEquals(this, obj);
+        public override bool Equals(object? obj) => ReferenceEquals(this, obj);
 
         /// <summary>Gets the hash code for this type.</summary>
         /// <returns>The type's name hash code.</returns>

@@ -9,14 +9,14 @@ namespace Blackboard.Core.Nodes.Outer {
     sealed public class OutputTrigger : TriggerNode, ITriggerOutput {
 
         /// <summary>The parent source to listen to.</summary>
-        private ITriggerParent source;
+        private ITriggerParent? source;
 
         /// <summary>Creates a new output trigger.</summary>
         public OutputTrigger() { }
 
         /// <summary>Creates a new output trigger.</summary>
         /// <param name="source">The initial source trigger to listen to.</param>
-        public OutputTrigger(ITriggerParent source = null) => this.Parent = source;
+        public OutputTrigger(ITriggerParent? source = null) => this.Parent = source;
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>
@@ -26,7 +26,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public override string TypeName => "Output"; // So that it is Output<bool> and Output<trigger>.
 
         /// <summary>The parent trigger node to listen to.</summary>
-        public ITriggerParent Parent {
+        public ITriggerParent? Parent {
             get => this.source;
             set => IChild.SetParent(this, ref this.source, value);
         }
@@ -36,7 +36,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public ParentCollection Parents => new ParentCollection(this, 1).
-            With(() => this.source, (ITriggerParent parent) => this.source = parent);
+            With(() => this.source, parent => this.source = parent);
 
         /// <summary>This updates the trigger during the an evaluation.</summary>
         /// <returns>This returns the provoked value as it currently is.</returns>

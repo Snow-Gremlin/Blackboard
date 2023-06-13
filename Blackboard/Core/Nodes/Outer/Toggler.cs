@@ -63,9 +63,9 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public ParentCollection Parents => new ParentCollection(this, 3).
-            With(() => this.toggle,     (ITriggerParent?     parent) => this.toggle     = parent).
-            With(() => this.reset,      (ITriggerParent?     parent) => this.reset      = parent).
-            With(() => this.resetValue, (IValueParent<Bool>? parent) => this.resetValue = parent);
+            With(() => this.toggle,     parent => this.toggle     = parent).
+            With(() => this.reset,      parent => this.reset      = parent).
+            With(() => this.resetValue, parent => this.resetValue = parent);
 
         /// <summary>This will determine the new value the node should be set to.</summary>
         /// <returns>The new value that the node should be set to.</returns>

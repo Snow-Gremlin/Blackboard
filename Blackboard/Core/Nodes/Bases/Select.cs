@@ -58,9 +58,9 @@ namespace Blackboard.Core.Nodes.Bases {
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public ParentCollection Parents => new ParentCollection(this).
-            With(() => this.source1, (IValueParent<Bool>? parent) => this.source1 = parent).
-            With(() => this.source2, (T? parent) => this.source2 = parent).
-            With(() => this.source3, (T? parent) => this.source3 = parent);
+            With(() => this.source1, parent => this.source1 = parent).
+            With(() => this.source2, parent => this.source2 = parent).
+            With(() => this.source3, parent => this.source3 = parent);
 
         /// <summary>The node which is currently selected.</summary>
         public T? Selected { get; private set; }

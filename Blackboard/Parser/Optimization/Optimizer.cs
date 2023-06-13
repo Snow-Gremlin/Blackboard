@@ -109,9 +109,9 @@ namespace Blackboard.Parser.Optimization {
         /// <param name="nodes">The new nodes for a formula which need to be optimized.</param>
         /// <param name="logger">The logger to debug and inspect the optimization.</param>
         /// <remarks>The node to replace the given root with or the given root.</remarks>
-        public INode Optimize(Slate slate, INode root, HashSet<INode> nodes, Logger logger = null) {
+        public INode Optimize(Slate slate, INode root, HashSet<INode> nodes, Logger? logger = null) {
             string opName = nameof(Optimize);
-            Logger opLogger = logger.Stringify(Stringifier.Deep()).SubGroup(opName);
+            Logger? opLogger = logger.Stringify(Stringifier.Deep())?.SubGroup(opName);
             opLogger.Info("Start {0}:", opName);
 
             int i = 0;
@@ -121,8 +121,8 @@ namespace Blackboard.Parser.Optimization {
                 changed = false;
 
                 foreach (IRule rule in this.rules) {
-                    string ruleName = rule.ToString();
-                    Logger ruleLogger = opLogger.SubGroup(ruleName);
+                    string ruleName = rule.ToString() ?? "null";
+                    Logger? ruleLogger = opLogger.SubGroup(ruleName);
                     ruleLogger.Info("Start {0}: {1}", ruleName, root);
 
                     // Perform the rule on the given root and nodes.

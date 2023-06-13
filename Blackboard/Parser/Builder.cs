@@ -23,7 +23,7 @@ namespace Blackboard.Parser {
         /// <summary>Creates a new formula builder for parsing states.</summary>
         /// <param name="slate">The slate this stack is for.</param>
         /// <param name="logger">The optional logger to output the build steps.</param>
-        public Builder(Slate slate, Logger logger = null) {
+        public Builder(Slate slate, Logger? logger = null) {
             this.Slate  = slate;
             this.Logger = logger.SubGroup(nameof(Builder));
 
@@ -44,7 +44,7 @@ namespace Blackboard.Parser {
         /// The logger to help debug the parser and builder.
         /// This may be null if no logger is being used.
         /// </summary>
-        public readonly Logger Logger;
+        public readonly Logger? Logger;
 
         /// <summary>The optimizer being used to optimize nodes for new actions.</summary>
         private readonly Optimizer optimizer;

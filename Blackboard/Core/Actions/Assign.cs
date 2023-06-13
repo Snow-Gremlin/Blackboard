@@ -20,8 +20,8 @@ namespace Blackboard.Core.Actions {
         /// <param name="target">The target node to assign to.</param>
         /// <param name="value">The value to assign to the given target.</param>
         /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
-        /// <returns>The assignment action.</returns>
-        static public Assign<T> Create(INode target, INode value, IEnumerable<INode> allNewNodes) =>
+        /// <returns>The assignment action or null if the value cannot be assigned to the target.</returns>
+        static public Assign<T>? Create(INode target, INode value, IEnumerable<INode> allNewNodes) =>
             (target is IValueInput<T> input) && (value is IValue<T> data) ?
             new Assign<T>(input, data, allNewNodes) : null;
 

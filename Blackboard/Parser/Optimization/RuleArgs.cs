@@ -15,7 +15,7 @@ namespace Blackboard.Parser.Optimization {
 
         /// <summary>The logger to debug and inspect the optimization.</summary>
         /// <remarks>May be null to not log during optimization.</remarks>
-        public readonly Logger Logger;
+        public readonly Logger? Logger;
 
         /// <summary>The new nodes for a formula which need to be optimized.</summary>
         public readonly HashSet<INode> Nodes;
@@ -34,7 +34,7 @@ namespace Blackboard.Parser.Optimization {
         /// <param name="root">The root node of the tree to optimize.</param>
         /// <param name="nodes">The new nodes for a formula which need to be optimized.</param>
         /// <param name="logger">The logger to debug and inspect the optimization.</param>
-        public RuleArgs(Slate slate, INode root, HashSet<INode> nodes, Logger logger = null) {
+        public RuleArgs(Slate slate, INode root, HashSet<INode> nodes, Logger? logger = null) {
             this.Slate   = slate;
             this.Logger  = logger;
             this.Nodes   = nodes;

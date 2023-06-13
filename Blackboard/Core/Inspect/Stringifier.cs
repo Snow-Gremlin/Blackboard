@@ -287,13 +287,13 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Gets the string for the given nodes with the given configuration.</summary>
         /// <param name="nodes">The nodes to stringify.</param>
         /// <returns>The string of all the given nodes.</returns>
-        public string Stringify(IEnumerable<INode> nodes) =>
+        public string Stringify(IEnumerable<INode?> nodes) =>
             this.stringNode(nodes, this.Depth, false, true);
 
         /// <summary>Gets the string for the given nodes with the given configuration.</summary>
         /// <param name="nodes">The nodes to stringify.</param>
         /// <returns>The string of all the given nodes.</returns>
-        public string Stringify(params INode[] nodes) =>
+        public string Stringify(params INode?[] nodes) =>
             this.stringNode(nodes, this.Depth, false, true);
 
         /// <summary>Creates a string for a collection of nodes.</summary>
@@ -302,7 +302,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="useOnlyName">Indicates that if there is a name for a node, use that name for the output.</param>
         /// <param name="first">Indicates this is a first node and if it has a name, it should show it.</param>
         /// <returns>The string for these nodes.</returns>
-        private string stringNode(IEnumerable<INode> nodes, int depth, bool useOnlyName, bool first) =>
+        private string stringNode(IEnumerable<INode?> nodes, int depth, bool useOnlyName, bool first) =>
             nodes.Select(node => this.stringNode(node, depth, useOnlyName, first)).Join(", ");
 
         /// <summary>Creates a string for a single node.</summary>
@@ -311,7 +311,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="useOnlyName">Indicates that if there is a name for a node, use that name for the output.</param>
         /// <param name="first">Indicates this is a first node and if it has a name, it should show it.</param>
         /// <returns>The string for this node.</returns>
-        private string stringNode(INode node, int depth, bool useOnlyName, bool first) {
+        private string stringNode(INode? node, int depth, bool useOnlyName, bool first) {
             if (node is null) return "null";
             if (node is IFieldReader fieldReader) this.PreLoadNames(fieldReader);
 
@@ -333,7 +333,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <param name="first">Indicates this is a first node and if it has a name, it should show it.</param>
         /// <returns>The string for this node.</returns>
-        private string stringNodeWithoutName(INode node, int depth, bool first) =>
+        private string stringNodeWithoutName(INode? node, int depth, bool first) =>
             node is null ? "null" : node.TypeName +
             this.nodeDataType(node)   + this.nodeDataValue(node, depth, first) +
             this.parents(node, depth) + this.tailingNodes(node, depth);
@@ -341,9 +341,10 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Gets the data type of the node.</summary>
         /// <param name="node">The node to get the data type of.</param>
         /// <returns>The string for the data type.</returns>
-        private string nodeDataType(INode node) =>
+        private string nodeDataType(INode? node) =>
             !this.ShowDataType ? "" :
             node switch {
+                null          => "null",
                 IFuncDef  def => nodeDataType(def),
                 IDataNode dat => "<" + dat.Data.TypeName + ">",
                 ITrigger      => "<trigger>",
@@ -366,8 +367,9 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Gets the string for the data value of the given node.</summary>
         /// <param name="node">The node to get the data value for.</param>
         /// <returns>The string for the data value.</returns>
-        private static string getDataValue(INode node) =>
+        private static string getDataValue(INode? node) =>
             node switch {
+                null          => "null",
                 IDataNode dat => "[" + dat.Data.ValueAsString + "]",
                 ITrigger trig => (trig.Provoked ? "[provoked]" : "[]"),
                 _             => "",
@@ -378,7 +380,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <param name="first">Indicates this is a first node.</param>
         /// <returns>The string for the data value.</returns>
-        private string nodeDataValue(INode node, int depth, bool first) =>
+        private string nodeDataValue(INode? node, int depth, bool first) =>
             this.ShowAllDataValues ? getDataValue(node) :
             this.ShowFirstDataValues && first ? getDataValue(node) :
             this.ShowLastDataValues && (depth <= 1 || node is not IChild child || !child.Parents.Any()) ? getDataValue(node) : "";
@@ -387,7 +389,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="node">The node to get the parents from.</param>
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <returns>The string for the parents of the given node.</returns>
-        private string parents(INode node, int depth) =>
+        private string parents(INode? node, int depth) =>
             !this.ShowParents || depth <= 1 || node is not IChild child || !child.Parents.Any() ? "" :
             node switch {
                 IFuncDef => "",
@@ -398,9 +400,10 @@ namespace Blackboard.Core.Inspect {
         /// <param name="node">The node to get the tailing nodes from.</param>
         /// <param name="depth">The depth to output theses nodes to.</param>
         /// <returns>The string containing the tailing nodes or is empty if there is no tail.</returns>
-        private string tailingNodes(INode node, int depth) =>
+        private string tailingNodes(INode? node, int depth) =>
             !this.ShowTailingNodes ? "" :
             node switch {
+                null                => "null",
                 IFuncGroup   group  => this.tailingNodes(group,  depth),
                 IFieldReader reader => this.tailingNodes(reader, depth),
                 _                   => "",
@@ -524,8 +527,9 @@ namespace Blackboard.Core.Inspect {
         /// The string of the given action or node,
         /// or the original value if not an action or node.
         /// </returns>
-        public object StringifyObject(object value) =>
+        public object StringifyObject(object? value) =>
             value switch {
+                null                       => "null",
                 INode               node   => this.Stringify(node),
                 IAction             action => this.Stringify(action),
                 Message             msg    => msg.Stringify(this),
@@ -541,7 +545,7 @@ namespace Blackboard.Core.Inspect {
         /// For each object this returns the string of a given action or node,
         /// or the original value if not an action or node.
         /// </returns>
-        public IEnumerable<object> StringifyObject(IEnumerable<object> values) =>
+        public IEnumerable<object> StringifyObject(IEnumerable<object?> values) =>
             values.Select(this.StringifyObject);
 
         #endregion

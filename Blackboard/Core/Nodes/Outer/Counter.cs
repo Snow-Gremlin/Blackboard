@@ -90,11 +90,11 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public ParentCollection Parents => new ParentCollection(this, 5).
-            With(() => this.increment,  (ITriggerParent  parent) => this.increment  = parent).
-            With(() => this.decrement,  (ITriggerParent  parent) => this.decrement  = parent).
-            With(() => this.reset,      (ITriggerParent  parent) => this.reset      = parent).
-            With(() => this.delta,      (IValueParent<T> parent) => this.delta      = parent).
-            With(() => this.resetValue, (IValueParent<T> parent) => this.resetValue = parent);
+            With(() => this.increment,  parent => this.increment  = parent).
+            With(() => this.decrement,  parent => this.decrement  = parent).
+            With(() => this.reset,      parent => this.reset      = parent).
+            With(() => this.delta,      parent => this.delta      = parent).
+            With(() => this.resetValue, parent => this.resetValue = parent);
 
         /// <summary>This sets the value of this node.</summary>
         /// <param name="value">The value to set.</param>

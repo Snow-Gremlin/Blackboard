@@ -14,10 +14,10 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Creates a new message with the given format text and arguments.</summary>
         /// <param name="format">The format text to fill in with the given arguments.</param>
         /// <param name="args">The arguments for the format text.</param>
-        public Message(string format, params object[] args) {
+        public Message(string format, params object?[] args) {
             this.Format = format;
             this.Arguments = args;
-            this.Data = new Dictionary<string, object>();
+            this.Data = new Dictionary<string, object?>();
         }
 
         /// <summary>Creates a copy of this message.</summary>
@@ -29,7 +29,7 @@ namespace Blackboard.Core.Inspect {
         /// <returns>The copied message.</returns>
         public Message Clone() {
             Message copy = new(this.Format, this.Arguments.Clone());
-            foreach ((string key, object value) in this.Data)
+            foreach ((string key, object? value) in this.Data)
                 copy.Data[key] = value;
             return copy;
         }
@@ -38,10 +38,10 @@ namespace Blackboard.Core.Inspect {
         public string Format;
 
         /// <summary>The arguments for the format test of the message.</summary>
-        public object[] Arguments;
+        public object?[] Arguments;
 
         /// <summary>The data for the message.</summary>
-        public readonly Dictionary<string, object> Data;
+        public readonly Dictionary<string, object?> Data;
 
         /// <summary>This gets the text of the message with the arguments mixed in.</summary>
         public string Text => string.Format(this.Format, this.Arguments);
@@ -50,7 +50,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="key">The key for the additional data.</param>
         /// <param name="value">The value for the additional data.</param>
         /// <returns>This message so that these calls can be chained.</returns>
-        public Message With(string key, object value) {
+        public Message With(string key, object? value) {
             this.Data.Add(key, value);
             return this;
         }
@@ -71,7 +71,7 @@ namespace Blackboard.Core.Inspect {
             stringifier ??= Stringifier.Shallow();
             for( int i = this.Arguments.Length-1; i >= 0; --i)
                 this.Arguments[i] = stringifier.StringifyObject(this.Arguments[i]);
-            foreach ((string key, object value) in this.Data)
+            foreach ((string key, object? value) in this.Data)
                 this.Data[key] = stringifier.StringifyObject(value);
             return this;
         }
@@ -98,7 +98,7 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Implicitly convert to an exception when needed.</summary>
         /// <param name="msg">The message to convert.</param>
         public static implicit operator Exception(Message msg) {
-            S.Exception inner = null;
+            S.Exception? inner = null;
             foreach (object value in msg.Data.Keys) {
                 if (value is S.Exception e) {
                     inner = e;

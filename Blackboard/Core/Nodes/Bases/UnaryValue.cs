@@ -21,7 +21,7 @@ namespace Blackboard.Core.Nodes.Bases {
             new Function<IValueParent<T1>, Tout>(handle);
 
         /// <summary>This is the parent node to read from.</summary>
-        private IValueParent<T1> source;
+        private IValueParent<T1>? source;
 
         /// <summary>Creates a unary value node.</summary>
         /// <param name="source">This is the single parent for the source value.</param>

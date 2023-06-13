@@ -36,14 +36,14 @@ namespace Blackboard.Core.Nodes.Inner {
         public override string TypeName => nameof(BoolAsTrigger);
 
         /// <summary>The parent node to get the source value from.</summary>
-        public IValueParent<Bool> Parent {
+        public IValueParent<Bool>? Parent {
             get => this.source;
             set => IChild.SetParent(this, ref this.source, value);
         }
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public ParentCollection Parents => new ParentCollection(this, 1).
-            With(() => this.source, (IValueParent<Bool>? parent) => this.source = parent);
+            With(() => this.source, parent => this.source = parent);
 
         /// <summary>
         /// This is called when the trigger is evaluated and updated.

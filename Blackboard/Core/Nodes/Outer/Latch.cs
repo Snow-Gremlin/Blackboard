@@ -54,8 +54,8 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public ParentCollection Parents => new ParentCollection(this, 2).
-            With(() => this.trigger, (ITriggerParent?  parent) => this.trigger = parent).
-            With(() => this.source,  (IValueParent<T>? parent) => this.source  = parent);
+            With(() => this.trigger, parent => this.trigger = parent).
+            With(() => this.source,  parent => this.source  = parent);
 
         /// <summary>This sets the value of this node.</summary>
         /// <param name="value">The value to set.</param>

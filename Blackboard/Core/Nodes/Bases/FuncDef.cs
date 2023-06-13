@@ -176,8 +176,8 @@ namespace Blackboard.Core.Nodes.Bases {
         /// <param name="node">The node to cast.</param>
         /// <param name="t">The type to get the cast to.</param>
         /// <returns>The resulting parameter in the expected type.</returns>
-        static private INode castParam(INode node, Type t) {
-            INode cast = t.Implicit(node);
+        static private INode castParam(INode node, Type? t) {
+            INode? cast = t?.Implicit(node);
             return cast is not null ? cast :
                 throw new Message("Error implicitly casting parameter").
                     With("Node", node).

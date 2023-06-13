@@ -571,16 +571,18 @@ namespace Blackboard.Core {
         /// <typeparam name="T">The data type of the value to output.</typeparam>
         /// <param name="names">The name of the node to look up.</param>
         /// <returns>The new or existing value output.</returns>
-        public IValueOutput<T> GetOutputValue<T>(params string[] names) where T : IEquatable<T> =>
+        public IValueOutput<T> GetOutputValue<T>(params string[] names)
+            where T : struct, IEquatable<T> =>
             this.GetOutputValue<T>(names as IEnumerable<string>);
 
         /// <summary>Gets or creates a new output value on the node with the given name.</summary>
         /// <typeparam name="T">The data type of the value to output.</typeparam>
         /// <param name="names">The name of the node to look up.</param>
         /// <returns>The new or existing value output.</returns>
-        public IValueOutput<T> GetOutputValue<T>(IEnumerable<string> names) where T : IEquatable<T> {
+        public IValueOutput<T> GetOutputValue<T>(IEnumerable<string> names)
+            where T : struct, IEquatable<T> {
             IValueParent<T> parent = this.GetNode<IValueParent<T>>(names);
-            IValueOutput<T> output = parent.Children.OfType<IValueOutput<T>>().FirstOrDefault();
+            IValueOutput<T>? output = parent.Children.OfType<IValueOutput<T>>().FirstOrDefault();
             if (output is not null) return output;
 
             output = new OutputValue<T>(parent);

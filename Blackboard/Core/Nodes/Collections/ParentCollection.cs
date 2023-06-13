@@ -587,7 +587,7 @@ namespace Blackboard.Core.Nodes.Collections {
         /// If there is no old child then this child is not set to the new parents.
         /// </param>
         /// <returns>True if any parents were added, false otherwise.</returns>
-        public bool Insert(int index, IEnumerable<IParent> newParents, IChild oldChild = null) {
+        public bool Insert(int index, IEnumerable<IParent> newParents, IChild? oldChild = null) {
             if (index < 0 || index > this.Count)
                 throw this.message("Index out of bounds of node's parents.").
                     With("index", index);

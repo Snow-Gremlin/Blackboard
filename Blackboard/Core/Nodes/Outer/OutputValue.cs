@@ -8,14 +8,14 @@ namespace Blackboard.Core.Nodes.Outer {
     /// <summary>A node for listening for changes in values used for outputting to the user.</summary>
     /// <typeparam name="T">The type of the value to hold.</typeparam>
     sealed public class OutputValue<T>: UnaryValue<T, T>, IValueOutput<T>
-        where T : IEquatable<T> {
+        where T : struct, IEquatable<T> {
 
         /// <summary>Creates a new output value node.</summary>
         public OutputValue() { }
 
         /// <summary>Creates a new output value node.</summary>
         /// <param name="source">The initial source to get the value from.</param>
-        public OutputValue(IValueParent<T> source = null) : base(source) { }
+        public OutputValue(IValueParent<T>? source = null) : base(source) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>
@@ -25,7 +25,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public override string TypeName => "Output"; // So that it is Output<bool> and Output<trigger>.
 
         /// <summary>This event is emitted when the value is changed.</summary>
-        public event S.EventHandler<OutputValueEventArgs<T>> OnChanged;
+        public event S.EventHandler<OutputValueEventArgs<T>>? OnChanged;
 
         /// <summary>Gets the negated value of the parent during evaluation.</summary>
         /// <param name="value">The parent value to negate.</param>

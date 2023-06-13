@@ -47,7 +47,7 @@ namespace Blackboard.Core.Extensions {
         /// </remarks>
         /// <param name="node">The node to try to convert into a constant.</param>
         /// <returns>A constant of this node or null if not able to be made into a constant.</returns>
-        static public IConstant ToConstant(this INode node) =>
+        static public IConstant? ToConstant(this INode node) =>
             node switch {
                 IConstant c => c,
                 IDataNode v => Literal.Data(v.Data),
@@ -76,7 +76,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="node">The first node to compare the value of.</param>
         /// <param name="other">The second node to compare the value against.</param>
         /// <returns>True if the value or trigger are the same.</returns>
-        static public bool SameValue(this INode node, INode other) =>
+        static public bool SameValue(this INode node, INode? other) =>
             node switch {
                 IDataNode d1 => other is IDataNode d2 && d1.Data.Equals(d2.Data),
                 ITrigger  t1 => other is ITrigger  t2 && t1.Provoked == t2.Provoked,

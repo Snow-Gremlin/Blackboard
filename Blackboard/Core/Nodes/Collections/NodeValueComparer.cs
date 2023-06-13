@@ -13,7 +13,7 @@ namespace Blackboard.Core.Nodes.Collections {
         /// <param name="x">The first node to check equality with.</param>
         /// <param name="y">The second node to check equality against.</param>
         /// <returns>True if the values are the same, false otherwise.</returns>
-        public bool Equals(T x, T y) => x.SameValue(y);
+        public bool Equals(T? x, T? y) => x?.SameValue(y) ?? y is null;
 
         /// <summary>Gets the hash code for the given node.</summary>
         /// <param name="node">The node to get the hash code for.</param>

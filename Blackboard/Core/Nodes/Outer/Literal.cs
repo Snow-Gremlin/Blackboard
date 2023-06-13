@@ -54,13 +54,13 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <typeparam name="T">The type of data to get the literal from.</typeparam>
         /// <param name="value">The data value to set to the literal.</param>
         /// <returns>The new literal for the given data.</returns>
-        static public Literal<T> Data<T>(T value) where T : IEquatable<T> => new(value);
+        static public Literal<T> Data<T>(T value) where T : struct, IEquatable<T> => new(value);
     }
 
     /// <summary>This is a literal value.</summary>
     /// <typeparam name="T">The type of this literal.</typeparam>
     sealed public class Literal<T>: ValueNode<T>, IConstant
-        where T : IEquatable<T> {
+        where T : struct, IEquatable<T> {
 
         /// <summary>This is a factory function for creating new instances of this node easily.</summary>
         static public readonly IFuncDef Factory = new Function<Literal<T>>(() => new Literal<T>());

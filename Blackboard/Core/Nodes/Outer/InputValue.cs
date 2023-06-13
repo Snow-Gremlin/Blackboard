@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Outer {
     /// <summary>A node for user inputted values.</summary>
     /// <typeparam name="T">The type of the value to hold.</typeparam>
     sealed public class InputValue<T>: ValueNode<T>, IValueInput<T>
-        where T : IData, IEquatable<T> {
+        where T : struct, IData, IEquatable<T> {
 
         /// <summary>Creates a new input value node.</summary>
         public InputValue() { }

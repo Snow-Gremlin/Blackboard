@@ -9,6 +9,7 @@ using Blackboard.Parser.Optimization;
 using System.Collections.Generic;
 using System.Linq;
 using PP = PetiteParser;
+using S = System;
 
 namespace Blackboard.Parser {
 
@@ -91,12 +92,9 @@ namespace Blackboard.Parser {
             /// <summary>Clears the collection of actions.</summary>
             public void Clear() => this.actions.Clear();
 
-            /// <summary>
-            /// Gets the formula containing all the actions or null if there were no actions.
-            /// </summary>
-            public Formula? Formula =>
-                this.actions.Count <= 0 ? null :
-                new Formula(this.builder.Slate, this.actions.Append(new Finish()));
+            /// <summary>Gets the formula containing all the actions.</summary>
+            public Formula Formula =>
+                new(this.builder.Slate, this.actions.Append(new Finish()));
 
             /// <summary>Adds a pending action into this formula.</summary>
             /// <param name="performer">The performer to add.</param>
@@ -132,10 +130,9 @@ namespace Blackboard.Parser {
             /// <param name="builder">The builder this stack belongs too.</param>
             internal ScopeStack(Builder builder) {
                 this.builder = builder;
+                this.Global  = new VirtualNode("Global", this.builder.Slate.Global);
                 this.scopes  = new LinkedList<VirtualNode>();
-
-                // Reset to prepare the global virtual node.
-                this.Reset();
+                this.scopes.AddFirst(this.Global);
             }
 
             /// <summary>Resets the scope to a new virtual global scope.</summary>
@@ -150,7 +147,7 @@ namespace Blackboard.Parser {
             public VirtualNode Global { get; private set; }
 
             /// <summary>Gets the current top of the scope stack.</summary>
-            public VirtualNode Current => this.scopes.First.Value;
+            public VirtualNode Current => this.scopes.First?.Value ?? this.Global;
 
             /// <summary>Gets a copy of the current scopes.</summary>
             public VirtualNode[] Scopes => this.scopes.ToArray();
@@ -158,9 +155,9 @@ namespace Blackboard.Parser {
             /// <summary>Finds the given ID in the current scopes.</summary>
             /// <param name="name">The name of the node to find.</param>
             /// <returns>The found node by that name or null if not found.</returns>
-            public INode FindID(string name) {
+            public INode? FindID(string name) {
                 foreach (VirtualNode scope in this.Scopes) {
-                    INode node = scope.ReadField(name);
+                    INode? node = scope.ReadField(name);
                     if (node is not null) return node;
                 }
                 return null;
@@ -217,13 +214,17 @@ namespace Blackboard.Parser {
 
             /// <summary>Peeks the value off the top of the stack without removing it.</summary>
             /// <returns>The value that is on the top of the stack.</returns>
-            public T Peek() => this.stack.Last.Value;
+            public T Peek() {
+                LinkedListNode<T>? last = this.stack.Last;
+                return last is not null ? last.Value :
+                    throw new S.Exception("May not peek in an empty map.");
+            }
 
             /// <summary>Pops off a value is on the top of the stack.</summary>
             /// <returns>The value which was on top of the stack.</returns>
             public T Pop() {
                 this.builder.Logger.Info("Pop {0}", this.usage);
-                T node = this.stack.Last.Value;
+                T node = this.Peek();
                 this.stack.RemoveLast();
                 return node;
             }
@@ -235,7 +236,7 @@ namespace Blackboard.Parser {
                 this.builder.Logger.Info("Pop {1} {0}(s)", this.usage, count);
                 T[] items = new T[count];
                 for (int i = count-1; i >= 0; i--) {
-                    items[i] = this.stack.Last.Value;
+                    items[i] = this.Peek();
                     this.stack.RemoveLast();
                 }
                 return items;
@@ -292,14 +293,18 @@ namespace Blackboard.Parser {
             /// <param name="node">The node to add to the argument list.</param>
             public void Add(INode node) {
                 this.builder.Logger.Info("Add Argument: {0}", node);
-                this.argStacks.First.Value.AddLast(node);
+                LinkedListNode<LinkedList<INode>>? first = this.argStacks.First;
+                if (first is not null) first.Value.AddLast(node);
+                else throw new S.Exception("May not add an argument without first starting an argument list.");
             }
 
             /// <summary>This gets all the nodes which are in the current argument list, then removes the list.</summary>
             /// <returns>The nodes which were in the current argument list.</returns>
             public INode[] End() {
                 this.builder.Logger.Info("End Arguments");
-                return this.argStacks.TakeFirst().ToArray();
+                LinkedListNode<LinkedList<INode>>? first = this.argStacks.First;
+                return first is not null ? first.Value.ToArray() :
+                        throw new S.Exception("May not end an argument without first starting an argument list.");
             }
 
             /// <summary>Gets the human readable string of the current actions.</summary>
@@ -375,7 +380,7 @@ namespace Blackboard.Parser {
         /// </param>
         /// <returns>The cast value or the given value in the given type.</returns>
         public INode PerformCast(Type type, INode value, bool explicitCasts = false) {
-            Type valueType = Type.TypeOf(value);
+            Type? valueType = Type.TypeOf(value);
             TypeMatch match = type.Match(valueType, explicitCasts);
             if (!match.IsAnyCast)
                 return match.IsMatch ? value :
@@ -385,20 +390,17 @@ namespace Blackboard.Parser {
                         With("Type",     valueType).
                         With("Value",    value);
 
-            IFuncGroup castGroup = Maker.GetCastMethod(this.Slate, type);
-            if (castGroup is null)
+            IFuncGroup? castGroup = Maker.GetCastMethod(this.Slate, type);
+            return castGroup?.Build(value) ??
                 throw new Message("Unsupported type for new definition cast").
                     With("Location", this.LastLocation).
-                    With("Type",     type);
-
-            INode castValue = (castGroup as IFuncGroup).Build(value);
-            return castValue;
+                    With("Type",     type);   
         }
 
         /// <summary>Collects all the new nodes and apply depths.</summary>
         /// <param name="root">The root node of the branch to check.</param>
         /// <returns>The collection of new nodes.</returns>
-        private HashSet<INode> collectAndOrder(INode root) {
+        private HashSet<INode> collectAndOrder(INode? root) {
             HashSet<INode> newNodes = new();
             this.collectAndOrder(root, newNodes);
             this.Existing.Clear();
@@ -409,7 +411,7 @@ namespace Blackboard.Parser {
         /// <param name="node">The current node to check.</param>
         /// <param name="newNodes">The set of new nodes being added.</param>
         /// <returns>True if a new node, false if not.</returns>
-        private bool collectAndOrder(INode node, HashSet<INode> newNodes) {
+        private bool collectAndOrder(INode? node, HashSet<INode> newNodes) {
             if (node is null || this.Existing.Has(node)) return false;
             if (newNodes.Contains(node)) return true;
             newNodes.Add(node);
@@ -435,7 +437,7 @@ namespace Blackboard.Parser {
         /// <param name="type">The type of the node to define or null to use the value type.</param>
         /// <param name="name">The name to write the node with to the current scope.</param>
         /// <returns>The root of the value branch which was used in the assignment.</returns>
-        public INode AddDefine(INode value, Type type, string name) {
+        public INode AddDefine(INode value, Type? type, string name) {
             this.Logger.Info("Add Define:");
             INode root = type is null ? value : this.PerformCast(type, value);
 
@@ -448,11 +450,11 @@ namespace Blackboard.Parser {
             return root;
         }
 
-        /// <summary>Creates a trigger provoke action and adds it t the builder.</summary>
+        /// <summary>Creates a trigger provoke action and adds it to the builder.</summary>
         /// <param name="target">The target trigger to effect.</param>
         /// <param name="value">The conditional value to trigger with or null if unconditional.</param>
         /// <returns>The root of the value branch which was used in the assignment.</returns>
-        public INode AddProvokeTrigger(INode target, INode value) {
+        public INode? AddProvokeTrigger(INode target, INode? value) {
             this.Logger.Info("Add Provoke Trigger:");
             if (target is not ITriggerInput input)
                 throw new Message("Target node is not an input trigger.").
@@ -462,8 +464,7 @@ namespace Blackboard.Parser {
 
             // If there is no condition, add an unconditional provoke.
             if (value is null) {
-                IAction assign = Provoke.Create(target);
-                if (assign is null)
+                IAction assign = Provoke.Create(target) ??
                     throw new Message("Unexpected node types for a unconditional provoke.").
                         With("Location", this.LastLocation).
                         With("Target", target);
@@ -475,8 +476,7 @@ namespace Blackboard.Parser {
             INode root = this.PerformCast(Type.Trigger, value);
             HashSet<INode> newNodes = this.collectAndOrder(root);
             root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
-            IAction condAssign = Provoke.Create(input, root, newNodes);
-            if (condAssign is null)
+            IAction condAssign = Provoke.Create(input, root, newNodes) ??
                 throw new Message("Unexpected node types for a conditional provoke.").
                    With("Location", this.LastLocation).
                    With("Target", target).
@@ -500,12 +500,16 @@ namespace Blackboard.Parser {
 
             // Check if the base types match. Don't need to check that the type is
             // a data type or trigger since only those can be reduced to constants.
-            Type targetType = Type.TypeOf(target);
+            Type targetType = Type.TypeOf(target) ??
+                throw new Message("Unable to find target type.").
+                    With("Location", this.LastLocation).
+                    With("Input", target).
+                    With("Value", value);
+
             INode root = this.PerformCast(targetType, value);
             HashSet<INode> newNodes = this.collectAndOrder(root);
             root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
-            IAction assign = Maker.CreateAssignAction(targetType, target, root, newNodes);
-            if (assign is null)
+            IAction assign = Maker.CreateAssignAction(targetType, target, root, newNodes) ??
                 throw new Message("Unsupported types for an assignment action.").
                     With("Location", this.LastLocation).
                     With("Type",     targetType).
@@ -526,11 +530,10 @@ namespace Blackboard.Parser {
 
             // Check if the base types match. Don't need to check that the type is
             // a data type or trigger since only those can be reduced to constants.
-            INode root = this.PerformCast(targetType, value);
+            INode? root = this.PerformCast(targetType, value);
             HashSet<INode> newNodes = this.collectAndOrder(root);
             root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
-            IAction getter = Maker.CreateGetterAction(targetType, name, root, newNodes);
-            if (getter is null)
+            IAction getter = Maker.CreateGetterAction(targetType, name, root, newNodes) ??
                 throw new Message("Unsupported type for a getter action.").
                     With("Location", this.LastLocation).
                     With("Type",     targetType).
@@ -554,8 +557,7 @@ namespace Blackboard.Parser {
                     With("Name", name).
                     With("Type", type);
 
-            IInput node = Maker.CreateInputNode(type);
-            if (node is null)
+            IInput node = Maker.CreateInputNode(type) ??
                 throw new Message("Unsupported type for new typed input").
                     With("Location", this.LastLocation).
                     With("Name",     name).

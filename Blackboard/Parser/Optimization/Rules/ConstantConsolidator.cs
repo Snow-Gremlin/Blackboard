@@ -29,10 +29,10 @@ namespace Blackboard.Parser.Optimization.Rules {
 
             // Create a new instance of the current node, set the constants as the
             // only parents, evaluate that node, then get the result as a constant.
-            ICoalescable temp = node.NewInstance() as ICoalescable;
+            ICoalescable temp = (ICoalescable)node.NewInstance();
             temp.Parents.SetAll(constants);
             args.UpdateValue(temp);
-            IConstant constant = temp.ToConstant();
+            IConstant? constant = temp.ToConstant();
 
             // If the reduced constant is valid, then replace the constants with the reduced constant.
             // If the reduced constant is the identity, then return no constants.
@@ -56,7 +56,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <param name="args">The arguments for the optimization rules.</param>
         /// <param name="node">The node to try and reduce.</param>
         /// <returns>A node to replace this node with or null to not replace.</returns>
-        static private INode commutativeReduce(RuleArgs args, ICoalescable node) {
+        static private INode? commutativeReduce(RuleArgs args, ICoalescable node) {
             IConstant identity = node.Identity;
             ParentCollection parents = node.Parents;
 
@@ -103,7 +103,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <param name="args">The arguments for the optimization rules.</param>
         /// <param name="node">The node to try and reduce.</param>
         /// <returns>A node to replace this node with or null to not replace.</returns>
-        static private INode notcommutableReduce(RuleArgs args, ICoalescable node) {
+        static private INode? notcommutableReduce(RuleArgs args, ICoalescable node) {
             IConstant identity = node.Identity;
             ParentCollection parents = node.Parents;
 
@@ -149,7 +149,7 @@ namespace Blackboard.Parser.Optimization.Rules {
         /// <param name="args">The arguments for the optimization rules.</param>
         public void Perform(RuleArgs args) {
             foreach (ICoalescable node in args.Nodes.OfType<ICoalescable>().WhereNot(args.Removed.Contains).Where(node => node.ParentReducible)) {
-                INode newNode = node.Commutative ? commutativeReduce(args, node) : notcommutableReduce(args, node);
+                INode? newNode = node.Commutative ? commutativeReduce(args, node) : notcommutableReduce(args, node);
                 if (newNode is null) continue;
                 args.Replace(node, newNode);
             }

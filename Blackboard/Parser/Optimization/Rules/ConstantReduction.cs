@@ -26,7 +26,7 @@ namespace Blackboard.Parser.Optimization.Rules {
 
             // It is a constant branch, so convert it to a literal constant. 
             args.UpdateValue(node);
-            IConstant con = node.ToConstant();
+            IConstant? con = node.ToConstant();
             if (con is null) return;
 
             // Look up constant in slate, if one doesn't exist, this will add it.

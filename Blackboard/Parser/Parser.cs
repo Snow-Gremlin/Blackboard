@@ -32,7 +32,7 @@ namespace Blackboard.Parser {
         private readonly Slate slate;
 
         /// <summary>The list of prompt handlers for running the Blackboard grammar with.</summary>
-        private readonly Dictionary<string, PP.ParseTree.PromptHandle> prompts;
+        private readonly Dictionary<string, PP.ParseTree.PromptHandle<Builder>> prompts;
 
         /// <summary>Optional logger to debugging and inspecting the parser.</summary>
         private readonly Logger? logger;
@@ -42,7 +42,7 @@ namespace Blackboard.Parser {
         /// <param name="logger">An optional logger for debugging and inspecting the parser.</param>
         public Parser(Slate slate, Logger? logger = null) {
             this.slate   = slate;
-            this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle>();
+            this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle<Builder>>();
             this.logger  = logger.SubGroup(nameof(Parser));
 
             // Console.WriteLine(PP.Parser.Parser.GetDebugStateString(BaseParser.Grammar));
@@ -68,12 +68,13 @@ namespace Blackboard.Parser {
             PP.Parser.Result result = BaseParser.Parse(new PP.Scanner.DefaultScanner(input, name));
 
             // Check for parser errors.
-            if (result.Errors.Length > 0)
+            PP.ParseTree.ITreeNode? tree = result.Tree;
+            if (result.Errors.Length > 0 || tree is null)
                 throw new Message("Errors while reading code source").
                     With("Errors", result.Errors.Join("\n"));
 
             // process the resulting tree to build the formula.
-            return this.read(result.Tree);
+            return this.read(tree);
         }
 
         /// <summary>Reads the given parse tree root for an input Blackboard code.</summary>
@@ -161,12 +162,12 @@ namespace Blackboard.Parser {
         /// <param name="name">This is the name of the prompt this handler is for.</param>
         /// <param name="hndl">This is the handler to call on this prompt.</param>
         private void addHandler(string name, S.Action<Builder> hndl) =>
-            this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
+            this.prompts[name] = (Builder builder) => {
                 try {
-                    this.logger.Info("Handle {0} [{1}]", name, args.LastLocation);
-                    hndl(args as Builder);
+                    this.logger.Info("Handle {0} [{1}]", name, builder.LastLocation);
+                    hndl(builder);
                 } catch(Exception ex) {
-                    this.logger.Error("Error while handling {0} [{1}]: {2}", name, args.LastLocation, ex);
+                    this.logger.Error("Error while handling {0} [{1}]: {2}", name, builder.LastLocation, ex);
                     throw;
                 }
             };
@@ -179,14 +180,12 @@ namespace Blackboard.Parser {
                 throw new Message("Could not find the operation by the given name.").
                     With("Name", name);
 
-            this.prompts[name] = (PP.ParseTree.PromptArgs args) => {
-                Builder? builder = args as Builder;
-                PP.Scanner.Location? loc = args.LastLocation;
+            this.prompts[name] = (Builder builder) => {
+                PP.Scanner.Location? loc = builder.LastLocation;
                 builder.Logger.Info("Process {0}({1}) [{2}]", name, count, loc);
 
                 INode[] inputs = builder.Nodes.Pop(count).Actualize().ToArray();
-                INode result = funcGroup.Build(inputs);
-                if (result is null)
+                INode result = funcGroup.Build(inputs) ??
                     throw new Message("Could not perform the operation with the given input.").
                         With("Operation", name).
                         With("Input", inputs.Types().Strings().Join(", "));
@@ -197,12 +196,15 @@ namespace Blackboard.Parser {
 
         /// <summary>Validates that all prompts in the grammar are handled.</summary>
         private void validatePrompts() {
+            /*
+            // TODO: Fix when petite parser can check the generic typed sets.
             string[] unneeded = BaseParser.UnneededPrompts(this.prompts);
             string[] missing  = BaseParser.MissingPrompts(this.prompts);
             if (unneeded.Length > 0 || missing.Length > 0)
                 throw new Message("Blackboard's parser grammar has prompts which do not match prompt handlers.").
                     With("Not handled", unneeded.Join(", ")).
                     With("Not in grammar", missing.Join(", "));
+            */
         }
 
         /// <summary>A helper handler for parsing literals.</summary>
@@ -243,7 +245,7 @@ namespace Blackboard.Parser {
             VirtualNode scope = builder.Scope.Current;
 
             // Check if the virtual namespace already exists.
-            INode next = scope.ReadField(name);
+            INode? next = scope.ReadField(name);
             if (next is not null) {
                 if (next is not VirtualNode nextspace)
                     throw new Message("Can not open namespace. Another non-namespace exists by that name.").
@@ -288,7 +290,8 @@ namespace Blackboard.Parser {
         static private void handleNewVarInputWithAssign(Builder builder) {
             INode value = builder.Nodes.Pop();
             string name = builder.Identifiers.Pop();
-            Type type = Type.TypeOf(value);
+            Type type = Type.TypeOf(value) ??
+                throw new Message("Unable to determine node type for new variable with assignment.");
             INode target = builder.CreateInput(name, type);
             builder.AddAssignment(target, value);
         }
@@ -322,7 +325,8 @@ namespace Blackboard.Parser {
         static private void handleConditionalProvokeTrigger(Builder builder) {
             INode target = builder.Nodes.Pop();
             INode value  = builder.Nodes.Pop();
-            INode root   = builder.AddProvokeTrigger(target, value);
+            INode root   = builder.AddProvokeTrigger(target, value) ??
+                throw new Message("Unable to create conditional provoke trigger");
 
             // Push the condition onto the stack for any following trigger pulls.
             // See comment in `handleAssignment` about pushing cast value back onto the stack.
@@ -344,7 +348,8 @@ namespace Blackboard.Parser {
         static private void handleVarGet(Builder builder) {
             INode  value = builder.Nodes.Pop();
             string name  = builder.Identifiers.Pop();
-            Type   type  = Type.TypeOf(value);
+            Type   type  = Type.TypeOf(value) ??
+                throw new Message("Unable to determine node type for getter.");
             builder.AddGetter(type, name, value);
         }
 
@@ -388,7 +393,7 @@ namespace Blackboard.Parser {
                     With("Name", name).
                     With("Location", builder.LastLocation);
 
-            INode node = receiver.ReadField(name);
+            INode? node = receiver.ReadField(name);
             if (node is not null) {
                 builder.Nodes.Push(node);
                 return;
@@ -418,7 +423,7 @@ namespace Blackboard.Parser {
                     With("Input", args.Types().Strings().Join(", ")).
                     With("Location", builder.LastLocation);
 
-            INode result = group.Build(args);
+            INode? result = group.Build(args);
             if (result is null) {
                 if (args.Length <= 0)
                     throw new Message("Could not perform the function without any inputs.").
@@ -438,7 +443,7 @@ namespace Blackboard.Parser {
         static private void handlePushId(Builder builder) {
             string name = builder.LastText;
             builder.Logger.Info("Id = \"{0}\"", name);
-            INode node = builder.Scope.FindID(name);
+            INode? node = builder.Scope.FindID(name);
             if (node is null) {
                 throw new Message("No identifier found in the scope stack.").
                     With("Identifier", name).
@@ -488,8 +493,7 @@ namespace Blackboard.Parser {
         /// <param name="builder">The formula builder being worked on.</param>
         static private void handlePushType(Builder builder) {
             string text = builder.LastText;
-            Type t = Type.FromName(text);
-            if (t is null)
+            Type t = Type.FromName(text) ??
                 throw new Message("Unrecognized type name.").
                     With("Text", text).
                     With("Location", builder.LastLocation);

@@ -713,9 +713,9 @@ namespace Blackboard.Core {
         /// <typeparam name="T">The type of the constant to add or find.</typeparam>
         /// <param name="con">The constant to find already stored or to add.</param>
         /// <returns>The already existing constant or the passed in constant if added.</returns>
-        public T? FindAddConstant<T>(T con)
+        public T FindAddConstant<T>(T con)
             where T : class, IConstant {
-            if (this.constants.TryGetValue(con, out IConstant? result)) return result as T;
+            if (this.constants.TryGetValue(con, out IConstant? result)) return (T)result;
             this.constants.Add(con);
             return con;
         }

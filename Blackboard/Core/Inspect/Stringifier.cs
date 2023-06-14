@@ -316,15 +316,15 @@ namespace Blackboard.Core.Inspect {
             if (node is IFieldReader fieldReader) this.PreLoadNames(fieldReader);
 
             // Check if a named parent which we can stop at with the name.
-            if (useOnlyName && this.nodeNames.ContainsKey(node))
-                return this.nodeNames[node] + this.nodeDataValue(node, depth, first);
+            if (useOnlyName && this.nodeNames.TryGetValue(node, out string? name1))
+                return name1 + this.nodeDataValue(node, depth, first);
 
             // Check if a constant which can be outputted as just the value.
             if (this.ShowSimpleConstants && node is IConstant)
                 return this.nodeDataType(node) + getDataValue(node);
 
             // Construct the node and any of its children, if it is a first node and it has a name, show it.
-            return (first && this.nodeNames.ContainsKey(node) ? this.nodeNames[node]+": " : "") +
+            return (first && this.nodeNames.TryGetValue(node, out string? name2) ? name2+": " : "") +
                 this.stringNodeWithoutName(node, depth, first);
         }
 
@@ -448,7 +448,7 @@ namespace Blackboard.Core.Inspect {
         /// <returns>The string for the given field reader.</returns>
         private string shortFieldReader(IFieldReader node) =>
             node is null ? "null" :
-            this.nodeNames.ContainsKey(node) ? this.nodeNames[node] :
+            this.nodeNames.TryGetValue(node, out string? name) ? name :
             node.TypeName;
 
         #endregion

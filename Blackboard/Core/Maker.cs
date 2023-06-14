@@ -16,8 +16,7 @@ namespace Blackboard.Core {
         /// <param name="type">The type the cast returns.</param>
         /// <returns>The function group for casting a value to the given type or null if an unexpected type./returns>
         static public IFuncGroup? GetCastMethod(Slate slate, Type type) {
-            Namespace? ops = slate.Global.Find(Slate.OperatorNamespace) as Namespace;
-            if (ops is null) return null;
+            if (slate.Global.Find(Slate.OperatorNamespace) is not Namespace ops) return null;
             INode? castGroup =
                 type == Type.Object  ? ops.Find("castObject") :
                 type == Type.Bool    ? ops.Find("castBool") :

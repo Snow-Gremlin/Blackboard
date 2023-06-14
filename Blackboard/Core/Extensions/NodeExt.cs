@@ -38,7 +38,7 @@ namespace Blackboard.Core.Extensions {
         /// <param name="nodes">The nodes to check if constant.</param>
         /// <returns>True if all nodes are constant, false otherwise.</returns>
         static public bool IsConstant(this IEnumerable<INode> nodes) =>
-            nodes.All(node => IsConstant(node));
+            nodes.All(IsConstant);
 
         /// <summary>Converts this node to a constant.</summary>
         /// <remarks>

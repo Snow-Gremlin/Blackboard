@@ -443,12 +443,10 @@ namespace Blackboard.Parser {
         static private void handlePushId(Builder builder) {
             string name = builder.LastText;
             builder.Logger.Info("Id = \"{0}\"", name);
-            INode? node = builder.Scope.FindID(name);
-            if (node is null) {
+            INode node = builder.Scope.FindID(name) ??
                 throw new Message("No identifier found in the scope stack.").
                     With("Identifier", name).
                     With("Location", builder.LastLocation);
-            }
 
             builder.Nodes.Push(node);
             builder.Existing.Add(node);

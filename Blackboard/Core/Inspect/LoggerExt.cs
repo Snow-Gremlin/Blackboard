@@ -114,7 +114,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="level">The level to log this message at.</param>
         /// <param name="msg">The message to log.</param>
         static public void Log(this Logger? logger, Level level, Message msg) =>
-            logger?.Log(level, () => msg.Clone());
+            logger?.Log(level, msg.Clone);
 
         /// <summary>This will write to this log.</summary>
         /// <param name="logger">The logger to write the log to.</param>

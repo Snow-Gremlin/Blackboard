@@ -54,14 +54,14 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <param name="name">The name of the field to look for.</param>
         /// <returns>True if the name exists in this node.</returns>
         public bool ContainsField(string name) =>
-            this.overrides.ContainsKey(name) ? this.overrides[name] is not null :
+            this.overrides.TryGetValue(name, out INode? over) ? over is not null :
             this.Receiver.ContainsField(name);
 
         /// <summary>Reads the node for the field by the given name.</summary>
         /// <param name="name">The name for the node to look for.</param>
         /// <returns>The node or null if not found.</returns>
         public INode? ReadField(string name) {
-            if (this.overrides.ContainsKey(name)) return this.overrides[name];
+            if (this.overrides.TryGetValue(name, out INode? over)) return over;
             INode? node = this.Receiver.ReadField(name);
             if (node is not IFieldWriter field) return node;
             VirtualNode vNode = new(name, field);

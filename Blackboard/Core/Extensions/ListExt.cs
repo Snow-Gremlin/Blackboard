@@ -48,9 +48,10 @@ namespace Blackboard.Core.Extensions {
         /// <typeparam name="T">The type of the values in the list.</typeparam>
         /// <param name="list">The list to take the first value from.</param>
         /// <returns>The first value from the linked list or the default value if the list is empty.</returns>
-        static public T TakeFirst<T>(this LinkedList<T> list) {
-            if (list.Count <= 0) return default;
-            T value = list.First.Value;
+        static public T? TakeFirst<T>(this LinkedList<T> list) {
+            LinkedListNode<T>? first = list.First;
+            if (first is null) return default;
+            T value = first.Value;
             list.RemoveFirst();
             return value;
         }

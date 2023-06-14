@@ -18,7 +18,7 @@ namespace Blackboard.Core.Nodes.Interfaces {
         /// <summary>Reads the node for the field by the given name.</summary>
         /// <param name="name">The name for the node to look for.</param>
         /// <returns>The node or null if not found.</returns>
-        public INode ReadField(string name);
+        public INode? ReadField(string name);
 
         /// <summary>Gets all the fields and their names in this reader.</summary>
         public IEnumerable<KeyValuePair<string, INode>> Fields { get; }

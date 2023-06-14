@@ -94,7 +94,7 @@ namespace Blackboard.Parser {
             /// <summary>
             /// Gets the formula containing all the actions or null if there were no actions.
             /// </summary>
-            public Formula Formula =>
+            public Formula? Formula =>
                 this.actions.Count <= 0 ? null :
                 new Formula(this.builder.Slate, this.actions.Append(new Finish()));
 

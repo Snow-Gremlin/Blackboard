@@ -19,7 +19,7 @@ namespace Blackboard.Core.Inspect {
                 _             => "Unknown",
             };
 
-        private S.Func<Message> fetcher;
+        private S.Func<Message?> fetcher;
         private readonly List<string> groups;
 
         /// <summary>Creates a new entry for a deferred message.</summary>
@@ -28,7 +28,7 @@ namespace Blackboard.Core.Inspect {
         /// This is the function used for constructing the message if
         /// and when this entry is being logged and not filtered out.
         /// </param>
-        internal Entry(Level level, S.Func<Message> fetcher) {
+        internal Entry(Level level, S.Func<Message?> fetcher) {
             if (fetcher is null)
                 throw new S.ArgumentNullException(nameof(fetcher),
                     "A message entry must have a non-null function for creating or getting a message.");
@@ -41,7 +41,7 @@ namespace Blackboard.Core.Inspect {
         /// <remarks>This will actually create the message not just copy the fetcher.</remarks>
         /// <returns>The cloned entry.</returns>
         public Entry Clone() {
-            Message msg = this.Message.Clone();
+            Message? msg = this.Message?.Clone();
             Entry copy = new(this.Level, () => msg);
             copy.groups.AddRange(this.groups);
             return copy;
@@ -53,9 +53,9 @@ namespace Blackboard.Core.Inspect {
         /// even if the message creation is slow. If the lower level messages are being
         /// filtered out, then the effort of the message creation is avoided.
         /// </remarks>
-        public Message Message {
+        public Message? Message {
             get {
-                Message msg = this.fetcher();
+                Message? msg = this.fetcher();
                 this.fetcher = () => msg;
                 return msg;
             }
@@ -93,9 +93,9 @@ namespace Blackboard.Core.Inspect {
         /// <param name="processor">The processor function to modify a message with.</param>
         internal void AddProcessing(S.Func<Message, Message> processor) {
             if (processor is null) return;
-            S.Func<Message> oldFetcher = this.fetcher;
+            S.Func<Message?> oldFetcher = this.fetcher;
             this.fetcher = () => {
-                Message msg = oldFetcher();
+                Message? msg = oldFetcher();
                 return msg is null ? null : processor(msg);
             }; 
         }
@@ -110,7 +110,7 @@ namespace Blackboard.Core.Inspect {
         /// <param name="showGroup">Indicates the message should show the group of the message.</param>
         /// <returns>The string for this entry.</returns>
         public string ToString(bool indent = true, bool showLevel = false, bool showGroup = false) {
-            string str = this.Message.ToString();
+            string str = this.Message?.ToString() ?? "null";
             if (showLevel) str = LevelToString(this.Level) + " " + str;
             if (showGroup) str = this.groups.Join("/") + " " + str;
             if (indent) str = str.Indent(new string(' ', this.groups.Count*2));

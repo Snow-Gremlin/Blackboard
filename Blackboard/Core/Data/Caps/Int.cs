@@ -7,7 +7,7 @@ using S = System;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a 32 bit signed integer value such that it can be used in generics.</summary>
-    public struct Int:
+    public readonly struct Int:
         IAdditive<Int>,
         IBitwise<Int>,
         IComparable<Int>,
@@ -245,7 +245,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Casts an object into an int for an explicit cast.</summary>
         /// <param name="value">The object value to cast.</param>
         /// <returns>The resulting integer value.</returns>
-        public Int CastFrom(Object value) => new((int)value.Value);
+        public Int CastFrom(Object value) => new((int?)value.Value ?? default);
 
         #endregion
 

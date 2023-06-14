@@ -61,7 +61,7 @@ namespace Blackboard.Core.Nodes.Bases {
         /// This is only valid for this constructor if and only if there is one argument.
         /// </param>
         /// <param name="argTypes">This is the required types for this function.</param>
-        protected FuncDef(bool needsOneNoCast, bool passOne, params Type[] argTypes) :
+        protected FuncDef(bool needsOneNoCast, bool passOne, params Type?[] argTypes) :
             this(argTypes.Length, argTypes.Length, needsOneNoCast, passOne, argTypes) { }
 
         /// <summary>Creates a new non-group function base.</summary>
@@ -78,8 +78,8 @@ namespace Blackboard.Core.Nodes.Bases {
         /// If needed it will still perform an implicit cast to match the first argument type.
         /// </param>
         /// <param name="argTypes">The types for all the arguments. Any nil types are ignored.</param>
-        protected FuncDef(int min, int max, bool needsOneNoCast, bool passOne, params Type[] argTypes) {
-            argTypes = argTypes.NotNull().ToArray();
+        protected FuncDef(int min, int max, bool needsOneNoCast, bool passOne, params Type?[] argTypes) {
+            Type[] nnTypes = argTypes.NotNull().ToArray();
 
             void throwExp(string message) =>
                 throw new Message(message).
@@ -87,7 +87,7 @@ namespace Blackboard.Core.Nodes.Bases {
                     With("Maximum", max).
                     With("Need one no cast", needsOneNoCast).
                     With("Pass one", passOne).
-                    With("Types", argTypes.Strings().Join(", ")).
+                    With("Types", nnTypes.Strings().Join(", ")).
                     With("Return type", typeof(TReturn));
 
             if (min < 0)
@@ -96,10 +96,10 @@ namespace Blackboard.Core.Nodes.Bases {
             if (min > max)
                 throwExp("Must define a maximum allowed number of arguments that is greater than and equal to the minimum required number.");
 
-            if (max < argTypes.Length)
+            if (max < nnTypes.Length)
                 throwExp("The maximum allowed number of arguments is below the number of given types. Trim the type list.");
 
-            if (max > 0 && argTypes.Length <= 0)
+            if (max > 0 && nnTypes.Length <= 0)
                 throwExp("Must have at least one argument type if maximum is greater than zero.");
 
             if (needsOneNoCast && min < 1)
@@ -108,14 +108,14 @@ namespace Blackboard.Core.Nodes.Bases {
             if (passOne && max < 1)
                 throwExp("May not allow pass one if the maximum allowed value less than one.");
 
-            bool passthroughOne = passOne && Type.Match<TReturn>(argTypes[0]).IsMatch;
+            bool passthroughOne = passOne && Type.Match<TReturn>(nnTypes[0]).IsMatch;
             if (passOne && !passthroughOne)
                 throwExp("May not pass one when the first argument type is not inherited nor implicit cast to the return type.");
 
             this.MinArgs = min;
             this.MaxArgs = max;
             this.NeedsOneNoCast = needsOneNoCast;
-            this.argTypes = argTypes;
+            this.argTypes = nnTypes;
             this.PassThroughOne = passthroughOne;
         }
 

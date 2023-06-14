@@ -47,6 +47,6 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>Builds and return the function node with the given arguments already casted.</summary>
         /// <param name="nodes">These are the nodes casted into the correct type for the build.</param>
         /// <returns>The resulting function node.</returns>
-        protected override INode PostCastBuild(INode[] nodes) => this.handle(nodes[0] as T1, nodes[1..].Cast<Tn>());
+        protected override INode PostCastBuild(INode[] nodes) => this.handle((T1)nodes[0], nodes[1..].Cast<Tn>());
     }
 }

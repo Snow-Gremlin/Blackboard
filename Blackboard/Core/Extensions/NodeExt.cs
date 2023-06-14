@@ -278,7 +278,8 @@ namespace Blackboard.Core.Extensions {
             logger.Info("Start Update (pending: {0})", pending.Count);
 
             while (pending.Count > 0) {
-                IEvaluable node = pending.TakeFirst();
+                IEvaluable? node = pending.TakeFirst();
+                if (node is null) break;
 
                 // Determine the depth that this node should be at based on its parents.
                 int depth = node.MinimumAllowedDepth();
@@ -310,7 +311,8 @@ namespace Blackboard.Core.Extensions {
 
             HashSet<ITrigger> provoked = new();
             while (pending.Count > 0) {
-                IEvaluable node = pending.TakeFirst();
+                IEvaluable? node = pending.TakeFirst();
+                if (node is null) break;
 
                 bool changed = false;
                 if (node.Evaluate()) {
@@ -353,15 +355,15 @@ namespace Blackboard.Core.Extensions {
         /// <param name="node">The field reader to find a node in.</param>
         /// <param name="names">The names to the node to find.</param>
         /// <returns>The node at the end of the path or null.</returns>
-        static public INode Find(this IFieldReader node, params string[] names) =>
+        static public INode? Find(this IFieldReader node, params string[] names) =>
             node.Find(names as IEnumerable<string>);
 
         /// <summary>Finds the node at the given path.</summary>
         /// <param name="node">The field reader to find a node in.</param>
         /// <param name="names">The names to the node to find.</param>
         /// <returns>The node at the end of the path or null.</returns>
-        static public INode Find(this IFieldReader node, IEnumerable<string> names) {
-            INode cur = node;
+        static public INode? Find(this IFieldReader node, IEnumerable<string> names) {
+            INode? cur = node;
             foreach (string name in names) {
                 if (cur is IFieldReader scope) {
                     if (!scope.ContainsField(name)) return null;

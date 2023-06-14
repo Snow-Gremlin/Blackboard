@@ -4,7 +4,7 @@ using Blackboard.Core.Types;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a boolean value such that it can be used in generics.</summary>
-    public struct Bool:
+    public readonly struct Bool:
         IData,
         IEquatable<Bool>,
         IExplicit<Object, Bool> {
@@ -43,7 +43,7 @@ namespace Blackboard.Core.Data.Caps {
         public string ValueAsString => this.Value ? TrueString : FalseString;
 
         /// <summary>Get the value of the data as an object.</summary>
-        public object ValueAsObject => this.Value;
+        public object? ValueAsObject => this.Value;
 
         #endregion
         #region Equatable...
@@ -62,7 +62,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Casts an object into a bool for an explicit cast.</summary>
         /// <param name="value">The object value to cast.</param>
         /// <returns>The resulting boolean value.</returns>
-        public Bool CastFrom(Object value) => new((bool)value.Value);
+        public Bool CastFrom(Object value) => new((bool?)value.Value ?? default);
 
         #endregion
 

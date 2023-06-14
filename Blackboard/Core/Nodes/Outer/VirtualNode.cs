@@ -15,7 +15,7 @@ namespace Blackboard.Core.Nodes.Outer {
 
         /// <summary>The overridden nodes for this receiver.</summary>
         /// <remarks>If the node value is null, then the node has been deleted.</remarks>
-        private readonly Dictionary<string, INode> overrides;
+        private readonly Dictionary<string, INode?> overrides;
 
         /// <summary>Creates a new virtual node around the given receiver.</summary>
         /// <param name="name">The is the name for this virtual node.</param>
@@ -23,7 +23,7 @@ namespace Blackboard.Core.Nodes.Outer {
         public VirtualNode(string name, IFieldWriter receiver) {
             this.Name = name;
             this.Receiver = receiver;
-            this.overrides = new Dictionary<string, INode>();
+            this.overrides = new Dictionary<string, INode?>();
 
             if (receiver is null or VirtualNode)
                 throw new Message("May not construct a virtual node with a null or virtual node receiver.");
@@ -45,7 +45,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>Gets or sets the field in this namespace.</summary>
         /// <param name="name">The name of the field.</param>
         /// <returns>The node to get or set to this field.</returns>
-        public INode this[string name] {
+        public INode? this[string name] {
             get => this.ReadField(name);
             set => this.WriteField(name, value);
         }
@@ -60,9 +60,9 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>Reads the node for the field by the given name.</summary>
         /// <param name="name">The name for the node to look for.</param>
         /// <returns>The node or null if not found.</returns>
-        public INode ReadField(string name) {
+        public INode? ReadField(string name) {
             if (this.overrides.ContainsKey(name)) return this.overrides[name];
-            INode node = this.Receiver.ReadField(name);
+            INode? node = this.Receiver.ReadField(name);
             if (node is not IFieldWriter field) return node;
             VirtualNode vNode = new(name, field);
             this.overrides[name] = vNode;
@@ -74,9 +74,10 @@ namespace Blackboard.Core.Nodes.Outer {
         public IEnumerable<KeyValuePair<string, INode>> Fields {
             get {
                 HashSet<string> reached = new();
-                foreach (KeyValuePair<string, INode> pair in this.overrides) {
+                foreach (KeyValuePair<string, INode?> pair in this.overrides) {
                     reached.Add(pair.Key);
-                    yield return pair;
+                    INode? value = pair.Value;
+                    if (value is not null) yield return new KeyValuePair<string, INode>(pair.Key, value);
                 }
                 foreach (KeyValuePair<string, INode> pair in this.Receiver.Fields) {
                     if (!reached.Contains(pair.Key)) yield return pair;
@@ -87,7 +88,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>Writes or overwrites a new field to this node.</summary>
         /// <param name="name">The name of the field to write.</param>
         /// <param name="node">The node to write to the field.</param>
-        public void WriteField(string name, INode node) => this.overrides[name] = node;
+        public void WriteField(string name, INode? node) => this.overrides[name] = node;
 
         /// <summary>Removes fields from this node by name if they exist.</summary>
         /// <param name="names">The names of the fields to remove.</param>

@@ -11,14 +11,14 @@ namespace Blackboard.Core.Inspect {
         /// <summary>Creates a new exception for the given message.</summary>
         /// <param name="message">The message to create an exception with.</param>
         /// <param name="inner">The inner exception from this message.</param>
-        internal Exception(string message, S.Exception? inner) :
+        internal Exception(string message, S.Exception? inner = null) :
             this(new Message(message), inner) { }
 
         /// <summary>Creates a new exception for the given message.</summary>
         /// <remarks>This used when a message is implicitly casted to an exception.</remarks>
         /// <param name="message">The message to create an exception with.</param>
         /// <param name="inner">The inner exception from this message.</param>
-        internal Exception(Message message, S.Exception? inner):
+        internal Exception(Message message, S.Exception? inner = null):
             base(message.ToString(), inner) {
             this.FullMessage = message;
             foreach ((string key, object? value) in message.Data)

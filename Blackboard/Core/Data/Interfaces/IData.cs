@@ -11,6 +11,6 @@
         public string ValueAsString { get; }
 
         /// <summary>Get the value of the data as an object.</summary>
-        public object ValueAsObject { get; }
+        public object? ValueAsObject { get; }
     }
 }

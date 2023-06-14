@@ -19,7 +19,7 @@ namespace Blackboard.Core.Nodes.Inner {
 
         /// <summary>Creates a one and only one trigger node.</summary>
         /// <param name="parents">The initial set of parents to use.</param>
-        public OnlyOne(IEnumerable<ITriggerParent>? parents) : base(parents) { }
+        public OnlyOne(IEnumerable<ITriggerParent> parents) : base(parents) { }
 
         /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
         /// <returns>The new instance of this node.</returns>

@@ -8,7 +8,7 @@ using System.Text;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a string value such that it can be used in generics.</summary>
-    public struct String:
+    public readonly struct String:
         IAdditive<String>,
         IComparable<String>,
         IData,

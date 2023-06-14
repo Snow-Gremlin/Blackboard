@@ -7,7 +7,7 @@ using S = System;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for an IEEE 754 double value such that it can be used in generics.</summary>
-    public struct Double:
+    public readonly struct Double:
         IAdditive<Double>,
         IComparable<Double>,
         IData,
@@ -268,7 +268,7 @@ namespace Blackboard.Core.Data.Caps {
         /// <summary>Casts an object into a double for an implicit cast.</summary>
         /// <param name="value">The object value to cast.</param>
         /// <returns>The resulting double value.</returns>
-        public Double CastFrom(Object value) => new((double)value.Value);
+        public Double CastFrom(Object value) => new((double?)value.Value ?? default);
 
         #endregion
 

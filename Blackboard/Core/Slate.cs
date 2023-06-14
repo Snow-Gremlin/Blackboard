@@ -465,8 +465,8 @@ namespace Blackboard.Core {
         /// <summary>Gets the type of the value at the given node.</summary>
         /// <param name="names">The name of the node to get the type of.</param>
         /// <returns>The type of the node or null if doesn't exist or not a node type.</returns>
-        public Type GetType(IEnumerable<string> names) {
-            object obj = this.Global.Find(names);
+        public Type? GetType(IEnumerable<string> names) {
+            object? obj = this.Global.Find(names);
             return obj is null ? null : Type.FromType(obj.GetType());
         }
 
@@ -497,7 +497,7 @@ namespace Blackboard.Core {
         /// <summary>Gets the value from a named node.</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value from the node.</returns>
-        public object GetObject(params string[] names) =>
+        public object? GetObject(params string[] names) =>
             this.GetValue<Object>(names).Value;
 
         /// <summary>Gets the value from a named node.</summary>
@@ -517,13 +517,13 @@ namespace Blackboard.Core {
         /// <summary>Gets the value as an object from a named node</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value as an object from the node.</returns>
-        public object GetValueAsObject(params string[] names) =>
+        public object? GetValueAsObject(params string[] names) =>
             this.GetValueAsObject(names as IEnumerable<string>);
 
         /// <summary>Gets the value as an object from a named node</summary>
         /// <param name="name">The name of the node to read the value from.</param>
         /// <returns>The value as an object from the node.</returns>
-        public object GetValueAsObject(IEnumerable<string> names) =>
+        public object? GetValueAsObject(IEnumerable<string> names) =>
             this.GetNode<IDataNode>(names).Data.ValueAsObject;
 
         /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
@@ -551,7 +551,7 @@ namespace Blackboard.Core {
         /// <param name="names">The name of the node to get.</param>
         /// <returns>The node with the given name and type.</returns>
         public T GetNode<T>(IEnumerable<string> names) where T : INode {
-            object obj = this.Global.Find(names);
+            object? obj = this.Global.Find(names);
             return obj is null ?
                     throw new Message("Unable to get a node by the given name.").
                         With("Name", names.Join(".")).
@@ -601,7 +601,7 @@ namespace Blackboard.Core {
         /// <returns>The new or existing trigger output.</returns>
         public ITriggerOutput GetOutputTrigger(IEnumerable<string> names) {
             ITriggerParent parent = this.GetNode<ITriggerParent>(names);
-            ITriggerOutput output = parent.Children.OfType<ITriggerOutput>().FirstOrDefault();
+            ITriggerOutput? output = parent.Children.OfType<ITriggerOutput>().FirstOrDefault();
             if (output is not null) return output;
 
             output = new OutputTrigger(parent);
@@ -683,7 +683,7 @@ namespace Blackboard.Core {
         /// <summary>This adds provoked trigger nodes which need to be reset.</summary>
         /// <param name="nodes">The provoked trigger nodes to add.</param>
         public void NeedsReset(IEnumerable<ITrigger> nodes) => nodes.NotNull().
-            Where(trig => trig.Provoked).Foreach(node => this.needsReset.Add(node));
+            Where(trig => trig.Provoked).Foreach(this.needsReset.Add);
 
         /// <summary>This will reset all provoked trigger nodes which have been added.</summary>
         /// <remarks>The needs reset set will be cleared by this call.</remarks>

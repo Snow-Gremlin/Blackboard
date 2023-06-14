@@ -25,7 +25,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>Gets or sets the field in this namespace.</summary>
         /// <param name="name">The name of the field.</param>
         /// <returns>The node to get or set to this field.</returns>
-        public INode this[string name] {
+        public INode? this[string name] {
             get => this.ReadField(name);
             set => this.WriteField(name, value);
         }
@@ -44,7 +44,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>Reads the node for the field by the given name.</summary>
         /// <param name="name">The name for the node to look for.</param>
         /// <returns>The node or null if not found.</returns>
-        public INode ReadField(string name) => this.fields.ContainsKey(name) ? this.fields[name] : null;
+        public INode? ReadField(string name) => this.fields.TryGetValue(name, out INode? field) ? field : null;
 
         /// <summary>Gets all the fields in this namespace with the name for each field.</summary>
         public IEnumerable<KeyValuePair<string, INode>> Fields => this.fields;
@@ -52,7 +52,7 @@ namespace Blackboard.Core.Nodes.Outer {
         /// <summary>Writes or overwrites a new field to this node.</summary>
         /// <param name="name">The name of the field to write.</param>
         /// <param name="node">The node to write to the field.</param>
-        public void WriteField(string name, INode node) {
+        public void WriteField(string name, INode? node) {
             if (node is null)
                 throw new Message("May not write a null node to a namespace.").
                     With("Name", name).

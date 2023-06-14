@@ -32,7 +32,7 @@ namespace Blackboard.Core.Nodes.Outer {
         }
 
         /// <summary>This event is emitted when the trigger has been provoked.</summary>
-        public event S.EventHandler OnProvoked;
+        public event S.EventHandler? OnProvoked;
 
         /// <summary>The set of parent nodes to this node in the graph.</summary>
         public ParentCollection Parents => new ParentCollection(this, 1).

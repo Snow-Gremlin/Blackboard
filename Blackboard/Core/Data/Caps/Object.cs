@@ -4,7 +4,7 @@ using Blackboard.Core.Types;
 namespace Blackboard.Core.Data.Caps {
 
     /// <summary>This is the data storage for a base value type, object, such that it can be used in generics.</summary>
-    public struct Object:
+    public readonly struct Object:
         IData,
         IEquatable<Object>, 
         IImplicit<Bool,   Object>,
@@ -21,11 +21,11 @@ namespace Blackboard.Core.Data.Caps {
         #endregion
 
         /// <summary>The object value being stored.</summary>
-        public readonly object Value;
+        public readonly object? Value;
 
         /// <summary>Creates a new object data value.</summary>
         /// <param name="value">The object value to store.</param>
-        public Object(object value) => this.Value = value;
+        public Object(object? value) => this.Value = value;
 
         #region Data...
 
@@ -36,7 +36,7 @@ namespace Blackboard.Core.Data.Caps {
         public string ValueAsString => this.Value?.ToString() ?? "null";
 
         /// <summary>Get the value of the data as an object.</summary>
-        public object ValueAsObject => this.Value;
+        public object? ValueAsObject => this.Value;
 
         #endregion
         #region Equatable...

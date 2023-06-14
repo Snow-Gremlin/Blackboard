@@ -22,8 +22,8 @@ namespace Blackboard.Core.Actions {
         /// <summary>Gets the type of the value at the given output.</summary>
         /// <param name="name">The name given to the output data.</param>
         /// <returns>The type of the output or null if doesn't exist or not a node type.</returns>
-        public Type OutputType(string name) {
-            object obj = this.outputData[name];
+        public Type? OutputType(string name) {
+            object? obj = this.outputData[name];
             return obj is null ? null : Type.FromType(obj.GetType());
         }
 
@@ -54,7 +54,7 @@ namespace Blackboard.Core.Actions {
         /// <summary>Gets the value from a named output.</summary>
         /// <param name="name">The name given to the output data.</param>
         /// <returns>The object from the output.</returns>
-        public object GetObject(string name) =>
+        public object? GetObject(string name) =>
             this.GetValue<Object>(name).Value;
 
         /// <summary>Gets the value from a named output.</summary>

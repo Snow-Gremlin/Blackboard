@@ -67,9 +67,9 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>Finds and returns the best matching function in this collection.</summary>
         /// <param name="types">The input types to match against the function signatures with.</param>
         /// <returns>The best matching function or null if none match.</returns>
-        public IFuncDef Find(params Type[] types) {
-            FuncMatch minMatch = null;
-            IFuncDef minFunc = null;
+        public IFuncDef? Find(params Type[] types) {
+            FuncMatch? minMatch = null;
+            IFuncDef? minFunc = null;
             foreach (IFuncDef func in this.definitions) {
                 FuncMatch match = func.Match(types);
                 if (!match.IsMatch) continue;
@@ -85,12 +85,12 @@ namespace Blackboard.Core.Nodes.Functions {
         /// <summary>Builds and returns the function object.</summary>
         /// <param name="types">The types of the parameters being passed into the function.</param>
         /// <returns>The new node from the function or null.</returns>
-        public System.Type Returns(params Type[] types) => this.Find(types)?.ReturnType;
+        public System.Type? Returns(params Type[] types) => this.Find(types)?.ReturnType;
 
         /// <summary>Builds and returns the function object.</summary>
         /// <param name="nodes">The nodes as parameters to the function.</param>
         /// <returns>The new node from the function or null.</returns>
-        public INode Build(params INode[] nodes) => this.Find(nodes.Select(Type.TypeOf).ToArray())?.Build(nodes);
+        public INode? Build(params INode[] nodes) => this.Find(nodes.Select(Type.TypeOf).NotNull().ToArray())?.Build(nodes);
 
         /// <summary>Gets the string for this node.</summary>
         /// <returns>The debug string for this node.</returns>

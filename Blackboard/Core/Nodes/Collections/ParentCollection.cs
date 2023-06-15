@@ -1,7 +1,6 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -320,7 +319,7 @@ sealed public class ParentCollection : IEnumerable<IParent> {
     /// <summary>This gets the type of the parent at the given index.</summary>
     /// <param name="index">The index to get the parent's type of.</param>
     /// <returns>The type of the parent at the given index.s</returns>
-    public Type TypeAt(int index) =>
+    public S.Type TypeAt(int index) =>
         (index < 0 || (!this.HasVariable && index >= this.FixedCount) ?
         throw this.message("Index out of bounds of node's parent types.").
             With("index", index) :
@@ -343,7 +342,7 @@ sealed public class ParentCollection : IEnumerable<IParent> {
             IParent? parent = this[index]; // This also will check bounds
             if (ReferenceEquals(parent, value)) return;
 
-            Type? type = this.TypeAt(index);
+            S.Type? type = this.TypeAt(index);
             if (value.GetType().IsAssignableTo(type))
                 throw this.message("Incorrect type of a parent being set to a node.").
                     With("index", index).

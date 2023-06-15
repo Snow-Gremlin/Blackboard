@@ -23,7 +23,7 @@ sealed public class Parser {
             PP.Scanner.DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Grammar.lang"),
             PP.Scanner.DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Keywords.lang"),
             PP.Scanner.DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Tokens.lang")
-        ));
+        ), ignoreConflicts: false);
 
     /// <summary>The Blackboard language base parser singleton.</summary>
     static public readonly PP.Parser.Parser BaseParser;

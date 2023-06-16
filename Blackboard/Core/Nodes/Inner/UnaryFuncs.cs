@@ -13,7 +13,7 @@ static public class UnaryFloatingPoint<T>
     where T : struct, IFloatingPoint<T>, IEquatable<T> {
 
     /// <summary>This is a factory for creating a new IsNaN instance of this node.</summary>
-    /// <remarks>Determines if the double is not a number, such as when something is divided by zero.</remarks>
+    /// <remarks>Determines if the floating point is not a number, such as when something is divided by zero.</remarks>
     static public readonly IFuncDef IsNaN = UnaryFuncs<T, Bool>.Factory(nameof(IsNaN), v => v.IsNaN());
 
     /// <summary>This is a factory for creating a new IsFinite instance of this node.</summary>
@@ -35,12 +35,12 @@ static public class UnaryFloatingPoint<T>
         Factory(nameof(IsNegativeInfinity), v => v.IsNegativeInfinity());
 
     /// <summary>This is a factory for creating a new IsNormal instance of this node.</summary>
-    /// <remarks>Determines if the value is in the normal range of doubles with full precision.</remarks>
+    /// <remarks>Determines if the value is in the normal range of floating point values with full precision.</remarks>
     /// <see cref="https://en.wikipedia.org/wiki/Subnormal_number"/>
     static public readonly IFuncDef IsNormal = UnaryFuncs<T, Bool>.Factory(nameof(IsNormal), v => v.IsNormal());
 
     /// <summary>This is a factory for creating a new IsSubnormal instance of this node.</summary>
-    /// <remarks>Determines if the value is not in the normal range of double so have reduced precision.</remarks>
+    /// <remarks>Determines if the value is not in the normal range of floating point value so have reduced precision.</remarks>
     /// <see cref="https://en.wikipedia.org/wiki/Subnormal_number"/>
     static public readonly IFuncDef IsSubnormal = UnaryFuncs<T, Bool>.Factory(nameof(IsSubnormal), v => v.IsSubnormal());
 
@@ -214,7 +214,7 @@ sealed public class UnaryFuncs<T1, TResult> : UnaryValue<T1, TResult>
     /// <summary>The function to perform on this node's value.</summary>
     private readonly S.Func<T1, TResult> func;
 
-    /// <summary>Creates a double mathematical function value node.</summary>
+    /// <summary>Creates a unary mathematical function value node.</summary>
     /// <param name="funcName">The name of the function to perform.</param>
     /// <param name="func">This is the function to apply to the parent.</param>
     /// <param name="source">This is the single parent for the source value.</param>
@@ -231,8 +231,8 @@ sealed public class UnaryFuncs<T1, TResult> : UnaryValue<T1, TResult>
     /// <summary>This is the type name of the node.</summary>
     public override string TypeName => this.funcName;
 
-    /// <summary>The result of the double mathematical function the parent's value during evaluation.</summary>
+    /// <summary>The result of the mathematical function the parent's value during evaluation.</summary>
     /// <param name="value">The value to evaluate.</param>
-    /// <returns>The new data with the double value.</returns>
+    /// <returns>The new data with the value.</returns>
     protected override TResult OnEval(T1 value) => this.func(value);
 }

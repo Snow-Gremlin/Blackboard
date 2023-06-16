@@ -12,11 +12,6 @@
     | <GetValue>
     | <Declaration> [End];
 
-# TODO: Why does two grammar rules one with [Var] and one without work but <OptionalVar> doesn't?
-#       It looks like the state table doesn't handle the lambda correctly for some reason.
-<OptionalVar> := _
-    | [Var];
-
 #=========================================================#
 # Namespace                                               #
 #=========================================================#
@@ -45,7 +40,8 @@
     | [DeclareIn] [CurlOpen] <NewInputGroup> [CurlClose];
 
 <NewInputHead> := <RootType> <NewTypedInputPart> <NewTypedInputTail>
-    | <OptionalVar> <NewVarInputPart> <NewVarInputTail>;
+    | <NewVarInputPart> <NewVarInputTail>
+    | [Var] <NewVarInputPart> <NewVarInputTail>;
 
 <NewTypedInputTail> := _
     | [Comma] <NewTypedInputPart> <NewTypedInputTail>;
@@ -83,12 +79,14 @@
     | [DeclareDefine] [CurlOpen] <DefineGroup> [CurlClose];
 
 <DefineDefine> := <RootType> <DefineDefinePart> {typeDefine}
-    | <OptionalVar> <DefineDefinePart> {varDefine};
+    | <DefineDefinePart> {varDefine}
+    | [Var] <DefineDefinePart> {varDefine};
 
 <DefineDefinePart> := [Identifier] {defineId} [Define] <Conditional>;
 
 <DefineAssign> := <RootType> <DefineAssignPart> {typeDefine}
-    | <OptionalVar> <DefineAssignPart> {varDefine};
+    | <DefineAssignPart> {varDefine}
+    | [Var] <DefineAssignPart> {varDefine};
 
 <DefineAssignPart> := [Identifier] {defineId} [Assign] <Conditional>;
 
@@ -115,7 +113,8 @@
 #=========================================================#
 
 <GetValue> := [DeclareGet] <RootType> <GetTypedValuePart> <GetTypedValueTail> [End]
-    | [DeclareGet] <OptionalVar> <GetVarValuePart> <GetVarValueTail> [End];
+    | [DeclareGet] <GetVarValuePart> <GetVarValueTail> [End]
+    | [DeclareGet] [Var] <GetVarValuePart> <GetVarValueTail> [End];
 
 <GetTypedValueTail> := _
     | [Comma] <GetTypedValuePart> <GetTypedValueTail>;
@@ -137,7 +136,7 @@
     | <Conditional> [Assign] <Declaration> {assignment};
     
 <Conditional> := <LogicalOr>
-    | <Conditional> [Test] <Conditional> [Else] <Conditional> {ternary};
+    | <LogicalOr> [Test] <Conditional> [Else] <Conditional> {ternary};
 
 <LogicalOr> := <LogicalXor>
     | <LogicalOr> [LogicalOr] <LogicalXor> {logicalOr};

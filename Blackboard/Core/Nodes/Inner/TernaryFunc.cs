@@ -7,7 +7,7 @@ using S = System;
 
 namespace Blackboard.Core.Nodes.Inner;
 
-/// <summary>Binary nodes for specific hard-coded data types.</summary>
+/// <summary>Ternary nodes for specific hard-coded data types.</summary>
 static public class TernaryComparable<T>
     where T : struct, IComparable<T> {
 
@@ -22,7 +22,7 @@ static public class TernaryComparable<T>
         Factory(nameof(Clamp), (value, min, max) => value.Clamp(min, max));
 }
 
-/// <summary>Binary nodes for specific hard-coded data types.</summary>
+/// <summary>Ternary nodes for specific hard-coded data types.</summary>
 static public class Ternary {
 
     /// <summary>This is a factory for creating a new PadLeft instance of this node.</summary>
@@ -32,7 +32,7 @@ static public class Ternary {
     /// </remarks>
     static public readonly IFuncDef PadLeft = TernaryFunc<String, Int, String, String>.
         Factory(nameof(PadLeft), (value, totalWidth, padding) =>
-            new(value.Value.PadString(totalWidth.Value, padding.Value ?? " ", true)));
+            new(value.Value.PadString(totalWidth.Value, padding.Value, true)));
 
     /// <summary>This is a factory for creating a new PadRight instance of this node.</summary>
     /// <remarks>
@@ -41,13 +41,13 @@ static public class Ternary {
     /// </remarks>
     static public readonly IFuncDef PadRight = TernaryFunc<String, Int, String, String>.
         Factory(nameof(PadRight), (value, totalWidth, padding) =>
-            new(value.Value.PadString(totalWidth.Value, padding.Value ?? " ", false)));
+            new(value.Value.PadString(totalWidth.Value, padding.Value, false)));
 
     /// <summary>This is a factory for creating a new IndexOf instance of this node.</summary>
     /// <remarks>This will return the index of a substring or -1 if not found.</remarks>
     static public readonly IFuncDef IndexOf = TernaryFunc<String, String, Int, Int>.
         Factory(nameof(IndexOf), (value, gram, index) =>
-            new(value.Value.IndexOf(gram.Value ?? "", index.Value)));
+            new(value.Value.IndexOf(gram.Value, index.Value)));
 
     /// <summary>This is a factory for creating a new Substring instance of this node.</summary>
     /// <remarks>This will return a substring for the given range from a source string.</remarks>
@@ -68,7 +68,7 @@ static public class Ternary {
             new(value.Value.Insert(index.Value, gram.Value)));
 }
 
-/// <summary>This gets the double mathematical function value from two parents.</summary>
+/// <summary>This gets the ternary mathematical function value from two parents.</summary>
 /// <remarks>
 /// This uses a little more computation time and more memory that hard coded nodes,
 /// therefor this should be used to perform less commonly used nodes.
@@ -91,7 +91,7 @@ sealed public class TernaryFunc<T1, T2, T3, TResult> : TernaryValue<T1, T2, T3, 
     /// <summary>The function to perform on this node's value.</summary>
     private readonly S.Func<T1, T2, T3, TResult> func;
 
-    /// <summary>Creates a double mathematical function value node.</summary>
+    /// <summary>Creates a ternary mathematical function value node.</summary>
     /// <param name="funcName">The name of the function to perform.</param>
     /// <param name="func">This is the function to apply to the parents.</param>
     /// <param name="source1">This is the first parent for the source value.</param>
@@ -110,10 +110,10 @@ sealed public class TernaryFunc<T1, T2, T3, TResult> : TernaryValue<T1, T2, T3, 
     /// <summary>This is the type name of the node.</summary>
     public override string TypeName => this.funcName;
 
-    /// <summary>The result of the double mathematical function the parents' value during evaluation.</summary>
+    /// <summary>The result of the mathematical function the parents' value during evaluation.</summary>
     /// <param name="value1">The first value to evaluate.</param>
     /// <param name="value2">The second value to evaluate.</param>
-    /// <returns>The new data with the double value.</returns>
+    /// <returns>The new data with the value.</returns>
     protected override TResult OnEval(T1 value1, T2 value2, T3 value3) =>
         this.func is null ? default : this.func(value1, value2, value3);
 }

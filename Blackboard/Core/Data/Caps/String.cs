@@ -29,11 +29,14 @@ public readonly struct String :
     #endregion
 
     /// <summary>The string value being stored.</summary>
-    public readonly string Value;
+    private readonly string rawValue;
+
+    /// <summary>Gets the string value being stored.</summary>
+    public string Value => this.rawValue ?? "";
 
     /// <summary>Creates a new string data value.</summary>
     /// <param name="value">The string value to store.</param>
-    public String(string value) => this.Value = value ?? "";
+    public String(string value) => this.rawValue = value;
 
     #region Additive...
 
@@ -80,7 +83,7 @@ public readonly struct String :
     public string TypeName => Type.String.Name;
 
     /// <summary>Get the value of the data as a string.</summary>
-    public string ValueAsString => this.Value ?? "";
+    public string ValueAsString => this.Value;
 
     /// <summary>Get the value of the data as an object.</summary>
     public object ValueAsObject => this.Value;

@@ -59,7 +59,7 @@ public class Operators {
         slate.Perform("A = false;").CheckValue(false, "B");
         slate.Perform("A = true; ").CheckValue(true,  "B");
         TestTools.CheckException(() => slate.Perform("A = 'Hello';"),
-            "Unable to cast object of type 'System.String' to type 'System.Boolean'.");
+            "Unable to cast object value (System.String) to bool type.");
     }
 
     [TestMethod]
@@ -93,10 +93,8 @@ public class Operators {
         slate.Perform("A =  2;").CheckValue( 2, "B");
         slate.Perform("A =  2;").CheckValue( 2, "B");
         slate.Perform("A = -4;").CheckValue(-4, "B");
-
-        // TODO: Should probably make the implicit and explicit casts have better exception messages.
         TestTools.CheckException(() => slate.Perform("A = 'Hello';"),
-            "Unable to cast object of type 'System.String' to type 'System.Int32'.");
+            "Unable to cast object value (System.String) to int type.");
     }
 
     [TestMethod]
@@ -124,7 +122,7 @@ public class Operators {
         slate.Perform("A = -inf;").CheckValue(double.NegativeInfinity, "B");
         slate.Perform("A =  nan;").CheckValue(double.NaN, "B");
         TestTools.CheckException(() => slate.Perform("A = 'Hello';"),
-            "Unable to cast object of type 'System.String' to type 'System.Double'.");
+            "Unable to cast object value (System.String) to double type.");
     }
 
     [TestMethod]

@@ -62,7 +62,7 @@ public readonly struct Bool :
     /// <summary>Casts an object into a bool for an explicit cast.</summary>
     /// <param name="value">The object value to cast.</param>
     /// <returns>The resulting boolean value.</returns>
-    public Bool CastFrom(Object value) => new((bool?)value.Value ?? default);
+    public Bool CastFrom(Object value) => new(value.CastTo<bool>(this.TypeName));
 
     #endregion
 

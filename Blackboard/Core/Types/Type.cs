@@ -95,12 +95,12 @@ sealed public class Type {
     /// <returns>The type for the given node or null if not found.</returns>
     static public Type? TypeOf(INode node) => FromType(node.GetType());
 
-    /// <summary>This gets the type from the given generic.</summary>
+    /// <summary>This gets the type from the given node type.</summary>
     /// <typeparam name="T">The generic type to get the type of.</typeparam>
     /// <returns>The type for the given generic or null if not found.</returns>
     static public Type? FromType<T>() where T : INode => FromType(typeof(T));
 
-    /// <summary>This get the type from the given C# type.</summary>
+    /// <summary>This get the type from the given node type.</summary>
     /// <param name="type">The C# type to get this type of.</param>
     /// <returns>The type for the given C# type or null if not found.</returns>
     static public Type? FromType(S.Type type) {

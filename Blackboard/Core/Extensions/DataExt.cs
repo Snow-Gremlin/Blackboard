@@ -67,7 +67,7 @@ static public class DataExt {
         where Tin   : IData
         where Tout  : IData
         where TCast : ICast<Tin, Tout> =>
-        default(Tout) is ICast<Tin, Tout> cast ? (Tout)cast.CastFrom(value) :
+        default(Tout) is ICast<Tin, Tout> cast ? cast.CastFrom(value) :
             throw new Message("Unable to cast from the given input into the given output.").
                 With("Input",     value).
                 With("In Type",   typeof(Tin)).

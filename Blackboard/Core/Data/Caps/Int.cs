@@ -245,7 +245,7 @@ public readonly struct Int :
     /// <summary>Casts an object into an int for an explicit cast.</summary>
     /// <param name="value">The object value to cast.</param>
     /// <returns>The resulting integer value.</returns>
-    public Int CastFrom(Object value) => new((int?)value.Value ?? default);
+    public Int CastFrom(Object value) => new(value.CastTo<int>(this.TypeName));
 
     #endregion
 

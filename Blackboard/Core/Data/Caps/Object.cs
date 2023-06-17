@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Types;
 
 namespace Blackboard.Core.Data.Caps;
@@ -26,6 +27,16 @@ public readonly struct Object :
     /// <summary>Creates a new object data value.</summary>
     /// <param name="value">The object value to store.</param>
     public Object(object? value) => this.Value = value;
+
+    /// <summary>CastTo is a helper for other types explicitly casting to their type.</summary>
+    /// <typeparam name="T">The C# type to cast the object into.</typeparam>
+    /// <param name="typeName">The name of the type to cast into.</param>
+    /// <exception cref="Message">
+    /// If the value in the object is unable to be cast, this exception will be thrown.
+    /// </exception>
+    internal T CastTo<T>(string typeName) where T : struct => this.Value as T? ??
+        throw new Message("Unable to cast {0} value ({1}) to {2} type.",
+            Type.Object.Name, this.Value?.GetType()?.FullName ?? "null", typeName);
 
     #region Data...
 

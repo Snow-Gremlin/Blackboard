@@ -265,10 +265,10 @@ public readonly struct Double :
     /// <returns>The resulting double value.</returns>
     public Double CastFrom(Int value) => new(value.Value);
 
-    /// <summary>Casts an object into a double for an implicit cast.</summary>
+    /// <summary>Casts an object into a double for an explicit cast.</summary>
     /// <param name="value">The object value to cast.</param>
     /// <returns>The resulting double value.</returns>
-    public Double CastFrom(Object value) => new((double?)value.Value ?? default);
+    public Double CastFrom(Object value) => new(value.CastTo<double>(this.TypeName));
 
     #endregion
 

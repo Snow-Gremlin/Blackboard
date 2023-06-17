@@ -21,6 +21,11 @@ public class Assignments {
             "   in int F, G;",
             "   in bool H;",
             "   in double I;",
+            "}",
+            "",
+            "in {",
+            "   bool J = true;",
+            "   int K;",
             "}").
             Perform();
 
@@ -32,6 +37,8 @@ public class Assignments {
         slate.CheckValue(0, "D", "G");
         slate.CheckValue(false, "D", "H");
         slate.CheckValue(0.0, "D", "I");
+        slate.CheckValue(true, "J");
+        slate.CheckValue(0, "K");
     }
 
     [TestMethod]
@@ -43,7 +50,19 @@ public class Assignments {
             "",
             "namespace D {",
             "   in E = 3.14;",
-            "   in var F = 0, G = 0.0, H = false;",
+            "   in var F = 4, G = 5.5, H = false;",
+            "}",
+            "",
+            "in {",
+            "  I = 6, J = 7.5;",
+            "  var K = true;",
+            "}",
+            "",
+            "namespace L {",
+            "  in {",
+            "    M = 8;",
+            "    var N = 9;",
+            "  }",
             "}").
             Perform();
 
@@ -51,9 +70,14 @@ public class Assignments {
         slate.CheckValue(3, "B");
         slate.CheckValue(true, "C");
         slate.CheckValue(3.14, "D", "E");
-        slate.CheckValue(0, "D", "F");
-        slate.CheckValue(0.0, "D", "G");
+        slate.CheckValue(4, "D", "F");
+        slate.CheckValue(5.5, "D", "G");
         slate.CheckValue(false, "D", "H");
+        slate.CheckValue(6, "I");
+        slate.CheckValue(7.5, "J");
+        slate.CheckValue(true, "K");
+        slate.CheckValue(8, "L", "M");
+        slate.CheckValue(9, "L", "N");
     }
 
     [TestMethod]

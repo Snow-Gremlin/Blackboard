@@ -116,8 +116,33 @@ public class Definitions {
             "in int A = 0x0F;",
             "int shift := 1;",
             "int B := (A | 0x10) & 0x15;",
-            "int C := B << shift;",
-            "int D := ~C;").
+            "var C := B << shift;",
+            "D := ~C;").
+            Perform();
+
+        slate.CheckValue( 0x0F, "A");
+        slate.CheckValue( 0x15, "B");
+        slate.CheckValue( 0x2A, "C");
+        slate.CheckValue(-0x2B, "D");
+
+        slate.SetInt(0x44, "A");
+        slate.PerformEvaluation();
+        slate.CheckValue( 0x14, "B");
+        slate.CheckValue( 0x28, "C");
+        slate.CheckValue(-0x29, "D");
+    }
+
+    [TestMethod]
+    public void TestBasicParses_Bitwise_GroupDefine() {
+        Slate slate = new();
+        slate.Read(
+            "in int A = 0x0F;",
+            "define {",
+            "   int shift = 1;",
+            "   int B = (A | 0x10) & 0x15;",
+            "   var C = B << shift;",
+            "   D = ~C;",
+            "}").
             Perform();
 
         slate.CheckValue( 0x0F, "A");

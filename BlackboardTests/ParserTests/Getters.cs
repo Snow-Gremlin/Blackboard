@@ -14,8 +14,10 @@ public class Getters {
         Result result = slate.Read(
             "get int A = 3;",
             "get bool B = true;",
-            "get double C = 4;",
-            "get string D = 'Boom stick';").
+            "get {",
+            "   double C = 4;",
+            "   string D = 'Boom stick';",
+            "}").
             Perform();
 
         result.CheckValue(3, "A");
@@ -30,8 +32,10 @@ public class Getters {
         Result result = slate.Read(
             "get A = 3;",
             "get B = true;",
-            "get C = 4.0;",
-            "get D = 'Boom stick';").
+            "get {" +
+            "   C = 4.0;",
+            "   D = 'Boom stick';",
+            "}").
             Perform();
 
         result.CheckValue(3, "A");

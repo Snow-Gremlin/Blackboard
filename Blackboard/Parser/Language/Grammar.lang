@@ -96,7 +96,13 @@
 #=========================================================#
 # Provoke                                                 #
 #=========================================================#
-#
+# Unconditional trigger provoke.                          #
+#   - -> A;                                               #
+#   - -> A -> C -> D;                                     #
+#   - -> B > 3 ? C : D;                                   #
+# Conditional trigger provoke.                            #
+#   - B > 3 -> A -> C;                                    #
+#   - B < 3 -> C -> D;                                    #
 #=========================================================#
 
 <ProvokeTrigger> := [Trigger] <Conditional> {provokeTrigger} <ProvokeTriggerTail> [End]
@@ -111,10 +117,24 @@
 #=========================================================#
 # Get Value                                               #
 #=========================================================#
+# New get with type and optional initial assignment.      #
+#   - get bool A;                                         #
+#   - get double A, B, C;                                 #
+#   - get int A = 3, B = 4, C;                            #
+# New get without type and required initial assignment.   #
+#   - get A = 3;                                          #
+#   - get A = true, B = "cat";                            #
+#   - get var A = false;                                  #
+# New get group.                                          #
+#   - get { int A, B; C = true; }                         #
+#=========================================================#
 
-<GetValue> := [DeclareGet] <RootType> <GetTypedValuePart> <GetTypedValueTail> [End]
-    | [DeclareGet] <GetVarValuePart> <GetVarValueTail> [End]
-    | [DeclareGet] [Var] <GetVarValuePart> <GetVarValueTail> [End];
+<GetValue> := [DeclareGet] <GetDefine> [End]
+    | [DeclareGet] [CurlOpen] <GetValueGroup> [CurlClose];
+
+<GetDefine> := <RootType> <GetTypedValuePart> <GetTypedValueTail>
+    | <GetVarValuePart> <GetVarValueTail>
+    | [Var] <GetVarValuePart> <GetVarValueTail>;
 
 <GetTypedValueTail> := _
     | [Comma] <GetTypedValuePart> <GetTypedValueTail>;
@@ -127,6 +147,9 @@
 
 <GetVarValuePart> := [Identifier] {defineId} {pushId} {varGet}
     | [Identifier] {defineId} [Assign] <Conditional> {varGet};
+    
+<GetValueGroup> := _
+    | <GetDefine> [End] <GetValueGroup>;
 
 #=========================================================#
 # Declarations                                            #

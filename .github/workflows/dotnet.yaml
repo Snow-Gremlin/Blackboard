@@ -23,13 +23,13 @@ jobs:
           dotnet-version: 7.0.x
       
       - name: Restore Dependencies
-        working-directory: ./Blackboard/BlackboardTests
+        working-directory: ./BlackboardTests
         run: dotnet restore
       
       - name: Build Test Project
-        working-directory: ./Blackboard/BlackboardTests
+        working-directory: ./BlackboardTests
         run: dotnet build --no-restore
       
       - name: Running Tests
-        working-directory: ./Blackboard/BlackboardTests
+        working-directory: ./BlackboardTests
         run: dotnet test --no-build --verbosity normal

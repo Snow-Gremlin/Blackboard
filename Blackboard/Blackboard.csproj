@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+	<NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -17,21 +19,36 @@
   <ItemGroup>
     <None Remove="Core\Cast.txt" />
     <None Remove="Core\Nodes\Cast.txt" />
+    <None Remove="Parser\Language\Keywords.lang" />
+    <None Remove="Parser\Language\Tokens.lang" />
     <None Remove="Parser\Parser.lang" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Parser\Parser.lang" />
+    <EmbeddedResource Include="Parser\Language\Keywords.lang" />
+    <EmbeddedResource Include="Parser\Language\Tokens.lang" />
+    <EmbeddedResource Include="Parser\Language\Grammar.lang" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="PetiteParser">
-      <HintPath>..\..\PetiteParserCSharp\PetiteParser\PetiteParser\bin\Debug\net5.0\PetiteParser.dll</HintPath>
+      <HintPath>..\..\PetiteParserCSharp\PetiteParser\PetiteParser\bin\Release\net7.0\PetiteParser.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

@@ -41,4 +41,20 @@ namespace N {
 namespace N.M {
     C := 5;
 }
+
+?? Maybe?
+
+in {
+    string A;
+    int B;
+}
+
+local {
+    string A;
+}
+
+define {
+    int B;
+}
+
 ```

@@ -1,0 +1,134 @@
+﻿# Blackboard Parser Language v1.0
+#----------------------------------------------------------
+# Tokenizer Definition
+
+> (Start);
+
+# Binary
+(Start): '0' => (Zero);
+(Zero): '01' => (PossibleBin);
+(Start): '1' => (PossibleBin): '01' => (PossibleBin);
+(Zero):        ^'b' => [Bin];
+(PossibleBin): ^'b' => [Bin];
+
+# Octal
+(Start):       '2'..'7' => (PossibleOct): '0'..'7' => (PossibleOct);
+(Zero):        '2'..'7' => (PossibleOct);
+(PossibleBin): '2'..'7' => (PossibleOct);
+(Zero):        ^'o' => [Oct];
+(PossibleBin): ^'o' => [Oct];
+(PossibleOct): ^'o' => [Oct];
+
+# Integers (Decimal)
+(Start): '89' => (Int): '0'..'9' => (Int);
+(Zero):  '89' => (Int);
+(PossibleBin): '2'..'9' => (Int);
+(PossibleOct): '89' => (Int);
+
+(Zero)        => [Int];
+(PossibleBin) => [Int];
+(PossibleOct) => [Int];
+(Int)         => [Int];
+(Zero):        ^'d' => [Int];
+(PossibleBin): ^'d' => [Int];
+(PossibleOct): ^'d' => [Int];
+(Int):         ^'d' => (Dec) => [Int];
+
+# Hexadecimals
+(Zero): 'x' => (HexStart): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
+
+# Doubles
+(Zero):        '.' => (Decimal);
+(PossibleBin): '.' => (Decimal);
+(PossibleOct): '.' => (Decimal);
+(Int):         '.' => (Decimal);
+(Decimal): '0'..'9' => (DoubleDec): '0'..'9' => (DoubleDec) => [Double];
+
+(Zero):        'eE' => (DoubleExpStart);
+(Int):         'eE' => (DoubleExpStart);
+(PossibleBin): 'eE' => (DoubleExpStart);
+(PossibleOct): 'eE' => (DoubleExpStart);
+(DoubleDec):   'eE' => (DoubleExpStart);
+(DoubleExpStart): '-' => (DoubleExpNeg): '0'..'9' => (DoubleExp);
+(DoubleExpStart): '0'..'9' => (DoubleExp): '0'..'9' => (DoubleExp) => [Double];
+
+# Identifiers
+(Start): 'a'..'z', 'A'..'Z', '_$' => (Identifier): '0'..'9', 'a'..'z', 'A'..'Z', '_' => [Identifier];
+
+# Strings
+(Start): ^"'" => (String1Body): ^"'" => [String];
+(String1Body): '\\' => (Escaped1);
+(Escaped1): '\\\'"0abfnrtv' => (String1Body);
+(Escaped1): 'x' => (Ascii1_0):   '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Ascii1_1):   '0'..'9', 'a'..'f', 'A'..'F' => (String1Body);
+(Escaped1): 'u' => (Unicode1_0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode1_1): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode1_2): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode1_3): '0'..'9', 'a'..'f', 'A'..'F' => (String1Body);
+(Escaped1): 'U' => (Rune1_0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_1): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_2): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_3): '0'..'9', 'a'..'f', 'A'..'F' => 
+                   (Rune1_4): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_5): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_6): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune1_7): '0'..'9', 'a'..'f', 'A'..'F' => (String1Body);
+(String1Body): * => (String1Body);
+
+(Start): ^'"' => (String2Body): ^'"' => [String];
+(String2Body): '\\' => (Escaped2);
+(Escaped2): '\\\'"0abfnrtv' => (String2Body);
+(Escaped2): 'x' => (Ascii2_0):   '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Ascii2_1):   '0'..'9', 'a'..'f', 'A'..'F' => (String2Body);
+(Escaped2): 'u' => (Unicode2_0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode2_1): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode2_2): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Unicode2_3): '0'..'9', 'a'..'f', 'A'..'F' => (String2Body);
+(Escaped2): 'U' => (Rune2_0): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_1): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_2): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_3): '0'..'9', 'a'..'f', 'A'..'F' => 
+                   (Rune2_4): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_5): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_6): '0'..'9', 'a'..'f', 'A'..'F' =>
+                   (Rune2_7): '0'..'9', 'a'..'f', 'A'..'F' => (String2Body);
+(String2Body): * => (String2Body);
+
+# Symbols
+(Start): '&' => [And]: '&' => [LogicalAnd];
+(Start): '|' => [Or]: '|' => [LogicalOr];
+(Start): '+' => [Pos];
+(Start): '-' => [Neg]: '>' => [Trigger];
+(Start): '/' => [Div];
+(Start): '*' => [Mul]: '*' => [Power];
+(Start): '%' => [Mod];
+(Start): '^' => [Xor]: '^' => [LogicalXor];
+(Start): '~' => [Invert];
+(Start): '?' => [Test];
+(Start): ':' => [Else]: '=' => [Define];
+(Start): ';' => [End];
+(Start): ',' => [Comma];
+(Start): '.' => [Dot];
+
+(Start): '(' => [ParOpen];
+(Start): ')' => [ParClose];
+(Start): '[' => [SqrOpen];
+(Start): ']' => [SqrClose];
+(Start): '{' => [CurlOpen];
+(Start): '}' => [CurlClose];
+
+(Start): '=' => [Assign]:  '=' => [Equal];
+(Start): '>' => [Greater]: '=' => [GreaterEqual];
+(Start): '<' => [Less]:    '=' => [LessEqual];
+(Start): '!' => [Not]:     '=' => [NotEqual];
+(Greater): '>' => [ShiftRight];
+(Less):    '<' => [ShiftLeft];
+
+# Comments
+(Div): '/' => (CommentSingle): !'\n' => (CommentSingle) => ^[Comment];
+(Div): '*' => (CommentMultiple): '*' => (CommentMultipleEnd): '/' => (CommentEnd) => ^[Comment];
+(CommentMultiple): * => (CommentMultiple);
+(CommentMultipleEnd): * => (CommentMultiple);
+
+# Whitespace
+(Start): ' \t\n' => (Whitespace): ' \t\n' => ^[Whitespace];

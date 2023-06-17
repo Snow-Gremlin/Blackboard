@@ -9,9 +9,8 @@ using Blackboard.Parser.Optimization;
 using System.Collections.Generic;
 using System.Linq;
 using PP = PetiteParser;
-using S = System;
 
-namespace Blackboard.Parser;
+namespace Blackboard.Parser.Builder;
 
 /// <summary>This is a tool for keeping the parse state while building a formula.</summary>
 /// <remarks>
@@ -19,7 +18,7 @@ namespace Blackboard.Parser;
 /// This holds onto virtual nodes being added and nodes virtually removed
 /// prior to the actions being performed. 
 /// </remarks>
-sealed internal class Builder : PP.ParseTree.PromptArgs {
+sealed internal partial class Builder : PP.ParseTree.PromptArgs {
 
     /// <summary>Creates a new formula builder for parsing states.</summary>
     /// <param name="slate">The slate this stack is for.</param>
@@ -75,186 +74,11 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         this.Existing.Clear();
     }
 
-    #region Actions...
-
-    /// <summary>The collection of actions which have been parsed.</summary>
-    public class ActionCollection {
-        private readonly Builder builder;
-        private readonly LinkedList<IAction> actions;
-
-        /// <summary>Creates new a new action collection.</summary>
-        /// <param name="builder">The builder this collection belongs to.</param>
-        internal ActionCollection(Builder builder) {
-            this.builder = builder;
-            this.actions = new LinkedList<IAction>();
-        }
-
-        /// <summary>Clears the collection of actions.</summary>
-        public void Clear() => this.actions.Clear();
-
-        /// <summary>Gets the formula containing all the actions.</summary>
-        public Formula Formula =>
-            new(this.builder.Slate, this.actions.Append(new Finish()));
-
-        /// <summary>Adds a pending action into this formula.</summary>
-        /// <param name="performer">The performer to add.</param>
-        public void Add(IAction action) {
-            this.builder.Logger.Info("Add Action: {0}", action);
-            this.actions.AddLast(action);
-        }
-
-        /// <summary>Gets the human readable string of the current actions.</summary>
-        /// <returns>The human readable string.</returns>
-        public override string ToString() => this.ToString("");
-
-        /// <summary>Gets the human readable string of the current actions.</summary>
-        /// <param name="indent">The indent to apply to all but the first line being returned.</param>
-        /// <returns>The human readable string.</returns>
-        public string ToString(string indent) =>
-            this.actions.Count <= 0 ? "[]" :
-            "[\n" + indent + this.actions.Strings().Indent(indent).Join(",\n" + indent) + "]";
-    }
-
     /// <summary>The collection of actions which will perform the actions which have been parsed.</summary>
     public readonly ActionCollection Actions;
 
-    #endregion
-    #region Scope...
-
-    /// <summary>The stack of the namespaces to represent the scope being worked on.</summary>
-    public class ScopeStack {
-        private readonly Builder builder;
-        private readonly LinkedList<VirtualNode> scopes;
-
-        /// <summary>Creates a new scope stack.</summary>
-        /// <param name="builder">The builder this stack belongs too.</param>
-        internal ScopeStack(Builder builder) {
-            this.builder = builder;
-            this.Global  = new VirtualNode("Global", this.builder.Slate.Global);
-            this.scopes  = new LinkedList<VirtualNode>();
-            this.scopes.AddFirst(this.Global);
-        }
-
-        /// <summary>Resets the scope to a new virtual global scope.</summary>
-        /// <remarks>By creating a new global virtual node anything virtually written will be dropped.</remarks>
-        public void Reset() {
-            this.Global = new VirtualNode("Global", this.builder.Slate.Global);
-            this.scopes.Clear();
-            this.scopes.AddFirst(this.Global);
-        }
-
-        /// <summary>The global node as a virtual node so it can be temporarily added to and removed from.</summary>
-        public VirtualNode Global { get; private set; }
-
-        /// <summary>Gets the current top of the scope stack.</summary>
-        public VirtualNode Current => this.scopes.First?.Value ?? this.Global;
-
-        /// <summary>Gets a copy of the current scopes.</summary>
-        public VirtualNode[] Scopes => this.scopes.ToArray();
-
-        /// <summary>Finds the given ID in the current scopes.</summary>
-        /// <param name="name">The name of the node to find.</param>
-        /// <returns>The found node by that name or null if not found.</returns>
-        public INode? FindID(string name) {
-            foreach (VirtualNode scope in this.Scopes) {
-                INode? node = scope.ReadField(name);
-                if (node is not null) return node;
-            }
-            return null;
-        }
-
-        /// <summary>Pops a top node from the scope.</summary>
-        public void Pop() {
-            this.builder.Logger.Info("Pop Scope");
-            this.scopes.RemoveFirst();
-        }
-
-        /// <summary>Pushes a new node onto the scope.</summary>
-        /// <param name="node">The node to push on the scope.</param>
-        public void Push(VirtualNode node) {
-            this.builder.Logger.Info("Push Scope: {0}", node);
-            this.scopes.AddFirst(node);
-        }
-
-        /// <summary>Gets the human readable string of the current scope.</summary>
-        /// <returns>The human readable string.</returns>
-        public override string ToString() => "[" + this.scopes.Join(", ") + "]";
-    }
-
     /// <summary>The stack of the namespaces to represent the scope being worked on.</summary>
     public readonly ScopeStack Scope;
-
-    #endregion
-    #region Stacks...
-
-    /// <summary>The stack of values which are currently being worked on during a parse.</summary>
-    public class BuilderStack<T> {
-        private readonly string usage;
-        private readonly Builder builder;
-        private readonly LinkedList<T> stack;
-
-        /// <summary>Creates a new stack.</summary>
-        /// <param name="usage">The short usage of this stack used for logging.</param>
-        /// <param name="builder">The builder this stack belongs to.</param>
-        internal BuilderStack(string usage, Builder builder) {
-            this.usage   = usage;
-            this.builder = builder;
-            this.stack   = new LinkedList<T>();
-        }
-
-        /// <summary>Removes all the values from this stack.</summary>
-        public void Clear() => this.stack.Clear();
-
-        /// <summary>Pushes a value onto the stack.</summary>
-        /// <param name="value">The value to push.</param>
-        public void Push(T value) {
-            this.builder.Logger.Info("Push {0}: {1}", this.usage, value);
-            this.stack.AddLast(value);
-        }
-
-        /// <summary>Peeks the value off the top of the stack without removing it.</summary>
-        /// <returns>The value that is on the top of the stack.</returns>
-        public T Peek() {
-            LinkedListNode<T>? last = this.stack.Last;
-            return last is not null ? last.Value :
-                throw new Message("May not peek in an empty map.");
-        }
-
-        /// <summary>Pops off a value is on the top of the stack.</summary>
-        /// <returns>The value which was on top of the stack.</returns>
-        public T Pop() {
-            this.builder.Logger.Info("Pop {0}", this.usage);
-            T node = this.Peek();
-            this.stack.RemoveLast();
-            return node;
-        }
-
-        /// <summary>Pops one or more values off the stack.</summary>
-        /// <param name="count">The number of values to pop.</param>
-        /// <returns>The popped values in the order oldest to newest.</returns>
-        public T[] Pop(int count) {
-            this.builder.Logger.Info("Pop {1} {0}(s)", this.usage, count);
-            T[] items = new T[count];
-            for (int i = count-1; i >= 0; i--) {
-                items[i] = this.Peek();
-                this.stack.RemoveLast();
-            }
-            return items;
-        }
-
-        /// <summary>Gets the human readable string of the current stack.</summary>
-        /// <returns>The human readable string.</returns>
-        public override string ToString() => this.ToString("", false);
-
-        /// <summary>Gets the human readable string of the current stack.</summary>
-        /// <param name="indent">The indent to apply to all but the first line being returned.</param>
-        /// <param name="inline">Indicates if the output should be one line or multiple lines.</param>
-        /// <returns>The human readable string.</returns>
-        public string ToString(string indent, bool inline) =>
-            this.stack.Count <= 0 ? "[]" :
-            inline ? "[" + this.stack.Join(", ") + "]" :
-            "[\n" + indent + this.stack.Strings().Indent(indent).Join(",\n" + indent) + "]";
-    }
 
     /// <summary>The stack of nodes which are currently being parsed but haven't been consumed yet.</summary>
     public readonly BuilderStack<INode> Nodes;
@@ -265,109 +89,12 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     /// <summary>A stack of identifiers which have been read but not used yet during the parse.</summary>
     public readonly BuilderStack<string> Identifiers;
 
-    #endregion
-    #region Arguments...
-
-    /// <summary>The stack of argument lists used for building up function calls.</summary>
-    public class ArgumentStack {
-        private readonly Builder builder;
-        private readonly LinkedList<LinkedList<INode>> argStacks;
-
-        /// <summary>Create a new argument stack.</summary>
-        /// <param name="builder">The builder this stack belong to.</param>
-        internal ArgumentStack(Builder builder) {
-            this.builder   = builder;
-            this.argStacks = new LinkedList<LinkedList<INode>>();
-        }
-
-        /// <summary>Clears all the argument lists from the argument stack.</summary>
-        public void Clear() => this.argStacks.Clear();
-
-        /// <summary>This starts a new argument list.</summary>
-        public void Start() {
-            this.builder.Logger.Info("Start Arguments");
-            this.argStacks.AddFirst(new LinkedList<INode>());
-        }
-
-        /// <summary>This adds the given node in to the newest argument list.</summary>
-        /// <param name="node">The node to add to the argument list.</param>
-        public void Add(INode node) {
-            this.builder.Logger.Info("Add Argument: {0}", node);
-            LinkedListNode<LinkedList<INode>>? first = this.argStacks.First;
-            if (first is not null) first.Value.AddLast(node);
-            else throw new Message("May not add an argument without first starting an argument list.");
-        }
-
-        /// <summary>This gets all the nodes which are in the current argument list, then removes the list.</summary>
-        /// <returns>The nodes which were in the current argument list.</returns>
-        public INode[] End() {
-            this.builder.Logger.Info("End Arguments");
-            LinkedListNode<LinkedList<INode>>? first = this.argStacks.First;
-            return first is not null ? first.Value.ToArray() :
-                    throw new Message("May not end an argument without first starting an argument list.");
-        }
-
-        /// <summary>Gets the human readable string of the current actions.</summary>
-        /// <returns>The human readable string.</returns>
-        public override string ToString() => this.ToString("");
-
-        /// <summary>Gets the human readable string of the current actions.</summary>
-        /// <param name="indent">The indent to apply to all but the first line being returned.</param>
-        /// <returns>The human readable string.</returns>
-        public string ToString(string indent) =>
-            this.argStacks.Count <= 0 ? "{}" :
-            "{\n" + indent + this.argStacks.Select(list => "[" + list.Join(", ") + "]").Indent(indent).Join(",\n" + indent) + "}";
-    }
-
     /// <summary>The stack of argument lists used for building up function calls.</summary>
     public readonly ArgumentStack Arguments;
-
-    #endregion
-    #region Existing...
-
-    /// <summary>A collection of existing nodes.</summary>
-    public class ExistingNodeSet {
-        private readonly Builder builder;
-        private readonly HashSet<INode> nodes;
-
-        /// <summary>Creates a new existing node set.</summary>
-        /// <param name="builder">The builder this et belongs to.</param>
-        internal ExistingNodeSet(Builder builder) {
-            this.builder  = builder;
-            this.nodes = new HashSet<INode>();
-        }
-
-        /// <summary>Clears the set of existing nodes.</summary>
-        public void Clear() => this.nodes.Clear();
-
-        /// <summary>Adds an existing node which has been referenced since the last clear.</summary>
-        /// <param name="node">The existing node to add.</param>
-        public void Add(INode node) {
-            this.builder.Logger.Info("Add Existing: {0} ", node);
-            this.nodes.Add(node is VirtualNode virt ? virt.Receiver : node);
-        }
-
-        /// <summary>Determines if the given node is in the existing nodes set.</summary>
-        /// <param name="node">The node to check for.</param>
-        /// <returns>True if the node is an existing node, false otherwise.</returns>
-        public bool Has(INode node) => this.nodes.Contains(node);
-
-        /// <summary>Gets the human readable string of the current existing nodes.</summary>
-        /// <returns>The human readable string.</returns>
-        public override string ToString() => this.ToString("");
-
-        /// <summary>Gets the human readable string of the current existing nodes.</summary>
-        /// <param name="indent">The indent to apply to all but the first line being returned.</param>
-        /// <returns>The human readable string.</returns>
-        public string ToString(string indent) =>
-            this.nodes.Count <= 0 ? "[]" :
-            "[\n" + indent + this.nodes.Strings().Indent(indent).Join(",\n" + indent) + "]";
-    }
 
     /// <summary>The set of existing nodes which have been references by new nodes.</summary>
     public readonly ExistingNodeSet Existing;
 
-    #endregion
     #region Helper Methods...
 
     /// <summary>Performs a cast if needed from one value to another by creating a new node.</summary>

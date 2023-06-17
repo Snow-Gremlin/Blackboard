@@ -217,7 +217,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         public T Peek() {
             LinkedListNode<T>? last = this.stack.Last;
             return last is not null ? last.Value :
-                throw new S.Exception("May not peek in an empty map.");
+                throw new Message("May not peek in an empty map.");
         }
 
         /// <summary>Pops off a value is on the top of the stack.</summary>
@@ -295,7 +295,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
             this.builder.Logger.Info("Add Argument: {0}", node);
             LinkedListNode<LinkedList<INode>>? first = this.argStacks.First;
             if (first is not null) first.Value.AddLast(node);
-            else throw new S.Exception("May not add an argument without first starting an argument list.");
+            else throw new Message("May not add an argument without first starting an argument list.");
         }
 
         /// <summary>This gets all the nodes which are in the current argument list, then removes the list.</summary>
@@ -304,7 +304,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
             this.builder.Logger.Info("End Arguments");
             LinkedListNode<LinkedList<INode>>? first = this.argStacks.First;
             return first is not null ? first.Value.ToArray() :
-                    throw new S.Exception("May not end an argument without first starting an argument list.");
+                    throw new Message("May not end an argument without first starting an argument list.");
         }
 
         /// <summary>Gets the human readable string of the current actions.</summary>

@@ -27,8 +27,9 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         this.Slate  = slate;
         this.Logger = logger.SubGroup(nameof(Builder));
 
-        this.Actions     = new ActionCollection(this);
-        this.Scope       = new ScopeStack(this);
+        this.Actions = new ActionCollection(this);
+        this.Scope   = new ScopeStack(this);
+
         this.Nodes       = new BuilderStack<INode>("Node", this);
         this.Types       = new BuilderStack<Type>("Type", this);
         this.Identifiers = new BuilderStack<string>("Id", this);
@@ -268,6 +269,29 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
                     With("Value",    value);
 
         this.Actions.Add(getter);
+        return root;
+    }
+
+    /// <summary>Creates a temporary node and adds it to the builder if possible.</summary>
+    /// <param name="targetType">The target type of the value for the temporary value.</param>
+    /// <param name="name">The name to output the value to.</param>
+    /// <param name="value">The value to get and write to the given name.</param>
+    /// <returns>The root of the value branch which was used in the assignment.</returns>
+    public INode AddTemp(Type targetType, string name, INode value) {
+        this.Logger.Info("Add Temp:");
+
+        VirtualNode scope = this.Scope.Current;
+        if (scope.ContainsField(name))
+            throw new Message("A node already exists with the given name.").
+                With("Name", name).
+                With("Type", targetType);
+
+        INode root = targetType is null ? value : this.PerformCast(targetType, value);
+        HashSet<INode> newNodes = this.collectAndOrder(root);
+        root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
+
+        this.Actions.Add(new Temp(name, root, newNodes));
+        this.Scope.Current.WriteField(name, root);
         return root;
     }
 

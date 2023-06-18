@@ -485,6 +485,7 @@ sealed public class Stringifier {
             IGetter getter  => this.stringGetter(getter),
             IAssign assign  => this.stringAssign(assign),
             Define  define  => this.stringDefine(define),
+            Temp    temp    => this.stringTemp(temp),
             Provoke provoke => this.stringProvoke(provoke),
             Finish          => "Finish",
             _               => "Unknown Action",
@@ -510,6 +511,13 @@ sealed public class Stringifier {
     private string stringDefine(Define define) =>
         this.shortFieldReader(define.Receiver) + "." + define.Name + " := " + this.Stringify(define.Node) +
             " {" + Simple().PreLoadNames(this).Stringify(define.NeedParents) + "};";
+    
+    /// <summary>Get the string for the given temp action.</summary>
+    /// <param name="temp">The temp action to stringify.</param>
+    /// <returns>The string for the given temp action.</returns>
+    private string stringTemp(Temp temp) =>
+        temp.Name + " := " + this.Stringify(temp.Node) +
+            " {" + Simple().PreLoadNames(this).Stringify(temp.NeedParents) + "};";
 
     /// <summary>Get the string for the given provoke action.</summary>
     /// <param name="provoke">The provoke action to stringify.</param>

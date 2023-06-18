@@ -10,6 +10,7 @@
     | <DefineRule>
     | <ProvokeTrigger>
     | <GetValue>
+    | <TempValue>
     | <Declaration> [End];
 
 #=========================================================#
@@ -150,6 +151,40 @@
     
 <GetValueGroup> := _
     | <GetDefine> [End] <GetValueGroup>;
+
+#=========================================================#
+# Temp Value                                              #
+#=========================================================#
+# New temp with type and initial assignment.              #
+#   - in bool A = true;                                   #
+#   - in int B = 4, C = 6;                                #
+# New temp without type and initial assignment.           #
+#   - temp A = 3;                                         #
+#   - temp A = true, B = "cat";                           #
+#   - temp var A = false;                                 #
+# New temp group.                                         #
+#   - temp { int A = 12; B = true; }                      #
+#=========================================================#
+
+<TempValue> := [DeclareTemp] <TempDefine> [End]
+    | [DeclareTemp] [CurlOpen] <TempValueGroup> [CurlClose];
+
+<TempDefine> := <RootType> <TempTypedValuePart> <TempTypedValueTail>
+    | <TempVarValuePart> <TempVarValueTail>
+    | [Var] <TempVarValuePart> <TempVarValueTail>;
+
+<TempTypedValueTail> := _
+    | [Comma] <TempTypedValuePart> <TempTypedValueTail>;
+
+<TempTypedValuePart> := [Identifier] {defineId} [Assign] <Conditional> {typeTemp};
+
+<TempVarValueTail> := _
+    | [Comma] <TempVarValuePart> <TempVarValueTail>;
+
+<TempVarValuePart> := [Identifier] {defineId} [Assign] <Conditional> {varTemp};
+    
+<TempValueGroup> := _
+    | <TempDefine> [End] <TempValueGroup>;
 
 #=========================================================#
 # Declarations                                            #

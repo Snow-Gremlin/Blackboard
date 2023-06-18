@@ -565,6 +565,35 @@ public class Slate {
     }
 
     #endregion
+    #region Has Node...
+
+    /// <summary>Determines if the node with the given name exists.</summary>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    public bool HasNode(params string[] names) =>
+        this.HasNode(names as IEnumerable<string>);
+
+    /// <summary>Determines if the node with the given name exists.</summary>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    public bool HasNode(IEnumerable<string> names) =>
+        this.Global.Find(names) is not null;
+    
+    /// <summary>Determines if the node with the given name and type exists.</summary>
+    /// <typeparam name="T">The type of the node to check for.</typeparam>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    public bool HasNode<T>(params string[] names) where T : INode =>
+        this.HasNode<T>(names as IEnumerable<string>);
+
+    /// <summary>Determines if the node with the given name and type exists.</summary>
+    /// <typeparam name="T">The type of the node to check for.</typeparam>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    public bool HasNode<T>(IEnumerable<string> names) where T : INode =>
+        this.Global.Find(names) is not T;
+
+    #endregion
     #region Output...
 
     /// <summary>Gets or creates a new output value on the node with the given name.</summary>

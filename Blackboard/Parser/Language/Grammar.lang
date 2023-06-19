@@ -11,6 +11,7 @@
     | <ProvokeTrigger>
     | <GetValue>
     | <TempValue>
+    | <NewExtern>
     | <Declaration> [End];
 
 #=========================================================#
@@ -185,6 +186,31 @@
     
 <TempValueGroup> := _
     | <TempDefine> [End] <TempValueGroup>;
+
+#=========================================================#
+# New Extern                                              #
+#=========================================================#
+# New extern with type and optional initial assignment.   #
+#   - extern bool A;                                      #
+#   - extern double A, B, C;                              #
+#   - extern int A = 3, B = 4, C;                         #
+# New extern group.                                       #
+#   - extern { int A, B; bool C = true; }                 #
+#=========================================================#
+
+<NewExtern> := [DeclareExtern] <NewExternHead> [End]
+    | [DeclareExtern] [CurlOpen] <NewExternGroup> [CurlClose];
+
+<NewExternHead> := <RootType> <NewTypedExternPart> <NewTypedExternTail>;
+
+<NewTypedExternTail> := _
+    | [Comma] <NewTypedExternPart> <NewTypedExternTail>;
+
+<NewTypedExternPart> := [Identifier] {defineId} {externNoAssign}
+    | [Identifier] {defineId} [Assign] <Declaration> {externWithAssign};
+
+<NewExternGroup> := _
+    | <NewExternHead> [End] <NewExternGroup>;
 
 #=========================================================#
 # Declarations                                            #

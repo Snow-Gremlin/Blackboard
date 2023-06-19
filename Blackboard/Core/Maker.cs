@@ -68,4 +68,16 @@ static public class Maker {
         type == Type.String  ? new InputValue<String>() :
         type == Type.Trigger ? new InputTrigger() :
         null;
+
+    /// <summary>Creates a new extern node of the given type.</summary>
+    /// <param name="type">The type of value to create an input node for.</param>
+    /// <returns>The newly created extern or null if an unexpected type.</returns>
+    static public IExtern? CreateExternNode(Type type) =>
+        type == Type.Object  ? new ExternValue<Object>() :
+        type == Type.Bool    ? new ExternValue<Bool>() :
+        type == Type.Int     ? new ExternValue<Int>() :
+        type == Type.Double  ? new ExternValue<Double>() :
+        type == Type.String  ? new ExternValue<String>() :
+        type == Type.Trigger ? new ExternTrigger() :
+        null;
 }

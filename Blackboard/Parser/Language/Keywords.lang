@@ -10,7 +10,7 @@
 [Identifier] = 'get'    => [DeclareGet];
 [Identifier] = 'define' => [DeclareDefine];
 [Identifier] = 'temp'   => [DeclareTemp];
-[Identifier] = 'proxy'  => [DeclareProxy];
+[Identifier] = 'extern' => [DeclareExtern];
 
 [Identifier] = 'bool'    => [TypeBool];
 [Identifier] = 'int'     => [TypeInt];

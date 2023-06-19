@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Xml.Linq;
 using PP = PetiteParser;
 using S = System;
 
@@ -118,6 +119,9 @@ sealed public class Parser {
         
         this.addHandler("typeTemp", handleTypeTemp);
         this.addHandler("varTemp", handleVarTemp);
+
+        this.addHandler("externNoAssign", handleExternNoAssign);
+        this.addHandler("externWithAssign", handleExternWithAssign);
 
         this.addHandler("assignment", handleAssignment);
         this.addHandler("cast", handleCast);
@@ -281,19 +285,19 @@ sealed public class Parser {
     /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handleNewTypeInputWithAssign(Builder.Builder builder) {
-        INode value = builder.Nodes.Pop();
-        Type type = builder.Types.Peek();
-        string name = builder.Identifiers.Pop();
-        INode target = builder.CreateInput(name, type);
+        INode  value  = builder.Nodes.Pop();
+        Type   type   = builder.Types.Peek();
+        string name   = builder.Identifiers.Pop();
+        INode  target = builder.CreateInput(name, type);
         builder.AddAssignment(target, value);
     }
 
     /// <summary>This creates a new input node and assigns it with an initial value.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handleNewVarInputWithAssign(Builder.Builder builder) {
-        INode value = builder.Nodes.Pop();
-        string name = builder.Identifiers.Pop();
-        Type type = Type.TypeOf(value) ??
+        INode  value = builder.Nodes.Pop();
+        string name  = builder.Identifiers.Pop();
+        Type   type  = Type.TypeOf(value) ??
             throw new Message("Unable to determine node type for new variable with assignment.");
         INode target = builder.CreateInput(name, type);
         builder.AddAssignment(target, value);
@@ -302,17 +306,17 @@ sealed public class Parser {
     /// <summary>This handles defining a new typed named node.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handleTypeDefine(Builder.Builder builder) {
-        INode value = builder.Nodes.Pop();
-        Type type = builder.Types.Peek();
-        string name = builder.Identifiers.Pop();
+        INode  value = builder.Nodes.Pop();
+        Type   type  = builder.Types.Peek();
+        string name  = builder.Identifiers.Pop();
         builder.AddDefine(value, type, name);
     }
 
     /// <summary>This handles defining a new untyped named node.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handleVarDefine(Builder.Builder builder) {
-        INode value = builder.Nodes.Pop();
-        string name = builder.Identifiers.Pop();
+        INode  value = builder.Nodes.Pop();
+        string name  = builder.Identifiers.Pop();
         builder.AddDefine(value, null, name);
     }
 
@@ -375,6 +379,27 @@ sealed public class Parser {
         builder.AddTemp(type, name, value);
     }
 
+    /// <summary>This handles checking for an existing node or creating an external node if there is no existing node.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleExternNoAssign(Builder.Builder builder) {
+        string name = builder.Identifiers.Pop();
+        Type   type = builder.Types.Peek();
+        builder.RequestExtern(name, type);
+    }
+    
+    /// <summary>
+    /// This handles checking for an existing node or creating an external node if there is no existing node.
+    /// If no node exists then the default value for the existing node will be set.
+    /// </summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleExternWithAssign(Builder.Builder builder) {
+        INode  value  = builder.Nodes.Pop();
+        Type   type   = builder.Types.Peek();
+        string name   = builder.Identifiers.Pop();
+        INode  target = builder.RequestExtern(name, type, value);
+        builder.AddAssignment(target, value);
+    }
+
     /// <summary>This handles assigning the left value to the right value.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handleAssignment(Builder.Builder builder) {
@@ -400,15 +425,15 @@ sealed public class Parser {
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handleCast(Builder.Builder builder) {
         INode value = builder.Nodes.Pop();
-        Type type   = builder.Types.Pop();
+        Type  type  = builder.Types.Pop();
         builder.Nodes.Push(builder.PerformCast(type, value, true));
     }
 
     /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handleMemberAccess(Builder.Builder builder) {
-        string name = builder.LastText;
-        INode rNode = builder.Nodes.Pop();
+        string name  = builder.LastText;
+        INode  rNode = builder.Nodes.Pop();
         if (rNode is not IFieldReader receiver)
             throw new Message("Unexpected node type for a member access. Expected a field reader.").
                 With("Node", rNode).

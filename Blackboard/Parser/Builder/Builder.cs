@@ -193,9 +193,9 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         // If there is no condition, add an unconditional provoke.
         if (value is null) {
             IAction assign = Provoke.Create(target) ??
-                    throw new Message("Unexpected node types for a unconditional provoke.").
-                        With("Location", this.LastLocation).
-                        With("Target", target);
+                throw new Message("Unexpected node types for a unconditional provoke.").
+                    With("Location", this.LastLocation).
+                    With("Target", target);
 
             this.Actions.Add(assign);
             return null;
@@ -205,10 +205,10 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
         IAction condAssign = Provoke.Create(input, root, newNodes) ??
-                throw new Message("Unexpected node types for a conditional provoke.").
-                   With("Location", this.LastLocation).
-                   With("Target", target).
-                   With("Value", value);
+            throw new Message("Unexpected node types for a conditional provoke.").
+                With("Location", this.LastLocation).
+                With("Target", target).
+                With("Value", value);
 
         this.Actions.Add(condAssign);
         return root;
@@ -229,20 +229,20 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         // Check if the base types match. Don't need to check that the type is
         // a data type or trigger since only those can be reduced to constants.
         Type targetType = Type.TypeOf(target) ??
-                throw new Message("Unable to find target type.").
-                    With("Location", this.LastLocation).
-                    With("Input", target).
-                    With("Value", value);
+            throw new Message("Unable to find target type.").
+                With("Location", this.LastLocation).
+                With("Input", target).
+                With("Value", value);
 
         INode root = this.PerformCast(targetType, value);
         HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
         IAction assign = Maker.CreateAssignAction(targetType, target, root, newNodes) ??
-                throw new Message("Unsupported types for an assignment action.").
-                    With("Location", this.LastLocation).
-                    With("Type",     targetType).
-                    With("Input",    target).
-                    With("Value",    value);
+            throw new Message("Unsupported types for an assignment action.").
+                With("Location", this.LastLocation).
+                With("Type",     targetType).
+                With("Input",    target).
+                With("Value",    value);
 
         this.Actions.Add(assign);
         return root;
@@ -262,14 +262,38 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
         IAction getter = Maker.CreateGetterAction(targetType, name, root, newNodes) ??
-                throw new Message("Unsupported type for a getter action.").
-                    With("Location", this.LastLocation).
-                    With("Type",     targetType).
-                    With("Name",     name).
-                    With("Value",    value);
+            throw new Message("Unsupported type for a getter action.").
+                With("Location", this.LastLocation).
+                With("Type",     targetType).
+                With("Name",     name).
+                With("Value",    value);
 
         this.Actions.Add(getter);
         return root;
+    }
+
+    /// <summary>Creates a new input node with the given name in the local scope.</summary>
+    /// <param name="name">The name to create the input for.</param>
+    /// <param name="type">The type of input to create.</param>
+    /// <returns>The newly created input.</returns>
+    public INode CreateInput(string name, Type type) {
+        this.Logger.Info("Create Input:");
+
+        VirtualNode scope = this.Scope.Current;
+        if (scope.ContainsField(name))
+            throw new Message("A node already exists with the given name.").
+                With("Name", name).
+                With("Type", type);
+
+        IInput node = Maker.CreateInputNode(type) ??
+            throw new Message("Unsupported type for new typed input").
+                With("Location", this.LastLocation).
+                With("Name",     name).
+                With("Type",     type);
+
+        this.Actions.Add(new Define(scope.Receiver, name, node, Enumerable.Empty<INode>()));
+        scope.WriteField(name, node);
+        return node;
     }
 
     /// <summary>Creates a temporary node and adds it to the builder if possible.</summary>
@@ -295,24 +319,46 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         return root;
     }
 
-    /// <summary>Creates a new input node with the given name in the local scope.</summary>
-    /// <param name="name">The name to create the input for.</param>
-    /// <param name="type">The type of input to create.</param>
-    /// <returns>The newly created input.</returns>
-    public INode CreateInput(string name, Type type) {
-        this.Logger.Info("Create Input:");
+    /// <summary>
+    /// Checks for an existing node and, if none exists, creates an extern node
+    /// as a placeholder with the given name in the local scope.
+    /// </summary>
+    /// <param name="name">The name to create the extern for.</param>
+    /// <param name="type">The type of extern to create.</param>
+    /// <param name="value">The optional initial default value the extern node.</param>
+    /// <returns>The newly created extern.</returns>
+    public INode RequestExtern(string name, Type type, INode? value = null) {
+        this.Logger.Info("Request Extern:");
 
         VirtualNode scope = this.Scope.Current;
-        if (scope.ContainsField(name))
-            throw new Message("A node already exists with the given name.").
-                With("Name", name).
-                With("Type", type);
+        INode? existing = scope.ReadField(name);
+        if (existing is not null) {
 
-        IInput node = Maker.CreateInputNode(type) ??
-                throw new Message("Unsupported type for new typed input").
+            Type existType = Type.TypeOf(existing) ??
+                throw new Message("Unable to find existing type.").
                     With("Location", this.LastLocation).
                     With("Name",     name).
-                    With("Type",     type);
+                    With("Existing", existing).
+                    With("New Type", type).
+                    With("Value",    value);
+
+            if (existType != type)
+                throw new Message("External does not match existing node type.").
+                    With("Location",      this.LastLocation).
+                    With("Name",          name).
+                    With("Existing",      existing).
+                    With("Existing Type", existType).
+                    With("New Type",      type).
+                    With("Value",         value);
+
+            return existing;
+        }
+
+        IExtern node = Maker.CreateExternNode(type) ??
+            throw new Message("Unsupported type for new extern").
+                With("Location", this.LastLocation).
+                With("Name",     name).
+                With("Type",     type);
 
         this.Actions.Add(new Define(scope.Receiver, name, node, Enumerable.Empty<INode>()));
         scope.WriteField(name, node);

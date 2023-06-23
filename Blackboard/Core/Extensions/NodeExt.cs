@@ -32,7 +32,8 @@ static public class NodeExt {
     /// <returns>True if constant, false otherwise.</returns>
     static public bool IsConstant(this INode node) =>
         node is IConstant ||
-        (node is not IInput && node is IChild child && child.Parents.IsConstant());
+        (node is not IInput && node is not IExtern &&
+        node is IChild child && child.Parents.IsConstant());
 
     /// <summary>This determines if all the given nodes are constant.</summary>
     /// <param name="nodes">The nodes to check if constant.</param>

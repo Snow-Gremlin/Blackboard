@@ -12,10 +12,42 @@ public class Extern {
         Slate slate = new();
         slate.Read(
             "extern int A = 2;",
-            "in int A = 3;").
+            "extern int B = 3;",
+            "in int A = 4;").
             Perform();
-
         Assert.IsTrue(slate.HasNode("A"));
+        Assert.IsTrue(slate.HasNode("B"));
+        slate.CheckValue(4, "A");
+        slate.CheckValue(3, "B");
+
+        slate.Read(
+            "in int B = 5;",
+            "A = 6;").
+            Perform();
+        slate.CheckValue(6, "A");
+        slate.CheckValue(5, "B");
+    }
+
+    [TestMethod]
+    public void TestBasicParses_ExternToRule() {
+        Slate slate = new(addConsts: false);
+        slate.Read(
+            "extern int A = 2;",
+            "extern int B = 3;",
+            "A := B;").
+            Perform();
+        Assert.IsTrue(slate.HasNode("A"));
+        Assert.IsTrue(slate.HasNode("B"));
+        slate.CheckValue(3, "A");
+        slate.CheckValue(3, "B");
+        slate.CheckGraphString(
+            ""); // TODO: FIX
+
+        slate.Read(
+            "in int C = 5;",
+            "B := C;").
+            Perform();
         slate.CheckValue(5, "A");
+        slate.CheckValue(5, "B");
     }
 }

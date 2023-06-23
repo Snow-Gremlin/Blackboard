@@ -201,12 +201,12 @@
 <NewExtern> := [DeclareExtern] <NewExternHead> [End]
     | [DeclareExtern] [CurlOpen] <NewExternGroup> [CurlClose];
 
-<NewExternHead> := <RootType> <NewTypedExternPart> <NewTypedExternTail>;
+<NewExternHead> := <RootType> <NewExternPart> <NewExternTail>;
 
-<NewTypedExternTail> := _
-    | [Comma] <NewTypedExternPart> <NewTypedExternTail>;
+<NewExternTail> := _
+    | [Comma] <NewExternPart> <NewExternTail>;
 
-<NewTypedExternPart> := [Identifier] {defineId} {externNoAssign}
+<NewExternPart> := [Identifier] {defineId} {externNoAssign}
     | [Identifier] {defineId} [Assign] <Declaration> {externWithAssign};
 
 <NewExternGroup> := _

@@ -54,6 +54,25 @@ sealed public class Define : IAction {
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Result result, Logger? logger = null) {
         logger.Info("Define: {0}", this);
+        
+        INode? existing = this.Receiver.ReadField(this.Name);
+        if (existing is not null) {
+            if (existing is not IExtern)
+                throw new Message("May not define node, a node already exists with the given name.").
+                    With("Name",     this.Name).
+                    With("Node",     this.Node).
+                    With("Existing", existing);
+
+            if (existing is not IParent oldParent || this.Node is not IParent newParent)
+                throw new Message("The existing node was not a parent.").
+                    With("Name",     this.Name).
+                    With("Node",     this.Node).
+                    With("Existing", existing);
+
+            oldParent.Children.ToList().ForEach(child => child.Parents.Replace(oldParent, newParent));
+            this.Receiver.RemoveFields(this.Name);
+        }
+
         this.Receiver.WriteField(this.Name, this.Node);
         List<IChild> changed = this.needParents.Where(child => child.Legitimatize()).ToList();
         slate.PendUpdate(changed);

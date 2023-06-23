@@ -171,10 +171,20 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
 
         HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
+        
+        VirtualNode scope = this.Scope.Current;
+        INode? existing = scope.ReadField(name);
+        if (existing is not null) {
+            if (existing is not IExtern)
+                throw new Message("A node already exists with the given name.").
+                    With("Location", this.LastLocation).
+                    With("Name", name).
+                    With("Type", type);
+            scope.RemoveFields(name);
+        }
 
-        VirtualNode curScope = this.Scope.Current;
-        this.Actions.Add(new Define(curScope.Receiver, name, root, newNodes));
-        curScope.WriteField(name, root);
+        this.Actions.Add(new Define(scope.Receiver, name, root, newNodes));
+        scope.WriteField(name, root);
         return root;
     }
 
@@ -279,17 +289,22 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
     public INode CreateInput(string name, Type type) {
         this.Logger.Info("Create Input:");
 
-        VirtualNode scope = this.Scope.Current;
-        if (scope.ContainsField(name))
-            throw new Message("A node already exists with the given name.").
-                With("Name", name).
-                With("Type", type);
-
         IInput node = Maker.CreateInputNode(type) ??
             throw new Message("Unsupported type for new typed input").
                 With("Location", this.LastLocation).
                 With("Name",     name).
                 With("Type",     type);
+
+        VirtualNode scope = this.Scope.Current;
+        INode? existing = scope.ReadField(name);
+        if (existing is not null) {
+            if (existing is not IExtern)
+                throw new Message("A node already exists with the given name.").
+                    With("Location", this.LastLocation).
+                    With("Name", name).
+                    With("Type", type);
+            scope.RemoveFields(name);
+        }
 
         this.Actions.Add(new Define(scope.Receiver, name, node, Enumerable.Empty<INode>()));
         scope.WriteField(name, node);
@@ -326,9 +341,14 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
     /// <param name="name">The name to create the extern for.</param>
     /// <param name="type">The type of extern to create.</param>
     /// <param name="value">The optional initial default value the extern node.</param>
-    /// <returns>The newly created extern.</returns>
-    public INode RequestExtern(string name, Type type, INode? value = null) {
+    public void RequestExtern(string name, Type type, INode? value = null) {
         this.Logger.Info("Request Extern:");
+
+        if (value is not null && type == Type.Trigger)
+            throw new Message("May not initialize an extern trigger.").
+                With("Location", this.LastLocation).
+                With("Name",     name).
+                With("Type",     type);
 
         VirtualNode scope = this.Scope.Current;
         INode? existing = scope.ReadField(name);
@@ -351,9 +371,11 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
                     With("New Type",      type).
                     With("Value",         value);
 
-            return existing;
+            // Node already exists as an extern or the actual node.
+            return;
         }
 
+        // Node doesn't exist, create the extern placeholder.
         IExtern node = Maker.CreateExternNode(type) ??
             throw new Message("Unsupported type for new extern").
                 With("Location", this.LastLocation).
@@ -362,7 +384,7 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
 
         this.Actions.Add(new Define(scope.Receiver, name, node, Enumerable.Empty<INode>()));
         scope.WriteField(name, node);
-        return node;
+        if (value is not null) this.AddAssignment(node, value);
     }
 
     #endregion

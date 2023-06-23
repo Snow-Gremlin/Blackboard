@@ -12,12 +12,10 @@ public class Extern {
         Slate slate = new();
         slate.Read(
             "extern int A = 2;",
-            "int A = 3;").
+            "in int A = 3;").
             Perform();
 
-        Assert.IsFalse(slate.HasNode("A"));
-        Assert.IsFalse(slate.HasNode("B"));
-        Assert.IsTrue(slate.HasNode("C"));
-        slate.CheckValue(5, "C");
+        Assert.IsTrue(slate.HasNode("A"));
+        slate.CheckValue(5, "A");
     }
 }

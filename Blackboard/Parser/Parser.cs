@@ -82,16 +82,16 @@ sealed public class Parser {
     /// <param name="node">The parsed tree root node to read from.</param>
     /// <returns>The formula for performing the parsed actions.</returns>
     private Formula read(PP.ParseTree.ITreeNode node) {
-        try {
+        //try {
             this.logger.Info("Parser Read");
             Builder.Builder builder = new(this.slate, this.logger);
             node.Process(this.prompts, builder);
             this.logger.Info("Parser Done");
             return builder.Actions.Formula;
-        } catch (S.Exception ex) {
+        /*} catch (S.Exception ex) {
             throw new Message("Error occurred while parsing input code.").
                 With("Error", ex);
-        }
+        }*/
     }
 
     #endregion
@@ -393,11 +393,10 @@ sealed public class Parser {
     /// </summary>
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handleExternWithAssign(Builder.Builder builder) {
-        INode  value  = builder.Nodes.Pop();
-        Type   type   = builder.Types.Peek();
-        string name   = builder.Identifiers.Pop();
-        INode  target = builder.RequestExtern(name, type, value);
-        builder.AddAssignment(target, value);
+        INode  value = builder.Nodes.Pop();
+        Type   type  = builder.Types.Peek();
+        string name  = builder.Identifiers.Pop();
+        builder.RequestExtern(name, type, value);
     }
 
     /// <summary>This handles assigning the left value to the right value.</summary>

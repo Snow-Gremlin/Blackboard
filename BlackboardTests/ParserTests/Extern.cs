@@ -41,7 +41,12 @@ public class Extern {
         slate.CheckValue(3, "A");
         slate.CheckValue(3, "B");
         slate.CheckGraphString(
-            ""); // TODO: FIX
+            "");
+        // TODO: FIX. The problem is that A is set to the extern B but is not a child
+        // so that when B is replaced, A still is the extern B. I need to make it so that
+        // extern becomes a child of the new B, that way any copies of extern still use
+        // extern B but extern B is updated automatically as a copy of B. The new B
+        // takes the place of the old B. This then also helps allow disconnecting in the future.
 
         slate.Read(
             "in int C = 5;",

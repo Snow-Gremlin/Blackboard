@@ -60,9 +60,12 @@ public abstract class BinaryValue<T1, T2, TResult> : ValueNode<TResult>, IChild
     /// <returns>The new value for this node.</returns>
     protected abstract TResult OnEval(T1 value1, T2 value2);
 
+    /// <summary>The value to return when a parent is not set.</summary>
+    protected virtual TResult DefaultValue => default;
+
     /// <summary>This updates the value during evaluation.</summary>
     /// <returns>True if the value was changed, false otherwise.</returns>
     protected override TResult CalculateValue() =>
-        this.source1 is null || this.source2 is null ? default :
+        this.source1 is null || this.source2 is null ? this.DefaultValue :
         this.OnEval(this.source1.Value, this.source2.Value);
 }

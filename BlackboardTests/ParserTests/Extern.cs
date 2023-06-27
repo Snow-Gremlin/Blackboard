@@ -55,4 +55,9 @@ public class Extern {
         slate.CheckValue(5, "A");
         slate.CheckValue(5, "B");
     }
+
+    // TODO: Need to make sure that a definition of an extern, e.g. `A := B`,
+    //       doesn't show `A` as extern in an away which allows it to be set
+    //       differently from `B` since `A` is not defined as an extern, only
+    //       `B` was. Need an identity/pass-through/shunt node.
 }

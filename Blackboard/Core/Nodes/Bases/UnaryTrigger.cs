@@ -6,7 +6,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Bases;
 
 /// <summary>This is a trigger which has a single parent as a source.</summary>
- public abstract class UnaryTrigger : TriggerNode, IChild {
+public abstract class UnaryTrigger : TriggerNode, IChild {
     
     /// <summary>This is a helper for creating unary node factories quickly.</summary>
     /// <param name="handle">The handler for calling the node constructor.</param>
@@ -36,8 +36,16 @@ namespace Blackboard.Core.Nodes.Bases;
     public ParentCollection Parents => new ParentCollection(this, 1).
         With(() => this.source, parent => this.source = parent);
 
+    /// <summary>
+    /// This handles updating this node's state given the
+    /// parent's provoked state during evaluation.
+    /// </summary>
+    /// <param name="provoked">The state from the parent.</param>
+    /// <returns>The new provoke state for this node.</returns>
+    protected virtual bool OnEval(bool provoked) => provoked;
+
     /// <summary>This updates the trigger during the an evaluation.</summary>
     /// <returns>This returns the provoked value as it currently is.</returns>
     protected override bool ShouldProvoke() =>
-        this.source is not null && this.source.Provoked;
+        this.source is not null && this.OnEval(this.source.Provoked);
 }

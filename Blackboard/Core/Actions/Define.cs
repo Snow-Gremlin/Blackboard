@@ -57,7 +57,7 @@ sealed public class Define : IAction {
         
         INode? existing = this.Receiver.ReadField(this.Name);
         if (existing is not null) {
-            if (existing is not IExtern)
+            if (existing is not IExtern existingExtern)
                 throw new Message("May not define node, a node already exists with the given name.").
                     With("Name",     this.Name).
                     With("Node",     this.Node).
@@ -68,6 +68,8 @@ sealed public class Define : IAction {
                     With("Name",     this.Name).
                     With("Node",     this.Node).
                     With("Existing", existing);
+
+            // TODO: See Extern.cs tests comments
 
             oldParent.Children.ToList().ForEach(child => child.Parents.Replace(oldParent, newParent));
             this.Receiver.RemoveFields(this.Name);

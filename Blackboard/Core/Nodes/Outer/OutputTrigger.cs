@@ -19,7 +19,8 @@ sealed public class OutputTrigger : UnaryTrigger, ITriggerOutput {
     public override INode NewInstance() => new OutputTrigger();
 
     /// <summary>This is the type name of the node.</summary>
-    public override string TypeName => "Output"; // So that it is Output<bool> and Output<trigger>.
+    /// <remarks>Doesn't use nameof since this has both trigger and value nodes.</remarks>
+    public override string TypeName => "Output";
 
     /// <summary>This event is emitted when the trigger has been provoked.</summary>
     public event S.EventHandler? OnProvoked;

@@ -19,7 +19,8 @@ sealed public class InputTrigger : TriggerNode, ITriggerInput {
     public override INode NewInstance() => new InputTrigger();
 
     /// <summary>This is the type name of the node.</summary>
-    public override string TypeName => "Input"; // So that it is Input<bool> and Input<trigger>.
+    /// <remarks>Doesn't use nameof since this has both trigger and value nodes.</remarks>
+    public override string TypeName => "Input";
 
     /// <summary>Provokes this trigger so that this node is provoked during the next evaluation.</summary>
     /// <remarks>This is not intended to be called directly, it should be called via the slate or action.</remarks>

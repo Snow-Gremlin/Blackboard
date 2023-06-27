@@ -2,31 +2,32 @@
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 
-namespace Blackboard.Core.Nodes.Outer;
+namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>An external node as a placeholder for value node.</summary>
 /// <typeparam name="T">The type of the value to hold.</typeparam>
-sealed public class ExternValue<T> : ValueNode<T>, IValueExtern<T>
+sealed public class ShellValue<T> : UnaryValue<T, T>, IValueExtern<T>
     where T : struct, IData, IEquatable<T> {
 
     /// <summary>Creates a new extern value node.</summary>
-    public ExternValue() { }
+    public ShellValue() { }
 
     /// <summary>Creates a new extern value node.</summary>
-    /// <param name="value">The initial value for this node.</param>
-    public ExternValue(T value = default) => this.SetValue(value);
-    
+    /// <param name="source">The parent node initialized for this external.</param>
+    public ShellValue(IValueParent<T> source) : base(source) { }
+
     /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
     /// <returns>The new instance of this node.</returns>
-    public override INode NewInstance() => new ExternValue<T>();
+    public override INode NewInstance() => new ShellValue<T>();
 
     /// <summary>This is the type name of the node.</summary>
     /// <remarks>Doesn't use nameof since this has both trigger and value nodes.</remarks>
-    public override string TypeName => "Extern";
+    public override string TypeName => "Shell";
 
-    /// <summary>Always return the initial value from the extern.</summary>
-    /// <returns>The initial value.</returns>
-    protected override T CalculateValue() => this.Value;
+    /// <summary>If the parent is set, then this will be called, so just return the parent value.</summary>
+    /// <param name="value">The value from the parent to pass through.</param>
+    /// <returns>The value from the parent unchanged.</returns>
+    protected override T OnEval(T value) => value;
 
     /// <summary>This sets the value of this node.</summary>
     /// <param name="value">The value to set.</param>

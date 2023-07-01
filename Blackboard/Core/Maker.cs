@@ -82,17 +82,4 @@ static public class Maker {
         type == Type.String  ? new ExternValue<String>() :
         type == Type.Trigger ? new ExternTrigger() :
         null;
-
-    // TODO: If not used, remove
-    /// <summary>Creates a new shell node to wrap the given node.</summary>
-    /// <param name="type">The type of value to create a shell node for.</param>
-    /// <returns>The newly created shell or null if an unexpected type.</returns>
-    static public INode? CreateShell(INode node) =>
-        node is IValueParent<Object> objectNode  ? new ShellValue<Object>(objectNode) :
-        node is IValueParent<Bool>   boolNode    ? new ShellValue<Bool>(boolNode) :
-        node is IValueParent<Int>    intNode     ? new ShellValue<Int>(intNode) :
-        node is IValueParent<Double> doubleNode  ? new ShellValue<Double>(doubleNode) :
-        node is IValueParent<String> stringNode  ? new ShellValue<String>(stringNode) :
-        node is ITriggerParent       triggerNode ? new ShellTrigger(triggerNode) :
-        null;
 }

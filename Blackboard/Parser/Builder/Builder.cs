@@ -2,6 +2,7 @@
 using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
@@ -183,6 +184,18 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
             scope.RemoveFields(name);
         }
 
+        // If the root node is an extern, then this define is an alias to that extern.
+        // So that this define updates properly when the extern is replaced and to prevent
+        // keeping a copy of the extern, wrap the extern in a shell for the alias.
+        if (root is IExtern) {
+            root = Maker.CreateShell(root) ??
+                throw new Message("Unable to create a shell for an extern define.").
+                    With("Location", this.LastLocation).
+                    With("Extern", root).
+                    With("Name", name).
+                    With("Type", type);
+        }
+
         this.Actions.Add(new Define(scope.Receiver, name, root, newNodes));
         scope.WriteField(name, root);
         return root;
@@ -306,7 +319,7 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
             scope.RemoveFields(name);
         }
 
-        this.Actions.Add(new Define(scope.Receiver, name, node, Enumerable.Empty<INode>()));
+        this.Actions.Add(new Define(scope.Receiver, name, node));
         scope.WriteField(name, node);
         return node;
     }
@@ -363,7 +376,7 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
                     With("Value",    value);
 
             if (existType != type)
-                throw new Message("External does not match existing node type.").
+                throw new Message("Extern node does not match existing node type.").
                     With("Location",      this.LastLocation).
                     With("Name",          name).
                     With("Existing",      existing).
@@ -382,7 +395,7 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
                 With("Name",     name).
                 With("Type",     type);
 
-        this.Actions.Add(new Define(scope.Receiver, name, node, Enumerable.Empty<INode>()));
+        this.Actions.Add(new Extern(scope.Receiver, name, node));
         scope.WriteField(name, node);
         if (value is not null) this.AddAssignment(node, value);
     }

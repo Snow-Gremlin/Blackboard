@@ -2,6 +2,7 @@
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -63,15 +64,36 @@ sealed public class Define : IAction {
                     With("Node",     this.Node).
                     With("Existing", existing);
 
-            if (existing is not IParent oldParent || this.Node is not IParent newParent)
-                throw new Message("The existing node was not a parent.").
+            Type externType = Type.TypeOf(existingExtern) ??
+                throw new Message("Unable to find existing extern type while setting input.").
                     With("Name",     this.Name).
                     With("Node",     this.Node).
-                    With("Existing", existing);
+                    With("Existing", existingExtern);
 
-            // TODO: See Extern.cs tests comments
+            Type inputType = Type.TypeOf(this.Node) ??
+                throw new Message("Unable to find input type while setting input.").
+                    With("Name",     this.Name).
+                    With("Node",     this.Node).
+                    With("Existing", existingExtern);
 
-            oldParent.Children.ToList().ForEach(child => child.Parents.Replace(oldParent, newParent));
+            if (inputType != externType)
+                throw new Message("Input node does not match existing extern node type.").
+                    With("Name",          this.Name).
+                    With("Node",          this.Node).
+                    With("Existing",      existingExtern).
+                    With("Existing Type", externType).
+                    With("New Type",      inputType);
+
+            if (existingExtern.Children.Any()) {
+                if (this.Node is not IParent parent)
+                    throw new Message("A non-parent node can not replace an extern with children.").
+                        With("Name",     this.Name).
+                        With("Node",     this.Node).
+                        With("Existing", existingExtern);
+
+                existingExtern.Children.ToList().ForEach(
+                    child => child.Parents.Replace(existingExtern, parent));
+            }
             this.Receiver.RemoveFields(this.Name);
         }
 

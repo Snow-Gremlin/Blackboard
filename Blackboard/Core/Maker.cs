@@ -1,10 +1,12 @@
 ﻿using Blackboard.Core.Actions;
 using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace Blackboard.Core;
 
@@ -70,7 +72,7 @@ static public class Maker {
         null;
 
     /// <summary>Creates a new extern node of the given type.</summary>
-    /// <param name="type">The type of value to create an input node for.</param>
+    /// <param name="type">The type of value to create an extern node for.</param>
     /// <returns>The newly created extern or null if an unexpected type.</returns>
     static public IExtern? CreateExternNode(Type type) =>
         type == Type.Object  ? new ExternValue<Object>() :
@@ -79,5 +81,17 @@ static public class Maker {
         type == Type.Double  ? new ExternValue<Double>() :
         type == Type.String  ? new ExternValue<String>() :
         type == Type.Trigger ? new ExternTrigger() :
+        null;
+
+    /// <summary>Creates a new shell node to wrap the given node.</summary>
+    /// <param name="type">The type of value to create a shell node for.</param>
+    /// <returns>The newly created shell or null if an unexpected type.</returns>
+    static public INode? CreateShell(INode node) =>
+        node is IValueParent<Object> objectNode  ? new ShellValue<Object>(objectNode) :
+        node is IValueParent<Bool>   boolNode    ? new ShellValue<Bool>(boolNode) :
+        node is IValueParent<Int>    intNode     ? new ShellValue<Int>(intNode) :
+        node is IValueParent<Double> doubleNode  ? new ShellValue<Double>(doubleNode) :
+        node is IValueParent<String> stringNode  ? new ShellValue<String>(stringNode) :
+        node is ITriggerParent       triggerNode ? new ShellTrigger(triggerNode) :
         null;
 }

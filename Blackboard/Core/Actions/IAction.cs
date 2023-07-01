@@ -19,4 +19,6 @@ public interface IAction {
     //       For things like define, it would check if the value hasn't been defined so that
     //       when it is performed the already-exists exception is thrown.
     //       Optionally Log any warnings or errors but return a boolean indicating if it can be performed.
+
+    // TODO: Add location information to an action so that on failure, the source can be given.
 }

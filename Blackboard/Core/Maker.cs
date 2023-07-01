@@ -83,6 +83,7 @@ static public class Maker {
         type == Type.Trigger ? new ExternTrigger() :
         null;
 
+    // TODO: If not used, remove
     /// <summary>Creates a new shell node to wrap the given node.</summary>
     /// <param name="type">The type of value to create a shell node for.</param>
     /// <returns>The newly created shell or null if an unexpected type.</returns>

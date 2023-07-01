@@ -184,18 +184,6 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
             scope.RemoveFields(name);
         }
 
-        // If the root node is an extern, then this define is an alias to that extern.
-        // So that this define updates properly when the extern is replaced and to prevent
-        // keeping a copy of the extern, wrap the extern in a shell for the alias.
-        if (root is IExtern) {
-            root = Maker.CreateShell(root) ??
-                throw new Message("Unable to create a shell for an extern define.").
-                    With("Location", this.LastLocation).
-                    With("Extern", root).
-                    With("Name", name).
-                    With("Type", type);
-        }
-
         this.Actions.Add(new Define(scope.Receiver, name, root, newNodes));
         scope.WriteField(name, root);
         return root;

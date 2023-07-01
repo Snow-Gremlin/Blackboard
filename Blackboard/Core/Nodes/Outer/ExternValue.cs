@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Nodes.Outer;
@@ -9,12 +10,15 @@ namespace Blackboard.Core.Nodes.Outer;
 sealed public class ExternValue<T> : ValueNode<T>, IValueExtern<T>
     where T : struct, IData, IEquatable<T> {
 
+    /// <summary>The shell to use in place of an extern in a define.</summary>
+    readonly private ShellValue<T> shell;
+
     /// <summary>Creates a new extern value node.</summary>
-    public ExternValue() { }
+    public ExternValue() => this.shell = new ShellValue<T>(this);
 
     /// <summary>Creates a new extern value node.</summary>
     /// <param name="value">The initial value for this node.</param>
-    public ExternValue(T value = default) => this.SetValue(value);
+    public ExternValue(T value = default) : this() => this.SetValue(value);
     
     /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
     /// <returns>The new instance of this node.</returns>
@@ -32,4 +36,7 @@ sealed public class ExternValue<T> : ValueNode<T>, IValueExtern<T>
     /// <param name="value">The value to set.</param>
     /// <returns>True if the value has changed, false otherwise.</returns>
     public bool SetValue(T value) => this.UpdateValue(value);
+
+    /// <summary>This is the child shell node for the extern.</summary>
+    public INode Shell => this.shell;
 }

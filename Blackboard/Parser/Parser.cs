@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Xml.Linq;
 using PP = PetiteParser;
 using S = System;
 
@@ -82,19 +81,23 @@ sealed public class Parser {
     /// <param name="node">The parsed tree root node to read from.</param>
     /// <returns>The formula for performing the parsed actions.</returns>
     private Formula read(PP.ParseTree.ITreeNode node) {
-        //try {
+        #if !DEBUG
+        try {
+        #endif
             this.logger.Info("Parser Read");
-            Builder.Builder builder = new(this.slate, this.logger);
-            node.Process(this.prompts, builder);
-            this.logger.Info("Parser Done");
-            return builder.Actions.Formula;
-        /*} catch (S.Exception ex) {
+                Builder.Builder builder = new(this.slate, this.logger);
+                node.Process(this.prompts, builder);
+                this.logger.Info("Parser Done");
+                return builder.Actions.Formula;
+        #if !DEBUG
+        } catch (S.Exception ex) {
             throw new Message("Error occurred while parsing input code.").
                 With("Error", ex);
-        }*/
+        }
+        #endif
     }
 
-    #endregion
+#endregion
     #region Prompts Setup...
 
     /// <summary>Initializes the prompts and operators for this parser.</summary>
@@ -439,15 +442,15 @@ sealed public class Parser {
                 With("Name", name).
                 With("Location", builder.LastLocation);
 
-        INode? node = receiver.ReadField(name);
-        if (node is not null) {
-            builder.Nodes.Push(node);
-            return;
-        }
+        INode node = receiver.ReadField(name) ??
+            throw new Message("No identifier found in the receiver stack.").
+                With("Identifier", name).
+                With("Location", builder.LastLocation);
 
-        throw new Message("No identifier found in the receiver stack.").
-            With("Identifier", name).
-            With("Location", builder.LastLocation);
+        if (node is IExtern externNode)
+            node = externNode.Shell;
+
+        builder.Nodes.Push(node);
     }
 
     /// <summary>This handles preparing for a method call.</summary>

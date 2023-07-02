@@ -35,6 +35,14 @@ public class Extern {
             "extern int A = 2;",
             "extern int B = 3;",
             "A := B;").
+            Check("[",
+              "  Global.A := Extern<int>[0];",
+              "  Extern<int>[0] = <int>[2] {};",
+              "  Global.B := Extern<int>[0];",
+              "  Extern<int>[0] = <int>[3] {};",
+              "  Global.A := Shell<int>[0](Extern<int>[0]) {};",
+              "  Finish",
+              "]").
             Perform();
         Assert.IsTrue(slate.HasNode("A"));
         Assert.IsTrue(slate.HasNode("B"));

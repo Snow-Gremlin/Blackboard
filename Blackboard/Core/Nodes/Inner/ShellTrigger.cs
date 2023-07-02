@@ -16,7 +16,7 @@ sealed public class ShellTrigger : UnaryTrigger, ITrigger {
     public ShellTrigger() { }
     
     /// <summary>Creates a new shell trigger.</summary>
-    /// <param name="source">The parent node initialized for this external.</param>
+    /// <param name="source">The parent node initialized for this shell.</param>
     public ShellTrigger(ITriggerParent source) : base(source) { }
 
     /// <summary>Creates a new instance of this node with similar configuration.</summary>

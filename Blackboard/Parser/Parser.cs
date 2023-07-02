@@ -97,7 +97,7 @@ sealed public class Parser {
         #endif
     }
 
-#endregion
+    #endregion
     #region Prompts Setup...
 
     /// <summary>Initializes the prompts and operators for this parser.</summary>
@@ -496,6 +496,9 @@ sealed public class Parser {
             throw new Message("No identifier found in the scope stack.").
                 With("Identifier", name).
                 With("Location", builder.LastLocation);
+        
+        if (node is IExtern externNode)
+            node = externNode.Shell;
 
         builder.Nodes.Push(node);
         builder.Existing.Add(node);

@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
@@ -14,7 +15,10 @@ sealed public class ExternValue<T> : ValueNode<T>, IValueExtern<T>
     readonly private ShellValue<T> shell;
 
     /// <summary>Creates a new extern value node.</summary>
-    public ExternValue() => this.shell = new ShellValue<T>(this);
+    public ExternValue() {
+        this.shell = new ShellValue<T>(this);
+        this.shell.Legitimatize();
+    }
 
     /// <summary>Creates a new extern value node.</summary>
     /// <param name="value">The initial value for this node.</param>

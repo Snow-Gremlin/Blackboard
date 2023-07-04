@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Nodes.Outer;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -35,26 +36,16 @@ public class Extern {
             "extern int A = 2;",
             "extern int B = 3;",
             "A := B;").
-            Check("[",
-              "  Global.A := Extern<int>[0];",
-              "  Extern<int>[0] = <int>[2] {};",
-              "  Global.B := Extern<int>[0];",
-              "  Extern<int>[0] = <int>[3] {};",
-              "  Global.A := Shell<int>[0](Extern<int>[0]) {};",
-              "  Finish",
-              "]").
             Perform();
         Assert.IsTrue(slate.HasNode("A"));
         Assert.IsTrue(slate.HasNode("B"));
         slate.CheckValue(3, "A");
         slate.CheckValue(3, "B");
         slate.CheckGraphString(
-            "");
-        // TODO: FIX. The problem is that A is set to the extern B but is not a child
-        // so that when B is replaced, A still is the extern B. I need to make it so that
-        // extern becomes a child of the new B, that way any copies of extern still use
-        // extern B but extern B is updated automatically as a copy of B. The new B
-        // takes the place of the old B. This then also helps allow disconnecting in the future.
+            "Global: Namespace{",
+            "  A: Shell<int>[3](B[3]),",
+            "  B: Extern<int>[3]",
+            "}");
 
         slate.Read(
             "in int C = 5;",
@@ -62,6 +53,12 @@ public class Extern {
             Perform();
         slate.CheckValue(5, "A");
         slate.CheckValue(5, "B");
+        slate.CheckGraphString(
+            "Global: Namespace{",
+            "  A: Shell<int>[5](C[5]),",
+            "  B: Input<int>[5],", // TODO: Should probably shell B so it can't be set.
+            "  C: Input<int>[5]",
+            "}");
     }
 
     // TODO: Need to make sure that a definition of an extern, e.g. `A := B`,

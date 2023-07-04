@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Bases;
+﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 
@@ -11,7 +12,10 @@ sealed public class ExternTrigger : TriggerNode, ITriggerExtern {
     readonly private ShellTrigger shell;
 
     /// <summary>Creates a new extern trigger.</summary>
-    public ExternTrigger() => this.shell = new ShellTrigger(this);
+    public ExternTrigger() {
+        this.shell = new ShellTrigger(this);
+        this.shell.Legitimatize();
+    }
 
     /// <summary>Creates a new instance of this node with similar configuration.</summary>
     /// <returns>The new instance of this node.</returns>

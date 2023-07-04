@@ -319,9 +319,9 @@ public class Definitions {
         slate.CheckGraphString(
             "Global: Namespace{",
             "  A: Input<double>[1.2],",
-            "  B: Explicit<int>[1](D[1.2]),",
-            "  C: Implicit<string>[1.2](D[1.2]),",
-            "  D: Input<double>[1.2]",
+            "  B: Explicit<int>[1](A[1.2]),",
+            "  C: Implicit<string>[1.2](A[1.2]),",
+            "  D: Shell<double>[1.2](A[1.2])",
             "}");
 
         slate.CheckValue( 1.2,  "A");

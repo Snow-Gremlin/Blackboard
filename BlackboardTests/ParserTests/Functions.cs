@@ -74,8 +74,8 @@ public class Functions {
         slate.PerformWithoutReset("A = false; B = false; C = true;  D = false;").CheckProvoked(false, "E").ResetTriggers();
         slate.PerformWithoutReset("A = false; B = false; C = false; D = true; ").CheckProvoked(false, "E").ResetTriggers();
         slate.PerformWithoutReset("A = true;  B = true;  C = true;  D = true; ").CheckProvoked(true,  "E").ResetTriggers();
-        slate.Perform("F := all(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<trigger>");
+        slate.Perform("F := all(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<trigger>[](A)");
         TestTools.CheckException(() => slate.Perform("G := all();"),
             "Error occurred while parsing input code.",
             "[Error: Could not perform the function without any inputs.",
@@ -94,8 +94,8 @@ public class Functions {
         slate.Perform("A = false; B = false; C = true;  D = false;").CheckValue(false, "E");
         slate.Perform("A = false; B = false; C = false; D = true; ").CheckValue(false, "E");
         slate.Perform("A = true;  B = true;  C = true;  D = true; ").CheckValue(true,  "E");
-        slate.Perform("F := and(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<bool>");
+        slate.Perform("F := and(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<bool>[true](A)");
         TestTools.CheckException(() => slate.Perform("G := and();"),
             "Error occurred while parsing input code.",
             "[Error: Could not perform the function without any inputs.",
@@ -117,8 +117,8 @@ public class Functions {
         slate.Perform("A = 0000b; B = 0000b; C = 1111b; D = 0000b;").CheckValue(0b0000, "E");
         slate.Perform("A = 0000b; B = 0000b; C = 0000b; D = 1111b;").CheckValue(0b0000, "E");
         slate.Perform("A = 1111b; B = 1111b; C = 1111b; D = 1111b;").CheckValue(0b1111, "E");
-        slate.Perform("F := and(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<int>");
+        slate.Perform("F := and(A);"); // Single pass through, F is set to A. with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<int>[15](A)");
         // The zero input scenario is checked in TestFunctions_and_And.
     }
 
@@ -133,8 +133,8 @@ public class Functions {
         slate.PerformWithoutReset("A = false; B = false; C = true;  D = false;").CheckProvoked(true,  "E").ResetTriggers();
         slate.PerformWithoutReset("A = false; B = false; C = false; D = true; ").CheckProvoked(true,  "E").ResetTriggers();
         slate.PerformWithoutReset("A = true;  B = true;  C = true;  D = true; ").CheckProvoked(true,  "E").ResetTriggers();
-        slate.Perform("F := any(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<trigger>");
+        slate.Perform("F := any(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<trigger>[](A)");
         TestTools.CheckException(() => slate.Perform("G := any();"),
             "Error occurred while parsing input code.",
             "[Error: Could not perform the function without any inputs.",
@@ -211,8 +211,8 @@ public class Functions {
         slate.Perform("A =  1.0; B =  1.0; C = 2.0; D = 2.0;").CheckValue(1.5, "E");
         slate.Perform("A =  1.0; B =  2.0; C = 3.0; D = 4.0;").CheckValue(2.5, "E");
         slate.Perform("A =  5.0; B =  1.0; C = 5.0; D = 1.0;").CheckValue(3.0, "E");
-        slate.Perform("F := average(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<double>");
+        slate.Perform("F := average(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<double>[5](A)");
         TestTools.CheckException(() => slate.Perform("G := average();"),
             "Error occurred while parsing input code.",
             "[Error: Could not perform the function without any inputs.",
@@ -806,8 +806,8 @@ public class Functions {
         slate.Perform("B = 2.0;").CheckValue(4.2, "E");
         slate.Perform("A = 5.0;").CheckValue(5.0, "E");
         slate.Perform("A = 2.0; C = 2.0;").CheckValue(4.0, "E");
-        slate.Perform("F := max(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<double>");
+        slate.Perform("F := max(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<double>[2](A)");
         TestTools.CheckException(() => slate.Perform("G := max();"),
             "Error occurred while parsing input code.",
             "[Error: Could not perform the function without any inputs.",
@@ -826,8 +826,8 @@ public class Functions {
         slate.Perform("B = 2;").CheckValue(5, "E");
         slate.Perform("A = 7;").CheckValue(7, "E");
         slate.Perform("A = 2; C = 2;").CheckValue(4, "E");
-        slate.Perform("F := max(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<int>");
+        slate.Perform("F := max(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<int>[2](A)");
         // The zero input scenario is checked in TestFunctions_max_Max_Double.
     }
 
@@ -842,8 +842,8 @@ public class Functions {
         slate.Perform("B = 2.0;").CheckValue(0.5, "E");
         slate.Perform("A = 0.0;").CheckValue(0.0, "E");
         slate.Perform("A = 5.0; C = 4.0;").CheckValue(2.0, "E");
-        slate.Perform("F := min(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<double>");
+        slate.Perform("F := min(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<double>[5](A)");
         TestTools.CheckException(() => slate.Perform("G := min();"),
             "Error occurred while parsing input code.",
             "[Error: Could not perform the function without any inputs.",
@@ -862,8 +862,8 @@ public class Functions {
         slate.Perform("B = 4;").CheckValue(2, "E");
         slate.Perform("A = 0;").CheckValue(0, "E");
         slate.Perform("A = 7; C = 8;").CheckValue(4, "E");
-        slate.Perform("F := min(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<int>");
+        slate.Perform("F := min(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<int>[7](A)");
         // The zero input scenario is checked in TestFunctions_max_Max_Double.
     }
 
@@ -882,8 +882,8 @@ public class Functions {
         slate.Perform("A =  1.0; B = -2.0; C =  1.0; D =  1.0;").CheckValue( -2.0, "E");
         slate.Perform("A =  1.0; B =  1.0; C = -2.0; D =  1.0;").CheckValue( -2.0, "E");
         slate.Perform("A =  1.0; B =  1.0; C =  1.0; D = -2.0;").CheckValue( -2.0, "E");
-        slate.Perform("F := mul(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<double>");
+        slate.Perform("F := mul(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<double>[1](A)");
         TestTools.CheckException(() => slate.Perform("G := mul();"),
             "Error occurred while parsing input code.",
             "[Error: Could not perform the function without any inputs.",
@@ -906,8 +906,8 @@ public class Functions {
         slate.Perform("A =  1; B = -2; C =  1; D =  1;").CheckValue( -2, "E");
         slate.Perform("A =  1; B =  1; C = -2; D =  1;").CheckValue( -2, "E");
         slate.Perform("A =  1; B =  1; C =  1; D = -2;").CheckValue( -2, "E");
-        slate.Perform("F := mul(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<int>");
+        slate.Perform("F := mul(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<int>[1](A)");
         // The zero input scenario is checked in TestFunctions_max_Max_Double.
     }
 
@@ -970,8 +970,8 @@ public class Functions {
         slate.PerformWithoutReset("-> A -> C -> D;").CheckProvoked(false, "E").ResetTriggers();
         slate.PerformWithoutReset("-> B -> C -> D;").CheckProvoked(false, "E").ResetTriggers();
         slate.PerformWithoutReset("-> A -> B -> C -> D;").CheckProvoked(false, "E").ResetTriggers();
-        slate.Perform("F := onlyOne(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<trigger>");
+        slate.Perform("F := onlyOne(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<trigger>[](A)");
         TestTools.CheckException(() => slate.Perform("G := onlyOne();"),
             "Error occurred while parsing input code.",
             "[Error: Could not perform the function without any inputs.",
@@ -1006,8 +1006,8 @@ public class Functions {
         slate.Perform("A = 0000b; B = 0000b; C = 1111b; D = 0000b;").CheckValue(0b1111, "E");
         slate.Perform("A = 0000b; B = 0000b; C = 0000b; D = 1111b;").CheckValue(0b1111, "E");
         slate.Perform("A = 1111b; B = 1111b; C = 1111b; D = 1111b;").CheckValue(0b1111, "E");
-        slate.Perform("F := or(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<int>");
+        slate.Perform("F := or(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<int>[15](A)");
         TestTools.CheckException(() => slate.Perform("G := or();"),
             "Error occurred while parsing input code.",
             "[Error: Could not perform the function without any inputs.",
@@ -1026,8 +1026,8 @@ public class Functions {
         slate.Perform("A = false; B = false; C = true;  D = false;").CheckValue(true,  "E");
         slate.Perform("A = false; B = false; C = false; D = true; ").CheckValue(true,  "E");
         slate.Perform("A = true;  B = true;  C = true;  D = true; ").CheckValue(true,  "E");
-        slate.Perform("F := or(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<bool>");
+        slate.Perform("F := or(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<bool>[true](A)");
         // The zero input scenario is checked in TestFunctions_or_BitwiseOr_Int.
     }
 
@@ -1298,8 +1298,8 @@ public class Functions {
         slate.Perform("A = 0.0; B = 0.0; C = 1.0; D = 0.0;").CheckValue( 1.0, "E");
         slate.Perform("A = 0.0; B = 0.0; C = 0.0; D = 1.0;").CheckValue( 1.0, "E");
         slate.Perform("A = 1.1; B = 2.3; C = 4.3; D = 6.0;").CheckValue(13.7, "E");
-        slate.Perform("F := sum(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<double>");
+        slate.Perform("F := sum(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<double>[1.1](A)");
         TestTools.CheckException(() => slate.Perform("G := sum();"),
             "Error occurred while parsing input code.",
             "[Error: Could not perform the function without any inputs.",
@@ -1318,8 +1318,8 @@ public class Functions {
         slate.Perform("A = 0; B = 0; C = 1; D = 0;").CheckValue( 1, "E");
         slate.Perform("A = 0; B = 0; C = 0; D = 1;").CheckValue( 1, "E");
         slate.Perform("A = 1; B = 2; C = 4; D = 6;").CheckValue(13, "E");
-        slate.Perform("F := sum(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<int>");
+        slate.Perform("F := sum(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<int>[1](A)");
         // The zero input scenario is checked in TestFunctions_sum_Sum_Double.
     }
 
@@ -1332,8 +1332,8 @@ public class Functions {
         slate.Perform("C = 't';").CheckValue("dots", "E");
         slate.Perform("A = 'c';").CheckValue("cots", "E");
         slate.Perform("B = 'a';").CheckValue("cats", "E");
-        slate.Perform("F := sum(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<string>");
+        slate.Perform("F := sum(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<string>[c](A)");
         // The zero input scenario is checked in TestFunctions_sum_Sum_Double.
     }
 
@@ -1482,8 +1482,8 @@ public class Functions {
         slate.Perform("A = 1111b; B = 1111b; C = 0000b; D = 1111b;").CheckValue(0b1111, "E");
         slate.Perform("A = 1111b; B = 1111b; C = 1111b; D = 0000b;").CheckValue(0b1111, "E");
         slate.Perform("A = 1111b; B = 1111b; C = 1111b; D = 1111b;").CheckValue(0b0000, "E");
-        slate.Perform("F := xor(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<int>");
+        slate.Perform("F := xor(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<int>[15](A)");
         TestTools.CheckException(() => slate.Perform("G := xor();"),
             "Error occurred while parsing input code.",
             "[Error: Could not perform the function without any inputs.",
@@ -1511,8 +1511,8 @@ public class Functions {
         slate.Perform("A = true;  B = true;  C = false; D = true; ").CheckValue(true,  "E");
         slate.Perform("A = false; B = true;  C = true;  D = true; ").CheckValue(true,  "E");
         slate.Perform("A = true;  B = true;  C = true;  D = true; ").CheckValue(false, "E");
-        slate.Perform("F := xor(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<bool>");
+        slate.Perform("F := xor(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<bool>[true](A)");
         // The zero input scenario is checked in TestFunctions_xor_BitwiseXor_Int.
     }
 
@@ -1536,8 +1536,8 @@ public class Functions {
         slate.PerformWithoutReset("-> A -> C -> D;").CheckProvoked(true, "E").ResetTriggers();
         slate.PerformWithoutReset("-> B -> C -> D;").CheckProvoked(true, "E").ResetTriggers();
         slate.PerformWithoutReset("-> A -> B -> C -> D;").CheckProvoked(false, "E").ResetTriggers();
-        slate.Perform("F := xor(A);"); // Single pass through, F is set to A. 
-        slate.CheckNodeString(Stringifier.Basic(), "F", "F: Input<trigger>");
+        slate.Perform("F := xor(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<trigger>[](A)");
         // The zero input scenario is checked in TestFunctions_xor_BitwiseXor_Int.
     }
 

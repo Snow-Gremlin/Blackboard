@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Nodes.Outer;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -61,8 +60,21 @@ public class Extern {
             "}");
     }
 
-    // TODO: Need to make sure that a definition of an extern, e.g. `A := B`,
-    //       doesn't show `A` as extern in an away which allows it to be set
-    //       differently from `B` since `A` is not defined as an extern, only
-    //       `B` was. Need an identity/pass-through/shunt node.
+    [TestMethod]
+    public void TestBasicParses_ExternToNamespace() {
+        Slate slate = new(addConsts: false);
+        TestTools.CheckException(() =>
+            slate.Read(
+                "extern int A;",
+                "namespace A {",
+                "  B := 8;",
+                "}").
+                Perform(),
+            "Error occurred while parsing input code.",
+            "[Error: Can not open namespace. Another non-namespace exists by that name.",
+            "   [Identifier: A]",
+            "   [Location: Unnamed:2, 11, 25]]");
+    }
+
+    // TODO: Add test for group define of extern and extern in namespaces
 }

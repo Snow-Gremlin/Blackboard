@@ -55,8 +55,8 @@ public class Extern {
         slate.CheckValue(5, "B");
         slate.CheckGraphString(
             "Global: Namespace{",
-            "  A: Shell<int>[5](C[5]),",
-            "  B: Input<int>[5],", // TODO: Should probably shell B so it can't be set.
+            "  A: Shell<int>[5](B),",
+            "  B: Shell<int>[5](C[5]),",
             "  C: Input<int>[5]",
             "}");
     }

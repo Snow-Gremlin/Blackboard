@@ -81,20 +81,16 @@ sealed public class Parser {
     /// <param name="node">The parsed tree root node to read from.</param>
     /// <returns>The formula for performing the parsed actions.</returns>
     private Formula read(PP.ParseTree.ITreeNode node) {
-        #if !DEBUG
         try {
-        #endif
             this.logger.Info("Parser Read");
-                Builder.Builder builder = new(this.slate, this.logger);
-                node.Process(this.prompts, builder);
-                this.logger.Info("Parser Done");
-                return builder.Actions.Formula;
-        #if !DEBUG
+            Builder.Builder builder = new(this.slate, this.logger);
+            node.Process(this.prompts, builder);
+            this.logger.Info("Parser Done");
+            return builder.Actions.Formula;
         } catch (S.Exception ex) {
             throw new Message("Error occurred while parsing input code.").
                 With("Error", ex);
         }
-        #endif
     }
 
     #endregion

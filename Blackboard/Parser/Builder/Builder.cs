@@ -184,6 +184,13 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
             scope.RemoveFields(name);
         }
 
+        if (root is IInput)
+            root = Maker.CreateShell(root) ??
+                throw new Message("The root for a define could not be shelled.").
+                    With("Location", this.LastLocation).
+                    With("Name", name).
+                    With("Root", root);
+
         this.Actions.Add(new Define(scope.Receiver, name, root, newNodes));
         scope.WriteField(name, root);
         return root;

@@ -242,6 +242,8 @@ sealed public class Stringifier {
 
     #region Naming...
 
+    // TODO: May want to add namespaces to the names based on the namespace being outputted from.
+
     /// <summary>Sets the name to show for a node.</summary>
     /// <remarks>If the node is already named, the name is overwritten with this new name.</remarks>
     /// <param name="name">The name to show for the node.</param>

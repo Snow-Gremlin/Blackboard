@@ -76,5 +76,75 @@ public class Extern {
             "   [Location: Unnamed:2, 11, 25]]");
     }
 
-    // TODO: Add test for group define of extern and extern in namespaces
+    [TestMethod]
+    public void TestBasicParses_ExternInNamespaces() {
+        Slate slate = new(addConsts: false);
+        slate.Read(
+            "namespace A {",
+            "   extern int B = 2;",
+            "   extern int C = 3;",
+            "}",
+            "D := A.B;",
+            "namespace A {",
+            "  B := C;",
+            "}").
+            Perform();
+        slate.CheckGraphString(
+            "Global: Namespace{",
+            "  A: Namespace{",
+            "    B: Shell<int>[3](C[3]),",
+            "    C: Extern<int>[3]",
+            "  },",
+            "  D: Shell<int>[3](B)",
+            "}");
+
+        slate.Read(
+            "namespace A {",
+            "   C := 8;",
+            "}").
+            Perform();
+        slate.CheckGraphString(
+            "Global: Namespace{",
+            "  A: Namespace{",
+            "    B: Shell<int>[8](C[8]),",
+            "    C: Literal<int>[8]",
+            "  },",
+            "  D: Shell<int>[8](B)",
+            "}");
+    }
+
+    [TestMethod]
+    public void TestBasicParses_ExternGroup() {
+        Slate slate = new(addConsts: false);
+        slate.Read(
+            "extern {",
+            "   int A = 2;",
+            "   int B = 3;",
+            "}",
+            "B := A;",
+            "in A = 9;").
+            Perform();
+        slate.CheckGraphString(
+            "Global: Namespace{",
+            "  A: Input<int>[9],",
+            "  B: Shell<int>[9](A[9])",
+            "}");
+    }
+
+    [TestMethod]
+    public void TestBasicParses_ExternCycle() {
+        Slate slate = new(addConsts: false);
+        slate.Read(
+            "extern int A = 3;",
+            "B := A*3 + 2;").
+            Perform();
+
+        TestTools.CheckException(() =>
+            slate.Read(
+                "A := B - 1;").
+                Perform(),
+            "May not add children to a parent which would cause a loop",
+            "[parent: Sub<int>[0](Sum<int>(Mul<int>, <int>[2]), <int>[1])]",
+            "[children: Shell<int>[0](Sub<int>(Sum<int>, <int>[1]))]");
+    }
 }

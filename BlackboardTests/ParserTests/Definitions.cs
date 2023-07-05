@@ -156,6 +156,35 @@ public class Definitions {
         slate.CheckValue( 0x28, "C");
         slate.CheckValue(-0x29, "D");
     }
+    
+    [TestMethod]
+    public void TestBasicParses_Bitwise_GroupDefineWithNamespace() {
+        Slate slate = new();
+        slate.Read(
+            "namespace X {",
+            "   in int A = 0x0F;",
+            "   define {",
+            "      int shift = 1;",
+            "      namespace Y {",
+            "         int B = (A | 0x10) & 0x15;",
+            "         var C = B << shift;",
+            "         D = ~C;",
+            "      }",
+            "   }",
+            "}").
+            Perform();
+
+        slate.CheckValue( 0x0F, "X", "A");
+        slate.CheckValue( 0x15, "X", "Y", "B");
+        slate.CheckValue( 0x2A, "X", "Y", "C");
+        slate.CheckValue(-0x2B, "X", "Y", "D");
+
+        slate.SetInt(0x44, "X", "A");
+        slate.PerformEvaluation();
+        slate.CheckValue( 0x14, "X", "Y", "B");
+        slate.CheckValue( 0x28, "X", "Y", "C");
+        slate.CheckValue(-0x29, "X", "Y", "D");
+    }
 
     [TestMethod]
     public void TestBasicParses_SomeBooleanMath() {

@@ -204,6 +204,7 @@
 #   - extern int A = 3, B = 4, C;                         #
 # New extern group.                                       #
 #   - extern { int A, B; bool C = true; }                 #
+#   - extern { namespace A { bool B = true; } }           #
 #=========================================================#
 
 <NewExtern> := [DeclareExtern] <NewExternHead> [End]
@@ -218,7 +219,8 @@
     | [Identifier] {defineId} [Assign] <Declaration> {externWithAssign};
 
 <NewExternGroup> := _
-    | <NewExternHead> [End] <NewExternGroup>;
+    | <NewExternHead> [End] <NewExternGroup>
+    | [Namespace] [Identifier] {pushNamespace} [CurlOpen] <NewExternGroup> [CurlClose] {popNamespace};
 
 #=========================================================#
 # Declarations                                            #

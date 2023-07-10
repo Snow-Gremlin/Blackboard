@@ -86,7 +86,48 @@ public class Extern {
             "}",
             "D := A.B;",
             "namespace A {",
-            "  B := C;",
+            "   B := C;",
+            "}").
+            Perform();
+        slate.CheckGraphString(
+            "Global: Namespace{",
+            "  A: Namespace{",
+            "    B: Shell<int>[3](C[3]),",
+            "    C: Extern<int>[3]",
+            "  },",
+            "  D: Shell<int>[3](B)",
+            "}");
+
+        slate.Read(
+            "namespace A {",
+            "   C := 8;",
+            "}").
+            Perform();
+        slate.CheckGraphString(
+            "Global: Namespace{",
+            "  A: Namespace{",
+            "    B: Shell<int>[8](C[8]),",
+            "    C: Literal<int>[8]",
+            "  },",
+            "  D: Shell<int>[8](B)",
+            "}");
+    }
+
+    [TestMethod]
+    public void TestBasicParses_ExternAroundNamespaces() {
+        Slate slate = new(addConsts: false);
+        slate.Read(
+            "extern {",
+            "   namespace A {",
+            "      int B = 2;",
+            "      int C = 3;",
+            "   }",
+            "}",
+            "D := A.B;",
+            "define {",
+            "   namespace A {",
+            "      B = C;",
+            "   }",
             "}").
             Perform();
         slate.CheckGraphString(

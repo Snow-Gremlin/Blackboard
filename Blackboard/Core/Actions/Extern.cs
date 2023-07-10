@@ -39,7 +39,7 @@ sealed public class Extern : IAction {
     /// <param name="slate">The slate for this action.</param>
     /// <param name="result">The result being created and added to.</param>
     /// <param name="logger">The optional logger to debug with.</param>
-    public void Perform(Slate slate, Result result, Logger? logger = null) {
+    public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Add Extern: {0}", this);
 
         INode? existing = this.Receiver.ReadField(this.Name);

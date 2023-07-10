@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Extensions;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -70,4 +71,6 @@ public class Temps {
         Assert.IsFalse(slate.HasNode("C"));
         slate.CheckValue(15, "D");
     }
+
+    // TODO: Add namespace tests
 }

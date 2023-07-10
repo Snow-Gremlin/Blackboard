@@ -65,7 +65,7 @@ sealed public class Assign<T> : IAssign
     /// <param name="slate">The slate for this action.</param>
     /// <param name="result">The result being created and added to.</param>
     /// <param name="logger">The optional logger to debug with.</param>
-    public void Perform(Slate slate, Result result, Logger? logger = null) {
+    public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Assign: {0}", this);
         slate.PendEval(this.needPending);
         slate.PerformEvaluation(logger);

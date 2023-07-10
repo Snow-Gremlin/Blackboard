@@ -13,7 +13,7 @@ public interface IAction {
     /// <param name="slate">The slate for this action.</param>
     /// <param name="result">The result being created and added to.</param>
     /// <param name="logger">The optional logger to debug with.</param>
-    public void Perform(Slate slate, Result result, Logger? logger = null);
+    public void Perform(Slate slate, Record.Result result, Logger? logger = null);
 
     // TODO: Add a method which can validate the action and check if it can still be performed.
     //       For things like define, it would check if the value hasn't been defined so that

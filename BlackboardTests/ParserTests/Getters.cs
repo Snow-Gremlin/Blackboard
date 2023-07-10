@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Actions;
+using Blackboard.Core.Record;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -42,6 +43,28 @@ public class Getters {
         result.CheckValue(true, "B");
         result.CheckValue(4.0, "C");
         result.CheckValue("Boom stick", "D");
+    }
+
+    [TestMethod]
+    public void TestBasicParses_GetterWithNamespace() {
+        Slate slate = new();
+        Result result = slate.Read(
+            "namespace X {",
+            "   get A = 3;",
+            "   get B = true;",
+            "}",
+            "get {" +
+            "   namespace Y {",
+            "      C = 4.0;",
+            "      D = 'Boom stick';",
+            "   }",
+            "}").
+            Perform();
+
+        result.CheckValue(3, "X", "A");
+        result.CheckValue(true, "X", "B");
+        result.CheckValue(4.0, "Y", "C");
+        result.CheckValue("Boom stick", "Y", "D");
     }
 
     [TestMethod]
@@ -157,4 +180,6 @@ public class Getters {
         result.CheckValue("2", "B");
         result.CheckValue("10", "C");
     }
+
+    // TODO: Get trigger?
 }

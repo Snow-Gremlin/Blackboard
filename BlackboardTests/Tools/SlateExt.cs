@@ -3,6 +3,7 @@ using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Record;
 using Blackboard.Parser;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;

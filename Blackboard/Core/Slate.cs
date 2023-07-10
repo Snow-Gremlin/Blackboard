@@ -7,7 +7,8 @@ using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
-using Blackboard.Core.Types;
+using Blackboard.Core.Record;
+using Blackboard.Core.Result;
 using System.Collections.Generic;
 using System.Linq;
 using S = System;
@@ -18,7 +19,7 @@ namespace Blackboard.Core;
 /// The slate stores all blackboard data via a node graph and
 /// perform evaluations/updates of change the values of the nodes.
 /// </summary>
-public class Slate {
+public class Slate: IWriter, IReader {
 
     /// <summary>The namespace for all the operators.</summary>
     public const string OperatorNamespace = "$operators";
@@ -369,58 +370,18 @@ public class Slate {
 
     #endregion
     #region Value Setters...
-
+    
     /// <summary>Sets a value for the given named input.</summary>
-    /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
-    /// <param name="value">The value to set to that node.</param>
-    /// <param name="names">The name of the input node to set.</param>
-    public void SetBool(bool value, params string[] names) =>
-        this.SetValue(new Bool(value), names);
-
-    /// <summary>Sets a value for the given named input.</summary>
-    /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
-    /// <param name="value">The value to set to that node.</param>
-    /// <param name="names">The name of the input node to set.</param>
-    public void SetInt(int value, params string[] names) =>
-        this.SetValue(new Int(value), names);
-
-    /// <summary>Sets a value for the given named input.</summary>
-    /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
-    /// <param name="value">The value to set to that node.</param>
-    /// <param name="names">The name of the input node to set.</param>
-    public void SetDouble(double value, params string[] names) =>
-        this.SetValue(new Double(value), names);
-
-    /// <summary>Sets a value for the given named input.</summary>
-    /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
-    /// <param name="value">The value to set to that node.</param>
-    /// <param name="names">The name of the input node to set.</param>
-    public void SetString(string value, params string[] names) =>
-        this.SetValue(new String(value), names);
-
-    /// <summary>Sets a value for the given named input.</summary>
-    /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
-    /// <param name="value">The value to set to that node.</param>
-    /// <param name="names">The name of the input node to set.</param>
-    public void SetObject(object value, params string[] names) =>
-        this.SetValue(new Object(value), names);
-
-    /// <summary>Sets a value for the given named input.</summary>
-    /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
-    /// <typeparam name="T">The type of the value to set to the input.</typeparam>
-    /// <param name="value">The value to set to that node.</param>
-    /// <param name="names">The name of the input node to set.</param>
-    public void SetValue<T>(T value, params string[] names) where T : IData =>
-        this.SetValue(value, names as IEnumerable<string>);
-
-    /// <summary>Sets a value for the given named input.</summary>
-    /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
+    /// <remarks>
+    /// This will not cause an evaluation,
+    /// if the value changed then updates will be pended.
+    /// </remarks>
     /// <typeparam name="T">The type of the value to set to the input.</typeparam>
     /// <param name="value">The value to set to that node.</param>
     /// <param name="names">The name of the input node to set.</param>
     public void SetValue<T>(T value, IEnumerable<string> names) where T : IData =>
         this.SetValue(value, this.GetNode<IValueInput<T>>(names));
-
+    
     /// <summary>Sets the value of the given input node.</summary>
     /// <remarks>
     /// This will not cause an evaluation right away.
@@ -433,11 +394,6 @@ public class Slate {
     public void SetValue<T>(T value, IValueInput<T> input) where T : IData {
         if (input.SetValue(value)) this.PendEval(input.Children);
     }
-
-    /// <summary>This will provoke the node with the given name.</summary>
-    /// <param name="names">The name of trigger node to provoke.</param>
-    public void Provoke(params string[] names) =>
-        this.Provoke(names as IEnumerable<string>);
 
     /// <summary>This will provoke the node with the given name.</summary>
     /// <param name="names">The name of trigger node to provoke.</param>
@@ -462,81 +418,28 @@ public class Slate {
     #endregion
     #region Value Getters...
 
-    /// <summary>Gets the type of the value at the given node.</summary>
-    /// <param name="names">The name of the node to get the type of.</param>
-    /// <returns>The type of the node or null if doesn't exist or not a node type.</returns>
-    public Type? GetType(IEnumerable<string> names) {
-        object? obj = this.Global.Find(names);
-        return obj is null ? null : Type.FromType(obj.GetType());
+    /// <summary>Tries to get provoke state with the given name.</summary>
+    /// <param name="names">The name of trigger node to get the state from.</param>
+    /// <param name="provoked">True if provoked, false otherwise, null if not found.</param>
+    /// <returns>True if the trigger node exists, false otherwise.</returns>
+    public bool TryGetProvoked(IEnumerable<string> names, out bool provoked) {
+        provoked = false;
+        if (!this.TryGetNode(names, out INode? node)) return false;
+        if (node is not ITrigger trigger) return false;
+        provoked = trigger.Provoked;
+        return true;
     }
-
-    /// <summary>Gets the value from a named node.</summary>
-    /// <param name="name">The name of the node to read the value from.</param>
-    /// <returns>The value from the node.</returns>
-    public bool GetBool(params string[] names) =>
-        this.GetValue<Bool>(names).Value;
-
-    /// <summary>Gets the value from a named node.</summary>
-    /// <param name="name">The name of the node to read the value from.</param>
-    /// <returns>The value from the node.</returns>
-    public int GetInt(params string[] names) =>
-        this.GetValue<Int>(names).Value;
-
-    /// <summary>Gets the value from a named node.</summary>
-    /// <param name="name">The name of the node to read the value from.</param>
-    /// <returns>The value from the node.</returns>
-    public double GetDouble(params string[] names) =>
-        this.GetValue<Double>(names).Value;
-
-    /// <summary>Gets the value from a named node.</summary>
-    /// <param name="name">The name of the node to read the value from.</param>
-    /// <returns>The value from the node.</returns>
-    public string GetString(params string[] names) =>
-        this.GetValue<String>(names).Value;
-
-    /// <summary>Gets the value from a named node.</summary>
-    /// <param name="name">The name of the node to read the value from.</param>
-    /// <returns>The value from the node.</returns>
-    public object? GetObject(params string[] names) =>
-        this.GetValue<Object>(names).Value;
-
-    /// <summary>Gets the value from a named node.</summary>
-    /// <typeparam name="T">The type of value to read.</typeparam>
-    /// <param name="name">The name of the node to read the value from.</param>
-    /// <returns>The value from the node.</returns>
-    public T GetValue<T>(params string[] names) where T : IData =>
-        this.GetValue<T>(names as IEnumerable<string>);
-
-    /// <summary>Gets the value from a named node.</summary>
-    /// <typeparam name="T">The type of value to read.</typeparam>
-    /// <param name="name">The name of the node to read the value from.</param>
-    /// <returns>The value from the node.</returns>
-    public T GetValue<T>(IEnumerable<string> names) where T : IData =>
-        this.GetNode<IValue<T>>(names).Value;
-
-    /// <summary>Gets the value as an object from a named node</summary>
-    /// <param name="name">The name of the node to read the value from.</param>
-    /// <returns>The value as an object from the node.</returns>
-    public object? GetValueAsObject(params string[] names) =>
-        this.GetValueAsObject(names as IEnumerable<string>);
-
-    /// <summary>Gets the value as an object from a named node</summary>
-    /// <param name="name">The name of the node to read the value from.</param>
-    /// <returns>The value as an object from the node.</returns>
-    public object? GetValueAsObject(IEnumerable<string> names) =>
-        this.GetNode<IDataNode>(names).Data.ValueAsObject;
-
-    /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
-    /// <param name="names">The name of trigger node to get the state from.</param>
-    /// <returns>True if a node by that name is found and it is provoked, false otherwise.</returns>
-    public bool Provoked(params string[] names) =>
-        this.Provoked(names as IEnumerable<string>);
-
-    /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
-    /// <param name="names">The name of trigger node to get the state from.</param>
-    /// <returns>True if a node by that name is found and it is provoked, false otherwise.</returns>
-    public bool Provoked(IEnumerable<string> names) =>
-        this.GetNode<ITrigger>(names).Provoked;
+        
+    /// <summary>Tries to get data with the given name.</summary>
+    /// <param name="names">The name of the data to read the value from.</param>
+    /// <param name="data">The output data or null if not found.</param>
+    /// <returns>True if found, false otherwise.</returns>
+    public bool TryGetData(IEnumerable<string> names, out IData? data) {
+        data = null;
+        if (!this.TryGetNode(names, out INode? node)) return false;
+        data = (node as IValue<IData>)?.Data;
+        return data is not null;
+    }
 
     /// <summary>Gets the node with the given name.</summary>
     /// <typeparam name="T">The expected type of node to get.</typeparam>
@@ -550,18 +453,25 @@ public class Slate {
     /// <typeparam name="T">The expected type of node to get.</typeparam>
     /// <param name="names">The name of the node to get.</param>
     /// <returns>The node with the given name and type.</returns>
-    public T GetNode<T>(IEnumerable<string> names) where T : INode {
-        object? obj = this.Global.Find(names);
-        return obj is null ?
-                throw new Message("Unable to get a node by the given name.").
-                    With("Name", names.Join(".")).
-                    With("Value Type", typeof(T)) :
-            obj is not T node ?
-                throw new Message("The node found by the given name is not the expected type.").
-                    With("Name", names.Join(".")).
-                    With("Found Type", obj.GetType()).
-                    With("Expected Type", typeof(T)) :
-            node;
+    public T GetNode<T>(IEnumerable<string> names) where T : INode =>
+        this.TryGetNode(names, out INode? node) ?
+            node is T result ? result :
+            throw new Message("The node found by the given name is not the expected type.").
+                With("Name", names.Join(".")).
+                With("Found", node).
+                With("Expected Type", typeof(T)) :
+            throw new Message("Unable to get a node by the given name.").
+                With("Name", names.Join(".")).
+                With("Value Type", typeof(T));
+
+    /// <summary>Tries to get the node with the given node.</summary>
+    /// <typeparam name="T">The expected type of node to get.</typeparam>
+    /// <param name="names">The name of the node to get.</param>
+    /// <param name="node">The returned node for the given name or null.</param>
+    /// <returns>True if the node was found, false otherwise.</returns>
+    public bool TryGetNode(IEnumerable<string> names, out INode? node) {
+        node = this.Global.Find(names);
+        return node is not null;
     }
 
     #endregion

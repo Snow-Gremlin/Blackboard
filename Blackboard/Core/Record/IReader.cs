@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using System.Collections.Generic;
 
-namespace Blackboard.Core.Result;
+namespace Blackboard.Core.Record;
 
 /// <summary>An object in a tree of values which can be read from.</summary>
 public interface IReader {

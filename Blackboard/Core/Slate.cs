@@ -8,7 +8,6 @@ using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Record;
-using Blackboard.Core.Result;
 using System.Collections.Generic;
 using System.Linq;
 using S = System;
@@ -19,7 +18,7 @@ namespace Blackboard.Core;
 /// The slate stores all blackboard data via a node graph and
 /// perform evaluations/updates of change the values of the nodes.
 /// </summary>
-public class Slate: IWriter, IReader {
+public class Slate: IReader, IWriter {
 
     /// <summary>The namespace for all the operators.</summary>
     public const string OperatorNamespace = "$operators";
@@ -369,54 +368,7 @@ public class Slate: IWriter, IReader {
     }
 
     #endregion
-    #region Value Setters...
-    
-    /// <summary>Sets a value for the given named input.</summary>
-    /// <remarks>
-    /// This will not cause an evaluation,
-    /// if the value changed then updates will be pended.
-    /// </remarks>
-    /// <typeparam name="T">The type of the value to set to the input.</typeparam>
-    /// <param name="value">The value to set to that node.</param>
-    /// <param name="names">The name of the input node to set.</param>
-    public void SetValue<T>(T value, IEnumerable<string> names) where T : IData =>
-        this.SetValue(value, this.GetNode<IValueInput<T>>(names));
-    
-    /// <summary>Sets the value of the given input node.</summary>
-    /// <remarks>
-    /// This will not cause an evaluation right away.
-    /// If the value is changed, then the children of this node will be pending evaluation
-    /// so that they are pending for the next evaluation.
-    /// </remarks>
-    /// <typeparam name="T">The type of value to set.</typeparam>
-    /// <param name="input">The input node to set the value of.</param>
-    /// <param name="value">The value to set to the given input.</param>
-    public void SetValue<T>(T value, IValueInput<T> input) where T : IData {
-        if (input.SetValue(value)) this.PendEval(input.Children);
-    }
-
-    /// <summary>This will provoke the node with the given name.</summary>
-    /// <param name="names">The name of trigger node to provoke.</param>
-    public void Provoke(IEnumerable<string> names) =>
-        this.Provoke(this.GetNode<ITriggerInput>(names));
-
-    /// <summary>This will provoke the given trigger node.</summary>
-    /// <remarks>
-    /// This will not cause an evaluation right away.
-    /// If the value is changed, then the children of this node will be pending evaluation
-    /// so that they are pending for the next evaluation.
-    /// </remarks>
-    /// <param name="input">The input trigger node to provoke.</param>
-    /// <param name="value">The provoke state to set, typically this will be true.</param>
-    public void Provoke(ITriggerInput input, bool value = true) {
-        if (input.Provoke(value)) {
-            this.PendEval(input.Children);
-            this.NeedsReset(input);
-        }
-    }
-
-    #endregion
-    #region Value Getters...
+    #region Record Getter and Setters...
 
     /// <summary>Tries to get provoke state with the given name.</summary>
     /// <param name="names">The name of trigger node to get the state from.</param>
@@ -440,6 +392,57 @@ public class Slate: IWriter, IReader {
         data = (node as IValue<IData>)?.Data;
         return data is not null;
     }
+    
+    /// <summary>Sets a value for the given named input.</summary>
+    /// <remarks>
+    /// This will not cause an evaluation,
+    /// if the value changed then updates will be pended.
+    /// </remarks>
+    /// <typeparam name="T">The type of the value to set to the input.</typeparam>
+    /// <param name="value">The value to set to that node.</param>
+    /// <param name="names">The name of the input node to set.</param>
+    public void SetValue<T>(T value, IEnumerable<string> names) where T : IData =>
+        this.SetValue(value, this.GetNode<IValueInput<T>>(names));
+
+    // TODO: Change above and below to use TryGetNode and throw errors.
+    
+    /// <summary>This will provoke the node with the given name.</summary>
+    /// <remarks>
+    /// This will not cause an evaluation,
+    /// if the value changed then updates will be pended.
+    /// </remarks>
+    /// <param name="names">The name of trigger node to provoke.</param>
+    public void Provoke(IEnumerable<string> names) =>
+        this.Provoke(this.GetNode<ITriggerInput>(names));
+
+    #endregion
+    #region Node Getter and Setter...
+
+    /// <summary>Determines if the node with the given name exists.</summary>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    public bool HasNode(params string[] names) =>
+        this.HasNode(names as IEnumerable<string>);
+
+    /// <summary>Determines if the node with the given name exists.</summary>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    public bool HasNode(IEnumerable<string> names) =>
+        this.Global.Find(names) is not null;
+    
+    /// <summary>Determines if the node with the given name and type exists.</summary>
+    /// <typeparam name="T">The type of the node to check for.</typeparam>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    public bool HasNode<T>(params string[] names) where T : INode =>
+        this.HasNode<T>(names as IEnumerable<string>);
+
+    /// <summary>Determines if the node with the given name and type exists.</summary>
+    /// <typeparam name="T">The type of the node to check for.</typeparam>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    public bool HasNode<T>(IEnumerable<string> names) where T : INode =>
+        this.Global.Find(names) is not T;
 
     /// <summary>Gets the node with the given name.</summary>
     /// <typeparam name="T">The expected type of node to get.</typeparam>
@@ -473,35 +476,34 @@ public class Slate: IWriter, IReader {
         node = this.Global.Find(names);
         return node is not null;
     }
-
-    #endregion
-    #region Has Node...
-
-    /// <summary>Determines if the node with the given name exists.</summary>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode(params string[] names) =>
-        this.HasNode(names as IEnumerable<string>);
-
-    /// <summary>Determines if the node with the given name exists.</summary>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode(IEnumerable<string> names) =>
-        this.Global.Find(names) is not null;
     
-    /// <summary>Determines if the node with the given name and type exists.</summary>
-    /// <typeparam name="T">The type of the node to check for.</typeparam>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode<T>(params string[] names) where T : INode =>
-        this.HasNode<T>(names as IEnumerable<string>);
+    /// <summary>Sets the value of the given input node.</summary>
+    /// <remarks>
+    /// This will not cause an evaluation right away.
+    /// If the value is changed, then the children of this node will be pending evaluation
+    /// so that they are pending for the next evaluation.
+    /// </remarks>
+    /// <typeparam name="T">The type of value to set.</typeparam>
+    /// <param name="input">The input node to set the value of.</param>
+    /// <param name="value">The value to set to the given input.</param>
+    public void SetValue<T>(T value, IValueInput<T> input) where T : IData {
+        if (input.SetValue(value)) this.PendEval(input.Children);
+    }
 
-    /// <summary>Determines if the node with the given name and type exists.</summary>
-    /// <typeparam name="T">The type of the node to check for.</typeparam>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode<T>(IEnumerable<string> names) where T : INode =>
-        this.Global.Find(names) is not T;
+    /// <summary>This will provoke the given trigger node.</summary>
+    /// <remarks>
+    /// This will not cause an evaluation right away.
+    /// If the value is changed, then the children of this node will be pending evaluation
+    /// so that they are pending for the next evaluation.
+    /// </remarks>
+    /// <param name="input">The input trigger node to provoke.</param>
+    /// <param name="value">The provoke state to set, typically this will be true.</param>
+    public void Provoke(ITriggerInput input, bool value = true) {
+        if (input.Provoke(value)) {
+            this.PendEval(input.Children);
+            this.NeedsReset(input);
+        }
+    }
 
     #endregion
     #region Output...

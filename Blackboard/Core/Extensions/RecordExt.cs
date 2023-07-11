@@ -1,9 +1,7 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Record;
-using Blackboard.Core.Result;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 
@@ -383,9 +381,8 @@ static public class RecordExt {
     /// <param name="names">The name of trigger node to get the state from.</param>
     /// <returns>True if a provoked flag exists, false otherwise.</returns>
     static public bool HasProvoked(this IReader reader, IEnumerable<string> names) =>
-        reader.GetNode<ITrigger>(names).Provoked;
+        reader.TryGetProvoked(names, out bool _);
 
-    
     /// <summary>Indicates if the trigger is currently provoked while waiting to be evaluated.</summary>
     /// <param name="names">The name of trigger node to get the state from.</param>
     /// <returns>True if a node by that name is found and it is provoked, false otherwise.</returns>
@@ -396,14 +393,15 @@ static public class RecordExt {
     /// <param name="names">The name of trigger node to get the state from.</param>
     /// <returns>True if a node by that name is found and it is provoked, false otherwise.</returns>
     static public bool Provoked(this IReader reader, IEnumerable<string> names) =>
-        reader.GetNode<ITrigger>(names).Provoked;
-
+        reader.TryGetProvoked(names, out bool provoked) ? provoked :
+            throw new Message("Unable to get provoked state by the given name.").
+                With("Name", names.Join("."));
 
     /// <summary>This will provoke the node with the given name.</summary>
     /// <param name="writer">The writer to provoke a trigger in.</param>
     /// <param name="names">The name of trigger node to provoke.</param>
     static public void Provoke(this IWriter writer, params string[] names) =>
-        writer.Provoke(names as IEnumerable<string>);
+        writer.Provoke(names);
 
     #endregion
 }

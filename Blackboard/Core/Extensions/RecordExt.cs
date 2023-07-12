@@ -62,7 +62,7 @@ static public class RecordExt {
     /// <param name="value">The value to set to that node.</param>
     /// <param name="names">The name of the input node to set.</param>
     static public void SetBool(this IWriter writer, bool value, params string[] names) =>
-        writer.SetBool(value, names);
+        writer.SetBool(value, names as IEnumerable<string>);
 
     /// <summary>Sets a value for the given named input.</summary>
     /// <remarks>This will not cause an evaluation, if the value changed then updates will be pended.</remarks>
@@ -107,7 +107,7 @@ static public class RecordExt {
     /// <param name="value">The value to set to that node.</param>
     /// <param name="names">The name of the input node to set.</param>
     static public void SetInt(this IWriter writer, int value, params string[] names) =>
-        writer.SetInt(value, names);
+        writer.SetInt(value, names as IEnumerable<string>);
 
     /// <summary>Sets a value for the given named input.</summary>
     /// <param name="writer">The writer to set the value to.</param>
@@ -152,7 +152,7 @@ static public class RecordExt {
     /// <param name="value">The value to set to that node.</param>
     /// <param name="names">The name of the input node to set.</param>
     static public void SetDouble(this IWriter writer, double value, params string[] names) =>
-        writer.SetDouble(value, names);
+        writer.SetDouble(value, names as IEnumerable<string>);
     
     /// <summary>Sets a value for the given named input.</summary>
     /// <param name="writer">The writer to set the value to.</param>
@@ -196,14 +196,14 @@ static public class RecordExt {
     /// <param name="writer">The writer to set the value to.</param>
     /// <param name="value">The value to set to that node.</param>
     /// <param name="names">The name of the input node to set.</param>
-    static public void SetString(this IWriter writer, string value, IEnumerable<string> names) =>
-        writer.SetString(value, names);
+    static public void SetString(this IWriter writer, string value, params string[] names) =>
+        writer.SetString(value, names as IEnumerable<string>);
 
     /// <summary>Sets a value for the given named input.</summary>
     /// <param name="writer">The writer to set the value to.</param>
     /// <param name="value">The value to set to that node.</param>
     /// <param name="names">The name of the input node to set.</param>
-    static public void SetString(this IWriter writer, string value, params string[] names) =>
+    static public void SetString(this IWriter writer, string value, IEnumerable<string> names) =>
         writer.SetValue(new String(value), names);
 
     #endregion
@@ -242,7 +242,7 @@ static public class RecordExt {
     /// <param name="value">The value to set to that node.</param>
     /// <param name="names">The name of the input node to set.</param>
     static public void SetObject(this IWriter writer, object value, params string[] names) =>
-        writer.SetObject(value, names);
+        writer.SetObject(value, names as IEnumerable<string>);
 
     /// <summary>Sets a value for the given named input.</summary>
     /// <param name="writer">The writer to set the value to.</param>
@@ -399,9 +399,10 @@ static public class RecordExt {
 
     /// <summary>This will provoke the node with the given name.</summary>
     /// <param name="writer">The writer to provoke a trigger in.</param>
+    /// <param name="provoke">True to provoke, false to reset.</param>
     /// <param name="names">The name of trigger node to provoke.</param>
-    static public void Provoke(this IWriter writer, params string[] names) =>
-        writer.Provoke(names);
+    static public void SetTrigger(this IWriter writer, bool provoke, params string[] names) =>
+        writer.SetTrigger(names, provoke);
 
     #endregion
 }

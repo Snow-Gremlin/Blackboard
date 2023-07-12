@@ -140,9 +140,9 @@ public class Nodes {
 
         void check(bool triggerA, bool triggerB, bool triggerC,
             int expCount, bool expHigh, bool expToggle) {
-            if (triggerA) drv.Provoke("TrigA");
-            if (triggerB) drv.Provoke("TrigB");
-            if (triggerC) drv.Provoke("TrigC");
+            if (triggerA) drv.SetTrigger(true, "TrigA");
+            if (triggerB) drv.SetTrigger(true, "TrigB");
+            if (triggerC) drv.SetTrigger(true, "TrigC");
             high = false;
 
             drv.PerformEvaluation();

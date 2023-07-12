@@ -71,7 +71,7 @@ sealed public class Provoke : IAction {
         logger.Info("Provoke: {0}", this);
         slate.PendEval(this.needPending);
         slate.PerformEvaluation(logger.SubGroup(nameof(Provoke)));
-        slate.Provoke(this.Target, this.Trigger?.Provoked ?? true);
+        slate.SetTrigger(this.Target, this.Trigger?.Provoked ?? true);
     }
 
     /// <summary>Gets a human readable string for this provoke.</summary>

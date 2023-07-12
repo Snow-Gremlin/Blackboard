@@ -389,7 +389,7 @@ public class Slate: IReader, IWriter {
     public bool TryGetData(IEnumerable<string> names, out IData? data) {
         data = null;
         if (!this.TryGetNode(names, out INode? node)) return false;
-        data = (node as IValue<IData>)?.Data;
+        data = (node as IDataNode)?.Data;
         return data is not null;
     }
     
@@ -412,8 +412,9 @@ public class Slate: IReader, IWriter {
     /// if the value changed then updates will be pended.
     /// </remarks>
     /// <param name="names">The name of trigger node to provoke.</param>
-    public void Provoke(IEnumerable<string> names) =>
-        this.Provoke(this.GetNode<ITriggerInput>(names));
+    /// <param name="provoke">True to provoke, false to reset.</param>
+    public void SetTrigger(IEnumerable<string> names, bool provoke = true) =>
+        this.SetTrigger(this.GetNode<ITriggerInput>(names), provoke);
 
     #endregion
     #region Node Getter and Setter...
@@ -497,9 +498,9 @@ public class Slate: IReader, IWriter {
     /// so that they are pending for the next evaluation.
     /// </remarks>
     /// <param name="input">The input trigger node to provoke.</param>
-    /// <param name="value">The provoke state to set, typically this will be true.</param>
-    public void Provoke(ITriggerInput input, bool value = true) {
-        if (input.Provoke(value)) {
+    /// <param name="provoke">The provoke state to set, typically this will be true, false to reset.</param>
+    public void SetTrigger(ITriggerInput input, bool provoke = true) {
+        if (input.Provoke(provoke)) {
             this.PendEval(input.Children);
             this.NeedsReset(input);
         }

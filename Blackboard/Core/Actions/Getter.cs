@@ -52,7 +52,7 @@ sealed public class Getter<T> : IGetter
     public string Name { get; }
 
     /// <summary>The data node to get the data to get.</summary>
-    public IDataNode Value => this.value;
+    public INode Node => this.value;
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
     public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
@@ -65,7 +65,7 @@ sealed public class Getter<T> : IGetter
         logger.Info("Getter: {0}", this);
         slate.PendEval(this.needPending);
         slate.PerformEvaluation(logger);
-        result.SetValue(this.Name, this.value.Value);
+        result.SetValue(this.value.Value, this.Name);
         logger.Info("Getter Done {0}", this.Name);
     }
 

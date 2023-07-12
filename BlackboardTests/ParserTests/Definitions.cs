@@ -293,7 +293,7 @@ public class Definitions {
             NoFinish().
             Perform();
 
-        slate.Provoke("A");
+        slate.SetTrigger(true, "A");
         slate.CheckProvoked(true, "A");
         slate.CheckProvoked(true, "B"); // this was created provoked
         slate.CheckEvaluate(
@@ -306,7 +306,7 @@ public class Definitions {
             "End Eval (provoked: 4)");
         slate.ResetTriggers();
 
-        slate.Provoke("A");
+        slate.SetTrigger(true, "A");
         slate.CheckProvoked(true, "A");
         slate.CheckProvoked(false, "B");
         slate.CheckEvaluate(
@@ -318,7 +318,7 @@ public class Definitions {
             "End Eval (provoked: 3)");
         slate.ResetTriggers();
 
-        slate.Provoke("B");
+        slate.SetTrigger(true, "B");
         slate.CheckProvoked(false, "A");
         slate.CheckProvoked(true, "B");
         slate.CheckEvaluate(

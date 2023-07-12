@@ -12,7 +12,8 @@ public interface IWriter {
     /// <param name="names">The name of the input node to set.</param>
     public void SetValue<T>(T value, IEnumerable<string> names) where T : IData;
 
-    /// <summary>This will provoke the node with the given name.</summary>
+    /// <summary>This will provoke or reset the trigger node with the given name.</summary>
     /// <param name="names">The name of trigger node to provoke.</param>
-    public void Provoke(IEnumerable<string> names);
+    /// <param name="provoked">True to provoke, false to reset.</param>
+    public void SetTrigger(IEnumerable<string> names, bool provoked = true);
 }

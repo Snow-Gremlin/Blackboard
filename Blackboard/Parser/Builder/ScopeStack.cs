@@ -18,18 +18,22 @@ sealed internal partial class Builder {
         /// <param name="builder">The builder this stack belongs too.</param>
         internal ScopeStack(Builder builder) {
             this.builder = builder;
-            this.Global  = new VirtualNode("Global", this.builder.Slate.Global);
-            this.scopes  = new LinkedList<VirtualNode>();
+            this.Global  = this.createGlobal();
+            this.scopes  = new();
             this.scopes.AddFirst(this.Global);
         }
 
         /// <summary>Resets the scope to a new virtual global scope.</summary>
         /// <remarks>By creating a new global virtual node anything virtually written will be dropped.</remarks>
         public void Reset() {
-            this.Global = new VirtualNode("Global", this.builder.Slate.Global);
+            this.Global = this.createGlobal();
             this.scopes.Clear();
             this.scopes.AddFirst(this.Global);
         }
+
+        /// <summary>Creates a new virtual global namespace.</summary>
+        /// <returns>The new virtual node for global.</returns>
+        private VirtualNode createGlobal() => new("Global", this.builder.Slate.Global);
 
         /// <summary>The global node as a virtual node so it can be temporarily added to and removed from.</summary>
         public VirtualNode Global { get; private set; }
@@ -40,11 +44,14 @@ sealed internal partial class Builder {
         /// <summary>Gets a copy of the current scopes.</summary>
         public VirtualNode[] Scopes => this.scopes.ToArray();
 
+        /// <summary>Gets the names of the virtual nodes in read order and without global.</summary>
+        public IEnumerable<string> Names => this.scopes.Reverse().Skip(1).Select(vn => vn.Name);
+
         /// <summary>Finds the given ID in the current scopes.</summary>
         /// <param name="name">The name of the node to find.</param>
         /// <returns>The found node by that name or null if not found.</returns>
         public INode? FindID(string name) {
-            foreach (VirtualNode scope in this.Scopes) {
+            foreach (VirtualNode scope in this.scopes) {
                 INode? node = scope.ReadField(name);
                 if (node is not null) return node;
             }

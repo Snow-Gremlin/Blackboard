@@ -51,10 +51,12 @@ public class Getters {
         Result result = slate.Read(
             "namespace X {",
             "   get A = 3;",
-            "   get B = true;",
+            "   namespace Y {",
+            "      get B = true;",
+            "   }",
             "}",
             "get {" +
-            "   namespace Y {",
+            "   namespace Z {",
             "      C = 4.0;",
             "      D = 'Boom stick';",
             "   }",
@@ -62,9 +64,9 @@ public class Getters {
             Perform();
 
         result.CheckValue(3, "X", "A");
-        result.CheckValue(true, "X", "B");
-        result.CheckValue(4.0, "Y", "C");
-        result.CheckValue("Boom stick", "Y", "D");
+        result.CheckValue(true, "X", "Y", "B");
+        result.CheckValue(4.0, "Z", "C");
+        result.CheckValue("Boom stick", "Z", "D");
     }
 
     [TestMethod]

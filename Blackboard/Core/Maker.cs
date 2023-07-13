@@ -46,16 +46,17 @@ static public class Maker {
 
     /// <summary>This creates an getter action for the given type.</summary>
     /// <param name="type">The type to create an getter action for.</param>
-    /// <param name="name">The name to write the value to.</param>
+    /// <param name="names">The names in the path to write the value to.</param>
     /// <param name="root">The root node to get to the given target.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
     /// <returns>The newly created getter action or null if an unexpected type.</returns>
-    static public IAction? CreateGetterAction(Type type, string name, INode root, IEnumerable<INode> allNewNodes) =>
-        type == Type.Object ? Getter<Object>.Create(name, root, allNewNodes) :
-        type == Type.Bool   ? Getter<Bool>.  Create(name, root, allNewNodes) :
-        type == Type.Int    ? Getter<Int>.   Create(name, root, allNewNodes) :
-        type == Type.Double ? Getter<Double>.Create(name, root, allNewNodes) :
-        type == Type.String ? Getter<String>.Create(name, root, allNewNodes) :
+    static public IAction? CreateGetterAction(Type type, string[] names, INode root, IEnumerable<INode> allNewNodes) =>
+        type == Type.Object ? Getter<Object>.Create(names, root, allNewNodes) :
+        type == Type.Bool   ? Getter<Bool>.  Create(names, root, allNewNodes) :
+        type == Type.Int    ? Getter<Int>.   Create(names, root, allNewNodes) :
+        type == Type.Double ? Getter<Double>.Create(names, root, allNewNodes) :
+        type == Type.String ? Getter<String>.Create(names, root, allNewNodes) :
+        // TODO: Add Trigger
         null;
 
     /// <summary>Creates a new input node of the given type.</summary>

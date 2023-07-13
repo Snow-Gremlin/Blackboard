@@ -26,15 +26,15 @@ sealed public class Result : IReader, IWriter {
     public IEnumerable<string> OutputNames(IEnumerable<string> names) {
         Dictionary<string, object> dic = this.outputData;
         foreach (string name in names) {
-            if (dic.TryGetValue(name, out object? value)) {
-                dic = value is Dictionary<string, object> next ? next :
+            dic = dic.TryGetValue(name, out object? value) ?
+                value is Dictionary<string, object> next ? next :
                     throw new Message("Path does not exist. Name in path is not a namespace.").
                         With("Name", name).
                         With("Path", names.Join(".")).
-                        With("Found", value);
-            } else throw new Message("Path does not exist. Name in path is missing.").
-                With("Name", name).
-                With("Path", names.Join("."));
+                        With("Found", value) :
+                throw new Message("Path does not exist. Name in path is missing.").
+                    With("Name", name).
+                    With("Path", names.Join("."));
         }
         return dic.Keys;
     }

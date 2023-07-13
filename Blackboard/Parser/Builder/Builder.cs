@@ -279,11 +279,12 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         INode? root = this.PerformCast(targetType, value);
         HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
-        IAction getter = Maker.CreateGetterAction(targetType, name, root, newNodes) ??
+        string[] names = this.Scope.Names.Append(name).ToArray();
+        IAction getter = Maker.CreateGetterAction(targetType, names, root, newNodes) ??
             throw new Message("Unsupported type for a getter action.").
                 With("Location", this.LastLocation).
                 With("Type",     targetType).
-                With("Name",     name).
+                With("Name",     names.Join(".")).
                 With("Value",    value);
 
         this.Actions.Add(getter);

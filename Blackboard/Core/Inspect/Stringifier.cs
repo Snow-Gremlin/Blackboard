@@ -498,7 +498,7 @@ sealed public class Stringifier {
     /// <param name="getter">The getter action to stringify.</param>
     /// <returns>The string for the given output action.</returns>
     private string stringGetter(IGetter getter) =>
-        getter.Name + " <= " + this.Stringify(getter.Node) +
+        getter.Names.Join(".") + " <= " + this.Stringify(getter.Node) +
             " {" + Simple().PreLoadNames(this).Stringify(getter.NeedPending) + "};";
 
     /// <summary>Get the string for the given assign action.</summary>

@@ -17,12 +17,12 @@ sealed public class Getter<T> : IGetter
     /// that the nodes can be used in this type of getter.
     /// </summary>
     /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
-    /// <param name="name">The name to write the value to.</param>
+    /// <param name="names">The name in the path to write the value to.</param>
     /// <param name="value">The value to get to the given target.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
     /// <returns>The getter action or null if the value can not be gotten.</returns>
-    static public Getter<T>? Create(string name, INode value, IEnumerable<INode> allNewNodes) =>
-        (value is IValue<T> data) ? new Getter<T>(name, data, allNewNodes) : null;
+    static public Getter<T>? Create(string[] names, INode value, IEnumerable<INode> allNewNodes) =>
+        (value is IValue<T> data) ? new Getter<T>(names, data, allNewNodes) : null;
 
     /// <summary>The data node to get the data from.</summary>
     private readonly IValue<T> value;
@@ -35,11 +35,11 @@ sealed public class Getter<T> : IGetter
 
     /// <summary>Creates a new getter.</summary>
     /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
-    /// <param name="name">The name to get to.</param>
+    /// <param name="names">The name in the path to write the value to.</param>
     /// <param name="value">The node to get the value from.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
-    public Getter(string name, IValue<T> value, IEnumerable<INode> allNewNodes) {
-        this.Name  = name;
+    public Getter(string[] names, IValue<T> value, IEnumerable<INode> allNewNodes) {
+        this.Names = names;
         this.value = value;
 
         // Pre-sort the evaluable nodes.
@@ -48,8 +48,8 @@ sealed public class Getter<T> : IGetter
         this.needPending = nodes.ToArray();
     }
 
-    /// <summary>The name to write the value to.</summary>
-    public string Name { get; }
+    /// <summary>The names in the path to write the value to.</summary>
+    public string[] Names { get; }
 
     /// <summary>The data node to get the data to get.</summary>
     public INode Node => this.value;
@@ -65,8 +65,8 @@ sealed public class Getter<T> : IGetter
         logger.Info("Getter: {0}", this);
         slate.PendEval(this.needPending);
         slate.PerformEvaluation(logger);
-        result.SetValue(this.value.Value, this.Name);
-        logger.Info("Getter Done {0}", this.Name);
+        result.SetValue(this.value.Value, this.Names);
+        logger.Info("Getter Done {0}", this.Names.Join("."));
     }
 
     /// <summary>Gets a human readable string for this getter.</summary>

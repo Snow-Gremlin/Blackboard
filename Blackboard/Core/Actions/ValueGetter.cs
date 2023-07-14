@@ -16,13 +16,13 @@ sealed public class ValueGetter<T> : IGetter
     /// Creates a getter from the given nodes after first checking
     /// that the nodes can be used in this type of getter.
     /// </summary>
-    /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
+    /// <remarks>It is assumed that these nodes have been run through the optimizer and validated.</remarks>
     /// <param name="names">The name in the path to write the value to.</param>
-    /// <param name="value">The value to get to the given target.</param>
-    /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
-    /// <returns>The getter action or null if the value can not be gotten.</returns>
-    static public ValueGetter<T>? Create(string[] names, INode value, IEnumerable<INode> allNewNodes) =>
-        (value is IValue<T> data) ? new ValueGetter<T>(names, data, allNewNodes) : null;
+    /// <param name="node">The node to get to the given target.</param>
+    /// <param name="allNewNodes">All the nodes which are new children of the node.</param>
+    /// <returns>The getter action or null if the node can not be gotten.</returns>
+    static public ValueGetter<T>? Create(string[] names, INode node, IEnumerable<INode> allNewNodes) =>
+        (node is IValue<T> data) ? new ValueGetter<T>(names, data, allNewNodes) : null;
 
     /// <summary>The data node to get the data from.</summary>
     private readonly IValue<T> value;
@@ -34,13 +34,13 @@ sealed public class ValueGetter<T> : IGetter
     private readonly IEvaluable[] needPending;
 
     /// <summary>Creates a new getter.</summary>
-    /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
+    /// <remarks>It is assumed that these nodes have been run through the optimizer and validated.</remarks>
     /// <param name="names">The name in the path to write the value to.</param>
-    /// <param name="value">The node to get the value from.</param>
-    /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
-    public ValueGetter(string[] names, IValue<T> value, IEnumerable<INode> allNewNodes) {
+    /// <param name="node">The node to get the value from.</param>
+    /// <param name="allNewNodes">All the nodes which are new children of the node.</param>
+    public ValueGetter(string[] names, IValue<T> node, IEnumerable<INode> allNewNodes) {
         this.Names = names;
-        this.value = value;
+        this.value = node;
 
         // Pre-sort the evaluable nodes.
         LinkedList<IEvaluable> nodes = new();
@@ -51,7 +51,7 @@ sealed public class ValueGetter<T> : IGetter
     /// <summary>The names in the path to write the value to.</summary>
     public string[] Names { get; }
 
-    /// <summary>The data node to get the data to get.</summary>
+    /// <summary>The data node to the data to get.</summary>
     public INode Node => this.value;
 
     /// <summary>All the nodes which are new children of the node to write.</summary>

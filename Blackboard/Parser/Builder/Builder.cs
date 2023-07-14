@@ -280,6 +280,9 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
         string[] names = this.Scope.Names.Append(name).ToArray();
+
+        // TODO: Add a way to check if the getter by the names is already set or part of a path.
+
         IAction getter = Maker.CreateGetterAction(targetType, names, root, newNodes) ??
             throw new Message("Unsupported type for a getter action.").
                 With("Location", this.LastLocation).

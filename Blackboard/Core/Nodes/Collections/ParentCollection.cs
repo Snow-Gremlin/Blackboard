@@ -445,7 +445,7 @@ sealed public class ParentCollection : IEnumerable<IParent> {
     /// <param name="newParent">The new parent to replace each instance with.</param>
     /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
     public bool Replace(IParent oldParent, IParent newParent) {
-        if (!ReferenceEquals(oldParent, newParent)) return false;
+        if (ReferenceEquals(oldParent, newParent)) return false;
         bool fixChange = this.checkFixReplace(oldParent, newParent);
         bool varChange = this.checkVarReplace(oldParent, newParent);
         if (!fixChange && !varChange) return false;

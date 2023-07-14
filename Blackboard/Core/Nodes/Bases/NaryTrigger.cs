@@ -57,12 +57,12 @@ public abstract class NaryTrigger : TriggerNode, INaryChild<ITriggerParent>, ICo
         With(this.sources); // TODO: Set the min and max
 
     /// <summary>
-    /// This handles updating this node's value given the
+    /// This handles updating this node's state given the
     /// parents' provoked state during evaluation.
     /// </summary>
     /// <remarks>Any null parents are ignored.</remarks>
-    /// <param name="provoked">The value from the all the non-null parents.</param>
-    /// <returns>The new value for this node.</returns>
+    /// <param name="provoked">The state from the all the non-null parents.</param>
+    /// <returns>The new provoke state for this node.</returns>
     protected abstract bool OnEval(IEnumerable<bool> provoked);
 
     /// <summary>

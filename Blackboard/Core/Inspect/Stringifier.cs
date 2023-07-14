@@ -242,6 +242,8 @@ sealed public class Stringifier {
 
     #region Naming...
 
+    // TODO: May want to add namespaces to the names based on the namespace being outputted from.
+
     /// <summary>Sets the name to show for a node.</summary>
     /// <remarks>If the node is already named, the name is overwritten with this new name.</remarks>
     /// <param name="name">The name to show for the node.</param>
@@ -485,6 +487,8 @@ sealed public class Stringifier {
             IGetter getter  => this.stringGetter(getter),
             IAssign assign  => this.stringAssign(assign),
             Define  define  => this.stringDefine(define),
+            Extern  ext     => this.stringAddExtern(ext),
+            Temp    temp    => this.stringTemp(temp),
             Provoke provoke => this.stringProvoke(provoke),
             Finish          => "Finish",
             _               => "Unknown Action",
@@ -494,7 +498,7 @@ sealed public class Stringifier {
     /// <param name="getter">The getter action to stringify.</param>
     /// <returns>The string for the given output action.</returns>
     private string stringGetter(IGetter getter) =>
-        getter.Name + " <= " + this.Stringify(getter.Value) +
+        getter.Names.Join(".") + " <= " + this.Stringify(getter.Node) +
             " {" + Simple().PreLoadNames(this).Stringify(getter.NeedPending) + "};";
 
     /// <summary>Get the string for the given assign action.</summary>
@@ -510,6 +514,19 @@ sealed public class Stringifier {
     private string stringDefine(Define define) =>
         this.shortFieldReader(define.Receiver) + "." + define.Name + " := " + this.Stringify(define.Node) +
             " {" + Simple().PreLoadNames(this).Stringify(define.NeedParents) + "};";
+    
+    /// <summary>Get the string for the given add extern action.</summary>
+    /// <param name="ext">The add extern action to stringify.</param>
+    /// <returns>The string for the given define action.</returns>
+    private string stringAddExtern(Extern ext) =>
+        this.shortFieldReader(ext.Receiver) + "." + ext.Name + " := " + this.Stringify(ext.Node) + ";";
+
+    /// <summary>Get the string for the given temp action.</summary>
+    /// <param name="temp">The temp action to stringify.</param>
+    /// <returns>The string for the given temp action.</returns>
+    private string stringTemp(Temp temp) =>
+        temp.Name + " := " + this.Stringify(temp.Node) +
+            " {" + Simple().PreLoadNames(this).Stringify(temp.NeedParents) + "};";
 
     /// <summary>Get the string for the given provoke action.</summary>
     /// <param name="provoke">The provoke action to stringify.</param>

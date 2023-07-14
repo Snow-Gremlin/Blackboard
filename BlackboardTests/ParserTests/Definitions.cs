@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Extensions;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -156,6 +157,35 @@ public class Definitions {
         slate.CheckValue( 0x28, "C");
         slate.CheckValue(-0x29, "D");
     }
+    
+    [TestMethod]
+    public void TestBasicParses_Bitwise_GroupDefineWithNamespace() {
+        Slate slate = new();
+        slate.Read(
+            "namespace X {",
+            "   in int A = 0x0F;",
+            "   define {",
+            "      int shift = 1;",
+            "      namespace Y {",
+            "         int B = (A | 0x10) & 0x15;",
+            "         var C = B << shift;",
+            "         D = ~C;",
+            "      }",
+            "   }",
+            "}").
+            Perform();
+
+        slate.CheckValue( 0x0F, "X", "A");
+        slate.CheckValue( 0x15, "X", "Y", "B");
+        slate.CheckValue( 0x2A, "X", "Y", "C");
+        slate.CheckValue(-0x2B, "X", "Y", "D");
+
+        slate.SetInt(0x44, "X", "A");
+        slate.PerformEvaluation();
+        slate.CheckValue( 0x14, "X", "Y", "B");
+        slate.CheckValue( 0x28, "X", "Y", "C");
+        slate.CheckValue(-0x29, "X", "Y", "D");
+    }
 
     [TestMethod]
     public void TestBasicParses_SomeBooleanMath() {
@@ -263,7 +293,7 @@ public class Definitions {
             NoFinish().
             Perform();
 
-        slate.Provoke("A");
+        slate.SetTrigger(true, "A");
         slate.CheckProvoked(true, "A");
         slate.CheckProvoked(true, "B"); // this was created provoked
         slate.CheckEvaluate(
@@ -276,7 +306,7 @@ public class Definitions {
             "End Eval (provoked: 4)");
         slate.ResetTriggers();
 
-        slate.Provoke("A");
+        slate.SetTrigger(true, "A");
         slate.CheckProvoked(true, "A");
         slate.CheckProvoked(false, "B");
         slate.CheckEvaluate(
@@ -288,7 +318,7 @@ public class Definitions {
             "End Eval (provoked: 3)");
         slate.ResetTriggers();
 
-        slate.Provoke("B");
+        slate.SetTrigger(true, "B");
         slate.CheckProvoked(false, "A");
         slate.CheckProvoked(true, "B");
         slate.CheckEvaluate(
@@ -319,9 +349,9 @@ public class Definitions {
         slate.CheckGraphString(
             "Global: Namespace{",
             "  A: Input<double>[1.2],",
-            "  B: Explicit<int>[1](D[1.2]),",
-            "  C: Implicit<string>[1.2](D[1.2]),",
-            "  D: Input<double>[1.2]",
+            "  B: Explicit<int>[1](A[1.2]),",
+            "  C: Implicit<string>[1.2](A[1.2]),",
+            "  D: Shell<double>[1.2](A[1.2])",
             "}");
 
         slate.CheckValue( 1.2,  "A");

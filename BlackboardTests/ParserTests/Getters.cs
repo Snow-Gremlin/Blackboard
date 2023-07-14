@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Actions;
+using Blackboard.Core.Record;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -31,8 +32,8 @@ public class Getters {
         Slate slate = new();
         Result result = slate.Read(
             "get A = 3;",
-            "get B = true;",
-            "get {" +
+            "get var B = true;",
+            "get {",
             "   C = 4.0;",
             "   D = 'Boom stick';",
             "}").
@@ -42,6 +43,46 @@ public class Getters {
         result.CheckValue(true, "B");
         result.CheckValue(4.0, "C");
         result.CheckValue("Boom stick", "D");
+    }
+
+    [TestMethod]
+    public void TestBasicParses_TriggerGetter() {
+        Slate slate = new();
+        Result result = slate.Read(
+            "in trigger A = true;",
+            "in trigger B = false;",
+            "get A;",
+            "get B;",
+            "get trigger C = A || B;").
+            Perform();
+
+        result.CheckTrigger(true, "A");
+        result.CheckTrigger(false, "B");
+        result.CheckTrigger(true, "C");
+    }
+
+    [TestMethod]
+    public void TestBasicParses_GetterWithNamespace() {
+        Slate slate = new();
+        Result result = slate.Read(
+            "namespace X {",
+            "   get A = 3;",
+            "   namespace Y {",
+            "      get B = true;",
+            "   }",
+            "}",
+            "get {",
+            "   namespace Z {",
+            "      C = 4.0;",
+            "      D = 'Boom stick';",
+            "   }",
+            "}").
+            Perform();
+
+        result.CheckValue(3, "X", "A");
+        result.CheckValue(true, "X", "Y", "B");
+        result.CheckValue(4.0, "Z", "C");
+        result.CheckValue("Boom stick", "Z", "D");
     }
 
     [TestMethod]
@@ -157,4 +198,6 @@ public class Getters {
         result.CheckValue("2", "B");
         result.CheckValue("10", "C");
     }
+
+    // TODO: Get trigger?
 }

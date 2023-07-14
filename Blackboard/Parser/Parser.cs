@@ -32,7 +32,7 @@ sealed public class Parser {
     private readonly Slate slate;
 
     /// <summary>The list of prompt handlers for running the Blackboard grammar with.</summary>
-    private readonly Dictionary<string, PP.ParseTree.PromptHandle<Builder>> prompts;
+    private readonly Dictionary<string, PP.ParseTree.PromptHandle<Builder.Builder>> prompts;
 
     /// <summary>Optional logger to debugging and inspecting the parser.</summary>
     private readonly Logger? logger;
@@ -42,7 +42,7 @@ sealed public class Parser {
     /// <param name="logger">An optional logger for debugging and inspecting the parser.</param>
     public Parser(Slate slate, Logger? logger = null) {
         this.slate   = slate;
-        this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle<Builder>>();
+        this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle<Builder.Builder>>();
         this.logger  = logger.SubGroup(nameof(Parser));
 
         // Console.WriteLine(PP.Parser.Parser.GetDebugStateString(BaseParser.Grammar));
@@ -83,7 +83,7 @@ sealed public class Parser {
     private Formula read(PP.ParseTree.ITreeNode node) {
         try {
             this.logger.Info("Parser Read");
-            Builder builder = new(this.slate, this.logger);
+            Builder.Builder builder = new(this.slate, this.logger);
             node.Process(this.prompts, builder);
             this.logger.Info("Parser Done");
             return builder.Actions.Formula;
@@ -115,6 +115,12 @@ sealed public class Parser {
 
         this.addHandler("typeGet", handleTypeGet);
         this.addHandler("varGet", handleVarGet);
+        
+        this.addHandler("typeTemp", handleTypeTemp);
+        this.addHandler("varTemp", handleVarTemp);
+
+        this.addHandler("externNoAssign", handleExternNoAssign);
+        this.addHandler("externWithAssign", handleExternWithAssign);
 
         this.addHandler("assignment", handleAssignment);
         this.addHandler("cast", handleCast);
@@ -161,8 +167,8 @@ sealed public class Parser {
     /// <summary>This adds a handler for the given name.</summary>
     /// <param name="name">This is the name of the prompt this handler is for.</param>
     /// <param name="hndl">This is the handler to call on this prompt.</param>
-    private void addHandler(string name, S.Action<Builder> hndl) =>
-        this.prompts[name] = (Builder builder) => {
+    private void addHandler(string name, S.Action<Builder.Builder> hndl) =>
+        this.prompts[name] = (Builder.Builder builder) => {
             try {
                 this.logger.Info("Handle {0} [{1}]", name, builder.LastLocation);
                 hndl(builder);
@@ -180,7 +186,7 @@ sealed public class Parser {
             throw new Message("Could not find the operation by the given name.").
                 With("Name", name);
 
-        this.prompts[name] = (Builder builder) => {
+        this.prompts[name] = (Builder.Builder builder) => {
             PP.Scanner.Location? loc = builder.LastLocation;
             builder.Logger.Info("Process {0}({1}) [{2}]", name, count, loc);
 
@@ -211,7 +217,7 @@ sealed public class Parser {
     /// <param name="builder">The formula builder being worked on.</param>
     /// <param name="usage">The string describing what this parse is doing.</param>
     /// <param name="parseMethod">The method to convert a string into a literal node.</param>
-    static private void parseLiteral(Builder builder, string usage, S.Func<string, INode> parseMethod) {
+    static private void parseLiteral(Builder.Builder builder, string usage, S.Func<string, INode> parseMethod) {
         string text = builder.LastText;
         try {
             builder.Nodes.Push(parseMethod(text));
@@ -228,19 +234,19 @@ sealed public class Parser {
 
     /// <summary>This is called before each statement to prepare and clean up the parser.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleClear(Builder builder) {
+    static private void handleClear(Builder.Builder builder) {
         builder.Tokens.Clear();
         builder.Clear();
     }
 
     /// <summary>This is called when a new simple identifier has been defined.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleDefineId(Builder builder) =>
+    static private void handleDefineId(Builder.Builder builder) =>
         builder.Identifiers.Push(builder.LastText);
 
     /// <summary>This is called when the namespace has opened.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushNamespace(Builder builder) {
+    static private void handlePushNamespace(Builder.Builder builder) {
         string name = builder.LastText;
         VirtualNode scope = builder.Scope.Current;
 
@@ -265,11 +271,11 @@ sealed public class Parser {
 
     /// <summary>This is called when the namespace had closed.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePopNamespace(Builder builder) => builder.Scope.Pop();
+    static private void handlePopNamespace(Builder.Builder builder) => builder.Scope.Pop();
 
     /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleNewTypeInputNoAssign(Builder builder) {
+    static private void handleNewTypeInputNoAssign(Builder.Builder builder) {
         string name = builder.Identifiers.Pop();
         Type type = builder.Types.Peek();
         builder.CreateInput(name, type);
@@ -277,56 +283,56 @@ sealed public class Parser {
 
     /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleNewTypeInputWithAssign(Builder builder) {
-        INode value = builder.Nodes.Pop();
-        Type type = builder.Types.Peek();
-        string name = builder.Identifiers.Pop();
-        INode target = builder.CreateInput(name, type);
+    static private void handleNewTypeInputWithAssign(Builder.Builder builder) {
+        INode  value  = builder.Nodes.Pop();
+        Type   type   = builder.Types.Peek();
+        string name   = builder.Identifiers.Pop();
+        INode  target = builder.CreateInput(name, type);
         builder.AddAssignment(target, value);
     }
 
     /// <summary>This creates a new input node and assigns it with an initial value.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleNewVarInputWithAssign(Builder builder) {
-        INode value = builder.Nodes.Pop();
-        string name = builder.Identifiers.Pop();
-        Type type = Type.TypeOf(value) ??
-                throw new Message("Unable to determine node type for new variable with assignment.");
+    static private void handleNewVarInputWithAssign(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        string name  = builder.Identifiers.Pop();
+        Type   type  = Type.TypeOf(value) ??
+            throw new Message("Unable to determine node type for new variable with assignment.");
         INode target = builder.CreateInput(name, type);
         builder.AddAssignment(target, value);
     }
 
     /// <summary>This handles defining a new typed named node.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleTypeDefine(Builder builder) {
-        INode value = builder.Nodes.Pop();
-        Type type = builder.Types.Peek();
-        string name = builder.Identifiers.Pop();
+    static private void handleTypeDefine(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        Type   type  = builder.Types.Peek();
+        string name  = builder.Identifiers.Pop();
         builder.AddDefine(value, type, name);
     }
 
     /// <summary>This handles defining a new untyped named node.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleVarDefine(Builder builder) {
-        INode value = builder.Nodes.Pop();
-        string name = builder.Identifiers.Pop();
+    static private void handleVarDefine(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        string name  = builder.Identifiers.Pop();
         builder.AddDefine(value, null, name);
     }
 
     /// <summary>This handles when a trigger is provoked unconditionally.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleProvokeTrigger(Builder builder) {
+    static private void handleProvokeTrigger(Builder.Builder builder) {
         INode target = builder.Nodes.Pop();
         builder.AddProvokeTrigger(target, null);
     }
 
     /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleConditionalProvokeTrigger(Builder builder) {
+    static private void handleConditionalProvokeTrigger(Builder.Builder builder) {
         INode target = builder.Nodes.Pop();
         INode value  = builder.Nodes.Pop();
         INode root   = builder.AddProvokeTrigger(target, value) ??
-                throw new Message("Unable to create conditional provoke trigger");
+            throw new Message("Unable to create conditional provoke trigger");
 
         // Push the condition onto the stack for any following trigger pulls.
         // See comment in `handleAssignment` about pushing cast value back onto the stack.
@@ -336,7 +342,7 @@ sealed public class Parser {
 
     /// <summary>This handles getting the typed left value and writing it out to the given name.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleTypeGet(Builder builder) {
+    static private void handleTypeGet(Builder.Builder builder) {
         INode  value = builder.Nodes.Pop();
         Type   type  = builder.Types.Peek();
         string name  = builder.Identifiers.Pop();
@@ -345,17 +351,56 @@ sealed public class Parser {
 
     /// <summary>This handles getting the variable type left value and writing it out to the given name.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleVarGet(Builder builder) {
+    static private void handleVarGet(Builder.Builder builder) {
         INode  value = builder.Nodes.Pop();
         string name  = builder.Identifiers.Pop();
         Type   type  = Type.TypeOf(value) ??
-                throw new Message("Unable to determine node type for getter.");
+            throw new Message("Unable to determine node type for getter.");
         builder.AddGetter(type, name, value);
+    }
+
+    /// <summary>This handles getting the typed left value as a temporary value with the given name.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleTypeTemp(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        Type   type  = builder.Types.Peek();
+        string name  = builder.Identifiers.Pop();
+        builder.AddTemp(type, name, value);
+    }
+
+    /// <summary>This handles getting the variable type left value as a temporary value with the given name.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleVarTemp(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        string name  = builder.Identifiers.Pop();
+        Type   type  = Type.TypeOf(value) ??
+            throw new Message("Unable to determine node type for temp.");
+        builder.AddTemp(type, name, value);
+    }
+
+    /// <summary>This handles checking for an existing node or creating an external node if there is no existing node.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleExternNoAssign(Builder.Builder builder) {
+        string name = builder.Identifiers.Pop();
+        Type   type = builder.Types.Peek();
+        builder.RequestExtern(name, type);
+    }
+    
+    /// <summary>
+    /// This handles checking for an existing node or creating an external node if there is no existing node.
+    /// If no node exists then the default value for the existing node will be set.
+    /// </summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleExternWithAssign(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        Type   type  = builder.Types.Peek();
+        string name  = builder.Identifiers.Pop();
+        builder.RequestExtern(name, type, value);
     }
 
     /// <summary>This handles assigning the left value to the right value.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleAssignment(Builder builder) {
+    static private void handleAssignment(Builder.Builder builder) {
         INode value  = builder.Nodes.Pop();
         INode target = builder.Nodes.Pop();
         INode root   = builder.AddAssignment(target, value);
@@ -376,45 +421,45 @@ sealed public class Parser {
 
     /// <summary>This handles performing a type cast of a node.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleCast(Builder builder) {
+    static private void handleCast(Builder.Builder builder) {
         INode value = builder.Nodes.Pop();
-        Type type   = builder.Types.Pop();
+        Type  type  = builder.Types.Pop();
         builder.Nodes.Push(builder.PerformCast(type, value, true));
     }
 
     /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleMemberAccess(Builder builder) {
-        string name = builder.LastText;
-        INode rNode = builder.Nodes.Pop();
+    static private void handleMemberAccess(Builder.Builder builder) {
+        string name  = builder.LastText;
+        INode  rNode = builder.Nodes.Pop();
         if (rNode is not IFieldReader receiver)
             throw new Message("Unexpected node type for a member access. Expected a field reader.").
                 With("Node", rNode).
                 With("Name", name).
                 With("Location", builder.LastLocation);
 
-        INode? node = receiver.ReadField(name);
-        if (node is not null) {
-            builder.Nodes.Push(node);
-            return;
-        }
+        INode node = receiver.ReadField(name) ??
+            throw new Message("No identifier found in the receiver stack.").
+                With("Identifier", name).
+                With("Location", builder.LastLocation);
 
-        throw new Message("No identifier found in the receiver stack.").
-            With("Identifier", name).
-            With("Location", builder.LastLocation);
+        if (node is IExtern externNode)
+            node = externNode.Shell;
+
+        builder.Nodes.Push(node);
     }
 
     /// <summary>This handles preparing for a method call.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleStartCall(Builder builder) => builder.Arguments.Start();
+    static private void handleStartCall(Builder.Builder builder) => builder.Arguments.Start();
 
     /// <summary>This handles the end of a method call and creates the node for the method.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleAddArg(Builder builder) => builder.Arguments.Add(builder.Nodes.Pop());
+    static private void handleAddArg(Builder.Builder builder) => builder.Arguments.Add(builder.Nodes.Pop());
 
     /// <summary>This handles finishing a method call and building the node for the method.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleEndCall(Builder builder) {
+    static private void handleEndCall(Builder.Builder builder) {
         INode[] args = builder.Arguments.End();
         INode node = builder.Nodes.Pop();
         if (node is not IFuncGroup group)
@@ -440,13 +485,16 @@ sealed public class Parser {
 
     /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushId(Builder builder) {
+    static private void handlePushId(Builder.Builder builder) {
         string name = builder.LastText;
         builder.Logger.Info("Id = \"{0}\"", name);
         INode node = builder.Scope.FindID(name) ??
-                throw new Message("No identifier found in the scope stack.").
-                    With("Identifier", name).
-                    With("Location", builder.LastLocation);
+            throw new Message("No identifier found in the scope stack.").
+                With("Identifier", name).
+                With("Location", builder.LastLocation);
+        
+        if (node is IExtern externNode)
+            node = externNode.Shell;
 
         builder.Nodes.Push(node);
         builder.Existing.Add(node);
@@ -454,47 +502,47 @@ sealed public class Parser {
 
     /// <summary>This handles pushing a bool literal value onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushBool(Builder builder) =>
+    static private void handlePushBool(Builder.Builder builder) =>
         parseLiteral(builder, "parse a bool", (string text) => Literal.Bool(bool.Parse(text)));
 
     /// <summary>This handles pushing a binary int literal value onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushBin(Builder builder) =>
+    static private void handlePushBin(Builder.Builder builder) =>
         parseLiteral(builder, "parse a binary int", (string text) => Literal.Int(S.Convert.ToInt32(text, 2)));
 
     /// <summary>This handles pushing an octal int literal value onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushOct(Builder builder) =>
+    static private void handlePushOct(Builder.Builder builder) =>
         parseLiteral(builder, "parse a octal int", (string text) => Literal.Int(S.Convert.ToInt32(text, 8)));
 
     /// <summary>This handles pushing a decimal int literal value onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushInt(Builder builder) =>
+    static private void handlePushInt(Builder.Builder builder) =>
         parseLiteral(builder, "parse a decimal int", (string text) => Literal.Int(int.Parse(text)));
 
     /// <summary>This handles pushing a hexadecimal int literal value onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushHex(Builder builder) =>
+    static private void handlePushHex(Builder.Builder builder) =>
         parseLiteral(builder, "parse a hex int", (string text) => Literal.Int(int.Parse(text[2..], NumberStyles.HexNumber)));
 
     /// <summary>This handles pushing a double literal value onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushDouble(Builder builder) =>
+    static private void handlePushDouble(Builder.Builder builder) =>
         parseLiteral(builder, "parse a double", (string text) => Literal.Double(double.Parse(text)));
 
     /// <summary>This handles pushing a string literal value onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushString(Builder builder) =>
+    static private void handlePushString(Builder.Builder builder) =>
         parseLiteral(builder, "decode escaped sequences", (string text) => Literal.String(PP.Formatting.Text.Unescape(text)));
 
     /// <summary>This handles pushing a type onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushType(Builder builder) {
+    static private void handlePushType(Builder.Builder builder) {
         string text = builder.LastText;
         Type t = Type.FromName(text) ??
-                throw new Message("Unrecognized type name.").
-                    With("Text", text).
-                    With("Location", builder.LastLocation);
+            throw new Message("Unrecognized type name.").
+                With("Text", text).
+                With("Location", builder.LastLocation);
         builder.Types.Push(t);
     }
 

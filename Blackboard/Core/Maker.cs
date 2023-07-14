@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Actions;
 using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
@@ -45,16 +46,17 @@ static public class Maker {
 
     /// <summary>This creates an getter action for the given type.</summary>
     /// <param name="type">The type to create an getter action for.</param>
-    /// <param name="name">The name to write the value to.</param>
+    /// <param name="names">The names in the path to write the value to.</param>
     /// <param name="root">The root node to get to the given target.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
     /// <returns>The newly created getter action or null if an unexpected type.</returns>
-    static public IAction? CreateGetterAction(Type type, string name, INode root, IEnumerable<INode> allNewNodes) =>
-        type == Type.Object ? Getter<Object>.Create(name, root, allNewNodes) :
-        type == Type.Bool   ? Getter<Bool>.  Create(name, root, allNewNodes) :
-        type == Type.Int    ? Getter<Int>.   Create(name, root, allNewNodes) :
-        type == Type.Double ? Getter<Double>.Create(name, root, allNewNodes) :
-        type == Type.String ? Getter<String>.Create(name, root, allNewNodes) :
+    static public IAction? CreateGetterAction(Type type, string[] names, INode root, IEnumerable<INode> allNewNodes) =>
+        type == Type.Object  ? ValueGetter<Object>.Create(names, root, allNewNodes) :
+        type == Type.Bool    ? ValueGetter<Bool>.  Create(names, root, allNewNodes) :
+        type == Type.Int     ? ValueGetter<Int>.   Create(names, root, allNewNodes) :
+        type == Type.Double  ? ValueGetter<Double>.Create(names, root, allNewNodes) :
+        type == Type.String  ? ValueGetter<String>.Create(names, root, allNewNodes) :
+        type == Type.Trigger ? TriggerGetter.      Create(names, root, allNewNodes) :
         null;
 
     /// <summary>Creates a new input node of the given type.</summary>
@@ -67,5 +69,29 @@ static public class Maker {
         type == Type.Double  ? new InputValue<Double>() :
         type == Type.String  ? new InputValue<String>() :
         type == Type.Trigger ? new InputTrigger() :
+        null;
+
+    /// <summary>Creates a new extern node of the given type.</summary>
+    /// <param name="type">The type of value to create an extern node for.</param>
+    /// <returns>The newly created extern or null if an unexpected type.</returns>
+    static public IExtern? CreateExternNode(Type type) =>
+        type == Type.Object  ? new ExternValue<Object>() :
+        type == Type.Bool    ? new ExternValue<Bool>() :
+        type == Type.Int     ? new ExternValue<Int>() :
+        type == Type.Double  ? new ExternValue<Double>() :
+        type == Type.String  ? new ExternValue<String>() :
+        type == Type.Trigger ? new ExternTrigger() :
+        null;
+
+    /// <summary>Creates a new shell node to wrap the given node.</summary>
+    /// <param name="type">The type of value to create a shell node for.</param>
+    /// <returns>The newly created shell or null if an unexpected type.</returns>
+    static public INode? CreateShell(INode node) =>
+        node is IValueParent<Object> objectNode  ? new ShellValue<Object>(objectNode) :
+        node is IValueParent<Bool>   boolNode    ? new ShellValue<Bool>(boolNode) :
+        node is IValueParent<Int>    intNode     ? new ShellValue<Int>(intNode) :
+        node is IValueParent<Double> doubleNode  ? new ShellValue<Double>(doubleNode) :
+        node is IValueParent<String> stringNode  ? new ShellValue<String>(stringNode) :
+        node is ITriggerParent       triggerNode ? new ShellTrigger(triggerNode) :
         null;
 }

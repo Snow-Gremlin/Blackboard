@@ -42,9 +42,12 @@ public abstract class UnaryValue<T1, TResult> : ValueNode<TResult>, IChild
     /// <param name="value">The value from the parent.</param>
     /// <returns>The new value for this node.</returns>
     protected abstract TResult OnEval(T1 value);
+    
+    /// <summary>The value to return when the parent is not set.</summary>
+    protected virtual TResult DefaultValue => default;
 
     /// <summary>This updates the value during evaluation.</summary>
     /// <returns>True if the value was changed, false otherwise.</returns>
     protected override TResult CalculateValue() =>
-        this.source is null ? default : this.OnEval(this.source.Value);
+        this.source is null ? this.DefaultValue : this.OnEval(this.source.Value);
 }

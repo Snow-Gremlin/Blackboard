@@ -10,6 +10,8 @@
     | <DefineRule>
     | <ProvokeTrigger>
     | <GetValue>
+    | <TempValue>
+    | <NewExtern>
     | <Declaration> [End];
 
 #=========================================================#
@@ -34,6 +36,7 @@
 #   - in var A = false;                                   #
 # New input group.                                        #
 #   - in { int A, B; C = true; }                          #
+#   - in { namespace A { int B; } }                       #
 #=========================================================#
 
 <NewInput> := [DeclareIn] <NewInputHead> [End]
@@ -55,7 +58,8 @@
 <NewVarInputPart> := [Identifier] {defineId} [Assign] <Declaration> {newVarInputWithAssign};
 
 <NewInputGroup> := _
-    | <NewInputHead> [End] <NewInputGroup>;
+    | <NewInputHead> [End] <NewInputGroup>
+    | [Namespace] [Identifier] {pushNamespace} [CurlOpen] <NewInputGroup> [CurlClose] {popNamespace};
 
 #=========================================================#
 # Define                                                  #
@@ -72,6 +76,7 @@
 #   - define var A = B + "cat";                           #
 # New define group                                        #
 #   - define { int A = B + C; D = E + "cat"; }            #
+#   - define { namespace A { int B; } }                   #
 #=========================================================#
 
 <DefineRule> := <DefineDefine> [End]
@@ -91,7 +96,8 @@
 <DefineAssignPart> := [Identifier] {defineId} [Assign] <Conditional>;
 
 <DefineGroup> := _
-    | <DefineAssign> [End] <DefineGroup>;
+    | <DefineAssign> [End] <DefineGroup>
+    | [Namespace] [Identifier] {pushNamespace} [CurlOpen] <DefineGroup> [CurlClose] {popNamespace};
 
 #=========================================================#
 # Provoke                                                 #
@@ -127,6 +133,7 @@
 #   - get var A = false;                                  #
 # New get group.                                          #
 #   - get { int A, B; C = true; }                         #
+#   - get { namespace A { int B; } }                      #
 #=========================================================#
 
 <GetValue> := [DeclareGet] <GetDefine> [End]
@@ -149,7 +156,71 @@
     | [Identifier] {defineId} [Assign] <Conditional> {varGet};
     
 <GetValueGroup> := _
-    | <GetDefine> [End] <GetValueGroup>;
+    | <GetDefine> [End] <GetValueGroup>
+    | [Namespace] [Identifier] {pushNamespace} [CurlOpen] <GetValueGroup> [CurlClose] {popNamespace};
+
+#=========================================================#
+# Temp Value                                              #
+#=========================================================#
+# New temp with type and initial assignment.              #
+#   - in bool A = true;                                   #
+#   - in int B = 4, C = 6;                                #
+# New temp without type and initial assignment.           #
+#   - temp A = 3;                                         #
+#   - temp A = true, B = "cat";                           #
+#   - temp var A = false;                                 #
+# New temp group.                                         #
+#   - temp { int A = 12; B = true; }                      #
+#   - temp { namespace A { B = true; } }                  #
+#=========================================================#
+
+<TempValue> := [DeclareTemp] <TempDefine> [End]
+    | [DeclareTemp] [CurlOpen] <TempValueGroup> [CurlClose];
+
+<TempDefine> := <RootType> <TempTypedValuePart> <TempTypedValueTail>
+    | <TempVarValuePart> <TempVarValueTail>
+    | [Var] <TempVarValuePart> <TempVarValueTail>;
+
+<TempTypedValueTail> := _
+    | [Comma] <TempTypedValuePart> <TempTypedValueTail>;
+
+<TempTypedValuePart> := [Identifier] {defineId} [Assign] <Conditional> {typeTemp};
+
+<TempVarValueTail> := _
+    | [Comma] <TempVarValuePart> <TempVarValueTail>;
+
+<TempVarValuePart> := [Identifier] {defineId} [Assign] <Conditional> {varTemp};
+    
+<TempValueGroup> := _
+    | <TempDefine> [End] <TempValueGroup>
+    | [Namespace] [Identifier] {pushNamespace} [CurlOpen] <TempValueGroup> [CurlClose] {popNamespace};
+
+#=========================================================#
+# New Extern                                              #
+#=========================================================#
+# New extern with type and optional initial assignment.   #
+#   - extern bool A;                                      #
+#   - extern double A, B, C;                              #
+#   - extern int A = 3, B = 4, C;                         #
+# New extern group.                                       #
+#   - extern { int A, B; bool C = true; }                 #
+#   - extern { namespace A { bool B = true; } }           #
+#=========================================================#
+
+<NewExtern> := [DeclareExtern] <NewExternHead> [End]
+    | [DeclareExtern] [CurlOpen] <NewExternGroup> [CurlClose];
+
+<NewExternHead> := <RootType> <NewExternPart> <NewExternTail>;
+
+<NewExternTail> := _
+    | [Comma] <NewExternPart> <NewExternTail>;
+
+<NewExternPart> := [Identifier] {defineId} {externNoAssign}
+    | [Identifier] {defineId} [Assign] <Declaration> {externWithAssign};
+
+<NewExternGroup> := _
+    | <NewExternHead> [End] <NewExternGroup>
+    | [Namespace] [Identifier] {pushNamespace} [CurlOpen] <NewExternGroup> [CurlClose] {popNamespace};
 
 #=========================================================#
 # Declarations                                            #

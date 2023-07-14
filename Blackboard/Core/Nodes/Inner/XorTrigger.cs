@@ -27,7 +27,8 @@ sealed public class XorTrigger : NaryTrigger {
     public override INode NewInstance() => new XorTrigger();
 
     /// <summary>This is the type name of the node.</summary>
-    public override string TypeName => "Xor"; // So that it is Xor<bool> and Xor<trigger>.
+    /// <remarks>Doesn't use nameof since this has both trigger and value nodes.</remarks>
+    public override string TypeName => "Xor";
 
     /// <summary>Updates this trigger during evaluation.</summary>
     /// <param name="provoked">The parent triggers to check.</param>

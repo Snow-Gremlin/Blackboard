@@ -21,7 +21,8 @@ sealed public class InputValue<T> : ValueNode<T>, IValueInput<T>
     public override INode NewInstance() => new InputValue<T>();
 
     /// <summary>This is the type name of the node.</summary>
-    public override string TypeName => "Input"; // So that it is Input<bool> and Input<trigger>.
+    /// <remarks>Doesn't use nameof since this has both trigger and value nodes.</remarks>
+    public override string TypeName => "Input";
 
     /// <summary>This sets the value of this node.</summary>
     /// <param name="value">The value to set.</param>

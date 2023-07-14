@@ -2,6 +2,7 @@
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -52,8 +53,54 @@ sealed public class Define : IAction {
     /// <param name="slate">The slate for this action.</param>
     /// <param name="result">The result being created and added to.</param>
     /// <param name="logger">The optional logger to debug with.</param>
-    public void Perform(Slate slate, Result result, Logger? logger = null) {
+    public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Define: {0}", this);
+        Logger? sublogger = logger.SubGroup("DefineSteps");
+        
+        INode? existing = this.Receiver.ReadField(this.Name);
+        if (existing is not null) {
+            if (existing is not IExtern existingExtern)
+                throw new Message("May not define node, a node already exists with the given name.").
+                    With("Name",     this.Name).
+                    With("Node",     this.Node).
+                    With("Existing", existing);
+
+            Type externType = Type.TypeOf(existingExtern) ??
+                throw new Message("Unable to find existing extern type while setting input.").
+                    With("Name",     this.Name).
+                    With("Node",     this.Node).
+                    With("Existing", existingExtern);
+
+            Type inputType = Type.TypeOf(this.Node) ??
+                throw new Message("Unable to find input type while setting input.").
+                    With("Name",     this.Name).
+                    With("Node",     this.Node).
+                    With("Existing", existingExtern);
+
+            if (inputType != externType)
+                throw new Message("Input node does not match existing extern node type.").
+                    With("Name",          this.Name).
+                    With("Node",          this.Node).
+                    With("Existing",      existingExtern).
+                    With("Existing Type", externType).
+                    With("New Type",      inputType);
+
+            if (existingExtern.Children.Any()) {
+                if (this.Node is not IParent parent)
+                    throw new Message("A non-parent node can not replace an extern with children.").
+                        With("Name",     this.Name).
+                        With("Node",     this.Node).
+                        With("Existing", existingExtern);
+
+                List<IChild> externChildren = existingExtern.Children.ToList();
+                List<IChild> movedChildren = externChildren.Where(
+                    child => child.Parents.Replace(existingExtern, parent)).ToList();
+                slate.PendUpdate(movedChildren);
+                slate.PendEval(movedChildren);
+            }
+            this.Receiver.RemoveFields(this.Name);
+        }
+
         this.Receiver.WriteField(this.Name, this.Node);
         List<IChild> changed = this.needParents.Where(child => child.Legitimatize()).ToList();
         slate.PendUpdate(changed);

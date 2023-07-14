@@ -22,7 +22,8 @@ sealed public class OutputValue<T> : UnaryValue<T, T>, IValueOutput<T>
     public override INode NewInstance() => new OutputValue<T>();
 
     /// <summary>This is the type name of the node.</summary>
-    public override string TypeName => "Output"; // So that it is Output<bool> and Output<trigger>.
+    /// <remarks>Doesn't use nameof since this has both trigger and value nodes.</remarks>
+    public override string TypeName => "Output";
 
     /// <summary>This event is emitted when the value is changed.</summary>
     public event S.EventHandler<OutputValueEventArgs<T>>? OnChanged;

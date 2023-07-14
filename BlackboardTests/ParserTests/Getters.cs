@@ -32,8 +32,8 @@ public class Getters {
         Slate slate = new();
         Result result = slate.Read(
             "get A = 3;",
-            "get B = true;",
-            "get {" +
+            "get var B = true;",
+            "get {",
             "   C = 4.0;",
             "   D = 'Boom stick';",
             "}").
@@ -46,6 +46,22 @@ public class Getters {
     }
 
     [TestMethod]
+    public void TestBasicParses_TriggerGetter() {
+        Slate slate = new();
+        Result result = slate.Read(
+            "in trigger A = true;",
+            "in trigger B = false;",
+            "get A;",
+            "get B;",
+            "get trigger C = A || B;").
+            Perform();
+
+        result.CheckTrigger(true, "A");
+        result.CheckTrigger(false, "B");
+        result.CheckTrigger(true, "C");
+    }
+
+    [TestMethod]
     public void TestBasicParses_GetterWithNamespace() {
         Slate slate = new();
         Result result = slate.Read(
@@ -55,7 +71,7 @@ public class Getters {
             "      get B = true;",
             "   }",
             "}",
-            "get {" +
+            "get {",
             "   namespace Z {",
             "      C = 4.0;",
             "      D = 'Boom stick';",

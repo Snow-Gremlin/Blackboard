@@ -1,5 +1,4 @@
-﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
+﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
@@ -8,9 +7,7 @@ using System.Linq;
 namespace Blackboard.Core.Actions;
 
 /// <summary>This is an action that will get a value to the result.</summary>
-/// <typeparam name="T">The type of data for the gotten value.</typeparam>
-sealed public class Getter<T> : IGetter
-    where T : IData {
+sealed public class TriggerGetter : IGetter {
 
     /// <summary>
     /// Creates a getter from the given nodes after first checking
@@ -21,11 +18,11 @@ sealed public class Getter<T> : IGetter
     /// <param name="value">The value to get to the given target.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
     /// <returns>The getter action or null if the value can not be gotten.</returns>
-    static public Getter<T>? Create(string[] names, INode value, IEnumerable<INode> allNewNodes) =>
-        (value is IValue<T> data) ? new Getter<T>(names, data, allNewNodes) : null;
+    static public TriggerGetter? Create(string[] names, INode value, IEnumerable<INode> allNewNodes) =>
+        (value is ITrigger data) ? new TriggerGetter(names, data, allNewNodes) : null;
 
     /// <summary>The data node to get the data from.</summary>
-    private readonly IValue<T> value;
+    private readonly ITrigger value;
 
     /// <summary>
     /// This is a subset of all the node for the value which need to be pended
@@ -38,7 +35,7 @@ sealed public class Getter<T> : IGetter
     /// <param name="names">The name in the path to write the value to.</param>
     /// <param name="value">The node to get the value from.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
-    public Getter(string[] names, IValue<T> value, IEnumerable<INode> allNewNodes) {
+    public TriggerGetter(string[] names, ITrigger value, IEnumerable<INode> allNewNodes) {
         this.Names = names;
         this.value = value;
 
@@ -62,11 +59,11 @@ sealed public class Getter<T> : IGetter
     /// <param name="result">The result being created and added to.</param>
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
-        logger.Info("Getter: {0}", this);
+        logger.Info("Trigger Getter: {0}", this);
         slate.PendEval(this.needPending);
         slate.PerformEvaluation(logger);
-        result.SetValue(this.value.Value, this.Names);
-        logger.Info("Getter Done {0}", this.Names.Join("."));
+        result.SetTrigger(this.value.Provoked, this.Names);
+        logger.Info("Trigger Getter Done {0}", this.Names.Join("."));
     }
 
     /// <summary>Gets a human readable string for this getter.</summary>

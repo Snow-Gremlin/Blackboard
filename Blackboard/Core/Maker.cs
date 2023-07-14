@@ -51,12 +51,12 @@ static public class Maker {
     /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
     /// <returns>The newly created getter action or null if an unexpected type.</returns>
     static public IAction? CreateGetterAction(Type type, string[] names, INode root, IEnumerable<INode> allNewNodes) =>
-        type == Type.Object ? Getter<Object>.Create(names, root, allNewNodes) :
-        type == Type.Bool   ? Getter<Bool>.  Create(names, root, allNewNodes) :
-        type == Type.Int    ? Getter<Int>.   Create(names, root, allNewNodes) :
-        type == Type.Double ? Getter<Double>.Create(names, root, allNewNodes) :
-        type == Type.String ? Getter<String>.Create(names, root, allNewNodes) :
-        // TODO: Add Trigger
+        type == Type.Object  ? ValueGetter<Object>.Create(names, root, allNewNodes) :
+        type == Type.Bool    ? ValueGetter<Bool>.  Create(names, root, allNewNodes) :
+        type == Type.Int     ? ValueGetter<Int>.   Create(names, root, allNewNodes) :
+        type == Type.Double  ? ValueGetter<Double>.Create(names, root, allNewNodes) :
+        type == Type.String  ? ValueGetter<String>.Create(names, root, allNewNodes) :
+        type == Type.Trigger ? TriggerGetter.      Create(names, root, allNewNodes) :
         null;
 
     /// <summary>Creates a new input node of the given type.</summary>

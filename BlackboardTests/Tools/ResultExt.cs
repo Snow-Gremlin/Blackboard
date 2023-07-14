@@ -17,17 +17,26 @@ static class ResultExt {
         return result;
     }
 
+    /// <summary>Checks the boolean value of this node.</summary>
+    /// <param name="result">This is the parse result to check the value with.</param>
+    /// <param name="exp">The expected trigger state.</param>
+    /// <param name="names">The name of the variable to get.</param>
+    static public Result CheckTrigger(this Result result, bool exp, params string[] names) {
+        Assert.AreEqual(exp, result.Provoked(names), "Checking the trigger state of \"" + names.Join(".") + "\".");
+        return result;
+    }
+
     /// <summary>Gets the message for the CheckValues assertions.</summary>
     /// <param name="type">The type of the value being checked.</param>
-    /// <param name="name">The name of the variable to get.</param>
+    /// <param name="names">The name of the variable to get.</param>
     /// <returns>The message to show in the assertion.</returns>
-    static private string checkValueMsg(string type, string[] name) =>
-        "Checking the " + type + " value of \"" + name.Join(".") + "\".";
+    static private string checkValueMsg(string type, string[] names) =>
+        "Checking the " + type + " value of \"" + names.Join(".") + "\".";
 
     /// <summary>Checks the boolean value of this node.</summary>
     /// <param name="result">This is the parse result to check the value with.</param>
     /// <param name="exp">The expected boolean value.</param>
-    /// <param name="name">The name of the variable to get.</param>
+    /// <param name="names">The name of the variable to get.</param>
     static public Result CheckValue(this Result result, bool exp, params string[] names) {
         Assert.AreEqual(exp, result.GetBool(names), checkValueMsg("bool", names));
         return result;
@@ -36,7 +45,7 @@ static class ResultExt {
     /// <summary>Checks the integer value of this node.</summary>
     /// <param name="result">This is the parse result to check the value with.</param>
     /// <param name="exp">The expected integer value.</param>
-    /// <param name="name">The name of the variable to get.</param>
+    /// <param name="names">The name of the variable to get.</param>
     static public Result CheckValue(this Result result, int exp, params string[] names) {
         Assert.AreEqual(exp, result.GetInt(names), checkValueMsg("int", names));
         return result;
@@ -45,7 +54,7 @@ static class ResultExt {
     /// <summary>Checks the double value of this node.</summary>
     /// <param name="result">This is the parse result to check the value with.</param>
     /// <param name="exp">The expected double value.</param>
-    /// <param name="name">The name of the variable to get.</param>
+    /// <param name="names">The name of the variable to get.</param>
     static public Result CheckValue(this Result result, double exp, params string[] names) {
         Assert.AreEqual(exp, result.GetDouble(names), checkValueMsg("double", names));
         return result;
@@ -54,7 +63,7 @@ static class ResultExt {
     /// <summary>Checks the string value of this node.</summary>
     /// <param name="result">This is the parse result to check the value with.</param>
     /// <param name="exp">The expected string value.</param>
-    /// <param name="name">The name of the variable to get.</param>
+    /// <param name="names">The name of the variable to get.</param>
     static public Result CheckValue(this Result result, string exp, params string[] names) {
         Assert.AreEqual(exp, result.GetString(names), checkValueMsg("string", names));
         return result;
@@ -63,9 +72,9 @@ static class ResultExt {
     /// <summary>Checks the string value of this node.</summary>
     /// <param name="result">This is the parse result to check the value with.</param>
     /// <param name="exp">The expected string value.</param>
-    /// <param name="name">The name of the variable to get.</param>
+    /// <param name="names">The name of the variable to get.</param>
     static public Result CheckObject(this Result result, object exp, params string[] names) {
         Assert.AreEqual(exp, result.GetObject(names), checkValueMsg("object", names));
         return result;
-    }
+    }   
 }

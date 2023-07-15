@@ -19,6 +19,7 @@ public readonly struct Double :
     ISigned<Double>,
     ISubtractive<Double>,
     IImplicit<Int, Double>,
+    IImplicit<Uint, Double>,
     IExplicit<Object, Double> {
 
     #region Static...
@@ -29,10 +30,10 @@ public readonly struct Double :
     /// <summary>Gets this multiplicative identity, one.</summary>
     static public readonly Double One = new(1.0);
 
-    /// <summary>Gets the minimum value, false, for this data type.</summary>
+    /// <summary>Gets the minimum value for this data type.</summary>
     static public readonly Double Min = new(double.MinValue);
 
-    /// <summary>Gets the maximum value, true, for this data type.</summary>
+    /// <summary>Gets the maximum value for this data type.</summary>
     static public readonly Double Max = new(double.MaxValue);
 
     /// <summary>The identity of summation for this data type.</summary>
@@ -264,6 +265,11 @@ public readonly struct Double :
     /// <param name="value">The integer value to cast.</param>
     /// <returns>The resulting double value.</returns>
     public Double CastFrom(Int value) => new(value.Value);
+
+    /// <summary>Casts an unsigned integer into a double for an implicit cast.</summary>
+    /// <param name="value">The integer value to cast.</param>
+    /// <returns>The resulting double value.</returns>
+    public Double CastFrom(Uint value) => new(value.Value);
 
     /// <summary>Casts an object into a double for an explicit cast.</summary>
     /// <param name="value">The object value to cast.</param>

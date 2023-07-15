@@ -16,6 +16,7 @@ public readonly struct String :
     IImplicit<Bool, String>,
     IImplicit<Double, String>,
     IImplicit<Int, String>,
+    IImplicit<Uint, String>,
     IImplicit<Object, String> {
 
     #region Static...
@@ -116,6 +117,11 @@ public readonly struct String :
     /// <param name="value">The integer value to cast.</param>
     /// <returns>The resulting string value.</returns>
     public String CastFrom(Int value) => new(value.ValueAsString);
+
+    /// <summary>Casts an unsigned integer into a string for an implicit cast.</summary>
+    /// <param name="value">The unsigned integer value to cast.</param>
+    /// <returns>The resulting string value.</returns>
+    public String CastFrom(Uint value) => new(value.ValueAsString);
 
     /// <summary>Casts an object into a string for an implicit cast.</summary>
     /// <param name="value">The object value to cast.</param>

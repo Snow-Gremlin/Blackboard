@@ -22,6 +22,7 @@ static public class Maker {
             type == Type.Object  ? ops.Find("castObject") :
             type == Type.Bool    ? ops.Find("castBool") :
             type == Type.Int     ? ops.Find("castInt") :
+            type == Type.Uint    ? ops.Find("castUint") :
             type == Type.Double  ? ops.Find("castDouble") :
             type == Type.String  ? ops.Find("castString") :
             type == Type.Trigger ? ops.Find("castTrigger") :
@@ -39,6 +40,7 @@ static public class Maker {
         type == Type.Object  ? Assign<Object>.Create(target, root, allNewNodes) :
         type == Type.Bool    ? Assign<Bool>.  Create(target, root, allNewNodes) :
         type == Type.Int     ? Assign<Int>.   Create(target, root, allNewNodes) :
+        type == Type.Uint    ? Assign<Uint>.  Create(target, root, allNewNodes) :
         type == Type.Double  ? Assign<Double>.Create(target, root, allNewNodes) :
         type == Type.String  ? Assign<String>.Create(target, root, allNewNodes) :
         type == Type.Trigger ? Provoke.       Create(target, root, allNewNodes) :
@@ -54,6 +56,7 @@ static public class Maker {
         type == Type.Object  ? ValueGetter<Object>.Create(names, root, allNewNodes) :
         type == Type.Bool    ? ValueGetter<Bool>.  Create(names, root, allNewNodes) :
         type == Type.Int     ? ValueGetter<Int>.   Create(names, root, allNewNodes) :
+        type == Type.Uint    ? ValueGetter<Uint>.  Create(names, root, allNewNodes) :
         type == Type.Double  ? ValueGetter<Double>.Create(names, root, allNewNodes) :
         type == Type.String  ? ValueGetter<String>.Create(names, root, allNewNodes) :
         type == Type.Trigger ? TriggerGetter.      Create(names, root, allNewNodes) :
@@ -66,6 +69,7 @@ static public class Maker {
         type == Type.Object  ? new InputValue<Object>() :
         type == Type.Bool    ? new InputValue<Bool>() :
         type == Type.Int     ? new InputValue<Int>() :
+        type == Type.Uint    ? new InputValue<Uint>() :
         type == Type.Double  ? new InputValue<Double>() :
         type == Type.String  ? new InputValue<String>() :
         type == Type.Trigger ? new InputTrigger() :
@@ -78,6 +82,7 @@ static public class Maker {
         type == Type.Object  ? new ExternValue<Object>() :
         type == Type.Bool    ? new ExternValue<Bool>() :
         type == Type.Int     ? new ExternValue<Int>() :
+        type == Type.Uint    ? new ExternValue<Uint>() :
         type == Type.Double  ? new ExternValue<Double>() :
         type == Type.String  ? new ExternValue<String>() :
         type == Type.Trigger ? new ExternTrigger() :
@@ -90,6 +95,7 @@ static public class Maker {
         node is IValueParent<Object> objectNode  ? new ShellValue<Object>(objectNode) :
         node is IValueParent<Bool>   boolNode    ? new ShellValue<Bool>(boolNode) :
         node is IValueParent<Int>    intNode     ? new ShellValue<Int>(intNode) :
+        node is IValueParent<Uint>   uintNode    ? new ShellValue<Uint>(uintNode) :
         node is IValueParent<Double> doubleNode  ? new ShellValue<Double>(doubleNode) :
         node is IValueParent<String> stringNode  ? new ShellValue<String>(stringNode) :
         node is ITriggerParent       triggerNode ? new ShellTrigger(triggerNode) :

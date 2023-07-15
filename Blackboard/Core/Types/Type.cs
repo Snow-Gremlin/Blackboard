@@ -36,6 +36,9 @@ sealed public class Type {
     /// <summary>The integer value type.</summary>
     static public readonly Type Int;
 
+    /// <summary>The unsigned integer value type.</summary>
+    static public readonly Type Uint;
+
     /// <summary>The double value type.</summary>
     static public readonly Type Double;
 
@@ -343,11 +346,14 @@ sealed public class Type {
         Object        = new Type("object",         typeof(IValue<Object>),  Node,   typeof(Object));
         Bool          = new Type("bool",           typeof(IValue<Bool>),    Node,   typeof(Bool));
         Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int));
+        Uint          = new Type("uint",           typeof(IValue<Uint>),    Node,   typeof(Uint));
         Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double));
         String        = new Type("string",         typeof(IValue<String>),  Node,   typeof(String));
         Namespace     = new Type("namespace",      typeof(Namespace),       Node,   null);
         FuncGroup     = new Type("function-group", typeof(FuncGroup),       Node,   null);
         FuncDef       = new Type("function-def",   typeof(IFuncDef),        Node,   null);
+
+        // TODO: Come up with a better way to handle sub-typing than predefining them.
         CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int));
         CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double));
         Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool));
@@ -362,15 +368,22 @@ sealed public class Type {
         addCast<IValueParent<Bool>>(Bool.imps, String,  (input) => new Implicit<Bool, String>(input));
 
         addCast<IValueParent<Int>>(Int.imps, Object, (input) => new Implicit<Int, Object>(input));
+        addCast<IValueParent<Int>>(Int.exps, Uint,   (input) => new Explicit<Int, Uint>(input));
         addCast<IValueParent<Int>>(Int.imps, Double, (input) => new Implicit<Int, Double>(input));
         addCast<IValueParent<Int>>(Int.imps, String, (input) => new Implicit<Int, String>(input));
 
+        addCast<IValueParent<Uint>>(Uint.imps, Object, (input) => new Implicit<Uint, Object>(input));
+        addCast<IValueParent<Uint>>(Uint.imps, Double, (input) => new Implicit<Uint, Double>(input));
+        addCast<IValueParent<Uint>>(Uint.imps, String, (input) => new Implicit<Uint, String>(input));
+
         addCast<IValueParent<Double>>(Double.imps, Object, (input) => new Implicit<Double, Object>(input));
         addCast<IValueParent<Double>>(Double.exps, Int,    (input) => new Explicit<Double, Int>(input));
+        addCast<IValueParent<Double>>(Double.exps, Uint,   (input) => new Explicit<Double, Uint>(input));
         addCast<IValueParent<Double>>(Double.imps, String, (input) => new Implicit<Double, String>(input));
             
         addCast<IValueParent<Object>>(Object.exps, Bool,   (input) => new Explicit<Object, Bool>(input));
         addCast<IValueParent<Object>>(Object.exps, Int,    (input) => new Explicit<Object, Int>(input));
+        addCast<IValueParent<Object>>(Object.exps, Uint,   (input) => new Explicit<Object, Uint>(input));
         addCast<IValueParent<Object>>(Object.exps, Double, (input) => new Explicit<Object, Double>(input));
         addCast<IValueParent<Object>>(Object.imps, String, (input) => new Implicit<Object, String>(input));
 

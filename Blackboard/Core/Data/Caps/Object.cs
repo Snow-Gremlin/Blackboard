@@ -11,6 +11,7 @@ public readonly struct Object :
     IImplicit<Bool, Object>,
     IImplicit<Double, Object>,
     IImplicit<Int, Object>,
+    IImplicit<Uint, Object>,
     IImplicit<String, Object>,
     INullable {
 
@@ -78,6 +79,11 @@ public readonly struct Object :
     /// <param name="value">The integer value to cast.</param>
     /// <returns>The resulting object value.</returns>
     public Object CastFrom(Int value) => new(value.Value);
+
+    /// <summary>Casts an unsigned integer into an object for an implicit cast.</summary>
+    /// <param name="value">The unsigned integer value to cast.</param>
+    /// <returns>The resulting object value.</returns>
+    public Object CastFrom(Uint value) => new(value.Value);
 
     /// <summary>Casts an string into an object for an implicit cast.</summary>
     /// <param name="value">The string value to cast.</param>

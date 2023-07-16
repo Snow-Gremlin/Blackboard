@@ -202,7 +202,6 @@ sealed public class Parser {
 
     /// <summary>Validates that all prompts in the grammar are handled.</summary>
     private void validatePrompts() {
-        /*
         // TODO: Fix when petite parser can check the generic typed sets.
         string[] unneeded = BaseParser.UnneededPrompts(this.prompts);
         string[] missing  = BaseParser.MissingPrompts(this.prompts);
@@ -210,7 +209,6 @@ sealed public class Parser {
             throw new Message("Blackboard's parser grammar has prompts which do not match prompt handlers.").
                 With("Not handled", unneeded.Join(", ")).
                 With("Not in grammar", missing.Join(", "));
-        */
     }
 
     /// <summary>A helper handler for parsing literals.</summary>

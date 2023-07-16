@@ -17,6 +17,7 @@ public readonly struct Uint :
     IMultiplicative<Uint>,
     ISubtractive<Uint>,
     IExplicit<Int, Uint>,
+    IExplicit<Float, Uint>,
     IExplicit<Double, Uint>,
     IExplicit<Object, Uint> {
 
@@ -133,8 +134,8 @@ public readonly struct Uint :
     #endregion
     #region Data...
 
-    /// <summary>Gets the name for the type of data.</summary>
-    public string TypeName => Type.Uint.Name;
+    /// <summary>Gets the type for the type of data.</summary>
+    public Type Type => Type.Uint;
 
     /// <summary>Get the value of the data as a string.</summary>
     public string ValueAsString => this.Value.ToString();
@@ -226,6 +227,11 @@ public readonly struct Uint :
     /// <returns>The resulting unsigned integer value.</returns>
     public Uint CastFrom(Int value) => new((uint)value.Value);
 
+    /// <summary>Casts a float into an unsigned integer for an explicit cast.</summary>
+    /// <param name="value">The float value to cast.</param>
+    /// <returns>The resulting unsigned integer value.</returns>
+    public Uint CastFrom(Float value) => new((uint)value.Value);
+
     /// <summary>Casts a double into an unsigned integer for an explicit cast.</summary>
     /// <param name="value">The double value to cast.</param>
     /// <returns>The resulting unsigned integer value.</returns>
@@ -234,7 +240,7 @@ public readonly struct Uint :
     /// <summary>Casts an object into an unsigned integer for an explicit cast.</summary>
     /// <param name="value">The object value to cast.</param>
     /// <returns>The resulting unsigned integer value.</returns>
-    public Uint CastFrom(Object value) => new(value.CastTo<uint>(this.TypeName));
+    public Uint CastFrom(Object value) => new(value.CastTo<uint>(this.Type.Name));
 
     #endregion
 
@@ -249,5 +255,5 @@ public readonly struct Uint :
 
     /// <summary>Gets the name of this data type and value.</summary>
     /// <returns>The name of the integer type and value.</returns>
-    public override string ToString() => this.TypeName+"("+this.ValueAsString+")";
+    public override string ToString() => this.Type.Name+"("+this.ValueAsString+")";
 }

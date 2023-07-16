@@ -348,7 +348,7 @@ sealed public class Stringifier {
         node switch {
             null          => "null",
             IFuncDef  def => nodeDataType(def),
-            IDataNode dat => "<" + dat.Data.TypeName + ">",
+            IDataNode dat => "<" + dat.Data.Type.Name + ">",
             ITrigger      => "<trigger>",
             _             => "",
         };

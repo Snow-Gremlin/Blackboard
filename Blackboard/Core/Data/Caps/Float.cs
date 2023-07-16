@@ -6,57 +6,57 @@ using S = System;
 
 namespace Blackboard.Core.Data.Caps;
 
-/// <summary>This is the data storage for an IEEE 754 double value such that it can be used in generics.</summary>
-public readonly struct Double :
-    IAdditive<Double>,
-    IComparable<Double>,
+/// <summary>This is the data storage for an IEEE 754 float value such that it can be used in generics.</summary>
+public readonly struct Float :
+    IAdditive<Float>,
+    IComparable<Float>,
     IData,
-    IDivisible<Double>,
-    IEquatable<Double>,
-    IFinite<Double>,
-    IFloatingPoint<Double>,
-    IMultiplicative<Double>,
-    ISigned<Double>,
-    ISubtractive<Double>,
-    IImplicit<Int, Double>,
-    IImplicit<Uint, Double>,
-    IImplicit<Float, Double>,
-    IExplicit<Object, Double> {
+    IDivisible<Float>,
+    IEquatable<Float>,
+    IFinite<Float>,
+    IFloatingPoint<Float>,
+    IMultiplicative<Float>,
+    ISigned<Float>,
+    ISubtractive<Float>,
+    IImplicit<Int, Float>,
+    IImplicit<Uint, Float>,
+    IExplicit<Double, Float>,
+    IExplicit<Object, Float> {
 
     #region Static...
 
     /// <summary>Gets this additive identity, zero.</summary>
-    static public readonly Double Zero = new(0.0);
+    static public readonly Float Zero = new(0.0f);
 
     /// <summary>Gets this multiplicative identity, one.</summary>
-    static public readonly Double One = new(1.0);
+    static public readonly Float One = new(1.0f);
 
     /// <summary>Gets the minimum value for this data type.</summary>
-    static public readonly Double Min = new(double.MinValue);
+    static public readonly Float Min = new(float.MinValue);
 
     /// <summary>Gets the maximum value for this data type.</summary>
-    static public readonly Double Max = new(double.MaxValue);
+    static public readonly Float Max = new(float.MaxValue);
 
     /// <summary>The identity of summation for this data type.</summary>
-    static public readonly Double SumIdentity = Zero;
+    static public readonly Float SumIdentity = Zero;
 
     /// <summary>The identity of multiplication for this data type.</summary>
-    static public readonly Double MulIdentity = One;
+    static public readonly Float MulIdentity = One;
 
     /// <summary>This gets the positive infinity value.</summary>
-    static public readonly Double Infinity = new(double.PositiveInfinity);
+    static public readonly Float Infinity = new(float.PositiveInfinity);
 
     /// <summary>Determines if this value is not a number.</summary>
-    static public readonly Double NaN = new(double.NaN);
+    static public readonly Float NaN = new(float.NaN);
 
     #endregion
 
-    /// <summary>The double value being stored.</summary>
-    public readonly double Value;
+    /// <summary>The float value being stored.</summary>
+    public readonly float Value;
 
-    /// <summary>Creates a new double data value.</summary>
-    /// <param name="value">The double value to store.</param>
-    public Double(double value) => this.Value = value;
+    /// <summary>Creates a new float data value.</summary>
+    /// <param name="value">The float value to store.</param>
+    public Float(float value) => this.Value = value;
 
     #region Additive...
 
@@ -64,7 +64,7 @@ public readonly struct Double :
     /// <remarks>The current value is not used in the subtraction.</remarks>
     /// <param name="other">The values to subtract from the first value.</param>
     /// <returns>The difference between the first value and the rest of the values.</returns>s
-    public Double Sum(IEnumerable<Double> other) => new(other.Sum(t => t.Value));
+    public Float Sum(IEnumerable<Float> other) => new(other.Sum(t => t.Value));
 
     /// <summary>
     /// Indicates that for this data type, summation is commutable,
@@ -76,26 +76,26 @@ public readonly struct Double :
     /// <summary>The identity of summation for this data type.</summary>
     /// <remarks>The current value is not used in the product.</remarks>
     /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
-    public Double SumIdentityValue => SumIdentity;
+    public Float SumIdentityValue => SumIdentity;
 
     #endregion
     #region Comparable...
 
-    public static bool operator < (Double left, Double right) => left.CompareTo(right) <  0;
-    public static bool operator <=(Double left, Double right) => left.CompareTo(right) <= 0;
-    public static bool operator > (Double left, Double right) => left.CompareTo(right) >  0;
-    public static bool operator >=(Double left, Double right) => left.CompareTo(right) >= 0;
+    public static bool operator < (Float left, Float right) => left.CompareTo(right) <  0;
+    public static bool operator <=(Float left, Float right) => left.CompareTo(right) <= 0;
+    public static bool operator > (Float left, Float right) => left.CompareTo(right) >  0;
+    public static bool operator >=(Float left, Float right) => left.CompareTo(right) >= 0;
 
-    /// <summary>Compares two doubles together.</summary>
-    /// <param name="other">The other double to compare.</param>
+    /// <summary>Compares two floats together.</summary>
+    /// <param name="other">The other float to compare.</param>
     /// <returns>The comparison result indicating which is greater than, less than, or equal.</returns>
-    public int CompareTo(Double other) => this.Value.CompareTo(other.Value);
+    public int CompareTo(Float other) => this.Value.CompareTo(other.Value);
 
     #endregion
     #region Data...
 
     /// <summary>Gets the type for the type of data.</summary>
-    public Type Type => Type.Double;
+    public Type Type => Type.Float;
 
     /// <summary>Get the value of the data as a string.</summary>
     public string ValueAsString => this.Value.ToString();
@@ -109,43 +109,43 @@ public readonly struct Double :
     /// <summary>Gets the division of this value and the other value.</summary>
     /// <param name="other">The value to divide this value with.</param>
     /// <returns>This value divided by the other value.</returns>
-    public Double Div(Double other) => new(this.Value / other.Value);
+    public Float Div(Float other) => new(this.Value / other.Value);
 
     /// <summary>Gets the modulo of this value and the other value.</summary>
     /// <remarks>The result will have the same sign as this value.</remarks>
     /// <param name="other">The value to mod this value with.</param>
     /// <returns>The modulo of this value and the other value.</returns>
-    public Double Mod(Double other) => new(this.Value % other.Value);
+    public Float Mod(Float other) => new(this.Value % other.Value);
 
     #endregion
     #region Equatable...
 
-    public static bool operator ==(Double left, Double right) =>  left.Equals(right);
-    public static bool operator !=(Double left, Double right) => !left.Equals(right);
+    public static bool operator ==(Float left, Float right) =>  left.Equals(right);
+    public static bool operator !=(Float left, Float right) => !left.Equals(right);
 
-    /// <summary>Checks if the given double is equal to this data type.</summary>
-    /// <param name="other">This is the double to test.</param>
+    /// <summary>Checks if the given float is equal to this data type.</summary>
+    /// <param name="other">This is the float to test.</param>
     /// <returns>True if they are equal, otherwise false.</returns>
-    public bool Equals(Double other) => this.Value.Equals(other.Value);
+    public bool Equals(Float other) => this.Value.Equals(other.Value);
 
     #endregion
     #region Finite...
 
     /// <summary>Gets this additive identity, zero.</summary>
     /// <remarks>The current value is not used when getting this identity.</remarks>
-    public Double ZeroValue => Zero;
+    public Float ZeroValue => Zero;
 
     /// <summary>Gets this multiplicative identity, one.</summary>
     /// <remarks>The current value is not used when getting this identity.</remarks>
-    public Double OneValue => One;
+    public Float OneValue => One;
 
     /// <summary>Gets the minimum value for this data type.</summary>
     /// <remarks>The current value is not used when getting this identity.</remarks>
-    public Double MinValue => Min;
+    public Float MinValue => Min;
 
     /// <summary>Gets the maximum value for this data type.</summary>
     /// <remarks>The current value is not used when getting this identity.</remarks>
-    public Double MaxValue => Max;
+    public Float MaxValue => Max;
 
     #endregion
     #region Floating Point...
@@ -154,66 +154,66 @@ public readonly struct Double :
     /// <param name="min">The minimum value for a factor of zero or less.</param>
     /// <param name="max">The maximum value for a factor of one or more.</param>
     /// <returns>The result of the linear interpolation.</returns>
-    public Double Lerp(Double min, Double max) {
-        double i = this.Value;
-        return i <= 0.0 ? min :
-               i >= 1.0 ? max :
-               new((1.0 - i)*min.Value + i*max.Value);
+    public Float Lerp(Float min, Float max) {
+        float i = this.Value;
+        return i <= 0.0f ? min :
+               i >= 1.0f ? max :
+               new((1.0f - i)*min.Value + i*max.Value);
     }
 
     /// <summary>This rounds this value to the given decimals.</summary>
     /// <param name="decimals">The integer value to round to.</param>
     /// <returns>This value rounded to the given decimals.</returns>
-    public Double Round(Int decimals) => new(S.Math.Round(this.Value, decimals.Value));
+    public Float Round(Int decimals) => new((float)S.Math.Round(this.Value, decimals.Value));
 
     /// <summary>This performs the given function on this value.</summary>
     /// <param name="func">The function to run on this value.</param>
     /// <returns>The resulting value from this value being used in the given function.</returns>
-    public Double DoubleMath(S.Func<double, double> func) => new(func(this.Value));
+    public Float DoubleMath(S.Func<double, double> func) => new((float)func(this.Value));
 
     /// <summary>This performs the given function on this value.</summary>
     /// <param name="other">The value to use as the second input to the function.</param>
     /// <param name="func">The function to run on this and the given value.</param>
     /// <returns>The resulting value from this and the other value being used in the given function.</returns>
-    public Double DoubleMath(Double other, S.Func<double, double, double> func) => new(func(this.Value, other.Value));
+    public Float DoubleMath(Float other, S.Func<double, double, double> func) => new((float)func(this.Value, other.Value));
 
     /// <summary>Determines if this value is positive or negative infinity.</summary>
     /// <returns>True if the number is either positive or negative infinity, false otherwise.</returns>
-    public Bool IsInfinity() => new(double.IsInfinity(this.Value));
+    public Bool IsInfinity() => new(float.IsInfinity(this.Value));
 
     /// <summary>Determines if this value is not a number.</summary>
     /// <returns>True if the number is not a number, false otherwise.</returns>
-    public Bool IsNaN() => new(double.IsNaN(this.Value));
+    public Bool IsNaN() => new(float.IsNaN(this.Value));
 
     /// <summary>Determines if the value is not infinite.</summary>
     /// <returns>True if the number is finite, false otherwise.</returns>
-    public Bool IsFinite() => new(double.IsFinite(this.Value));
+    public Bool IsFinite() => new(float.IsFinite(this.Value));
 
     /// <summary>Determines if the value is positive infinity.</summary>
     /// <returns>True if the number is positive infinity, false otherwise.</returns>
-    public Bool IsPositiveInfinity() => new(double.IsPositiveInfinity(this.Value));
+    public Bool IsPositiveInfinity() => new(float.IsPositiveInfinity(this.Value));
 
     /// <summary>Determines if the value is negative infinity.</summary>
     /// <returns>True if the number is negative infinity, false otherwise.</returns>
-    public Bool IsNegativeInfinity() => new(double.IsNegativeInfinity(this.Value));
+    public Bool IsNegativeInfinity() => new(float.IsNegativeInfinity(this.Value));
 
-    /// <summary>Determines if the value is in the normal range of doubles with full precision.</summary>
+    /// <summary>Determines if the value is in the normal range of floats with full precision.</summary>
     /// <returns>True if the number is normal, false otherwise.</returns>
     /// <see cref="https://en.wikipedia.org/wiki/Subnormal_number"/>
-    public Bool IsNormal() => new(double.IsNormal(this.Value));
+    public Bool IsNormal() => new(float.IsNormal(this.Value));
 
-    /// <summary>Determines if the value is not in the normal range of double so have reduced precision.</summary>
+    /// <summary>Determines if the value is not in the normal range of float so have reduced precision.</summary>
     /// <returns>True if the subnormal is normal, false otherwise.</returns>
     /// <see cref="https://en.wikipedia.org/wiki/Subnormal_number"/>
-    public Bool IsSubnormal() => new(double.IsSubnormal(this.Value));
+    public Bool IsSubnormal() => new(float.IsSubnormal(this.Value));
 
     /// <summary>This gets the positive infinity value.</summary>
     /// <remarks>The current value is not used when getting this identity.</remarks>
-    public Double InfinityValue => Infinity;
+    public Float InfinityValue => Infinity;
 
     /// <summary>Determines if this value is not a number.</summary>
     /// <remarks>The current value is not used when getting this identity.</remarks>
-    public Double NaNValue => NaN;
+    public Float NaNValue => NaN;
 
     #endregion
     #region Multiplicative...
@@ -222,7 +222,7 @@ public readonly struct Double :
     /// <remarks>The current value is not used in the product.</remarks>
     /// <param name="other">The values to multiply this value with.</param>
     /// <returns>The product of this value and the other values.</returns>
-    public Double Mul(IEnumerable<Double> other) => new(other.Aggregate(1.0, (t1, t2) => t1 * t2.Value));
+    public Float Mul(IEnumerable<Float> other) => new(other.Aggregate(1.0f, (t1, t2) => t1 * t2.Value));
 
     /// <summary>
     /// Indicates that for this data type, multiplication is commutable,
@@ -234,22 +234,22 @@ public readonly struct Double :
     /// <summary>The identity of multiplication for this data type.</summary>
     /// <remarks>The current value is not used in the product.</remarks>
     /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
-    public Double MulIdentityValue => MulIdentity;
+    public Float MulIdentityValue => MulIdentity;
 
     #endregion
     #region Signed...
 
     /// <summary>Gets the absolute value of this data value.</summary>
     /// <returns>The absolute value of this value.</returns>
-    public Double Abs() => new(S.Math.Abs(this.Value));
+    public Float Abs() => new(S.Math.Abs(this.Value));
 
     /// <summary>Gets the absolute value of this data value.</summary>
     /// <returns>The absolute value of this value.</returns>
-    public Double Neg() => new(-this.Value);
+    public Float Neg() => new(-this.Value);
 
     /// <summary>Determines if the this value is negative.</summary>
     /// <returns>True if below zero, false if zero or more.</returns>
-    public Bool IsNegative() => new(double.IsNegative(this.Value));
+    public Bool IsNegative() => new(float.IsNegative(this.Value));
 
     #endregion
     #region Subtractive...
@@ -257,30 +257,30 @@ public readonly struct Double :
     /// <summary>Gets the difference between this value and the other value.</summary>
     /// <param name="other">The value to subtract from this value.</param>
     /// <returns>The difference between this value and the other value.</returns>
-    public Double Sub(Double other) => new(this.Value - other.Value);
+    public Float Sub(Float other) => new(this.Value - other.Value);
 
     #endregion
     #region Casts...
 
-    /// <summary>Casts an integer into a double for an implicit cast.</summary>
+    /// <summary>Casts an integer into a float for an implicit cast.</summary>
     /// <param name="value">The integer value to cast.</param>
-    /// <returns>The resulting double value.</returns>
-    public Double CastFrom(Int value) => new(value.Value);
+    /// <returns>The resulting float value.</returns>
+    public Float CastFrom(Int value) => new(value.Value);
 
-    /// <summary>Casts an unsigned integer into a double for an implicit cast.</summary>
-    /// <param name="value">The unsigned integer value to cast.</param>
-    /// <returns>The resulting double value.</returns>
-    public Double CastFrom(Uint value) => new(value.Value);
+    /// <summary>Casts an unsigned integer into a float for an implicit cast.</summary>
+    /// <param name="value">The integer value to cast.</param>
+    /// <returns>The resulting float value.</returns>
+    public Float CastFrom(Uint value) => new(value.Value);
 
-    /// <summary>Casts a float into a double for an implicit cast.</summary>
-    /// <param name="value">The float value to cast.</param>
-    /// <returns>The resulting double value.</returns>
-    public Double CastFrom(Float value) => new(value.Value);
+    /// <summary>Casts a double into a float for an explicit cast.</summary>
+    /// <param name="value">The double value to cast.</param>
+    /// <returns>The resulting float value.</returns>
+    public Float CastFrom(Double value) => new((float)value.Value);
 
-    /// <summary>Casts an object into a double for an explicit cast.</summary>
+    /// <summary>Casts an object into a float for an explicit cast.</summary>
     /// <param name="value">The object value to cast.</param>
-    /// <returns>The resulting double value.</returns>
-    public Double CastFrom(Object value) => new(value.CastTo<double>(this.Type.Name));
+    /// <returns>The resulting float value.</returns>
+    public Float CastFrom(Object value) => new(value.CastTo<float>(this.Type.Name));
 
     #endregion
 
@@ -291,9 +291,9 @@ public readonly struct Double :
     /// <summary>Checks if the given object is equal to this data type.</summary>
     /// <param name="obj">This is the object to test.</param>
     /// <returns>True if they are equal, otherwise false.</returns>
-    public override bool Equals(object? obj) => obj is Double other && this.Equals(other);
+    public override bool Equals(object? obj) => obj is Float other && this.Equals(other);
 
     /// <summary>Gets the name of this data type and value.</summary>
-    /// <returns>The name of the double type and value.</returns>
+    /// <returns>The name of the float type and value.</returns>
     public override string ToString() => this.Type.Name+"("+this.ValueAsString+")";
 }

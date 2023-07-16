@@ -9,6 +9,7 @@ public readonly struct Object :
     IData,
     IEquatable<Object>,
     IImplicit<Bool, Object>,
+    IImplicit<Float, Object>,
     IImplicit<Double, Object>,
     IImplicit<Int, Object>,
     IImplicit<Uint, Object>,
@@ -41,8 +42,8 @@ public readonly struct Object :
 
     #region Data...
 
-    /// <summary>Gets the name for the type of data.</summary>
-    public string TypeName => Type.Object.Name;
+    /// <summary>Gets the type for the type of data.</summary>
+    public Type Type => Type.Object;
 
     /// <summary>Get the value of the data as a string.</summary>
     public string ValueAsString => this.Value?.ToString() ?? "null";
@@ -69,6 +70,11 @@ public readonly struct Object :
     /// <param name="value">The boolean value to cast.</param>
     /// <returns>The resulting object value.</returns>
     public Object CastFrom(Bool value) => new(value.Value);
+
+    /// <summary>Casts a float into an object for an implicit cast.</summary>
+    /// <param name="value">The float value to cast.</param>
+    /// <returns>The resulting object value.</returns>
+    public Object CastFrom(Float value) => new(value.Value);
 
     /// <summary>Casts a double into an object for an implicit cast.</summary>
     /// <param name="value">The double value to cast.</param>
@@ -110,5 +116,5 @@ public readonly struct Object :
 
     /// <summary>Gets the name of this data type and value.</summary>
     /// <returns>The name of the double type and value.</returns>
-    public override string ToString() => this.TypeName+"("+this.ValueAsString+")";
+    public override string ToString() => this.Type.Name+"("+this.ValueAsString+")";
 }

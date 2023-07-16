@@ -24,7 +24,7 @@ static public class RecordExt {
     /// <returns>The type of the data or null if doesn't exist or not a data type.</returns>
     static public Type? GetType(this IReader reader, IEnumerable<string> names) =>
         reader.TryGetData(names, out IData? data) && data is not null ?
-            Type.FromName(data.TypeName) : null;
+            Type.FromName(data.Type.Name) : null;
 
     #endregion
     #region Bool

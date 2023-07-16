@@ -14,6 +14,7 @@ public readonly struct String :
     IData,
     IEquatable<String>,
     IImplicit<Bool, String>,
+    IImplicit<Float, String>,
     IImplicit<Double, String>,
     IImplicit<Int, String>,
     IImplicit<Uint, String>,
@@ -80,8 +81,8 @@ public readonly struct String :
     #endregion
     #region Data...
 
-    /// <summary>Gets the name for the type of data.</summary>
-    public string TypeName => Type.String.Name;
+    /// <summary>Gets the type for the type of data.</summary>
+    public Type Type => Type.String;
 
     /// <summary>Get the value of the data as a string.</summary>
     public string ValueAsString => this.Value;
@@ -107,6 +108,11 @@ public readonly struct String :
     /// <param name="value">The boolean value to cast.</param>
     /// <returns>The resulting string value.</returns>
     public String CastFrom(Bool value) => new(value.ValueAsString);
+
+    /// <summary>Casts a float into a string for an implicit cast.</summary>
+    /// <param name="value">The float value to cast.</param>
+    /// <returns>The resulting string value.</returns>
+    public String CastFrom(Float value) => new(value.ValueAsString);
 
     /// <summary>Casts a double into a string for an implicit cast.</summary>
     /// <param name="value">The double value to cast.</param>
@@ -141,5 +147,5 @@ public readonly struct String :
 
     /// <summary>Gets the name of this data type and value.</summary>
     /// <returns>The name of the string type and value.</returns>
-    public override string ToString() => this.TypeName+"("+this.ValueAsString+")";
+    public override string ToString() => this.Type.Name+"("+this.ValueAsString+")";
 }

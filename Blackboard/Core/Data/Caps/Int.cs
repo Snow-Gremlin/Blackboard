@@ -19,6 +19,7 @@ public readonly struct Int :
     ISigned<Int>,
     ISubtractive<Int>,
     IExplicit<Uint, Int>,
+    IExplicit<Float, Int>,
     IExplicit<Double, Int>,
     IExplicit<Object, Int> {
 
@@ -135,8 +136,8 @@ public readonly struct Int :
     #endregion
     #region Data...
 
-    /// <summary>Gets the name for the type of data.</summary>
-    public string TypeName => Type.Int.Name;
+    /// <summary>Gets the type for the type of data.</summary>
+    public Type Type => Type.Float;
 
     /// <summary>Get the value of the data as a string.</summary>
     public string ValueAsString => this.Value.ToString();
@@ -243,6 +244,11 @@ public readonly struct Int :
     /// <returns>The resulting integer value.</returns>
     public Int CastFrom(Uint value) => new((int)value.Value);
 
+    /// <summary>Casts a float into an int for an explicit cast.</summary>
+    /// <param name="value">The float value to cast.</param>
+    /// <returns>The resulting integer value.</returns>
+    public Int CastFrom(Float value) => new((int)value.Value);
+
     /// <summary>Casts a double into an int for an explicit cast.</summary>
     /// <param name="value">The double value to cast.</param>
     /// <returns>The resulting integer value.</returns>
@@ -251,7 +257,7 @@ public readonly struct Int :
     /// <summary>Casts an object into an int for an explicit cast.</summary>
     /// <param name="value">The object value to cast.</param>
     /// <returns>The resulting integer value.</returns>
-    public Int CastFrom(Object value) => new(value.CastTo<int>(this.TypeName));
+    public Int CastFrom(Object value) => new(value.CastTo<int>(this.Type.Name));
 
     #endregion
 
@@ -266,5 +272,5 @@ public readonly struct Int :
 
     /// <summary>Gets the name of this data type and value.</summary>
     /// <returns>The name of the integer type and value.</returns>
-    public override string ToString() => this.TypeName+"("+this.ValueAsString+")";
+    public override string ToString() => this.Type.Name+"("+this.ValueAsString+")";
 }

@@ -14,6 +14,7 @@
 
 [Identifier] = 'bool'    => [TypeBool];
 [Identifier] = 'int'     => [TypeInt];
+[Identifier] = 'uint'    => [TypeUint];
 [Identifier] = 'double'  => [TypeDouble];
 [Identifier] = 'string'  => [TypeString];
 [Identifier] = 'trigger' => [TypeTrigger];
@@ -21,7 +22,7 @@
 
 # Reserved Identifiers (Keeping options open for future versions)
 [Identifier] = 'byte', 'char', 'enum', 'float', 'int8', 'int16', 'int32', 'int64',
-               'list', 'long', 'map', 'set', 'short', 'struct', 'type', 'uint',
+               'list', 'long', 'map', 'set', 'short', 'struct', 'type',
                'uint8', 'uint16', 'uint32', 'uint64', 'ulong', 'ushort'
              => [ReservedTypes];
 

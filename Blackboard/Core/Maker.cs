@@ -1,6 +1,8 @@
 ﻿using Blackboard.Core.Actions;
 using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
@@ -100,4 +102,19 @@ static public class Maker {
         node is IValueParent<String> stringNode  ? new ShellValue<String>(stringNode) :
         node is ITriggerParent       triggerNode ? new ShellTrigger(triggerNode) :
         null;
+
+    /// <summary>Creates a new constant for the given value.</summary>
+    /// <param name="value">The value to create a constant for.</param>
+    /// <returns>The constant for the given value.</returns>
+    static public IConstant CreateConstant(IData value) =>
+        value switch {
+            Bool   b => new Literal<Bool>(b),
+            Int    i => new Literal<Int>(i),
+            Uint   u => new Literal<Uint>(u),
+            Double d => new Literal<Double>(d),
+            String s => new Literal<String>(s),
+            Object o => new Literal<Object>(o),
+            _        => throw new Message("Unexpected value type in literal creation").
+                           With("Value", value)
+        };
 }

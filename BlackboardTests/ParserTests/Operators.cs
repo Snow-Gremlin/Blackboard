@@ -41,6 +41,19 @@ public class Operators {
     }
 
     [TestMethod]
+    [TestTag("and:BitwiseAnd<Uint>")]
+    public void TestOperators_and_BitwiseAnd_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A & B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: BitwiseAnd<uint>");
+        slate.Perform("A = (uint)0000b; B = (uint)0000b;").CheckValue((uint)0b0000, "C");
+        slate.Perform("A = (uint)1100b; B = (uint)0011b;").CheckValue((uint)0b0000, "C");
+        slate.Perform("A = (uint)1110b; B = (uint)0111b;").CheckValue((uint)0b0110, "C");
+        slate.Perform("A = (uint)1111b; B = (uint)0101b;").CheckValue((uint)0b0101, "C");
+        slate.Perform("A = (uint)1010b; B = (uint)1111b;").CheckValue((uint)0b1010, "C");
+        slate.Perform("A = (uint)1111b; B = (uint)1111b;").CheckValue((uint)0b1111, "C");
+    }
+
+    [TestMethod]
     [TestTag("and:All")]
     public void TestOperators_and_All() {
         Slate slate = new Slate().Perform("in trigger A, B; C := A & B;");
@@ -72,6 +85,18 @@ public class Operators {
     }
 
     [TestMethod]
+    [TestTag("castInt:Explicit<Uint, Int>")]
+    public void TestOperators_castInt_Explicit_Uint_Int() {
+        Slate slate = new Slate().Perform("in uint A; B := (int)A;");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Explicit<int>");
+        slate.Perform("A = (uint)0;").CheckValue(0, "B");
+        slate.Perform("A = (uint)1;").CheckValue(1, "B");
+        slate.Perform("A = (uint)2;").CheckValue(2, "B");
+        slate.Perform("A = (uint)3;").CheckValue(3, "B");
+        //slate.Perform("A = (uint) -1;").CheckValue(-1, "B"); // TODO: Check roll-over and fix parser issue
+    }
+
+    [TestMethod]
     [TestTag("castInt:Explicit<Double, Int>")]
     public void TestOperators_castInt_Explicit_Double_Int() {
         Slate slate = new Slate().Perform("in double A; B := (int)A;");
@@ -82,19 +107,54 @@ public class Operators {
         slate.Perform("A =  2.9;").CheckValue( 2, "B");
         slate.Perform("A = -4.2;").CheckValue(-4, "B");
     }
-
+    
     [TestMethod]
     [TestTag("castInt:Explicit<Object, Int>")]
     public void TestOperators_castInt_Explicit_Object_Int() {
         Slate slate = new Slate().Perform("in object A = 0; B := (int)A;");
         slate.CheckNodeString(Stringifier.Basic(), "B", "B: Explicit<int>");
         slate.Perform("A =  0;").CheckValue( 0, "B");
-        slate.Perform("A =  0;").CheckValue( 0, "B");
+        slate.Perform("A =  1;").CheckValue( 1, "B");
         slate.Perform("A =  2;").CheckValue( 2, "B");
-        slate.Perform("A =  2;").CheckValue( 2, "B");
+        slate.Perform("A =  3;").CheckValue( 3, "B");
         slate.Perform("A = -4;").CheckValue(-4, "B");
         TestTools.CheckException(() => slate.Perform("A = 'Hello';"),
             "Unable to cast object value (System.String) to int type.");
+    }
+
+    [TestMethod]
+    [TestTag("castUint:Explicit<Int, Uint>")]
+    public void TestOperators_castUint_Explicit_Int_Uint() {
+        Slate slate = new Slate().Perform("in int A; B := (uint)A;");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Explicit<uint>");
+        slate.Perform("A = 0;").CheckValue((uint)0, "B");
+        slate.Perform("A = 1;").CheckValue((uint)1, "B");
+        slate.Perform("A = 2;").CheckValue((uint)2, "B");
+        slate.Perform("A = 3;").CheckValue((uint)3, "B");
+    }
+
+    [TestMethod]
+    [TestTag("castUint:Explicit<Double, Uint>")]
+    public void TestOperators_castUint_Explicit_Double_Uint() {
+        Slate slate = new Slate().Perform("in double A; B := (uint)A;");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Explicit<uint>");
+        slate.Perform("A =  0.1;").CheckValue((uint)0, "B");
+        slate.Perform("A =  0.9;").CheckValue((uint)0, "B");
+        slate.Perform("A =  2.1;").CheckValue((uint)2, "B");
+        slate.Perform("A =  2.9;").CheckValue((uint)2, "B");
+        slate.Perform("A = -4.2;").CheckValue(4294967292, "B");
+    }
+    
+    [TestMethod]
+    [TestTag("castUint:Explicit<Object, Uint>")]
+    public void TestOperators_castUint_Explicit_Object_Uint() {
+        Slate slate = new Slate().Perform("in object A = (uint)0; B := (uint)A;");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Explicit<uint>");
+        slate.Perform("A = (uint)0;").CheckValue((uint)0, "B");
+        slate.Perform("A = (uint)1;").CheckValue((uint)1, "B");
+        slate.Perform("A = (uint)2;").CheckValue((uint)2, "B");
+        TestTools.CheckException(() => slate.Perform("A = 'Hello';"),
+            "Unable to cast object value (System.String) to uint type.");
     }
 
     [TestMethod]
@@ -106,6 +166,16 @@ public class Operators {
         slate.Perform("A =  1;").CheckValue( 1.0, "B");
         slate.Perform("A =  2;").CheckValue( 2.0, "B");
         slate.Perform("A = -1;").CheckValue(-1.0, "B");
+    }
+
+    [TestMethod]
+    [TestTag("castDouble:Implicit<Uint, Double>")]
+    public void TestOperators_castDouble_Implicit_Uint_Double() {
+        Slate slate = new Slate().Perform("in uint A; double B := A;");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<double>");
+        slate.Perform("A = (uint)0;").CheckValue( 0.0, "B");
+        slate.Perform("A = (uint)1;").CheckValue( 1.0, "B");
+        slate.Perform("A = (uint)2;").CheckValue( 2.0, "B");
     }
 
     [TestMethod]
@@ -143,6 +213,16 @@ public class Operators {
         slate.Perform("A =  1;").CheckValue("1",  "B");
         slate.Perform("A =  2;").CheckValue("2" , "B");
         slate.Perform("A = -1;").CheckValue("-1", "B");
+    }
+
+    [TestMethod]
+    [TestTag("castString:Implicit<Uint, String>")]
+    public void TestOperators_castString_Implicit_Uint_String() {
+        Slate slate = new Slate().Perform("in uint A; string B := A;");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<string>");
+        slate.Perform("A = (uint)0;").CheckValue("0",  "B");
+        slate.Perform("A = (uint)1;").CheckValue("1",  "B");
+        slate.Perform("A = (uint)2;").CheckValue("2" , "B");
     }
 
     [TestMethod]
@@ -190,6 +270,16 @@ public class Operators {
     }
 
     [TestMethod]
+    [TestTag("castObject:Implicit<Uint, Object>")]
+    public void TestOperators_castObject_Implicit_Uint_Object() {
+        Slate slate = new Slate().Perform("in uint A; object B := A;");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Implicit<object>");
+        slate.Perform("A = (uint)0;").CheckObject((uint)0, "B");
+        slate.Perform("A = (uint)1;").CheckObject((uint)1, "B");
+        slate.Perform("A = (uint)2;").CheckObject((uint)2, "B");
+    }
+
+    [TestMethod]
     [TestTag("castObject:Implicit<Double, Object>")]
     public void TestOperators_castObject_Implicit_Double_Object() {
         Slate slate = new Slate().Perform("in double A; object B := A;");
@@ -233,6 +323,20 @@ public class Operators {
     }
 
     [TestMethod]
+    [TestTag("divide:Div<Uint>")]
+    public void TestOperators_divide_Div_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B = (uint)1; C := A/B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: Div<uint>");
+        slate.Perform("A = (uint)4; B = (uint)2;").CheckValue((uint)2, "C");
+        slate.Perform("A = (uint)3; B = (uint)2;").CheckValue((uint)1, "C");
+        slate.Perform("A = (uint)9; B = (uint)3;").CheckValue((uint)3, "C");
+        slate.Perform("A = (uint)1; B = (uint)3;").CheckValue((uint)0, "C");
+        slate.Perform("A = (uint)8; B = (uint)3;").CheckValue((uint)2, "C");
+        TestTools.CheckException(() => slate.Perform("B = (uint)0;"),
+            "Attempted to divide by zero.");
+    }
+
+    [TestMethod]
     [TestTag("divide:Div<Double>")]
     public void TestOperators_divide_Div_Double() {
         Slate slate = new Slate().Perform("in double A, B; C := A/B;");
@@ -268,6 +372,17 @@ public class Operators {
         slate.Perform("A = -1; B =  1;").CheckValue(false, "C");
         slate.Perform("A =  1; B = -1;").CheckValue(false, "C");
         slate.Perform("A = 42; B = 42;").CheckValue(true,  "C");
+    }
+
+    [TestMethod]
+    [TestTag("equal:Equal<Uint>")]
+    public void TestOperators_equal_Equal_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A == B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: Equal<bool>");
+        slate.Perform("A = (uint) 0; B = (uint) 0;").CheckValue(true,  "C");
+        slate.Perform("A = (uint) 2; B = (uint) 1;").CheckValue(false, "C");
+        slate.Perform("A = (uint) 1; B = (uint) 2;").CheckValue(false, "C");
+        slate.Perform("A = (uint)42; B = (uint)42;").CheckValue(true,  "C");
     }
 
     [TestMethod]
@@ -342,6 +457,17 @@ public class Operators {
     }
 
     [TestMethod]
+    [TestTag("greater:GreaterThan<Uint>")]
+    public void TestOperators_greater_GreaterThan_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A > B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThan<bool>");
+        slate.Perform("A = (uint) 0; B = (uint) 0;").CheckValue(false, "C");
+        slate.Perform("A = (uint) 1; B = (uint) 2;").CheckValue(false, "C");
+        slate.Perform("A = (uint) 2; B = (uint) 1;").CheckValue(true,  "C");
+        slate.Perform("A = (uint)42; B = (uint)42;").CheckValue(false, "C");
+    }
+
+    [TestMethod]
     [TestTag("greater:GreaterThan<Double>")]
     public void TestOperators_greater_GreaterThan_Double() {
         Slate slate = new Slate().Perform("in double A, B; C := A > B;");
@@ -377,6 +503,17 @@ public class Operators {
         slate.Perform("A = -1; B =  1;").CheckValue(false, "C");
         slate.Perform("A =  1; B = -1;").CheckValue(true,  "C");
         slate.Perform("A = 42; B = 42;").CheckValue(true,  "C");
+    }
+
+    [TestMethod]
+    [TestTag("greaterEqual:GreaterThanOrEqual<Uint>")]
+    public void TestOperators_greaterEqual_GreaterThanOrEqual_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A >= B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: GreaterThanOrEqual<bool>");
+        slate.Perform("A = (uint) 0; B = (uint) 0;").CheckValue(true,  "C");
+        slate.Perform("A = (uint) 1; B = (uint) 2;").CheckValue(false, "C");
+        slate.Perform("A = (uint) 2; B = (uint) 1;").CheckValue(true,  "C");
+        slate.Perform("A = (uint)42; B = (uint)42;").CheckValue(true,  "C");
     }
 
     [TestMethod]
@@ -422,6 +559,21 @@ public class Operators {
     }
 
     [TestMethod]
+    [TestTag("invert:BitwiseNot<Uint>")]
+    public void TestOperators_invert_BitwiseNot_Uint() {
+        Slate slate = new Slate().Perform("in uint A; B := ~A;");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: BitwiseNot<uint>");
+        slate.Perform("A = (uint)0x00000000;").CheckValue(unchecked((uint)0xFFFF_FFFF), "B");
+        slate.Perform("A = (uint)0x00000001;").CheckValue(unchecked((uint)0xFFFF_FFFE), "B");
+        slate.Perform("A = (uint)0x66666666;").CheckValue(unchecked((uint)0x9999_9999), "B");
+        slate.Perform("A = (uint)0x0F0F0F0F;").CheckValue(unchecked((uint)0xF0F0_F0F0), "B");
+        slate.Perform("A = (uint)0xF0F0F0F0;").CheckValue(unchecked((uint)0x0F0F_0F0F), "B");
+        slate.Perform("A = (uint)0x80000000;").CheckValue(unchecked((uint)0x7FFF_FFFF), "B");
+        slate.Perform("A = (uint)0x88888888;").CheckValue(unchecked((uint)0x7777_7777), "B");
+        slate.Perform("A = (uint)0x77777777;").CheckValue(unchecked((uint)0x8888_8888), "B");
+    }
+
+    [TestMethod]
     [TestTag("less:LessThan<Int>")]
     public void TestOperators_less_LessThan_Int() {
         Slate slate = new Slate().Perform("in int A, B; C := A < B;");
@@ -430,6 +582,17 @@ public class Operators {
         slate.Perform("A = -1; B =  1;").CheckValue(true,  "C");
         slate.Perform("A =  1; B = -1;").CheckValue(false, "C");
         slate.Perform("A = 42; B = 42;").CheckValue(false, "C");
+    }
+
+    [TestMethod]
+    [TestTag("less:LessThan<Uint>")]
+    public void TestOperators_less_LessThan_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A < B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThan<bool>");
+        slate.Perform("A = (uint) 0; B = (uint) 0;").CheckValue(false, "C");
+        slate.Perform("A = (uint) 1; B = (uint) 2;").CheckValue(true,  "C");
+        slate.Perform("A = (uint) 2; B = (uint) 1;").CheckValue(false, "C");
+        slate.Perform("A = (uint)42; B = (uint)42;").CheckValue(false, "C");
     }
 
     [TestMethod]
@@ -468,6 +631,17 @@ public class Operators {
         slate.Perform("A = -1; B =  1;").CheckValue(true,  "C");
         slate.Perform("A =  1; B = -1;").CheckValue(false, "C");
         slate.Perform("A = 42; B = 42;").CheckValue(true,  "C");
+    }
+
+    [TestMethod]
+    [TestTag("lessEqual:LessThanOrEqual<Uint>")]
+    public void TestOperators_lessEqual_LessThanOrEqual_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A <= B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: LessThanOrEqual<bool>");
+        slate.Perform("A = (uint) 0; B = (uint) 0;").CheckValue(true,  "C");
+        slate.Perform("A = (uint) 1; B = (uint) 2;").CheckValue(true,  "C");
+        slate.Perform("A = (uint) 2; B = (uint) 1;").CheckValue(false, "C");
+        slate.Perform("A = (uint)42; B = (uint)42;").CheckValue(true,  "C");
     }
 
     [TestMethod]
@@ -581,6 +755,20 @@ public class Operators {
     }
 
     [TestMethod]
+    [TestTag("modulo:Mod<Uint>")]
+    public void TestOperators_modulo_Mod_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B = (uint)1; C := A % B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mod<uint>");
+        slate.Perform("A = (uint)4; B = (uint)2;").CheckValue((uint)0, "C");
+        slate.Perform("A = (uint)3; B = (uint)2;").CheckValue((uint)1, "C");
+        slate.Perform("A = (uint)9; B = (uint)3;").CheckValue((uint)0, "C");
+        slate.Perform("A = (uint)1; B = (uint)3;").CheckValue((uint)1, "C");
+        slate.Perform("A = (uint)8; B = (uint)3;").CheckValue((uint)2, "C");
+        TestTools.CheckException(() => slate.Perform("B = (uint)0;"),
+            "Attempted to divide by zero.");
+    }
+
+    [TestMethod]
     [TestTag("modulo:Mod<Double>")]
     public void TestOperators_modulo_Mod_Double() {
         Slate slate = new Slate().Perform("in double A, B; C := A % B;");
@@ -610,6 +798,18 @@ public class Operators {
         slate.Perform("A =  8; B = -3;").CheckValue(-24, "C");
         slate.Perform("A = -8; B =  3;").CheckValue(-24, "C");
         slate.Perform("A = -8; B = -3;").CheckValue( 24, "C");
+    }
+
+    [TestMethod]
+    [TestTag("multiply:Mul<Uint>")]
+    public void TestOperators_multiply_Mul_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A * B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: Mul<uint>");
+        slate.Perform("A = (uint)0; B = (uint)0;").CheckValue((uint) 0, "C");
+        slate.Perform("A = (uint)3; B = (uint)0;").CheckValue((uint) 0, "C");
+        slate.Perform("A = (uint)9; B = (uint)1;").CheckValue((uint) 9, "C");
+        slate.Perform("A = (uint)3; B = (uint)4;").CheckValue((uint)12, "C");
+        slate.Perform("A = (uint)8; B = (uint)3;").CheckValue((uint)24, "C");
     }
 
     [TestMethod]
@@ -681,6 +881,17 @@ public class Operators {
         slate.Perform("A = -1; B =  1;").CheckValue(true,  "C");
         slate.Perform("A =  1; B = -1;").CheckValue(true,  "C");
         slate.Perform("A = 42; B = 42;").CheckValue(false, "C");
+    }
+
+    [TestMethod]
+    [TestTag("notEqual:NotEqual<Uint>")]
+    public void TestOperators_notEqual_NotEqual_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A != B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: NotEqual<bool>");
+        slate.Perform("A = (uint) 0; B = (uint) 0;").CheckValue(false, "C");
+        slate.Perform("A = (uint) 1; B = (uint) 2;").CheckValue(true,  "C");
+        slate.Perform("A = (uint) 2; B = (uint) 1;").CheckValue(true,  "C");
+        slate.Perform("A = (uint)42; B = (uint)42;").CheckValue(false, "C");
     }
 
     [TestMethod]
@@ -764,6 +975,17 @@ public class Operators {
     }
 
     [TestMethod]
+    [TestTag("or:BitwiseOr<Uint>")]
+    public void TestOperators_or_BitwiseOr_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A | B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: BitwiseOr<uint>");
+        slate.Perform("A = (uint)0x00000000; B = (uint)0x00000000;").CheckValue(unchecked((uint)0x0000_0000), "C");
+        slate.Perform("A = (uint)0x11112222; B = (uint)0x22221111;").CheckValue(unchecked((uint)0x3333_3333), "C");
+        slate.Perform("A = (uint)0xFF00FF00; B = (uint)0x00FF00FF;").CheckValue(unchecked((uint)0xFFFF_FFFF), "C");
+        slate.Perform("A = (uint)0xC3C3C3C3; B = (uint)0x0033CCFF;").CheckValue(unchecked((uint)0xC3F3_CFFF), "C");
+    }
+
+    [TestMethod]
     [TestTag("or:Any")]
     public void TestOperators_or_Any() {
         Slate slate = new Slate().Perform("in trigger A, B; C := A | B;");
@@ -813,6 +1035,25 @@ public class Operators {
     }
 
     [TestMethod]
+    [TestTag("shiftLeft:LeftShift<Uint>")]
+    public void TestOperators_shiftLeft_LeftShift_Uint() {
+        Slate slate = new Slate().Perform("in { uint A; int B; } C := A << B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: LeftShift<uint>");
+        slate.Perform("A = (uint)0x00000000; B =  3;").CheckValue(unchecked((uint)0x0000_0000), "C");
+        slate.Perform("A = (uint)0xFFFFFFFF; B =  0;").CheckValue(unchecked((uint)0xFFFF_FFFF), "C");
+        slate.Perform("A = (uint)0xFFFFFFFF; B =  1;").CheckValue(unchecked((uint)0xFFFF_FFFE), "C");
+        slate.Perform("A = (uint)0xFFFFFFFF; B =  3;").CheckValue(unchecked((uint)0xFFFF_FFF8), "C");
+        slate.Perform("A = (uint)0x12345678; B =  4;").CheckValue(unchecked((uint)0x2345_6780), "C");
+        slate.Perform("A = (uint)0xFEDCBA98; B =  4;").CheckValue(unchecked((uint)0xEDCB_A980), "C");
+        slate.Perform("A = (uint)0x12345678; B = 24;").CheckValue(unchecked((uint)0x7800_0000), "C");
+        slate.Perform("A = (uint)0x7FFFFFFF; B =  1;").CheckValue(unchecked((uint)0xFFFF_FFFE), "C");
+        slate.Perform("A = (uint)0x80000001; B =  4;").CheckValue(unchecked((uint)0x0000_0010), "C");
+        slate.Perform("A = (uint)0x88000000; B =  4;").CheckValue(unchecked((uint)0x8000_0000), "C");
+        // Left shifting by a negative value is undefined,
+        // See: https://en.wikipedia.org/wiki/Bitwise_operation#C-family_and_Python
+    }
+
+    [TestMethod]
     [TestTag("shiftRight:RightShift<Int>")]
     public void TestOperators_shiftRight_RightShift_Int() {
         Slate slate = new Slate().Perform("in int A, B; C := A >> B;");
@@ -831,6 +1072,23 @@ public class Operators {
     }
 
     [TestMethod]
+    [TestTag("shiftRight:RightShift<Uint>")]
+    public void TestOperators_shiftRight_RightShift_Uint() {
+        Slate slate = new Slate().Perform("in { uint A; int B; } C := A >> B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: RightShift<uint>");
+        slate.Perform("A = (uint)0x00000000; B =  3;").CheckValue(unchecked((uint)0x0000_0000), "C");
+        slate.Perform("A = (uint)0xFFFFFFFF; B =  0;").CheckValue(unchecked((uint)0xFFFF_FFFF), "C");
+        slate.Perform("A = (uint)0x12345678; B =  4;").CheckValue(unchecked((uint)0x0123_4567), "C");
+        slate.Perform("A = (uint)0x12345678; B = 24;").CheckValue(unchecked((uint)0x0000_0012), "C");
+        slate.Perform("A = (uint)0x80000001; B =  4;").CheckValue(unchecked((uint)0x0800_0000), "C");
+        slate.Perform("A = (uint)0x88000000; B =  4;").CheckValue(unchecked((uint)0x0880_0000), "C");
+        slate.Perform("A = (uint)0xFFFFFFFF; B =  1;").CheckValue(unchecked((uint)0x7FFF_FFFF), "C");
+        slate.Perform("A = (uint)0xFFFFFFFF; B =  3;").CheckValue(unchecked((uint)0x1FFF_FFFF), "C");
+        // Right shifting by a negative value is undefined,
+        // See: https://en.wikipedia.org/wiki/Bitwise_operation#C-family_and_Python
+    }
+
+    [TestMethod]
     [TestTag("subtract:Sub<Int>")]
     public void TestOperators_subtract_Sub_Int() {
         Slate slate = new Slate().Perform("in int A, B; C := A - B;");
@@ -842,6 +1100,19 @@ public class Operators {
         slate.Perform("A =   0; B =  -1;").CheckValue(   1, "C");
         slate.Perform("A = 136; B =  24;").CheckValue( 112, "C");
         slate.Perform("A =  24; B = 136;").CheckValue(-112, "C");
+    }
+
+    [TestMethod]
+    [TestTag("subtract:Sub<Uint>")]
+    public void TestOperators_subtract_Sub_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A - B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sub<uint>");
+        slate.Perform("A = (uint)  0; B = (uint)  0;").CheckValue(unchecked((uint)   0), "C");
+        slate.Perform("A = (uint)  1; B = (uint)  0;").CheckValue(unchecked((uint)   1), "C");
+        slate.Perform("A = (uint)  0; B = (uint)  1;").CheckValue(unchecked((uint)  -1), "C");
+        slate.Perform("A = (uint)  1; B = (uint)  1;").CheckValue(unchecked((uint)   0), "C");
+        slate.Perform("A = (uint)136; B = (uint) 24;").CheckValue(unchecked((uint) 112), "C");
+        slate.Perform("A = (uint) 24; B = (uint)136;").CheckValue(unchecked((uint)-112), "C");
     }
 
     [TestMethod]
@@ -869,6 +1140,19 @@ public class Operators {
         slate.Perform("A =   0; B =  -1;").CheckValue( -1, "C");
         slate.Perform("A = 136; B =  24;").CheckValue(160, "C");
         slate.Perform("A =  24; B = 136;").CheckValue(160, "C");
+    }
+
+    [TestMethod]
+    [TestTag("sum:Sum<Uint>")]
+    public void TestOperators_sum_Sum_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A + B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: Sum<uint>");
+        slate.Perform("A = (uint)  0; B = (uint)  0;").CheckValue((uint)  0, "C");
+        slate.Perform("A = (uint)  1; B = (uint)  0;").CheckValue((uint)  1, "C");
+        slate.Perform("A = (uint)  0; B = (uint)  1;").CheckValue((uint)  1, "C");
+        slate.Perform("A = (uint)  1; B = (uint)  1;").CheckValue((uint)  2, "C");
+        slate.Perform("A = (uint)136; B = (uint) 24;").CheckValue((uint)160, "C");
+        slate.Perform("A = (uint) 24; B = (uint)136;").CheckValue((uint)160, "C");
     }
 
     [TestMethod]
@@ -933,6 +1217,15 @@ public class Operators {
     }
 
     [TestMethod]
+    [TestTag("ternary:SelectValue<Uint>")]
+    public void TestOperators_ternary_SelectValue_Uint() {
+        Slate slate = new Slate().Perform("in bool A; in uint B, C; D := A ? B : C;");
+        slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<uint>");
+        slate.Perform("A = false; B = (uint)10; C = (uint)32;").CheckValue((uint)32, "D");
+        slate.Perform("A = true;  B = (uint)42; C = (uint)87;").CheckValue((uint)42, "D");
+    }
+
+    [TestMethod]
     [TestTag("ternary:SelectValue<Double>")]
     public void TestOperators_ternary_SelectValue_Double() {
         Slate slate = new Slate().Perform("in bool A; in double B, C; D := A ? B : C;");
@@ -984,6 +1277,18 @@ public class Operators {
         slate.Perform("A = 0xFF00FF00; B = 0x00FF00FF;").CheckValue(unchecked((int)0xFFFF_FFFF), "C");
         slate.Perform("A = 0xFF00FF00; B = 0xFFFFFFFF;").CheckValue(unchecked((int)0x00FF_00FF), "C");
         slate.Perform("A = 0xC3C3C3C3; B = 0x0033CCFF;").CheckValue(unchecked((int)0xC3F0_0F3C), "C");
+    }
+
+    [TestMethod]
+    [TestTag("xor:BitwiseXor<Uint>")]
+    public void TestOperators_xor_BitwiseXor_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B; C := A ^ B;");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: BitwiseXor<uint>");
+        slate.Perform("A = (uint)0x00000000; B = (uint)0x00000000;").CheckValue(unchecked((uint)0x0000_0000), "C");
+        slate.Perform("A = (uint)0x11112222; B = (uint)0x22221111;").CheckValue(unchecked((uint)0x3333_3333), "C");
+        slate.Perform("A = (uint)0xFF00FF00; B = (uint)0x00FF00FF;").CheckValue(unchecked((uint)0xFFFF_FFFF), "C");
+        slate.Perform("A = (uint)0xFF00FF00; B = (uint)0xFFFFFFFF;").CheckValue(unchecked((uint)0x00FF_00FF), "C");
+        slate.Perform("A = (uint)0xC3C3C3C3; B = (uint)0x0033CCFF;").CheckValue(unchecked((uint)0xC3F0_0F3C), "C");
     }
 
     [TestMethod]

@@ -96,7 +96,7 @@ public class Types {
         Type.Double.
             CheckInheritors("counter-double, latch-double").
             CheckImplicits("object, string").
-            CheckExplicits("int");
+            CheckExplicits("int, uint");
     }
 
     [TestMethod]
@@ -126,7 +126,17 @@ public class Types {
         Type.Int.
             CheckInheritors("counter-int, latch-int").
             CheckImplicits("object, double, string").
-            CheckExplicits("");
+            CheckExplicits("uint");
+    }
+
+    [TestMethod]
+    [TestTag("uint")]
+    public void TestTypes_uint() {
+        new InputValue<Uint>().CheckTypeOf(Type.Uint);
+        Type.Uint.
+            CheckInheritors("").
+            CheckImplicits("object, double, string").
+            CheckExplicits("int");
     }
 
     [TestMethod]
@@ -212,7 +222,7 @@ public class Types {
     [TestTag("node")]
     public void TestTypes_node() =>
         Type.Node.
-            CheckInheritors("trigger, object, bool, int, double, string, namespace, function-group, function-def").
+            CheckInheritors("trigger, object, bool, int, uint, double, string, namespace, function-group, function-def").
             CheckImplicits("").
             CheckExplicits("");
 
@@ -223,7 +233,7 @@ public class Types {
         Type.Object.
             CheckInheritors("latch-object").
             CheckImplicits("string").
-            CheckExplicits("bool, int, double");
+            CheckExplicits("bool, int, uint, double");
     }
 
     [TestMethod]

@@ -117,6 +117,51 @@ static public class RecordExt {
         writer.SetValue(new Int(value), names);
 
     #endregion
+    #region Uint
+
+    /// <summary>Indicates if some data exists for the given name.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to check.</param>
+    /// <returns>True if the data exists, false otherwise.</returns>
+    static public bool HasUint(this IReader reader, params string[] names) =>
+        reader.HasUint(names as IEnumerable<string>);
+
+    /// <summary>Indicates if some data exists for the given name.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to check.</param>
+    /// <returns>True if the data exists, false otherwise.</returns>
+    static public bool HasUint(this IReader reader, IEnumerable<string> names) =>
+        reader.HasValue<Uint>(names);
+
+    /// <summary>Gets the value from a named data.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to read the value from.</param>
+    /// <returns>The value from the data.</returns>
+    static public uint GetUint(this IReader reader, params string[] names) =>
+        reader.GetUint(names as IEnumerable<string>);
+
+    /// <summary>Gets the value from a named data.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to read the value from.</param>
+    /// <returns>The value from the data.</returns>
+    static public uint GetUint(this IReader reader, IEnumerable<string> names) =>
+        reader.GetValue<Uint>(names).Value;
+
+    /// <summary>Sets a value for the given named input.</summary>
+    /// <param name="writer">The writer to set the value to.</param>
+    /// <param name="value">The value to set to that node.</param>
+    /// <param name="names">The name of the input node to set.</param>
+    static public void SetUint(this IWriter writer, uint value, params string[] names) =>
+        writer.SetUint(value, names as IEnumerable<string>);
+
+    /// <summary>Sets a value for the given named input.</summary>
+    /// <param name="writer">The writer to set the value to.</param>
+    /// <param name="value">The value to set to that node.</param>
+    /// <param name="names">The name of the input node to set.</param>
+    static public void SetUint(this IWriter writer, uint value, IEnumerable<string> names) =>
+        writer.SetValue(new Uint(value), names);
+
+    #endregion
     #region Double
 
     /// <summary>Indicates if some data exists for the given name.</summary>

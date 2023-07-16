@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
@@ -20,6 +19,11 @@ static public class Literal {
     /// <returns>The new literal node.</returns>
     static public Literal<Int> Int(int value) => new(new Int(value));
 
+    /// <summary>Creates a new integer literal.</summary>
+    /// <param name="value">The value to use for the literal.</param>
+    /// <returns>The new literal node.</returns>
+    static public Literal<Uint> Uint(uint value) => new(new Uint(value));
+
     /// <summary>Creates a new double literal.</summary>
     /// <param name="value">The value to use for the literal.</param>
     /// <returns>The new literal node.</returns>
@@ -38,16 +42,7 @@ static public class Literal {
     /// <summary>Tries to create a new literal for the given data.</summary>
     /// <param name="value">The value to use for the literal.</param>
     /// <returns>The new literal node for the given data.</returns>
-    static public IConstant Data(IData value) =>
-        value switch {
-            Bool   b => new Literal<Bool>(b),
-            Int    i => new Literal<Int>(i),
-            Double d => new Literal<Double>(d),
-            String s => new Literal<String>(s),
-            Object o => new Literal<Object>(o),
-            _        => throw new Message("Unexpected value type in literal creation").
-                           With("Value", value)
-        };
+    static public IConstant Data(IData value) => Maker.CreateConstant(value);
 
     /// <summary>This creates a new literal with the given typed data.</summary>
     /// <typeparam name="T">The type of data to get the literal from.</typeparam>

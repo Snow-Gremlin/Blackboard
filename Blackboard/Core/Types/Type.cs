@@ -373,6 +373,7 @@ sealed public class Type {
         addCast<IValueParent<Int>>(Int.imps, String, (input) => new Implicit<Int, String>(input));
 
         addCast<IValueParent<Uint>>(Uint.imps, Object, (input) => new Implicit<Uint, Object>(input));
+        addCast<IValueParent<Uint>>(Uint.exps, Int,    (input) => new Explicit<Uint, Int>(input));
         addCast<IValueParent<Uint>>(Uint.imps, Double, (input) => new Implicit<Uint, Double>(input));
         addCast<IValueParent<Uint>>(Uint.imps, String, (input) => new Implicit<Uint, String>(input));
 

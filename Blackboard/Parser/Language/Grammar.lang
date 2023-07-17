@@ -307,6 +307,7 @@
 <RootType> := [TypeBool] {pushType}
     | [TypeInt]     {pushType}
     | [TypeUint]    {pushType}
+    | [TypeFloat]   {pushType}
     | [TypeDouble]  {pushType}
     | [TypeString]  {pushType}
     | [TypeTrigger] {pushType}

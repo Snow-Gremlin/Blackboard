@@ -12,7 +12,7 @@ public class Operators {
     [TestMethod]
     public void CheckAllOperatorsAreTested() =>
         TestTools.SetEntriesMatch(
-            TestTools.FuncDefTags(new Slate().Global[Slate.OperatorNamespace] as Namespace),
+            TestTools.FuncDefTags(new Slate().Global[Blackboard.Core.Innate.Operators.Namespace] as Namespace),
             TestTools.TestTags(this.GetType()),
             "Tests do not match the existing operators");
 

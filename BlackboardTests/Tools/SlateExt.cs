@@ -60,6 +60,16 @@ static class SlateExt {
         return slate;
     }
 
+    /// <summary>Checks the float value of this node.</summary>
+    /// <param name="slate">This is the slate to check the value with.</param>
+    /// <param name="exp">The expected float value.</param>
+    /// <param name="names">The name of the variable to look up.</param>
+    /// <returns>The slate so that method calls can be chained together.</returns>
+    static public Slate CheckValue(this Slate slate, float exp, params string[] names) {
+        Assert.AreEqual(exp, slate.GetFloat(names), checkValueMsg("float", names));
+        return slate;
+    }
+
     /// <summary>Checks the string value of this node.</summary>
     /// <param name="slate">This is the slate to check the value with.</param>
     /// <param name="exp">The expected string value.</param>

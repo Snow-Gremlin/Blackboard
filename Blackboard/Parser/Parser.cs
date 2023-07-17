@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
@@ -182,7 +183,7 @@ sealed public class Parser {
     /// <param name="count">The number of values to pop off the stack for this function.</param>
     /// <param name="name">The name of the prompt to add to.</param>
     private void addProcess(int count, string name) {
-        if (this.slate.Global.Find(Slate.OperatorNamespace, name) is not IFuncGroup funcGroup)
+        if (this.slate.Global.Find(Operators.Namespace, name) is not IFuncGroup funcGroup)
             throw new Message("Could not find the operation by the given name.").
                 With("Name", name);
 

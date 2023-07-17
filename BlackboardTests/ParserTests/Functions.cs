@@ -13,7 +13,8 @@ public class Functions {
     [TestMethod]
     public void CheckAllFunctionsAreTested() =>
         TestTools.SetEntriesMatch(
-            TestTools.FuncDefTags(new Slate().Global).WhereNot(tag => tag.StartsWith(Slate.OperatorNamespace)),
+            TestTools.FuncDefTags(new Slate().Global).WhereNot(tag =>
+                tag.StartsWith(Blackboard.Core.Innate.Operators.Namespace)),
             TestTools.TestTags(this.GetType()),
             "Tests do not match the existing function");
 
@@ -27,6 +28,18 @@ public class Functions {
         slate.Perform("A =  -1.0; ").CheckValue(1.0,   "B");
         slate.Perform("A =  42.03;").CheckValue(42.03, "B");
         slate.Perform("A = -42.03;").CheckValue(42.03, "B");
+    }
+    
+    [TestMethod]
+    [TestTag("abs:Abs<Float>")]
+    public void TestFunctions_abs_Abs_Float() {
+        Slate slate = new Slate().Perform("in float A; B := abs(A);");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Abs<float>");
+        slate.Perform("A = (float)  0.0; ").CheckValue(0.0f,   "B");
+        slate.Perform("A = (float)  1.0; ").CheckValue(1.0f,   "B");
+        slate.Perform("A = (float) -1.0; ").CheckValue(1.0f,   "B");
+        slate.Perform("A = (float) 42.03;").CheckValue(42.03f, "B");
+        slate.Perform("A = (float)-42.03;").CheckValue(42.03f, "B");
     }
 
     [TestMethod]

@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
@@ -33,7 +34,7 @@ public class Slate: IReader, IWriter {
     private readonly HashSet<IConstant> constants;
 
     /// <summary>Creates a new slate.</summary>
-    /// <param name="addFuncs">Indicates that built-in functions should be added.</param>
+    /// <param name="addFuncs">Indicates that built-in functions should be added.</param> 
     /// <param name="addConsts">Indicates that constants should be added.</param>
     public Slate(bool addFuncs = true, bool addConsts = true) {
         this.pendingUpdate = new LinkedList<IEvaluable>();

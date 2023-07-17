@@ -39,12 +39,12 @@ sealed public class Type {
 
     /// <summary>The unsigned integer value type.</summary>
     static public readonly Type Uint;
-    
-    /// <summary>The float value type.</summary>
-    static public readonly Type Float;
 
     /// <summary>The double value type.</summary>
     static public readonly Type Double;
+    
+    /// <summary>The float value type.</summary>
+    static public readonly Type Float;
 
     /// <summary>The string value type.</summary>
     static public readonly Type String;
@@ -368,8 +368,8 @@ sealed public class Type {
         Bool          = new Type("bool",           typeof(IValue<Bool>),    Node,   typeof(Bool));
         Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int));
         Uint          = new Type("uint",           typeof(IValue<Uint>),    Node,   typeof(Uint));
-        Float         = new Type("float",          typeof(IValue<Float>),   Node,   typeof(Float));
         Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double));
+        Float         = new Type("float",          typeof(IValue<Float>),   Node,   typeof(Float));
         String        = new Type("string",         typeof(IValue<String>),  Node,   typeof(String));
         Namespace     = new Type("namespace",      typeof(Namespace),       Node,   null);
         FuncGroup     = new Type("function-group", typeof(FuncGroup),       Node,   null);
@@ -391,21 +391,15 @@ sealed public class Type {
 
         addImplicit<Int, Object>();
         addExplicit<Int, Uint>();
-        addImplicit<Int, Float>();
         addImplicit<Int, Double>();
+        addImplicit<Int, Float>();
         addImplicit<Int, String>();
 
         addImplicit<Uint, Object>();
         addExplicit<Uint, Int>();
-        addImplicit<Uint, Float>();
         addImplicit<Uint, Double>();
+        addImplicit<Uint, Float>();
         addImplicit<Uint, String>();
-
-        addImplicit<Float, Object>();
-        addExplicit<Float, Int>();
-        addExplicit<Float, Uint>();
-        addImplicit<Float, Double>();
-        addImplicit<Float, String>();
         
         addImplicit<Double, Object>();
         addExplicit<Double, Int>();
@@ -413,11 +407,17 @@ sealed public class Type {
         addExplicit<Double, Float>();
         addImplicit<Double, String>();
 
+        addImplicit<Float, Object>();
+        addExplicit<Float, Int>();
+        addExplicit<Float, Uint>();
+        addImplicit<Float, Double>();
+        addImplicit<Float, String>();
+
         addExplicit<Object, Bool>();
         addExplicit<Object, Int>();
         addExplicit<Object, Uint>();
-        addExplicit<Object, Float>();
         addExplicit<Object, Double>();
+        addExplicit<Object, Float>();
         addImplicit<Object, String>();
 
         addImplicit<String, Object>();

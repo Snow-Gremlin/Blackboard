@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Functions;
 using Blackboard.Core.Nodes.Interfaces;
@@ -53,7 +54,7 @@ public class FunctionSelection {
 
     [TestMethod]
     public void TestFunctionSelection_Or() {
-        Tester t = new(Slate.OperatorNamespace, "or");
+        Tester t = new(Operators.Namespace, "or");
         t.Test("T, T",    "Any<trigger>(T, T)");
         t.Test("B, B",    "Or<bool>(B, B)");
         t.Test("B, B, B", "Or<bool>(B, B, B)");
@@ -84,7 +85,7 @@ public class FunctionSelection {
 
     [TestMethod]
     public void TestFunctionSelection_Sum() {
-        Tester t = new(Slate.OperatorNamespace, "sum");
+        Tester t = new(Operators.Namespace, "sum");
         t.Test("B, B",       "null");
         t.Test("B, I",       "null");
         t.Test("O, O",       "null");

@@ -137,7 +137,7 @@ public readonly struct Int :
     #region Data...
 
     /// <summary>Gets the type for the type of data.</summary>
-    public Type Type => Type.Float;
+    public Type Type => Type.Int;
 
     /// <summary>Get the value of the data as a string.</summary>
     public string ValueAsString => this.Value.ToString();

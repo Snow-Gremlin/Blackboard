@@ -9,7 +9,7 @@ using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 
-namespace Blackboard.Core;
+namespace Blackboard.Core.Innate;
 
 /// <summary>A collection of creation methods which switch based on type.</summary>
 static public class Maker {
@@ -19,7 +19,7 @@ static public class Maker {
     /// <param name="type">The type the cast returns.</param>
     /// <returns>The function group for casting a value to the given type or null if an unexpected type./returns>
     static public IFuncGroup? GetCastMethod(Slate slate, Type type) {
-        if (slate.Global.Find(Slate.OperatorNamespace) is not Namespace ops) return null;
+        if (slate.Global.Find(Operators.Namespace) is not Namespace ops) return null;
         INode? castGroup =
             type == Type.Object  ? ops.Find("castObject") :
             type == Type.Bool    ? ops.Find("castBool") :

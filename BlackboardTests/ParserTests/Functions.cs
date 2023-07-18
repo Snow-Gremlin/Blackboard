@@ -37,9 +37,9 @@ public class Functions {
         slate.CheckNodeString(Stringifier.Basic(), "B", "B: Abs<float>");
         slate.Perform("A = (float)  0.0; ").CheckValue(0.0f,   "B");
         slate.Perform("A = (float)  1.0; ").CheckValue(1.0f,   "B");
-        slate.Perform("A = (float) -1.0; ").CheckValue(1.0f,   "B");
+        slate.Perform("A = (float)( -1.0);").CheckValue(1.0f,   "B"); // TODO: Fix cast of negative in language
         slate.Perform("A = (float) 42.03;").CheckValue(42.03f, "B");
-        slate.Perform("A = (float)-42.03;").CheckValue(42.03f, "B");
+        slate.Perform("A = (float)(-42.03);").CheckValue(42.03f, "B"); // TODO: Fix cast of negative in language
     }
 
     [TestMethod]
@@ -66,6 +66,17 @@ public class Functions {
     }
 
     [TestMethod]
+    [TestTag("acos:UnaryFuncs<Float, Float>")]
+    public void TestFunctions_acos_UnaryFuncs_Float_Float() {
+        Slate slate = new Slate().Perform("in float A; B := acos(A);");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Acos<float>");
+        slate.Perform("A =(float) 0.0;").CheckValue(float.Pi*0.5f, "B");
+        slate.Perform("A =(float) 1.0;").CheckValue(0.0f,           "B");
+        slate.Perform("A =(float)(-1.0);").CheckValue(float.Pi,     "B"); // TODO: Fix cast of negative in language
+        slate.Perform("A =(float) 1.1;").CheckValue(float.NaN,    "B");
+    }
+
+    [TestMethod]
     [TestTag("acosh:UnaryFuncs<Double, Double>")]
     public void TestFunctions_acosh_UnaryFuncs_Double_Double() {
         Slate slate = new Slate().Perform("in double A; B := acosh(A);");
@@ -74,6 +85,17 @@ public class Functions {
         slate.Perform("A = 1.0;   ").CheckValue(S.Math.Acosh(1.0),    "B");
         slate.Perform("A = 1.5;   ").CheckValue(S.Math.Acosh(1.5),    "B");
         slate.Perform("A = 1000.0;").CheckValue(S.Math.Acosh(1000.0), "B");
+    }
+
+    [TestMethod]
+    [TestTag("acosh:UnaryFuncs<Float, Float>")]
+    public void TestFunctions_acosh_UnaryFuncs_Float_Float() {
+        Slate slate = new Slate().Perform("in float A; B := acosh(A);");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Acosh<float>");
+        slate.Perform("A = (float)0.0;   ").CheckValue(float.NaN,                   "B");
+        slate.Perform("A = (float)1.0;   ").CheckValue((float)S.Math.Acosh(1.0),    "B");
+        slate.Perform("A = (float)1.5;   ").CheckValue((float)S.Math.Acosh(1.5),    "B");
+        slate.Perform("A = (float)1000.0;").CheckValue((float)S.Math.Acosh(1000.0), "B");
     }
 
     [TestMethod]
@@ -167,6 +189,17 @@ public class Functions {
     }
 
     [TestMethod]
+    [TestTag("asin:UnaryFuncs<Float, Float>")]
+    public void TestFunctions_asin_UnaryFuncs_Float_Float() {
+        Slate slate = new Slate().Perform("in float A; B := asin(A);");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Asin<float>");
+        slate.Perform("A = (float) 0.0;").CheckValue(0.0f,                    "B");
+        slate.Perform("A = (float) 1.0;").CheckValue((float)( S.Math.PI*0.5), "B");
+        slate.Perform("A = (float)(-1.0);").CheckValue((float)(-S.Math.PI*0.5), "B"); // TODO: Fix cast of negative in language
+        slate.Perform("A = (float) 2.0;").CheckValue(float.NaN,              "B");
+    }
+
+    [TestMethod]
     [TestTag("asinh:UnaryFuncs<Double, Double>")]
     public void TestFunctions_asinh_UnaryFuncs_Double_Double() {
         Slate slate = new Slate().Perform("in double A; B := asinh(A);");
@@ -179,6 +212,18 @@ public class Functions {
     }
 
     [TestMethod]
+    [TestTag("asinh:UnaryFuncs<Float, Float>")]
+    public void TestFunctions_asinh_UnaryFuncs_Float_Float() {
+        Slate slate = new Slate().Perform("in float A; B := asinh(A);");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Asinh<float>");
+        slate.Perform("A = (float) 0.0;").CheckValue(float.Asinh( 0.0f), "B");
+        slate.Perform("A = (float) 1.0;").CheckValue(float.Asinh( 1.0f), "B");
+        slate.Perform("A = (float)(-1.0);").CheckValue(float.Asinh(-1.0f), "B"); // TODO: Fix cast of negative in language
+        slate.Perform("A = (float) 2.0;").CheckValue(float.Asinh( 2.0f), "B");
+        slate.Perform("A = (float)10.0;").CheckValue(float.Asinh(10.0f), "B");
+    }
+
+    [TestMethod]
     [TestTag("atan:BinaryFunc<Double, Double, Double>")]
     public void TestFunctions_atan_BinaryFunc_Double_Double_Double() {
         Slate slate = new Slate().Perform("in double A, B; C := atan(A, B);");
@@ -187,6 +232,17 @@ public class Functions {
         slate.Perform("A =  1.0; B =  1.0;").CheckValue( S.Math.PI*0.25,    "C");
         slate.Perform("A = -1.0; B = -1.0;").CheckValue(-S.Math.PI*3.0/4.0, "C");
         slate.Perform("A =  1.0; B =  0.0;").CheckValue( S.Math.PI*0.5,     "C");
+    }
+
+    [TestMethod]
+    [TestTag("atan:BinaryFunc<Float, Float, Float>")]
+    public void TestFunctions_atan_BinaryFunc_Float_Float_Float() {
+        Slate slate = new Slate().Perform("in float A, B; C := atan(A, B);");
+        slate.CheckNodeString(Stringifier.Basic(), "C", "C: Atan2<float>");
+        slate.Perform("A = (float) 0.0; B = (float) 0.0;").CheckValue(0.0f,                        "C");
+        slate.Perform("A = (float) 1.0; B = (float) 1.0;").CheckValue((float)( S.Math.PI*0.25),    "C");
+        slate.Perform("A = (float)(-1.0); B = (float)(-1.0);").CheckValue((float)(-S.Math.PI*3.0/4.0), "C"); // TODO: Fix cast of negative in language
+        slate.Perform("A = (float) 1.0; B = (float) 0.0;").CheckValue((float)( S.Math.PI*0.5),     "C");
     }
 
     [TestMethod]

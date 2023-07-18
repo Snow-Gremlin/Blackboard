@@ -93,7 +93,7 @@ public class Operators {
         slate.Perform("A = (uint)1;").CheckValue(1, "B");
         slate.Perform("A = (uint)2;").CheckValue(2, "B");
         slate.Perform("A = (uint)3;").CheckValue(3, "B");
-        //slate.Perform("A = (uint) -1;").CheckValue(-1, "B"); // TODO: Check roll-over and fix parser issue
+        slate.Perform("A = (uint)(-1);").CheckValue(-1, "B"); // TODO: Fix cast of negative in language
     }
 
     [TestMethod]

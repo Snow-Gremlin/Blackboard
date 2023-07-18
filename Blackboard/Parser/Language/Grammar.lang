@@ -273,14 +273,16 @@
     | <Multiplicative> [Div] <Exponent> {divide}
     | <Multiplicative> [Mod] <Exponent> {modulo};
 
-<Exponent> := <Unary>
-    | <Exponent> [Power] <Unary> {power};
+<Exponent> := <Castable>
+    | <Exponent> [Power] <Castable> {power};
+
+<Castable> := <Unary>
+    | [ParOpen] <RootType> [ParClose] <Unary> {cast};
 
 <Unary> := <Expression>
     | [Neg]    <Expression> {negate}
     | [Not]    <Expression> {not}
-    | [Invert] <Expression> {invert}
-    | [ParOpen] <RootType> [ParClose] <Expression> {cast};
+    | [Invert] <Expression> {invert};
 
 <Expression> := <Value>
     | [ParOpen] <Conditional> [ParClose]

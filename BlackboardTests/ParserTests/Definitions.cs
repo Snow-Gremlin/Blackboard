@@ -453,4 +453,18 @@ public class Definitions {
         slate.CheckValue(5, "D");
         slate.ResetTriggers();
     }
+  
+    [TestMethod]
+    public void TestBasicParses_CastUnary() {
+        Slate slate = new();
+        slate.Read(
+            "in int A = (int)-2.1;",
+            "in string B = (string)!true;",
+            "in string C = (string)( ~((int)12345.2) );").
+            Perform();
+
+        slate.CheckValue(-2, "A");
+        slate.CheckValue("false", "B");
+        slate.CheckValue("-12346", "C");
+    }
 }

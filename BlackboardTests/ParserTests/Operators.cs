@@ -89,11 +89,11 @@ public class Operators {
     public void TestOperators_castInt_Explicit_Uint_Int() {
         Slate slate = new Slate().Perform("in uint A; B := (int)A;");
         slate.CheckNodeString(Stringifier.Basic(), "B", "B: Explicit<int>");
-        slate.Perform("A = (uint)0;").CheckValue(0, "B");
-        slate.Perform("A = (uint)1;").CheckValue(1, "B");
-        slate.Perform("A = (uint)2;").CheckValue(2, "B");
-        slate.Perform("A = (uint)3;").CheckValue(3, "B");
-        slate.Perform("A = (uint)(-1);").CheckValue(-1, "B"); // TODO: Fix cast of negative in language
+        slate.Perform("A = (uint) 0;").CheckValue( 0, "B");
+        slate.Perform("A = (uint) 1;").CheckValue( 1, "B");
+        slate.Perform("A = (uint) 2;").CheckValue( 2, "B");
+        slate.Perform("A = (uint) 3;").CheckValue( 3, "B");
+        slate.Perform("A = (uint)-1;").CheckValue(-1, "B");
     }
 
     [TestMethod]

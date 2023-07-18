@@ -2002,6 +2002,22 @@ public class Functions {
     }
 
     [TestMethod]
+    [TestTag("sum:Sum<Float>")]
+    public void TestFunctions_sum_Sum_Float() {
+        Slate slate = new Slate().Perform("in float A, B, C, D; E := sum(A, B, C, D);");
+        slate.CheckNodeString(Stringifier.Basic(), "E", "E: Sum<float>");
+        slate.Perform("A = (float)0.0; B = (float)0.0; C = (float)0.0; D = (float)0.0;").CheckValue( 0.0f, "E");
+        slate.Perform("A = (float)1.0; B = (float)0.0; C = (float)0.0; D = (float)0.0;").CheckValue( 1.0f, "E");
+        slate.Perform("A = (float)0.0; B = (float)1.0; C = (float)0.0; D = (float)0.0;").CheckValue( 1.0f, "E");
+        slate.Perform("A = (float)0.0; B = (float)0.0; C = (float)1.0; D = (float)0.0;").CheckValue( 1.0f, "E");
+        slate.Perform("A = (float)0.0; B = (float)0.0; C = (float)0.0; D = (float)1.0;").CheckValue( 1.0f, "E");
+        slate.Perform("A = (float)1.1; B = (float)2.3; C = (float)4.3; D = (float)6.0;").CheckValue(13.7f, "E");
+        slate.Perform("F := sum(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<float>[1.1](A)");
+        // The zero input scenario is checked in TestFunctions_sum_Sum_Double.
+    }
+
+    [TestMethod]
     [TestTag("sum:Sum<Int>")]
     public void TestFunctions_sum_Sum_Int() {
         Slate slate = new Slate().Perform("in int A, B, C, D; E := sum(A, B, C, D);");
@@ -2014,6 +2030,22 @@ public class Functions {
         slate.Perform("A = 1; B = 2; C = 4; D = 6;").CheckValue(13, "E");
         slate.Perform("F := sum(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
         slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<int>[1](A)");
+        // The zero input scenario is checked in TestFunctions_sum_Sum_Double.
+    }
+
+    [TestMethod]
+    [TestTag("sum:Sum<Uint>")]
+    public void TestFunctions_sum_Sum_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B, C, D; E := sum(A, B, C, D);");
+        slate.CheckNodeString(Stringifier.Basic(), "E", "E: Sum<uint>");
+        slate.Perform("A = (uint)0; B = (uint)0; C = (uint)0; D = (uint)0;").CheckValue((uint) 0, "E");
+        slate.Perform("A = (uint)1; B = (uint)0; C = (uint)0; D = (uint)0;").CheckValue((uint) 1, "E");
+        slate.Perform("A = (uint)0; B = (uint)1; C = (uint)0; D = (uint)0;").CheckValue((uint) 1, "E");
+        slate.Perform("A = (uint)0; B = (uint)0; C = (uint)1; D = (uint)0;").CheckValue((uint) 1, "E");
+        slate.Perform("A = (uint)0; B = (uint)0; C = (uint)0; D = (uint)1;").CheckValue((uint) 1, "E");
+        slate.Perform("A = (uint)1; B = (uint)2; C = (uint)4; D = (uint)6;").CheckValue((uint)13, "E");
+        slate.Perform("F := sum(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<uint>[1](A)");
         // The zero input scenario is checked in TestFunctions_sum_Sum_Double.
     }
 
@@ -2045,6 +2077,19 @@ public class Functions {
     }
 
     [TestMethod]
+    [TestTag("tan:UnaryFuncs<Float, Float>")]
+    public void TestFunctions_tan_UnaryFuncs_Float_Float() {
+        Slate slate = new Slate().Perform("in float A; B := tan(A);");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Tan<float>");
+        slate.Perform("A = (float) 0.0;     ").CheckValue(0.0f, "B");
+        slate.Perform("A = (float)( pi*0.5);").CheckValue(float.Tan( float.Pi*0.5f), "B");
+        slate.Perform("A = (float)(-pi*0.5);").CheckValue(float.Tan(-float.Pi*0.5f), "B");
+        slate.Perform("A = (float) pi;      ").CheckValue(float.Tan( float.Pi),      "B");
+        slate.Perform("A = (float)-pi;      ").CheckValue(float.Tan(-float.Pi),      "B");
+        slate.Perform("A = (float)( pi*1.5);").CheckValue(float.Tan( float.Pi*1.5f), "B");
+    }
+
+    [TestMethod]
     [TestTag("tanh:UnaryFuncs<Double, Double>")]
     public void TestFunctions_tanh_UnaryFuncs_Double_Double() {
         Slate slate = new Slate().Perform("in double A; B := tanh(A);");
@@ -2054,6 +2099,18 @@ public class Functions {
         slate.Perform("A = -1.0;").CheckValue(S.Math.Tanh(-1.0), "B");
         slate.Perform("A =  3.0;").CheckValue(S.Math.Tanh( 3.0), "B");
         slate.Perform("A = 12.3;").CheckValue(S.Math.Tanh(12.3), "B");
+    }
+
+    [TestMethod]
+    [TestTag("tanh:UnaryFuncs<Float, Float>")]
+    public void TestFunctions_tanh_UnaryFuncs_Float_Float() {
+        Slate slate = new Slate().Perform("in float A; B := tanh(A);");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Tanh<float>");
+        slate.Perform("A = (float) 0.0;").CheckValue(0.0f, "B");
+        slate.Perform("A = (float) 1.0;").CheckValue(float.Tanh( 1.0f), "B");
+        slate.Perform("A = (float)-1.0;").CheckValue(float.Tanh(-1.0f), "B");
+        slate.Perform("A = (float) 3.0;").CheckValue(float.Tanh( 3.0f), "B");
+        slate.Perform("A = (float)12.3;").CheckValue(float.Tanh(12.3f), "B");
     }
 
     [TestMethod]
@@ -2153,6 +2210,18 @@ public class Functions {
     }
 
     [TestMethod]
+    [TestTag("trunc:UnaryFuncs<Float, Float>")]
+    public void TestFunctions_trunc_UnaryFuncs_Float_Float() {
+        Slate slate = new Slate().Perform("in float A; B := trunc(A);");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Truncate<float>");
+        slate.Perform("A = (float) 3.14;  ").CheckValue( 3.0f, "B");
+        slate.Perform("A = (float) 3.4999;").CheckValue( 3.0f, "B");
+        slate.Perform("A = (float) 3.5;   ").CheckValue( 3.0f, "B");
+        slate.Perform("A = (float) 3.6;   ").CheckValue( 3.0f, "B");
+        slate.Perform("A = (float)42.0;   ").CheckValue(42.0f, "B");
+    }
+
+    [TestMethod]
     [TestTag("xor:BitwiseXor<Int>")]
     public void TestFunctions_xor_BitwiseXor_Int() {
         Slate slate = new Slate().Perform("in int A, B, C, D; E := xor(A, B, C, D);");
@@ -2183,6 +2252,35 @@ public class Functions {
             "[Error: Could not perform the function without any inputs.",
             "   [Function: FuncGroup]",
             "   [Location: Unnamed:1, 9, 9]]");
+    }
+
+    [TestMethod]
+    [TestTag("xor:BitwiseXor<Uint>")]
+    public void TestFunctions_xor_BitwiseXor_Uint() {
+        Slate slate = new Slate().Perform("in uint A, B, C, D; E := xor(A, B, C, D);");
+        slate.CheckNodeString(Stringifier.Basic(), "E", "E: BitwiseXor<uint>");
+        slate.Perform("A = (uint)0000b; B = (uint)0000b; C = (uint)0000b; D = (uint)0000b;").CheckValue((uint)0b0000, "E");
+        slate.Perform("A = (uint)1000b; B = (uint)0100b; C = (uint)0010b; D = (uint)0001b;").CheckValue((uint)0b1111, "E");
+        slate.Perform("A = (uint)1100b; B = (uint)0110b; C = (uint)0011b; D = (uint)1111b;").CheckValue((uint)0b0110, "E");
+        slate.Perform("A = (uint)1010b; B = (uint)1001b; C = (uint)1010b; D = (uint)1011b;").CheckValue((uint)0b0010, "E");
+        slate.Perform("A = (uint)1111b; B = (uint)0000b; C = (uint)0000b; D = (uint)0000b;").CheckValue((uint)0b1111, "E");
+        slate.Perform("A = (uint)0000b; B = (uint)1111b; C = (uint)0000b; D = (uint)0000b;").CheckValue((uint)0b1111, "E");
+        slate.Perform("A = (uint)0000b; B = (uint)0000b; C = (uint)1111b; D = (uint)0000b;").CheckValue((uint)0b1111, "E");
+        slate.Perform("A = (uint)1111b; B = (uint)1111b; C = (uint)0000b; D = (uint)0000b;").CheckValue((uint)0b0000, "E");
+        slate.Perform("A = (uint)1111b; B = (uint)0000b; C = (uint)1111b; D = (uint)0000b;").CheckValue((uint)0b0000, "E");
+        slate.Perform("A = (uint)1111b; B = (uint)0000b; C = (uint)0000b; D = (uint)1111b;").CheckValue((uint)0b0000, "E");
+        slate.Perform("A = (uint)0000b; B = (uint)1111b; C = (uint)1111b; D = (uint)0000b;").CheckValue((uint)0b0000, "E");
+        slate.Perform("A = (uint)0000b; B = (uint)1111b; C = (uint)0000b; D = (uint)1111b;").CheckValue((uint)0b0000, "E");
+        slate.Perform("A = (uint)0000b; B = (uint)0000b; C = (uint)1111b; D = (uint)1111b;").CheckValue((uint)0b0000, "E");
+        slate.Perform("A = (uint)0000b; B = (uint)0000b; C = (uint)0000b; D = (uint)1111b;").CheckValue((uint)0b1111, "E");
+        slate.Perform("A = (uint)0000b; B = (uint)1111b; C = (uint)1111b; D = (uint)1111b;").CheckValue((uint)0b1111, "E");
+        slate.Perform("A = (uint)1111b; B = (uint)0000b; C = (uint)1111b; D = (uint)1111b;").CheckValue((uint)0b1111, "E");
+        slate.Perform("A = (uint)1111b; B = (uint)1111b; C = (uint)0000b; D = (uint)1111b;").CheckValue((uint)0b1111, "E");
+        slate.Perform("A = (uint)1111b; B = (uint)1111b; C = (uint)1111b; D = (uint)0000b;").CheckValue((uint)0b1111, "E");
+        slate.Perform("A = (uint)1111b; B = (uint)1111b; C = (uint)1111b; D = (uint)1111b;").CheckValue((uint)0b0000, "E");
+        slate.Perform("F := xor(A);"); // Single pass through, F is set to A with a shell to prevent F from being set like A.
+        slate.CheckNodeString(Stringifier.Shallow(), "F", "F: Shell<uint>[15](A)");
+        // The zero input scenario is checked in TestFunctions_xor_BitwiseXor_Int.
     }
 
     [TestMethod]
@@ -2254,6 +2352,24 @@ public class Functions {
     }
 
     [TestMethod]
+    [TestTag("zener:Zener<Float>")]
+    public void TestFunctions_zener_Zener_Float() {
+        Slate slate = new Slate().Perform("in float A, Min, Max; B := zener(A, Min, Max);");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Zener<bool>");
+        slate.Perform("A = (float)0.0; Min = (float)0.0; Max = (float)0.0;").CheckValue(false, "B");
+        slate.Perform("A = (float)0.5; Min = (float)1.0; Max = (float)2.0;").CheckValue(false, "B");
+        slate.Perform("A = (float)1.0; Min = (float)1.0; Max = (float)2.0;").CheckValue(false, "B");
+        slate.Perform("A = (float)1.5; Min = (float)1.0; Max = (float)2.0;").CheckValue(false, "B");
+        slate.Perform("A = (float)2.0; Min = (float)1.0; Max = (float)2.0;").CheckValue(true,  "B");
+        slate.Perform("A = (float)2.5; Min = (float)1.0; Max = (float)2.0;").CheckValue(true,  "B");
+        slate.Perform("A = (float)2.0; Min = (float)1.0; Max = (float)2.0;").CheckValue(true,  "B");
+        slate.Perform("A = (float)1.5; Min = (float)1.0; Max = (float)2.0;").CheckValue(true,  "B");
+        slate.Perform("A = (float)1.0; Min = (float)1.0; Max = (float)2.0;").CheckValue(false, "B");
+        slate.Perform("A = (float)0.5; Min = (float)1.0; Max = (float)2.0;").CheckValue(false, "B");
+        slate.Perform("A = (float)2.0; Min = (float)3.0; Max = (float)1.0;").CheckValue(false, "B"); // Min/max reversed
+    }
+
+    [TestMethod]
     [TestTag("zener:Zener<Int>")]
     public void TestFunctions_zener_Zener_Int() {
         Slate slate = new Slate().Perform("in int A, Min, Max; B := zener(A, Min, Max);");
@@ -2269,5 +2385,23 @@ public class Functions {
         slate.Perform("A = 1; Min = 1; Max = 3;").CheckValue(false, "B");
         slate.Perform("A = 0; Min = 1; Max = 3;").CheckValue(false, "B");
         slate.Perform("A = 2; Min = 3; Max = 1;").CheckValue(false, "B"); // Min/max reversed
+    }
+
+    [TestMethod]
+    [TestTag("zener:Zener<Uint>")]
+    public void TestFunctions_zener_Zener_Uint() {
+        Slate slate = new Slate().Perform("in uint A, Min, Max; B := zener(A, Min, Max);");
+        slate.CheckNodeString(Stringifier.Basic(), "B", "B: Zener<bool>");
+        slate.Perform("A = (uint)0; Min = (uint)0; Max = (uint)0;").CheckValue(false, "B");
+        slate.Perform("A = (uint)0; Min = (uint)1; Max = (uint)3;").CheckValue(false, "B");
+        slate.Perform("A = (uint)1; Min = (uint)1; Max = (uint)3;").CheckValue(false, "B");
+        slate.Perform("A = (uint)2; Min = (uint)1; Max = (uint)3;").CheckValue(false, "B");
+        slate.Perform("A = (uint)3; Min = (uint)1; Max = (uint)3;").CheckValue(true,  "B");
+        slate.Perform("A = (uint)4; Min = (uint)1; Max = (uint)3;").CheckValue(true,  "B");
+        slate.Perform("A = (uint)3; Min = (uint)1; Max = (uint)3;").CheckValue(true,  "B");
+        slate.Perform("A = (uint)2; Min = (uint)1; Max = (uint)3;").CheckValue(true,  "B");
+        slate.Perform("A = (uint)1; Min = (uint)1; Max = (uint)3;").CheckValue(false, "B");
+        slate.Perform("A = (uint)0; Min = (uint)1; Max = (uint)3;").CheckValue(false, "B");
+        slate.Perform("A = (uint)2; Min = (uint)3; Max = (uint)1;").CheckValue(false, "B"); // Min/max reversed
     }
 }

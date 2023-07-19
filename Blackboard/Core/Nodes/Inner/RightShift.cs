@@ -1,11 +1,12 @@
-﻿using Blackboard.Core.Data.Interfaces;
+﻿using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Performs a right shifts the first parent the amount of the second parent.</summary>
-sealed public class RightShift<T> : BinaryValue<T, T, T>
+sealed public class RightShift<T> : BinaryValue<T, Int, T>
     where T : struct, IBitwise<T>, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
@@ -17,7 +18,7 @@ sealed public class RightShift<T> : BinaryValue<T, T, T>
     /// <summary>Creates a right shift value node.</summary>
     /// <param name="left">This is the first parent for the source value.</param>
     /// <param name="right">This is the second parent for the source value.</param>
-    public RightShift(IValueParent<T>? left = null, IValueParent<T>? right = null) : base(left, right) { }
+    public RightShift(IValueParent<T>? left = null, IValueParent<Int>? right = null) : base(left, right) { }
 
     /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
     /// <returns>The new instance of this node.</returns>
@@ -30,5 +31,5 @@ sealed public class RightShift<T> : BinaryValue<T, T, T>
     /// <param name="left">The integer value to right shift.</param>
     /// <param name="right">The integer value to right shift the other value by.</param>
     /// <returns>The right shifted value for this node.</returns>
-    protected override T OnEval(T left, T right) => left.RightShift(right);
+    protected override T OnEval(T left, Int right) => left.RightShift(right);
 }

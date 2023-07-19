@@ -17,8 +17,10 @@ static public class DataExt {
         value switch {
             T      => true,
             Bool   => default(T) is ICast<Bool,   T>,
+            Float  => default(T) is ICast<Float,  T>,
             Double => default(T) is ICast<Double, T>,
             Int    => default(T) is ICast<Int,    T>,
+            Uint   => default(T) is ICast<Uint,   T>,
             String => default(T) is ICast<String, T>,
             _      => throw new Message("Unexpected input type in cast").
                             With("Input", value)
@@ -33,8 +35,10 @@ static public class DataExt {
         value switch {
             T      => true,
             Bool   => default(T) is IImplicit<Bool,   T>,
+            Float  => default(T) is IImplicit<Float,  T>,
             Double => default(T) is IImplicit<Double, T>,
             Int    => default(T) is IImplicit<Int,    T>,
+            Uint   => default(T) is IImplicit<Uint,   T>,
             String => default(T) is IImplicit<String, T>,
             _      => throw new Message("Unexpected input type in implicit cast").
                             With("Input", value)
@@ -49,8 +53,10 @@ static public class DataExt {
         value switch {
             T      => true,
             Bool   => default(T) is IExplicit<Bool,   T>,
+            Float  => default(T) is IExplicit<Float,  T>,
             Double => default(T) is IExplicit<Double, T>,
             Int    => default(T) is IExplicit<Int,    T>,
+            Uint   => default(T) is IExplicit<Uint,   T>,
             String => default(T) is IExplicit<String, T>,
             _      => throw new Message("Unexpected input type in explicit cast").
                             With("Input", value)
@@ -83,8 +89,10 @@ static public class DataExt {
         value switch {
             T      v  => v,
             Bool   vb => castTo<Bool,   T, ICast<Bool,   T>>(vb),
+            Float  vf => castTo<Float,  T, ICast<Float,  T>>(vf),
             Double vd => castTo<Double, T, ICast<Double, T>>(vd),
             Int    vi => castTo<Int,    T, ICast<Int,    T>>(vi),
+            Uint   vu => castTo<Uint,   T, ICast<Uint,   T>>(vu),
             String vs => castTo<String, T, ICast<String, T>>(vs),
             _         => throw new Message("Unexpected input type in cast").
                             With("Input", value)
@@ -99,8 +107,10 @@ static public class DataExt {
         value switch {
             T      v  => v,
             Bool   vb => castTo<Bool,   T, IImplicit<Bool,   T>>(vb),
+            Float  vf => castTo<Float,  T, IImplicit<Float,  T>>(vf),
             Double vd => castTo<Double, T, IImplicit<Double, T>>(vd),
             Int    vi => castTo<Int,    T, IImplicit<Int,    T>>(vi),
+            Uint   vu => castTo<Uint,   T, IImplicit<Uint,   T>>(vu),
             String vs => castTo<String, T, IImplicit<String, T>>(vs),
             _         => throw new Message("Unexpected input type in implicit cast").
                             With("Input", value)
@@ -115,8 +125,10 @@ static public class DataExt {
         value switch {
             T      v  => v,
             Bool   vb => castTo<Bool,   T, IExplicit<Bool,   T>>(vb),
+            Float  vf => castTo<Float,  T, IExplicit<Float,  T>>(vf),
             Double vd => castTo<Double, T, IExplicit<Double, T>>(vd),
             Int    vi => castTo<Int,    T, IExplicit<Int,    T>>(vi),
+            Uint   vu => castTo<Uint,   T, IExplicit<Uint,   T>>(vu),
             String vs => castTo<String, T, IExplicit<String, T>>(vs),
             _         => throw new Message("Unexpected input type in explicit cast").
                             With("Input", value)

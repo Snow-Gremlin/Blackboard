@@ -24,7 +24,7 @@ static public class RecordExt {
     /// <returns>The type of the data or null if doesn't exist or not a data type.</returns>
     static public Type? GetType(this IReader reader, IEnumerable<string> names) =>
         reader.TryGetData(names, out IData? data) && data is not null ?
-            Type.FromName(data.TypeName) : null;
+            Type.FromName(data.Type.Name) : null;
 
     #endregion
     #region Bool
@@ -117,6 +117,51 @@ static public class RecordExt {
         writer.SetValue(new Int(value), names);
 
     #endregion
+    #region Uint
+
+    /// <summary>Indicates if some data exists for the given name.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to check.</param>
+    /// <returns>True if the data exists, false otherwise.</returns>
+    static public bool HasUint(this IReader reader, params string[] names) =>
+        reader.HasUint(names as IEnumerable<string>);
+
+    /// <summary>Indicates if some data exists for the given name.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to check.</param>
+    /// <returns>True if the data exists, false otherwise.</returns>
+    static public bool HasUint(this IReader reader, IEnumerable<string> names) =>
+        reader.HasValue<Uint>(names);
+
+    /// <summary>Gets the value from a named data.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to read the value from.</param>
+    /// <returns>The value from the data.</returns>
+    static public uint GetUint(this IReader reader, params string[] names) =>
+        reader.GetUint(names as IEnumerable<string>);
+
+    /// <summary>Gets the value from a named data.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to read the value from.</param>
+    /// <returns>The value from the data.</returns>
+    static public uint GetUint(this IReader reader, IEnumerable<string> names) =>
+        reader.GetValue<Uint>(names).Value;
+
+    /// <summary>Sets a value for the given named input.</summary>
+    /// <param name="writer">The writer to set the value to.</param>
+    /// <param name="value">The value to set to that node.</param>
+    /// <param name="names">The name of the input node to set.</param>
+    static public void SetUint(this IWriter writer, uint value, params string[] names) =>
+        writer.SetUint(value, names as IEnumerable<string>);
+
+    /// <summary>Sets a value for the given named input.</summary>
+    /// <param name="writer">The writer to set the value to.</param>
+    /// <param name="value">The value to set to that node.</param>
+    /// <param name="names">The name of the input node to set.</param>
+    static public void SetUint(this IWriter writer, uint value, IEnumerable<string> names) =>
+        writer.SetValue(new Uint(value), names);
+
+    #endregion
     #region Double
 
     /// <summary>Indicates if some data exists for the given name.</summary>
@@ -160,6 +205,51 @@ static public class RecordExt {
     /// <param name="names">The name of the input node to set.</param>
     static public void SetDouble(this IWriter writer, double value, IEnumerable<string> names) =>
         writer.SetValue(new Double(value), names);
+
+    #endregion
+    #region Float
+
+    /// <summary>Indicates if some data exists for the given name.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to check.</param>
+    /// <returns>True if the data exists, false otherwise.</returns>
+    static public bool HasFloat(this IReader reader, params string[] names) =>
+        reader.HasFloat(names as IEnumerable<string>);
+
+    /// <summary>Indicates if some data exists for the given name.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to check.</param>
+    /// <returns>True if the data exists, false otherwise.</returns>
+    static public bool HasFloat(this IReader reader, IEnumerable<string> names) =>
+        reader.HasValue<Float>(names);
+
+    /// <summary>Gets the value from a named data.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to read the value from.</param>
+    /// <returns>The value from the data.</returns>
+    static public float GetFloat(this IReader reader, params string[] names) =>
+        reader.GetFloat(names as IEnumerable<string>);
+
+    /// <summary>Gets the value from a named data.</summary>
+    /// <param name="reader">The value reader to read from.</param>
+    /// <param name="names">The name of the data to read the value from.</param>
+    /// <returns>The value from the data.</returns>
+    static public float GetFloat(this IReader reader, IEnumerable<string> names) =>
+        reader.GetValue<Float>(names).Value;
+    
+    /// <summary>Sets a value for the given named input.</summary>
+    /// <param name="writer">The writer to set the value to.</param>
+    /// <param name="value">The value to set to that node.</param>
+    /// <param name="names">The name of the input node to set.</param>
+    static public void SetFloat(this IWriter writer, float value, params string[] names) =>
+        writer.SetDouble(value, names as IEnumerable<string>);
+    
+    /// <summary>Sets a value for the given named input.</summary>
+    /// <param name="writer">The writer to set the value to.</param>
+    /// <param name="value">The value to set to that node.</param>
+    /// <param name="names">The name of the input node to set.</param>
+    static public void SetFloat(this IWriter writer, float value, IEnumerable<string> names) =>
+        writer.SetValue(new Float(value), names);
 
     #endregion
     #region String

@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
@@ -182,7 +183,7 @@ sealed public class Parser {
     /// <param name="count">The number of values to pop off the stack for this function.</param>
     /// <param name="name">The name of the prompt to add to.</param>
     private void addProcess(int count, string name) {
-        if (this.slate.Global.Find(Slate.OperatorNamespace, name) is not IFuncGroup funcGroup)
+        if (this.slate.Global.Find(Operators.Namespace, name) is not IFuncGroup funcGroup)
             throw new Message("Could not find the operation by the given name.").
                 With("Name", name);
 
@@ -202,15 +203,12 @@ sealed public class Parser {
 
     /// <summary>Validates that all prompts in the grammar are handled.</summary>
     private void validatePrompts() {
-        /*
-        // TODO: Fix when petite parser can check the generic typed sets.
         string[] unneeded = BaseParser.UnneededPrompts(this.prompts);
         string[] missing  = BaseParser.MissingPrompts(this.prompts);
         if (unneeded.Length > 0 || missing.Length > 0)
             throw new Message("Blackboard's parser grammar has prompts which do not match prompt handlers.").
                 With("Not handled", unneeded.Join(", ")).
                 With("Not in grammar", missing.Join(", "));
-        */
     }
 
     /// <summary>A helper handler for parsing literals.</summary>

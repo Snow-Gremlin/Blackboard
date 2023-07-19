@@ -1,6 +1,7 @@
 ﻿// Ignore Spelling: Implicits
 
 using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Functions;
@@ -36,8 +37,14 @@ sealed public class Type {
     /// <summary>The integer value type.</summary>
     static public readonly Type Int;
 
+    /// <summary>The unsigned integer value type.</summary>
+    static public readonly Type Uint;
+
     /// <summary>The double value type.</summary>
     static public readonly Type Double;
+    
+    /// <summary>The float value type.</summary>
+    static public readonly Type Float;
 
     /// <summary>The string value type.</summary>
     static public readonly Type String;
@@ -333,8 +340,25 @@ sealed public class Type {
     /// <param name="dict">Either the implicit or explicit dictionary for the type being added to.</param>
     /// <param name="dest">The destination type to cast to.</param>
     /// <param name="func">The function for performing the cast.</param>
-    static private void addCast<T>(Dictionary<Type, caster> dict, Type dest, S.Func<T, INode> func) where T : INode =>
+    static private void addCast<T>(Dictionary<Type, caster> dict, Type dest, S.Func<T, INode> func)
+        where T : INode =>
         dict[dest] = (INode input) => input is T value ? func(value) : null;
+
+    /// <summary>Adds an implicit cast-ability definition to a type.</summary>
+    /// <typeparam name="Tin">The input data type.</typeparam>
+    /// <typeparam name="Tout">The output data type.</typeparam>
+    static private void addImplicit<Tin, Tout>()
+        where Tin:  struct, IData
+        where Tout: struct, IImplicit<Tin, Tout>, IEquatable<Tout> =>
+        addCast<IValueParent<Tin>>(default(Tin).Type.imps, default(Tout).Type, (input) => new Implicit<Tin, Tout>(input));
+    
+    /// <summary>Adds an explicit cast-ability definition to a type.</summary>
+    /// <typeparam name="Tin">The input data type.</typeparam>
+    /// <typeparam name="Tout">The output data type.</typeparam>
+    static private void addExplicit<Tin, Tout>()
+        where Tin:  struct, IData
+        where Tout: struct, IExplicit<Tin, Tout>, IEquatable<Tout> =>
+        addCast<IValueParent<Tin>>(default(Tin).Type.exps, default(Tout).Type, (input) => new Explicit<Tin, Tout>(input));
 
     /// <summary>Initializes the types before they are used.</summary>
     static Type() {
@@ -343,11 +367,15 @@ sealed public class Type {
         Object        = new Type("object",         typeof(IValue<Object>),  Node,   typeof(Object));
         Bool          = new Type("bool",           typeof(IValue<Bool>),    Node,   typeof(Bool));
         Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int));
+        Uint          = new Type("uint",           typeof(IValue<Uint>),    Node,   typeof(Uint));
         Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double));
+        Float         = new Type("float",          typeof(IValue<Float>),   Node,   typeof(Float));
         String        = new Type("string",         typeof(IValue<String>),  Node,   typeof(String));
         Namespace     = new Type("namespace",      typeof(Namespace),       Node,   null);
         FuncGroup     = new Type("function-group", typeof(FuncGroup),       Node,   null);
         FuncDef       = new Type("function-def",   typeof(IFuncDef),        Node,   null);
+
+        // TODO: Come up with a better way to handle sub-typing than predefining them.
         CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int));
         CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double));
         Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool));
@@ -358,23 +386,41 @@ sealed public class Type {
         LatchString   = new Type("latch-string",   typeof(Latch<String>),   String, typeof(String));
 
         addCast<IValueParent<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
-        addCast<IValueParent<Bool>>(Bool.imps, Object,  (input) => new Implicit<Bool, Object>(input));
-        addCast<IValueParent<Bool>>(Bool.imps, String,  (input) => new Implicit<Bool, String>(input));
+        addImplicit<Bool, Object>();
+        addImplicit<Bool, String>();
 
-        addCast<IValueParent<Int>>(Int.imps, Object, (input) => new Implicit<Int, Object>(input));
-        addCast<IValueParent<Int>>(Int.imps, Double, (input) => new Implicit<Int, Double>(input));
-        addCast<IValueParent<Int>>(Int.imps, String, (input) => new Implicit<Int, String>(input));
+        addImplicit<Int, Object>();
+        addExplicit<Int, Uint>();
+        addImplicit<Int, Double>();
+        addImplicit<Int, Float>();
+        addImplicit<Int, String>();
 
-        addCast<IValueParent<Double>>(Double.imps, Object, (input) => new Implicit<Double, Object>(input));
-        addCast<IValueParent<Double>>(Double.exps, Int,    (input) => new Explicit<Double, Int>(input));
-        addCast<IValueParent<Double>>(Double.imps, String, (input) => new Implicit<Double, String>(input));
-            
-        addCast<IValueParent<Object>>(Object.exps, Bool,   (input) => new Explicit<Object, Bool>(input));
-        addCast<IValueParent<Object>>(Object.exps, Int,    (input) => new Explicit<Object, Int>(input));
-        addCast<IValueParent<Object>>(Object.exps, Double, (input) => new Explicit<Object, Double>(input));
-        addCast<IValueParent<Object>>(Object.imps, String, (input) => new Implicit<Object, String>(input));
+        addImplicit<Uint, Object>();
+        addExplicit<Uint, Int>();
+        addImplicit<Uint, Double>();
+        addImplicit<Uint, Float>();
+        addImplicit<Uint, String>();
+        
+        addImplicit<Double, Object>();
+        addExplicit<Double, Int>();
+        addExplicit<Double, Uint>();
+        addExplicit<Double, Float>();
+        addImplicit<Double, String>();
 
-        addCast<IValueParent<String>>(String.imps, Object, (input) => new Implicit<String, Object>(input));
+        addImplicit<Float, Object>();
+        addExplicit<Float, Int>();
+        addExplicit<Float, Uint>();
+        addImplicit<Float, Double>();
+        addImplicit<Float, String>();
+
+        addExplicit<Object, Bool>();
+        addExplicit<Object, Int>();
+        addExplicit<Object, Uint>();
+        addExplicit<Object, Double>();
+        addExplicit<Object, Float>();
+        addImplicit<Object, String>();
+
+        addImplicit<String, Object>();
 
         addCast<IFuncDef>(FuncDef.imps, FuncGroup, (input) => new FuncGroup(input));
     }

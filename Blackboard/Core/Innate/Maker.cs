@@ -1,13 +1,15 @@
 ﻿using Blackboard.Core.Actions;
 using Blackboard.Core.Data.Caps;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 
-namespace Blackboard.Core;
+namespace Blackboard.Core.Innate;
 
 /// <summary>A collection of creation methods which switch based on type.</summary>
 static public class Maker {
@@ -17,11 +19,13 @@ static public class Maker {
     /// <param name="type">The type the cast returns.</param>
     /// <returns>The function group for casting a value to the given type or null if an unexpected type./returns>
     static public IFuncGroup? GetCastMethod(Slate slate, Type type) {
-        if (slate.Global.Find(Slate.OperatorNamespace) is not Namespace ops) return null;
+        if (slate.Global.Find(Operators.Namespace) is not Namespace ops) return null;
         INode? castGroup =
             type == Type.Object  ? ops.Find("castObject") :
             type == Type.Bool    ? ops.Find("castBool") :
             type == Type.Int     ? ops.Find("castInt") :
+            type == Type.Uint    ? ops.Find("castUint") :
+            type == Type.Float   ? ops.Find("castFloat") :
             type == Type.Double  ? ops.Find("castDouble") :
             type == Type.String  ? ops.Find("castString") :
             type == Type.Trigger ? ops.Find("castTrigger") :
@@ -39,6 +43,8 @@ static public class Maker {
         type == Type.Object  ? Assign<Object>.Create(target, root, allNewNodes) :
         type == Type.Bool    ? Assign<Bool>.  Create(target, root, allNewNodes) :
         type == Type.Int     ? Assign<Int>.   Create(target, root, allNewNodes) :
+        type == Type.Uint    ? Assign<Uint>.  Create(target, root, allNewNodes) :
+        type == Type.Float   ? Assign<Float>. Create(target, root, allNewNodes) :
         type == Type.Double  ? Assign<Double>.Create(target, root, allNewNodes) :
         type == Type.String  ? Assign<String>.Create(target, root, allNewNodes) :
         type == Type.Trigger ? Provoke.       Create(target, root, allNewNodes) :
@@ -54,6 +60,8 @@ static public class Maker {
         type == Type.Object  ? ValueGetter<Object>.Create(names, root, allNewNodes) :
         type == Type.Bool    ? ValueGetter<Bool>.  Create(names, root, allNewNodes) :
         type == Type.Int     ? ValueGetter<Int>.   Create(names, root, allNewNodes) :
+        type == Type.Uint    ? ValueGetter<Uint>.  Create(names, root, allNewNodes) :
+        type == Type.Float   ? ValueGetter<Float>. Create(names, root, allNewNodes) :
         type == Type.Double  ? ValueGetter<Double>.Create(names, root, allNewNodes) :
         type == Type.String  ? ValueGetter<String>.Create(names, root, allNewNodes) :
         type == Type.Trigger ? TriggerGetter.      Create(names, root, allNewNodes) :
@@ -66,6 +74,8 @@ static public class Maker {
         type == Type.Object  ? new InputValue<Object>() :
         type == Type.Bool    ? new InputValue<Bool>() :
         type == Type.Int     ? new InputValue<Int>() :
+        type == Type.Uint    ? new InputValue<Uint>() :
+        type == Type.Float   ? new InputValue<Float>() :
         type == Type.Double  ? new InputValue<Double>() :
         type == Type.String  ? new InputValue<String>() :
         type == Type.Trigger ? new InputTrigger() :
@@ -78,6 +88,8 @@ static public class Maker {
         type == Type.Object  ? new ExternValue<Object>() :
         type == Type.Bool    ? new ExternValue<Bool>() :
         type == Type.Int     ? new ExternValue<Int>() :
+        type == Type.Uint    ? new ExternValue<Uint>() :
+        type == Type.Float   ? new ExternValue<Float>() :
         type == Type.Double  ? new ExternValue<Double>() :
         type == Type.String  ? new ExternValue<String>() :
         type == Type.Trigger ? new ExternTrigger() :
@@ -90,8 +102,26 @@ static public class Maker {
         node is IValueParent<Object> objectNode  ? new ShellValue<Object>(objectNode) :
         node is IValueParent<Bool>   boolNode    ? new ShellValue<Bool>(boolNode) :
         node is IValueParent<Int>    intNode     ? new ShellValue<Int>(intNode) :
+        node is IValueParent<Uint>   uintNode    ? new ShellValue<Uint>(uintNode) :
+        node is IValueParent<Float>  floatNode   ? new ShellValue<Float>(floatNode) :
         node is IValueParent<Double> doubleNode  ? new ShellValue<Double>(doubleNode) :
         node is IValueParent<String> stringNode  ? new ShellValue<String>(stringNode) :
         node is ITriggerParent       triggerNode ? new ShellTrigger(triggerNode) :
         null;
+
+    /// <summary>Creates a new constant for the given value.</summary>
+    /// <param name="value">The value to create a constant for.</param>
+    /// <returns>The constant for the given value.</returns>
+    static public IConstant CreateConstant(IData value) =>
+        value switch {
+            Bool   b => new Literal<Bool>(b),
+            Int    i => new Literal<Int>(i),
+            Uint   u => new Literal<Uint>(u),
+            Float  f => new Literal<Float>(f),
+            Double d => new Literal<Double>(d),
+            String s => new Literal<String>(s),
+            Object o => new Literal<Object>(o),
+            _        => throw new Message("Unexpected value type in literal creation").
+                           With("Value", value)
+        };
 }

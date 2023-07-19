@@ -36,7 +36,9 @@ public class Types {
         node.CheckImplicit(Type.Object, 0, "Implicit<object>[null](Input<bool>)");
         node.CheckInherit (Type.Bool, 0);
         node.CheckNoCast  (Type.Int);
+        node.CheckNoCast  (Type.Uint);
         node.CheckNoCast  (Type.Double);
+        node.CheckNoCast  (Type.Float);
         node.CheckImplicit(Type.String, 0, "Implicit<string>[](Input<bool>)");
         node.CheckNoCast  (Type.FuncGroup);
         node.CheckNoCast  (Type.FuncDef);
@@ -96,7 +98,17 @@ public class Types {
         Type.Double.
             CheckInheritors("counter-double, latch-double").
             CheckImplicits("object, string").
-            CheckExplicits("int");
+            CheckExplicits("int, uint, float");
+    }
+
+    [TestMethod]
+    [TestTag("float")]
+    public void TestTypes_float() {
+        new InputValue<Float>().CheckTypeOf(Type.Float);
+        Type.Float.
+            CheckInheritors("").
+            CheckImplicits("object, double, string").
+            CheckExplicits("int, uint");
     }
 
     [TestMethod]
@@ -125,8 +137,18 @@ public class Types {
         new InputValue<Int>().CheckTypeOf(Type.Int);
         Type.Int.
             CheckInheritors("counter-int, latch-int").
-            CheckImplicits("object, double, string").
-            CheckExplicits("");
+            CheckImplicits("object, double, float, string").
+            CheckExplicits("uint");
+    }
+
+    [TestMethod]
+    [TestTag("uint")]
+    public void TestTypes_uint() {
+        new InputValue<Uint>().CheckTypeOf(Type.Uint);
+        Type.Uint.
+            CheckInheritors("").
+            CheckImplicits("object, double, float, string").
+            CheckExplicits("int");
     }
 
     [TestMethod]
@@ -212,7 +234,7 @@ public class Types {
     [TestTag("node")]
     public void TestTypes_node() =>
         Type.Node.
-            CheckInheritors("trigger, object, bool, int, double, string, namespace, function-group, function-def").
+            CheckInheritors("trigger, object, bool, int, uint, double, float, string, namespace, function-group, function-def").
             CheckImplicits("").
             CheckExplicits("");
 
@@ -223,7 +245,7 @@ public class Types {
         Type.Object.
             CheckInheritors("latch-object").
             CheckImplicits("string").
-            CheckExplicits("bool, int, double");
+            CheckExplicits("bool, int, uint, double, float");
     }
 
     [TestMethod]

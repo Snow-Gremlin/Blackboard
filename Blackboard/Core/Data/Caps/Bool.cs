@@ -36,8 +36,8 @@ public readonly struct Bool :
 
     #region Data...
 
-    /// <summary>Gets the name for the type of data.</summary>
-    public string TypeName => Type.Bool.Name;
+    /// <summary>Gets the type for the type of data.</summary>
+    public Type Type => Type.Bool;
 
     /// <summary>Get the value of the data as a string.</summary>
     public string ValueAsString => this.Value ? TrueString : FalseString;
@@ -62,7 +62,7 @@ public readonly struct Bool :
     /// <summary>Casts an object into a bool for an explicit cast.</summary>
     /// <param name="value">The object value to cast.</param>
     /// <returns>The resulting boolean value.</returns>
-    public Bool CastFrom(Object value) => new(value.CastTo<bool>(this.TypeName));
+    public Bool CastFrom(Object value) => new(value.CastTo<bool>(this.Type.Name));
 
     #endregion
 
@@ -77,5 +77,5 @@ public readonly struct Bool :
 
     /// <summary>Gets the name of this data type and value.</summary>
     /// <returns>The name of the boolean type and value.</returns>
-    public override string ToString() => this.TypeName+"("+this.ValueAsString+")";
+    public override string ToString() => this.Type.Name+"("+this.ValueAsString+")";
 }

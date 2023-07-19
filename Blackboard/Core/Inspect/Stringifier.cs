@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Innate;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
@@ -348,7 +349,7 @@ sealed public class Stringifier {
         node switch {
             null          => "null",
             IFuncDef  def => nodeDataType(def),
-            IDataNode dat => "<" + dat.Data.TypeName + ">",
+            IDataNode dat => "<" + dat.Data.Type.Name + ">",
             ITrigger      => "<trigger>",
             _             => "",
         };
@@ -438,7 +439,7 @@ sealed public class Stringifier {
 
         string tail = node.Fields.Select(pair =>
             (pair.Value is IFuncGroup or IFuncDef) && !this.ShowFuncs ? null :
-            pair.Key == Slate.OperatorNamespace ? null :
+            pair.Key == Operators.Namespace ? null :
             pair.Key + ": " + this.stringNodeWithoutName(pair.Value, depth-1, true)
         ).NotNull().Indent(this.Indent).Join("," + nl);
 

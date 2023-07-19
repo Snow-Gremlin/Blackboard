@@ -40,6 +40,16 @@ static class SlateExt {
         return slate;
     }
 
+    /// <summary>Checks the integer value of this node.</summary>
+    /// <param name="slate">This is the slate to check the value with.</param>
+    /// <param name="exp">The expected integer value.</param>
+    /// <param name="names">The name of the variable to look up.</param>
+    /// <returns>The slate so that method calls can be chained together.</returns>
+    static public Slate CheckValue(this Slate slate, uint exp, params string[] names) {
+        Assert.AreEqual(exp, slate.GetUint(names), checkValueMsg("uint", names));
+        return slate;
+    }
+
     /// <summary>Checks the double value of this node.</summary>
     /// <param name="slate">This is the slate to check the value with.</param>
     /// <param name="exp">The expected double value.</param>
@@ -47,6 +57,16 @@ static class SlateExt {
     /// <returns>The slate so that method calls can be chained together.</returns>
     static public Slate CheckValue(this Slate slate, double exp, params string[] names) {
         Assert.AreEqual(exp, slate.GetDouble(names), checkValueMsg("double", names));
+        return slate;
+    }
+
+    /// <summary>Checks the float value of this node.</summary>
+    /// <param name="slate">This is the slate to check the value with.</param>
+    /// <param name="exp">The expected float value.</param>
+    /// <param name="names">The name of the variable to look up.</param>
+    /// <returns>The slate so that method calls can be chained together.</returns>
+    static public Slate CheckValue(this Slate slate, float exp, params string[] names) {
+        Assert.AreEqual(exp, slate.GetFloat(names), checkValueMsg("float", names));
         return slate;
     }
 

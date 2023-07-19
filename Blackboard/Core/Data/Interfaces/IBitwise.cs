@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Blackboard.Core.Data.Caps;
+using System.Collections.Generic;
 
 namespace Blackboard.Core.Data.Interfaces;
 
@@ -51,10 +52,10 @@ public interface IBitwise<T> : IData
     /// <summary>This gets the left shift of this value by the other value.</summary>
     /// <param name="other">The number of bits to shift by. This should always be positive.</param>
     /// <returns>The left shifted value.</returns>
-    T LeftShift(T other);
+    T LeftShift(Int other);
 
     /// <summary>This gets the right shift of this value by the other value.</summary>
     /// <param name="other">The number of bits to shift by. This should always be positive.</param>
     /// <returns>The right shifted value.</returns>
-    T RightShift(T other);
+    T RightShift(Int other);
 }

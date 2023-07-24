@@ -179,8 +179,8 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
             if (existing is not IExtern)
                 throw new Message("A node already exists with the given name.").
                     With("Location", this.LastLocation).
-                    With("Name", name).
-                    With("Type", type);
+                    With("Name",     name).
+                    With("Type",     type);
             scope.RemoveFields(name);
         }
 
@@ -188,8 +188,8 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
             root = Maker.CreateShell(root) ??
                 throw new Message("The root for a define could not be shelled.").
                     With("Location", this.LastLocation).
-                    With("Name", name).
-                    With("Root", root);
+                    With("Name",     name).
+                    With("Root",     root);
 
         this.Actions.Add(new Define(scope.Receiver, name, root, newNodes));
         scope.WriteField(name, root);
@@ -204,16 +204,16 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         this.Logger.Info("Add Provoke Trigger:");
         if (target is not ITriggerInput input)
             throw new Message("Target node is not an input trigger.").
+                With("Location", this.LastLocation).
                 With("Target",   target).
-                With("Value",    value).
-                With("Location", this.LastLocation);
+                With("Value",    value);
 
         // If there is no condition, add an unconditional provoke.
         if (value is null) {
             IAction assign = Provoke.Create(target) ??
                 throw new Message("Unexpected node types for a unconditional provoke.").
                     With("Location", this.LastLocation).
-                    With("Target", target);
+                    With("Target",   target);
 
             this.Actions.Add(assign);
             return null;
@@ -225,8 +225,8 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         IAction condAssign = Provoke.Create(input, root, newNodes) ??
             throw new Message("Unexpected node types for a conditional provoke.").
                 With("Location", this.LastLocation).
-                With("Target", target).
-                With("Value", value);
+                With("Target",   target).
+                With("Value",    value);
 
         this.Actions.Add(condAssign);
         return root;
@@ -241,16 +241,16 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         if (target is not IInput)
             throw new Message("May not assign to a node which is not an input.").
                 With("Location", this.LastLocation).
-                With("Input", target).
-                With("Value", value);
+                With("Input",    target).
+                With("Value",    value);
 
         // Check if the base types match. Don't need to check that the type is
         // a data type or trigger since only those can be reduced to constants.
         Type targetType = Type.TypeOf(target) ??
             throw new Message("Unable to find target type.").
                 With("Location", this.LastLocation).
-                With("Input", target).
-                With("Value", value);
+                With("Input",    target).
+                With("Value",    value);
 
         INode root = this.PerformCast(targetType, value);
         HashSet<INode> newNodes = this.collectAndOrder(root);
@@ -313,8 +313,8 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
             if (existing is not IExtern)
                 throw new Message("A node already exists with the given name.").
                     With("Location", this.LastLocation).
-                    With("Name", name).
-                    With("Type", type);
+                    With("Name",     name).
+                    With("Type",     type);
             scope.RemoveFields(name);
         }
 
@@ -334,8 +334,9 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         VirtualNode scope = this.Scope.Current;
         if (scope.ContainsField(name))
             throw new Message("A node already exists with the given name.").
-                With("Name", name).
-                With("Type", targetType);
+                With("Location", this.LastLocation).
+                With("Name",     name).
+                With("Type",     targetType);
 
         INode root = targetType is null ? value : this.PerformCast(targetType, value);
         HashSet<INode> newNodes = this.collectAndOrder(root);

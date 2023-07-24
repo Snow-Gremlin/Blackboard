@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Actions;
+﻿using Blackboard.Core;
+using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using System.Collections.Generic;
@@ -10,13 +11,16 @@ sealed internal partial class Builder {
 
     /// <summary>The collection of actions which have been parsed.</summary>
     public class ActionCollection {
-        private readonly Builder builder;
+        private readonly Slate slate;
+        private readonly Logger? logger;
         private readonly LinkedList<IAction> actions;
 
         /// <summary>Creates new a new action collection.</summary>
-        /// <param name="builder">The builder this collection belongs to.</param>
-        internal ActionCollection(Builder builder) {
-            this.builder = builder;
+        /// <param name="slate">The slate to create the formula for.</param>
+        /// <param name="logger">The optional logger to write debugging information to.</param>
+        internal ActionCollection(Slate slate, Logger? logger = null) {
+            this.slate   = slate;
+            this.logger  = logger;
             this.actions = new LinkedList<IAction>();
         }
 
@@ -24,13 +28,12 @@ sealed internal partial class Builder {
         public void Clear() => this.actions.Clear();
 
         /// <summary>Gets the formula containing all the actions.</summary>
-        public Formula Formula =>
-            new(this.builder.Slate, this.actions.Append(new Finish()));
+        public Formula Formula => new(this.slate, this.actions.Append(new Finish()));
 
         /// <summary>Adds a pending action into this formula.</summary>
         /// <param name="performer">The performer to add.</param>
         public void Add(IAction action) {
-            this.builder.Logger.Info("Add Action: {0}", action);
+            this.logger.Info("Add Action: {0}", action);
             this.actions.AddLast(action);
         }
 

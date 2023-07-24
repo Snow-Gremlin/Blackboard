@@ -10,13 +10,13 @@ sealed internal partial class Builder {
 
     /// <summary>The stack of argument lists used for building up function calls.</summary>
     public class ArgumentStack {
-        private readonly Builder builder;
+        private readonly Logger? logger;
         private readonly LinkedList<LinkedList<INode>> argStacks;
 
         /// <summary>Create a new argument stack.</summary>
-        /// <param name="builder">The builder this stack belong to.</param>
-        internal ArgumentStack(Builder builder) {
-            this.builder   = builder;
+        /// <param name="logger">The logger to get debug information with.</param>
+        internal ArgumentStack(Logger? logger = null) {
+            this.logger    = logger;
             this.argStacks = new LinkedList<LinkedList<INode>>();
         }
 
@@ -25,14 +25,14 @@ sealed internal partial class Builder {
 
         /// <summary>This starts a new argument list.</summary>
         public void Start() {
-            this.builder.Logger.Info("Start Arguments");
+            this.logger.Info("Start Arguments");
             this.argStacks.AddFirst(new LinkedList<INode>());
         }
 
         /// <summary>This adds the given node in to the newest argument list.</summary>
         /// <param name="node">The node to add to the argument list.</param>
         public void Add(INode node) {
-            this.builder.Logger.Info("Add Argument: {0}", node);
+            this.logger.Info("Add Argument: {0}", node);
             LinkedListNode<LinkedList<INode>>? first = this.argStacks.First;
             if (first is not null) first.Value.AddLast(node);
             else throw new Message("May not add an argument without first starting an argument list.");
@@ -41,7 +41,7 @@ sealed internal partial class Builder {
         /// <summary>This gets all the nodes which are in the current argument list, then removes the list.</summary>
         /// <returns>The nodes which were in the current argument list.</returns>
         public INode[] End() {
-            this.builder.Logger.Info("End Arguments");
+            this.logger.Info("End Arguments");
             LinkedListNode<LinkedList<INode>>? first = this.argStacks.First;
             return first is not null ? first.Value.ToArray() :
                     throw new Message("May not end an argument without first starting an argument list.");

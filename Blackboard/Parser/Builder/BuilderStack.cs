@@ -10,16 +10,16 @@ sealed internal partial class Builder {
     /// <summary>The stack of values which are currently being worked on during a parse.</summary>
     public class BuilderStack<T> {
         private readonly string usage;
-        private readonly Builder builder;
+        private readonly Logger? logger;
         private readonly LinkedList<T> stack;
 
         /// <summary>Creates a new stack.</summary>
         /// <param name="usage">The short usage of this stack used for logging.</param>
-        /// <param name="builder">The builder this stack belongs to.</param>
-        internal BuilderStack(string usage, Builder builder) {
-            this.usage   = usage;
-            this.builder = builder;
-            this.stack   = new LinkedList<T>();
+        /// <param name="logger">The optional logger to write debugging information to.</param>
+        internal BuilderStack(string usage, Logger? logger = null) {
+            this.usage  = usage;
+            this.logger = logger;
+            this.stack  = new LinkedList<T>();
         }
 
         /// <summary>Removes all the values from this stack.</summary>
@@ -28,7 +28,7 @@ sealed internal partial class Builder {
         /// <summary>Pushes a value onto the stack.</summary>
         /// <param name="value">The value to push.</param>
         public void Push(T value) {
-            this.builder.Logger.Info("Push {0}: {1}", this.usage, value);
+            this.logger.Info("Push {0}: {1}", this.usage, value);
             this.stack.AddLast(value);
         }
 
@@ -43,7 +43,7 @@ sealed internal partial class Builder {
         /// <summary>Pops off a value is on the top of the stack.</summary>
         /// <returns>The value which was on top of the stack.</returns>
         public T Pop() {
-            this.builder.Logger.Info("Pop {0}", this.usage);
+            this.logger.Info("Pop {0}", this.usage);
             T node = this.Peek();
             this.stack.RemoveLast();
             return node;
@@ -53,7 +53,7 @@ sealed internal partial class Builder {
         /// <param name="count">The number of values to pop.</param>
         /// <returns>The popped values in the order oldest to newest.</returns>
         public T[] Pop(int count) {
-            this.builder.Logger.Info("Pop {1} {0}(s)", this.usage, count);
+            this.logger.Info("Pop {1} {0}(s)", this.usage, count);
             T[] items = new T[count];
             for (int i = count-1; i >= 0; i--) {
                 items[i] = this.Peek();

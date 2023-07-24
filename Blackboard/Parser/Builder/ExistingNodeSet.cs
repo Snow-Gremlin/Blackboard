@@ -11,14 +11,14 @@ sealed internal partial class Builder {
 
     /// <summary>A collection of existing nodes.</summary>
     public class ExistingNodeSet {
-        private readonly Builder builder;
+        private readonly Logger? logger;
         private readonly HashSet<INode> nodes;
 
         /// <summary>Creates a new existing node set.</summary>
-        /// <param name="builder">The builder this et belongs to.</param>
-        internal ExistingNodeSet(Builder builder) {
-            this.builder  = builder;
-            this.nodes = new HashSet<INode>();
+        /// <param name="logger">The optional logger to write debugging information to.</param>
+        internal ExistingNodeSet(Logger? logger = null) {
+            this.logger = logger;
+            this.nodes  = new HashSet<INode>();
         }
 
         /// <summary>Clears the set of existing nodes.</summary>
@@ -27,7 +27,7 @@ sealed internal partial class Builder {
         /// <summary>Adds an existing node which has been referenced since the last clear.</summary>
         /// <param name="node">The existing node to add.</param>
         public void Add(INode node) {
-            this.builder.Logger.Info("Add Existing: {0} ", node);
+            this.logger.Info("Add Existing: {0} ", node);
             this.nodes.Add(node is VirtualNode virt ? virt.Receiver : node);
         }
 

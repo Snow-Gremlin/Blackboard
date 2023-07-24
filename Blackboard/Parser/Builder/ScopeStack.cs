@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Extensions;
+﻿using Blackboard.Core;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
@@ -11,15 +12,18 @@ sealed internal partial class Builder {
 
     /// <summary>The stack of the namespaces to represent the scope being worked on.</summary>
     public class ScopeStack {
-        private readonly Builder builder;
+        private readonly Slate slate;
+        private readonly Logger? logger;
         private readonly LinkedList<VirtualNode> scopes;
 
         /// <summary>Creates a new scope stack.</summary>
-        /// <param name="builder">The builder this stack belongs too.</param>
-        internal ScopeStack(Builder builder) {
-            this.builder = builder;
-            this.Global  = this.createGlobal();
-            this.scopes  = new();
+        /// <param name="slate">The slate to create the formula for.</param>
+        /// <param name="logger">The optional logger to write debugging information to.</param>
+        internal ScopeStack(Slate slate, Logger? logger = null) {
+            this.slate  = slate;
+            this.logger = logger;
+            this.Global = this.createGlobal();
+            this.scopes = new();
             this.scopes.AddFirst(this.Global);
         }
 
@@ -33,7 +37,7 @@ sealed internal partial class Builder {
 
         /// <summary>Creates a new virtual global namespace.</summary>
         /// <returns>The new virtual node for global.</returns>
-        private VirtualNode createGlobal() => new("Global", this.builder.Slate.Global);
+        private VirtualNode createGlobal() => new("Global", this.slate.Global);
 
         /// <summary>The global node as a virtual node so it can be temporarily added to and removed from.</summary>
         public VirtualNode Global { get; private set; }
@@ -60,14 +64,14 @@ sealed internal partial class Builder {
 
         /// <summary>Pops a top node from the scope.</summary>
         public void Pop() {
-            this.builder.Logger.Info("Pop Scope");
+            this.logger.Info("Pop Scope");
             this.scopes.RemoveFirst();
         }
 
         /// <summary>Pushes a new node onto the scope.</summary>
         /// <param name="node">The node to push on the scope.</param>
         public void Push(VirtualNode node) {
-            this.builder.Logger.Info("Push Scope: {0}", node);
+            this.logger.Info("Push Scope: {0}", node);
             this.scopes.AddFirst(node);
         }
 

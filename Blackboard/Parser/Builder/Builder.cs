@@ -3,7 +3,6 @@ using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
@@ -29,14 +28,14 @@ sealed internal partial class Builder : PP.ParseTree.PromptArgs {
         this.Slate  = slate;
         this.Logger = logger.SubGroup(nameof(Builder));
 
-        this.Actions = new ActionCollection(this);
-        this.Scope   = new ScopeStack(this);
+        this.Actions = new ActionCollection(this.Slate, this.Logger);
+        this.Scope   = new ScopeStack(this.Slate, this.Logger);
 
-        this.Nodes       = new BuilderStack<INode>("Node", this);
-        this.Types       = new BuilderStack<Type>("Type", this);
-        this.Identifiers = new BuilderStack<string>("Id", this);
-        this.Existing    = new ExistingNodeSet(this);
-        this.Arguments   = new ArgumentStack(this);
+        this.Nodes       = new BuilderStack<INode>("Node", this.Logger);
+        this.Types       = new BuilderStack<Type>("Type", this.Logger);
+        this.Identifiers = new BuilderStack<string>("Id", this.Logger);
+        this.Existing    = new ExistingNodeSet(this.Logger);
+        this.Arguments   = new ArgumentStack(this.Logger);
         this.optimizer   = new Optimizer();
     }
 

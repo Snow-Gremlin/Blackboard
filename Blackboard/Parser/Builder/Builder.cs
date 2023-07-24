@@ -19,7 +19,7 @@ namespace Blackboard.Parser.Builder;
 /// This holds onto virtual nodes being added and nodes virtually removed
 /// prior to the actions being performed. 
 /// </remarks>
-sealed internal partial class Builder : PP.ParseTree.PromptArgs {
+sealed internal class Builder : PP.ParseTree.PromptArgs {
 
     /// <summary>Creates a new formula builder for parsing states.</summary>
     /// <param name="slate">The slate this stack is for.</param>

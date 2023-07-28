@@ -1,9 +1,10 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Formuila.Actions;
 using Blackboard.Core.Inspect;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Actions;
+namespace Blackboard.Core.Formuila;
 
 /// <summary>This is a collection of actions pending to perform on the Blackboard slate.</summary>
 sealed public class Formula {
@@ -22,14 +23,14 @@ sealed public class Formula {
     /// <param name="actions">The actions that this formula will perform.</param>
     public Formula(Slate slate, IEnumerable<IAction> actions) {
         this.actions = actions.NotNull().ToArray();
-        this.Slate = slate;
+        Slate = slate;
     }
 
     /// <summary>The slate that this formula was built for and will be run on.</summary>
     public readonly Slate Slate;
 
     /// <summary>The actions for this formula.</summary>
-    public IReadOnlyList<IAction> Actions => this.actions;
+    public IReadOnlyList<IAction> Actions => actions;
 
     /// <summary>Performs all the actions for this formula.</summary>
     /// <param name="logger">The optional logger to debug with.</param>
@@ -38,8 +39,8 @@ sealed public class Formula {
         logger.Info("Formula");
         Logger? sub = logger.SubGroup(nameof(Formula));
         Record.Result result = new();
-        foreach (IAction action in this.actions)
-            action.Perform(this.Slate, result, sub);
+        foreach (IAction action in actions)
+            action.Perform(Slate, result, sub);
         return result;
     }
 

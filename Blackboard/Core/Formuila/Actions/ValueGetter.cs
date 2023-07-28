@@ -5,7 +5,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Actions;
+namespace Blackboard.Core.Formuila.Actions;
 
 /// <summary>This is an action that will get a value to the result.</summary>
 /// <typeparam name="T">The type of data for the gotten value.</typeparam>
@@ -22,7 +22,7 @@ sealed public class ValueGetter<T> : IGetter
     /// <param name="allNewNodes">All the nodes which are new children of the node.</param>
     /// <returns>The getter action or null if the node can not be gotten.</returns>
     static public ValueGetter<T>? Create(string[] names, INode node, IEnumerable<INode> allNewNodes) =>
-        (node is IValue<T> data) ? new ValueGetter<T>(names, data, allNewNodes) : null;
+        node is IValue<T> data ? new ValueGetter<T>(names, data, allNewNodes) : null;
 
     /// <summary>The data node to get the data from.</summary>
     private readonly IValue<T> value;
@@ -39,23 +39,23 @@ sealed public class ValueGetter<T> : IGetter
     /// <param name="node">The node to get the value from.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the node.</param>
     public ValueGetter(string[] names, IValue<T> node, IEnumerable<INode> allNewNodes) {
-        this.Names = names;
-        this.value = node;
+        Names = names;
+        value = node;
 
         // Pre-sort the evaluable nodes.
         LinkedList<IEvaluable> nodes = new();
         nodes.SortInsertUnique(allNewNodes.NotNull().OfType<IEvaluable>());
-        this.needPending = nodes.ToArray();
+        needPending = nodes.ToArray();
     }
 
     /// <summary>The names in the path to write the value to.</summary>
     public string[] Names { get; }
 
     /// <summary>The data node to the data to get.</summary>
-    public INode Node => this.value;
+    public INode Node => value;
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
-    public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
+    public IReadOnlyList<IEvaluable> NeedPending => needPending;
 
     /// <summary>This will perform the action.</summary>
     /// <param name="slate">The slate for this action.</param>
@@ -63,10 +63,10 @@ sealed public class ValueGetter<T> : IGetter
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Value Getter: {0}", this);
-        slate.PendEval(this.needPending);
+        slate.PendEval(needPending);
         slate.PerformEvaluation(logger);
-        result.SetValue(this.value.Value, this.Names);
-        logger.Info("Value Getter Done {0}", this.Names.Join("."));
+        result.SetValue(value.Value, Names);
+        logger.Info("Value Getter Done {0}", Names.Join("."));
     }
 
     /// <summary>Gets a human readable string for this getter.</summary>

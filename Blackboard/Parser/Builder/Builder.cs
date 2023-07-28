@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Formuila.Actions;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
@@ -157,7 +157,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         // During optimization the depths may change from this but this initial depth
         // will help make all future depth updates perform efficiently.
         if (node is IEvaluable eval)
-            eval.Depth = eval.MinimumAllowedDepth();
+            eval.Depth = eval.MinimumAllowedDepth();s
         return true;
     }
 

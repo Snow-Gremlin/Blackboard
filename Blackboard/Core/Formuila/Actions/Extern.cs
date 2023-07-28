@@ -2,9 +2,8 @@
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
-using System.Threading.Channels;
 
-namespace Blackboard.Core.Actions;
+namespace Blackboard.Core.Formuila.Actions;
 
 /// <summary>
 /// This is an action to add an extern node in a field writer.
@@ -21,9 +20,9 @@ sealed public class Extern : IAction {
         if (receiver is null or VirtualNode)
             throw new Message("May not use a null or {0} as the receiver in a {1}.", nameof(VirtualNode), nameof(Extern));
 
-        this.Receiver = receiver;
-        this.Name = name;
-        this.Node = node;
+        Receiver = receiver;
+        Name = name;
+        Node = node;
     }
 
     /// <summary>This is the receiver that will be written to.</summary>
@@ -42,34 +41,34 @@ sealed public class Extern : IAction {
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Add Extern: {0}", this);
 
-        INode? existing = this.Receiver.ReadField(this.Name);
+        INode? existing = Receiver.ReadField(Name);
         if (existing is not null) {
 
             Type existType = Type.TypeOf(existing) ??
                 throw new Message("Unable to find existing type while setting extern.").
-                    With("Name",     this.Name).
+                    With("Name",     Name).
                     With("Existing", existing).
-                    With("Node",     this.Node);
-            
-            Type externType = Type.TypeOf(this.Node) ??
+                    With("Node",     Node);
+
+            Type externType = Type.TypeOf(Node) ??
                 throw new Message("Unable to find extern type while setting extern.").
-                    With("Name",     this.Name).
+                    With("Name",     Name).
                     With("Existing", existing).
-                    With("Node",     this.Node);
+                    With("Node",     Node);
 
             if (existType != externType)
                 throw new Message("Extern node does not match existing node type.").
-                    With("Name",          this.Name).
+                    With("Name",          Name).
                     With("Existing",      existing).
                     With("Existing Type", existType).
-                    With("Node",          this.Node);
+                    With("Node",          Node);
 
             // Node already exists as an extern or the actual node.
             return;
         }
 
         // Write the extern placeholder node.
-        this.Receiver.WriteField(this.Name, this.Node);
+        Receiver.WriteField(Name, Node);
     }
 
     /// <summary>Gets a human readable string for this define.</summary>

@@ -45,13 +45,13 @@ sealed public class Provoke : IAction {
     /// <param name="trigger">The optional trigger to conditionally provoke with or null to always provoke.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the trigger.</param>
     public Provoke(ITriggerInput target, ITrigger? trigger, IEnumerable<INode>? allNewNodes = null) {
-        Target = target;
-        Trigger = trigger;
+        this.Target  = target;
+        this.Trigger = trigger;
 
         // Pre-sort the evaluable nodes.
         LinkedList<IEvaluable> nodes = new();
         nodes.SortInsertUnique(allNewNodes?.NotNull()?.OfType<IEvaluable>());
-        needPending = nodes.ToArray();
+        this.needPending = nodes.ToArray();
     }
 
     /// <summary>The target input trigger to provoke.</summary>
@@ -61,7 +61,7 @@ sealed public class Provoke : IAction {
     public readonly ITrigger? Trigger;
 
     /// <summary>All the nodes which are new children of the node to provoke.</summary>
-    public IReadOnlyList<IEvaluable> NeedPending => needPending;
+    public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
 
     /// <summary>This will perform the action.</summary>
     /// <param name="slate">The slate for this action.</param>
@@ -69,9 +69,9 @@ sealed public class Provoke : IAction {
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Provoke: {0}", this);
-        slate.PendEval(needPending);
+        slate.PendEval(this.needPending);
         slate.PerformEvaluation(logger.SubGroup(nameof(Provoke)));
-        slate.SetTrigger(Target, Trigger?.Provoked ?? true);
+        slate.SetTrigger(this.Target, this.Trigger?.Provoked ?? true);
     }
 
     /// <summary>Gets a human readable string for this provoke.</summary>

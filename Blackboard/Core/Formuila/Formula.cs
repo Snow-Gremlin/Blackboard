@@ -23,14 +23,14 @@ sealed public class Formula {
     /// <param name="actions">The actions that this formula will perform.</param>
     public Formula(Slate slate, IEnumerable<IAction> actions) {
         this.actions = actions.NotNull().ToArray();
-        Slate = slate;
+        this.Slate   = slate;
     }
 
     /// <summary>The slate that this formula was built for and will be run on.</summary>
     public readonly Slate Slate;
 
     /// <summary>The actions for this formula.</summary>
-    public IReadOnlyList<IAction> Actions => actions;
+    public IReadOnlyList<IAction> Actions => this.actions;
 
     /// <summary>Performs all the actions for this formula.</summary>
     /// <param name="logger">The optional logger to debug with.</param>

@@ -21,8 +21,8 @@ sealed public class Extern : IAction {
             throw new Message("May not use a null or {0} as the receiver in a {1}.", nameof(VirtualNode), nameof(Extern));
 
         this.Receiver = receiver;
-        this.Name = name;
-        this.Node = node;
+        this.Name     = name;
+        this.Node     = node;
     }
 
     /// <summary>This is the receiver that will be written to.</summary>
@@ -41,34 +41,34 @@ sealed public class Extern : IAction {
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Add Extern: {0}", this);
 
-        INode? existing = Receiver.ReadField(Name);
+        INode? existing = this.Receiver.ReadField(this.Name);
         if (existing is not null) {
 
             Type existType = Type.TypeOf(existing) ??
                 throw new Message("Unable to find existing type while setting extern.").
-                    With("Name",     Name).
+                    With("Name",     this.Name).
                     With("Existing", existing).
-                    With("Node",     Node);
+                    With("Node",     this.Node);
 
             Type externType = Type.TypeOf(Node) ??
                 throw new Message("Unable to find extern type while setting extern.").
-                    With("Name",     Name).
+                    With("Name",     this.Name).
                     With("Existing", existing).
-                    With("Node",     Node);
+                    With("Node",     this.Node);
 
             if (existType != externType)
                 throw new Message("Extern node does not match existing node type.").
-                    With("Name",          Name).
+                    With("Name",          this.Name).
                     With("Existing",      existing).
                     With("Existing Type", existType).
-                    With("Node",          Node);
+                    With("Node",          this.Node);
 
             // Node already exists as an extern or the actual node.
             return;
         }
 
         // Write the extern placeholder node.
-        Receiver.WriteField(Name, Node);
+        this.Receiver.WriteField(this.Name, this.Node);
     }
 
     /// <summary>Gets a human readable string for this define.</summary>

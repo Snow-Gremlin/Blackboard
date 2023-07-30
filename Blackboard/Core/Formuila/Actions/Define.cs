@@ -30,9 +30,9 @@ sealed public class Define : IAction {
         if (receiver is null or VirtualNode)
             throw new Message("May not use a null or {0} as the receiver in a {1}.", nameof(VirtualNode), nameof(Define));
 
-        this.Receiver = receiver;
-        this.Name = name;
-        this.Node = node;
+        this.Receiver    = receiver;
+        this.Name        = name;
+        this.Node        = node;
         this.needParents = (allNewNodes ?? Enumerable.Empty<INode>()).Illegitimates().ToArray();
     }
 

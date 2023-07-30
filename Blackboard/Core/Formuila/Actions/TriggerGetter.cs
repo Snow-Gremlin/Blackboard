@@ -36,7 +36,7 @@ sealed public class TriggerGetter : IGetter {
     /// <param name="node">The node to get the provoke state from.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the node.</param>
     public TriggerGetter(string[] names, ITrigger node, IEnumerable<INode> allNewNodes) {
-        this.Names = names;
+        this.Names   = names;
         this.trigger = node;
 
         // Pre-sort the evaluable nodes.

@@ -24,9 +24,9 @@ sealed public class Temp : IAction {
     /// <param name="node">The temporary node with the given name.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the node to write.</param>
     public Temp(string name, INode node, IEnumerable<INode>? allNewNodes = null) {
-        Name = name;
-        Node = node;
-        needParents = (allNewNodes ?? Enumerable.Empty<INode>()).Illegitimates().ToArray();
+        this.Name        = name;
+        this.Node        = node;
+        this.needParents = (allNewNodes ?? Enumerable.Empty<INode>()).Illegitimates().ToArray();
     }
 
     /// <summary>The name to write the node with.</summary>
@@ -36,7 +36,7 @@ sealed public class Temp : IAction {
     public readonly INode Node;
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
-    public IReadOnlyList<IChild> NeedParents => needParents;
+    public IReadOnlyList<IChild> NeedParents => this.needParents;
 
     /// <summary>This will perform the action.</summary>
     /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
@@ -45,7 +45,7 @@ sealed public class Temp : IAction {
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Temp: {0}", this);
-        List<IChild> changed = needParents.Where(child => child.Legitimatize()).ToList();
+        List<IChild> changed = this.needParents.Where(child => child.Legitimatize()).ToList();
         slate.PendUpdate(changed);
         slate.PendEval(changed);
     }

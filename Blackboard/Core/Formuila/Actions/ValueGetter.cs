@@ -45,7 +45,7 @@ sealed public class ValueGetter<T> : IGetter
         // Pre-sort the evaluable nodes.
         LinkedList<IEvaluable> nodes = new();
         nodes.SortInsertUnique(allNewNodes.NotNull().OfType<IEvaluable>());
-        needPending = nodes.ToArray();
+        this.needPending = nodes.ToArray();
     }
 
     /// <summary>The names in the path to write the value to.</summary>

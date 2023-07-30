@@ -157,7 +157,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         // During optimization the depths may change from this but this initial depth
         // will help make all future depth updates perform efficiently.
         if (node is IEvaluable eval)
-            eval.Depth = eval.MinimumAllowedDepth();s
+            eval.Depth = eval.MinimumAllowedDepth();
         return true;
     }
 

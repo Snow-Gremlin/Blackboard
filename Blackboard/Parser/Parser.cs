@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Actions;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Formuila;
+using Blackboard.Core.Formuila.Actions;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
@@ -262,7 +262,7 @@ sealed public class Parser {
 
         // Create a new virtual namespace and an action to define the new namespace when this formula is run.
         Namespace newspace = new();
-        builder.Actions.Add(new Define(scope.Receiver, name, newspace));
+        builder.Actions.Add(new Define(scope.Receiver, name, newspace)); // TODO: Remove action creation from parser
         VirtualNode nextScope = new(name, newspace);
         builder.Scope.Push(nextScope);
         scope.WriteField(name, nextScope);

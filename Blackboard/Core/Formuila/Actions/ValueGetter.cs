@@ -39,8 +39,8 @@ sealed public class ValueGetter<T> : IGetter
     /// <param name="node">The node to get the value from.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the node.</param>
     public ValueGetter(string[] names, IValue<T> node, IEnumerable<INode> allNewNodes) {
-        Names = names;
-        value = node;
+        this.Names = names;
+        this.value = node;
 
         // Pre-sort the evaluable nodes.
         LinkedList<IEvaluable> nodes = new();
@@ -52,10 +52,10 @@ sealed public class ValueGetter<T> : IGetter
     public string[] Names { get; }
 
     /// <summary>The data node to the data to get.</summary>
-    public INode Node => value;
+    public INode Node => this.value;
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
-    public IReadOnlyList<IEvaluable> NeedPending => needPending;
+    public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
 
     /// <summary>This will perform the action.</summary>
     /// <param name="slate">The slate for this action.</param>
@@ -63,10 +63,10 @@ sealed public class ValueGetter<T> : IGetter
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Value Getter: {0}", this);
-        slate.PendEval(needPending);
+        slate.PendEval(this.needPending);
         slate.PerformEvaluation(logger);
-        result.SetValue(value.Value, Names);
-        logger.Info("Value Getter Done {0}", Names.Join("."));
+        result.SetValue(this.value.Value, this.Names);
+        logger.Info("Value Getter Done {0}", this.Names.Join("."));
     }
 
     /// <summary>Gets a human readable string for this getter.</summary>

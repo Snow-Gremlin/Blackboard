@@ -36,23 +36,23 @@ sealed public class TriggerGetter : IGetter {
     /// <param name="node">The node to get the provoke state from.</param>
     /// <param name="allNewNodes">All the nodes which are new children of the node.</param>
     public TriggerGetter(string[] names, ITrigger node, IEnumerable<INode> allNewNodes) {
-        Names = names;
-        trigger = node;
+        this.Names = names;
+        this.trigger = node;
 
         // Pre-sort the evaluable nodes.
         LinkedList<IEvaluable> nodes = new();
         nodes.SortInsertUnique(allNewNodes.NotNull().OfType<IEvaluable>());
-        needPending = nodes.ToArray();
+        this.needPending = nodes.ToArray();
     }
 
     /// <summary>The names in the path to write the provoke state to.</summary>
     public string[] Names { get; }
 
     /// <summary>The trigger node to the provoke state to get.</summary>
-    public INode Node => trigger;
+    public INode Node => this.trigger;
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
-    public IReadOnlyList<IEvaluable> NeedPending => needPending;
+    public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
 
     /// <summary>This will perform the action.</summary>
     /// <param name="slate">The slate for this action.</param>
@@ -60,10 +60,10 @@ sealed public class TriggerGetter : IGetter {
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Trigger Getter: {0}", this);
-        slate.PendEval(needPending);
+        slate.PendEval(this.needPending);
         slate.PerformEvaluation(logger);
-        result.SetTrigger(trigger.Provoked, Names);
-        logger.Info("Trigger Getter Done {0}", Names.Join("."));
+        result.SetTrigger(this.trigger.Provoked, this.Names);
+        logger.Info("Trigger Getter Done {0}", this.Names.Join("."));
     }
 
     /// <summary>Gets a human readable string for this getter.</summary>

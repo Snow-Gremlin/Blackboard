@@ -44,22 +44,22 @@ sealed public class Assign<T> : IAssign
     /// <param name="allNewNodes">All the nodes which are new children of the value.</param>
     public Assign(IValueInput<T> target, IValue<T> value, IEnumerable<INode> allNewNodes) {
         this.target = target;
-        this.value = value;
+        this.value  = value;
 
         // Pre-sort the evaluable nodes.
         LinkedList<IEvaluable> nodes = new();
         nodes.SortInsertUnique(allNewNodes.Illegitimates().OfType<IEvaluable>());
-        needPending = nodes.ToArray();
+        this.needPending = nodes.ToArray();
     }
 
     /// <summary>The target input node to set the value of.</summary>
-    public IInput Target => target;
+    public IInput Target => this.target;
 
     /// <summary>The data node to get the data to assign.</summary>
-    public IDataNode Value => value;
+    public IDataNode Value => this.value;
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
-    public IReadOnlyList<IEvaluable> NeedPending => needPending;
+    public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
 
     /// <summary>This will perform the action.</summary>
     /// <param name="slate">The slate for this action.</param>
@@ -67,10 +67,10 @@ sealed public class Assign<T> : IAssign
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Assign: {0}", this);
-        slate.PendEval(needPending);
+        slate.PendEval(this.needPending);
         slate.PerformEvaluation(logger);
-        slate.SetValue(value.Value, target);
-        logger.Info("Assign Done {0}", target);
+        slate.SetValue(this.value.Value, this.target);
+        logger.Info("Assign Done {0}", this.target);
     }
 
     /// <summary>Gets a human readable string for this assignment.</summary>

@@ -20,9 +20,9 @@ sealed public class Extern : IAction {
         if (receiver is null or VirtualNode)
             throw new Message("May not use a null or {0} as the receiver in a {1}.", nameof(VirtualNode), nameof(Extern));
 
-        Receiver = receiver;
-        Name = name;
-        Node = node;
+        this.Receiver = receiver;
+        this.Name = name;
+        this.Node = node;
     }
 
     /// <summary>This is the receiver that will be written to.</summary>

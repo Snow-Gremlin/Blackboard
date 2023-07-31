@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Formuila;
 using Blackboard.Core.Formuila.Actions;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
@@ -25,11 +26,9 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     /// <param name="slate">The slate this stack is for.</param>
     /// <param name="logger">The optional logger to output the build steps.</param>
     public Builder(Slate slate, Logger? logger = null) {
-        this.Slate  = slate;
-        this.Logger = logger.SubGroup(nameof(Builder));
-
-        this.Actions = new ActionCollection(this.Slate, this.Logger);
-        this.Scope   = new ScopeStack(this.Slate, this.Logger);
+        this.Slate   = slate;
+        this.Logger  = logger.SubGroup(nameof(Builder));
+        this.factory = new Factory(this.Slate, this.Logger);
 
         this.Nodes       = new BuilderStack<INode>("Node", this.Logger);
         this.Types       = new BuilderStack<Type>("Type", this.Logger);
@@ -51,12 +50,14 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     /// <summary>The optimizer being used to optimize nodes for new actions.</summary>
     private readonly Optimizer optimizer;
 
+    /// <summary>The factory for formulas which will perform the actions that have been parsed.</summary>
+    private readonly Factory factory;
+
     /// <summary>Resets the stack back to the initial state.</summary>
     public void Reset() {
         this.Logger.Info("Reset");
 
-        this.Actions.Clear();
-        this.Scope.Reset();
+        this.factory.Reset();
 
         this.Nodes.Clear();
         this.Types.Clear();
@@ -76,11 +77,9 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         this.Existing.Clear();
     }
 
-    /// <summary>The collection of actions which will perform the actions which have been parsed.</summary>
-    public readonly ActionCollection Actions;
-
-    /// <summary>The stack of the namespaces to represent the scope being worked on.</summary>
-    public readonly ScopeStack Scope;
+    /// <summary>Gets the formula containing all the actions.</summary>
+    /// <returns>The formula containing all the actions.</returns>
+    public Formula BuildFormula() => this.factory.Build();
 
     /// <summary>The stack of nodes which are currently being parsed but haven't been consumed yet.</summary>
     public readonly BuilderStack<INode> Nodes;
@@ -98,6 +97,36 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     public readonly ExistingNodeSet Existing;
 
     #region Helper Methods...
+
+    /// <summary>Pushes a namespace onto the scope stack.</summary>
+    public void PushNamespace() {
+        try {
+            this.factory.PushNamespace(this.LastText);
+        } catch (System.Exception inner) {
+            throw new Message("Error parsing namespace").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
+    }
+
+    /// <summary>Pops a namespace off the scope stack.</summary>
+    public void PopNamespace() => this.factory.PopNamespace();
+
+    /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
+    public void PushId() {
+        string name = this.LastText;
+        this.Logger.Info("Id = \"{0}\"", name);
+
+        try {
+            INode node = this.factory.FindInNamespace(name);
+            this.Nodes.Push(node);
+            this.Existing.Add(node);
+        } catch (System.Exception inner) {
+            throw new Message("Error parsing identifier").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
+    }
 
     /// <summary>Performs a cast if needed from one value to another by creating a new node.</summary>
     /// <remarks>If a cast is added then the cast will be added to the builder as a new node.</remarks>
@@ -191,7 +220,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
                     With("Name",     name).
                     With("Root",     root);
 
-        this.Actions.Add(new Define(scope.Receiver, name, root, newNodes));
+        this.factory.Add(new Define(scope.Receiver, name, root, newNodes));
         scope.WriteField(name, root);
         return root;
     }
@@ -215,7 +244,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
                     With("Location", this.LastLocation).
                     With("Target",   target);
 
-            this.Actions.Add(assign);
+            this.factory.Add(assign);
             return null;
         }
 
@@ -228,7 +257,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
                 With("Target",   target).
                 With("Value",    value);
 
-        this.Actions.Add(condAssign);
+        this.factory.Add(condAssign);
         return root;
     }
 
@@ -262,7 +291,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
                 With("Input",    target).
                 With("Value",    value);
 
-        this.Actions.Add(assign);
+        this.factory.Add(assign);
         return root;
     }
 
@@ -290,7 +319,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
                 With("Name",     names.Join(".")).
                 With("Value",    value);
 
-        this.Actions.Add(getter);
+        this.factory.Add(getter);
         return root;
     }
 
@@ -318,7 +347,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
             scope.RemoveFields(name);
         }
 
-        this.Actions.Add(new Define(scope.Receiver, name, node));
+        this.factory.Add(new Define(scope.Receiver, name, node));
         scope.WriteField(name, node);
         return node;
     }
@@ -342,7 +371,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
 
-        this.Actions.Add(new Temp(name, root, newNodes));
+        this.factory.Add(new Temp(name, root, newNodes));
         this.Scope.Current.WriteField(name, root);
         return root;
     }
@@ -355,49 +384,13 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     /// <param name="type">The type of extern to create.</param>
     /// <param name="value">The optional initial default value the extern node.</param>
     public void RequestExtern(string name, Type type, INode? value = null) {
-        this.Logger.Info("Request Extern:");
-
-        if (value is not null && type == Type.Trigger)
-            throw new Message("May not initialize an extern trigger.").
+        try {
+            this.factory.RequestExtern(name, type, value);
+        } catch (System.Exception inner) {
+            throw new Message("Error parsing extern").
                 With("Location", this.LastLocation).
-                With("Name",     name).
-                With("Type",     type);
-
-        VirtualNode scope = this.Scope.Current;
-        INode? existing = scope.ReadField(name);
-        if (existing is not null) {
-
-            Type existType = Type.TypeOf(existing) ??
-                throw new Message("Unable to find existing type.").
-                    With("Location", this.LastLocation).
-                    With("Name",     name).
-                    With("Existing", existing).
-                    With("New Type", type).
-                    With("Value",    value);
-
-            if (existType != type)
-                throw new Message("Extern node does not match existing node type.").
-                    With("Location",      this.LastLocation).
-                    With("Name",          name).
-                    With("Existing",      existing).
-                    With("Existing Type", existType).
-                    With("New Type",      type).
-                    With("Value",         value);
-
-            // Node already exists as an extern or the actual node.
-            return;
+                With("Error",    inner);
         }
-
-        // Node doesn't exist, create the extern placeholder.
-        IExtern node = Maker.CreateExternNode(type) ??
-            throw new Message("Unsupported type for new extern").
-                With("Location", this.LastLocation).
-                With("Name",     name).
-                With("Type",     type);
-
-        this.Actions.Add(new Extern(scope.Receiver, name, node));
-        scope.WriteField(name, node);
-        if (value is not null) this.AddAssignment(node, value);
     }
 
     #endregion
@@ -421,7 +414,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         bool showExisting = true) {
         const string indent = "  ";
         List<string> parts = new();
-        if (showActions)   parts.Add("Actions: "   + this.Actions.ToString(indent));
+        if (showActions)   parts.Add("Actions: "   + this.factory.ToString(indent));
         if (showGlobal)    parts.Add("Global: "    + this.Scope.Global.ToString());
         if (showScope)     parts.Add("Scope: "     + this.Scope);
         if (showNodes)     parts.Add("Stack: "     + this.Nodes.ToString(indent, false));

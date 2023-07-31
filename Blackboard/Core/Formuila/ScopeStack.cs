@@ -1,15 +1,14 @@
-﻿using Blackboard.Core;
-using Blackboard.Core.Extensions;
+﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Parser.Builder;
+namespace Blackboard.Core.Formuila;
 
 /// <summary>The stack of the namespaces to represent the scope being worked on.</summary>
-public class ScopeStack {
+sealed public class ScopeStack {
     private readonly Slate slate;
     private readonly Logger? logger;
     private readonly LinkedList<VirtualNode> scopes;
@@ -20,7 +19,7 @@ public class ScopeStack {
     internal ScopeStack(Slate slate, Logger? logger = null) {
         this.slate  = slate;
         this.logger = logger;
-        this.Global = this.createGlobal();
+        this.Global = createGlobal();
         this.scopes = new();
         this.scopes.AddFirst(this.Global);
     }
@@ -52,7 +51,7 @@ public class ScopeStack {
     /// <summary>Finds the given ID in the current scopes.</summary>
     /// <param name="name">The name of the node to find.</param>
     /// <returns>The found node by that name or null if not found.</returns>
-    public INode? FindID(string name) {
+    public INode? FindId(string name) {
         foreach (VirtualNode scope in this.scopes) {
             INode? node = scope.ReadField(name);
             if (node is not null) return node;

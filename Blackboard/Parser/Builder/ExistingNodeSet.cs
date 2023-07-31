@@ -8,7 +8,7 @@ using System.Linq;
 namespace Blackboard.Parser.Builder;
 
 /// <summary>A collection of existing nodes.</summary>
-public class ExistingNodeSet {
+sealed public class ExistingNodeSet {
     private readonly Logger? logger;
     private readonly HashSet<INode> nodes;
 

@@ -7,7 +7,7 @@ using System.Linq;
 namespace Blackboard.Parser.Builder;
 
 /// <summary>The stack of argument lists used for building up function calls.</summary>
-public class ArgumentStack {
+sealed public class ArgumentStack {
     private readonly Logger? logger;
     private readonly LinkedList<LinkedList<INode>> argStacks;
 

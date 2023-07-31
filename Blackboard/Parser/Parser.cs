@@ -88,7 +88,7 @@ sealed public class Parser {
             Builder.Builder builder = new(this.slate, this.logger);
             node.Process(this.prompts, builder);
             this.logger.Info("Parser Done");
-            return builder.Actions.Formula;
+            return builder.BuildFormula();
         } catch (S.Exception ex) {
             throw new Message("Error occurred while parsing input code.").
                 With("Error", ex);
@@ -245,32 +245,13 @@ sealed public class Parser {
 
     /// <summary>This is called when the namespace has opened.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushNamespace(Builder.Builder builder) {
-        string name = builder.LastText;
-        VirtualNode scope = builder.Scope.Current;
-
-        // Check if the virtual namespace already exists.
-        INode? next = scope.ReadField(name);
-        if (next is not null) {
-            if (next is not VirtualNode nextspace)
-                throw new Message("Can not open namespace. Another non-namespace exists by that name.").
-                     With("Identifier", name).
-                     With("Location", builder.LastLocation);
-            builder.Scope.Push(nextspace);
-            return;
-        }
-
-        // Create a new virtual namespace and an action to define the new namespace when this formula is run.
-        Namespace newspace = new();
-        builder.Actions.Add(new Define(scope.Receiver, name, newspace)); // TODO: Remove action creation from parser
-        VirtualNode nextScope = new(name, newspace);
-        builder.Scope.Push(nextScope);
-        scope.WriteField(name, nextScope);
-    }
+    static private void handlePushNamespace(Builder.Builder builder) =>
+        builder.PushNamespace();
 
     /// <summary>This is called when the namespace had closed.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePopNamespace(Builder.Builder builder) => builder.Scope.Pop();
+    static private void handlePopNamespace(Builder.Builder builder) =>
+        builder.PopNamespace();
 
     /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
@@ -484,20 +465,8 @@ sealed public class Parser {
 
     /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handlePushId(Builder.Builder builder) {
-        string name = builder.LastText;
-        builder.Logger.Info("Id = \"{0}\"", name);
-        INode node = builder.Scope.FindID(name) ??
-            throw new Message("No identifier found in the scope stack.").
-                With("Identifier", name).
-                With("Location", builder.LastLocation);
-        
-        if (node is IExtern externNode)
-            node = externNode.Shell;
-
-        builder.Nodes.Push(node);
-        builder.Existing.Add(node);
-    }
+    static private void handlePushId(Builder.Builder builder) =>
+        builder.PushId();
 
     /// <summary>This handles pushing a bool literal value onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>

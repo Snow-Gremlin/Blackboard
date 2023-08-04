@@ -5,7 +5,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Parser.Optimization.Rules;
+namespace Blackboard.Core.Optimization.Rules;
 
 /// <summary>An optimizer rule for consolidating constants in nodes which implement ICoalescable.</summary>
 sealed internal class ConstantConsolidator : IRule {

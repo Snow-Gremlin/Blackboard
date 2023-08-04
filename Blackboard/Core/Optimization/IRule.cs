@@ -1,4 +1,4 @@
-﻿namespace Blackboard.Parser.Optimization;
+﻿namespace Blackboard.Core.Optimization;
 
 /// <summary>The interface for an optimization rule.</summary>
 internal interface IRule {

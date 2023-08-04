@@ -1,10 +1,8 @@
-﻿using Blackboard.Core;
-using Blackboard.Core.Inspect;
+﻿using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Parser.Optimization.Rules;
 using System.Collections.Generic;
 
-namespace Blackboard.Parser.Optimization;
+namespace Blackboard.Core.Optimization;
 
 /// <summary>
 /// A tool for running rules on the new nodes for a formula to optimize, validate,
@@ -16,7 +14,7 @@ sealed internal class Optimizer {
 
     /// <summary>Creates a new optimizer.</summary>
     public Optimizer() =>
-        this.rules = new List<IRule>() {
+        rules = new List<IRule>() {
             new ConstantReduction(),
             new ParentIncorporator(),
             new ConstantConsolidator(),
@@ -120,7 +118,7 @@ sealed internal class Optimizer {
         while (changed) {
             changed = false;
 
-            foreach (IRule rule in this.rules) {
+            foreach (IRule rule in rules) {
                 string ruleName = rule.ToString() ?? "null";
                 Logger? ruleLogger = opLogger.SubGroup(ruleName);
                 ruleLogger.Info("Start {0}: {1}", ruleName, root);

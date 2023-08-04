@@ -3,7 +3,7 @@ using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
-namespace Blackboard.Parser.Optimization.Rules;
+namespace Blackboard.Core.Optimization.Rules;
 
 /// <summary>Removes any nodes which are unreachable from the root.</summary>
 sealed internal class RemoveUnreachable : IRule {

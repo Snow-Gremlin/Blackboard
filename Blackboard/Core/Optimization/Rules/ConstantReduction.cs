@@ -2,7 +2,7 @@
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 
-namespace Blackboard.Parser.Optimization.Rules;
+namespace Blackboard.Core.Optimization.Rules;
 
 /// <summary>
 /// This is an optimization rule for finding constant branches and replacing them with literals.

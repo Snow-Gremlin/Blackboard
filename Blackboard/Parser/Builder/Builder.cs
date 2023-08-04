@@ -7,10 +7,12 @@ using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
-using Blackboard.Parser.Optimization;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Xml.Linq;
 using PP = PetiteParser;
+using S = System;
 
 namespace Blackboard.Parser.Builder;
 
@@ -35,7 +37,6 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         this.Identifiers = new BuilderStack<string>("Id", this.Logger);
         this.Existing    = new ExistingNodeSet(this.Logger);
         this.Arguments   = new ArgumentStack(this.Logger);
-        this.optimizer   = new Optimizer();
     }
 
     /// <summary>The slate for the Blackboard these stacks belongs too.</summary>
@@ -47,9 +48,6 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     /// </summary>
     public readonly Logger? Logger;
 
-    /// <summary>The optimizer being used to optimize nodes for new actions.</summary>
-    private readonly Optimizer optimizer;
-
     /// <summary>The factory for formulas which will perform the actions that have been parsed.</summary>
     private readonly Factory factory;
 
@@ -58,7 +56,8 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         this.Logger.Info("Reset");
 
         this.factory.Reset();
-
+        
+        this.Tokens.Clear();
         this.Nodes.Clear();
         this.Types.Clear();
         this.Identifiers.Clear();
@@ -66,16 +65,6 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         this.Existing.Clear();
     }
 
-    /// <summary>Clears the node stack and type stack without changing pending actions nor scopes.</summary>
-    public void Clear() {
-        this.Logger.Info("Clear");
-
-        this.Nodes.Clear();
-        this.Types.Clear();
-        this.Identifiers.Clear();
-        this.Arguments.Clear();
-        this.Existing.Clear();
-    }
 
     /// <summary>Gets the formula containing all the actions.</summary>
     /// <returns>The formula containing all the actions.</returns>
@@ -96,13 +85,29 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     /// <summary>The set of existing nodes which have been references by new nodes.</summary>
     public readonly ExistingNodeSet Existing;
 
-    #region Helper Methods...
+    #region Handler Methods...
+
+    /// <summary>Clears the node stack and type stack without changing pending actions nor scopes.</summary>
+    public void Clear() {
+        this.Logger.Info("Clear");
+
+        this.Tokens.Clear();
+        this.Nodes.Clear();
+        this.Types.Clear();
+        this.Identifiers.Clear();
+        this.Arguments.Clear();
+        this.Existing.Clear();
+    }
+
+    /// <summary>This is called when a new simple identifier has been defined.</summary>
+    public void DefineId() =>
+        this.Identifiers.Push(this.LastText);
 
     /// <summary>Pushes a namespace onto the scope stack.</summary>
     public void PushNamespace() {
         try {
             this.factory.PushNamespace(this.LastText);
-        } catch (System.Exception inner) {
+        } catch (S.Exception inner) {
             throw new Message("Error parsing namespace").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
@@ -114,45 +119,17 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
 
     /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
     public void PushId() {
-        string name = this.LastText;
-        this.Logger.Info("Id = \"{0}\"", name);
-
         try {
+            string name = this.LastText;
+            this.Logger.Info("Id = \"{0}\"", name);
             INode node = this.factory.FindInNamespace(name);
             this.Nodes.Push(node);
             this.Existing.Add(node);
-        } catch (System.Exception inner) {
+        } catch (S.Exception inner) {
             throw new Message("Error parsing identifier").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
-    }
-
-    /// <summary>Performs a cast if needed from one value to another by creating a new node.</summary>
-    /// <remarks>If a cast is added then the cast will be added to the builder as a new node.</remarks>
-    /// <param name="type">The type to cast the value to.</param>
-    /// <param name="value">The value to cast to the given type.</param>
-    /// <param name="explicitCasts">
-    /// Indicates if explicit casts are allowed to be used when casting.
-    /// If false then only inheritance or implicit casts will be used.
-    /// </param>
-    /// <returns>The cast value or the given value in the given type.</returns>
-    public INode PerformCast(Type type, INode value, bool explicitCasts = false) {
-        Type? valueType = Type.TypeOf(value);
-        TypeMatch match = type.Match(valueType, explicitCasts);
-        if (!match.IsAnyCast)
-            return match.IsMatch ? value :
-                throw new Message("The value type can not be cast to the given type.").
-                    With("Location", this.LastLocation).
-                    With("Target",   type).
-                    With("Type",     valueType).
-                    With("Value",    value);
-
-        IFuncGroup? castGroup = Maker.GetCastMethod(this.Slate, type);
-        return castGroup?.Build(value) ??
-            throw new Message("Unsupported type for new definition cast").
-                With("Location", this.LastLocation).
-                With("Type",     type);
     }
 
     /// <summary>Collects all the new nodes and apply depths.</summary>
@@ -189,6 +166,20 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
             eval.Depth = eval.MinimumAllowedDepth();
         return true;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /// <summary>Creates a define action and adds it to the builder.</summary>
     /// <param name="value">The value to define the node with.</param>
@@ -323,35 +314,6 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         return root;
     }
 
-    /// <summary>Creates a new input node with the given name in the local scope.</summary>
-    /// <param name="name">The name to create the input for.</param>
-    /// <param name="type">The type of input to create.</param>
-    /// <returns>The newly created input.</returns>
-    public INode CreateInput(string name, Type type) {
-        this.Logger.Info("Create Input:");
-
-        IInput node = Maker.CreateInputNode(type) ??
-            throw new Message("Unsupported type for new typed input").
-                With("Location", this.LastLocation).
-                With("Name",     name).
-                With("Type",     type);
-
-        VirtualNode scope = this.Scope.Current;
-        INode? existing = scope.ReadField(name);
-        if (existing is not null) {
-            if (existing is not IExtern)
-                throw new Message("A node already exists with the given name.").
-                    With("Location", this.LastLocation).
-                    With("Name",     name).
-                    With("Type",     type);
-            scope.RemoveFields(name);
-        }
-
-        this.factory.Add(new Define(scope.Receiver, name, node));
-        scope.WriteField(name, node);
-        return node;
-    }
-
     /// <summary>Creates a temporary node and adds it to the builder if possible.</summary>
     /// <param name="targetType">The target type of the value for the temporary value.</param>
     /// <param name="name">The name to output the value to.</param>
@@ -376,21 +338,152 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         return root;
     }
 
+
+
+
+
+
+
+
+
+
+    
+    /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
+    public void NewTypeInputNoAssign() {
+        try {
+            string name = this.Identifiers.Pop();
+            Type type   = this.Types.Peek();
+            this.factory.CreateInput(name, type);
+        } catch (S.Exception inner) {
+            throw new Message("Error parsing input").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
+    }
+
+    /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
+    public void NewTypeInputWithAssign() {
+        try {
+            INode  value  = this.Nodes.Pop();
+            Type   type   = this.Types.Peek();
+            string name   = this.Identifiers.Pop();
+            INode  target = this.factory.CreateInput(name, type);
+            this.AddAssignment(target, value);
+        } catch (S.Exception inner) {
+            throw new Message("Error parsing input").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
+    }
+
+    /// <summary>This creates a new input node and assigns it with an initial value.</summary>
+    public void NewVarInputWithAssign() {
+        try {
+            INode  value = this.Nodes.Pop();
+            string name  = this.Identifiers.Pop();
+            Type   type  = Type.TypeOf(value) ??
+                throw new Message("Unable to determine node type for new variable with assignment.");
+            INode target = this.factory.CreateInput(name, type);
+            this.AddAssignment(target, value);
+        } catch (S.Exception inner) {
+            throw new Message("Error parsing input").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
+    }
+
     /// <summary>
     /// Checks for an existing node and, if none exists, creates an extern node
     /// as a placeholder with the given name in the local scope.
     /// </summary>
-    /// <param name="name">The name to create the extern for.</param>
-    /// <param name="type">The type of extern to create.</param>
-    /// <param name="value">The optional initial default value the extern node.</param>
-    public void RequestExtern(string name, Type type, INode? value = null) {
+    public void RequestExtern() {
         try {
-            this.factory.RequestExtern(name, type, value);
-        } catch (System.Exception inner) {
+            string name = this.Identifiers.Pop();
+            Type   type = this.Types.Peek();
+            this.factory.RequestExtern(name, type);
+        } catch (S.Exception inner) {
             throw new Message("Error parsing extern").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
+    }
+
+    /// <summary>
+    /// Checks for an existing node and, if none exists, creates an extern node
+    /// as a placeholder with the given name in the local scope.
+    /// If the external node is created it will be assigned to a default value.
+    /// </summary>
+    public void RequestExternWithAssign() {
+        try {
+            INode  value = this.Nodes.Pop();
+            Type   type  = this.Types.Peek();
+            string name  = this.Identifiers.Pop();
+
+            if (type == Type.Trigger)
+                throw new Message("May not initialize an extern trigger.").
+                    With("Name", name).
+                    With("Type", type);
+
+            (INode node, bool isExtern) = this.factory.RequestExtern(name, type);
+            if (isExtern) this.AddAssignment(node, value);
+        } catch (S.Exception inner) {
+            throw new Message("Error parsing extern").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
+    }
+    
+    /// <summary>A helper handler for parsing literals.</summary>
+    /// <param name="usage">The string describing what this parse is doing.</param>
+    /// <param name="parseMethod">The method to convert a string into a literal node.</param>
+    private void parseLiteral(string usage, S.Func<string, INode> parseMethod) {
+        string text = this.LastText;
+        try {
+            this.Nodes.Push(parseMethod(text));
+        } catch (S.Exception ex) {
+            throw new Message("Failed to " + usage + ".").
+                With("Error", ex).
+                With("Text", text).
+                With("Location", this.LastLocation);
+        }
+    }
+
+    /// <summary>This handles pushing a bool literal value onto the stack.</summary>
+    public void PushBool() =>
+        this.parseLiteral("parse a bool", (string text) => Literal.Bool(bool.Parse(text)));
+
+    /// <summary>This handles pushing a binary int literal value onto the stack.</summary>
+    public void PushBin() =>
+        this.parseLiteral("parse a binary int", (string text) => Literal.Int(S.Convert.ToInt32(text, 2)));
+
+    /// <summary>This handles pushing an octal int literal value onto the stack.</summary>
+    public void PushOct() =>
+        this.parseLiteral("parse a octal int", (string text) => Literal.Int(S.Convert.ToInt32(text, 8)));
+
+    /// <summary>This handles pushing a decimal int literal value onto the stack.</summary>
+    public void PushInt() =>
+        this.parseLiteral("parse a decimal int", (string text) => Literal.Int(int.Parse(text)));
+
+    /// <summary>This handles pushing a hexadecimal int literal value onto the stack.</summary>
+    public void PushHex() =>
+        this.parseLiteral("parse a hex int", (string text) => Literal.Int(int.Parse(text[2..], NumberStyles.HexNumber)));
+
+    /// <summary>This handles pushing a double literal value onto the stack.</summary>
+    public void PushDouble() =>
+        this.parseLiteral("parse a double", (string text) => Literal.Double(double.Parse(text)));
+
+    /// <summary>This handles pushing a string literal value onto the stack.</summary>
+    public void PushString() =>
+        this.parseLiteral("decode escaped sequences", (string text) => Literal.String(PP.Formatting.Text.Unescape(text)));
+
+    /// <summary>This handles pushing a type onto the stack.</summary>
+    public void PushType() {
+        string text = this.LastText;
+        Type t = Type.FromName(text) ??
+            throw new Message("Unrecognized type name.").
+                With("Text",     text).
+                With("Location", this.LastLocation);
+        this.Types.Push(t);
     }
 
     #endregion
@@ -414,9 +507,8 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         bool showExisting = true) {
         const string indent = "  ";
         List<string> parts = new();
-        if (showActions)   parts.Add("Actions: "   + this.factory.ToString(indent));
-        if (showGlobal)    parts.Add("Global: "    + this.Scope.Global.ToString());
-        if (showScope)     parts.Add("Scope: "     + this.Scope);
+        if (showActions || showGlobal || showScope)
+            parts.Add(this.factory.StackString(showActions, showGlobal, showScope));
         if (showNodes)     parts.Add("Stack: "     + this.Nodes.ToString(indent, false));
         if (showTypes)     parts.Add("Types: "     + this.Types.ToString(indent, true));
         if (showIds)       parts.Add("Ids: "       + this.Identifiers.ToString(indent, true));

@@ -3,7 +3,7 @@ using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Linq;
 
-namespace Blackboard.Parser.Optimization.Rules;
+namespace Blackboard.Core.Optimization.Rules;
 
 /// <summary>Validates all the nodes in the action being created.</summary>
 sealed internal class Validator : IRule {

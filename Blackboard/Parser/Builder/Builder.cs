@@ -1,8 +1,6 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Formuila;
-using Blackboard.Core.Formuila.Actions;
-using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
@@ -54,10 +52,8 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     /// <summary>Resets the stack back to the initial state.</summary>
     public void Reset() {
         this.Logger.Info("Reset");
-
         this.factory.Reset();
-        
-        this.Tokens.Clear();
+
         this.Nodes.Clear();
         this.Types.Clear();
         this.Identifiers.Clear();
@@ -85,53 +81,8 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     /// <summary>The set of existing nodes which have been references by new nodes.</summary>
     public readonly ExistingNodeSet Existing;
 
-    #region Handler Methods...
-
-    /// <summary>Clears the node stack and type stack without changing pending actions nor scopes.</summary>
-    public void Clear() {
-        this.Logger.Info("Clear");
-
-        this.Tokens.Clear();
-        this.Nodes.Clear();
-        this.Types.Clear();
-        this.Identifiers.Clear();
-        this.Arguments.Clear();
-        this.Existing.Clear();
-    }
-
-    /// <summary>This is called when a new simple identifier has been defined.</summary>
-    public void DefineId() =>
-        this.Identifiers.Push(this.LastText);
-
-    /// <summary>Pushes a namespace onto the scope stack.</summary>
-    public void PushNamespace() {
-        try {
-            this.factory.PushNamespace(this.LastText);
-        } catch (S.Exception inner) {
-            throw new Message("Error parsing namespace").
-                With("Location", this.LastLocation).
-                With("Error",    inner);
-        }
-    }
-
-    /// <summary>Pops a namespace off the scope stack.</summary>
-    public void PopNamespace() => this.factory.PopNamespace();
-
-    /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
-    public void PushId() {
-        try {
-            string name = this.LastText;
-            this.Logger.Info("Id = \"{0}\"", name);
-            INode node = this.factory.FindInNamespace(name);
-            this.Nodes.Push(node);
-            this.Existing.Add(node);
-        } catch (S.Exception inner) {
-            throw new Message("Error parsing identifier").
-                With("Location", this.LastLocation).
-                With("Error",    inner);
-        }
-    }
-
+    #region Helper Methods...
+    
     /// <summary>Collects all the new nodes and apply depths.</summary>
     /// <param name="root">The root node of the branch to check.</param>
     /// <returns>The collection of new nodes.</returns>
@@ -167,176 +118,175 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         return true;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /// <summary>Creates a define action and adds it to the builder.</summary>
-    /// <param name="value">The value to define the node with.</param>
-    /// <param name="type">The type of the node to define or null to use the value type.</param>
-    /// <param name="name">The name to write the node with to the current scope.</param>
-    /// <returns>The root of the value branch which was used in the assignment.</returns>
-    public INode AddDefine(INode value, Type? type, string name) {
-        this.Logger.Info("Add Define:");
-        INode root = type is null ? value : this.PerformCast(type, value);
-
-        HashSet<INode> newNodes = this.collectAndOrder(root);
-        root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
-        
-        VirtualNode scope = this.Scope.Current;
-        INode? existing = scope.ReadField(name);
-        if (existing is not null) {
-            if (existing is not IExtern)
-                throw new Message("A node already exists with the given name.").
-                    With("Location", this.LastLocation).
-                    With("Name",     name).
-                    With("Type",     type);
-            scope.RemoveFields(name);
+    /// <summary>A helper handler for parsing literals.</summary>
+    /// <param name="usage">The string describing what this parse is doing.</param>
+    /// <param name="parseMethod">The method to convert a string into a literal node.</param>
+    private void parseLiteral(string usage, S.Func<string, INode> parseMethod) {
+        string text = this.LastText;
+        try {
+            this.Nodes.Push(parseMethod(text));
+        } catch (S.Exception ex) {
+            throw new Message("Failed to " + usage + ".").
+                With("Error", ex).
+                With("Text", text).
+                With("Location", this.LastLocation);
         }
-
-        if (root is IInput)
-            root = Maker.CreateShell(root) ??
-                throw new Message("The root for a define could not be shelled.").
-                    With("Location", this.LastLocation).
-                    With("Name",     name).
-                    With("Root",     root);
-
-        this.factory.Add(new Define(scope.Receiver, name, root, newNodes));
-        scope.WriteField(name, root);
-        return root;
     }
 
-    /// <summary>Creates a trigger provoke action and adds it to the builder.</summary>
-    /// <param name="target">The target trigger to effect.</param>
-    /// <param name="value">The conditional value to trigger with or null if unconditional.</param>
-    /// <returns>The root of the value branch which was used in the assignment.</returns>
-    public INode? AddProvokeTrigger(INode target, INode? value) {
-        this.Logger.Info("Add Provoke Trigger:");
-        if (target is not ITriggerInput input)
-            throw new Message("Target node is not an input trigger.").
+    #endregion
+    #region Handler Methods...
+
+    /// <summary>Clears the node stack and type stack without changing pending actions nor scopes.</summary>
+    public void HandleClear() {
+        try {
+            this.Logger.Info("Clear");
+            this.Tokens.Clear();
+            this.Nodes.Clear();
+            this.Types.Clear();
+            this.Identifiers.Clear();
+            this.Arguments.Clear();
+            this.Existing.Clear();
+        } catch (S.Exception inner) {
+            throw new Message("Error clearing stacks at end of command").
                 With("Location", this.LastLocation).
-                With("Target",   target).
-                With("Value",    value);
-
-        // If there is no condition, add an unconditional provoke.
-        if (value is null) {
-            IAction assign = Provoke.Create(target) ??
-                throw new Message("Unexpected node types for a unconditional provoke.").
-                    With("Location", this.LastLocation).
-                    With("Target",   target);
-
-            this.factory.Add(assign);
-            return null;
+                With("Error",    inner);
         }
-
-        INode root = this.PerformCast(Type.Trigger, value);
-        HashSet<INode> newNodes = this.collectAndOrder(root);
-        root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
-        IAction condAssign = Provoke.Create(input, root, newNodes) ??
-            throw new Message("Unexpected node types for a conditional provoke.").
-                With("Location", this.LastLocation).
-                With("Target",   target).
-                With("Value",    value);
-
-        this.factory.Add(condAssign);
-        return root;
     }
 
-    /// <summary>Creates an assignment action and adds it to the builder if possible.</summary>
-    /// <param name="target">The node to assign the value to.</param>
-    /// <param name="value">The value to assign to the given target node.</param>
-    /// <returns>The root of the value branch which was used in the assignment.</returns>
-    public INode AddAssignment(INode target, INode value) {
-        this.Logger.Info("Add Assignment:");
-        if (target is not IInput)
-            throw new Message("May not assign to a node which is not an input.").
+    /// <summary>This is called when a new simple identifier has been defined.</summary>
+    public void HandleDefineId() {
+        try {
+            this.Identifiers.Push(this.LastText);
+        } catch (S.Exception inner) {
+            throw new Message("Error defining identifier").
                 With("Location", this.LastLocation).
-                With("Input",    target).
-                With("Value",    value);
-
-        // Check if the base types match. Don't need to check that the type is
-        // a data type or trigger since only those can be reduced to constants.
-        Type targetType = Type.TypeOf(target) ??
-            throw new Message("Unable to find target type.").
-                With("Location", this.LastLocation).
-                With("Input",    target).
-                With("Value",    value);
-
-        INode root = this.PerformCast(targetType, value);
-        HashSet<INode> newNodes = this.collectAndOrder(root);
-        root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
-        IAction assign = Maker.CreateAssignAction(targetType, target, root, newNodes) ??
-            throw new Message("Unsupported types for an assignment action.").
-                With("Location", this.LastLocation).
-                With("Type",     targetType).
-                With("Input",    target).
-                With("Value",    value);
-
-        this.factory.Add(assign);
-        return root;
+                With("Error",    inner);
+        }
     }
 
-    /// <summary>Creates a getter action and adds it to the builder if possible.</summary>
-    /// <param name="targetType">The target type of the value to get.</param>
-    /// <param name="name">The name to output the value to.</param>
-    /// <param name="value">The value to get and write to the given name.</param>
-    /// <returns>The root of the value branch which was used in the assignment.</returns>
-    public INode AddGetter(Type targetType, string name, INode value) {
-        this.Logger.Info("Add Getter:");
-
-        // Check if the base types match. Don't need to check that the type is
-        // a data type or trigger since only those can be reduced to constants.
-        INode? root = this.PerformCast(targetType, value);
-        HashSet<INode> newNodes = this.collectAndOrder(root);
-        root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
-        string[] names = this.Scope.Names.Append(name).ToArray();
-
-        // TODO: Add a way to check if the getter by the names is already set or part of a path.
-
-        IAction getter = Maker.CreateGetterAction(targetType, names, root, newNodes) ??
-            throw new Message("Unsupported type for a getter action.").
+    /// <summary>Pushes a namespace onto the scope stack.</summary>
+    public void HandlePushNamespace() {
+        try {
+            this.factory.PushNamespace(this.LastText);
+        } catch (S.Exception inner) {
+            throw new Message("Error parsing namespace").
                 With("Location", this.LastLocation).
-                With("Type",     targetType).
-                With("Name",     names.Join(".")).
-                With("Value",    value);
-
-        this.factory.Add(getter);
-        return root;
+                With("Error",    inner);
+        }
     }
 
-    /// <summary>Creates a temporary node and adds it to the builder if possible.</summary>
-    /// <param name="targetType">The target type of the value for the temporary value.</param>
-    /// <param name="name">The name to output the value to.</param>
-    /// <param name="value">The value to get and write to the given name.</param>
-    /// <returns>The root of the value branch which was used in the assignment.</returns>
-    public INode AddTemp(Type targetType, string name, INode value) {
-        this.Logger.Info("Add Temp:");
-
-        VirtualNode scope = this.Scope.Current;
-        if (scope.ContainsField(name))
-            throw new Message("A node already exists with the given name.").
+    /// <summary>Pops a namespace off the scope stack.</summary>
+    public void HandlePopNamespace() {
+        try {
+            this.factory.PopNamespace();
+        } catch (S.Exception inner) {
+            throw new Message("Error closing namespace").
                 With("Location", this.LastLocation).
-                With("Name",     name).
-                With("Type",     targetType);
-
-        INode root = targetType is null ? value : this.PerformCast(targetType, value);
-        HashSet<INode> newNodes = this.collectAndOrder(root);
-        root = this.optimizer.Optimize(this.Slate, root, newNodes, this.Logger);
-
-        this.factory.Add(new Temp(name, root, newNodes));
-        this.Scope.Current.WriteField(name, root);
-        return root;
+                With("Error",    inner);
+        }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+    /// <summary>This handles defining a new typed named node.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleTypeDefine(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        Type   type  = builder.Types.Peek();
+        string name  = builder.Identifiers.Pop();
+        builder.AddDefine(value, type, name);
+    }
+
+    /// <summary>This handles defining a new untyped named node.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleVarDefine(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        string name  = builder.Identifiers.Pop();
+        builder.AddDefine(value, null, name);
+    }
+
+    /// <summary>This handles when a trigger is provoked unconditionally.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleProvokeTrigger(Builder.Builder builder) {
+        INode target = builder.Nodes.Pop();
+        builder.AddProvokeTrigger(target, null);
+    }
+
+    /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleConditionalProvokeTrigger(Builder.Builder builder) {
+        INode target = builder.Nodes.Pop();
+        INode value  = builder.Nodes.Pop();
+        INode root   = builder.AddProvokeTrigger(target, value) ??
+            throw new Message("Unable to create conditional provoke trigger");
+
+        // Push the condition onto the stack for any following trigger pulls.
+        // See comment in `handleAssignment` about pushing cast value back onto the stack.
+        builder.Nodes.Push(root);
+        builder.Existing.Add(root);
+    }
+
+    /// <summary>This handles getting the typed left value and writing it out to the given name.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleTypeGet(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        Type   type  = builder.Types.Peek();
+        string name  = builder.Identifiers.Pop();
+        builder.AddGetter(type, name, value);
+    }
+
+    /// <summary>This handles getting the variable type left value and writing it out to the given name.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleVarGet(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        string name  = builder.Identifiers.Pop();
+        Type   type  = Type.TypeOf(value) ??
+            throw new Message("Unable to determine node type for getter.");
+        builder.AddGetter(type, name, value);
+    }
+
+    /// <summary>This handles getting the typed left value as a temporary value with the given name.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleTypeTemp(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        Type   type  = builder.Types.Peek();
+        string name  = builder.Identifiers.Pop();
+        builder.AddTemp(type, name, value);
+    }
+
+    /// <summary>This handles getting the variable type left value as a temporary value with the given name.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleVarTemp(Builder.Builder builder) {
+        INode  value = builder.Nodes.Pop();
+        string name  = builder.Identifiers.Pop();
+        Type   type  = Type.TypeOf(value) ??
+            throw new Message("Unable to determine node type for temp.");
+        builder.AddTemp(type, name, value);
+    }
+    
+
+
+
+
+
+
+
+
+
 
 
 
@@ -349,7 +299,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
 
     
     /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
-    public void NewTypeInputNoAssign() {
+    public void HandleNewTypeInputNoAssign() {
         try {
             string name = this.Identifiers.Pop();
             Type type   = this.Types.Peek();
@@ -362,7 +312,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     }
 
     /// <summary>This creates a new input node of a specific type and assigns it with an initial value.</summary>
-    public void NewTypeInputWithAssign() {
+    public void HandleNewTypeInputWithAssign() {
         try {
             INode  value  = this.Nodes.Pop();
             Type   type   = this.Types.Peek();
@@ -377,7 +327,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     }
 
     /// <summary>This creates a new input node and assigns it with an initial value.</summary>
-    public void NewVarInputWithAssign() {
+    public void HandleNewVarInputWithAssign() {
         try {
             INode  value = this.Nodes.Pop();
             string name  = this.Identifiers.Pop();
@@ -396,7 +346,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     /// Checks for an existing node and, if none exists, creates an extern node
     /// as a placeholder with the given name in the local scope.
     /// </summary>
-    public void RequestExtern() {
+    public void HandleExternNoAssign() {
         try {
             string name = this.Identifiers.Pop();
             Type   type = this.Types.Peek();
@@ -413,7 +363,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     /// as a placeholder with the given name in the local scope.
     /// If the external node is created it will be assigned to a default value.
     /// </summary>
-    public void RequestExternWithAssign() {
+    public void HandleExternWithAssign() {
         try {
             INode  value = this.Nodes.Pop();
             Type   type  = this.Types.Peek();
@@ -425,59 +375,155 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
                     With("Type", type);
 
             (INode node, bool isExtern) = this.factory.RequestExtern(name, type);
-            if (isExtern) this.AddAssignment(node, value);
+            if (isExtern) {
+
+
+
+
+
+
+
+
+                this.factory.AddAssignment(node, value);
+
+            }
         } catch (S.Exception inner) {
             throw new Message("Error parsing extern").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
     }
-    
-    /// <summary>A helper handler for parsing literals.</summary>
-    /// <param name="usage">The string describing what this parse is doing.</param>
-    /// <param name="parseMethod">The method to convert a string into a literal node.</param>
-    private void parseLiteral(string usage, S.Func<string, INode> parseMethod) {
-        string text = this.LastText;
-        try {
-            this.Nodes.Push(parseMethod(text));
-        } catch (S.Exception ex) {
-            throw new Message("Failed to " + usage + ".").
-                With("Error", ex).
-                With("Text", text).
+
+    /// <summary>This handles assigning the left value to the right value.</summary>
+    public void HandleAssignment() {
+        INode value  = this.Nodes.Pop();
+        INode target = this.Nodes.Pop();
+
+
+
+        INode root   = this.AddAssignment(target, value);
+
+        // TODO: Reevaluate this statement and make sure we're doing it correctly.
+        //
+        // Push the cast value back onto the stack for any following assignments.
+        // By using the cast it makes it more like `X=Y=Z` is `Y=Z; X=Y;` but means that if a double and an int are being set by
+        // an int, the int must be assigned first then it can cast to a double for the double assignment, otherwise it will cast
+        // to a double but not be able to implicitly cast that double back to an int. For example: if `int X; double Y;` then
+        // `Y=X=3;` works and `X=Y=3` will not. One drawback for this way is that if you assign an int to multiple doubles it will
+        // construct multiple cast nodes, but with a little optimization to remove duplicate node paths, this isn't an issue. 
+        // Alternatively, if we push the value then `X=Y=Z` will be like `Y=Z; X=Z;`, but we won't.
+        this.Nodes.Push(root);
+        // Add to existing since the first assignment will handle preparing the tree being assigned.
+        this.Existing.Add(root);
+    }
+
+    /// <summary>This handles performing a type cast of a node.</summary>
+    public void HandleCast() {
+        INode value = this.Nodes.Pop();
+        Type  type  = this.Types.Pop();
+        this.Nodes.Push(this.factory.PerformCast(type, value, true));
+    }
+
+    /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    public void HandleMemberAccess() {
+        string name  = this.LastText;
+        INode  rNode = this.Nodes.Pop();
+        if (rNode is not IFieldReader receiver)
+            throw new Message("Unexpected node type for a member access. Expected a field reader.").
+                With("Node", rNode).
+                With("Name", name).
                 With("Location", this.LastLocation);
+
+        INode node = receiver.ReadField(name) ??
+            throw new Message("No identifier found in the receiver stack.").
+                With("Identifier", name).
+                With("Location", this.LastLocation);
+
+        if (node is IExtern externNode)
+            node = externNode.Shell;
+
+        this.Nodes.Push(node);
+    }
+
+    /// <summary>This handles preparing for a method call.</summary>
+    public void HandleStartCall() =>
+        this.Arguments.Start();
+
+    /// <summary>This handles the end of a method call and creates the node for the method.</summary>
+    public void HandleAddArg() =>
+        this.Arguments.Add(this.Nodes.Pop());
+
+    /// <summary>This handles finishing a method call and building the node for the method.</summary>
+    public void HandleEndCall() {
+        INode[] args = this.Arguments.End();
+        INode   node = this.Nodes.Pop();
+        if (node is not IFuncGroup group)
+            throw new Message("Unexpected node type for a method call. Expected a function group.").
+                With("Node", node).
+                With("Input", args.Types().Strings().Join(", ")).
+                With("Location", this.LastLocation);
+
+        INode? result = group.Build(args);
+        if (result is null) {
+            if (args.Length <= 0)
+                throw new Message("Could not perform the function without any inputs.").
+                    With("Function", group).
+                    With("Location", this.LastLocation);
+            throw new Message("Could not perform the function with the given input types.").
+                With("Function", group).
+                With("Input", args.Types().Strings().Join(", ")).
+                With("Location", this.LastLocation);
+        }
+
+        this.Nodes.Push(result);
+    }
+
+    /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
+    public void HandlePushId() {
+        try {
+            string name = this.LastText;
+            this.Logger.Info("Id = \"{0}\"", name);
+            INode node = this.factory.FindInNamespace(name);
+            this.Nodes.Push(node);
+            this.Existing.Add(node);
+        } catch (S.Exception inner) {
+            throw new Message("Error parsing identifier").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
         }
     }
 
     /// <summary>This handles pushing a bool literal value onto the stack.</summary>
-    public void PushBool() =>
+    public void HandlePushBool() =>
         this.parseLiteral("parse a bool", (string text) => Literal.Bool(bool.Parse(text)));
 
     /// <summary>This handles pushing a binary int literal value onto the stack.</summary>
-    public void PushBin() =>
+    public void HandlePushBin() =>
         this.parseLiteral("parse a binary int", (string text) => Literal.Int(S.Convert.ToInt32(text, 2)));
 
     /// <summary>This handles pushing an octal int literal value onto the stack.</summary>
-    public void PushOct() =>
+    public void HandlePushOct() =>
         this.parseLiteral("parse a octal int", (string text) => Literal.Int(S.Convert.ToInt32(text, 8)));
 
     /// <summary>This handles pushing a decimal int literal value onto the stack.</summary>
-    public void PushInt() =>
+    public void HandlePushInt() =>
         this.parseLiteral("parse a decimal int", (string text) => Literal.Int(int.Parse(text)));
 
     /// <summary>This handles pushing a hexadecimal int literal value onto the stack.</summary>
-    public void PushHex() =>
+    public void HandlePushHex() =>
         this.parseLiteral("parse a hex int", (string text) => Literal.Int(int.Parse(text[2..], NumberStyles.HexNumber)));
 
     /// <summary>This handles pushing a double literal value onto the stack.</summary>
-    public void PushDouble() =>
+    public void HandlePushDouble() =>
         this.parseLiteral("parse a double", (string text) => Literal.Double(double.Parse(text)));
 
     /// <summary>This handles pushing a string literal value onto the stack.</summary>
-    public void PushString() =>
+    public void HandlePushString() =>
         this.parseLiteral("decode escaped sequences", (string text) => Literal.String(PP.Formatting.Text.Unescape(text)));
 
     /// <summary>This handles pushing a type onto the stack.</summary>
-    public void PushType() {
+    public void HandlePushType() {
         string text = this.LastText;
         Type t = Type.FromName(text) ??
             throw new Message("Unrecognized type name.").

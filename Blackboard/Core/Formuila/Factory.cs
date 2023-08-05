@@ -93,7 +93,7 @@ sealed public class Factory {
     /// If false then only inheritance or implicit casts will be used.
     /// </param>
     /// <returns>The cast value or the given value in the given type.</returns>
-    public INode performCast(Type type, INode value, bool explicitCasts = false) {
+    public INode PerformCast(Type type, INode value, bool explicitCasts = false) {
         Type? valueType = Type.TypeOf(value);
         TypeMatch match = type.Match(valueType, explicitCasts);
         if (!match.IsAnyCast)
@@ -117,7 +117,7 @@ sealed public class Factory {
     /// <returns>The root of the value branch which was used in the assignment.</returns>
     public INode AddDefine(INode value, Type? type, string name, HashSet<INode> newNodes) {
         this.logger.Info("Add Define:");
-        INode root = type is null ? value : this.performCast(type, value);
+        INode root = type is null ? value : this.PerformCast(type, value);
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
         
         VirtualNode scope = this.scope.Current;
@@ -163,7 +163,7 @@ sealed public class Factory {
             return null;
         }
 
-        INode root = this.performCast(Type.Trigger, value);
+        INode root = this.PerformCast(Type.Trigger, value);
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
         IAction condAssign = Provoke.Create(input, root, newNodes) ??
             throw new Message("Unexpected node types for a conditional provoke.").
@@ -193,7 +193,7 @@ sealed public class Factory {
                 With("Input", target).
                 With("Value", value);
 
-        INode root = this.performCast(targetType, value);
+        INode root = this.PerformCast(targetType, value);
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
         IAction assign = Maker.CreateAssignAction(targetType, target, root, newNodes) ??
             throw new Message("Unsupported types for an assignment action.").
@@ -216,7 +216,7 @@ sealed public class Factory {
 
         // Check if the base types match. Don't need to check that the type is
         // a data type or trigger since only those can be reduced to constants.
-        INode? root = this.performCast(targetType, value);
+        INode? root = this.PerformCast(targetType, value);
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
         string[] names = this.scope.Names.Append(name).ToArray();
 
@@ -247,7 +247,7 @@ sealed public class Factory {
                 With("Name", name).
                 With("Type", targetType);
 
-        INode root = targetType is null ? value : this.performCast(targetType, value);
+        INode root = targetType is null ? value : this.PerformCast(targetType, value);
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
 
         this.add(new Temp(name, root, newNodes));

@@ -4,10 +4,7 @@ using Blackboard.Core.Formuila;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Core.Nodes.Outer;
-using Blackboard.Core.Types;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using PP = PetiteParser;
@@ -242,92 +239,38 @@ sealed public class Parser {
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handleNewVarInputWithAssign(Builder.Builder builder) => builder.HandleNewVarInputWithAssign();
 
-
-
-
-
-
     /// <summary>This handles defining a new typed named node.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleTypeDefine(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        Type   type  = builder.Types.Peek();
-        string name  = builder.Identifiers.Pop();
-        builder.AddDefine(value, type, name);
-    }
+    static private void handleTypeDefine(Builder.Builder builder) => builder.HandleTypeDefine();
 
     /// <summary>This handles defining a new untyped named node.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleVarDefine(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        string name  = builder.Identifiers.Pop();
-        builder.AddDefine(value, null, name);
-    }
+    static private void handleVarDefine(Builder.Builder builder) => builder.HandleVarDefine();
 
     /// <summary>This handles when a trigger is provoked unconditionally.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleProvokeTrigger(Builder.Builder builder) {
-        INode target = builder.Nodes.Pop();
-        builder.AddProvokeTrigger(target, null);
-    }
+    static private void handleProvokeTrigger(Builder.Builder builder) => builder.HandleProvokeTrigger();
 
     /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleConditionalProvokeTrigger(Builder.Builder builder) {
-        INode target = builder.Nodes.Pop();
-        INode value  = builder.Nodes.Pop();
-        INode root   = builder.AddProvokeTrigger(target, value) ??
-            throw new Message("Unable to create conditional provoke trigger");
-
-        // Push the condition onto the stack for any following trigger pulls.
-        // See comment in `handleAssignment` about pushing cast value back onto the stack.
-        builder.Nodes.Push(root);
-        builder.Existing.Add(root);
-    }
+    static private void handleConditionalProvokeTrigger(Builder.Builder builder) => builder.HandleConditionalProvokeTrigger();
 
     /// <summary>This handles getting the typed left value and writing it out to the given name.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleTypeGet(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        Type   type  = builder.Types.Peek();
-        string name  = builder.Identifiers.Pop();
-        builder.AddGetter(type, name, value);
-    }
+    static private void handleTypeGet(Builder.Builder builder) => builder.HandleTypeGet();
 
     /// <summary>This handles getting the variable type left value and writing it out to the given name.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleVarGet(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        string name  = builder.Identifiers.Pop();
-        Type   type  = Type.TypeOf(value) ??
-            throw new Message("Unable to determine node type for getter.");
-        builder.AddGetter(type, name, value);
-    }
+    static private void handleVarGet(Builder.Builder builder) => builder.HandleVarGet();
 
     /// <summary>This handles getting the typed left value as a temporary value with the given name.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleTypeTemp(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        Type   type  = builder.Types.Peek();
-        string name  = builder.Identifiers.Pop();
-        builder.AddTemp(type, name, value);
-    }
+    static private void handleTypeTemp(Builder.Builder builder) => builder.HandleTypeTemp();
 
     /// <summary>This handles getting the variable type left value as a temporary value with the given name.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleVarTemp(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        string name  = builder.Identifiers.Pop();
-        Type   type  = Type.TypeOf(value) ??
-            throw new Message("Unable to determine node type for temp.");
-        builder.AddTemp(type, name, value);
-    }
+    static private void handleVarTemp(Builder.Builder builder) => builder.HandleVarTemp();
     
-
-
-
-
-
     /// <summary>This handles checking for an existing node or creating an external node if there is no existing node.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handleExternNoAssign(Builder.Builder builder) => builder.HandleExternNoAssign();
@@ -346,6 +289,10 @@ sealed public class Parser {
     /// <summary>This handles performing a type cast of a node.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handleCast(Builder.Builder builder) => builder.HandleCast();
+
+    /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handleMemberAccess(Builder.Builder builder) => builder.HandleMemberAccess();
 
     /// <summary>This handles preparing for a method call.</summary>
     /// <param name="builder">The formula builder being worked on.</param>

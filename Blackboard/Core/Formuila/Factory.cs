@@ -47,6 +47,48 @@ sealed public class Factory {
         this.actions.AddLast(action);
     }
 
+
+
+
+
+    
+    /// <summary>Collects all the new nodes and apply depths.</summary>
+    /// <param name="root">The root node of the branch to check.</param>
+    /// <returns>The collection of new nodes.</returns>
+    private HashSet<INode> collectAndOrder(INode? root) {
+        HashSet<INode> newNodes = new();
+        this.collectAndOrder(root, newNodes);
+        this.Existing.Clear();
+        return newNodes;
+    }
+
+    /// <summary>Recessively collect the new nodes and apply depths.</summary>
+    /// <param name="node">The current node to check.</param>
+    /// <param name="newNodes">The set of new nodes being added.</param>
+    /// <returns>True if a new node, false if not.</returns>
+    private bool collectAndOrder(INode? node, HashSet<INode> newNodes) {
+        if (node is null || this.Existing.Has(node)) return false;
+        if (newNodes.Contains(node)) return true;
+        newNodes.Add(node);
+
+        // Continue up to all the parents.
+        if (node is IChild child) {
+            foreach (IParent par in child.Parents) {
+                if (this.collectAndOrder(par, newNodes))
+                    par.AddChildren(child);
+            }
+        }
+
+        // Now that all parents are prepared, update the depth.
+        // During optimization the depths may change from this but this initial depth
+        // will help make all future depth updates perform efficiently.
+        if (node is IEvaluable eval)
+            eval.Depth = eval.MinimumAllowedDepth();
+        return true;
+    }
+
+
+
     /// <summary>Pushes a namespace onto the scope stack.</summary>
     /// <param name="name">The name of the namespace to push onto the namespace stack.</param>
     public void PushNamespace(string name) {
@@ -247,7 +289,7 @@ sealed public class Factory {
                 With("Name", name).
                 With("Type", targetType);
 
-        INode root = targetType is null ? value : this.PerformCast(targetType, value);
+        INode root = this.PerformCast(targetType, value);
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
 
         this.add(new Temp(name, root, newNodes));

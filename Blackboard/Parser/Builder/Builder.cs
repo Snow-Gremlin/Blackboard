@@ -83,41 +83,6 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
 
     #region Helper Methods...
     
-    /// <summary>Collects all the new nodes and apply depths.</summary>
-    /// <param name="root">The root node of the branch to check.</param>
-    /// <returns>The collection of new nodes.</returns>
-    private HashSet<INode> collectAndOrder(INode? root) {
-        HashSet<INode> newNodes = new();
-        this.collectAndOrder(root, newNodes);
-        this.Existing.Clear();
-        return newNodes;
-    }
-
-    /// <summary>Recessively collect the new nodes and apply depths.</summary>
-    /// <param name="node">The current node to check.</param>
-    /// <param name="newNodes">The set of new nodes being added.</param>
-    /// <returns>True if a new node, false if not.</returns>
-    private bool collectAndOrder(INode? node, HashSet<INode> newNodes) {
-        if (node is null || this.Existing.Has(node)) return false;
-        if (newNodes.Contains(node)) return true;
-        newNodes.Add(node);
-
-        // Continue up to all the parents.
-        if (node is IChild child) {
-            foreach (IParent par in child.Parents) {
-                if (this.collectAndOrder(par, newNodes))
-                    par.AddChildren(child);
-            }
-        }
-
-        // Now that all parents are prepared, update the depth.
-        // During optimization the depths may change from this but this initial depth
-        // will help make all future depth updates perform efficiently.
-        if (node is IEvaluable eval)
-            eval.Depth = eval.MinimumAllowedDepth();
-        return true;
-    }
-
     /// <summary>A helper handler for parsing literals.</summary>
     /// <param name="usage">The string describing what this parse is doing.</param>
     /// <param name="parseMethod">The method to convert a string into a literal node.</param>
@@ -186,117 +151,82 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
     /// <summary>This handles defining a new typed named node.</summary>
-    /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleTypeDefine(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        Type   type  = builder.Types.Peek();
-        string name  = builder.Identifiers.Pop();
-        builder.AddDefine(value, type, name);
+    public void HandleTypeDefine() {
+        INode  value = this.Nodes.Pop();
+        Type   type  = this.Types.Peek();
+        string name  = this.Identifiers.Pop();
+        this.AddDefine(value, type, name);
     }
 
     /// <summary>This handles defining a new untyped named node.</summary>
-    /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleVarDefine(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        string name  = builder.Identifiers.Pop();
-        builder.AddDefine(value, null, name);
+    public void HandleVarDefine() {
+        INode  value = this.Nodes.Pop();
+        string name  = this.Identifiers.Pop();
+        this.AddDefine(value, null, name);
     }
 
     /// <summary>This handles when a trigger is provoked unconditionally.</summary>
-    /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleProvokeTrigger(Builder.Builder builder) {
-        INode target = builder.Nodes.Pop();
-        builder.AddProvokeTrigger(target, null);
+    public void HandleProvokeTrigger() {
+        INode target = this.Nodes.Pop();
+        this.AddProvokeTrigger(target, null);
     }
 
     /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
-    /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleConditionalProvokeTrigger(Builder.Builder builder) {
-        INode target = builder.Nodes.Pop();
-        INode value  = builder.Nodes.Pop();
-        INode root   = builder.AddProvokeTrigger(target, value) ??
+    public void HandleConditionalProvokeTrigger() {
+        INode target = this.Nodes.Pop();
+        INode value  = this.Nodes.Pop();
+        INode root   = this.AddProvokeTrigger(target, value) ??
             throw new Message("Unable to create conditional provoke trigger");
 
         // Push the condition onto the stack for any following trigger pulls.
         // See comment in `handleAssignment` about pushing cast value back onto the stack.
-        builder.Nodes.Push(root);
-        builder.Existing.Add(root);
+        this.Nodes.Push(root);
+        this.Existing.Add(root);
     }
 
     /// <summary>This handles getting the typed left value and writing it out to the given name.</summary>
-    /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleTypeGet(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        Type   type  = builder.Types.Peek();
-        string name  = builder.Identifiers.Pop();
-        builder.AddGetter(type, name, value);
+    public void HandleTypeGet() {
+        INode  value = this.Nodes.Pop();
+        Type   type  = this.Types.Peek();
+        string name  = this.Identifiers.Pop();
+        this.AddGetter(type, name, value);
     }
 
     /// <summary>This handles getting the variable type left value and writing it out to the given name.</summary>
-    /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleVarGet(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        string name  = builder.Identifiers.Pop();
+    public void HandleVarGet() {
+        INode  value = this.Nodes.Pop();
+        string name  = this.Identifiers.Pop();
         Type   type  = Type.TypeOf(value) ??
             throw new Message("Unable to determine node type for getter.");
-        builder.AddGetter(type, name, value);
+
+        INode root = this.factory.PerformCast(type, value);
+        HashSet<INode> newNodes = this.collectAndOrder(root);
+        this.factory.AddGetter(type, name, root, newNodes);
     }
 
     /// <summary>This handles getting the typed left value as a temporary value with the given name.</summary>
-    /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleTypeTemp(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        Type   type  = builder.Types.Peek();
-        string name  = builder.Identifiers.Pop();
-        builder.AddTemp(type, name, value);
+    public void HandleTypeTemp() {
+        INode  value = this.Nodes.Pop();
+        Type   type  = this.Types.Peek();
+        string name  = this.Identifiers.Pop();
+        
+        INode root = this.factory.PerformCast(type, value);
+        HashSet<INode> newNodes = this.collectAndOrder(root);
+        this.factory.AddTemp(name, root, newNodes);
     }
 
     /// <summary>This handles getting the variable type left value as a temporary value with the given name.</summary>
-    /// <param name="builder">The formula builder being worked on.</param>
-    static private void handleVarTemp(Builder.Builder builder) {
-        INode  value = builder.Nodes.Pop();
-        string name  = builder.Identifiers.Pop();
+    public void HandleVarTemp() {
+        INode  value = this.Nodes.Pop();
+        string name  = this.Identifiers.Pop();
         Type   type  = Type.TypeOf(value) ??
             throw new Message("Unable to determine node type for temp.");
-        builder.AddTemp(type, name, value);
+        
+        INode root = this.factory.PerformCast(type, value);
+        HashSet<INode> newNodes = this.collectAndOrder(value);
+        this.factory.AddTemp(type, name, value, newNodes);
     }
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
     /// <summary>This creates a new input node of a specific type without assigning the value.</summary>
     public void HandleNewTypeInputNoAssign() {
@@ -318,7 +248,8 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
             Type   type   = this.Types.Peek();
             string name   = this.Identifiers.Pop();
             INode  target = this.factory.CreateInput(name, type);
-            this.AddAssignment(target, value);
+            HashSet<INode> newNodes = this.collectAndOrder(target);
+            this.factory.AddAssignment(target, value, newNodes);
         } catch (S.Exception inner) {
             throw new Message("Error parsing input").
                 With("Location", this.LastLocation).
@@ -334,7 +265,8 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
             Type   type  = Type.TypeOf(value) ??
                 throw new Message("Unable to determine node type for new variable with assignment.");
             INode target = this.factory.CreateInput(name, type);
-            this.AddAssignment(target, value);
+            HashSet<INode> newNodes = this.collectAndOrder(target);
+            this.factory.AddAssignment(target, value, newNodes);
         } catch (S.Exception inner) {
             throw new Message("Error parsing input").
                 With("Location", this.LastLocation).
@@ -376,16 +308,8 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
 
             (INode node, bool isExtern) = this.factory.RequestExtern(name, type);
             if (isExtern) {
-
-
-
-
-
-
-
-
-                this.factory.AddAssignment(node, value);
-
+                HashSet<INode> newNodes = this.collectAndOrder(node);
+                this.factory.AddAssignment(node, value, newNodes);
             }
         } catch (S.Exception inner) {
             throw new Message("Error parsing extern").
@@ -398,10 +322,9 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     public void HandleAssignment() {
         INode value  = this.Nodes.Pop();
         INode target = this.Nodes.Pop();
-
-
-
-        INode root   = this.AddAssignment(target, value);
+        
+        HashSet<INode> newNodes = this.collectAndOrder(target);
+        INode root = this.factory.AddAssignment(target, value, newNodes);
 
         // TODO: Reevaluate this statement and make sure we're doing it correctly.
         //
@@ -425,7 +348,6 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
     }
 
     /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>
-    /// <param name="builder">The formula builder being worked on.</param>
     public void HandleMemberAccess() {
         string name  = this.LastText;
         INode  rNode = this.Nodes.Pop();

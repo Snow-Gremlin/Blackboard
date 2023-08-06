@@ -338,7 +338,7 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
             (INode node, bool isExtern) = this.factory.RequestExtern(name, type);
             if (isExtern) this.factory.AddAssignment(node, value);
         } catch (S.Exception inner) {
-            throw new Message("Error parsing extern").
+            throw new Message("Error parsing extern with assign").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -346,28 +346,40 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
 
     /// <summary>This handles assigning the left value to the right value.</summary>
     public void HandleAssignment() {
-        INode value  = this.Nodes.Pop();
-        INode target = this.Nodes.Pop();
-        INode root   = this.factory.AddAssignment(target, value);
+        try {
+            INode value  = this.Nodes.Pop();
+            INode target = this.Nodes.Pop();
+            INode root   = this.factory.AddAssignment(target, value);
 
-        // TODO: Reevaluate this statement and make sure we're doing it correctly.
-        //
-        // Push the cast value back onto the stack for any following assignments.
-        // By using the cast it makes it more like `X=Y=Z` is `Y=Z; X=Y;` but means that if a double and an int are being set by
-        // an int, the int must be assigned first then it can cast to a double for the double assignment, otherwise it will cast
-        // to a double but not be able to implicitly cast that double back to an int. For example: if `int X; double Y;` then
-        // `Y=X=3;` works and `X=Y=3` will not. One drawback for this way is that if you assign an int to multiple doubles it will
-        // construct multiple cast nodes, but with a little optimization to remove duplicate node paths, this isn't an issue. 
-        // Alternatively, if we push the value then `X=Y=Z` will be like `Y=Z; X=Z;`, but we won't.
-        this.Nodes.Push(root);
+            // TODO: Reevaluate this statement and make sure we're doing it correctly.
+            //
+            // Push the cast value back onto the stack for any following assignments.
+            // By using the cast it makes it more like `X=Y=Z` is `Y=Z; X=Y;` but means that if a double and an int are being set by
+            // an int, the int must be assigned first then it can cast to a double for the double assignment, otherwise it will cast
+            // to a double but not be able to implicitly cast that double back to an int. For example: if `int X; double Y;` then
+            // `Y=X=3;` works and `X=Y=3` will not. One drawback for this way is that if you assign an int to multiple doubles it will
+            // construct multiple cast nodes, but with a little optimization to remove duplicate node paths, this isn't an issue. 
+            // Alternatively, if we push the value then `X=Y=Z` will be like `Y=Z; X=Z;`, but we won't.
+            this.Nodes.Push(root);
+        } catch (S.Exception inner) {
+            throw new Message("Error an assignment").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
     }
 
     /// <summary>This handles performing a type cast of a node.</summary>
     public void HandleCast() {
-        INode value = this.Nodes.Pop();
-        Type  type  = this.Types.Pop();
-        INode root  = this.factory.PerformCast(type, value, true);
-        this.Nodes.Push(root);
+        try {
+            INode value = this.Nodes.Pop();
+            Type  type  = this.Types.Pop();
+            INode root  = this.factory.PerformCast(type, value, true);
+            this.Nodes.Push(root);
+        } catch (S.Exception inner) {
+            throw new Message("Error while casting").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
     }
 
     /// <summary>This handles accessing an identifier to find the receiver for the next identifier.</summary>

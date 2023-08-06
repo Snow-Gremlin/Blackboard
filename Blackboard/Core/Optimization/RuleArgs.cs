@@ -34,12 +34,12 @@ internal class RuleArgs {
     /// <param name="nodes">The new nodes for a formula which need to be optimized.</param>
     /// <param name="logger">The logger to debug and inspect the optimization.</param>
     public RuleArgs(Slate slate, INode root, HashSet<INode> nodes, Logger? logger = null) {
-        Slate = slate;
-        Logger = logger;
-        Nodes = nodes;
-        Removed = new HashSet<INode>();
-        Root = root;
-        Changed = false;
+        this.Slate   = slate;
+        this.Logger  = logger;
+        this.Nodes   = nodes;
+        this.Removed = new HashSet<INode>();
+        this.Root    = root;
+        this.Changed = false;
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ internal class RuleArgs {
     /// </summary>
     /// <param name="node">The node to evaluate.</param>
     public void UpdateValue(INode node) =>
-        PostReachable(node).OfType<IEvaluable>().Foreach(eval => eval.Evaluate());
+        this.PostReachable(node).OfType<IEvaluable>().Foreach(eval => eval.Evaluate());
 
     /// <summary>This will enumerate all new nodes which are reachable from the given node.</summary>
     /// <param name="node">The node to start enumerating from.</param>
@@ -58,8 +58,8 @@ internal class RuleArgs {
             // Copy parents into a list so they can be modified and
             // filter from the list any which are no longer in the nodes.
             foreach (INode parent in child.Parents.ToList().
-                Where(Nodes.Contains).WhereNot(Removed.Contains).
-                SelectMany(PostReachable))
+                Where(this.Nodes.Contains).WhereNot(Removed.Contains).
+                SelectMany(this.PostReachable))
                 yield return parent;
         }
         yield return node;
@@ -74,8 +74,8 @@ internal class RuleArgs {
             // Copy parents into a list so they can be modified and
             // filter from the list any which are no longer in the nodes.
             foreach (INode parent in child.Parents.ToList().
-                Where(Nodes.Contains).WhereNot(Removed.Contains).
-                SelectMany(PreReachable))
+                Where(this.Nodes.Contains).WhereNot(Removed.Contains).
+                SelectMany(this.PreReachable))
                 yield return parent;
         }
     }
@@ -84,11 +84,11 @@ internal class RuleArgs {
     /// <param name="oldNode">The old node to replace with the given new node.</param>
     /// <param name="newNode">The new node to replace the old node with.</param>
     public void Replace(INode oldNode, INode newNode) {
-        if (ReferenceEquals(Root, oldNode)) Root = newNode;
+        if (ReferenceEquals(this.Root, oldNode)) this.Root = newNode;
         else if (oldNode is IParent oldParent && newNode is IParent newParent)
             oldParent.Children.ToList().ForEach(child => child.Parents.Replace(oldParent, newParent));
-        Nodes.Add(newNode);
-        Removed.Add(oldNode);
-        Changed = true;
+        this.Nodes.Add(newNode);
+        this.Removed.Add(oldNode);
+        this.Changed = true;
     }
 }

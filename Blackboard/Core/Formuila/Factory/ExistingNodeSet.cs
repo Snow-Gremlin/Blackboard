@@ -5,10 +5,10 @@ using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Parser.Builder;
+namespace Blackboard.Core.Formuila.Factory;
 
 /// <summary>A collection of existing nodes.</summary>
-sealed public class ExistingNodeSet {
+sealed internal class ExistingNodeSet {
     private readonly Logger? logger;
     private readonly HashSet<INode> nodes;
 

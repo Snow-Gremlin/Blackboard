@@ -5,10 +5,10 @@ using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Formuila;
+namespace Blackboard.Core.Formuila.Factory;
 
 /// <summary>The stack of the namespaces to represent the scope being worked on.</summary>
-sealed public class ScopeStack {
+sealed internal class ScopeStack {
     private readonly Slate slate;
     private readonly Logger? logger;
     private readonly LinkedList<VirtualNode> scopes;
@@ -19,7 +19,7 @@ sealed public class ScopeStack {
     internal ScopeStack(Slate slate, Logger? logger = null) {
         this.slate  = slate;
         this.logger = logger;
-        this.Global = createGlobal();
+        this.Global = this.createGlobal();
         this.scopes = new();
         this.scopes.AddFirst(this.Global);
     }

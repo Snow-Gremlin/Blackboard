@@ -6,7 +6,7 @@ using System.Linq;
 namespace Blackboard.Parser.Builder;
 
 /// <summary>The stack of values which are currently being worked on during a parse.</summary>
-sealed public class BuilderStack<T> {
+sealed internal class BuilderStack<T> {
     private readonly string usage;
     private readonly Logger? logger;
     private readonly LinkedList<T> stack;

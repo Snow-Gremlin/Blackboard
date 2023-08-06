@@ -50,7 +50,7 @@ sealed public class Extern : IAction {
                     With("Existing", existing).
                     With("Node",     this.Node);
 
-            Type externType = Type.TypeOf(Node) ??
+            Type externType = Type.TypeOf(this.Node) ??
                 throw new Message("Unable to find extern type while setting extern.").
                     With("Name",     this.Name).
                     With("Existing", existing).

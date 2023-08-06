@@ -9,14 +9,15 @@ using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Formuila;
+namespace Blackboard.Core.Formuila.Factory;
 
 /// <summary>The collection of actions which have been parsed.</summary>
 sealed public class Factory {
     private readonly Slate slate;
     private readonly Logger? logger;
-    private readonly LinkedList<IAction> actions;
+    private readonly ActionCollection actions;
     private readonly ScopeStack scope;
+    private readonly ExistingNodeSet existing;
     private readonly Optimizer optimizer;
 
     /// <summary>Creates new a new action collection.</summary>
@@ -25,8 +26,9 @@ sealed public class Factory {
     internal Factory(Slate slate, Logger? logger = null) {
         this.slate     = slate;
         this.logger    = logger;
-        this.actions   = new LinkedList<IAction>();
+        this.actions   = new ActionCollection(this.slate, this.logger);
         this.scope     = new ScopeStack(this.slate, this.logger);
+        this.existing  = new ExistingNodeSet(this.logger);
         this.optimizer = new Optimizer();
     }
 
@@ -34,23 +36,12 @@ sealed public class Factory {
     public void Reset() {
         this.actions.Clear();
         this.scope.Reset();
+        this.existing.Clear(); // TODO: Auto-clear when collectAndOrder wasn't needed.
     }
 
     /// <summary>Gets the formula containing all the actions.</summary>
     /// <returns>The formula containing all the actions.</returns>
-    public Formula Build() => new(this.slate, this.actions.Append(new Finish()));
-
-    /// <summary>Adds a pending action into this formula.</summary>
-    /// <param name="performer">The performer to add.</param>
-    private void add(IAction action) {
-        this.logger.Info("Add Action: {0}", action);
-        this.actions.AddLast(action);
-    }
-
-
-
-
-
+    public Formula Build() => this.actions.CreateFormula();
     
     /// <summary>Collects all the new nodes and apply depths.</summary>
     /// <param name="root">The root node of the branch to check.</param>
@@ -58,7 +49,7 @@ sealed public class Factory {
     private HashSet<INode> collectAndOrder(INode? root) {
         HashSet<INode> newNodes = new();
         this.collectAndOrder(root, newNodes);
-        this.Existing.Clear();
+        this.existing.Clear();
         return newNodes;
     }
 
@@ -67,7 +58,7 @@ sealed public class Factory {
     /// <param name="newNodes">The set of new nodes being added.</param>
     /// <returns>True if a new node, false if not.</returns>
     private bool collectAndOrder(INode? node, HashSet<INode> newNodes) {
-        if (node is null || this.Existing.Has(node)) return false;
+        if (node is null || this.existing.Has(node)) return false;
         if (newNodes.Contains(node)) return true;
         newNodes.Add(node);
 
@@ -87,8 +78,6 @@ sealed public class Factory {
         return true;
     }
 
-
-
     /// <summary>Pushes a namespace onto the scope stack.</summary>
     /// <param name="name">The name of the namespace to push onto the namespace stack.</param>
     public void PushNamespace(string name) {
@@ -106,7 +95,7 @@ sealed public class Factory {
 
         // Create a new virtual namespace and an action to define the new namespace when this formula is run.
         Namespace newspace = new();
-        this.add(new Define(scope.Receiver, name, newspace)); // TODO: Remove action creation from parser
+        this.actions.Add(new Define(scope.Receiver, name, newspace));
         VirtualNode nextScope = new(name, newspace);
         this.scope.Push(nextScope);
         scope.WriteField(name, nextScope);
@@ -121,9 +110,10 @@ sealed public class Factory {
         INode node = this.scope.FindId(name) ??
             throw new Message("No identifier found in the scope stack.").
                 With("Identifier", name);
-        return node is IExtern externNode ?
-            externNode.Shell :
-            node;
+        if (node is IExtern externNode)
+            node = externNode.Shell;
+        this.existing.Add(node);
+        return node;
     }
 
     /// <summary>Performs a cast if needed from one value to another by creating a new node.</summary>
@@ -141,25 +131,25 @@ sealed public class Factory {
         if (!match.IsAnyCast)
             return match.IsMatch ? value :
                 throw new Message("The value type can not be cast to the given type.").
-                    With("Target",   type).
-                    With("Type",     valueType).
-                    With("Value",    value);
+                    With("Target", type).
+                    With("Type",   valueType).
+                    With("Value",  value);
 
         IFuncGroup? castGroup = Maker.GetCastMethod(this.slate, type);
         return castGroup?.Build(value) ??
             throw new Message("Unsupported type for new definition cast").
-                With("Type",     type);
+                With("Type", type);
     }
 
     /// <summary>Creates a define action and adds it to the builder.</summary>
     /// <param name="value">The value to define the node with.</param>
     /// <param name="type">The type of the node to define or null to use the value type.</param>
     /// <param name="name">The name to write the node with to the current scope.</param>
-    /// <param name="newNodes">Any new nodes that were created for this action.</param>
     /// <returns>The root of the value branch which was used in the assignment.</returns>
-    public INode AddDefine(INode value, Type? type, string name, HashSet<INode> newNodes) {
+    public INode AddDefine(INode value, Type? type, string name) {
         this.logger.Info("Add Define:");
         INode root = type is null ? value : this.PerformCast(type, value);
+        HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
         
         VirtualNode scope = this.scope.Current;
@@ -178,7 +168,7 @@ sealed public class Factory {
                     With("Name", name).
                     With("Root", root);
 
-        this.add(new Define(scope.Receiver, name, root, newNodes));
+        this.actions.Add(new Define(scope.Receiver, name, root, newNodes));
         scope.WriteField(name, root);
         return root;
     }
@@ -186,9 +176,8 @@ sealed public class Factory {
     /// <summary>Creates a trigger provoke action and adds it to the builder.</summary>
     /// <param name="target">The target trigger to effect.</param>
     /// <param name="value">The conditional value to trigger with or null if unconditional.</param>
-    /// <param name="newNodes">Any new nodes that were created for this action.</param>
     /// <returns>The root of the value branch which was used in the assignment.</returns>
-    public INode? AddProvokeTrigger(INode target, INode? value, HashSet<INode> newNodes) {
+    public INode? AddProvokeTrigger(INode target, INode? value) {
         this.logger.Info("Add Provoke Trigger:");
         if (target is not ITriggerInput input)
             throw new Message("Target node is not an input trigger.").
@@ -201,27 +190,30 @@ sealed public class Factory {
                 throw new Message("Unexpected node types for a unconditional provoke.").
                     With("Target", target);
 
-            this.add(assign);
+            this.actions.Add(assign);
             return null;
         }
 
         INode root = this.PerformCast(Type.Trigger, value);
+        HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
+
         IAction condAssign = Provoke.Create(input, root, newNodes) ??
             throw new Message("Unexpected node types for a conditional provoke.").
                 With("Target", target).
                 With("Value",  value);
-
-        this.add(condAssign);
+        this.actions.Add(condAssign);
+        
+        // Add to existing since the first provoke will handle preparing the tree being provoked
+        this.existing.Add(root);
         return root;
     }
 
     /// <summary>Creates an assignment action and adds it to the builder if possible.</summary>
     /// <param name="target">The node to assign the value to.</param>
     /// <param name="value">The value to assign to the given target node.</param>
-    /// <param name="newNodes">Any new nodes that were created for this action.</param>
     /// <returns>The root of the value branch which was used in the assignment.</returns>
-    public INode AddAssignment(INode target, INode value, HashSet<INode> newNodes) {
+    public INode AddAssignment(INode target, INode value) {
         this.logger.Info("Add Assignment:");
         if (target is not IInput)
             throw new Message("May not assign to a node which is not an input.").
@@ -236,14 +228,18 @@ sealed public class Factory {
                 With("Value", value);
 
         INode root = this.PerformCast(targetType, value);
+        HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
+
         IAction assign = Maker.CreateAssignAction(targetType, target, root, newNodes) ??
             throw new Message("Unsupported types for an assignment action.").
                 With("Type",  targetType).
                 With("Input", target).
                 With("Value", value);
+        this.actions.Add(assign);
 
-        this.add(assign);
+        // Add to existing since the first assignment will handle preparing the tree being assigned.
+        this.existing.Add(root);
         return root;
     }
 
@@ -251,14 +247,14 @@ sealed public class Factory {
     /// <param name="targetType">The target type of the value to get.</param>
     /// <param name="name">The name to output the value to.</param>
     /// <param name="value">The value to get and write to the given name.</param>
-    /// <param name="newNodes">Any new nodes that were created for this action.</param>
     /// <returns>The root of the value branch which was used in the assignment.</returns>
-    public INode AddGetter(Type targetType, string name, INode value, HashSet<INode> newNodes) {
+    public INode AddGetter(Type targetType, string name, INode value) {
         this.logger.Info("Add Getter:");
 
         // Check if the base types match. Don't need to check that the type is
         // a data type or trigger since only those can be reduced to constants.
         INode? root = this.PerformCast(targetType, value);
+        HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
         string[] names = this.scope.Names.Append(name).ToArray();
 
@@ -270,7 +266,7 @@ sealed public class Factory {
                 With("Name",  names.Join(".")).
                 With("Value", value);
 
-        this.add(getter);
+        this.actions.Add(getter);
         return root;
     }
 
@@ -278,9 +274,8 @@ sealed public class Factory {
     /// <param name="targetType">The target type of the value for the temporary value.</param>
     /// <param name="name">The name to output the value to.</param>
     /// <param name="value">The value to get and write to the given name.</param>
-    /// <param name="newNodes">Any new nodes that were created for this action.</param>
     /// <returns>The root of the value branch which was used in the assignment.</returns>
-    public INode AddTemp(Type targetType, string name, INode value, HashSet<INode> newNodes) {
+    public INode AddTemp(Type targetType, string name, INode value) {
         this.logger.Info("Add Temp:");
 
         VirtualNode scope = this.scope.Current;
@@ -290,9 +285,10 @@ sealed public class Factory {
                 With("Type", targetType);
 
         INode root = this.PerformCast(targetType, value);
+        HashSet<INode> newNodes = this.collectAndOrder(root);
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
 
-        this.add(new Temp(name, root, newNodes));
+        this.actions.Add(new Temp(name, root, newNodes));
         this.scope.Current.WriteField(name, root);
         return root;
     }
@@ -319,7 +315,7 @@ sealed public class Factory {
             scope.RemoveFields(name);
         }
 
-        this.add(new Define(scope.Receiver, name, node));
+        this.actions.Add(new Define(scope.Receiver, name, node));
         scope.WriteField(name, node);
         return node;
     }
@@ -360,7 +356,7 @@ sealed public class Factory {
                 With("Name", name).
                 With("Type", type);
 
-        this.add(new Extern(scope.Receiver, name, node));
+        this.actions.Add(new Extern(scope.Receiver, name, node));
         scope.WriteField(name, node);
         return (node, true);
     }
@@ -369,24 +365,19 @@ sealed public class Factory {
     /// <returns>The human readable string.</returns>
     public override string ToString() => this.StackString();
 
-    /// <summary>Gets the human readable string of the current actions.</summary>
-    /// <param name="indent">The indent to apply to all but the first line being returned.</param>
-    /// <returns>The human readable string.</returns>
-    public string ActionsToString(string indent) =>
-        this.actions.Count <= 0 ? "[]" :
-        "[\n" + indent + this.actions.Strings().Indent(indent).Join(",\n" + indent) + "]";
-
     /// <summary>Gets the formula debug string.</summary>
     /// <param name="showActions">Indicates that pending actions should be shown.</param>
     /// <param name="showGlobal">Indicates that the namespaces starting from the global should be shown.</param>
     /// <param name="showScope">Indicates that the scope stack should be shown.</param>
+    /// <param name="showExisting">Indicates that the new nodes should be shown.</param>
     /// <returns>A human readable debug string.</returns>
-    public string StackString(bool showActions = true, bool showGlobal = true, bool showScope = true) {
+    public string StackString(bool showActions = true, bool showGlobal = true, bool showScope = true, bool showExisting = true) {
         const string indent = "  ";
         List<string> parts = new();
-        if (showActions)   parts.Add("Actions: " + this.ActionsToString(indent));
-        if (showGlobal)    parts.Add("Global: "  + this.scope.Global.ToString());
-        if (showScope)     parts.Add("Scope: "   + this.scope);
+        if (showActions)   parts.Add("Actions: "  + this.actions.ToString(indent));
+        if (showGlobal)    parts.Add("Global: "   + this.scope.Global.ToString());
+        if (showScope)     parts.Add("Scope: "    + this.scope);
+        if (showExisting)  parts.Add("Existing: " + this.existing.ToString(indent));
         return parts.Join("\n");
     }
 }

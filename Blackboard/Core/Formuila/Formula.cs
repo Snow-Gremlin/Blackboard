@@ -39,8 +39,8 @@ sealed public class Formula {
         logger.Info("Formula");
         Logger? sub = logger.SubGroup(nameof(Formula));
         Record.Result result = new();
-        foreach (IAction action in actions)
-            action.Perform(Slate, result, sub);
+        foreach (IAction action in this.actions)
+            action.Perform(this.Slate, result, sub);
         return result;
     }
 

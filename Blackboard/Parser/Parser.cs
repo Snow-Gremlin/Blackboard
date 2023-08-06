@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Formuila;
+using Blackboard.Core.Formuila.Factory;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
@@ -16,7 +17,7 @@ namespace Blackboard.Parser;
 sealed public class Parser {
 
     /// <summary>Prepares the parser's static variables before they are used.</summary>
-    static Parser() => BaseParser = PP.Loader.Loader.LoadParser(
+    static Parser() => baseParser = PP.Loader.Loader.LoadParser(
         new PP.Scanner.Joiner(
             PP.Scanner.DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Grammar.lang"),
             PP.Scanner.DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Keywords.lang"),
@@ -24,7 +25,7 @@ sealed public class Parser {
         ), ignoreConflicts: false);
 
     /// <summary>The Blackboard language base parser singleton.</summary>
-    static public readonly PP.Parser.Parser BaseParser;
+    static private readonly PP.Parser.Parser baseParser;
 
     /// <summary>The slate that this Blackboard is to create the actions for.</summary>
     private readonly Slate slate;
@@ -63,7 +64,7 @@ sealed public class Parser {
     /// <param name="input">The input code to parse.</param>
     /// <returns>The formula for performing the parsed actions.</returns>
     public Formula Read(IEnumerable<string> input, string name = "Unnamed") {
-        PP.Parser.Result result = BaseParser.Parse(new PP.Scanner.DefaultScanner(input, name));
+        PP.Parser.Result result = baseParser.Parse(new PP.Scanner.DefaultScanner(input, name));
 
         // Check for parser errors.
         PP.ParseTree.ITreeNode? tree = result.Tree;
@@ -81,10 +82,11 @@ sealed public class Parser {
     private Formula read(PP.ParseTree.ITreeNode node) {
         try {
             this.logger.Info("Parser Read");
-            Builder.Builder builder = new(this.slate, this.logger);
+            Factory factory = new(this.slate, this.logger);
+            Builder.Builder builder = new(factory, this.logger);
             node.Process(this.prompts, builder);
             this.logger.Info("Parser Done");
-            return builder.BuildFormula();
+            return factory.Build();
         } catch (S.Exception ex) {
             throw new Message("Error occurred while parsing input code.").
                 With("Error", ex);
@@ -95,46 +97,51 @@ sealed public class Parser {
     #region Prompts Setup...
 
     /// <summary>Initializes the prompts and operators for this parser.</summary>
+    /// <remarks>
+    /// The prompts are defined as static methods which then calls into the builder used as the arguments.
+    /// This allows for reads to occur in parallel since all the state is kept in the builder.
+    /// A unique builder is created per read.
+    /// </remarks>
     private void initPrompts() {
-        this.addHandler("clear", handleClear);
-        this.addHandler("defineId", handleDefineId);
+        this.addHandler("clear",         handleClear);
+        this.addHandler("defineId",      handleDefineId);
         this.addHandler("pushNamespace", handlePushNamespace);
-        this.addHandler("popNamespace", handlePopNamespace);
+        this.addHandler("popNamespace",  handlePopNamespace);
 
-        this.addHandler("newTypeInputNoAssign", handleNewTypeInputNoAssign);
+        this.addHandler("newTypeInputNoAssign",   handleNewTypeInputNoAssign);
         this.addHandler("newTypeInputWithAssign", handleNewTypeInputWithAssign);
-        this.addHandler("newVarInputWithAssign", handleNewVarInputWithAssign);
+        this.addHandler("newVarInputWithAssign",  handleNewVarInputWithAssign);
 
         this.addHandler("typeDefine", handleTypeDefine);
-        this.addHandler("varDefine", handleVarDefine);
+        this.addHandler("varDefine",  handleVarDefine);
 
-        this.addHandler("provokeTrigger", handleProvokeTrigger);
+        this.addHandler("provokeTrigger",            handleProvokeTrigger);
         this.addHandler("conditionalProvokeTrigger", handleConditionalProvokeTrigger);
 
         this.addHandler("typeGet", handleTypeGet);
-        this.addHandler("varGet", handleVarGet);
+        this.addHandler("varGet" , handleVarGet);
         
         this.addHandler("typeTemp", handleTypeTemp);
-        this.addHandler("varTemp", handleVarTemp);
+        this.addHandler("varTemp",  handleVarTemp);
 
-        this.addHandler("externNoAssign", handleExternNoAssign);
+        this.addHandler("externNoAssign",   handleExternNoAssign);
         this.addHandler("externWithAssign", handleExternWithAssign);
 
-        this.addHandler("assignment", handleAssignment);
-        this.addHandler("cast", handleCast);
+        this.addHandler("assignment",   handleAssignment);
+        this.addHandler("cast",         handleCast);
         this.addHandler("memberAccess", handleMemberAccess);
-        this.addHandler("startCall", handleStartCall);
-        this.addHandler("addArg", handleAddArg);
-        this.addHandler("endCall", handleEndCall);
-        this.addHandler("pushId", handlePushId);
-        this.addHandler("pushBool", handlePushBool);
-        this.addHandler("pushBin", handlePushBin);
-        this.addHandler("pushOct", handlePushOct);
-        this.addHandler("pushInt", handlePushInt);
-        this.addHandler("pushHex", handlePushHex);
-        this.addHandler("pushDouble", handlePushDouble);
-        this.addHandler("pushString", handlePushString);
-        this.addHandler("pushType", handlePushType);
+        this.addHandler("startCall",    handleStartCall);
+        this.addHandler("addArg",       handleAddArg);
+        this.addHandler("endCall",      handleEndCall);
+        this.addHandler("pushId",       handlePushId);
+        this.addHandler("pushBool",     handlePushBool);
+        this.addHandler("pushBin",      handlePushBin);
+        this.addHandler("pushOct",      handlePushOct);
+        this.addHandler("pushInt",      handlePushInt);
+        this.addHandler("pushHex",      handlePushHex);
+        this.addHandler("pushDouble",   handlePushDouble);
+        this.addHandler("pushString",   handlePushString);
+        this.addHandler("pushType",     handlePushType);
 
         this.addProcess(3, "ternary");
         this.addProcess(2, "logicalOr");
@@ -183,25 +190,14 @@ sealed public class Parser {
         if (this.slate.Global.Find(Operators.Namespace, name) is not IFuncGroup funcGroup)
             throw new Message("Could not find the operation by the given name.").
                 With("Name", name);
-
-        this.prompts[name] = (Builder.Builder builder) => {
-            PP.Scanner.Location? loc = builder.LastLocation;
-            builder.Logger.Info("Process {0}({1}) [{2}]", name, count, loc);
-
-            INode[] inputs = builder.Nodes.Pop(count).Actualize().ToArray();
-            INode result = funcGroup.Build(inputs) ??
-                    throw new Message("Could not perform the operation with the given input.").
-                        With("Operation", name).
-                        With("Input", inputs.Types().Strings().Join(", "));
-
-            builder.Nodes.Push(result);
-        };
+        this.prompts[name] = (Builder.Builder builder) =>
+            builder.HandleProcesses(count, name, funcGroup);
     }
 
     /// <summary>Validates that all prompts in the grammar are handled.</summary>
     private void validatePrompts() {
-        string[] unneeded = BaseParser.UnneededPrompts(this.prompts);
-        string[] missing  = BaseParser.MissingPrompts(this.prompts);
+        string[] unneeded = baseParser.UnneededPrompts(this.prompts);
+        string[] missing  = baseParser.MissingPrompts(this.prompts);
         if (unneeded.Length > 0 || missing.Length > 0)
             throw new Message("Blackboard's parser grammar has prompts which do not match prompt handlers.").
                 With("Not handled", unneeded.Join(", ")).

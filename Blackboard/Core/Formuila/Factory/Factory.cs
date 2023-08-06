@@ -36,7 +36,7 @@ sealed public class Factory {
     public void Reset() {
         this.actions.Clear();
         this.scope.Reset();
-        this.existing.Clear(); // TODO: Auto-clear when collectAndOrder wasn't needed.
+        this.existing.Clear();
     }
 
     /// <summary>Gets the formula containing all the actions.</summary>

@@ -86,9 +86,9 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
             this.Nodes.Push(parseMethod(text));
         } catch (S.Exception ex) {
             throw new Message("Failed to " + usage + ".").
-                With("Error", ex).
-                With("Text", text).
-                With("Location", this.LastLocation);
+                With("Location", this.LastLocation).
+                With("Error",    ex).
+                With("Text",     text);
         }
     }
 
@@ -146,69 +146,117 @@ sealed internal class Builder : PP.ParseTree.PromptArgs {
 
     /// <summary>This handles defining a new typed named node.</summary>
     public void HandleTypeDefine() {
-        INode  value = this.Nodes.Pop();
-        Type   type  = this.Types.Peek();
-        string name  = this.Identifiers.Pop();
-        this.factory.AddDefine(value, type, name);
+        try {
+            INode  value = this.Nodes.Pop();
+            Type   type  = this.Types.Peek();
+            string name  = this.Identifiers.Pop();
+            this.factory.AddDefine(value, type, name);
+        } catch (S.Exception inner) {
+            throw new Message("Error creating a typed define").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
     }
 
     /// <summary>This handles defining a new untyped named node.</summary>
     public void HandleVarDefine() {
-        INode  value = this.Nodes.Pop();
-        string name  = this.Identifiers.Pop();
-        this.factory.AddDefine(value, null, name);
+        try {
+            INode  value = this.Nodes.Pop();
+            string name  = this.Identifiers.Pop();
+            this.factory.AddDefine(value, null, name);
+        } catch (S.Exception inner) {
+            throw new Message("Error creating a variable typed define").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
     }
 
     /// <summary>This handles when a trigger is provoked unconditionally.</summary>
     public void HandleProvokeTrigger() {
-        INode target = this.Nodes.Pop();
-        this.factory.AddProvokeTrigger(target, null);
+        try {
+            INode target = this.Nodes.Pop();
+            this.factory.AddProvokeTrigger(target, null);
+        } catch (S.Exception inner) {
+            throw new Message("Error provoking a trigger").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
     }
 
     /// <summary>This handles when a trigger should only be provoked if a condition returns true.</summary>
     public void HandleConditionalProvokeTrigger() {
-        INode target = this.Nodes.Pop();
-        INode value  = this.Nodes.Pop();
-        INode root   = this.factory.AddProvokeTrigger(target, value) ??
-            throw new Message("Unable to create conditional provoke trigger");
+        try {
+            INode target = this.Nodes.Pop();
+            INode value  = this.Nodes.Pop();
+            INode root   = this.factory.AddProvokeTrigger(target, value) ??
+                throw new Message("Unable to create conditional provoke trigger");
 
-        // Push the condition onto the stack for any following trigger pulls.
-        // See comment in `handleAssignment` about pushing cast value back onto the stack.
-        this.Nodes.Push(root);
+            // Push the condition onto the stack for any following trigger pulls.
+            // See comment in `handleAssignment` about pushing cast value back onto the stack.
+            this.Nodes.Push(root);
+        } catch (S.Exception inner) {
+            throw new Message("Error conditionally provoking a trigger").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
     }
 
     /// <summary>This handles getting the typed left value and writing it out to the given name.</summary>
     public void HandleTypeGet() {
-        INode  value = this.Nodes.Pop();
-        Type   type  = this.Types.Peek();
-        string name  = this.Identifiers.Pop();
-        this.factory.AddGetter(type, name, value);
+        try {
+            INode  value = this.Nodes.Pop();
+            Type   type  = this.Types.Peek();
+            string name  = this.Identifiers.Pop();
+            this.factory.AddGetter(type, name, value);
+        } catch (S.Exception inner) {
+            throw new Message("Error getting typed value").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
     }
 
     /// <summary>This handles getting the variable type left value and writing it out to the given name.</summary>
     public void HandleVarGet() {
-        INode  value = this.Nodes.Pop();
-        string name  = this.Identifiers.Pop();
-        Type   type  = Type.TypeOf(value) ??
-            throw new Message("Unable to determine node type for getter.");
-        this.factory.AddGetter(type, name, value);
+        try {
+            INode  value = this.Nodes.Pop();
+            string name  = this.Identifiers.Pop();
+            Type   type  = Type.TypeOf(value) ??
+                throw new Message("Unable to determine node type for getter.");
+            this.factory.AddGetter(type, name, value);
+        } catch (S.Exception inner) {
+            throw new Message("Error getting variable typed value").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
     }
 
     /// <summary>This handles getting the typed left value as a temporary value with the given name.</summary>
     public void HandleTypeTemp() {
-        INode  value = this.Nodes.Pop();
-        Type   type  = this.Types.Peek();
-        string name  = this.Identifiers.Pop();
-        this.factory.AddTemp(type, name, value);
+        try {
+            INode  value = this.Nodes.Pop();
+            Type   type  = this.Types.Peek();
+            string name  = this.Identifiers.Pop();
+            this.factory.AddTemp(type, name, value);
+        } catch (S.Exception inner) {
+            throw new Message("Error creating a typed temp").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
     }
 
     /// <summary>This handles getting the variable type left value as a temporary value with the given name.</summary>
     public void HandleVarTemp() {
-        INode  value = this.Nodes.Pop();
-        string name  = this.Identifiers.Pop();
-        Type   type  = Type.TypeOf(value) ??
-            throw new Message("Unable to determine node type for temp.");
-        this.factory.AddTemp(type, name, value);
+        try {
+            INode  value = this.Nodes.Pop();
+            string name  = this.Identifiers.Pop();
+            Type   type  = Type.TypeOf(value) ??
+                throw new Message("Unable to determine node type for temp.");
+            this.factory.AddTemp(type, name, value);
+        } catch (S.Exception inner) {
+            throw new Message("Error creating a variable typed temp").
+                With("Location", this.LastLocation).
+                With("Error",    inner);
+        }
     }
     
     /// <summary>This creates a new input node of a specific type without assigning the value.</summary>

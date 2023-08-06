@@ -71,9 +71,10 @@ public class Extern {
                 "}").
                 Perform(),
             "Error occurred while parsing input code.",
-            "[Error: Can not open namespace. Another non-namespace exists by that name.",
-            "   [Identifier: A]",
-            "   [Location: Unnamed:2, 11, 25]]");
+            "[Error: Error parsing namespace",
+            "   [Location: Unnamed:2, 11, 25]",
+            "   [Error: Can not open namespace. Another non-namespace exists by that name.",
+            "      [Identifier: A]]]");
     }
 
     [TestMethod]

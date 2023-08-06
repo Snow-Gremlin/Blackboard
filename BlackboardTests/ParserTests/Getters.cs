@@ -130,9 +130,10 @@ public class Getters {
         Tools.TestTools.CheckException(() =>
             slate.Read("get X;").Perform(),
             "Error occurred while parsing input code.",
-            "[Error: No identifier found in the scope stack.",
-            "   [Identifier: X]",
-            "   [Location: Unnamed:1, 5, 5]]");
+            "[Error: Error parsing identifier",
+            "   [Location: Unnamed:1, 5, 5]",
+            "   [Error: No identifier found in the scope stack.",
+            "      [Identifier: X]]]");
 
         Tools.TestTools.CheckException(() =>
             slate.Read("get int X = A*2.0;").Perform(),

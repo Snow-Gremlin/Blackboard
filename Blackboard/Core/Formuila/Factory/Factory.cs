@@ -81,6 +81,7 @@ sealed public class Factory {
     /// <summary>Pushes a namespace onto the scope stack.</summary>
     /// <param name="name">The name of the namespace to push onto the namespace stack.</param>
     public void PushNamespace(string name) {
+        this.logger.Info("Push Namespace");
         VirtualNode scope = this.scope.Current;
 
         // Check if the virtual namespace already exists.
@@ -102,7 +103,10 @@ sealed public class Factory {
     }
 
     /// <summary>Pops a namespace off the scope stack.</summary>
-    public void PopNamespace() => this.scope.Pop();
+    public void PopNamespace() {
+        this.logger.Info("Pop Namespace");
+        this.scope.Pop();
+    }
 
     /// <summary>This handles looking up a node by an id and pushing the node onto the stack.</summary>
     /// <param name="name"></param>
@@ -299,7 +303,6 @@ sealed public class Factory {
     /// <returns>The newly created input.</returns>
     public INode CreateInput(string name, Type type) {
         this.logger.Info("Create Input:");
-
         IInput node = Maker.CreateInputNode(type) ??
             throw new Message("Unsupported type for new typed input").
                 With("Name", name).

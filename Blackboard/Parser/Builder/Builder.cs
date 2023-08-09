@@ -21,22 +21,13 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
 
     /// <summary>Creates a new formula builder for parsing states.</summary>
     /// <param name="factory">The factory this builder writes to.</param>
-    /// <param name="logger">The optional logger to output the build steps.</param>
-    public Builder(Factory factory, Logger? logger = null) {
-        this.logger  = logger.SubGroup(nameof(Builder));
-        this.factory = factory;
-
-        this.nodes       = new BuilderStack<INode>("Node", this.logger);
-        this.types       = new BuilderStack<Type>("Type", this.logger);
-        this.identifiers = new BuilderStack<string>("Id", this.logger);
-        this.arguments   = new ArgumentStack(this.logger);
+    public Builder(Factory factory) {
+        this.factory     = factory;
+        this.nodes       = new("Node");
+        this.types       = new("Type");
+        this.identifiers = new("Id");
+        this.arguments   = new();
     }
-
-    /// <summary>
-    /// The logger to help debug the parser and builder.
-    /// This may be null if no logger is being used.
-    /// </summary>
-    private readonly Logger? logger;
 
     /// <summary>The factory for formulas which will perform the actions that have been parsed.</summary>
     private readonly Factory factory;
@@ -55,7 +46,6 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
 
     /// <summary>Resets the stack back to the initial state.</summary>
     public void Reset() {
-        this.logger.Info("Reset");
         this.factory.Reset();
         this.nodes.Clear();
         this.types.Clear();
@@ -88,8 +78,6 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
     /// <param name="name">The name of the function that was given.</param>
     /// <param name="funcGroup">The function to perform.</param>
     public void HandleProcesses(int count, string name, IFuncGroup funcGroup) {
-        this.logger.Info("Process {0}({1}) [{2}]", name, count, this.LastLocation);
-
         INode[] inputs = this.nodes.Pop(count).Actualize().ToArray();
         INode result = funcGroup.Build(inputs) ??
                 throw new Message("Could not perform the operation with the given input.").
@@ -103,7 +91,6 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
     /// <summary>Clears the node stack and type stack without changing pending actions nor scopes.</summary>
     public void HandleClear() {
         try {
-            this.logger.Info("Clear");
             this.Tokens.Clear();
             this.nodes.Clear();
             this.types.Clear();
@@ -445,7 +432,6 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
     public void HandlePushId() {
         try {
             string name = this.LastText;
-            this.logger.Info("Id = \"{0}\"", name);
             INode node = this.factory.FindInNamespace(name);
             this.nodes.Push(node);
         } catch (S.Exception inner) {

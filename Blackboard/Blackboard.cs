@@ -1,4 +1,6 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Formuila;
 using Blackboard.Core.Formuila.Factory;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
@@ -13,13 +15,36 @@ sealed public class Blackboard {
 
     public Blackboard() => this.slate = new Slate();
 
-    //private Formula read(params string[] input) =>
-    //    new Parser.Parser(this.slate).Read(input);
+    public Formula CreateFormula(params string[] input) =>
+        new Parser.Parser(this.slate).Read(input);
 
-    public ITriggerOutput EmitOn(string name) {
+    public Surface.ITrigger OnProvoke(string name) {
         Factory factory = new(this.slate, this.logger);
         factory.RequestExtern(name, Type.Trigger);
         factory.Build().Perform();
-        return this.slate.GetOutputTrigger(name);
+
+        IOutput output = this.slate.GetOutput(Type.Trigger, name);
+        return output as Surface.ITrigger ??
+            throw new Message("Failed to create output trigger").
+                With("name", name).
+                With("existing", output);
+    }
+    
+    public Surface.IValue<T> OnChange<T>(string name)
+        where T : struct, IData, IEquatable<T> {
+        Type type = Type.FromValueType(typeof(T)) ??
+            throw new Message("The given type is unsupported").
+                With("Type", typeof(T));
+
+        Factory factory = new(this.slate, this.logger);
+        factory.RequestExtern(name, default(T).Type);
+        factory.Build().Perform();
+        
+        IOutput output = this.slate.GetOutput(type, name);
+        return output as Surface.IValue<T> ??
+            throw new Message("Failed to create value output").
+                With("type", type).
+                With("name", name).
+                With("existing", output);
     }
 }

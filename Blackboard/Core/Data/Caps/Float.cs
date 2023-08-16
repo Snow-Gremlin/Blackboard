@@ -9,6 +9,7 @@ namespace Blackboard.Core.Data.Caps;
 /// <summary>This is the data storage for an IEEE 754 float value such that it can be used in generics.</summary>
 public readonly struct Float :
     IAdditive<Float>,
+    IBaseValue<float>,
     IComparable<Float>,
     IData,
     IDivisible<Float>,
@@ -77,6 +78,12 @@ public readonly struct Float :
     /// <remarks>The current value is not used in the product.</remarks>
     /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
     public Float SumIdentityValue => SumIdentity;
+
+    #endregion
+    #region BaseValue...
+
+    /// <summary>Gets the C# base value in the data.</summary>
+    public float BaseValue => this.Value;
 
     #endregion
     #region Comparable...

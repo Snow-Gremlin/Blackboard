@@ -6,6 +6,7 @@ namespace Blackboard.Core.Data.Caps;
 
 /// <summary>This is the data storage for a base value type, object, such that it can be used in generics.</summary>
 public readonly struct Object :
+    IBaseValue<object?>,
     IData,
     IEquatable<Object>,
     IImplicit<Bool, Object>,
@@ -39,7 +40,13 @@ public readonly struct Object :
     internal T CastTo<T>(string typeName) where T : struct => this.Value as T? ??
         throw new Message("Unable to cast {0} value ({1}) to {2} type.",
             Type.Object.Name, this.Value?.GetType()?.FullName ?? "null", typeName);
+    
+    #region BaseValue...
 
+    /// <summary>Gets the C# base value in the data.</summary>
+    public object? BaseValue => this.Value;
+
+    #endregion
     #region Data...
 
     /// <summary>Gets the type for the type of data.</summary>

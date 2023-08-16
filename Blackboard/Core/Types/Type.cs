@@ -10,6 +10,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using S = System;
 
 namespace Blackboard.Core.Types;
@@ -95,7 +96,7 @@ sealed public class Type {
     /// <param name="name">The name of the type to get.</param>
     /// <returns>The type for the given name or null if name isn't found.</returns>
     static public Type? FromName(string name) =>
-        AllTypes.Where((t) => t.Name == name).FirstOrDefault();
+        AllTypes.Where(t => t.Name == name).FirstOrDefault();
 
     /// <summary>This gets the type given a node.</summary>
     /// <param name="node">The node to get the type of.</param>
@@ -107,7 +108,7 @@ sealed public class Type {
     /// <returns>The type for the given generic or null if not found.</returns>
     static public Type? FromType<T>() where T : INode => FromType(typeof(T));
 
-    /// <summary>This get the type from the given node type.</summary>
+    /// <summary>This gets the type from the given node type.</summary>
     /// <param name="type">The C# type to get this type of.</param>
     /// <returns>The type for the given C# type or null if not found.</returns>
     static public Type? FromType(S.Type type) {
@@ -119,6 +120,12 @@ sealed public class Type {
             current = next;
         }
     }
+    
+    /// <summary>This gets the type given the C# base value type.</summary>
+    /// <param name="type">The C# value type, like `int`.</param>
+    /// <returns>The type for the given C# value type, like `Int`.</returns>
+    static public Type? FromValueType(S.Type type) =>
+        AllTypes.Where(t => t.ValueType == type).FirstOrDefault();
 
     /// <summary>This determines the implicit and inheritance match.</summary>
     /// <param name="input">This is the type to cast from.</param>
@@ -129,7 +136,8 @@ sealed public class Type {
     /// <summary>The display name of the type.</summary>
     public readonly string Name;
 
-    /// <summary>The C# type for this type.</summary>
+    /// <summary>The C# type for this node type.</summary>
+    /// <remarks>This is type for nodes like `IValue~Int~`.</remarks>
     public readonly S.Type RealType;
 
     /// <summary>This is the base type this type inherits from.</summary>
@@ -137,8 +145,13 @@ sealed public class Type {
     public readonly Type? BaseType;
 
     /// <summary>The underlying IData type for this node, or null if no data.</summary>
+    /// <remarks>This is types like an `Int` IData inside of an `IValue~Int~` node.</remarks>
     public readonly S.Type? DataType;
-        
+    
+    /// <summary>The underlying C# data type for the IData of the node, or null if no data value.</summary>
+    /// <remarks>This is types like C# `int` for an `Int` IData inside of an `IValue~Int~` node.</remarks>
+    public readonly S.Type? ValueType;
+
     /// <summary>The types with base type of this type.</summary>
     private readonly List<Type> inheritors;
 
@@ -150,16 +163,18 @@ sealed public class Type {
 
     /// <summary>This creates a new type.</summary>
     /// <param name="name">The name of the type.</param>
-    /// <param name="realType">The C# type for this type.</param>
+    /// <param name="realType">The C# type for this node type.</param>
     /// <param name="baseType">The base type this type inherits from.</param>
     /// <param name="dataType">The IData type underlying this type.</param>
-    private Type(string name, S.Type realType, Type? baseType, S.Type? dataType) {
-        this.Name = name;
-        this.RealType = realType;
-        this.BaseType = baseType;
-        this.DataType = dataType;
-        this.imps = new();
-        this.exps = new();
+    /// <param name="valueType">The C# data type for the IData of the node.</param>
+    private Type(string name, S.Type realType, Type? baseType = null, S.Type? dataType = null, S.Type? valueType = null) {
+        this.Name       = name;
+        this.RealType   = realType;
+        this.BaseType   = baseType;
+        this.DataType   = dataType;
+        this.ValueType  = valueType;
+        this.imps       = new();
+        this.exps       = new();
         this.inheritors = new();
 
         if ((dataType is null) == realType.IsAssignableTo(typeof(IDataNode)))
@@ -362,28 +377,28 @@ sealed public class Type {
 
     /// <summary>Initializes the types before they are used.</summary>
     static Type() {
-        Node          = new Type("node",           typeof(INode),           null,   null);
-        Trigger       = new Type("trigger",        typeof(ITrigger),        Node,   null);
-        Object        = new Type("object",         typeof(IValue<Object>),  Node,   typeof(Object));
-        Bool          = new Type("bool",           typeof(IValue<Bool>),    Node,   typeof(Bool));
-        Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int));
-        Uint          = new Type("uint",           typeof(IValue<Uint>),    Node,   typeof(Uint));
-        Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double));
-        Float         = new Type("float",          typeof(IValue<Float>),   Node,   typeof(Float));
-        String        = new Type("string",         typeof(IValue<String>),  Node,   typeof(String));
-        Namespace     = new Type("namespace",      typeof(Namespace),       Node,   null);
-        FuncGroup     = new Type("function-group", typeof(FuncGroup),       Node,   null);
-        FuncDef       = new Type("function-def",   typeof(IFuncDef),        Node,   null);
+        Node          = new Type("node",           typeof(INode));
+        Trigger       = new Type("trigger",        typeof(ITrigger),        Node);
+        Object        = new Type("object",         typeof(IValue<Object>),  Node,   typeof(Object), typeof(object));
+        Bool          = new Type("bool",           typeof(IValue<Bool>),    Node,   typeof(Bool),   typeof(bool));
+        Int           = new Type("int",            typeof(IValue<Int>),     Node,   typeof(Int),    typeof(int));
+        Uint          = new Type("uint",           typeof(IValue<Uint>),    Node,   typeof(Uint),   typeof(uint));
+        Double        = new Type("double",         typeof(IValue<Double>),  Node,   typeof(Double), typeof(double));
+        Float         = new Type("float",          typeof(IValue<Float>),   Node,   typeof(Float),  typeof(float));
+        String        = new Type("string",         typeof(IValue<String>),  Node,   typeof(String), typeof(string));
+        Namespace     = new Type("namespace",      typeof(Namespace),       Node);
+        FuncGroup     = new Type("function-group", typeof(FuncGroup),       Node);
+        FuncDef       = new Type("function-def",   typeof(IFuncDef),        Node);
 
         // TODO: Come up with a better way to handle sub-typing than predefining them.
-        CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int));
-        CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double));
-        Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool));
-        LatchObject   = new Type("latch-object",   typeof(Latch<Object>),   Object, typeof(Object));
-        LatchBool     = new Type("latch-bool",     typeof(Latch<Bool>),     Bool,   typeof(Bool));
-        LatchInt      = new Type("latch-int",      typeof(Latch<Int>),      Int,    typeof(Int));
-        LatchDouble   = new Type("latch-double",   typeof(Latch<Double>),   Double, typeof(Double));
-        LatchString   = new Type("latch-string",   typeof(Latch<String>),   String, typeof(String));
+        CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int),    typeof(int));
+        CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double), typeof(double));
+        Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool),   typeof(bool));
+        LatchObject   = new Type("latch-object",   typeof(Latch<Object>),   Object, typeof(Object), typeof(object));
+        LatchBool     = new Type("latch-bool",     typeof(Latch<Bool>),     Bool,   typeof(Bool),   typeof(bool));
+        LatchInt      = new Type("latch-int",      typeof(Latch<Int>),      Int,    typeof(Int),    typeof(int));
+        LatchDouble   = new Type("latch-double",   typeof(Latch<Double>),   Double, typeof(Double), typeof(double));
+        LatchString   = new Type("latch-string",   typeof(Latch<String>),   String, typeof(String), typeof(string));
 
         addCast<IValueParent<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
         addImplicit<Bool, Object>();

@@ -9,6 +9,7 @@ namespace Blackboard.Core.Data.Caps;
 /// <summary>This is the data storage for an IEEE 754 double value such that it can be used in generics.</summary>
 public readonly struct Double :
     IAdditive<Double>,
+    IBaseValue<double>,
     IComparable<Double>,
     IData,
     IDivisible<Double>,
@@ -77,6 +78,12 @@ public readonly struct Double :
     /// <remarks>The current value is not used in the product.</remarks>
     /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
     public Double SumIdentityValue => SumIdentity;
+
+    #endregion
+    #region BaseValue...
+
+    /// <summary>Gets the C# base value in the data.</summary>
+    public double BaseValue => this.Value;
 
     #endregion
     #region Comparable...

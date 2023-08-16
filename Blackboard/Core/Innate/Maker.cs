@@ -124,4 +124,18 @@ static public class Maker {
             _        => throw new Message("Unexpected value type in literal creation").
                            With("Value", value)
         };
+    
+    /// <summary>Creates a new output node of the given type.</summary>
+    /// <param name="type">The type of value to create an output node for.</param>
+    /// <returns>The newly created output or null if an unexpected type.</returns>
+    static public IOutput? CreateOutputNode(Type type) =>
+        type == Type.Object  ? new OutputValue<Object, object?>() :
+        type == Type.Bool    ? new OutputValue<Bool,   bool>() :
+        type == Type.Int     ? new OutputValue<Int,    int>() :
+        type == Type.Uint    ? new OutputValue<Uint,   uint>() :
+        type == Type.Float   ? new OutputValue<Float,  float>() :
+        type == Type.Double  ? new OutputValue<Double, double>() :
+        type == Type.String  ? new OutputValue<String, string>() :
+        type == Type.Trigger ? new OutputTrigger() :
+        null;
 }

@@ -10,6 +10,7 @@ namespace Blackboard.Core.Data.Caps;
 /// <summary>This is the data storage for a string value such that it can be used in generics.</summary>
 public readonly struct String :
     IAdditive<String>,
+    IBaseValue<string>,
     IComparable<String>,
     IData,
     IEquatable<String>,
@@ -64,6 +65,12 @@ public readonly struct String :
     /// <remarks>Typically this is zero or empty.</remarks>
     /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
     public String SumIdentityValue => SumIdentity;
+
+    #endregion
+    #region BaseValue...
+
+    /// <summary>Gets the C# base value in the data.</summary>
+    public string BaseValue => this.Value;
 
     #endregion
     #region Comparable...

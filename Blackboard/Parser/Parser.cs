@@ -83,8 +83,7 @@ sealed public class Parser {
         try {
             this.logger.Info("Parser Read");
             Factory factory = new(this.slate, this.logger);
-            Builder.Builder builder = new(factory, this.logger);
-            node.Process(this.prompts, builder);
+            node.Process(this.prompts, new Builder.Builder(factory));
             this.logger.Info("Parser Done");
             return factory.Build();
         } catch (S.Exception ex) {

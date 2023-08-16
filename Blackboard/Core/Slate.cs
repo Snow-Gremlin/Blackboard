@@ -6,6 +6,7 @@ using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Record;
+using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -193,43 +194,25 @@ public class Slate: IReader, IWriter {
     #region Output...
 
     /// <summary>Gets or creates a new output value on the node with the given name.</summary>
-    /// <typeparam name="T">The data type of the value to output.</typeparam>
+    /// <param name="type">The type of the output to create.</param>
     /// <param name="names">The name of the node to look up.</param>
     /// <returns>The new or existing value output.</returns>
-    public IValueOutput<T> GetOutputValue<T>(params string[] names)
-        where T : struct, IEquatable<T> =>
-        this.GetOutputValue<T>(names as IEnumerable<string>);
+    public IOutput GetOutput(Type type, params string[] names) =>
+        this.GetOutput(type, names as IEnumerable<string>);
 
     /// <summary>Gets or creates a new output value on the node with the given name.</summary>
-    /// <typeparam name="T">The data type of the value to output.</typeparam>
+    /// <param name="type">The type of the output to create.</param>
     /// <param name="names">The name of the node to look up.</param>
     /// <returns>The new or existing value output.</returns>
-    public IValueOutput<T> GetOutputValue<T>(IEnumerable<string> names)
-        where T : struct, IEquatable<T> {
-        IValueParent<T> parent = this.GetNode<IValueParent<T>>(names);
-        IValueOutput<T>? output = parent.Children.OfType<IValueOutput<T>>().FirstOrDefault();
+    public IOutput GetOutput(Type type, IEnumerable<string> names) {
+        IParent  parent = this.GetNode<IParent>(names);
+        IOutput? output = parent.Children.OfType<IOutput>().FirstOrDefault();
         if (output is not null) return output;
 
-        output = new OutputValue<T>(parent);
-        output.Legitimatize();
-        return output;
-    }
-
-    /// <summary>Gets or creates a new output trigger on the node with the given name.</summary>
-    /// <param name="names">The name of the node to look up.</param>
-    /// <returns>The new or existing trigger output.</returns>
-    public ITriggerOutput GetOutputTrigger(params string[] names) =>
-        this.GetOutputTrigger(names as IEnumerable<string>);
-
-    /// <summary>Gets or creates a new output trigger on the node with the given name.</summary>
-    /// <param name="names">The name of the node to look up.</param>
-    /// <returns>The new or existing trigger output.</returns>
-    public ITriggerOutput GetOutputTrigger(IEnumerable<string> names) {
-        ITriggerParent parent = this.GetNode<ITriggerParent>(names);
-        ITriggerOutput? output = parent.Children.OfType<ITriggerOutput>().FirstOrDefault();
-        if (output is not null) return output;
-
-        output = new OutputTrigger(parent);
+        output = Maker.CreateOutputNode(type) ??
+            throw new Message("Unable to create output node of given type").
+                With("type", type);
+        output.Parents[0] = parent;
         output.Legitimatize();
         return output;
     }

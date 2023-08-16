@@ -8,6 +8,7 @@ namespace Blackboard.Core.Data.Caps;
 /// <summary>This is the data storage for a 32 bit unsigned integer value such that it can be used in generics.</summary>
 public readonly struct Uint :
     IAdditive<Uint>,
+    IBaseValue<uint>,
     IBitwise<Uint>,
     IComparable<Uint>,
     IData,
@@ -74,6 +75,12 @@ public readonly struct Uint :
     /// <summary>The identity of summation for this data type.</summary>
     /// <see cref="https://en.wikipedia.org/wiki/Identity_element"/>
     public Uint SumIdentityValue => SumIdentity;
+
+    #endregion
+    #region BaseValue...
+
+    /// <summary>Gets the C# base value in the data.</summary>
+    public uint BaseValue => this.Value;
 
     #endregion
     #region Bitwise...

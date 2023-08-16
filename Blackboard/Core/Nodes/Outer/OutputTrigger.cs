@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
-using S = System;
 
 namespace Blackboard.Core.Nodes.Outer;
 
@@ -23,14 +22,14 @@ sealed public class OutputTrigger : UnaryTrigger, ITriggerOutput {
     public override string TypeName => "Output";
 
     /// <summary>This event is emitted when the trigger has been provoked.</summary>
-    public event S.EventHandler? OnProvoked;
+    public event System.EventHandler? OnProvoked;
 
     /// <summary>Updates the node's provoked state.</summary>
     /// <remarks>Here we want to return if provoked and NOT if the provoke state has changed.</remarks>
     /// <returns>True indicates that the value has been provoked, false otherwise.</returns>
     public override bool Evaluate() {
         if (!base.Evaluate()) return false;
-        this.OnProvoked?.Invoke(this, S.EventArgs.Empty);
+        this.OnProvoked?.Invoke(this, System.EventArgs.Empty);
         return true;
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Formuila;
-using Blackboard.Core.Formuila.Actions;
+using Blackboard.Core.Formula;
+using Blackboard.Core.Formula.Actions;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Types;
@@ -35,7 +35,7 @@ sealed public class Stringifier {
     /// <summary>Gets a simple string for the given formula.</summary>
     /// <param name="formula">The formula to stringify.</param>
     /// <returns>The simple string for the given formula.</returns>
-    static public string Simple(Formula formula) => Simple().Stringify(formula);
+    static public string Simple(Formula.Formula formula) => Simple().Stringify(formula);
 
     /// <summary>Gets a simple string for the given actions even any action which is null.</summary>
     /// <param name="actions">The actions to stringify.</param>
@@ -73,7 +73,7 @@ sealed public class Stringifier {
     /// <summary>Gets a basic string for the given formula.</summary>
     /// <param name="formula">The formula to stringify.</param>
     /// <returns>The basic string for the given formula.</returns>
-    static public string Basic(Formula formula) => Simple().Stringify(formula);
+    static public string Basic(Formula.Formula formula) => Simple().Stringify(formula);
 
     /// <summary>Gets a basic string for the given actions even any action which is null.</summary>
     /// <param name="actions">The actions to stringify.</param>
@@ -110,7 +110,7 @@ sealed public class Stringifier {
     /// <summary>Gets a shallow string for the given formula.</summary>
     /// <param name="formula">The formula to stringify.</param>
     /// <returns>The shallow string for the given formula.</returns>
-    static public string Shallow(Formula formula) => Simple().Stringify(formula);
+    static public string Shallow(Formula.Formula formula) => Simple().Stringify(formula);
 
     /// <summary>Gets a shallow string for the given actions even any action which is null.</summary>
     /// <param name="actions">The actions to stringify.</param>
@@ -142,7 +142,7 @@ sealed public class Stringifier {
     /// <summary>Gets a deep string for the given formula.</summary>
     /// <param name="formula">The formula to stringify.</param>
     /// <returns>The deep string for the given formula.</returns>
-    static public string Deep(Formula formula) => Deep().Stringify(formula);
+    static public string Deep(Formula.Formula formula) => Deep().Stringify(formula);
 
     /// <summary>Gets a deep string for the given actions even any action which is null.</summary>
     /// <param name="actions">The actions to stringify.</param>
@@ -461,7 +461,7 @@ sealed public class Stringifier {
     /// <summary>Get the string for the given formula.</summary>
     /// <param name="formula">The formula to stringify.</param>
     /// <returns>The string for the given formula.</returns>
-    public string Stringify(Formula formula) {
+    public string Stringify(Formula.Formula formula) {
         this.PreLoadNames(formula.Slate);
         const string nl = "\n";
         return formula is null ? "null" : formula.Actions.Count <= 0 ? "[]" :

@@ -3,7 +3,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
 
-namespace Blackboard.Core.Formuila.Actions;
+namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>
 /// This is an action to add an extern node in a field writer.

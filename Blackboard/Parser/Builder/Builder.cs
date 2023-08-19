@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Formuila.Factory;
+using Blackboard.Core.Formula.Factory;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
@@ -23,9 +23,9 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
     /// <param name="factory">The factory this builder writes to.</param>
     public Builder(Factory factory) {
         this.factory     = factory;
-        this.nodes       = new("Node");
-        this.types       = new("Type");
-        this.identifiers = new("Id");
+        this.nodes       = new();
+        this.types       = new();
+        this.identifiers = new();
         this.arguments   = new();
     }
 
@@ -354,7 +354,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             // Alternatively, if we push the value then `X=Y=Z` will be like `Y=Z; X=Z;`, but we won't.
             this.nodes.Push(root);
         } catch (S.Exception inner) {
-            throw new Message("Error an assignment").
+            throw new Message("Error in assignment").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }

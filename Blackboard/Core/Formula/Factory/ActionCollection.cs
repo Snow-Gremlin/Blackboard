@@ -1,10 +1,10 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Formuila.Actions;
+using Blackboard.Core.Formula.Actions;
 using Blackboard.Core.Inspect;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Formuila.Factory;
+namespace Blackboard.Core.Formula.Factory;
 
 /// <summary>The collection of actions which have been parsed.</summary>
 sealed internal class ActionCollection {

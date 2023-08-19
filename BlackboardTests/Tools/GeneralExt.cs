@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics;
+using System.Text;
 using S = System;
 
 namespace BlackboardTests.Tools;
@@ -39,5 +41,13 @@ static class GeneralExt {
             S.Console.WriteLine("   Per Op:     "+perOp.TotalMilliseconds+"ms");
         }
         return perOp.TotalMilliseconds;
+    }
+
+    /// <summary>Checks if the given buffer has the given expected value and clears the buffer.</summary>
+    /// <param name="buffer">The buffer to check and clear.</param>
+    /// <param name="expStr">The expected text in the buffer.</param>
+    static public void Check(this StringBuilder buffer, string expStr) {
+        Assert.AreEqual(expStr, buffer.ToString());
+        buffer.Clear();
     }
 }

@@ -105,7 +105,7 @@ sealed public class ParentCollection : IEnumerable<IParent> {
         /// <remarks>This will NOT check if this will make the list go below the minimum value.</remarks>
         /// <param name="index">The index of the parents to remove.</param>
         /// <param name="count">The number of parents to remove.</param>
-        public void Remove(int index, int count);
+        public void Remove(int index, int count = 1);
     }
 
     /// <summary>This is a variable parent container.</summary>
@@ -178,7 +178,7 @@ sealed public class ParentCollection : IEnumerable<IParent> {
         /// <remarks>This will NOT check if this will make the list go below the minimum value.</remarks>
         /// <param name="index">The index of the parents to remove.</param>
         /// <param name="count">The number of parents to remove.</param>
-        public void Remove(int index, int count) => this.source.RemoveRange(index, count);
+        public void Remove(int index, int count = 1) => this.source.RemoveRange(index, count);
 
         /// <summary>Gets the enumerator of the variable parents.</summary>
         /// <returns>The enumerator of the variable parents.</returns>
@@ -318,42 +318,46 @@ sealed public class ParentCollection : IEnumerable<IParent> {
 
     /// <summary>This gets the type of the parent at the given index.</summary>
     /// <param name="index">The index to get the parent's type of.</param>
-    /// <returns>The type of the parent at the given index.s</returns>
+    /// <returns>The type of the parent at the given index.</returns>
     public S.Type TypeAt(int index) =>
         (index < 0 || (!this.HasVariable && index >= this.FixedCount) ?
         throw this.message("Index out of bounds of node's parent types.").
             With("index", index) :
         index < this.FixedCount ? this.fixedParents[index].Type :
         this.varParents?.Type) ??
-        throw this.message("Null parent from node's parent types.");
+            throw this.message("Null parent from node's parent types.");
 
     /// <summary>This gets or sets the parent at the given location.</summary>
     /// <remarks>This will throw an exception if out-of-bounds or wrong type.</remarks>
     /// <param name="index">The index to get or set from.</param>
-    /// <returns>The parent gotten from the given index.</returns>
-    public IParent this[int index] {
-        get => (index < 0 || index >= this.Count ?
+    /// <returns>The parent gotten from the given index. A parent maybe null.</returns>
+    public IParent? this[int index] {
+        get => index < 0 || index >= this.Count ?
             throw this.message("Index out of bounds of node's parents.").
                 With("index", index) :
             index < this.FixedCount ? this.fixedParents[index].Node :
-            this.varParents?[index - this.FixedCount]) ??
-            throw this.message("Null parent from node's parents.");
+                this.varParents?[index - this.FixedCount];
         set {
             IParent? parent = this[index]; // This also will check bounds
             if (ReferenceEquals(parent, value)) return;
 
-            S.Type? type = this.TypeAt(index);
-            if (value.GetType().IsAssignableTo(type))
-                throw this.message("Incorrect type of a parent being set to a node.").
-                    With("index", index).
-                    With("expected type", type).
-                    With("new parent", value);
+            if (value is not null) {
+                S.Type? type = this.TypeAt(index);
+                if (!value.GetType().IsAssignableTo(type))
+                    throw this.message("Incorrect type of a parent being set to a node.").
+                        With("index", index).
+                        With("expected type", type).
+                        With("new parent", value);
+            }
 
             bool removed = parent?.RemoveChildren(this.Child) ?? false;
             if (index < this.FixedCount)
                 this.fixedParents[index].Node = value;
-            else if (this.varParents is not null)
-                this.varParents[index - this.FixedCount] = value;
+            else if (this.varParents is not null) {
+                if (value is null)
+                    this.varParents.Remove(index - this.FixedCount);
+                else this.varParents[index - this.FixedCount] = value;
+            }
             if (removed) value?.AddChildren(this.Child);
         }
     }

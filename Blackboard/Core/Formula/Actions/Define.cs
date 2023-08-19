@@ -6,7 +6,7 @@ using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Formuila.Actions;
+namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>
 /// This is an action to define a named node in a field writer.

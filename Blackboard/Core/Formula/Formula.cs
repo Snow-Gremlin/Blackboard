@@ -1,13 +1,31 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Formuila.Actions;
+using Blackboard.Core.Formula.Actions;
 using Blackboard.Core.Inspect;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Formuila;
+namespace Blackboard.Core.Formula;
 
 /// <summary>This is a collection of actions pending to perform on the Blackboard slate.</summary>
 sealed public class Formula {
+
+    /// <summary>Joins one or more formulas to run together.</summary>
+    /// <remarks>This will not evaluate or reset triggers until after the last formula is run.</remarks>
+    /// <param name="formulas">The formulas to join together.</param>
+    /// <returns>The joined formula to run several formulas together.</returns>
+    static public Formula Join(params Formula[] formulas) {
+        if (formulas.Length <= 0)
+            throw new Message("Join must have at least one formula in it.");
+        Slate slate = formulas[0].Slate;
+        List<IAction> actions = new();
+        foreach (Formula f in formulas) {
+            if (f.Slate != slate)
+                throw new Message("May only join formulas from the same blackboard.");
+            actions.AddRange(f.Actions.Where(action => action is not Finish));
+        }
+        actions.Add(new Finish());
+        return new Formula(slate, actions);
+    }
 
     /// <summary>The collection of performers for this formula.</summary>
     private readonly IAction[] actions;

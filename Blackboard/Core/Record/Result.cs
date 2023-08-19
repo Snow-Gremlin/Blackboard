@@ -3,7 +3,6 @@ using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using System.Collections.Generic;
 using System.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Blackboard.Core.Record;
 
@@ -12,7 +11,7 @@ sealed public class Result : IReader, IWriter {
     private readonly Dictionary<string, object> outputData;
 
     /// <summary>Creates a new results object.</summary>
-    internal Result() => outputData = new();
+    internal Result() => this.outputData = new();
 
     /// <summary>Gets the output names found at the given path.</summary>
     /// <param name="names">The names of the path to get the names from.</param>

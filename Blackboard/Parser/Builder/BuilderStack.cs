@@ -7,15 +7,10 @@ namespace Blackboard.Parser.Builder;
 
 /// <summary>The stack of values which are currently being worked on during a parse.</summary>
 sealed internal class BuilderStack<T> {
-    private readonly string usage;
     private readonly LinkedList<T> stack;
 
     /// <summary>Creates a new stack.</summary>
-    /// <param name="usage">The short usage of this stack used for logging.</param>
-    internal BuilderStack(string usage) {
-        this.usage = usage;
-        this.stack = new();
-    }
+    internal BuilderStack() => this.stack = new();
 
     /// <summary>Removes all the values from this stack.</summary>
     public void Clear() => this.stack.Clear();

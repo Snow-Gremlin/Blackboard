@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Formuila;
+using Blackboard.Core.Formula;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

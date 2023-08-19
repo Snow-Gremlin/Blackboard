@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core.Inspect;
 
-namespace Blackboard.Core.Formuila.Actions;
+namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>This is an action for performing any remaining evaluation and resets any provoked triggers.</summary>
 sealed public class Finish : IAction {

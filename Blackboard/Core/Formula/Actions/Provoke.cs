@@ -4,7 +4,7 @@ using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Formuila.Actions;
+namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>This is an action that will provoke an input trigger with an optional conditional trigger.</summary>
 sealed public class Provoke : IAction {

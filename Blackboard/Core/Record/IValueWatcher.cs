@@ -1,4 +1,4 @@
-﻿namespace Blackboard.Surface;
+﻿namespace Blackboard.Core.Record;
 
 /// <summary>Event arguments for the change in a value node.</summary>
 /// <typeparam name="T">The type of the value node.</typeparam>
@@ -21,8 +21,11 @@ sealed public class ValueEventArgs<T> : System.EventArgs {
 
 /// <summary>The interface for an output which has a value.</summary>
 /// <typeparam name="T">The type of the value to output.</typeparam>
-public interface IValue<T> {
-    
+public interface IValueWatcher<T> {
+
     /// <summary>This event is emitted when the value is changed.</summary>
-    event System.EventHandler<ValueEventArgs<T>> OnChanged;
+    public event System.EventHandler<ValueEventArgs<T>> OnChanged;
+
+    /// <summary>Gets the current value.</summary>
+    public T Current { get; }
 }

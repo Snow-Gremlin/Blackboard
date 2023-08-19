@@ -1,8 +1,8 @@
-﻿namespace Blackboard.Surface;
+﻿namespace Blackboard.Core.Record;
 
 /// <summary>The interface for an output trigger.</summary>
-public interface ITrigger {
+public interface ITriggerWatcher {
 
     /// <summary>This event is emitted when the trigger has been provoked.</summary>
-    event System.EventHandler OnProvoked;
+    public event System.EventHandler OnProvoked;
 }

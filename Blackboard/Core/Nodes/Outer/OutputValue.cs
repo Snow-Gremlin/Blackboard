@@ -1,13 +1,13 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Surface;
+using Blackboard.Core.Record;
 
 namespace Blackboard.Core.Nodes.Outer;
 
 /// <summary>A node for listening for changes in values used for outputting to the user.</summary>
 /// <typeparam name="T">The type of the value to hold.</typeparam>
-sealed public class OutputValue<T1, T2> : UnaryValue<T1, T1>, IValueOutput<T1>, Surface.IValue<T2>
+sealed public class OutputValue<T1, T2> : UnaryValue<T1, T1>, IValueOutput<T1>, IValueWatcher<T2>
     where T1 : struct, IEquatable<T1>, IBaseValue<T2> {
 
     /// <summary>Creates a new output value node.</summary>
@@ -24,6 +24,9 @@ sealed public class OutputValue<T1, T2> : UnaryValue<T1, T1>, IValueOutput<T1>, 
     /// <summary>This is the type name of the node.</summary>
     /// <remarks>Doesn't use nameof since this has both trigger and value nodes.</remarks>
     public override string TypeName => "Output";
+
+    /// <summary>Gets the current value.</summary>
+    public T2 Current => this.Value.BaseValue;
 
     /// <summary>This event is emitted when the value is changed.</summary>
     public event System.EventHandler<ValueEventArgs<T2>>? OnChanged;

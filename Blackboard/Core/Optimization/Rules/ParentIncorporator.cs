@@ -21,9 +21,10 @@ sealed internal class ParentIncorporator : IRule {
     static private void incorporateParents(RuleArgs args, ICoalescable node) {
         ParentCollection parents = node.Parents;
         for (int i = 0; i < parents.Count; ++i) {
-            IParent parent = parents[i];
+            IParent? parent = parents[i];
 
-            if (node.GetType().Equals(parent.GetType()) &&
+            if (parent is not null &&
+                node.GetType().Equals(parent.GetType()) &&
                 parent.Children.IsCount(1) &&
                 ReferenceEquals(parent.Children.First(), node) &&
                 parent is IChild childParent) {

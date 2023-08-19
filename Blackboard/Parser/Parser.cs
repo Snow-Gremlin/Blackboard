@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Extensions;
-using Blackboard.Core.Formuila;
-using Blackboard.Core.Formuila.Factory;
+using Blackboard.Core.Formula;
+using Blackboard.Core.Formula.Factory;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;

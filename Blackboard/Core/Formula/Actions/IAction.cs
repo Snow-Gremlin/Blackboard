@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core.Inspect;
 
-namespace Blackboard.Core.Formuila.Actions;
+namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>This represents an action which can be performed as part of a formula.</summary>
 public interface IAction {

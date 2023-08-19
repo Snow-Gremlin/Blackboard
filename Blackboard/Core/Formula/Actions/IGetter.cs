@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
-namespace Blackboard.Core.Formuila.Actions;
+namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>The interface for all the typed and trigger getter actions.</summary>
 public interface IGetter : IAction {

@@ -5,7 +5,7 @@ using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Formuila.Factory;
+namespace Blackboard.Core.Formula.Factory;
 
 /// <summary>The stack of the namespaces to represent the scope being worked on.</summary>
 sealed internal class ScopeStack {

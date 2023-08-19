@@ -5,7 +5,7 @@ using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Blackboard.Core.Formuila.Factory;
+namespace Blackboard.Core.Formula.Factory;
 
 /// <summary>A collection of existing nodes.</summary>
 sealed internal class ExistingNodeSet {

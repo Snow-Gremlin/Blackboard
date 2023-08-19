@@ -8,4 +8,11 @@
 /// This is different from IInput which can also be read from because input nodes
 /// can be read from directly without watching for changes.
 /// </remarks>
-public interface IOutput : IChild { }
+public interface IOutput : IChild {
+
+    /// <summary>Indicates there is an output event waiting to be emitted.</summary>
+    bool Pending { get; }
+
+    /// <summary>Emits any pending output.</summary>
+    void Emit();
+}

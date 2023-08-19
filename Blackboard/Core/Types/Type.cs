@@ -10,7 +10,6 @@ using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 using S = System;
 
 namespace Blackboard.Core.Types;
@@ -391,14 +390,14 @@ sealed public class Type {
         FuncDef       = new Type("function-def",   typeof(IFuncDef),        Node);
 
         // TODO: Come up with a better way to handle sub-typing than predefining them.
-        CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int),    typeof(int));
-        CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double), typeof(double));
-        Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool),   typeof(bool));
-        LatchObject   = new Type("latch-object",   typeof(Latch<Object>),   Object, typeof(Object), typeof(object));
-        LatchBool     = new Type("latch-bool",     typeof(Latch<Bool>),     Bool,   typeof(Bool),   typeof(bool));
-        LatchInt      = new Type("latch-int",      typeof(Latch<Int>),      Int,    typeof(Int),    typeof(int));
-        LatchDouble   = new Type("latch-double",   typeof(Latch<Double>),   Double, typeof(Double), typeof(double));
-        LatchString   = new Type("latch-string",   typeof(Latch<String>),   String, typeof(String), typeof(string));
+        CounterInt    = new Type("counter-int",    typeof(Counter<Int>),    Int,    typeof(Int));
+        CounterDouble = new Type("counter-double", typeof(Counter<Double>), Double, typeof(Double));
+        Toggler       = new Type("toggler",        typeof(Toggler),         Bool,   typeof(Bool));
+        LatchObject   = new Type("latch-object",   typeof(Latch<Object>),   Object, typeof(Object));
+        LatchBool     = new Type("latch-bool",     typeof(Latch<Bool>),     Bool,   typeof(Bool));
+        LatchInt      = new Type("latch-int",      typeof(Latch<Int>),      Int,    typeof(Int));
+        LatchDouble   = new Type("latch-double",   typeof(Latch<Double>),   Double, typeof(Double));
+        LatchString   = new Type("latch-string",   typeof(Latch<String>),   String, typeof(String));
 
         addCast<IValueParent<Bool>>(Bool.imps, Trigger, (input) => new BoolAsTrigger(input));
         addImplicit<Bool, Object>();

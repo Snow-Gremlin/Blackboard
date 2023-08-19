@@ -51,15 +51,14 @@ sealed public class Blackboard {
     /// <typeparam name="T">The C# type of the value to watch.</typeparam>
     /// <param name="name">The name of the value to watch.</param>
     /// <returns>The value watcher.</returns>
-    public IValueWatcher<T> OnChange<T>(string name)
-        where T : struct, IData, IEquatable<T> {
+    public IValueWatcher<T> OnChange<T>(string name) {
         Type type = Type.FromValueType(typeof(T)) ??
             throw new Message("The given type is unsupported").
                 With("name", name).
                 With("Type", typeof(T));
 
         Factory factory = new(this.slate, this.logger);
-        factory.RequestExtern(name, default(T).Type);
+        factory.RequestExtern(name, type);
         factory.Build().Perform();
 
         IOutput output = this.slate.GetOutput(type, name);

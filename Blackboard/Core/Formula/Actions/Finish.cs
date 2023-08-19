@@ -16,6 +16,7 @@ sealed public class Finish : IAction {
         logger.Info("Finish: {0}", this);
         slate.PerformEvaluation(logger);
         slate.ResetTriggers();
+        slate.EmitOutputs();
     }
 
     /// <summary>Gets a human readable string for this reset.</summary>

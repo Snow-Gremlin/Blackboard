@@ -9,7 +9,6 @@ using Blackboard.Core.Record;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace Blackboard.Core;
 

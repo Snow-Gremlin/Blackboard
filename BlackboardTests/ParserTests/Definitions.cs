@@ -297,37 +297,33 @@ public class Definitions {
         slate.CheckProvoked(true, "A");
         slate.CheckProvoked(true, "B"); // this was created provoked
         slate.CheckEvaluate(
-            "Start Eval (pending: 5)",
-            "  Evaluated (changed: True, depth: 0, node: A: Input<trigger>[provoked], remaining: 4)",
-            "  Evaluated (changed: True, depth: 0, node: B: Input<trigger>[provoked], remaining: 3)",
+            "Start Eval (pending: 3)",
             "  Evaluated (changed: True, depth: 1, node: D: All<trigger>[provoked](A, B), remaining: 2)",
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: False, depth: 2, node: E: Xor<trigger>[](C, D), remaining: 0)",
-            "End Eval (provoked: 4, outputs: 0)");
+            "End Eval (provoked: 2, outputs: 0)");
         slate.ResetTriggers();
 
         slate.SetTrigger(true, "A");
         slate.CheckProvoked(true, "A");
         slate.CheckProvoked(false, "B");
         slate.CheckEvaluate(
-            "Start Eval (pending: 3)",
-            "  Evaluated (changed: True, depth: 0, node: A: Input<trigger>[provoked], remaining: 2)",
+            "Start Eval (pending: 2)",
             "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
-            "End Eval (provoked: 3, outputs: 0)");
+            "End Eval (provoked: 2, outputs: 0)");
         slate.ResetTriggers();
 
         slate.SetTrigger(true, "B");
         slate.CheckProvoked(false, "A");
         slate.CheckProvoked(true, "B");
         slate.CheckEvaluate(
-            "Start Eval (pending: 3)",
-            "  Evaluated (changed: True, depth: 0, node: B: Input<trigger>[provoked], remaining: 2)",
+            "Start Eval (pending: 2)",
             "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
-            "End Eval (provoked: 3, outputs: 0)");
+            "End Eval (provoked: 2, outputs: 0)");
         slate.ResetTriggers();
 
         slate.CheckProvoked(false, "A");

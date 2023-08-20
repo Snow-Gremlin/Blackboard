@@ -36,6 +36,10 @@ sealed public class Blackboard {
     /// <param name="name">The name of the trigger to watch.</param>
     /// <returns>The trigger watcher.</returns>
     public ITriggerWatcher OnProvoke(string name) {
+
+        // TODO: Allow namespaces to be given in name.
+        // TODO: Validate that the name is an acceptable identifiers.
+
         Factory factory = new(this.slate, this.logger);
         factory.RequestExtern(name, Type.Trigger);
         factory.Build().Perform();
@@ -52,6 +56,10 @@ sealed public class Blackboard {
     /// <param name="name">The name of the value to watch.</param>
     /// <returns>The value watcher.</returns>
     public IValueWatcher<T> OnChange<T>(string name) {
+        
+        // TODO: Allow namespaces to be given in name.
+        // TODO: Validate that the name is an acceptable identifiers.
+
         Type type = Type.FromValueType(typeof(T)) ??
             throw new Message("The given type is unsupported").
                 With("name", name).
@@ -68,4 +76,9 @@ sealed public class Blackboard {
                 With("name",     name).
                 With("existing", output);
     }
+
+
+    // TODO: Add a way to get input values.
+    // TODO: Add a way to set input values.
+    // TODO: Add a way to suspend finalization (eval, reset, emit) for several sets.
 }

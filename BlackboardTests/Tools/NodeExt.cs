@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Types;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -192,6 +193,6 @@ static class NodeExt {
     /// <param name="node">The node to start evaluate from and to get all parents and parent parents from.</param>
     /// <param name="logger">Optional logger to use to debug the update with.</param>
     /// <returns>All the triggers which have been provoked and need to be reset.</returns>
-    static public HashSet<ITrigger> EvaluateAllParents(this INode node, Logger logger = null) =>
+    static public EvaluationResult EvaluateAllParents(this INode node, Logger logger = null) =>
         node.GetAllParents().ToEvalList().Evaluate(logger);
 }

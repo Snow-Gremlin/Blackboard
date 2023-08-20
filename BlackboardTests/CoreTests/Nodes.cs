@@ -72,7 +72,7 @@ public class Nodes {
             "  Evaluated (changed: False, depth: 1, node: And<bool>[false](One, Two), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: Or<bool>[true](And<bool>(One, Two), Three), remaining: 1)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[false](Or<bool>(And<bool>, Three)), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval (provoked: 0, outputs: 0)");
         input1.CheckValue(true);
         input2.CheckValue(false);
         input3.CheckValue(true);
@@ -85,7 +85,7 @@ public class Nodes {
             "Start Eval (pending: 1)",
             "  Evaluated (changed: True, depth: 2, node: Or<bool>[false](And<bool>(One, Two), Three), remaining: 1)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](Or<bool>(And<bool>, Three)), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval (provoked: 0, outputs: 0)");
         input1.CheckValue(true);
         input2.CheckValue(false);
         input3.CheckValue(false);
@@ -99,7 +99,7 @@ public class Nodes {
             "  Evaluated (changed: True, depth: 1, node: And<bool>[true](One, Two), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: Or<bool>[true](And<bool>(One, Two), Three), remaining: 1)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[false](Or<bool>(And<bool>, Three)), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval (provoked: 0, outputs: 0)");
         input1.CheckValue(true);
         input2.CheckValue(true);
         input3.CheckValue(false);
@@ -147,6 +147,7 @@ public class Nodes {
 
             drv.PerformEvaluation();
             drv.ResetTriggers();
+            drv.EmitOutputs();
 
             drv.CheckValue(expCount, "Count");
             Assert.AreEqual(expHigh, high, "High flag state");

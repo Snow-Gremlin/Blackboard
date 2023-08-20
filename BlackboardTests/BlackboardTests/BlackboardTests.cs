@@ -107,6 +107,6 @@ public class BlackboardTests {
         
         Formula set1 = Formula.Join(setX1, setY1);
         set1.Perform();
-        buf.Check("X(34 -> 12)Z(34.78 -> 12.78)Y(78 -> 56)Z(12.78 -> 12.56)");
+        buf.Check("X(34 -> 12)Z(34.78 -> 12.56)Y(78 -> 56)");
     }
 }

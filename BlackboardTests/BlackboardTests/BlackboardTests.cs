@@ -54,8 +54,17 @@ public class BlackboardTests {
         buf.Check("Y");
         provokeX.Perform();
         provokeY.Perform();
-        buf.Check("XY"); // No 'Z' because they are performed separately.
+        // No 'Z' because the formulas were performed separately.
+        buf.Check("XY");
 
+        // Perform both formulas in a group call.
+        b.Group(() => {
+            provokeX.Perform();
+            provokeY.Perform();
+        });
+        buf.Check("XYZ");
+
+        // Join the formulas to preform as a group formula.
         Formula provokeZ = Formula.Join(provokeX, provokeY);
         provokeZ.Perform();
         buf.Check("XYZ");
@@ -103,10 +112,56 @@ public class BlackboardTests {
         buf.Check("Z(0 -> 12.56)");
         setX2.Perform();
         setY2.Perform();
+        // 'Z' emits twice because the formulas were performed separately.
         buf.Check("X(12 -> 34)Z(12.56 -> 34.56)Y(56 -> 78)Z(34.56 -> 34.78)");
-        
-        Formula set1 = Formula.Join(setX1, setY1);
-        set1.Perform();
+                
+        // Perform both formulas in a group call.
+        b.Group(() => {
+            setX1.Perform();
+            setY1.Perform();
+        });
         buf.Check("X(34 -> 12)Z(34.78 -> 12.56)Y(78 -> 56)");
+
+        // Join the formulas to preform as a group formula.
+        Formula set1 = Formula.Join(setX2, setY2);
+        set1.Perform();
+        buf.Check("X(12 -> 34)Z(12.56 -> 34.78)Y(56 -> 78)");
+    }
+
+    [TestMethod]
+    public void TestOnChangeAndOnProvokeWithNamespaces() {
+        StringBuilder buf = new();
+        Blackboard.Blackboard b = new();
+
+        ITriggerWatcher x1 = b.OnProvoke("stuff.triggers.x");
+        x1.OnProvoked += (object sender, EventArgs e) => buf.Append("Stuff.Triggers.X");
+        
+        IValueWatcher<int> x2 = b.OnChange<int>("stuff.values.x");
+        x2.OnChanged += (object sender, ValueEventArgs<int> e) => buf.Append("Stuff.Values.X(" + e.Previous + " -> " + e.Current + ")");
+        
+        buf.Check("");
+        b.Perform(
+            "in source = 10;",
+            "namespace stuff {",
+            "   namespace triggers {",
+            "      x := on(source > 10);",
+            "   }",
+            "   namespace values {",
+            "      x := clamp(source, 1, 20);",
+            "   }",
+            "}");
+        buf.Check("Stuff.Values.X(0 -> 10)");
+
+        b.Perform("source = 30;");
+        buf.Check("Stuff.Values.X(10 -> 20)Stuff.Triggers.X");
+
+        b.Perform("source = -10;");
+        buf.Check("Stuff.Values.X(20 -> 1)");
+
+        b.Perform("source = 8;");
+        buf.Check("Stuff.Values.X(1 -> 8)");
+
+        b.Perform("source = 12;");
+        buf.Check("Stuff.Values.X(8 -> 12)Stuff.Triggers.X");
     }
 }

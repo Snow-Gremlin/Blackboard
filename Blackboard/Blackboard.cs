@@ -69,15 +69,14 @@ sealed public partial class Blackboard {
                 With("name", name);
 
     /// <summary>Create an extension with the given identifier and optional namespace.</summary>
-    /// <param name="name">The identifier and optional namespace of the extern.</param>
     /// <param name="type">The type of the external to create.</param>
-    private void createExtern(string name, Type type) {
-        string[] parts = this.splitUpName(name);
-        int max = parts.Length-1;
+    /// <param name="name">The identifier and optional namespace of the extern.</param>
+    private void createExtern(Type type, params string[] name) {
+        int max = name.Length-1;
         Factory factory = new(this.slate, this.logger);
         for (int i = 0; i < max; ++i)
-            factory.PushNamespace(parts[i]);
-        factory.RequestExtern(parts[max], type);
+            factory.PushNamespace(name[i]);
+        factory.RequestExtern(name[max], type);
         factory.Build().Perform();
     }
 
@@ -85,9 +84,10 @@ sealed public partial class Blackboard {
     /// <param name="name">The name of the trigger to watch.</param>
     /// <returns>The trigger watcher.</returns>
     public ITriggerWatcher OnProvoke(string name) {
-        this.createExtern(name, Type.Trigger);
+        string[] parts = this.splitUpName(name);
+        this.createExtern(Type.Trigger, parts);
 
-        IOutput output = this.slate.GetOutput(Type.Trigger, name);
+        IOutput output = this.slate.GetOutput(Type.Trigger, parts);
         return output as ITriggerWatcher ??
             throw new Message("Failed to create output trigger").
                 With("name",     name).
@@ -103,10 +103,11 @@ sealed public partial class Blackboard {
             throw new Message("The given type is unsupported").
                 With("name", name).
                 With("Type", typeof(T));
+        
+        string[] parts = this.splitUpName(name);
+        this.createExtern(type, parts);
 
-        this.createExtern(name, type);
-
-        IOutput output = this.slate.GetOutput(type, name);
+        IOutput output = this.slate.GetOutput(type, parts);
         return output as IValueWatcher<T> ??
             throw new Message("Failed to create value output").
                 With("type",     type).

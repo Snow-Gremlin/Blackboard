@@ -191,8 +191,8 @@ static class NodeExt {
 
     /// <summary>Will perform evaluation on all the nodes reachable from the parents.</summary>
     /// <param name="node">The node to start evaluate from and to get all parents and parent parents from.</param>
+    /// <param name="finalization">The set of the triggers which have been provoked and need to be reset.</param>
     /// <param name="logger">Optional logger to use to debug the update with.</param>
-    /// <returns>All the triggers which have been provoked and need to be reset.</returns>
-    static public EvaluationResult EvaluateAllParents(this INode node, Logger logger = null) =>
-        node.GetAllParents().ToEvalList().Evaluate(logger);
+    static public void EvaluateAllParents(this INode node, Finalization finalization, Logger logger = null) =>
+        node.GetAllParents().ToEvalList().Evaluate(finalization, logger);
 }

@@ -311,12 +311,11 @@ static public class NodeExt {
     /// presorted by depth which will usually provide the fastest update.
     /// </remarks>
     /// <param name="pending">The initial set of nodes which are pending depth update.</param>
+    /// <param name="finalization">The set to add nodes to which need finalization.</param>
     /// <param name="logger">The logger to debug the evaluate with.</param>
-    /// <returns>The list of provoked triggers</returns>
-    static public EvaluationResult Evaluate(this LinkedList<IEvaluable> pending, Logger? logger = null) {
+    static public void Evaluate(this LinkedList<IEvaluable> pending, Finalization finalization, Logger? logger = null) {
         logger.Info("Start Eval (pending: {0})", pending.Count);
 
-        EvaluationResult results = new();
         while (pending.Count > 0) {
             IEvaluable? node = pending.TakeFirst();
             if (node is null) break;
@@ -324,18 +323,14 @@ static public class NodeExt {
             bool changed = false;
             if (node.Evaluate()) {
                 pending.SortInsertUnique(node.Children.NotNull().OfType<IEvaluable>());
-                if (node is ITrigger trigger && trigger.Provoked)
-                    results.Provoked.Add(trigger);
-                if (node is IOutput output && output.Pending)
-                    results.Outputs.Add(output);
+                finalization.Add(node);
                 changed = true;
             }
 
             logger.Info("  Evaluated (changed: {0}, depth: {1}, node: {2}, remaining: {3})", changed, node.Depth, node, pending.Count);
         }
 
-        logger.Info("End Eval (provoked: {0}, outputs: {1})", results.Provoked.Count, results.Outputs.Count);
-        return results;
+        logger.Info("End Eval ({0})", finalization);
     }
 
     /// <summary>Gets the maximum depth from the given nodes.</summary>

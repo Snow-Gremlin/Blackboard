@@ -302,7 +302,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: False, depth: 2, node: E: Xor<trigger>[](C, D), remaining: 0)",
             "End Eval (provoked: 2, outputs: 0)");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.SetTrigger(true, "A");
         slate.CheckProvoked(true, "A");
@@ -313,7 +313,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
             "End Eval (provoked: 2, outputs: 0)");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.SetTrigger(true, "B");
         slate.CheckProvoked(false, "A");
@@ -324,7 +324,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
             "End Eval (provoked: 2, outputs: 0)");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.CheckProvoked(false, "A");
         slate.CheckProvoked(false, "B");
@@ -378,7 +378,7 @@ public class Definitions {
         slate.CheckProvoked(false, "B");
         slate.CheckProvoked(false, "C");
         slate.CheckValue(3, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "->A;",
@@ -390,7 +390,7 @@ public class Definitions {
         slate.CheckProvoked(false, "B");
         slate.CheckProvoked(false, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "D > 3 -> A;",
@@ -402,7 +402,7 @@ public class Definitions {
         slate.CheckProvoked(true, "B");
         slate.CheckProvoked(true, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "false -> A;",
@@ -414,7 +414,7 @@ public class Definitions {
         slate.CheckProvoked(false, "B");
         slate.CheckProvoked(false, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "-> A -> B;").
@@ -425,7 +425,7 @@ public class Definitions {
         slate.CheckProvoked(true, "B");
         slate.CheckProvoked(true, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "false -> A -> B;").
@@ -436,7 +436,7 @@ public class Definitions {
         slate.CheckProvoked(false, "B");
         slate.CheckProvoked(false, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "true -> A -> B;").
@@ -447,7 +447,7 @@ public class Definitions {
         slate.CheckProvoked(true, "B");
         slate.CheckProvoked(true, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
     }
   
     [TestMethod]

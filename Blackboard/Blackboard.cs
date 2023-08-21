@@ -2,11 +2,11 @@
 using Blackboard.Core.Formula;
 using Blackboard.Core.Formula.Factory;
 using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Record;
 using Blackboard.Core.Types;
 using System.Text.RegularExpressions;
+using S = System;
 
 namespace Blackboard;
 
@@ -38,6 +38,24 @@ sealed public partial class Blackboard {
     /// <returns>The result of the performed blackboard code.</returns>
     public Result Perform(params string[] input) =>
         this.CreateFormula(input).Perform();
+
+    /// <summary>Groups several calls together.</summary>
+    /// <remarks>
+    /// Any formulas run or values set during this group will not reset triggers or
+    /// emit any output until the group has finished.
+    /// </remarks>
+    /// <param name="handle">This action performs all the values to group together.</param>
+    public void Group(S.Action handle) {
+        if (this.slate.Finalization.Suspend) {
+            handle();
+            return;
+        }
+
+        this.slate.Finalization.Suspend = true;
+        handle();
+        this.slate.Finalization.Suspend = false;
+        this.slate.FinishEvaluation();
+    }
 
     /// <summary>
     /// Checks that the given name is a valid identifier with optional namespace
@@ -98,5 +116,4 @@ sealed public partial class Blackboard {
 
     // TODO: Add a way to get input values.
     // TODO: Add a way to set input values.
-    // TODO: Add a way to suspend finalization (eval, reset, emit) for several sets.
 }

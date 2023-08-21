@@ -24,12 +24,6 @@ public class Slate: IReader, IWriter {
     /// <summary>The nodes which have had one or more parent modified and they need to be reevaluated.</summary>
     private readonly LinkedList<IEvaluable> pendingEval;
 
-    /// <summary>The set of provoked triggers which need to be reset.</summary>
-    private readonly HashSet<ITrigger> needsReset;
-
-    /// <summary>The set of output nodes which need to emit values.</summary>
-    private readonly HashSet<IOutput> needsOutput;
-
     /// <summary>A collection of literals and constants used in the graph.</summary>
     /// <remarks>
     /// This is to help reduce overhead of duplicate constants and
@@ -41,17 +35,19 @@ public class Slate: IReader, IWriter {
     /// <param name="addFuncs">Indicates that built-in functions should be added.</param> 
     /// <param name="addConsts">Indicates that constants should be added.</param>
     public Slate(bool addFuncs = true, bool addConsts = true) {
-        this.pendingUpdate = new LinkedList<IEvaluable>();
-        this.pendingEval   = new LinkedList<IEvaluable>();
-        this.needsReset    = new HashSet<ITrigger>();
-        this.needsOutput   = new HashSet<IOutput>();
-        this.constants     = new HashSet<IConstant>(new NodeValueComparer<IConstant>());
-        this.Global        = new Namespace();
+        this.pendingUpdate = new();
+        this.pendingEval   = new();
+        this.constants     = new(new NodeValueComparer<IConstant>());
+        this.Finalization  = new();
+        this.Global        = new();
 
         Operators.Add(this.Global);
         if (addFuncs)  Functions.Add(this.Global);
         if (addConsts) Constants.Add(this.Global);
     }
+    
+    /// <summary>The sets of pending values after evaluation that need to be acted on.</summary>
+    public Finalization Finalization { get; }
 
     /// <summary>The base set of named nodes to access the total node structure.</summary>
     public Namespace Global { get; }
@@ -190,7 +186,7 @@ public class Slate: IReader, IWriter {
     public void SetTrigger(ITriggerInput input, bool provoke = true) {
         if (input.Provoke(provoke)) {
             this.PendEval(input.Children);
-            this.NeedsReset(input);
+            this.Finalization.Add(input);   
         }
     }
 
@@ -254,11 +250,11 @@ public class Slate: IReader, IWriter {
     /// </summary>
     /// <remarks>By performing the update the pending evaluation list will be cleared.</remarks>
     /// <param name="logger">An optional logger for debugging this evaluation.</param>
-    public void PerformEvaluation(Logger? logger = null) {
-        EvaluationResult results = this.pendingEval.Evaluate(logger.SubGroup(nameof(PerformEvaluation)));
-        this.NeedsReset(results.Provoked);
-        this.NeedsOutput(results.Outputs);
-    }
+    public void PerformEvaluation(Logger? logger = null) =>
+        this.pendingEval.Evaluate(this.Finalization, logger.SubGroup(nameof(PerformEvaluation)));
+
+    /// <summary>Finish evaluation by performing finalization.</summary>
+    public void FinishEvaluation() => this.Finalization.Perform();
 
     #endregion
     #region Output...
@@ -287,49 +283,6 @@ public class Slate: IReader, IWriter {
         return output;
     }
     
-    /// <summary>This adds output nodes which need to be emitted.</summary>
-    /// <param name="nodes">The output nodes to add.</param>
-    public void NeedsOutput(params IOutput[] nodes) =>
-        this.NeedsOutput(nodes as IEnumerable<IOutput>);
-    
-    /// <summary>This adds output nodes which need to be emitted.</summary>
-    /// <param name="nodes">The output nodes to add.</param>
-    public void NeedsOutput(IEnumerable<IOutput> nodes) =>
-        nodes.NotNull().Where(trig => trig.Pending).Foreach(this.needsOutput.Add);
-
-    /// <summary>This will emit all pending value and trigger updates which have been added.</summary>
-    /// <remarks>The needs output set will be cleared by this call.</remarks>
-    public void EmitOutputs() {
-        this.needsOutput.Emit();
-        this.needsOutput.Clear();
-    }
-
-    /// <summary>Indicates if there are any outputs which needs to be emitting.</summary>
-    public bool HasOutputsNeedingEmitting => this.needsReset.Count > 0;
-
-    #endregion
-    #region Needs Reset...
-
-    /// <summary>This adds provoked trigger nodes which need to be reset.</summary>
-    /// <param name="nodes">The provoked trigger nodes to add.</param>
-    public void NeedsReset(params ITrigger[] nodes) =>
-        this.NeedsReset(nodes as IEnumerable<ITrigger>);
-
-    /// <summary>This adds provoked trigger nodes which need to be reset.</summary>
-    /// <param name="nodes">The provoked trigger nodes to add.</param>
-    public void NeedsReset(IEnumerable<ITrigger> nodes) =>
-        nodes.NotNull().Where(trig => trig.Provoked).Foreach(this.needsReset.Add);
-
-    /// <summary>This will reset all provoked trigger nodes which have been added.</summary>
-    /// <remarks>The needs reset set will be cleared by this call.</remarks>
-    public void ResetTriggers() {
-        this.needsReset.Reset();
-        this.needsReset.Clear();
-    }
-
-    /// <summary>Indicates if there are any provoked triggers which needs to be reset.</summary>
-    public bool HasTriggersNeedingReset => this.needsReset.Count > 0;
-
     #endregion
     #region Constants...
 

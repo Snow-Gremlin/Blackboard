@@ -195,53 +195,6 @@ public class Slate: IReader, IWriter {
     }
 
     #endregion
-    #region Output...
-
-    /// <summary>Gets or creates a new output value on the node with the given name.</summary>
-    /// <param name="type">The type of the output to create.</param>
-    /// <param name="names">The name of the node to look up.</param>
-    /// <returns>The new or existing value output.</returns>
-    public IOutput GetOutput(Type type, params string[] names) =>
-        this.GetOutput(type, names as IEnumerable<string>);
-
-    /// <summary>Gets or creates a new output value on the node with the given name.</summary>
-    /// <param name="type">The type of the output to create.</param>
-    /// <param name="names">The name of the node to look up.</param>
-    /// <returns>The new or existing value output.</returns>
-    public IOutput GetOutput(Type type, IEnumerable<string> names) {
-        IParent  parent = this.GetNode<IParent>(names);
-        IOutput? output = parent.Children.OfType<IOutput>().FirstOrDefault();
-        if (output is not null) return output;
-
-        output = Maker.CreateOutputNode(type) ??
-            throw new Message("Unable to create output node of given type").
-                With("type", type);
-        output.Parents[0] = parent;
-        output.Legitimatize();
-        return output;
-    }
-    
-    /// <summary>This adds output nodes which need to be emitted.</summary>
-    /// <param name="nodes">The output nodes to add.</param>
-    public void NeedsOutput(params IOutput[] nodes) =>
-        this.NeedsOutput(nodes as IEnumerable<IOutput>);
-    
-    /// <summary>This adds output nodes which need to be emitted.</summary>
-    /// <param name="nodes">The output nodes to add.</param>
-    public void NeedsOutput(IEnumerable<IOutput> nodes) =>
-        nodes.NotNull().Where(trig => trig.Pending).Foreach(this.needsOutput.Add);
-
-    /// <summary>This will emit all pending value and trigger updates which have been added.</summary>
-    /// <remarks>The needs output set will be cleared by this call.</remarks>
-    public void EmitOutputs() {
-        this.needsOutput.Emit();
-        this.needsOutput.Clear();
-    }
-
-    /// <summary>Indicates if there are any outputs which needs to be emitting.</summary>
-    public bool HasOutputsNeedingEmitting => this.needsReset.Count > 0;
-
-    #endregion
     #region Update...
 
     /// <summary>This indicates that the given nodes have had parents added or removed and need to be updated.</summary>
@@ -306,6 +259,53 @@ public class Slate: IReader, IWriter {
         this.NeedsReset(results.Provoked);
         this.NeedsOutput(results.Outputs);
     }
+
+    #endregion
+    #region Output...
+
+    /// <summary>Gets or creates a new output value on the node with the given name.</summary>
+    /// <param name="type">The type of the output to create.</param>
+    /// <param name="names">The name of the node to look up.</param>
+    /// <returns>The new or existing value output.</returns>
+    public IOutput GetOutput(Type type, params string[] names) =>
+        this.GetOutput(type, names as IEnumerable<string>);
+
+    /// <summary>Gets or creates a new output value on the node with the given name.</summary>
+    /// <param name="type">The type of the output to create.</param>
+    /// <param name="names">The name of the node to look up.</param>
+    /// <returns>The new or existing value output.</returns>
+    public IOutput GetOutput(Type type, IEnumerable<string> names) {
+        IParent  parent = this.GetNode<IParent>(names);
+        IOutput? output = parent.Children.OfType<IOutput>().FirstOrDefault();
+        if (output is not null) return output;
+
+        output = Maker.CreateOutputNode(type) ??
+            throw new Message("Unable to create output node of given type").
+                With("type", type);
+        output.Parents[0] = parent;
+        output.Legitimatize();
+        return output;
+    }
+    
+    /// <summary>This adds output nodes which need to be emitted.</summary>
+    /// <param name="nodes">The output nodes to add.</param>
+    public void NeedsOutput(params IOutput[] nodes) =>
+        this.NeedsOutput(nodes as IEnumerable<IOutput>);
+    
+    /// <summary>This adds output nodes which need to be emitted.</summary>
+    /// <param name="nodes">The output nodes to add.</param>
+    public void NeedsOutput(IEnumerable<IOutput> nodes) =>
+        nodes.NotNull().Where(trig => trig.Pending).Foreach(this.needsOutput.Add);
+
+    /// <summary>This will emit all pending value and trigger updates which have been added.</summary>
+    /// <remarks>The needs output set will be cleared by this call.</remarks>
+    public void EmitOutputs() {
+        this.needsOutput.Emit();
+        this.needsOutput.Clear();
+    }
+
+    /// <summary>Indicates if there are any outputs which needs to be emitting.</summary>
+    public bool HasOutputsNeedingEmitting => this.needsReset.Count > 0;
 
     #endregion
     #region Needs Reset...

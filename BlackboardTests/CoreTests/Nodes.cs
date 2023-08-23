@@ -15,9 +15,9 @@ public class Nodes {
 
     [TestMethod]
     public void TestAddNodes() {
-        InputValue<Bool> input1 = new();
-        InputValue<Bool> input2 = new();
-        InputValue<Bool> input3 = new();
+        InputValue<Bool, bool> input1 = new();
+        InputValue<Bool, bool> input2 = new();
+        InputValue<Bool, bool> input3 = new();
         And and12  = new(input1, input2);
         Or  or123  = new(and12, input3);
         Not not123 = new(or123);
@@ -43,9 +43,9 @@ public class Nodes {
 
     [TestMethod]
     public void TestEvaluateNodes() {
-        InputValue<Bool> input1 = new();
-        InputValue<Bool> input2 = new();
-        InputValue<Bool> input3 = new();
+        InputValue<Bool, bool> input1 = new();
+        InputValue<Bool, bool> input2 = new();
+        InputValue<Bool, bool> input3 = new();
         And and12  = new(input1, input2);
         Or  or123  = new(and12,  input3);
         Not not123 = new(or123);
@@ -73,7 +73,7 @@ public class Nodes {
             "  Evaluated (changed: False, depth: 1, node: And<bool>[false](One, Two), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: Or<bool>[true](And<bool>(One, Two), Three), remaining: 1)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[false](Or<bool>(And<bool>, Three)), remaining: 0)",
-            "End Eval (provoked: 0, outputs: 0)");
+            "End Eval ()");
         input1.CheckValue(true);
         input2.CheckValue(false);
         input3.CheckValue(true);
@@ -86,7 +86,7 @@ public class Nodes {
             "Start Eval (pending: 1)",
             "  Evaluated (changed: True, depth: 2, node: Or<bool>[false](And<bool>(One, Two), Three), remaining: 1)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](Or<bool>(And<bool>, Three)), remaining: 0)",
-            "End Eval (provoked: 0, outputs: 0)");
+            "End Eval ()");
         input1.CheckValue(true);
         input2.CheckValue(false);
         input3.CheckValue(false);
@@ -100,7 +100,7 @@ public class Nodes {
             "  Evaluated (changed: True, depth: 1, node: And<bool>[true](One, Two), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: Or<bool>[true](And<bool>(One, Two), Three), remaining: 1)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[false](Or<bool>(And<bool>, Three)), remaining: 0)",
-            "End Eval (provoked: 0, outputs: 0)");
+            "End Eval ()");
         input1.CheckValue(true);
         input2.CheckValue(true);
         input3.CheckValue(false);
@@ -132,7 +132,7 @@ public class Nodes {
 
         bool high;
         OutputTrigger outTrig = new(over3);
-        outTrig.OnProvoked += (object sender, S.EventArgs e) => high = true;
+        outTrig.OnProvoked += (object? sender, S.EventArgs e) => high = true;
 
         outTrig.LegitimatizeAll();
         toggle.LegitimatizeAll();

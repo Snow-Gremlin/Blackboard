@@ -17,13 +17,13 @@ public class BlackboardTests {
         b.Perform("in trigger x;");
         
         ITriggerWatcher x = b.OnProvoke("x");
-        x.OnProvoked += (object sender, EventArgs e) => buf.Append('X');
+        x.OnProvoked += (object? sender, EventArgs e) => buf.Append('X');
 
         ITriggerWatcher y = b.OnProvoke("y");
-        y.OnProvoked += (object sender, EventArgs e) => buf.Append('Y');
+        y.OnProvoked += (object? sender, EventArgs e) => buf.Append('Y');
         
         ITriggerWatcher z = b.OnProvoke("z");
-        z.OnProvoked += (object sender, EventArgs e) => buf.Append('Z');
+        z.OnProvoked += (object? sender, EventArgs e) => buf.Append('Z');
 
         buf.Check("");
         Formula provokeX = b.CreateFormula("-> x;");
@@ -77,13 +77,13 @@ public class BlackboardTests {
         b.Perform("in int x;");
         
         IValueWatcher<int> x = b.OnChange<int>("x");
-        x.OnChanged += (object sender, ValueEventArgs<int> e) => buf.Append("X(" + e.Previous + " -> " + e.Current + ")");
+        x.OnChanged += (object? sender, ValueEventArgs<int> e) => buf.Append("X(" + e.Previous + " -> " + e.Current + ")");
 
         IValueWatcher<int> y = b.OnChange<int>("y");
-        y.OnChanged += (object sender, ValueEventArgs<int> e) => buf.Append("Y(" + e.Previous + " -> " + e.Current + ")");
+        y.OnChanged += (object? sender, ValueEventArgs<int> e) => buf.Append("Y(" + e.Previous + " -> " + e.Current + ")");
         
         IValueWatcher<double> z = b.OnChange<double>("z");
-        z.OnChanged += (object sender, ValueEventArgs<double> e) => buf.Append("Z(" + e.Previous + " -> " + e.Current + ")");
+        z.OnChanged += (object? sender, ValueEventArgs<double> e) => buf.Append("Z(" + e.Previous + " -> " + e.Current + ")");
 
         buf.Check("");
         Formula setX1 = b.CreateFormula("x = 12;");
@@ -134,10 +134,10 @@ public class BlackboardTests {
         Blackboard.Blackboard b = new();
 
         ITriggerWatcher x1 = b.OnProvoke("stuff.triggers.x");
-        x1.OnProvoked += (object sender, EventArgs e) => buf.Append("Stuff.Triggers.X");
+        x1.OnProvoked += (object? sender, EventArgs e) => buf.Append("Stuff.Triggers.X");
         
         IValueWatcher<int> x2 = b.OnChange<int>("stuff.values.x");
-        x2.OnChanged += (object sender, ValueEventArgs<int> e) => buf.Append("Stuff.Values.X(" + e.Previous + " -> " + e.Current + ")");
+        x2.OnChanged += (object? sender, ValueEventArgs<int> e) => buf.Append("Stuff.Values.X(" + e.Previous + " -> " + e.Current + ")");
         
         buf.Check("");
         b.Perform(

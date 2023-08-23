@@ -9,7 +9,7 @@ namespace Blackboard.Core.Data.Caps;
 /// <summary>This is the data storage for a 32 bit signed integer value such that it can be used in generics.</summary>
 public readonly struct Int :
     IAdditive<Int>,
-    IBaseValue<int>,
+    IBaseValue<Int, int>,
     IBitwise<Int>,
     IComparable<Int>,
     IData,
@@ -83,6 +83,11 @@ public readonly struct Int :
 
     /// <summary>Gets the C# base value in the data.</summary>
     public int BaseValue => this.Value;
+    
+    /// <summary>This creates a new instance of the data with the given value.</summary>
+    /// <param name="baseValue">The value to create data for.</param>
+    /// <returns>The new data set for the given value.</returns>
+    public Int Wrap(int baseValue) => new(baseValue);
 
     #endregion
     #region Bitwise...

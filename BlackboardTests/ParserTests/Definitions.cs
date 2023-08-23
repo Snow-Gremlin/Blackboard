@@ -219,7 +219,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](C), remaining: 2)",
             "  Evaluated (changed: True, depth: 4, node: And<bool>[true](B, Not<bool>(C)), remaining: 1)",
             "  Evaluated (changed: False, depth: 5, node: F: Xor<bool>[false](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
-            "End Eval (provoked: 0, outputs: 0)");
+            "End Eval ()");
         slate.CheckValue(false, "F");
 
         slate.SetInt(0x4, "A");
@@ -232,7 +232,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 2, node: B: NotEqual<bool>[false](BitwiseAnd<int>(A, <int>[1]), <int>[0]), remaining: 1)",
             "  Evaluated (changed: True, depth: 4, node: And<bool>[false](B, Not<bool>(C)), remaining: 1)",
             "  Evaluated (changed: True, depth: 5, node: F: Xor<bool>[true](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
-            "End Eval (provoked: 0, outputs: 0)");
+            "End Eval ()");
         slate.CheckValue(true, "F");
 
         slate.SetInt(0x8, "A");
@@ -245,7 +245,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 2, node: D: NotEqual<bool>[false](BitwiseAnd<int>(A, <int>[4]), <int>[0]), remaining: 2)",
             "  Evaluated (changed: True, depth: 2, node: E: NotEqual<bool>[true](BitwiseAnd<int>(A, <int>[8]), <int>[0]), remaining: 1)",
             "  Evaluated (changed: False, depth: 3, node: Or<bool>[true](D, E), remaining: 0)",
-            "End Eval (provoked: 0, outputs: 0)");
+            "End Eval ()");
         slate.CheckValue(true, "F");
 
         slate.SetInt(0xF, "A");
@@ -261,7 +261,7 @@ public class Definitions {
             "  Evaluated (changed: False, depth: 3, node: Or<bool>[true](D, E), remaining: 2)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[false](C), remaining: 1)",
             "  Evaluated (changed: False, depth: 4, node: And<bool>[false](B, Not<bool>(C)), remaining: 0)",
-            "End Eval (provoked: 0, outputs: 0)");
+            "End Eval ()");
         slate.CheckValue(true, "F");
 
         slate.SetInt(0x5, "A");
@@ -277,7 +277,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](C), remaining: 1)",
             "  Evaluated (changed: True, depth: 4, node: And<bool>[true](B, Not<bool>(C)), remaining: 1)",
             "  Evaluated (changed: True, depth: 5, node: F: Xor<bool>[false](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
-            "End Eval (provoked: 0, outputs: 0)");
+            "End Eval ()");
         slate.CheckValue(false, "F");
     }
 
@@ -293,6 +293,8 @@ public class Definitions {
             NoFinish().
             Perform();
 
+        Assert.AreEqual("resets: 2", slate.Finalization.ToString());
+
         slate.SetTrigger(true, "A");
         slate.CheckProvoked(true, "A");
         slate.CheckProvoked(true, "B"); // this was created provoked
@@ -301,7 +303,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 1, node: D: All<trigger>[provoked](A, B), remaining: 2)",
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: False, depth: 2, node: E: Xor<trigger>[](C, D), remaining: 0)",
-            "End Eval (provoked: 2, outputs: 0)");
+            "End Eval (resets: 5)");
         slate.FinishEvaluation();
 
         slate.SetTrigger(true, "A");
@@ -312,7 +314,7 @@ public class Definitions {
             "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
-            "End Eval (provoked: 2, outputs: 0)");
+            "End Eval (resets: 3)");
         slate.FinishEvaluation();
 
         slate.SetTrigger(true, "B");
@@ -323,14 +325,14 @@ public class Definitions {
             "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
-            "End Eval (provoked: 2, outputs: 0)");
+            "End Eval (resets: 3)");
         slate.FinishEvaluation();
 
         slate.CheckProvoked(false, "A");
         slate.CheckProvoked(false, "B");
         slate.CheckEvaluate(
             "Start Eval (pending: 0)",
-            "End Eval (provoked: 0, outputs: 0)");
+            "End Eval ()");
     }
 
     [TestMethod]

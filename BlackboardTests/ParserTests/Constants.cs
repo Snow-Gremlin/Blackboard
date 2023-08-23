@@ -30,7 +30,7 @@ public class Constants {
     /// </summary>
     /// <param name="name">The name of the constant with any required namespaces</param>
     /// <param name="exp">The expected value to compare against.</param>
-    static private void checkObject(string name, object exp) =>
+    static private void checkObject(string name, object? exp) =>
         new Slate().Read("get A = " + name + ";").Perform().CheckObject(exp, "A");
 
     [TestMethod]

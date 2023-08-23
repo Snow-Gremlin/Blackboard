@@ -18,31 +18,31 @@ public class Benchmarks {
     /// <param name="title">The title to show for this implementation.</param>
     /// <param name="testHandle">The FromType implementation to test and measure.</param>
     /// <returns>The average milliseconds per </returns>
-    static private double measureFromTypeImplementation(string title, S.Func<S.Type, Type> testHandle) {
-        Dictionary<S.Type, Type> testTypes = new() {
-                { typeof(And),                   Type.Bool },
-                { typeof(InputValue<Bool>),      Type.Bool },
-                { typeof(InputValue<Double>),    Type.Double },
-                { typeof(InputValue<String>),    Type.String },
-                { typeof(Counter<Int>),          Type.CounterInt },
-                { typeof(Counter<Double>),       Type.CounterDouble },
-                { typeof(Toggler),               Type.Toggler },
-                { typeof(Latch<String>),         Type.LatchString },
-                { typeof(OutputTrigger),         Type.Trigger },
-                { typeof(Namespace),             Type.Namespace },
-                { typeof(FuncGroup),             Type.FuncGroup },
-                { typeof(Function<Sum<Double>>), Type.FuncDef },
-                { typeof(string),                null },
+    static private double measureFromTypeImplementation(string title, S.Func<S.Type, Type?> testHandle) {
+        Dictionary<S.Type, Type?> testTypes = new() {
+                { typeof(And),                        Type.Bool          },
+                { typeof(InputValue<Bool,   bool>),   Type.Bool          },
+                { typeof(InputValue<Double, double>), Type.Double        },
+                { typeof(InputValue<String, string>), Type.String        },
+                { typeof(Counter<Int>),               Type.CounterInt    },
+                { typeof(Counter<Double>),            Type.CounterDouble },
+                { typeof(Toggler),                    Type.Toggler       },
+                { typeof(Latch<String>),              Type.LatchString   },
+                { typeof(OutputTrigger),              Type.Trigger       },
+                { typeof(Namespace),                  Type.Namespace     },
+                { typeof(FuncGroup),                  Type.FuncGroup     },
+                { typeof(Function<Sum<Double>>),      Type.FuncDef       },
+                { typeof(string),                     null               },
             };
 
         S.Action testAction = () => {
-            foreach (KeyValuePair<S.Type, Type> types in testTypes) {
-                Type result = testHandle(types.Key);
+            foreach (KeyValuePair<S.Type, Type?> types in testTypes) {
+                Type? result = testHandle(types.Key);
 
                 // Check types are equal simply instead of using assert to reduce test overhead.
-                if (result != types.Value)
+                if (!Equals(types.Value, result))
                     Assert.Fail("FromType({0}) returned {1} but expected {2}",
-                            types.Key, result?.ToString() ?? "null", types.Value?.ToString() ?? "null");
+                        types.Key, result?.ToString() ?? "null", types.Value?.ToString() ?? "null");
             }
         };
         return testAction.Measure(title: title, divisor: testTypes.Count);

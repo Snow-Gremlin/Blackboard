@@ -6,7 +6,7 @@ namespace Blackboard.Core.Data.Caps;
 
 /// <summary>This is the data storage for a base value type, object, such that it can be used in generics.</summary>
 public readonly struct Object :
-    IBaseValue<object?>,
+    IBaseValue<Object, object?>,
     IData,
     IEquatable<Object>,
     IImplicit<Bool, Object>,
@@ -45,6 +45,11 @@ public readonly struct Object :
 
     /// <summary>Gets the C# base value in the data.</summary>
     public object? BaseValue => this.Value;
+    
+    /// <summary>This creates a new instance of the data with the given value.</summary>
+    /// <param name="baseValue">The value to create data for.</param>
+    /// <returns>The new data set for the given value.</returns>
+    public Object Wrap(object? baseValue) => new(baseValue);
 
     #endregion
     #region Data...

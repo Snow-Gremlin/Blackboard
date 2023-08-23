@@ -101,7 +101,7 @@ static class NodeExt {
     /// <returns>The given node so that method calls can be chained.</returns>
     static public INode CheckValue(this INode node, bool exp) {
         Assert.IsInstanceOfType(node, typeof(IValue<Bool>));
-        Assert.AreEqual(exp, (node as IValue<Bool>).Value.Value);
+        Assert.AreEqual(exp, (node as IValue<Bool>)?.Value.Value);
         return node;
     }
 
@@ -111,7 +111,7 @@ static class NodeExt {
     /// <returns>The given node so that method calls can be chained.</returns>
     static public INode CheckValue(this INode node, int exp) {
         Assert.IsInstanceOfType(node, typeof(IValue<Int>));
-        Assert.AreEqual(exp, (node as IValue<Int>).Value.Value);
+        Assert.AreEqual(exp, (node as IValue<Int>)?.Value.Value);
         return node;
     }
 
@@ -121,7 +121,7 @@ static class NodeExt {
     /// <returns>The given node so that method calls can be chained.</returns>
     static public INode CheckValue(this INode node, double exp) {
         Assert.IsInstanceOfType(node, typeof(IValue<Double>));
-        Assert.AreEqual(exp, (node as IValue<Double>).Value.Value);
+        Assert.AreEqual(exp, (node as IValue<Double>)?.Value.Value);
         return node;
     }
 
@@ -131,7 +131,7 @@ static class NodeExt {
     /// <returns>The given node so that method calls can be chained.</returns>
     static public INode CheckValue(this INode node, string exp) {
         Assert.IsInstanceOfType(node, typeof(IValue<String>));
-        Assert.AreEqual(exp, (node as IValue<String>).Value.Value);
+        Assert.AreEqual(exp, (node as IValue<String>)?.Value.Value);
         return node;
     }
 
@@ -141,7 +141,7 @@ static class NodeExt {
     /// <returns>The given node so that method calls can be chained.</returns>
     static public INode CheckProvoked(this INode node, bool exp) {
         Assert.IsInstanceOfType(node, typeof(ITrigger));
-        Assert.AreEqual(exp, (node as ITrigger).Provoked);
+        Assert.AreEqual(exp, (node as ITrigger)?.Provoked);
         return node;
     }
 
@@ -184,7 +184,7 @@ static class NodeExt {
     /// <param name="node">The node to start updating from and to get all parents and parent parents from.</param>
     /// <param name="logger">Optional logger to use to debug the update with.</param>
     /// <returns>The given node so that method calls can be chained.</returns>
-    static public INode UpdateAllParents(this INode node, Logger logger = null) {
+    static public INode UpdateAllParents(this INode node, Logger? logger = null) {
         node.GetAllParents().ToEvalList().UpdateDepths(logger);
         return node;
     }
@@ -193,6 +193,6 @@ static class NodeExt {
     /// <param name="node">The node to start evaluate from and to get all parents and parent parents from.</param>
     /// <param name="finalization">The set of the triggers which have been provoked and need to be reset.</param>
     /// <param name="logger">Optional logger to use to debug the update with.</param>
-    static public void EvaluateAllParents(this INode node, Finalization finalization, Logger logger = null) =>
+    static public void EvaluateAllParents(this INode node, Finalization finalization, Logger? logger = null) =>
         node.GetAllParents().ToEvalList().Evaluate(finalization, logger);
 }

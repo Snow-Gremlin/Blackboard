@@ -5,7 +5,7 @@ namespace Blackboard.Core.Data.Caps;
 
 /// <summary>This is the data storage for a boolean value such that it can be used in generics.</summary>
 public readonly struct Bool :
-    IBaseValue<bool>,
+    IBaseValue<Bool, bool>,
     IData,
     IEquatable<Bool>,
     IExplicit<Object, Bool> {
@@ -39,6 +39,11 @@ public readonly struct Bool :
 
     /// <summary>Gets the C# base value in the data.</summary>
     public bool BaseValue => this.Value;
+
+    /// <summary>This creates a new instance of the data with the given value.</summary>
+    /// <param name="baseValue">The value to create data for.</param>
+    /// <returns>The new data set for the given value.</returns>
+    public Bool Wrap(bool baseValue) => new(baseValue);
 
     #endregion
     #region Data...

@@ -20,7 +20,7 @@ static class GeneralExt {
     /// </param>
     /// <param name="minSecs">The minimum amount of time to keep repeating the action.</param>
     /// <returns>The average number of milliseconds per action operation.</returns>
-    static public double Measure(this S.Action action, string title = null, double divisor = 1.0, double minSecs = 0.5) {
+    static public double Measure(this S.Action action, string? title = null, double divisor = 1.0, double minSecs = 0.5) {
         S.TimeSpan minimum = S.TimeSpan.FromSeconds(minSecs);
         int count = 0;
         Stopwatch stopwatch = Stopwatch.StartNew();

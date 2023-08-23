@@ -1,7 +1,5 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Outer;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,7 +12,8 @@ public class Operators {
     [TestMethod]
     public void CheckAllOperatorsAreTested() =>
         TestTools.SetEntriesMatch(
-            TestTools.FuncDefTags(new Slate().Global[Blackboard.Core.Innate.Operators.Namespace] as Namespace),
+            TestTools.FuncDefTags(new Slate().Global[Blackboard.Core.Innate.Operators.Namespace] as Namespace ??
+                throw new System.Exception("Failed to get the operators namespace")),
             TestTools.TestTags(this.GetType()),
             "Tests do not match the existing operators");
 

@@ -85,7 +85,7 @@ static class SlateExt {
     /// <param name="exp">The expected object value.</param>
     /// <param name="names">The name of the variable to look up.</param>
     /// <returns>The slate so that method calls can be chained together.</returns>
-    static public Slate CheckObject(this Slate slate, object exp, params string[] names) {
+    static public Slate CheckObject(this Slate slate, object? exp, params string[] names) {
         Assert.AreEqual(exp, slate.GetObject(names), checkValueMsg("object", names));
         return slate;
     }
@@ -95,7 +95,7 @@ static class SlateExt {
     /// <param name="exp">The expected object value.</param>
     /// <param name="names">The name of the variable to look up.</param>
     /// <returns>The slate so that method calls can be chained together.</returns>
-    static public Slate CheckValueAsObject(this Slate slate, object exp, params string[] names) {
+    static public Slate CheckValueAsObject(this Slate slate, object? exp, params string[] names) {
         Assert.AreEqual(exp, slate.GetValueAsObject(names), checkValueMsg("object", names));
         return slate;
     }
@@ -209,7 +209,7 @@ static class SlateExt {
     static public Formula LogRead(this Slate slate, params string[] input) {
         Stringifier stringifier = Stringifier.Deep().PreLoadNames(slate);
         stringifier.ShowFuncs = false;
-        Logger logger = new ConsoleLogger().Stringify(stringifier);
+        Logger? logger = new ConsoleLogger().Stringify(stringifier);
         return new Parser(slate, logger).Read(input);
     }
 

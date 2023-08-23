@@ -100,12 +100,12 @@ sealed public class Stringifier {
     /// <summary>Gets a shallow string for the given nodes even any node which is null.</summary>
     /// <param name="nodes">The set of nodes which may contain nulls.</param>
     /// <returns>The shallow string for the given nodes.</returns>
-    static public string Shallow(params INode[] nodes) => Shallow().Stringify(nodes);
+    static public string Shallow(params INode?[] nodes) => Shallow().Stringify(nodes);
 
     /// <summary>Gets a shallow string for the given nodes even any node which is null.</summary>
     /// <param name="nodes">The set of nodes which may contain nulls.</param>
     /// <returns>The shallow string for the given nodes.</returns>
-    static public string Shallow(IEnumerable<INode> nodes) => Shallow().Stringify(nodes);
+    static public string Shallow(IEnumerable<INode?> nodes) => Shallow().Stringify(nodes);
 
     /// <summary>Gets a shallow string for the given formula.</summary>
     /// <param name="formula">The formula to stringify.</param>

@@ -10,7 +10,7 @@ namespace Blackboard.Core.Data.Caps;
 /// <summary>This is the data storage for a string value such that it can be used in generics.</summary>
 public readonly struct String :
     IAdditive<String>,
-    IBaseValue<string>,
+    IBaseValue<String, string>,
     IComparable<String>,
     IData,
     IEquatable<String>,
@@ -71,6 +71,11 @@ public readonly struct String :
 
     /// <summary>Gets the C# base value in the data.</summary>
     public string BaseValue => this.Value;
+    
+    /// <summary>This creates a new instance of the data with the given value.</summary>
+    /// <param name="baseValue">The value to create data for.</param>
+    /// <returns>The new data set for the given value.</returns>
+    public String Wrap(string baseValue) => new(baseValue);
 
     #endregion
     #region Comparable...

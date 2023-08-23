@@ -8,7 +8,7 @@ namespace Blackboard.Core.Data.Caps;
 /// <summary>This is the data storage for a 32 bit unsigned integer value such that it can be used in generics.</summary>
 public readonly struct Uint :
     IAdditive<Uint>,
-    IBaseValue<uint>,
+    IBaseValue<Uint, uint>,
     IBitwise<Uint>,
     IComparable<Uint>,
     IData,
@@ -81,6 +81,11 @@ public readonly struct Uint :
 
     /// <summary>Gets the C# base value in the data.</summary>
     public uint BaseValue => this.Value;
+    
+    /// <summary>This creates a new instance of the data with the given value.</summary>
+    /// <param name="baseValue">The value to create data for.</param>
+    /// <returns>The new data set for the given value.</returns>
+    public Uint Wrap(uint baseValue) => new(baseValue);
 
     #endregion
     #region Bitwise...

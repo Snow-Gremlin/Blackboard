@@ -104,7 +104,7 @@ static public class TestTools {
     /// <returns>All tag values from the given class.</returns>
     static public IEnumerable<string> TestTags(S.Type type) {
         foreach (MethodInfo info in type.GetMethods()) {
-            TestTagAttribute tag = info.GetCustomAttribute<TestTagAttribute>();
+            TestTagAttribute? tag = info.GetCustomAttribute<TestTagAttribute>();
             if (tag is not null) yield return tag.Value;
         }
     }

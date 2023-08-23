@@ -71,13 +71,13 @@ static public class Maker {
     /// <param name="type">The type of value to create an input node for.</param>
     /// <returns>The newly created input or null if an unexpected type.</returns>
     static public IInput? CreateInputNode(Type type) =>
-        type == Type.Object  ? new InputValue<Object>() :
-        type == Type.Bool    ? new InputValue<Bool>() :
-        type == Type.Int     ? new InputValue<Int>() :
-        type == Type.Uint    ? new InputValue<Uint>() :
-        type == Type.Float   ? new InputValue<Float>() :
-        type == Type.Double  ? new InputValue<Double>() :
-        type == Type.String  ? new InputValue<String>() :
+        type == Type.Object  ? new InputValue<Object, object?>() :
+        type == Type.Bool    ? new InputValue<Bool,   bool>() :
+        type == Type.Int     ? new InputValue<Int,    int>() :
+        type == Type.Uint    ? new InputValue<Uint,   uint>() :
+        type == Type.Float   ? new InputValue<Float,  float>() :
+        type == Type.Double  ? new InputValue<Double, double>() :
+        type == Type.String  ? new InputValue<String, string>() :
         type == Type.Trigger ? new InputTrigger() :
         null;
 

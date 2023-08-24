@@ -234,26 +234,32 @@ public class BlackboardTests {
 
     [TestMethod]
     public void TestInputValueTypes() {
-        StringBuilder buf = new();
-        Blackboard.Blackboard b = new();
-        
-        InputValue<T> create<T>() {
-            string name = nameof(T);
-            InputValue<T> input = b.ValueInput<T>("$"+name);
-            b.OnChange<T>("$"+name).OnChanged +=
-                (object? sender, ValueEventArgs<T> e) =>
-                    buf.Add("{0}({1} → {2})", name, e.Previous, e.Current);
-            return input;
+        void test<T>(T initial, params T[] values) {
+            StringBuilder buf = new();
+            Blackboard.Blackboard b = new();
+
+            InputValue<T> input = b.ValueInput<T>("value");            
+            IValueWatcher<T> output = b.OnChange<T>("value");
+            output.OnChanged += (object? sender, ValueEventArgs<T> e) => buf.Add("{0} → {1}", e.Previous, e.Current);
+
+            T? prior = initial;
+            Assert.AreEqual(prior, output.Current, "check initial value");
+            buf.Check("");
+
+            foreach (T value in values) {
+                input.SetValue(value);
+                Assert.AreEqual(value, output.Current, "check current value");
+                buf.Check("{0} → {1}", prior, value);
+                prior = value;
+            }
         }
 
-        InputValue<bool>   inBool   = create<bool>();
-        InputValue<double> inDouble = create<double>();
-        InputValue<float>  inFloat  = create<float>();
-        InputValue<int>    inInt    = create<int>();
-        InputValue<object> inObject = create<object>();
-        InputValue<string> inString = create<string>();
-        InputValue<uint>   inUint   = create<uint>();
-
-        // TODO: Finish
+        test<bool>   (default, true, false);
+        test<double> (default, 1.0,  3.145,  -1e-12,  1e19,  double.NaN, double.PositiveInfinity, 0.0);
+        test<float>  (default, 1.0f, 3.145f, -1e-12f, 1e19f, float.NaN,  float.PositiveInfinity,  0.0f);
+        test<int>    (default, 1, 3, 18, 34, -158, 0);
+        test<object?>(default, "Hello", 123, 45.78, null);
+        test<string> ("",      "Hello", "Small", "Blue", "World", "");
+        test<uint>   (default, 1, 3, 18, 34, 158, 0);
     }
 }

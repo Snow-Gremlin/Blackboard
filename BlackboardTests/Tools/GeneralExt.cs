@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Blackboard.Core.Nodes.Inner;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.Text;
 using S = System;
@@ -54,9 +55,10 @@ static class GeneralExt {
 
     /// <summary>Checks if the given buffer has the given expected value and clears the buffer.</summary>
     /// <param name="buffer">The buffer to check and clear.</param>
-    /// <param name="expStr">The expected text in the buffer.</param>
-    static public void Check(this StringBuilder buffer, string expStr) {
-        Assert.AreEqual(expStr, buffer.ToString());
+    /// <param name="expFormat">The expected text in the buffer.</param>
+    /// <param name="expArgs">The expected arguments for the format.</param>
+    static public void Check(this StringBuilder buffer,  string expFormat, params object?[] expArgs) {
+        Assert.AreEqual(string.Format(expFormat, expArgs), buffer.ToString());
         buffer.Clear();
     }
 }

@@ -273,7 +273,7 @@ public class Slate: IReader, IWriter {
     /// <param name="names">The name of the node to look up.</param>
     /// <returns>The new or existing input node.</returns>
     public IInput GetInput(Type type, params string[] names) {
-        if (!this.HasNode(names)) {
+        if (!this.TryGetNode(names, out INode? node) || node is IExtern) {
             int max = names.Length-1;
             Factory factory = new(this);
             for (int i = 0; i < max; ++i)
@@ -337,6 +337,9 @@ public class Slate: IReader, IWriter {
                 With("names", names.Join("."));
         output.Parents[0] = parent;
         output.Legitimatize();
+        this.PendEval(output);
+        this.PerformEvaluation();
+        this.FinishEvaluation();
         return output;
     }
 

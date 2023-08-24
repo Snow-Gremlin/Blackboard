@@ -21,7 +21,6 @@ sealed public partial class Blackboard {
     private static partial Regex nameRegex();
 
     private readonly Slate slate;
-    private readonly Logger? logger;
 
     /// <summary>Creates a new blackboard.</summary>
     public Blackboard() => this.slate = new Slate();
@@ -63,10 +62,10 @@ sealed public partial class Blackboard {
     /// <param name="name">The name to split.</param>
     /// <returns>The namespace identifiers followed by the main identifier.</returns>
     private string[] splitUpName(string name) =>
+        // TODO: Should check that the given name isn't a reserved word.
         nameRegex().IsMatch(name) ? name.Split('.') :
             throw new Message("Invalid identifier with optional namespace.").
                 With("name", name);
-    // TODO: Should check that the given name isn't a reserved word.
     
     /// <summary>Creates or gets a trigger input.</summary>
     /// <param name="name">The name of the trigger to get the provoker of.</param>

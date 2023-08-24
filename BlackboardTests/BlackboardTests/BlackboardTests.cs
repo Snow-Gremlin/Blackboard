@@ -238,7 +238,7 @@ public class BlackboardTests {
             StringBuilder buf = new();
             Blackboard.Blackboard b = new();
 
-            InputValue<T> input = b.ValueInput<T>("value");            
+            InputValue<T> input = b.ValueInput<T>("value");
             IValueWatcher<T> output = b.OnChange<T>("value");
             output.OnChanged += (object? sender, ValueEventArgs<T> e) => buf.Add("{0} → {1}", e.Previous, e.Current);
 
@@ -261,5 +261,67 @@ public class BlackboardTests {
         test<object?>(default, "Hello", 123, 45.78, null);
         test<string> ("",      "Hello", "Small", "Blue", "World", "");
         test<uint>   (default, 1, 3, 18, 34, 158, 0);
+    }
+
+    [TestMethod]
+    public void TestExample1() {
+        StringBuilder buf = new();
+        Blackboard.Blackboard b = new();
+        b.Perform(
+            "extern int curYear = 2000;",
+            "namespace person {",
+            "   namespace name {",
+            "      in first = \"Bob\";",
+            "      in last  = \"Paulson\";",
+            "      full := last + \", \" + first;",
+            "   }",
+            "   birthYear := 1947;",
+            "   deathYear := 2022;",
+            "   age   := clamp(curYear - birthYear, 0, deathYear - birthYear);",
+            "   alive := inRange(curYear, birthYear, deathYear);",
+            "}",
+            "summary := person.name.full + (person.alive ? \" is \" + person.age + \" years old.\" : ",
+            "           (curYear < person.birthYear ? \" hasn't been born yet.\" : ",
+            "           \" has passed away at \" + person.age + \" years old.\"));",
+            "");
+        
+        InputValue<int> curYear = b.ValueInput<int>("curYear");
+        IValueWatcher<string> output = b.OnChange<string>("summary");
+        output.OnChanged += (object? sender, ValueEventArgs<string> e) => buf.Add("Changed");
+        buf.Check("");
+        Assert.AreEqual("Paulson, Bob is 53 years old.", output.Current);
+
+        curYear.SetValue(1900);
+        buf.Check("Changed");
+        Assert.AreEqual("Paulson, Bob hasn't been born yet.", output.Current);
+        
+        curYear.SetValue(1920);
+        buf.Check("");
+        Assert.AreEqual("Paulson, Bob hasn't been born yet.", output.Current);
+
+        curYear.SetValue(1947);
+        buf.Check("Changed");
+        Assert.AreEqual("Paulson, Bob is 0 years old.", output.Current);
+        
+        curYear.SetValue(1957);
+        buf.Check("Changed");
+        Assert.AreEqual("Paulson, Bob is 10 years old.", output.Current);
+        
+        curYear.SetValue(2018);
+        buf.Check("Changed");
+        Assert.AreEqual("Paulson, Bob is 71 years old.", output.Current);
+        
+        curYear.SetValue(2022);
+        buf.Check("Changed");
+        Assert.AreEqual("Paulson, Bob is 75 years old.", output.Current);
+        
+        curYear.SetValue(2024);
+        buf.Check("Changed");
+        Assert.AreEqual("Paulson, Bob has passed away at 75 years old.", output.Current);
+
+        InputValue<string> firstName = b.ValueInput<string>("person.name.first");
+        firstName.SetValue("Robert");
+        buf.Check("Changed");
+        Assert.AreEqual("Paulson, Robert has passed away at 75 years old.", output.Current);
     }
 }

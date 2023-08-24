@@ -59,12 +59,15 @@ sealed public class Define : IAction {
 
         INode? existing = this.Receiver.ReadField(this.Name);
         if (existing is not null) {
+
+            // Check if the existing node is an extern node. If not then error.
             if (existing is not IExtern existingExtern)
                 throw new Message("May not define node, a node already exists with the given name.").
                     With("Name",     this.Name).
                     With("Node",     this.Node).
                     With("Existing", existing);
 
+            // Check the extern type and the new node type's match.
             Type externType = Type.TypeOf(existingExtern) ??
                 throw new Message("Unable to find existing extern type while setting input.").
                     With("Name",     this.Name).
@@ -77,7 +80,7 @@ sealed public class Define : IAction {
                     With("Node",     this.Node).
                     With("Existing", existingExtern);
 
-            if (inputType != externType)
+            if (!inputType.IsInheritorOf(externType))
                 throw new Message("Input node does not match existing extern node type.").
                     With("Name",          this.Name).
                     With("Node",          this.Node).
@@ -85,6 +88,13 @@ sealed public class Define : IAction {
                     With("Existing Type", externType).
                     With("New Type",      inputType);
 
+            // If the new node is an input overwriting an extern node, then copy the extern node's
+            // value into the input. If the input was assigned, the assignment action will happen
+            // after this point. Otherwise if unassigned the input will now have the extern's default value.
+            if (this.Node is IDataInput input && existingExtern is IDataNode externData)
+                input.SetData(externData.Data);
+
+            // Copy over any children which have been added to the extern node to this node.
             if (existingExtern.Children.Any()) {
                 if (this.Node is not IParent parent)
                     throw new Message("A non-parent node can not replace an extern with children.").

@@ -270,6 +270,13 @@ sealed public class Type {
         }
     }
 
+    /// <summary>Determines if this type is the given type or an inheritor of the given type.</summary>
+    /// <remarks>This returns true for things like an int counter being checked against an int.</remarks>
+    /// <param name="other">The other type to check if inherited.</param>
+    /// <returns>True if this is an inheritor of the given type.</returns>
+    public bool IsInheritorOf(Type other) =>
+        this == other || other.AllInheritors.Contains(this);
+
     /// <summary>The types which this type can directly implicitly cast into.</summary>
     public IReadOnlyCollection<Type> Implicits => this.imps.Keys;
 

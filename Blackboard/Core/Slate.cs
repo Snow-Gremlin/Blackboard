@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Formula.Factory;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Collections;
@@ -257,32 +258,87 @@ public class Slate: IReader, IWriter {
     public void FinishEvaluation() => this.Finalization.Perform();
 
     #endregion
-    #region Output...
+    #region Input and Output...
 
-    /// <summary>Gets or creates a new output value on the node with the given name.</summary>
+    /// <summary>Gets or creates a new input node with the given name.</summary>
     /// <param name="type">The type of the output to create.</param>
     /// <param name="names">The name of the node to look up.</param>
-    /// <returns>The new or existing value output.</returns>
-    public IOutput GetOutput(Type type, params string[] names) =>
-        this.GetOutput(type, names as IEnumerable<string>);
-
-    /// <summary>Gets or creates a new output value on the node with the given name.</summary>
+    /// <returns>The new or existing input node.</returns>
+    public IInput GetInput(Type type, IEnumerable<string> names) =>
+        this.GetInput(type, names.ToArray());
+    
+    /// <summary>Gets or creates a new input node with the given name.</summary>
     /// <param name="type">The type of the output to create.</param>
     /// <param name="names">The name of the node to look up.</param>
-    /// <returns>The new or existing value output.</returns>
-    public IOutput GetOutput(Type type, IEnumerable<string> names) {
+    /// <returns>The new or existing input node.</returns>
+    public IInput GetInput(Type type, params string[] names) {
+        if (!this.HasNode(names)) {
+            int max = names.Length-1;
+            Factory factory = new(this);
+            for (int i = 0; i < max; ++i)
+                factory.PushNamespace(names[i]);
+            factory.CreateInput(names[max], type);
+            factory.Build().Perform();
+        }
+
+        IInput input = this.GetNode<IInput>(names);
+        Type found = Type.TypeOf(input) ??
+            throw new Message("Unable to find type of found input node.").
+                With("node",  input).
+                With("type",  type).
+                With("names", names.Join("."));
+        return found == type ? input :
+            throw new Message("The existing input type didn't match the requested type").
+                With("found", found).
+                With("type",  type).
+                With("names", names.Join("."));
+    }
+
+    /// <summary>Gets or creates a new output node on the node with the given name.</summary>
+    /// <param name="type">The type of the output to create.</param>
+    /// <param name="names">The name of the node to look up.</param>
+    /// <returns>The new or existing output node.</returns>
+    public IOutput GetOutput(Type type,IEnumerable<string> names) =>
+        this.GetOutput(type, names.ToArray());
+
+    /// <summary>Gets or creates a new output node on the node with the given name.</summary>
+    /// <param name="type">The type of the output to create.</param>
+    /// <param name="names">The name of the node to look up.</param>
+    /// <returns>The new or existing output node.</returns>
+    public IOutput GetOutput(Type type, params string[] names) {
+        if (!this.HasNode(names)) {
+            int max = names.Length-1;
+            Factory factory = new(this);
+            for (int i = 0; i < max; ++i)
+                factory.PushNamespace(names[i]);
+            factory.RequestExtern(names[max], type);
+            factory.Build().Perform();
+        }
+
         IParent  parent = this.GetNode<IParent>(names);
         IOutput? output = parent.Children.OfType<IOutput>().FirstOrDefault();
-        if (output is not null) return output;
+        if (output is not null) {
+            Type found = Type.TypeOf(output) ??
+                throw new Message("Unable to find type of found output node.").
+                    With("node",  output).
+                    With("type",  type).
+                    With("names", names.Join("."));
+            return found == type ? output :
+                throw new Message("The existing output type didn't match the requested type").
+                    With("found", found).
+                    With("type",  type).
+                    With("names", names.Join("."));
+        }
 
         output = Maker.CreateOutputNode(type) ??
             throw new Message("Unable to create output node of given type").
-                With("type", type);
+                With("type",  type).
+                With("names", names.Join("."));
         output.Parents[0] = parent;
         output.Legitimatize();
         return output;
     }
-    
+
     #endregion
     #region Constants...
 

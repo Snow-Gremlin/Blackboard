@@ -301,7 +301,7 @@ sealed public class Factory {
     /// <param name="name">The name to create the input for.</param>
     /// <param name="type">The type of input to create.</param>
     /// <returns>The newly created input.</returns>
-    public INode CreateInput(string name, Type type) {
+    public IInput CreateInput(string name, Type type) {
         this.logger.Info("Create Input:");
         IInput node = Maker.CreateInputNode(type) ??
             throw new Message("Unsupported type for new typed input").

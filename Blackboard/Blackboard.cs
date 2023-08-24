@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Formula;
-using Blackboard.Core.Formula.Factory;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Record;
@@ -67,26 +66,43 @@ sealed public partial class Blackboard {
         nameRegex().IsMatch(name) ? name.Split('.') :
             throw new Message("Invalid identifier with optional namespace.").
                 With("name", name);
-
-    /// <summary>Create an extension with the given identifier and optional namespace.</summary>
-    /// <param name="type">The type of the external to create.</param>
-    /// <param name="name">The identifier and optional namespace of the extern.</param>
-    private void createExtern(Type type, params string[] name) {
-        int max = name.Length-1;
-        Factory factory = new(this.slate, this.logger);
-        for (int i = 0; i < max; ++i)
-            factory.PushNamespace(name[i]);
-        factory.RequestExtern(name[max], type);
-        factory.Build().Perform();
+    
+    /// <summary>Creates or gets a trigger input.</summary>
+    /// <param name="name">The name of the trigger to get the provoker of.</param>
+    /// <returns>The trigger provoker.</returns>
+    public IInputTrigger Provoker(string name) {
+        string[] parts = this.splitUpName(name);
+        IInput input = this.slate.GetInput(Type.Trigger, parts);
+        return new InputTrigger(this.slate, input as IInputTrigger ??
+            throw new Message("Failed to create input trigger").
+                With("name",     name).
+                With("existing", input));
     }
 
+    /// <summary>Creates or gets an input value.</summary>
+    /// <typeparam name="T">The C# type of the value to input.</typeparam>
+    /// <param name="name">The name of the value to get the setter of.</param>
+    /// <returns>The value setter.</returns>
+    public IInputValue<T> ValueInput<T>(string name) {
+        Type type = Type.FromValueType(typeof(T)) ??
+            throw new Message("The given type is unsupported").
+                With("name", name).
+                With("Type", typeof(T));
+
+        string[] parts = this.splitUpName(name);
+        IInput input = this.slate.GetInput(Type.Trigger, parts);
+        return new InputValue<T>(this.slate, input as IInputValue<T> ??
+            throw new Message("Failed to create value input").
+                With("type",     type).
+                With("name",     name).
+                With("existing", input));
+    }
+   
     /// <summary>Watches for a trigger to be provoked.</summary>
     /// <param name="name">The name of the trigger to watch.</param>
     /// <returns>The trigger watcher.</returns>
     public ITriggerWatcher OnProvoke(string name) {
         string[] parts = this.splitUpName(name);
-        this.createExtern(Type.Trigger, parts);
-
         IOutput output = this.slate.GetOutput(Type.Trigger, parts);
         return output as ITriggerWatcher ??
             throw new Message("Failed to create output trigger").
@@ -98,15 +114,13 @@ sealed public partial class Blackboard {
     /// <typeparam name="T">The C# type of the value to watch.</typeparam>
     /// <param name="name">The name of the value to watch.</param>
     /// <returns>The value watcher.</returns>
-    public IValueWatcher<T> OnChange<T>(string name) {  
+    public IValueWatcher<T> OnChange<T>(string name) {
         Type type = Type.FromValueType(typeof(T)) ??
             throw new Message("The given type is unsupported").
                 With("name", name).
                 With("Type", typeof(T));
         
         string[] parts = this.splitUpName(name);
-        this.createExtern(type, parts);
-
         IOutput output = this.slate.GetOutput(type, parts);
         return output as IValueWatcher<T> ??
             throw new Message("Failed to create value output").
@@ -114,7 +128,4 @@ sealed public partial class Blackboard {
                 With("name",     name).
                 With("existing", output);
     }
-
-    // TODO: Add a way to get input values.
-    // TODO: Add a way to set input values.
 }

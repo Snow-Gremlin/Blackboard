@@ -24,7 +24,8 @@ sealed public class InputTrigger : TriggerNode, ITriggerInput, IInputTrigger {
     public override string TypeName => "Input";
 
     /// <summary>Provokes this trigger.</summary>
-    public void Provoke() => this.Provoke(true);
+    /// <returns>True if there was any change, false otherwise.</returns>
+    public bool Provoke() => this.Provoke(true);
 
     /// <summary>Provokes this trigger so that this node is provoked during the next evaluation.</summary>
     /// <remarks>This is not intended to be called directly, it should be called via the slate or action.</remarks>

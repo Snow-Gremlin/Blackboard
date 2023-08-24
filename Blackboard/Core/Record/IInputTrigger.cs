@@ -4,5 +4,6 @@
 public interface IInputTrigger {
 
     /// <summary>Provokes this trigger.</summary>
-    public void Provoke();
+    /// <returns>True if there was any change, false otherwise.</returns>
+    public bool Provoke();
 }

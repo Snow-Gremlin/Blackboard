@@ -26,15 +26,15 @@ sealed public class InputValue<T1, T2> : ValueNode<T1>, IValueInput<T1>, IInputV
     /// <remarks>Doesn't use nameof since this has both trigger and value nodes.</remarks>
     public override string TypeName => "Input";
 
-    /// <summary>This sets the value of this node with the given C# value type.</summary>
-    /// <param name="baseValue">The value to set.</param>
-    /// <returns>True if the value has changed, false otherwise.</returns>
-    public bool SetValue(T2 baseValue) => this.SetValue(this.Value.Wrap(baseValue));
-
     /// <summary>This sets the value of this node.</summary>
     /// <param name="value">The value to set.</param>
     /// <returns>True if the value has changed, false otherwise.</returns>
     public bool SetValue(T1 value) => this.UpdateValue(value);
+
+    /// <summary>This sets the value of this node with the given C# value type.</summary>
+    /// <param name="baseValue">The value to set.</param>
+    /// <returns>True if the value has changed, false otherwise.</returns>
+    public bool SetValue(T2 baseValue) => this.SetValue(this.Value.Wrap(baseValue));
 
     /// <summary>This is called when the value is evaluated and updated.</summary>
     /// <remarks>

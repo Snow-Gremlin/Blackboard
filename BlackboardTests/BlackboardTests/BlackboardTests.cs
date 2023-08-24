@@ -196,4 +196,64 @@ public class BlackboardTests {
         });
         buf.Check("X, Y, Z");
     }
+
+    [TestMethod]
+    public void TestInputValueBasics() {
+        StringBuilder buf = new();
+        Blackboard.Blackboard b = new();
+
+        // Get existing value
+        b.Perform("in int x;");
+        InputValue<int> xValue = b.ValueInput<int>("x");
+        IValueWatcher<int> x = b.OnChange<int>("x");
+        x.OnChanged += (object? sender, ValueEventArgs<int> e) => buf.Add("X({0} → {1})", e.Previous, e.Current);
+
+        // Create new value
+        InputValue<int> yValue = b.ValueInput<int>("y");
+        IValueWatcher<int> y = b.OnChange<int>("y");
+        y.OnChanged += (object? sender, ValueEventArgs<int> e) => buf.Add("Y({0} → {1})", e.Previous, e.Current);
+        
+        // Create a value for checking grouping
+        b.Perform("z := x + y/100.0;");
+        IValueWatcher<double> z = b.OnChange<double>("z");
+        z.OnChanged += (object? sender, ValueEventArgs<double> e) => buf.Add("Z({0} → {1})", e.Previous, e.Current);
+
+        buf.Check("");
+        xValue.SetValue(34);
+        yValue.SetValue(78);
+        // 'Z' emits twice because the formulas were performed separately.
+        buf.Check("X(0 → 34), Z(0 → 34), Y(0 → 78), Z(34 → 34.78)");
+                
+        // Perform both formulas in a group call.
+        b.Group(() => {
+            xValue.SetValue(12);
+            yValue.SetValue(56);
+        });
+        buf.Check("X(34 → 12), Z(34.78 → 12.56), Y(78 → 56)");
+    }
+
+    [TestMethod]
+    public void TestInputValueTypes() {
+        StringBuilder buf = new();
+        Blackboard.Blackboard b = new();
+        
+        InputValue<T> create<T>() {
+            string name = nameof(T);
+            InputValue<T> input = b.ValueInput<T>("$"+name);
+            b.OnChange<T>("$"+name).OnChanged +=
+                (object? sender, ValueEventArgs<T> e) =>
+                    buf.Add("{0}({1} → {2})", name, e.Previous, e.Current);
+            return input;
+        }
+
+        InputValue<bool>   inBool   = create<bool>();
+        InputValue<double> inDouble = create<double>();
+        InputValue<float>  inFloat  = create<float>();
+        InputValue<int>    inInt    = create<int>();
+        InputValue<object> inObject = create<object>();
+        InputValue<string> inString = create<string>();
+        InputValue<uint>   inUint   = create<uint>();
+
+        // TODO: Finish
+    }
 }

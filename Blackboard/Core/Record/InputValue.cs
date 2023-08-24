@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Record;
 
@@ -17,9 +18,9 @@ sealed public class InputValue<T> {
     }
     
     /// <summary>This sets the value of this node.</summary>
-    /// <param name="value">The value to set.</param>
+    /// <param name="logger">An optional logger for debugging.</param>
     /// <returns>True if the value has changed, false otherwise.</returns>
-    public bool SetValue(T value) {
+    public bool SetValue(T value, Logger? logger = null) {
         if (!this.node.SetValue(value)) return false;
         if (this.node is IParent parent)
             this.slate.PendEval(parent.Children);
@@ -27,8 +28,8 @@ sealed public class InputValue<T> {
         // TODO: Should probably make the group suspend finalization also have a
         //       suspend evaluation unless required by something like an assignment or get.
 
-        this.slate.PerformEvaluation();
-        this.slate.FinishEvaluation();
+        this.slate.PerformEvaluation(logger);
+        this.slate.FinishEvaluation(logger);
         return true;
     }
 }

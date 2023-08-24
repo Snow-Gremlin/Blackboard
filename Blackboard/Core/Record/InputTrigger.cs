@@ -17,7 +17,7 @@ sealed public class InputTrigger {
     }
 
     /// <summary>Provokes this trigger.</summary>
-    /// <param name="logger">The optional logger for debugging.</param>
+    /// <param name="logger">An optional logger for debugging.</param>
     /// <returns>True if there was any change, false otherwise.</returns>
     public bool Provoke(Logger? logger = null) {
         if (!this.node.Provoke()) return false;

@@ -66,6 +66,7 @@ sealed public partial class Blackboard {
         nameRegex().IsMatch(name) ? name.Split('.') :
             throw new Message("Invalid identifier with optional namespace.").
                 With("name", name);
+    // TODO: Should check that the given name isn't a reserved word.
     
     /// <summary>Creates or gets a trigger input.</summary>
     /// <param name="name">The name of the trigger to get the provoker of.</param>
@@ -90,7 +91,7 @@ sealed public partial class Blackboard {
                 With("Type", typeof(T));
 
         string[] parts = this.splitUpName(name);
-        IInput input = this.slate.GetInput(Type.Trigger, parts);
+        IInput input = this.slate.GetInput(type, parts);
         return new InputValue<T>(this.slate, input as IInputValue<T> ??
             throw new Message("Failed to create value input").
                 With("type",     type).

@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,7 +44,9 @@ sealed public class Finalization {
 
     /// <summary>Performs a finalization.</summary>
     /// <remarks>If suspended then this will have no effect.</remarks>
-    public void Perform() {
+    /// <param name="logger">An optional logger for debugging this finish.</param>
+    public void Perform(Logger? logger = null) {
+        logger.Notice("finalization: {0}", this);
         if (this.Suspend) return;
         
         // reset the triggers.

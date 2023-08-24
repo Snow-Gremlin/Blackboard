@@ -17,13 +17,13 @@ public class BlackboardTests {
         b.Perform("in trigger x;");
         
         ITriggerWatcher x = b.OnProvoke("x");
-        x.OnProvoked += (object? sender, EventArgs e) => buf.Append('X');
+        x.OnProvoked += (object? sender, EventArgs e) => buf.Add("X");
 
         ITriggerWatcher y = b.OnProvoke("y");
-        y.OnProvoked += (object? sender, EventArgs e) => buf.Append('Y');
+        y.OnProvoked += (object? sender, EventArgs e) => buf.Add("Y");
         
         ITriggerWatcher z = b.OnProvoke("z");
-        z.OnProvoked += (object? sender, EventArgs e) => buf.Append('Z');
+        z.OnProvoked += (object? sender, EventArgs e) => buf.Add("Z");
 
         buf.Check("");
         Formula provokeX = b.CreateFormula("-> x;");
@@ -44,7 +44,7 @@ public class BlackboardTests {
         buf.Check("Y");
         provokeX.Perform();
         provokeY.Perform();
-        buf.Check("XY");
+        buf.Check("X, Y");
         
         b.Perform("z := x & y;");
         buf.Check("");
@@ -55,19 +55,19 @@ public class BlackboardTests {
         provokeX.Perform();
         provokeY.Perform();
         // No 'Z' because the formulas were performed separately.
-        buf.Check("XY");
+        buf.Check("X, Y");
 
         // Perform both formulas in a group call.
         b.Group(() => {
             provokeX.Perform();
             provokeY.Perform();
         });
-        buf.Check("XYZ");
+        buf.Check("X, Y, Z");
 
         // Join the formulas to preform as a group formula.
         Formula provokeZ = Formula.Join(provokeX, provokeY);
         provokeZ.Perform();
-        buf.Check("XYZ");
+        buf.Check("X, Y, Z");
     }
 
     [TestMethod]
@@ -77,55 +77,55 @@ public class BlackboardTests {
         b.Perform("in int x;");
         
         IValueWatcher<int> x = b.OnChange<int>("x");
-        x.OnChanged += (object? sender, ValueEventArgs<int> e) => buf.Append("X(" + e.Previous + " -> " + e.Current + ")");
+        x.OnChanged += (object? sender, ValueEventArgs<int> e) => buf.Add("X({0} → {1})", e.Previous, e.Current);
 
         IValueWatcher<int> y = b.OnChange<int>("y");
-        y.OnChanged += (object? sender, ValueEventArgs<int> e) => buf.Append("Y(" + e.Previous + " -> " + e.Current + ")");
+        y.OnChanged += (object? sender, ValueEventArgs<int> e) => buf.Add("Y({0} → {1})", e.Previous, e.Current);
         
         IValueWatcher<double> z = b.OnChange<double>("z");
-        z.OnChanged += (object? sender, ValueEventArgs<double> e) => buf.Append("Z(" + e.Previous + " -> " + e.Current + ")");
+        z.OnChanged += (object? sender, ValueEventArgs<double> e) => buf.Add("Z({0} → {1})", e.Previous, e.Current);
 
         buf.Check("");
         Formula setX1 = b.CreateFormula("x = 12;");
         Formula setX2 = b.CreateFormula("x = 34;");
         buf.Check("");
         setX1.Perform();
-        buf.Check("X(0 -> 12)");
+        buf.Check("X(0 → 12)");
         setX2.Perform();
-        buf.Check("X(12 -> 34)");
+        buf.Check("X(12 → 34)");
         setX1.Perform();
-        buf.Check("X(34 -> 12)");
+        buf.Check("X(34 → 12)");
         
         b.Perform("in int y = 9;");
-        buf.Check("Y(0 -> 9)");
+        buf.Check("Y(0 → 9)");
         Formula setY1 = b.CreateFormula("y = 56;");
         Formula setY2 = b.CreateFormula("y = 78;");
         buf.Check("");
         setY1.Perform();
-        buf.Check("Y(9 -> 56)");
+        buf.Check("Y(9 → 56)");
         setY2.Perform();
-        buf.Check("Y(56 -> 78)");
+        buf.Check("Y(56 → 78)");
         setY1.Perform();
-        buf.Check("Y(78 -> 56)");
+        buf.Check("Y(78 → 56)");
         
         b.Perform("z := x + y/100.0;");
-        buf.Check("Z(0 -> 12.56)");
+        buf.Check("Z(0 → 12.56)");
         setX2.Perform();
         setY2.Perform();
         // 'Z' emits twice because the formulas were performed separately.
-        buf.Check("X(12 -> 34)Z(12.56 -> 34.56)Y(56 -> 78)Z(34.56 -> 34.78)");
+        buf.Check("X(12 → 34), Z(12.56 → 34.56), Y(56 → 78), Z(34.56 → 34.78)");
                 
         // Perform both formulas in a group call.
         b.Group(() => {
             setX1.Perform();
             setY1.Perform();
         });
-        buf.Check("X(34 -> 12)Z(34.78 -> 12.56)Y(78 -> 56)");
+        buf.Check("X(34 → 12), Z(34.78 → 12.56), Y(78 → 56)");
 
         // Join the formulas to preform as a group formula.
         Formula set1 = Formula.Join(setX2, setY2);
         set1.Perform();
-        buf.Check("X(12 -> 34)Z(12.56 -> 34.78)Y(56 -> 78)");
+        buf.Check("X(12 → 34), Z(12.56 → 34.78), Y(56 → 78)");
     }
 
     [TestMethod]
@@ -134,10 +134,10 @@ public class BlackboardTests {
         Blackboard.Blackboard b = new();
 
         ITriggerWatcher x1 = b.OnProvoke("stuff.triggers.x");
-        x1.OnProvoked += (object? sender, EventArgs e) => buf.Append("Stuff.Triggers.X");
+        x1.OnProvoked += (object? sender, EventArgs e) => buf.Add("Stuff.Triggers.X");
         
         IValueWatcher<int> x2 = b.OnChange<int>("stuff.values.x");
-        x2.OnChanged += (object? sender, ValueEventArgs<int> e) => buf.Append("Stuff.Values.X(" + e.Previous + " -> " + e.Current + ")");
+        x2.OnChanged += (object? sender, ValueEventArgs<int> e) => buf.Add("Stuff.Values.X({0} → {1})", e.Previous, e.Current);
         
         buf.Check("");
         b.Perform(
@@ -150,18 +150,50 @@ public class BlackboardTests {
             "      x := clamp(source, 1, 20);",
             "   }",
             "}");
-        buf.Check("Stuff.Values.X(0 -> 10)");
+        buf.Check("Stuff.Values.X(0 → 10)");
 
         b.Perform("source = 30;");
-        buf.Check("Stuff.Values.X(10 -> 20)Stuff.Triggers.X");
+        buf.Check("Stuff.Values.X(10 → 20), Stuff.Triggers.X");
 
         b.Perform("source = -10;");
-        buf.Check("Stuff.Values.X(20 -> 1)");
+        buf.Check("Stuff.Values.X(20 → 1)");
 
         b.Perform("source = 8;");
-        buf.Check("Stuff.Values.X(1 -> 8)");
+        buf.Check("Stuff.Values.X(1 → 8)");
 
         b.Perform("source = 12;");
-        buf.Check("Stuff.Values.X(8 -> 12)Stuff.Triggers.X");
+        buf.Check("Stuff.Values.X(8 → 12), Stuff.Triggers.X");
+    }
+
+    [TestMethod]
+    public void TestInputTriggerBasics() {
+        StringBuilder buf = new();
+        Blackboard.Blackboard b = new();
+
+        // Get existing trigger
+        b.Perform("in trigger x;");
+        InputTrigger xTrigger = b.Provoker("x");
+        ITriggerWatcher x = b.OnProvoke("x");
+        x.OnProvoked += (object? sender, EventArgs e) => buf.Add("X");
+
+        // Create new trigger
+        InputTrigger yTrigger = b.Provoker("y");
+        ITriggerWatcher y = b.OnProvoke("y");
+        y.OnProvoked += (object? sender, EventArgs e) => buf.Add("Y"); 
+        
+        // Create a trigger for checking trigger resets and grouping
+        b.Perform("z := x & y;");
+        ITriggerWatcher z = b.OnProvoke("z");
+        z.OnProvoked += (object? sender, EventArgs e) => buf.Add("Z");
+        
+        buf.Check("");
+        xTrigger.Provoke();
+        yTrigger.Provoke();
+        buf.Check("X, Y");
+        b.Group(() => {
+            xTrigger.Provoke();
+            yTrigger.Provoke();
+        });
+        buf.Check("X, Y, Z");
     }
 }

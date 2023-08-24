@@ -43,6 +43,15 @@ static class GeneralExt {
         return perOp.TotalMilliseconds;
     }
 
+    /// <summary>Appends text to the given buffer with a comma separating it from preceding text.</summary>
+    /// <param name="buffer">The buffer to append to.</param>
+    /// <param name="format">The format string to add.</param>
+    /// <param name="args">The arguments for the format string.</param>
+    static public void Add(this StringBuilder buffer, string format, params object?[] args) {
+        if (buffer.Length > 0) buffer.Append(", ");
+        buffer.Append(string.Format(format, args));
+    }
+
     /// <summary>Checks if the given buffer has the given expected value and clears the buffer.</summary>
     /// <param name="buffer">The buffer to check and clear.</param>
     /// <param name="expStr">The expected text in the buffer.</param>

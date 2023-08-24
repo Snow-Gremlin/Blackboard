@@ -70,7 +70,7 @@ sealed public partial class Blackboard {
     /// <summary>Creates or gets a trigger input.</summary>
     /// <param name="name">The name of the trigger to get the provoker of.</param>
     /// <returns>The trigger provoker.</returns>
-    public IInputTrigger Provoker(string name) {
+    public InputTrigger Provoker(string name) {
         string[] parts = this.splitUpName(name);
         IInput input = this.slate.GetInput(Type.Trigger, parts);
         return new InputTrigger(this.slate, input as IInputTrigger ??
@@ -83,7 +83,7 @@ sealed public partial class Blackboard {
     /// <typeparam name="T">The C# type of the value to input.</typeparam>
     /// <param name="name">The name of the value to get the setter of.</param>
     /// <returns>The value setter.</returns>
-    public IInputValue<T> ValueInput<T>(string name) {
+    public InputValue<T> ValueInput<T>(string name) {
         Type type = Type.FromValueType(typeof(T)) ??
             throw new Message("The given type is unsupported").
                 With("name", name).

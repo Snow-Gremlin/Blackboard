@@ -4,7 +4,7 @@ namespace Blackboard.Core.Record;
 
 /// <summary>An input for setting a value.</summary>
 /// <typeparam name="T">The C# type of the value to set.</typeparam>
-sealed public class InputValue<T>: IInputValue<T> {
+sealed public class InputValue<T> {
     private readonly Slate slate;
     private readonly IInputValue<T> node;
 
@@ -23,6 +23,11 @@ sealed public class InputValue<T>: IInputValue<T> {
         if (!this.node.SetValue(value)) return false;
         if (this.node is IParent parent)
             this.slate.PendEval(parent.Children);
+
+        // TODO: Should probably make the group suspend finalization also have a
+        //       suspend evaluation unless required by something like an assignment or get.
+
+        this.slate.PerformEvaluation();
         this.slate.FinishEvaluation();
         return true;
     }

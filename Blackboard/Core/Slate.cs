@@ -255,7 +255,8 @@ public class Slate: IReader, IWriter {
         this.pendingEval.Evaluate(this.Finalization, logger.SubGroup(nameof(PerformEvaluation)));
 
     /// <summary>Finish evaluation by performing finalization.</summary>
-    public void FinishEvaluation() => this.Finalization.Perform();
+    /// <param name="logger">An optional logger for debugging this finish.</param>
+    public void FinishEvaluation(Logger? logger = null) => this.Finalization.Perform(logger);
 
     #endregion
     #region Input and Output...

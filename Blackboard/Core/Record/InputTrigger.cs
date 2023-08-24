@@ -1,9 +1,10 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Record;
 
 /// <summary>An input for provoking a trigger.</summary>
-sealed public class InputTrigger: IInputTrigger {
+sealed public class InputTrigger {
     private readonly Slate slate;
     private readonly IInputTrigger node;
 
@@ -16,12 +17,15 @@ sealed public class InputTrigger: IInputTrigger {
     }
 
     /// <summary>Provokes this trigger.</summary>
+    /// <param name="logger">The optional logger for debugging.</param>
     /// <returns>True if there was any change, false otherwise.</returns>
-    public bool Provoke() {
+    public bool Provoke(Logger? logger = null) {
         if (!this.node.Provoke()) return false;
+        this.slate.Finalization.Add(this.node as INode);
         if (this.node is IParent parent)
             this.slate.PendEval(parent.Children);
-        this.slate.FinishEvaluation();
+        this.slate.PerformEvaluation(logger);
+        this.slate.FinishEvaluation(logger);
         return true;
     }
 }

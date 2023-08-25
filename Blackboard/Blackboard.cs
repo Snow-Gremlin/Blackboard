@@ -61,7 +61,7 @@ sealed public partial class Blackboard {
     /// </summary>
     /// <param name="name">The name to split.</param>
     /// <returns>The namespace identifiers followed by the main identifier.</returns>
-    private string[] splitUpName(string name) =>
+    static private string[] splitUpName(string name) =>
         // TODO: Should check that the given name isn't a reserved word.
         nameRegex().IsMatch(name) ? name.Split('.') :
             throw new Message("Invalid identifier with optional namespace.").
@@ -71,7 +71,7 @@ sealed public partial class Blackboard {
     /// <param name="name">The name of the trigger to get the provoker of.</param>
     /// <returns>The trigger provoker.</returns>
     public InputTrigger Provoker(string name) {
-        string[] parts = this.splitUpName(name);
+        string[] parts = splitUpName(name);
         IInput input = this.slate.GetInput(Type.Trigger, parts);
         return new InputTrigger(this.slate, input as IInputTrigger ??
             throw new Message("Failed to create input trigger").
@@ -89,7 +89,7 @@ sealed public partial class Blackboard {
                 With("name", name).
                 With("Type", typeof(T));
 
-        string[] parts = this.splitUpName(name);
+        string[] parts = splitUpName(name);
         IInput input = this.slate.GetInput(type, parts);
         return new InputValue<T>(this.slate, input as IInputValue<T> ??
             throw new Message("Failed to create value input").
@@ -102,7 +102,7 @@ sealed public partial class Blackboard {
     /// <param name="name">The name of the trigger to watch.</param>
     /// <returns>The trigger watcher.</returns>
     public ITriggerWatcher OnProvoke(string name) {
-        string[] parts = this.splitUpName(name);
+        string[] parts = splitUpName(name);
         IOutput output = this.slate.GetOutput(Type.Trigger, parts);
         return output as ITriggerWatcher ??
             throw new Message("Failed to create output trigger").
@@ -120,7 +120,7 @@ sealed public partial class Blackboard {
                 With("name", name).
                 With("Type", typeof(T));
         
-        string[] parts = this.splitUpName(name);
+        string[] parts = splitUpName(name);
         IOutput output = this.slate.GetOutput(type, parts);
         return output as IValueWatcher<T> ??
             throw new Message("Failed to create value output").

@@ -33,14 +33,14 @@ partial class MainForm {
         tabControl.Location=new Point(0, 0);
         tabControl.Name="tabControl";
         tabControl.SelectedIndex=0;
-        tabControl.Size=new Size(800, 450);
+        tabControl.Size=new Size(1184, 961);
         tabControl.TabIndex=0;
         // 
         // MainForm
         // 
         this.AutoScaleDimensions=new SizeF(7F, 15F);
         this.AutoScaleMode=AutoScaleMode.Font;
-        this.ClientSize=new Size(800, 450);
+        this.ClientSize=new Size(1184, 961);
         this.Controls.Add(tabControl);
         this.Name="MainForm";
         this.Text="Blackboard Examples";

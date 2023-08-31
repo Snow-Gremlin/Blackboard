@@ -3,43 +3,43 @@ using System.ComponentModel;
 
 namespace BlackboardExamples.Controls;
 
-/// <summary>A check box which can connect to a blackboard instance.</summary>
-internal class BlackBoardCheckBox : CheckBox, IBlackBoardControl {
-    private string priorText;
-    private bool   priorEnabled;
-    private bool   priorVisible;
-    private int    priorBackColor;
-    private int    priorForeColor;
+/// <summary>A numeric integer up/down which can connect to a blackboard instance.</summary>
+internal class BlackBoardIntUpDown: NumericUpDown, IBlackBoardControl {
+    private bool priorEnabled;
+    private bool priorVisible;
+    private int  priorBackColor;
+    private int  priorForeColor;
 
-    private IValueWatcher<string>? textWatcher;
-    private IValueWatcher<bool>?   enabledWatcher;
-    private IValueWatcher<bool>?   visibleWatcher;
-    private IValueWatcher<int>?    backColorWatcher;
-    private IValueWatcher<int>?    foreColorWatcher;
+    private IValueWatcher<bool>? enabledWatcher;
+    private IValueWatcher<bool>? visibleWatcher;
+    private IValueWatcher<int>?  backColorWatcher;
+    private IValueWatcher<int>?  foreColorWatcher;
+    private IValueWatcher<int>?  maxValueWatcher;
+    private IValueWatcher<int>?  minValueWatcher;
+    private IValueWatcher<int>?  stepValueWatcher;
 
-    private InputValue<bool>? onCheckTrigger;
-    private InputValue<bool>? onFocusChanged;
+    private InputValue<int>? onValueChanged;
 
-    /// <summary>Creates a new check box.</summary>
-    public BlackBoardCheckBox() {
-        this.priorText        = string.Empty;
+    /// <summary>Creates a new numeric integer up/down.</summary>
+    public BlackBoardIntUpDown() {
         this.priorEnabled     = false;
         this.priorBackColor   = 0;
         this.priorForeColor   = 0;
-        this.Identifier       = "checkBox";
-        this.textWatcher      = null;
+        this.Identifier       = "numericUpDown";
         this.enabledWatcher   = null;
         this.visibleWatcher   = null;
         this.backColorWatcher = null;
         this.foreColorWatcher = null;
-        this.onCheckTrigger   = null;
-        this.onFocusChanged   = null;
+        this.maxValueWatcher  = null;
+        this.minValueWatcher  = null;
+        this.stepValueWatcher = null;
+        this.onValueChanged   = null;
     }
 
-    /// <summary>The identifier and optional namespace to write this check box to.</summary>
+    /// <summary>The identifier and optional namespace to write this numeric up/down to.</summary>
     [Category("Design")]
-    [DefaultValue("checkBox")]
-    [Description("The identifier and optional namespace to write this check box to.")]
+    [DefaultValue("numericUpDown")]
+    [Description("The identifier and optional namespace to write this numeric up/down to.")]
     public string Identifier { get; set; }
 
     /// <summary>
@@ -48,11 +48,7 @@ internal class BlackBoardCheckBox : CheckBox, IBlackBoardControl {
     /// </summary>
     /// <param name="b">The blackboard to connect to.</param>
     public void Connect(Blackboard.Blackboard b) {
-        if (this.textWatcher is not null) this.Disconnect();
-
-        this.priorText   = this.Text;
-        this.textWatcher = b.OnChange<string>(this.Identifier+".text");
-        this.textWatcher.OnChanged += this.onTextChanged;
+        if (this.enabledWatcher is not null) this.Disconnect();
 
         this.priorEnabled   = this.Enabled;
         this.enabledWatcher = b.OnChange<bool>(this.Identifier+".enabled");
@@ -70,18 +66,11 @@ internal class BlackBoardCheckBox : CheckBox, IBlackBoardControl {
         this.foreColorWatcher = b.OnChange<int>(this.Identifier+".foreColor");
         this.foreColorWatcher.OnChanged += this.onForeColorChanged;
 
-        this.onCheckTrigger = b.ValueInput<bool>(this.Identifier+".checked");
-        this.onFocusChanged = b.ValueInput<bool>(this.Identifier+".focus");
+        this.onValueChanged = b.ValueInput<int>(this.Identifier+".value");
     }
 
     /// <summary>Disconnects this control from a blackboard.</summary>
     public void Disconnect() {
-        if (this.textWatcher is not null) {
-            this.textWatcher.OnChanged -= this.onTextChanged;
-            this.textWatcher = null;
-            this.Text = this.priorText;
-        }
-
         if (this.enabledWatcher is not null) {
             this.enabledWatcher.OnChanged -= this.onEnabledChanged;
             this.enabledWatcher = null;
@@ -106,8 +95,7 @@ internal class BlackBoardCheckBox : CheckBox, IBlackBoardControl {
             this.ForeColor = Color.FromArgb(this.priorForeColor);
         }
 
-        this.onCheckTrigger = null;
-        this.onFocusChanged = null;
+        this.onValueChanged = null;
     }
 
     private void onTextChanged     (object? sender, ValueEventArgs<string> e) => this.Text      = e.Current;
@@ -115,8 +103,5 @@ internal class BlackBoardCheckBox : CheckBox, IBlackBoardControl {
     private void onVisibleChanged  (object? sender, ValueEventArgs<bool>   e) => this.Visible   = e.Current;
     private void onBackColorChanged(object? sender, ValueEventArgs<int>    e) => this.BackColor = Color.FromArgb(e.Current);
     private void onForeColorChanged(object? sender, ValueEventArgs<int>    e) => this.ForeColor = Color.FromArgb(e.Current);
-
-    protected override void OnCheckedChanged(EventArgs e) { base.OnCheckedChanged(e); this.onCheckTrigger?.SetValue(this.Checked); }
-    protected override void OnGotFocus      (EventArgs e) { base.OnGotFocus(e);       this.onFocusChanged?.SetValue(true);         }
-    protected override void OnLostFocus     (EventArgs e) { base.OnLostFocus(e);      this.onFocusChanged?.SetValue(false);        }
+    protected override void OnValueChanged(EventArgs e) { base.OnValueChanged(e); this.onValueChanged?.SetValue((int)this.Value); }
 }

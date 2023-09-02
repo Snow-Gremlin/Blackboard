@@ -58,11 +58,11 @@ partial class PushBoard {
         output2=new BlackBoardTextBox();
         output1=new BlackBoardTextBox();
         splitContainer=new SplitContainer();
+        panel1=new Panel();
         codeInput=new TextBox();
+        errorBox=new TextBox();
         presets=new ComboBox();
         rebuildButton=new Button();
-        panel1=new Panel();
-        errorBox=new TextBox();
         inputTriggers.SuspendLayout();
         inputBools.SuspendLayout();
         inputInts.SuspendLayout();
@@ -100,6 +100,8 @@ partial class PushBoard {
         trigger5.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left;
         trigger5.Identifier="trigger5";
         trigger5.Location=new Point(418, 22);
+        trigger5.MaximumSize=new Size(125, 25);
+        trigger5.MinimumSize=new Size(75, 25);
         trigger5.Name="trigger5";
         trigger5.Size=new Size(97, 25);
         trigger5.TabIndex=4;
@@ -111,6 +113,8 @@ partial class PushBoard {
         trigger4.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left;
         trigger4.Identifier="trigger4";
         trigger4.Location=new Point(315, 22);
+        trigger4.MaximumSize=new Size(125, 25);
+        trigger4.MinimumSize=new Size(75, 25);
         trigger4.Name="trigger4";
         trigger4.Size=new Size(97, 25);
         trigger4.TabIndex=3;
@@ -122,6 +126,8 @@ partial class PushBoard {
         trigger3.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left;
         trigger3.Identifier="trigger3";
         trigger3.Location=new Point(212, 22);
+        trigger3.MaximumSize=new Size(125, 25);
+        trigger3.MinimumSize=new Size(75, 25);
         trigger3.Name="trigger3";
         trigger3.Size=new Size(97, 25);
         trigger3.TabIndex=2;
@@ -133,6 +139,8 @@ partial class PushBoard {
         trigger2.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left;
         trigger2.Identifier="trigger2";
         trigger2.Location=new Point(109, 22);
+        trigger2.MaximumSize=new Size(125, 25);
+        trigger2.MinimumSize=new Size(75, 25);
         trigger2.Name="trigger2";
         trigger2.Size=new Size(97, 25);
         trigger2.TabIndex=1;
@@ -144,6 +152,8 @@ partial class PushBoard {
         trigger1.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left;
         trigger1.Identifier="trigger1";
         trigger1.Location=new Point(6, 22);
+        trigger1.MaximumSize=new Size(125, 25);
+        trigger1.MinimumSize=new Size(75, 25);
         trigger1.Name="trigger1";
         trigger1.Size=new Size(97, 25);
         trigger1.TabIndex=0;
@@ -426,6 +436,16 @@ partial class PushBoard {
         splitContainer.SplitterDistance=535;
         splitContainer.TabIndex=6;
         // 
+        // panel1
+        // 
+        panel1.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left|AnchorStyles.Right;
+        panel1.Controls.Add(codeInput);
+        panel1.Controls.Add(errorBox);
+        panel1.Location=new Point(3, 39);
+        panel1.Name="panel1";
+        panel1.Size=new Size(455, 652);
+        panel1.TabIndex=3;
+        // 
         // codeInput
         // 
         codeInput.Dock=DockStyle.Fill;
@@ -437,6 +457,20 @@ partial class PushBoard {
         codeInput.TabIndex=2;
         codeInput.WordWrap=false;
         codeInput.TextChanged+=this.codeInput_TextChanged;
+        // 
+        // errorBox
+        // 
+        errorBox.BackColor=Color.FromArgb(255, 192, 192);
+        errorBox.Dock=DockStyle.Bottom;
+        errorBox.ForeColor=Color.Maroon;
+        errorBox.Location=new Point(0, 462);
+        errorBox.Multiline=true;
+        errorBox.Name="errorBox";
+        errorBox.ReadOnly=true;
+        errorBox.ScrollBars=ScrollBars.Both;
+        errorBox.Size=new Size(455, 190);
+        errorBox.TabIndex=3;
+        errorBox.WordWrap=false;
         // 
         // presets
         // 
@@ -459,30 +493,6 @@ partial class PushBoard {
         rebuildButton.Text="Rebuild";
         rebuildButton.UseVisualStyleBackColor=true;
         rebuildButton.Click+=this.rebuildButton_Click;
-        // 
-        // panel1
-        // 
-        panel1.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left|AnchorStyles.Right;
-        panel1.Controls.Add(codeInput);
-        panel1.Controls.Add(errorBox);
-        panel1.Location=new Point(3, 39);
-        panel1.Name="panel1";
-        panel1.Size=new Size(455, 652);
-        panel1.TabIndex=3;
-        // 
-        // errorBox
-        // 
-        errorBox.BackColor=Color.FromArgb(255, 192, 192);
-        errorBox.Dock=DockStyle.Bottom;
-        errorBox.ForeColor=Color.Maroon;
-        errorBox.Location=new Point(0, 462);
-        errorBox.Multiline=true;
-        errorBox.Name="errorBox";
-        errorBox.ReadOnly=true;
-        errorBox.ScrollBars=ScrollBars.Both;
-        errorBox.Size=new Size(455, 190);
-        errorBox.TabIndex=3;
-        errorBox.WordWrap=false;
         // 
         // PushBoard
         // 

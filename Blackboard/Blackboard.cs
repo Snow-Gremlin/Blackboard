@@ -1,5 +1,7 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Formula;
+using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Record;
@@ -20,6 +22,7 @@ sealed public partial class Blackboard {
     [GeneratedRegex(@"[a-zA-Z_$][0-9a-zA-Z_]*(\.[a-zA-Z_$][0-9a-zA-Z_]*)*", RegexOptions.Compiled)]
     private static partial Regex nameRegex();
 
+    /// <summary>The slate storing the data for this blackboard.</summary>
     private readonly Slate slate;
 
     /// <summary>Creates a new blackboard.</summary>
@@ -103,7 +106,7 @@ sealed public partial class Blackboard {
     /// <returns>The trigger watcher.</returns>
     public ITriggerWatcher OnProvoke(string name) {
         string[] parts = splitUpName(name);
-        IOutput output = this.slate.GetOutput(Type.Trigger, parts);
+        IOutput output = this.slate.GetOutput(Type.Trigger, null, parts);
         return output as ITriggerWatcher ??
             throw new Message("Failed to create output trigger").
                 With("name",     name).
@@ -121,11 +124,36 @@ sealed public partial class Blackboard {
                 With("Type", typeof(T));
         
         string[] parts = splitUpName(name);
-        IOutput output = this.slate.GetOutput(type, parts);
+        IOutput output = this.slate.GetOutput(type, null, parts);
         return output as IValueWatcher<T> ??
             throw new Message("Failed to create value output").
                 With("type",     type).
                 With("name",     name).
                 With("existing", output);
     }
+
+    /// <summary>Watches for a change in the value by the given name.</summary>
+    /// <typeparam name="T">The C# type of the value to watch.</typeparam>
+    /// <param name="name">The name of the value to watch.</param>
+    /// <param name="value">The initial value to set if the watched node doesn't exist yet.</param>
+    /// <returns>The value watcher.</returns>
+    public IValueWatcher<T> OnChange<T>(string name, T value) {
+        Type type = Type.FromValueType(typeof(T)) ??
+            throw new Message("The given type is unsupported").
+                With("name", name).
+                With("Type", typeof(T));
+        
+        string[] parts = splitUpName(name);
+        IConstant lit = Maker.CreateConstant(Maker.WrapData<T>(value));
+        IOutput output = this.slate.GetOutput(type, lit, parts);
+        return output as IValueWatcher<T> ??
+            throw new Message("Failed to create value output").
+                With("type",     type).
+                With("name",     name).
+                With("existing", output);
+    }
+
+    /// <summary>Gets the string for debugging this blackboard.</summary>
+    /// <returns>The string for the internal slate.</returns>
+    public override string ToString() => this.slate.ToString();
 }

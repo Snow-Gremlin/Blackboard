@@ -21,7 +21,7 @@ sealed public class ValueWatcher<T>: IBlackBoardComponent {
     public void Connect(Blackboard.Blackboard b, string id) {
         if (this.watcher is not null) this.Disconnect();
         this.prior   = this.getter();
-        this.watcher = b.OnChange<T>(id+"."+name);
+        this.watcher = b.OnChange(id+"."+name, this.prior);
         this.watcher.OnChanged += this.onChanged;
     }
 

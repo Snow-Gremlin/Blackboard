@@ -109,6 +109,23 @@ static public class Maker {
         node is ITriggerParent       triggerNode ? new ShellTrigger(triggerNode) :
         null;
 
+    /// <summary>Creates a new IData for the given C# value.</summary>
+    /// <param name="value">The C# value to create an IData for.</param>
+    /// <returns>The IData for the given C# value.</returns>
+    static public IData WrapData<T>(T value) =>
+        value switch {
+            IData  x => x, 
+            bool   b => new Bool(b),
+            int    i => new Int(i),
+            uint   u => new Uint(u),
+            float  f => new Float(f),
+            double d => new Double(d),
+            string s => new String(s),
+            object o => new Object(o),
+            _        => throw new Message("Unexpected value type in IData creation").
+                           With("Value", value)
+        };
+
     /// <summary>Creates a new constant for the given value.</summary>
     /// <param name="value">The value to create a constant for.</param>
     /// <returns>The constant for the given value.</returns>

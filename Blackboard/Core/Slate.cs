@@ -297,22 +297,25 @@ public class Slate: IReader, IWriter {
 
     /// <summary>Gets or creates a new output node on the node with the given name.</summary>
     /// <param name="type">The type of the output to create.</param>
+    /// <param name="value">Optional default value to set to the output if it doesn't exist yet.</param>
     /// <param name="names">The name of the node to look up.</param>
     /// <returns>The new or existing output node.</returns>
-    public IOutput GetOutput(Type type,IEnumerable<string> names) =>
-        this.GetOutput(type, names.ToArray());
+    public IOutput GetOutput(Type type, INode? value, IEnumerable<string> names) =>
+        this.GetOutput(type, value, names.ToArray());
 
     /// <summary>Gets or creates a new output node on the node with the given name.</summary>
     /// <param name="type">The type of the output to create.</param>
+    /// <param name="value">Optional default value to set to the output if it doesn't exist yet.</param>
     /// <param name="names">The name of the node to look up.</param>
     /// <returns>The new or existing output node.</returns>
-    public IOutput GetOutput(Type type, params string[] names) {
+    public IOutput GetOutput(Type type, INode? value, params string[] names) {
         if (!this.HasNode(names)) {
             int max = names.Length-1;
             Factory factory = new(this);
             for (int i = 0; i < max; ++i)
                 factory.PushNamespace(names[i]);
-            factory.RequestExtern(names[max], type);
+            (INode node, bool isExtern) = factory.RequestExtern(names[max], type);
+            if (isExtern && value is not null) factory.AddAssignment(node, value);
             factory.Build().Perform();
         }
 

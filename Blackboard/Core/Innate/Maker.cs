@@ -100,13 +100,13 @@ static public class Maker {
     /// <returns>The newly created shell or null if an unexpected type.</returns>
     static public INode? CreateShell(INode node) =>
         node is IValueParent<Object> objectNode  ? new ShellValue<Object>(objectNode) :
-        node is IValueParent<Bool>   boolNode    ? new ShellValue<Bool>(boolNode) :
-        node is IValueParent<Int>    intNode     ? new ShellValue<Int>(intNode) :
-        node is IValueParent<Uint>   uintNode    ? new ShellValue<Uint>(uintNode) :
-        node is IValueParent<Float>  floatNode   ? new ShellValue<Float>(floatNode) :
+        node is IValueParent<Bool>   boolNode    ? new ShellValue<Bool>  (boolNode) :
+        node is IValueParent<Int>    intNode     ? new ShellValue<Int>   (intNode) :
+        node is IValueParent<Uint>   uintNode    ? new ShellValue<Uint>  (uintNode) :
+        node is IValueParent<Float>  floatNode   ? new ShellValue<Float> (floatNode) :
         node is IValueParent<Double> doubleNode  ? new ShellValue<Double>(doubleNode) :
         node is IValueParent<String> stringNode  ? new ShellValue<String>(stringNode) :
-        node is ITriggerParent       triggerNode ? new ShellTrigger(triggerNode) :
+        node is ITriggerParent       triggerNode ? new ShellTrigger      (triggerNode) :
         null;
 
     /// <summary>Creates a new IData for the given C# value.</summary>
@@ -115,10 +115,10 @@ static public class Maker {
     static public IData WrapData<T>(T value) =>
         value switch {
             IData  x => x, 
-            bool   b => new Bool(b),
-            int    i => new Int(i),
-            uint   u => new Uint(u),
-            float  f => new Float(f),
+            bool   b => new Bool  (b),
+            int    i => new Int   (i),
+            uint   u => new Uint  (u),
+            float  f => new Float (f),
             double d => new Double(d),
             string s => new String(s),
             object o => new Object(o),
@@ -131,10 +131,10 @@ static public class Maker {
     /// <returns>The constant for the given value.</returns>
     static public IConstant CreateConstant(IData value) =>
         value switch {
-            Bool   b => new Literal<Bool>(b),
-            Int    i => new Literal<Int>(i),
-            Uint   u => new Literal<Uint>(u),
-            Float  f => new Literal<Float>(f),
+            Bool   b => new Literal<Bool>  (b),
+            Int    i => new Literal<Int>   (i),
+            Uint   u => new Literal<Uint>  (u),
+            Float  f => new Literal<Float> (f),
             Double d => new Literal<Double>(d),
             String s => new Literal<String>(s),
             Object o => new Literal<Object>(o),

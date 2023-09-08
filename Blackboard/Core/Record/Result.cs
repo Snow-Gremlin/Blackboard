@@ -13,6 +13,12 @@ sealed public class Result : IReader, IWriter {
     /// <summary>Creates a new results object.</summary>
     internal Result() => this.outputData = new();
 
+    /// <summary>Indicates if there are any outputs.</summary>
+    public bool HasOutput => this.AllOutputNames().Any();
+
+    /// <summary>Gets the number of output objects in the results.</summary>
+    public int OutputCount => this.AllOutputNames().Count();
+
     /// <summary>Gets the output names found at the given path.</summary>
     /// <param name="names">The names of the path to get the names from.</param>
     /// <returns>The names at the given depth of the path.</returns>
@@ -36,6 +42,25 @@ sealed public class Result : IReader, IWriter {
                     With("Path", names.Join("."));
         }
         return dic.Keys;
+    }
+
+    /// <summary>Gets the full names for all the outputs.</summary>
+    /// <returns>The output's full names.</returns>
+    public IEnumerable<string> AllOutputNames() =>
+        this.allOutputs().Select(p => p.name);
+
+    /// <summary>Gets the full names for all the outputs.</summary>
+    /// <returns>The output's full names.</returns>
+    private IEnumerable<(string name, object value)> allOutputs() {
+        static IEnumerable<(string, object)> namesInDic(Dictionary<string, object> outputData, string prefix) {
+            foreach (KeyValuePair<string, object> pair in outputData) {
+                if (pair.Value is Dictionary<string, object> dic) {
+                    foreach ((string, object) pair2 in namesInDic(dic, prefix+pair.Key+"."))
+                        yield return pair2;
+                } else yield return (prefix+pair.Key, pair.Value);
+            }
+        }
+        return namesInDic(this.outputData, "");
     }
 
     /// <summary>Tries to get data with the given name.</summary>
@@ -137,5 +162,20 @@ sealed public class Result : IReader, IWriter {
         }
         return !first ? dic.Remove(lastName) :
             throw new Message("Path was empty.");
+    }
+
+    /// <summary>Gets a string with all the outputs in the results.</summary>
+    /// <returns>The outputs as a string for this result.</returns>
+    public override string ToString() {
+        List<string> lines = new();
+        foreach ((string name, object value) pair in this.allOutputs()) {
+            string value = pair.value switch {
+                IData data     => data.ValueAsString,
+                bool  provoked => provoked ? "provoked" : "unprovoked",
+                _              => "unknown"
+            };
+            lines.Add(pair.name+": "+value);
+        }
+        return lines.Join("\n");
     }
 }

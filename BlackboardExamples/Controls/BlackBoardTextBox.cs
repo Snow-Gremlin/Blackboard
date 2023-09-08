@@ -38,7 +38,8 @@ internal class BlackBoardTextBox: TextBox, IBlackBoardControl {
     /// <param name="b">The blackboard to connect to.</param>
     public void Connect(Blackboard.Blackboard b) {
         this.components.Foreach(c => c.Connect(b, this.Identifier));
-        this.onTextChanged  = b.ValueInput<string>(this.Identifier+".text");
+        if (!this.ReadOnly)
+            this.onTextChanged  = b.ValueInput<string>(this.Identifier+".text");
         this.onFocusChanged = b.ValueInput<bool>  (this.Identifier+".focus");
     }
 

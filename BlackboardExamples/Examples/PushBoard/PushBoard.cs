@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Record;
 using BlackboardExamples.Controls;
 
 namespace BlackboardExamples.Examples.PushBoard;
@@ -9,6 +10,7 @@ public partial class PushBoard : UserControl {
     /// <summary>The collection of all blackboard control children.</summary>
     private readonly IBlackBoardControl[] ctrls;
     private bool suspendCodeChange;
+    private Blackboard.Blackboard? blackboard;
 
     /// <summary>Creates a new black board test control.</summary>
     public PushBoard() {
@@ -21,32 +23,35 @@ public partial class PushBoard : UserControl {
             this.output1,       this.output2,    this.output3,   this.output4,      this.output5,
             this.inputTriggers, this.inputBools, this.inputInts, this.inputStrings, this.outputs
         };
-        this.suspendCodeChange  = false;
-        this.presetDesc.Visible = false;
-        this.errorBox.Visible   = false;
+        this.suspendCodeChange = false;
+        this.blackboard        = null;
+        this.errorBox.Visible  = false;
+        this.runButton.Enabled = false;
         this.presets.Items.Add(PresetItem.CustomInstance);
         this.setPresets();
         this.presets.SelectedIndex = 0;
+    }
+    
+    /// <summary>Handles a quick command being run.</summary>
+    /// <param name="sender">Not used.</param>
+    /// <param name="e">Not used.</param>
+    private void runButton_Click(object sender, EventArgs e) {
+        Result? result = this.blackboard?.Perform(this.quickCommand.Lines);
+        if (result is not null) Console.WriteLine(result);
     }
 
     /// <summary>Handles a preset is selected.</summary>
     /// <param name="sender">Not used.</param>
     /// <param name="e">Not used.</param>
     private void presets_SelectedIndexChanged(object sender, EventArgs e) {
-        PresetItem item = this.presets.SelectedItem as PresetItem ??
-            throw new Exception("Unexpected preset item type.");
+        PresetItem item = (PresetItem)this.presets.SelectedItem;
+        if (item.Custom) return;
 
-        if (item.Custom) {
-            this.presetDesc.Visible = false;
-            return;
-        }
-
-        this.suspendCodeChange  = true;
-        this.errorBox.Visible   = false;
-        this.codeInput.Lines    = item.Code;
-        this.presetDesc.Text    = item.Description;
-        this.presetDesc.Visible = true;
-        this.suspendCodeChange  = false;
+        this.suspendCodeChange     = true;
+        this.errorBox.Visible      = false;
+        this.codeInput.Lines       = item.Code;
+        this.rebuildButton.Enabled = true;
+        this.suspendCodeChange     = false;
     }
 
     /// <summary>Handles rebuilding the code and a blackboard instance.</summary>
@@ -60,13 +65,17 @@ public partial class PushBoard : UserControl {
 
             Blackboard.Blackboard b = new();
             this.ctrls.Foreach(ctrl => ctrl.Connect(b));
-            b.Perform(this.codeInput.Lines);
+            Result result = b.Perform(this.codeInput.Lines);
+            Console.WriteLine(result);
+
+            this.runButton.Enabled = true;
+            this.blackboard = b;
 
         } catch (Exception ex) {
             this.ctrls.Foreach(ctrl => ctrl.Disconnect());
-            this.presetDesc.Visible = false;
-            this.errorBox.Text = ex.Message;
-            this.errorBox.Visible = true;
+            this.errorBox.Text     = ex.Message;
+            this.errorBox.Visible  = true;
+            this.runButton.Enabled = false;
         }
     }
 
@@ -81,29 +90,39 @@ public partial class PushBoard : UserControl {
 
     /// <summary>Adds a new preset item.</summary>
     /// <param name="name">The display name of the preset.</param>
-    /// <param name="description">The description to display for this preset.</param>
     /// <param name="code">The code to set for the preset.</param>
-    private void addPreset(string name, string description, params string[] code) =>
-        this.presets.Items.Add(new PresetItem(name, description, code));
+    private void addPreset(string name, params string[] code) =>
+        this.presets.Items.Add(new PresetItem(name, code));
 
     /// <summary>Adds all the presets.</summary>
     private void setPresets() {
-        this.addPreset(
-            "Min/Max",
+        this.addPreset("Min/Max",
+            "// This preset changes the push board example into five input values.",
+            "// The minimum value of the input values is printed to the output.",
+            "// The check box changes the output from minimum to maximum.",
             "",
             "// Setup the push board",
             "namespace inputTriggers { visible := false; }",
             "namespace inputStrings  { visible := false; }",
             "namespace inputBools { text := \"options\"; }",
-            "namespace bool1 { text := \"maximum\"; }",
+            "namespace bool1 { text := \"max\"; }",
             "namespace bool2 { visible := false; }",
             "namespace bool3 { visible := false; }",
             "namespace bool4 { visible := false; }",
-            "namespace bool5 { visible := false; }");
-
-        this.addPreset(
-            "X",
+            "namespace bool5 { visible := false; }",
+            "namespace output2 { visible := false; }",
+            "namespace output3 { visible := false; }",
+            "namespace output4 { visible := false; }",
+            "namespace output5 { visible := false; }",
             "",
+            "// Setup the example",
+            "namespace output1 {",
+            "   string text := bool1.checked ?",
+            "      max(int1.value, int2.value, int3.value, int4.value, int5.value) :",
+            "      min(int1.value, int2.value, int3.value, int4.value, int5.value);",
+            "}");
+
+        this.addPreset("X",
             "X");
     }
 }

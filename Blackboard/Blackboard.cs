@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Formula;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
@@ -25,20 +24,27 @@ sealed public partial class Blackboard {
     /// <summary>The slate storing the data for this blackboard.</summary>
     private readonly Slate slate;
 
+    /// <summary>The optional logger for debugging.</summary>
+    private readonly Logger? logger;
+
     /// <summary>Creates a new blackboard.</summary>
-    public Blackboard() => this.slate = new Slate();
+    /// <param name="logger">The optional logger for debugging.</param>
+    public Blackboard(Logger? logger = null) {
+        this.slate  = new Slate();
+        this.logger = logger;
+    }
 
     /// <summary>Create a collection of commands that can be run and rerun.</summary>
     /// <param name="input">The input blackboard code to create the formula for.</param>
     /// <returns>The formula for the given blackboard code.</returns>
     public Formula CreateFormula(params string[] input) =>
-        new Parser.Parser(this.slate).Read(input);
+        new Parser.Parser(this.slate, this.logger).Read(input);
 
     /// <summary>Reads the given blackboard code and performs the formula.</summary>
     /// <param name="input">The input blackboard code to run.</param>
     /// <returns>The result of the performed blackboard code.</returns>
     public Result Perform(params string[] input) =>
-        this.CreateFormula(input).Perform();
+        this.CreateFormula(input).Perform(this.logger);
 
     /// <summary>Groups several calls together.</summary>
     /// <remarks>
@@ -55,7 +61,7 @@ sealed public partial class Blackboard {
         this.slate.Finalization.Suspend = true;
         handle();
         this.slate.Finalization.Suspend = false;
-        this.slate.FinishEvaluation();
+        this.slate.FinishEvaluation(this.logger);
     }
 
     /// <summary>

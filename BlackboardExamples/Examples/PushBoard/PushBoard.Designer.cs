@@ -63,12 +63,15 @@ partial class PushBoard {
         output5=new BlackBoardTextBox();
         splitContainer=new SplitContainer();
         mainFlow=new FlowLayoutPanel();
-        codePanel=new Panel();
-        codeInput=new TextBox();
-        presetDesc=new TextBox();
-        errorBox=new TextBox();
+        setupGroup=new GroupBox();
         presets=new ComboBox();
         rebuildButton=new Button();
+        codePanel=new Panel();
+        codeInput=new TextBox();
+        errorBox=new TextBox();
+        runGroup=new GroupBox();
+        quickCommand=new TextBox();
+        runButton=new Button();
         inputTriggers.SuspendLayout();
         inputTriggersFlow.SuspendLayout();
         inputBools.SuspendLayout();
@@ -89,7 +92,9 @@ partial class PushBoard {
         splitContainer.Panel2.SuspendLayout();
         splitContainer.SuspendLayout();
         mainFlow.SuspendLayout();
+        setupGroup.SuspendLayout();
         codePanel.SuspendLayout();
+        runGroup.SuspendLayout();
         this.SuspendLayout();
         // 
         // inputTriggers
@@ -529,9 +534,8 @@ partial class PushBoard {
         // 
         // splitContainer.Panel2
         // 
-        splitContainer.Panel2.Controls.Add(codePanel);
-        splitContainer.Panel2.Controls.Add(presets);
-        splitContainer.Panel2.Controls.Add(rebuildButton);
+        splitContainer.Panel2.Controls.Add(setupGroup);
+        splitContainer.Panel2.Controls.Add(runGroup);
         splitContainer.Size=new Size(1000, 700);
         splitContainer.SplitterDistance=486;
         splitContainer.TabIndex=6;
@@ -550,15 +554,49 @@ partial class PushBoard {
         mainFlow.Size=new Size(486, 700);
         mainFlow.TabIndex=6;
         // 
+        // setupGroup
+        // 
+        setupGroup.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left|AnchorStyles.Right;
+        setupGroup.Controls.Add(presets);
+        setupGroup.Controls.Add(rebuildButton);
+        setupGroup.Controls.Add(codePanel);
+        setupGroup.Location=new Point(3, 59);
+        setupGroup.Name="setupGroup";
+        setupGroup.Size=new Size(504, 641);
+        setupGroup.TabIndex=5;
+        setupGroup.TabStop=false;
+        setupGroup.Text="Setup Script";
+        // 
+        // presets
+        // 
+        presets.Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right;
+        presets.DropDownStyle=ComboBoxStyle.DropDownList;
+        presets.FormattingEnabled=true;
+        presets.Location=new Point(6, 22);
+        presets.Name="presets";
+        presets.Size=new Size(411, 23);
+        presets.TabIndex=1;
+        presets.SelectedIndexChanged+=this.presets_SelectedIndexChanged;
+        // 
+        // rebuildButton
+        // 
+        rebuildButton.Anchor=AnchorStyles.Top|AnchorStyles.Right;
+        rebuildButton.Location=new Point(423, 22);
+        rebuildButton.Name="rebuildButton";
+        rebuildButton.Size=new Size(75, 23);
+        rebuildButton.TabIndex=0;
+        rebuildButton.Text="Rebuild";
+        rebuildButton.UseVisualStyleBackColor=true;
+        rebuildButton.Click+=this.rebuildButton_Click;
+        // 
         // codePanel
         // 
         codePanel.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left|AnchorStyles.Right;
         codePanel.Controls.Add(codeInput);
-        codePanel.Controls.Add(presetDesc);
         codePanel.Controls.Add(errorBox);
-        codePanel.Location=new Point(3, 39);
+        codePanel.Location=new Point(-1, 51);
         codePanel.Name="codePanel";
-        codePanel.Size=new Size(504, 652);
+        codePanel.Size=new Size(499, 584);
         codePanel.TabIndex=3;
         // 
         // codeInput
@@ -569,23 +607,10 @@ partial class PushBoard {
         codeInput.Multiline=true;
         codeInput.Name="codeInput";
         codeInput.ScrollBars=ScrollBars.Both;
-        codeInput.Size=new Size(504, 272);
+        codeInput.Size=new Size(499, 394);
         codeInput.TabIndex=2;
         codeInput.WordWrap=false;
         codeInput.TextChanged+=this.codeInput_TextChanged;
-        // 
-        // presetDesc
-        // 
-        presetDesc.Dock=DockStyle.Bottom;
-        presetDesc.Font=new Font("Cascadia Code", 9F, FontStyle.Regular, GraphicsUnit.Point);
-        presetDesc.ForeColor=Color.Navy;
-        presetDesc.Location=new Point(0, 272);
-        presetDesc.Multiline=true;
-        presetDesc.Name="presetDesc";
-        presetDesc.ReadOnly=true;
-        presetDesc.ScrollBars=ScrollBars.Both;
-        presetDesc.Size=new Size(504, 190);
-        presetDesc.TabIndex=4;
         // 
         // errorBox
         // 
@@ -593,35 +618,43 @@ partial class PushBoard {
         errorBox.Dock=DockStyle.Bottom;
         errorBox.Font=new Font("Cascadia Code", 9F, FontStyle.Regular, GraphicsUnit.Point);
         errorBox.ForeColor=Color.Maroon;
-        errorBox.Location=new Point(0, 462);
+        errorBox.Location=new Point(0, 394);
         errorBox.Multiline=true;
         errorBox.Name="errorBox";
         errorBox.ReadOnly=true;
         errorBox.ScrollBars=ScrollBars.Both;
-        errorBox.Size=new Size(504, 190);
+        errorBox.Size=new Size(499, 190);
         errorBox.TabIndex=3;
         // 
-        // presets
+        // runGroup
         // 
-        presets.Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right;
-        presets.DropDownStyle=ComboBoxStyle.DropDownList;
-        presets.FormattingEnabled=true;
-        presets.Location=new Point(3, 10);
-        presets.Name="presets";
-        presets.Size=new Size(401, 23);
-        presets.TabIndex=1;
-        presets.SelectedIndexChanged+=this.presets_SelectedIndexChanged;
+        runGroup.Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right;
+        runGroup.Controls.Add(quickCommand);
+        runGroup.Controls.Add(runButton);
+        runGroup.Location=new Point(3, 3);
+        runGroup.Name="runGroup";
+        runGroup.Size=new Size(504, 53);
+        runGroup.TabIndex=4;
+        runGroup.TabStop=false;
+        runGroup.Text="Quick Command";
         // 
-        // rebuildButton
+        // quickCommand
         // 
-        rebuildButton.Anchor=AnchorStyles.Top|AnchorStyles.Right;
-        rebuildButton.Location=new Point(410, 3);
-        rebuildButton.Name="rebuildButton";
-        rebuildButton.Size=new Size(97, 35);
-        rebuildButton.TabIndex=0;
-        rebuildButton.Text="Rebuild";
-        rebuildButton.UseVisualStyleBackColor=true;
-        rebuildButton.Click+=this.rebuildButton_Click;
+        quickCommand.Location=new Point(6, 22);
+        quickCommand.Name="quickCommand";
+        quickCommand.Size=new Size(411, 23);
+        quickCommand.TabIndex=1;
+        // 
+        // runButton
+        // 
+        runButton.Anchor=AnchorStyles.Top|AnchorStyles.Right;
+        runButton.Location=new Point(423, 22);
+        runButton.Name="runButton";
+        runButton.Size=new Size(75, 23);
+        runButton.TabIndex=0;
+        runButton.Text="Run";
+        runButton.UseVisualStyleBackColor=true;
+        runButton.Click+=this.runButton_Click;
         // 
         // PushBoard
         // 
@@ -659,8 +692,11 @@ partial class PushBoard {
         splitContainer.ResumeLayout(false);
         mainFlow.ResumeLayout(false);
         mainFlow.PerformLayout();
+        setupGroup.ResumeLayout(false);
         codePanel.ResumeLayout(false);
         codePanel.PerformLayout();
+        runGroup.ResumeLayout(false);
+        runGroup.PerformLayout();
         this.ResumeLayout(false);
     }
 
@@ -708,5 +744,8 @@ partial class PushBoard {
     private FlowLayoutPanel inputStringsFlow;
     private FlowLayoutPanel outputsFlow;
     private FlowLayoutPanel mainFlow;
-    private TextBox presetDesc;
+    private GroupBox runGroup;
+    private Button runButton;
+    private TextBox quickCommand;
+    private GroupBox setupGroup;
 }

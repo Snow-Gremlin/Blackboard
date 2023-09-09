@@ -31,7 +31,7 @@ public partial class PushBoard : UserControl {
         this.setPresets();
         this.presets.SelectedIndex = 0;
     }
-    
+
     /// <summary>Handles a quick command being run.</summary>
     /// <param name="sender">Not used.</param>
     /// <param name="e">Not used.</param>

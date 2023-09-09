@@ -594,9 +594,9 @@ partial class PushBoard {
         codePanel.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left|AnchorStyles.Right;
         codePanel.Controls.Add(codeInput);
         codePanel.Controls.Add(errorBox);
-        codePanel.Location=new Point(-1, 51);
+        codePanel.Location=new Point(6, 51);
         codePanel.Name="codePanel";
-        codePanel.Size=new Size(499, 584);
+        codePanel.Size=new Size(492, 584);
         codePanel.TabIndex=3;
         // 
         // codeInput
@@ -607,7 +607,7 @@ partial class PushBoard {
         codeInput.Multiline=true;
         codeInput.Name="codeInput";
         codeInput.ScrollBars=ScrollBars.Both;
-        codeInput.Size=new Size(499, 394);
+        codeInput.Size=new Size(492, 394);
         codeInput.TabIndex=2;
         codeInput.WordWrap=false;
         codeInput.TextChanged+=this.codeInput_TextChanged;
@@ -623,7 +623,7 @@ partial class PushBoard {
         errorBox.Name="errorBox";
         errorBox.ReadOnly=true;
         errorBox.ScrollBars=ScrollBars.Both;
-        errorBox.Size=new Size(499, 190);
+        errorBox.Size=new Size(492, 190);
         errorBox.TabIndex=3;
         // 
         // runGroup
@@ -640,6 +640,7 @@ partial class PushBoard {
         // 
         // quickCommand
         // 
+        quickCommand.Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right;
         quickCommand.Location=new Point(6, 22);
         quickCommand.Name="quickCommand";
         quickCommand.Size=new Size(411, 23);

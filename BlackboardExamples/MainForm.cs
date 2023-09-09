@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace BlackboardExamples;
 
 public partial class MainForm : Form {
@@ -6,6 +8,9 @@ public partial class MainForm : Form {
         this.InitializeComponent();
 
         this.addExample(new Examples.PushBoard.PushBoard());
+
+        for (int i = 0; i < 1000; i++)
+            Console.WriteLine(i+". Hello World");
     }
 
     private void addExample(UserControl ctrl) {

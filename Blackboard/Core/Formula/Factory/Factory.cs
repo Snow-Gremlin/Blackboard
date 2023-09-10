@@ -140,9 +140,11 @@ sealed public class Factory {
                     With("Value",  value);
 
         IFuncGroup? castGroup = Maker.GetCastMethod(this.slate, type);
-        return castGroup?.Build(value) ??
+        INode casted = castGroup?.Build(value) ??
             throw new Message("Unsupported type for new definition cast").
                 With("Type", type);
+        if (casted is IEvaluable eval) eval.Evaluate();
+        return casted;
     }
 
     /// <summary>Creates a define action and adds it to the builder.</summary>

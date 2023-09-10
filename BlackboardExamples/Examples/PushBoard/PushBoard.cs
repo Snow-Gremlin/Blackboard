@@ -6,8 +6,6 @@ namespace BlackboardExamples.Examples.PushBoard;
 
 /// <summary>A control for testing black board controls.</summary>
 public partial class PushBoard : UserControl {
-
-    /// <summary>The collection of all blackboard control children.</summary>
     private readonly IBlackBoardControl[] ctrls;
     private bool suspendCodeChange;
     private Blackboard.Blackboard? blackboard;
@@ -25,7 +23,6 @@ public partial class PushBoard : UserControl {
         };
         this.suspendCodeChange = false;
         this.blackboard        = null;
-        this.errorBox.Visible  = false;
         this.runButton.Enabled = false;
         this.presets.Items.Add(PresetItem.CustomInstance);
         this.setPresets();
@@ -36,8 +33,23 @@ public partial class PushBoard : UserControl {
     /// <param name="sender">Not used.</param>
     /// <param name="e">Not used.</param>
     private void runButton_Click(object sender, EventArgs e) {
-        Result? result = this.blackboard?.Perform(this.quickCommand.Lines);
-        if (result is not null) Console.WriteLine(result);
+        try {
+            if (this.quickCommand.Text == "print")
+                Console.WriteLine(this.blackboard?.ToString());
+            else {
+                Result? result = this.blackboard?.Perform(this.quickCommand.Lines);
+                if (result is not null && result.HasOutput) Console.WriteLine(result);
+            }
+        } catch (Exception ex) {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    /// <summary>Handles the enter key being pressed on the quick command.</summary>
+    /// <param name="sender">Not used.</param>
+    /// <param name="e">Not used.</param>
+    private void quickCommand_KeyDown(object sender, KeyEventArgs e) {
+        if (e.KeyCode == Keys.Enter) this.runButton.PerformClick();
     }
 
     /// <summary>Handles a preset is selected.</summary>
@@ -48,7 +60,6 @@ public partial class PushBoard : UserControl {
         if (item.Custom) return;
 
         this.suspendCodeChange     = true;
-        this.errorBox.Visible      = false;
         this.codeInput.Lines       = item.Code;
         this.rebuildButton.Enabled = true;
         this.suspendCodeChange     = false;
@@ -60,22 +71,20 @@ public partial class PushBoard : UserControl {
     private void rebuildButton_Click(object sender, EventArgs e) {
         try {
             this.rebuildButton.Enabled = false;
-            this.errorBox.Visible = false;
             this.ctrls.Foreach(ctrl => ctrl.Disconnect());
 
             Blackboard.Blackboard b = new();
             this.ctrls.Foreach(ctrl => ctrl.Connect(b));
             Result result = b.Perform(this.codeInput.Lines);
-            Console.WriteLine(result);
+            if (result.HasOutput) Console.WriteLine(result);
 
             this.runButton.Enabled = true;
             this.blackboard = b;
 
         } catch (Exception ex) {
             this.ctrls.Foreach(ctrl => ctrl.Disconnect());
-            this.errorBox.Text     = ex.Message;
-            this.errorBox.Visible  = true;
             this.runButton.Enabled = false;
+            Console.WriteLine(ex.Message);
         }
     }
 

@@ -15,12 +15,20 @@ sealed public partial class ConsolePanel : UserControl {
         private readonly TextWriter oldConsole;
         private readonly StringBuilder buffer;
         private readonly Action<string> writeText;
+        private readonly System.Windows.Forms.Timer timer;
 
         public ConsoleHook(Action<string> writeText) {
             this.oldConsole = Console.Out;
             this.buffer     = new();
             this.writeText  = writeText;
+            this.timer      = new() { Interval = 250 };
+            this.timer.Tick += this.timer_Tick;
             Console.SetOut(this);
+        }
+
+        private void timer_Tick(object? sender, EventArgs e) {
+            this.timer.Stop();
+            this.Flush();
         }
 
         public void Unhook() => Console.SetOut(this.oldConsole);
@@ -36,7 +44,8 @@ sealed public partial class ConsolePanel : UserControl {
         public override void Write(char value) {
             this.oldConsole.Write(value);
             this.buffer.Append(value);
-            if (value == '\n') this.Flush();
+            if (value == '\n' && !this.timer.Enabled)
+                this.timer.Start();
         }
     }
 
@@ -49,7 +58,7 @@ sealed public partial class ConsolePanel : UserControl {
         this.textBox   = new() {
             Dock       = DockStyle.Fill,
             ScrollBars = ScrollBars.Both,
-            BackColor  = Color.Black,
+            BackColor  = Color.FromArgb(10, 10, 10),
             ForeColor  = Color.White,
             Multiline  = true,
             ReadOnly   = true,

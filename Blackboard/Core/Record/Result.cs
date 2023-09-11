@@ -1,6 +1,6 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
+using PetiteParser.Formatting;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -164,18 +164,22 @@ sealed public class Result : IReader, IWriter {
             throw new Message("Path was empty.");
     }
 
+    /// <summary>Gets the string for the value stored in the results.</summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    static private string valueToString(object value) =>
+        value switch {
+            IData data     => data.ValueAsString,
+            bool  provoked => provoked ? "provoked" : "unprovoked",
+            _              => "unknown"
+        };
+
     /// <summary>Gets a string with all the outputs in the results.</summary>
     /// <returns>The outputs as a string for this result.</returns>
     public override string ToString() {
         List<string> lines = new();
-        foreach ((string name, object value) pair in this.allOutputs()) {
-            string value = pair.value switch {
-                IData data     => data.ValueAsString,
-                bool  provoked => provoked ? "provoked" : "unprovoked",
-                _              => "unknown"
-            };
-            lines.Add(pair.name+": "+value);
-        }
-        return lines.Join("\n");
+        foreach ((string name, object value) in this.allOutputs())
+            lines.Add(name+" = "+valueToString(value));
+        return lines.JoinLines();
     }
 }

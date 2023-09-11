@@ -64,12 +64,12 @@ partial class PushBoard {
         splitContainer=new SplitContainer();
         mainFlow=new FlowLayoutPanel();
         setupGroup=new GroupBox();
+        codeInput=new CodePanel();
         presets=new ComboBox();
         rebuildButton=new Button();
         runGroup=new GroupBox();
         quickCommand=new TextBox();
         runButton=new Button();
-        codeInput=new TextBox();
         inputTriggers.SuspendLayout();
         inputTriggersFlow.SuspendLayout();
         inputBools.SuspendLayout();
@@ -564,6 +564,15 @@ partial class PushBoard {
         setupGroup.TabStop=false;
         setupGroup.Text="Setup Script";
         // 
+        // codeInput
+        // 
+        codeInput.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left|AnchorStyles.Right;
+        codeInput.Location=new Point(6, 51);
+        codeInput.Name="codeInput";
+        codeInput.Size=new Size(492, 584);
+        codeInput.TabIndex=2;
+        codeInput.TextChanged+=this.codeInput_TextChanged;
+        // 
         // presets
         // 
         presets.Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right;
@@ -617,19 +626,6 @@ partial class PushBoard {
         runButton.Text="Run";
         runButton.UseVisualStyleBackColor=true;
         runButton.Click+=this.runButton_Click;
-        // 
-        // codeInput
-        // 
-        codeInput.Anchor=AnchorStyles.Top|AnchorStyles.Bottom|AnchorStyles.Left|AnchorStyles.Right;
-        codeInput.Font=new Font("Cascadia Code", 9F, FontStyle.Regular, GraphicsUnit.Point);
-        codeInput.Location=new Point(6, 51);
-        codeInput.Multiline=true;
-        codeInput.Name="codeInput";
-        codeInput.ScrollBars=ScrollBars.Both;
-        codeInput.Size=new Size(492, 584);
-        codeInput.TabIndex=2;
-        codeInput.WordWrap=false;
-        codeInput.TextChanged+=this.codeInput_TextChanged;
         // 
         // PushBoard
         // 
@@ -719,5 +715,5 @@ partial class PushBoard {
     private Button runButton;
     private TextBox quickCommand;
     private GroupBox setupGroup;
-    private TextBox codeInput;
+    private CodePanel codeInput;
 }

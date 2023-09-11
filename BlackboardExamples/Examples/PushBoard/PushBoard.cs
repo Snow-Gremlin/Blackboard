@@ -49,7 +49,10 @@ public partial class PushBoard : UserControl {
     /// <param name="sender">Not used.</param>
     /// <param name="e">Not used.</param>
     private void quickCommand_KeyDown(object sender, KeyEventArgs e) {
-        if (e.KeyCode == Keys.Enter) this.runButton.PerformClick();
+        if (e.KeyCode == Keys.Enter) {
+            this.runButton.PerformClick();
+            e.Handled = true;
+        }
     }
 
     /// <summary>Handles a preset is selected.</summary>

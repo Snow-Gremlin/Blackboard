@@ -7,8 +7,8 @@ namespace BlackboardExamples.Controls;
 /// <summary>A text box which can connect to a blackboard instance.</summary>
 internal class BlackBoardTextBox: TextBox, IBlackBoardControl {
     private readonly IBlackBoardComponent[] components;
-    private InputValue<string>? onTextChanged;
-    private InputValue<bool>?   onFocusChanged;
+    private InputValue<string>? textValue;
+    private InputValue<bool>?   focusState;
 
     /// <summary>Creates a new text box.</summary>
     public BlackBoardTextBox() {
@@ -21,8 +21,8 @@ internal class BlackBoardTextBox: TextBox, IBlackBoardControl {
         ValueWatcher<int>    foreColorWatcher = new("foreColor", v => this.ForeColor = Color.FromArgb(v), this.ForeColor.ToArgb);
         this.components = new IBlackBoardComponent[] { textWatcher, enabledWatcher,
             visibleWatcher, readOnlyWatcher, backColorWatcher, foreColorWatcher };
-        this.onTextChanged  = null;
-        this.onFocusChanged = null;
+        this.textValue  = null;
+        this.focusState = null;
     }
 
     /// <summary>The identifier and optional namespace to write this text box to.</summary>
@@ -39,18 +39,18 @@ internal class BlackBoardTextBox: TextBox, IBlackBoardControl {
     public void Connect(Blackboard.Blackboard b) {
         this.components.Foreach(c => c.Connect(b, this.Identifier));
         if (!this.ReadOnly)
-            this.onTextChanged  = b.ValueInput<string>(this.Identifier+".text");
-        this.onFocusChanged = b.ValueInput<bool>  (this.Identifier+".focus");
+            this.textValue = b.ValueInput<string>(this.Identifier+".text");
+        this.focusState    = b.ValueInput<bool>  (this.Identifier+".focus");
     }
 
     /// <summary>Disconnects this control from a blackboard.</summary>
     public void Disconnect() {
         this.components.Foreach(c => c.Disconnect());
-        this.onTextChanged  = null;
-        this.onFocusChanged = null;
+        this.textValue  = null;
+        this.focusState = null;
     }
 
-    protected override void OnTextChanged(EventArgs e) { base.OnTextChanged(e); this.onTextChanged?.SetValue(this.Text); }
-    protected override void OnGotFocus   (EventArgs e) { base.OnGotFocus(e);    this.onFocusChanged?.SetValue(true);            }
-    protected override void OnLostFocus  (EventArgs e) { base.OnLostFocus(e);   this.onFocusChanged?.SetValue(false);           }
+    protected override void OnTextChanged(EventArgs e) { base.OnTextChanged(e); this.textValue?.SetValue(this.Text); }
+    protected override void OnGotFocus   (EventArgs e) { base.OnGotFocus(e);    this.focusState?.SetValue(true);  }
+    protected override void OnLostFocus  (EventArgs e) { base.OnLostFocus(e);   this.focusState?.SetValue(false); }
 }

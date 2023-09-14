@@ -7,8 +7,8 @@ namespace BlackboardExamples.Controls;
 /// <summary>A numeric integer up/down which can connect to a blackboard instance.</summary>
 internal class BlackBoardIntUpDown: NumericUpDown, IBlackBoardControl {
     private readonly IBlackBoardComponent[] components;
-    private InputValue<int>?  onValueChanged;
-    private InputValue<bool>? onFocusChanged;
+    private InputValue<int>?  value;
+    private InputValue<bool>? focusState;
 
     /// <summary>Creates a new numeric integer up/down.</summary>
     public BlackBoardIntUpDown() {
@@ -24,8 +24,8 @@ internal class BlackBoardIntUpDown: NumericUpDown, IBlackBoardControl {
         ValueWatcher<int>  stepValueWatcher = new("step",      v => this.Increment = v,                 () => (int)this.Increment);
         this.components = new IBlackBoardComponent[] { valueWatcher, enabledWatcher, visibleWatcher, readOnlyWatcher,
             backColorWatcher, foreColorWatcher, maxValueWatcher, minValueWatcher, stepValueWatcher };
-        this.onValueChanged   = null;
-        this.onFocusChanged   = null;
+        this.value      = null;
+        this.focusState = null;
     }
 
     /// <summary>The identifier and optional namespace to write this numeric up/down to.</summary>
@@ -41,18 +41,18 @@ internal class BlackBoardIntUpDown: NumericUpDown, IBlackBoardControl {
     /// <param name="b">The blackboard to connect to.</param>
     public void Connect(Blackboard.Blackboard b) {
         this.components.Foreach(c => c.Connect(b, this.Identifier));
-        this.onValueChanged = b.ValueInput<int> (this.Identifier+".value");
-        this.onFocusChanged = b.ValueInput<bool>(this.Identifier+".focus");
+        this.value      = b.ValueInput<int> (this.Identifier+".value");
+        this.focusState = b.ValueInput<bool>(this.Identifier+".focus");
     }
 
     /// <summary>Disconnects this control from a blackboard.</summary>
     public void Disconnect() {
         this.components.Foreach(c => c.Disconnect());
-        this.onValueChanged = null;
-        this.onFocusChanged = null;
+        this.value      = null;
+        this.focusState = null;
     }
 
-    protected override void OnValueChanged(EventArgs e) { base.OnValueChanged(e); this.onValueChanged?.SetValue((int)this.Value); }
-    protected override void OnGotFocus    (EventArgs e) { base.OnGotFocus(e);     this.onFocusChanged?.SetValue(true);            }
-    protected override void OnLostFocus   (EventArgs e) { base.OnLostFocus(e);    this.onFocusChanged?.SetValue(false);           }
+    protected override void OnValueChanged(EventArgs e) { base.OnValueChanged(e); this.value?.SetValue((int)this.Value); }
+    protected override void OnGotFocus    (EventArgs e) { base.OnGotFocus(e);     this.focusState?.SetValue(true);  }
+    protected override void OnLostFocus   (EventArgs e) { base.OnLostFocus(e);    this.focusState?.SetValue(false); }
 }

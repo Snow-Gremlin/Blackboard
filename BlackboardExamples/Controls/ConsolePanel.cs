@@ -109,7 +109,7 @@ public partial class ConsolePanel : TextBox {
     /// <summary>Determines if the scroll bar is at the bottom of the panel.</summary>
     /// <returns>True if the panel should auto-scroll on new text.</returns>
     private bool shouldAutoScroll() =>
-        this.SelectionStart >= this.Text.Length - 10;
+        this.SelectionStart + this.SelectionLength >= this.Text.Length - 10;
 
     /// <summary>Scrolls to the bottom of the panel.</summary>
     private void scrollToBottom() {

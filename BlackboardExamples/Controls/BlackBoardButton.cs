@@ -8,7 +8,7 @@ namespace BlackboardExamples.Controls;
 internal class BlackBoardButton : Button, IBlackBoardControl {
     private readonly IBlackBoardComponent[] components;
     private InputTrigger?     onClickTrigger;
-    private InputValue<bool>? onFocusChanged;
+    private InputValue<bool>? focusState;
 
     /// <summary>Creates a new button.</summary>
     public BlackBoardButton() {
@@ -20,7 +20,7 @@ internal class BlackBoardButton : Button, IBlackBoardControl {
         ValueWatcher<int>    foreColorWatcher = new("foreColor", v => this.ForeColor = Color.FromArgb(v), this.ForeColor.ToArgb);
         this.components = new IBlackBoardComponent[] { textWatcher, enabledWatcher, visibleWatcher, backColorWatcher, foreColorWatcher };
         this.onClickTrigger = null;
-        this.onFocusChanged = null;
+        this.focusState     = null;
     }
 
     /// <summary>The identifier and optional namespace to write this button to.</summary>
@@ -37,17 +37,17 @@ internal class BlackBoardButton : Button, IBlackBoardControl {
     public void Connect(Blackboard.Blackboard b) {
         this.components.Foreach(c => c.Connect(b, this.Identifier));
         this.onClickTrigger = b.Provoker(this.Identifier+".onClick");
-        this.onFocusChanged = b.ValueInput<bool>(this.Identifier+".focus");
+        this.focusState     = b.ValueInput<bool>(this.Identifier+".focus");
     }
 
     /// <summary>Disconnects this control from a blackboard.</summary>
     public void Disconnect() {
         this.components.Foreach(c => c.Disconnect());
         this.onClickTrigger = null;
-        this.onFocusChanged = null;
+        this.focusState     = null;
     }
 
-    protected override void OnClick    (EventArgs e) { base.OnClick(e);     this.onClickTrigger?.Provoke();       }
-    protected override void OnGotFocus (EventArgs e) { base.OnGotFocus(e);  this.onFocusChanged?.SetValue(true);  }
-    protected override void OnLostFocus(EventArgs e) { base.OnLostFocus(e); this.onFocusChanged?.SetValue(false); }
+    protected override void OnClick    (EventArgs e) { base.OnClick(e);     this.onClickTrigger?.Provoke();   }
+    protected override void OnGotFocus (EventArgs e) { base.OnGotFocus(e);  this.focusState?.SetValue(true);  }
+    protected override void OnLostFocus(EventArgs e) { base.OnLostFocus(e); this.focusState?.SetValue(false); }
 }

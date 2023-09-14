@@ -26,6 +26,7 @@ public partial class PushBoard : UserControl {
         this.runButton.Enabled = false;
         this.presets.Items.Add(PresetItem.CustomInstance);
         this.setPresets();
+        this.quickCommand.PushToHistory("print");
         this.presets.SelectedIndex = 0;
     }
 
@@ -40,6 +41,7 @@ public partial class PushBoard : UserControl {
                 Result? result = this.blackboard?.Perform(this.quickCommand.Lines);
                 if (result is not null && result.HasOutput) Console.WriteLine(result);
             }
+            this.quickCommand.AcceptCurrent();
         } catch (Exception ex) {
             Console.WriteLine(ex.Message);
         }
@@ -48,12 +50,8 @@ public partial class PushBoard : UserControl {
     /// <summary>Handles the enter key being pressed on the quick command.</summary>
     /// <param name="sender">Not used.</param>
     /// <param name="e">Not used.</param>
-    private void quickCommand_KeyDown(object sender, KeyEventArgs e) {
-        if (e.KeyCode == Keys.Enter) {
-            this.runButton.PerformClick();
-            e.Handled = true;
-        }
-    }
+    private void quickCommand_ReturnPressed(object sender, EventArgs e) =>
+        this.runButton.PerformClick();
 
     /// <summary>Handles a preset is selected.</summary>
     /// <param name="sender">Not used.</param>
@@ -134,7 +132,31 @@ public partial class PushBoard : UserControl {
             "      min(int1.value, int2.value, int3.value, int4.value, int5.value);",
             "}");
 
-        this.addPreset("X",
-            "X");
+        this.addPreset("Boolean Logic",
+            "// This preset changes the push board example into just boolean inputs.",
+            "// The outputs are set to be several different boolean logic examples.",
+            "",
+            "// Setup the push board",
+            "namespace inputTriggers { visible := false; }",
+            "namespace inputStrings  { visible := false; }",
+            "namespace inputInts     { visible := false; }",
+            "namespace inputBools { text := \"input\"; }",
+            "namespace bool1 { text := \"A\"; }",
+            "namespace bool2 { text := \"B\"; }",
+            "namespace bool3 { text := \"C\"; }",
+            "namespace bool4 { text := \"D\"; }",
+            "namespace bool5 { text := \"E\"; }",
+            "",
+            "// Setup the example",
+            "A := bool1.checked;",
+            "B := bool2.checked;",
+            "C := bool3.checked;",
+            "D := bool4.checked;",
+            "E := bool5.checked;",
+            "namespace output1 { string text := !A; }",
+            "namespace output2 { string text := A ^  B ^  C ^  D ^  E; }",
+            "namespace output3 { string text := A && B && C && D && E; }",
+            "namespace output4 { string text := A || B || C || D || E; }",
+            "namespace output5 { string text := implies(A, B); }");
     }
 }

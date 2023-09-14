@@ -68,7 +68,7 @@ partial class PushBoard {
         presets=new ComboBox();
         rebuildButton=new Button();
         runGroup=new GroupBox();
-        quickCommand=new TextBox();
+        quickCommand=new CommandBox();
         runButton=new Button();
         inputTriggers.SuspendLayout();
         inputTriggersFlow.SuspendLayout();
@@ -614,7 +614,7 @@ partial class PushBoard {
         quickCommand.Name="quickCommand";
         quickCommand.Size=new Size(411, 23);
         quickCommand.TabIndex=1;
-        quickCommand.KeyDown+=this.quickCommand_KeyDown;
+        quickCommand.ReturnPressed+=this.quickCommand_ReturnPressed;
         // 
         // runButton
         // 
@@ -713,7 +713,7 @@ partial class PushBoard {
     private FlowLayoutPanel mainFlow;
     private GroupBox runGroup;
     private Button runButton;
-    private TextBox quickCommand;
+    private CommandBox quickCommand;
     private GroupBox setupGroup;
     private CodePanel codeInput;
 }

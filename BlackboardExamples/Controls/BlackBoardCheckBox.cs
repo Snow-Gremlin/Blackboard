@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
 using Blackboard.Core.Record;
 using System.ComponentModel;
 
@@ -48,7 +47,7 @@ sealed public class BlackBoardCheckBox : CheckBox, IBlackBoardControl {
         this.focusState   = null;
     }
 
-    protected override void OnCheckedChanged(EventArgs e) { base.OnCheckedChanged(e); this.checkedState?.SetValue(this.Checked, new ConsoleLogger()); }
+    protected override void OnCheckedChanged(EventArgs e) { base.OnCheckedChanged(e); this.checkedState?.SetValue(this.Checked); }
     protected override void OnGotFocus      (EventArgs e) { base.OnGotFocus(e);       this.focusState?.SetValue(true);  }
     protected override void OnLostFocus     (EventArgs e) { base.OnLostFocus(e);      this.focusState?.SetValue(false); }
 }

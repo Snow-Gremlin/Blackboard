@@ -17,7 +17,7 @@ namespace Blackboard.Core;
 /// The slate stores all blackboard data via a node graph and
 /// perform evaluations/updates of change the values of the nodes.
 /// </summary>
-public class Slate: IReader, IWriter {
+public class Slate: INodeReader, IReader, IWriter {
 
     /// <summary>The nodes which have had one or more parent modified and they need to have their depth updated.</summary>
     private readonly LinkedList<IEvaluable> pendingUpdate;
@@ -53,7 +53,7 @@ public class Slate: IReader, IWriter {
     /// <summary>The base set of named nodes to access the total node structure.</summary>
     public Namespace Global { get; }
 
-    #region Record Getter and Setters...
+    #region Getter and Setters...
 
     /// <summary>Tries to get provoke state with the given name.</summary>
     /// <param name="names">The name of trigger node to get the state from.</param>
@@ -100,61 +100,8 @@ public class Slate: IReader, IWriter {
     /// <param name="provoke">True to provoke, false to reset.</param>
     public void SetTrigger(IEnumerable<string> names, bool provoke = true) =>
         this.SetTrigger(this.GetNode<ITriggerInput>(names), provoke);
-
-    #endregion
-    #region Node Getter and Setter...
-
-    /// <summary>Determines if the node with the given name exists.</summary>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode(params string[] names) =>
-        this.HasNode(names as IEnumerable<string>);
-
-    /// <summary>Determines if the node with the given name exists.</summary>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode(IEnumerable<string> names) =>
-        this.Global.Find(names) is not null;
-    
-    /// <summary>Determines if the node with the given name and type exists.</summary>
-    /// <typeparam name="T">The type of the node to check for.</typeparam>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode<T>(params string[] names) where T : INode =>
-        this.HasNode<T>(names as IEnumerable<string>);
-
-    /// <summary>Determines if the node with the given name and type exists.</summary>
-    /// <typeparam name="T">The type of the node to check for.</typeparam>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode<T>(IEnumerable<string> names) where T : INode =>
-        this.Global.Find(names) is not T;
-
-    /// <summary>Gets the node with the given name.</summary>
-    /// <typeparam name="T">The expected type of node to get.</typeparam>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>The node with the given name and type.</returns>
-    public T GetNode<T>(params string[] names) where T : INode =>
-        this.GetNode<T>(names as IEnumerable<string>);
-
-    /// <summary>Gets the node with the given name.</summary>
-    /// <remarks>This will throw an exception if no node by that name exists or the found node is the incorrect type.</remarks>
-    /// <typeparam name="T">The expected type of node to get.</typeparam>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>The node with the given name and type.</returns>
-    public T GetNode<T>(IEnumerable<string> names) where T : INode =>
-        this.TryGetNode(names, out INode? node) ?
-            node is T result ? result :
-            throw new Message("The node found by the given name is not the expected type.").
-                With("Name", names.Join(".")).
-                With("Found", node).
-                With("Expected Type", typeof(T)) :
-            throw new Message("Unable to get a node by the given name.").
-                With("Name", names.Join(".")).
-                With("Value Type", typeof(T));
-
+      
     /// <summary>Tries to get the node with the given node.</summary>
-    /// <typeparam name="T">The expected type of node to get.</typeparam>
     /// <param name="names">The name of the node to get.</param>
     /// <param name="node">The returned node for the given name or null.</param>
     /// <returns>True if the node was found, false otherwise.</returns>

@@ -21,7 +21,11 @@ sealed public class InputValue<T> {
     /// <param name="logger">An optional logger for debugging.</param>
     /// <returns>True if the value has changed, false otherwise.</returns>
     public bool SetValue(T value, Logger? logger = null) {
+
+        logger ??= new ConsoleLogger(); // TODO: REMOVE
+
         if (!this.node.SetValue(value)) return false;
+        logger?.Info("Changed: "+this.node);
         if (this.node is IParent parent)
             this.slate.PendEval(parent.Children);
 

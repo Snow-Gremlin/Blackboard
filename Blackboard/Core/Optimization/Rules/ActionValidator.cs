@@ -6,7 +6,7 @@ using System.Linq;
 namespace Blackboard.Core.Optimization.Rules;
 
 /// <summary>Validates all the nodes in the action being created.</summary>
-sealed internal class Validator : IRule {
+sealed internal class ActionValidator : IRule {
 
     /// <summary>Checks all the children of the given parent.</summary>
     /// <param name="args">The argument for this rule.</param>

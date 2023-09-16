@@ -31,23 +31,23 @@ sealed internal class Optimizer {
             //        - Remove all 1 constants in products, all 0 constants in sums, all true constants in ANDs, etc.
             //        
             //   - [ ] All:
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] And:
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] Any:
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] BitwiseAnd:
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] BitwiseOr:
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] BitwiseXor:
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] OnlyOne:
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] Or:
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] Xor:
-            //         - <TBA>
+            //         - <TBD>
                 
             // TODO: Add ruled for node specific reductions:
             //   - [ ] Mul:
@@ -76,30 +76,30 @@ sealed internal class Optimizer {
             // TODO: Add advanced mathematics simplification rules:
             //   - Simplify ANDs of ORs, DeMorgan's rule to reduce NOTs in ANDs and ORs, Sums of Products, etc
             //   - [ ] BitwiseNot:
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] Neg:
             //         - If parent is a Neg, remove both this node and parent, and replace with parent's parent (recheck for deep nesting)
             //         - If a value is being negated in a sum and the same value exists in the sum they can both be removed.
             //         - If parent is a sub, then replace it with a reversed sub, `Neg(Sub(X, Y)) => Sub(Y, X)`
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] Not:
             //         - If parent is a Not, remove both this node and parent, and replace with parent's parent (recheck for deep nesting)
             //         - If parent is NotEqual, remove both this node and parent, and replace with an Equal with the parent's parents
             //         - Same as previous but for other comparisons, e.g. `Not(GreaterThan(a, b))` => `LessThanOrEqual(a, b)`
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] NotEqual
-            //         - <TBA>
+            //         - <TBD>
             //   - [ ] Sub:
             //         - If parent is a Sub, remove both this node and parent, and replace with sum (recheck for deep nesting)
             //         - If sub is a parent in a sum, check for a new combination which cancels out the sub and combine subs
             //           with a neg sum if there are multiple subs.
-            //         - <TBA>
+            //         - <TBD>
 
             // TODO: Add rule for reusing existing nodes:
             //   - [ ] Find and replace repeat branches in the new nodes.
             //   - [ ] Find and replace existing duplicate branches defined on slate using constants and existing nodes.
             new RemoveUnreachable(),
-            new Validator()
+            new ActionValidator()
         };
 
     /// <summary>Performs optimization on the given nodes and surrounding nodes.</summary>

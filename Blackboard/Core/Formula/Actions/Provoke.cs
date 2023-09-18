@@ -70,7 +70,7 @@ sealed public class Provoke : IAction {
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Provoke: {0}", this);
         slate.PendEval(this.needPending);
-        slate.PerformEvaluation(logger.SubGroup(nameof(Provoke)));
+        slate.PerformEvaluation(logger.Group(nameof(Provoke)));
         slate.SetTrigger(this.Target, this.Trigger?.Provoked ?? true);
     }
 

@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Record;
 using BlackboardExamples.Controls;
 
@@ -42,7 +43,7 @@ public partial class PushBoard : UserControl {
                 if (result is not null && result.HasOutput) Console.WriteLine(result);
             }
             this.quickCommand.AcceptCurrent();
-        } catch (Exception ex) {
+        } catch (System.Exception ex) {
             Console.WriteLine(ex.Message);
         }
     }
@@ -78,11 +79,12 @@ public partial class PushBoard : UserControl {
             this.ctrls.Foreach(ctrl => ctrl.Connect(b));
             Result result = b.Perform(this.codeInput.Lines);
             if (result.HasOutput) Console.WriteLine(result);
+            b.Validate();
 
             this.runButton.Enabled = true;
             this.blackboard = b;
 
-        } catch (Exception ex) {
+        } catch (System.Exception ex) {
             this.ctrls.Foreach(ctrl => ctrl.Disconnect());
             this.runButton.Enabled = false;
             Console.WriteLine(ex.Message);

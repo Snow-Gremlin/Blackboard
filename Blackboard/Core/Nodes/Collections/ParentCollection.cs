@@ -80,8 +80,8 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
                 With("child", this.Child);
         if (this.HasVariable)
             m.With("variable count", this.VarCount).
-                With("maximum count", this.MinimumCount).
-                With("minimum count", this.MaximumCount);
+              With("maximum count",  this.MinimumCount).
+              With("minimum count",  this.MaximumCount);
         if (this.HasFixed) m.With("fixed count", this.VarCount);
         if (this.HasFixed && this.HasVariable) m.With("total count", this.Count);
         return m;

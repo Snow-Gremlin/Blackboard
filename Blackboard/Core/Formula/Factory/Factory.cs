@@ -168,11 +168,14 @@ sealed public class Factory {
             scope.RemoveFields(name);
         }
 
-        if (root is IInput)
-            root = Maker.CreateShell(root) ??
+        if (root is IInput) {
+            IChild shell = Maker.CreateShell(root) ??
                 throw new Message("The root for a define could not be shelled.").
                     With("Name", name).
                     With("Root", root);
+            shell.Legitimatize();
+            root = shell;
+        }
 
         this.actions.Add(new Define(scope.Receiver, name, root, newNodes));
         scope.WriteField(name, root);

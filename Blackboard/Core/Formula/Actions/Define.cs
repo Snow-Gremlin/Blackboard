@@ -55,7 +55,7 @@ sealed public class Define : IAction {
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Define: {0}", this);
-        Logger? sublogger = logger.SubGroup("DefineSteps");
+        Logger? sublogger = logger.Group("DefineSteps");
 
         INode? existing = this.Receiver.ReadField(this.Name);
         if (existing is not null) {
@@ -103,7 +103,7 @@ sealed public class Define : IAction {
                         With("Existing", existingExtern);
 
                 List<IChild> externChildren = existingExtern.Children.ToList();
-                List<IChild> movedChildren = externChildren.Where(
+                List<IChild> movedChildren  = externChildren.Where(
                     child => child.Parents.Replace(existingExtern, parent)).ToList();
                 slate.PendUpdate(movedChildren);
                 slate.PendEval(movedChildren);

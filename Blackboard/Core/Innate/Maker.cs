@@ -98,7 +98,7 @@ static public class Maker {
     /// <summary>Creates a new shell node to wrap the given node.</summary>
     /// <param name="type">The type of value to create a shell node for.</param>
     /// <returns>The newly created shell or null if an unexpected type.</returns>
-    static public INode? CreateShell(INode node) =>
+    static public IChild? CreateShell(INode node) =>
         node is IValueParent<Object> objectNode  ? new ShellValue<Object>(objectNode) :
         node is IValueParent<Bool>   boolNode    ? new ShellValue<Bool>  (boolNode) :
         node is IValueParent<Int>    intNode     ? new ShellValue<Int>   (intNode) :

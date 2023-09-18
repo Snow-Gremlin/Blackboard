@@ -63,7 +63,7 @@ public partial class ConsolePanel : TextBox {
     private static partial Regex lineSplitter();
 
     /// <summary>The maximum number of lines to keep in the console before throwing away old lines.</summary>
-    private const int lineLimit = 1_000_000;
+    private const int lineLimit = 10_000_000;
 
     /// <summary>The hook to inject </summary>
     private readonly ConsoleHook consoleHook;

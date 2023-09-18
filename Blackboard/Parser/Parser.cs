@@ -42,7 +42,7 @@ sealed public class Parser {
     public Parser(Slate slate, Logger? logger = null) {
         this.slate   = slate;
         this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle<Builder.Builder>>();
-        this.logger  = logger.SubGroup(nameof(Parser));
+        this.logger  = logger.Group(nameof(Parser));
 
         // Console.WriteLine(PP.Parser.Parser.GetDebugStateString(BaseParser.Grammar));
 

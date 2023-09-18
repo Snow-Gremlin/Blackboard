@@ -165,7 +165,7 @@ public class Slate: INodeReader, IReader, IWriter {
     /// <remarks>By performing the update the pending update list will be cleared.</remarks>
     /// <param name="logger">An optional logger for debugging this update.</param>
     public void PerformUpdates(Logger? logger = null) =>
-        this.pendingUpdate.UpdateDepths(logger.SubGroup(nameof(PerformUpdates)));
+        this.pendingUpdate.UpdateDepths(logger.Group(nameof(PerformUpdates)));
 
     #endregion
     #region Evaluate...
@@ -199,7 +199,7 @@ public class Slate: INodeReader, IReader, IWriter {
     /// <remarks>By performing the update the pending evaluation list will be cleared.</remarks>
     /// <param name="logger">An optional logger for debugging this evaluation.</param>
     public void PerformEvaluation(Logger? logger = null) =>
-        this.pendingEval.Evaluate(this.Finalization, logger.SubGroup(nameof(PerformEvaluation)));
+        this.pendingEval.Evaluate(this.Finalization, logger.Group(nameof(PerformEvaluation)));
 
     /// <summary>Finish evaluation by performing finalization.</summary>
     /// <param name="logger">An optional logger for debugging this finish.</param>

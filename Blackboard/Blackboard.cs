@@ -46,6 +46,10 @@ sealed public partial class Blackboard {
     public Result Perform(params string[] input) =>
         this.CreateFormula(input).Perform(this.logger);
 
+    /// <summary>Validates the blackboard's data.</summary>
+    /// <returns>True if valid, false otherwise.</returns>
+    public bool Validate() => Inspector.Validate(this.slate, this.logger);
+
     /// <summary>Groups several calls together.</summary>
     /// <remarks>
     /// Any formulas run or values set during this group will not reset triggers or

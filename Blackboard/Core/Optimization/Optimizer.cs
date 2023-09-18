@@ -110,7 +110,7 @@ sealed internal class Optimizer {
     /// <remarks>The node to replace the given root with or the given root.</remarks>
     public INode Optimize(Slate slate, INode root, HashSet<INode> nodes, Logger? logger = null) {
         string opName = nameof(Optimize);
-        Logger? opLogger = logger.Stringify(Stringifier.Deep())?.SubGroup(opName);
+        Logger? opLogger = logger.Stringify(Stringifier.Deep())?.Group(opName);
         opLogger.Info("Start {0}:", opName);
 
         int i = 0;
@@ -121,7 +121,7 @@ sealed internal class Optimizer {
 
             foreach (IRule rule in this.rules) {
                 string ruleName = rule.ToString() ?? "null";
-                Logger? ruleLogger = opLogger.SubGroup(ruleName);
+                Logger? ruleLogger = opLogger.Group(ruleName);
                 ruleLogger.Info("Start {0}: {1}", ruleName, root);
 
                 // Perform the rule on the given root and nodes.

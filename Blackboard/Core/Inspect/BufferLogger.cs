@@ -24,7 +24,7 @@ public class BufferLogger : Logger {
         this.Indent    = indent;
         this.ShowLevel = showLevel;
         this.ShowGroup = showGroup;
-        this.fout      = new StringWriter();
+        this.fout      = new();
     }
 
     /// <summary>Indicates the message should be indented by group depth.<</summary>
@@ -37,7 +37,7 @@ public class BufferLogger : Logger {
     public bool ShowGroup;
 
     /// <summary>Clears this logger.</summary>
-    public void Clear() => this.fout = new StringWriter();
+    public void Clear() => this.fout = new();
 
     /// <summary>This writes the given entry to the buffer.</summary>
     /// <param name="entry">The entry to write.</param>

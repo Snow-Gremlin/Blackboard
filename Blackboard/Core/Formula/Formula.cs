@@ -55,7 +55,7 @@ sealed public class Formula {
     /// <returns>The results of the formula being performed.</returns>
     public Record.Result Perform(Logger? logger = null) {
         logger.Info("Formula");
-        Logger? sub = logger.SubGroup(nameof(Formula));
+        Logger? sub = logger.Group(nameof(Formula));
         Record.Result result = new();
         foreach (IAction action in this.actions)
             action.Perform(this.Slate, result, sub);

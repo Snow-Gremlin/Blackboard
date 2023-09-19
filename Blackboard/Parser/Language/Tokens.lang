@@ -8,6 +8,8 @@
 (Start): '0' => (Zero);
 (Zero): '01' => (PossibleBin);
 (Start): '1' => (PossibleBin): '01' => (PossibleBin);
+(Zero): ^`_` => (UnderBin): `01` => (PossibleBin);
+(PossibleBin): ^`_` => (UnderBin);
 (Zero):        ^'b' => [Bin];
 (PossibleBin): ^'b' => [Bin];
 
@@ -15,6 +17,8 @@
 (Start):       '2'..'7' => (PossibleOct): '0'..'7' => (PossibleOct);
 (Zero):        '2'..'7' => (PossibleOct);
 (PossibleBin): '2'..'7' => (PossibleOct);
+(UnderBin):    '2'..'7' => (PossibleOct);
+(PossibleOct): ^'_' => (UnderOct): '0'..'7' => (PossibleOct);
 (Zero):        ^'o' => [Oct];
 (PossibleBin): ^'o' => [Oct];
 (PossibleOct): ^'o' => [Oct];
@@ -22,8 +26,11 @@
 # Integers (Decimal)
 (Start): '89' => (Int): '0'..'9' => (Int);
 (Zero):  '89' => (Int);
-(PossibleBin): '2'..'9' => (Int);
+(PossibleBin): '89' => (Int);
 (PossibleOct): '89' => (Int);
+(UnderBin):    '89' => (Int);
+(UnderOct):    '89' => (Int);
+(Int): ^'_' => (UnderInt): '0'..'9' => (Int);
 
 (Zero)        => [Int];
 (PossibleBin) => [Int];
@@ -36,6 +43,7 @@
 
 # Hexadecimals
 (Zero): 'x' => (HexStart): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
+(Hex): ^'_' => (UnderHex): '0'..'9', 'a'..'f', 'A'..'F' => (Hex);
 
 # Doubles
 (Zero):        '.' => (Decimal);
@@ -43,6 +51,7 @@
 (PossibleOct): '.' => (Decimal);
 (Int):         '.' => (Decimal);
 (Decimal): '0'..'9' => (DoubleDec): '0'..'9' => (DoubleDec) => [Double];
+(DecimalDec): ^'_' => (UnderDec): '0'..'9' => (DoubleDec);
 
 (Zero):        'eE' => (DoubleExpStart);
 (Int):         'eE' => (DoubleExpStart);
@@ -51,6 +60,7 @@
 (DoubleDec):   'eE' => (DoubleExpStart);
 (DoubleExpStart): '-' => (DoubleExpNeg): '0'..'9' => (DoubleExp);
 (DoubleExpStart): '0'..'9' => (DoubleExp): '0'..'9' => (DoubleExp) => [Double];
+(DoubleExp): ^'_' => (UnderExp): '0'..'9' => (DoubleExp);
 
 # Identifiers
 (Start): 'a'..'z', 'A'..'Z', '_$' => (Identifier): '0'..'9', 'a'..'z', 'A'..'Z', '_' => [Identifier];

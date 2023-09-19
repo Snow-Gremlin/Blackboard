@@ -13,7 +13,7 @@ namespace Blackboard.Core.Formula.Actions;
 /// Typically this is for defining a new node into the namespaces reachable from global.
 /// </summary>
 sealed public class Define : IAction {
-    
+
     /// <summary>
     /// This is a subset of all the node for this node to write which need to be
     /// added to parents their parents to make this node reactive to changes.

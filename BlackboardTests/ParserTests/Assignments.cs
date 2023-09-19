@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Actions;
+using Blackboard.Core.Formula;
 using Blackboard.Parser;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -210,11 +210,12 @@ public class Assignments {
         Parser parser = new(slate);
         Tools.TestTools.CheckException(() => parser.Read("in int A = 3.14;"),
            "Error occurred while parsing input code.",
-           "[Error: The value type can not be cast to the given type.",
+           "[Error: Error parsing input",
            "   [Location: Unnamed:1, 15, 15]",
-           "   [Target: int]",
-           "   [Type: double]",
-           "   [Value: <double>[3.14]]]");
+           "   [Error: The value type can not be cast to the given type.",
+           "      [Target: int]",
+           "      [Type: double]",
+           "      [Value: <double>[3.14]]]]");
     }
 
     [TestMethod]

@@ -1,11 +1,13 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Formula.Factory;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Record;
+using Blackboard.Core.Types;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,16 +17,13 @@ namespace Blackboard.Core;
 /// The slate stores all blackboard data via a node graph and
 /// perform evaluations/updates of change the values of the nodes.
 /// </summary>
-public class Slate: IReader, IWriter {
+public class Slate: INodeReader, IReader, IWriter {
 
     /// <summary>The nodes which have had one or more parent modified and they need to have their depth updated.</summary>
     private readonly LinkedList<IEvaluable> pendingUpdate;
 
     /// <summary>The nodes which have had one or more parent modified and they need to be reevaluated.</summary>
     private readonly LinkedList<IEvaluable> pendingEval;
-
-    /// <summary>The set of provoked triggers which need to be reset.</summary>
-    private readonly HashSet<ITrigger> needsReset;
 
     /// <summary>A collection of literals and constants used in the graph.</summary>
     /// <remarks>
@@ -37,21 +36,24 @@ public class Slate: IReader, IWriter {
     /// <param name="addFuncs">Indicates that built-in functions should be added.</param> 
     /// <param name="addConsts">Indicates that constants should be added.</param>
     public Slate(bool addFuncs = true, bool addConsts = true) {
-        this.pendingUpdate = new LinkedList<IEvaluable>();
-        this.pendingEval   = new LinkedList<IEvaluable>();
-        this.needsReset    = new HashSet<ITrigger>();
-        this.constants     = new HashSet<IConstant>(new NodeValueComparer<IConstant>());
-        this.Global        = new Namespace();
+        this.pendingUpdate = new();
+        this.pendingEval   = new();
+        this.constants     = new(new NodeValueComparer<IConstant>());
+        this.Finalization  = new();
+        this.Global        = new();
 
         Operators.Add(this.Global);
         if (addFuncs)  Functions.Add(this.Global);
         if (addConsts) Constants.Add(this.Global);
     }
+    
+    /// <summary>The sets of pending values after evaluation that need to be acted on.</summary>
+    public Finalization Finalization { get; }
 
     /// <summary>The base set of named nodes to access the total node structure.</summary>
     public Namespace Global { get; }
 
-    #region Record Getter and Setters...
+    #region Getter and Setters...
 
     /// <summary>Tries to get provoke state with the given name.</summary>
     /// <param name="names">The name of trigger node to get the state from.</param>
@@ -98,61 +100,8 @@ public class Slate: IReader, IWriter {
     /// <param name="provoke">True to provoke, false to reset.</param>
     public void SetTrigger(IEnumerable<string> names, bool provoke = true) =>
         this.SetTrigger(this.GetNode<ITriggerInput>(names), provoke);
-
-    #endregion
-    #region Node Getter and Setter...
-
-    /// <summary>Determines if the node with the given name exists.</summary>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode(params string[] names) =>
-        this.HasNode(names as IEnumerable<string>);
-
-    /// <summary>Determines if the node with the given name exists.</summary>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode(IEnumerable<string> names) =>
-        this.Global.Find(names) is not null;
-    
-    /// <summary>Determines if the node with the given name and type exists.</summary>
-    /// <typeparam name="T">The type of the node to check for.</typeparam>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode<T>(params string[] names) where T : INode =>
-        this.HasNode<T>(names as IEnumerable<string>);
-
-    /// <summary>Determines if the node with the given name and type exists.</summary>
-    /// <typeparam name="T">The type of the node to check for.</typeparam>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>True if a node by the given name exists, false otherwise</returns>
-    public bool HasNode<T>(IEnumerable<string> names) where T : INode =>
-        this.Global.Find(names) is not T;
-
-    /// <summary>Gets the node with the given name.</summary>
-    /// <typeparam name="T">The expected type of node to get.</typeparam>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>The node with the given name and type.</returns>
-    public T GetNode<T>(params string[] names) where T : INode =>
-        this.GetNode<T>(names as IEnumerable<string>);
-
-    /// <summary>Gets the node with the given name.</summary>
-    /// <remarks>This will throw an exception if no node by that name exists or the found node is the incorrect type.</remarks>
-    /// <typeparam name="T">The expected type of node to get.</typeparam>
-    /// <param name="names">The name of the node to get.</param>
-    /// <returns>The node with the given name and type.</returns>
-    public T GetNode<T>(IEnumerable<string> names) where T : INode =>
-        this.TryGetNode(names, out INode? node) ?
-            node is T result ? result :
-            throw new Message("The node found by the given name is not the expected type.").
-                With("Name", names.Join(".")).
-                With("Found", node).
-                With("Expected Type", typeof(T)) :
-            throw new Message("Unable to get a node by the given name.").
-                With("Name", names.Join(".")).
-                With("Value Type", typeof(T));
-
+      
     /// <summary>Tries to get the node with the given node.</summary>
-    /// <typeparam name="T">The expected type of node to get.</typeparam>
     /// <param name="names">The name of the node to get.</param>
     /// <param name="node">The returned node for the given name or null.</param>
     /// <returns>True if the node was found, false otherwise.</returns>
@@ -185,53 +134,8 @@ public class Slate: IReader, IWriter {
     public void SetTrigger(ITriggerInput input, bool provoke = true) {
         if (input.Provoke(provoke)) {
             this.PendEval(input.Children);
-            this.NeedsReset(input);
+            this.Finalization.Add(input);   
         }
-    }
-
-    #endregion
-    #region Output...
-
-    /// <summary>Gets or creates a new output value on the node with the given name.</summary>
-    /// <typeparam name="T">The data type of the value to output.</typeparam>
-    /// <param name="names">The name of the node to look up.</param>
-    /// <returns>The new or existing value output.</returns>
-    public IValueOutput<T> GetOutputValue<T>(params string[] names)
-        where T : struct, IEquatable<T> =>
-        this.GetOutputValue<T>(names as IEnumerable<string>);
-
-    /// <summary>Gets or creates a new output value on the node with the given name.</summary>
-    /// <typeparam name="T">The data type of the value to output.</typeparam>
-    /// <param name="names">The name of the node to look up.</param>
-    /// <returns>The new or existing value output.</returns>
-    public IValueOutput<T> GetOutputValue<T>(IEnumerable<string> names)
-        where T : struct, IEquatable<T> {
-        IValueParent<T> parent = this.GetNode<IValueParent<T>>(names);
-        IValueOutput<T>? output = parent.Children.OfType<IValueOutput<T>>().FirstOrDefault();
-        if (output is not null) return output;
-
-        output = new OutputValue<T>(parent);
-        output.Legitimatize();
-        return output;
-    }
-
-    /// <summary>Gets or creates a new output trigger on the node with the given name.</summary>
-    /// <param name="names">The name of the node to look up.</param>
-    /// <returns>The new or existing trigger output.</returns>
-    public ITriggerOutput GetOutputTrigger(params string[] names) =>
-        this.GetOutputTrigger(names as IEnumerable<string>);
-
-    /// <summary>Gets or creates a new output trigger on the node with the given name.</summary>
-    /// <param name="names">The name of the node to look up.</param>
-    /// <returns>The new or existing trigger output.</returns>
-    public ITriggerOutput GetOutputTrigger(IEnumerable<string> names) {
-        ITriggerParent parent = this.GetNode<ITriggerParent>(names);
-        ITriggerOutput? output = parent.Children.OfType<ITriggerOutput>().FirstOrDefault();
-        if (output is not null) return output;
-
-        output = new OutputTrigger(parent);
-        output.Legitimatize();
-        return output;
     }
 
     #endregion
@@ -261,7 +165,7 @@ public class Slate: IReader, IWriter {
     /// <remarks>By performing the update the pending update list will be cleared.</remarks>
     /// <param name="logger">An optional logger for debugging this update.</param>
     public void PerformUpdates(Logger? logger = null) =>
-        this.pendingUpdate.UpdateDepths(logger.SubGroup(nameof(PerformUpdates)));
+        this.pendingUpdate.UpdateDepths(logger.Group(nameof(PerformUpdates)));
 
     #endregion
     #region Evaluate...
@@ -295,30 +199,99 @@ public class Slate: IReader, IWriter {
     /// <remarks>By performing the update the pending evaluation list will be cleared.</remarks>
     /// <param name="logger">An optional logger for debugging this evaluation.</param>
     public void PerformEvaluation(Logger? logger = null) =>
-        this.NeedsReset(this.pendingEval.Evaluate(logger.SubGroup(nameof(PerformEvaluation))));
+        this.pendingEval.Evaluate(this.Finalization, logger.Group(nameof(PerformEvaluation)));
+
+    /// <summary>Finish evaluation by performing finalization.</summary>
+    /// <param name="logger">An optional logger for debugging this finish.</param>
+    public void FinishEvaluation(Logger? logger = null) => this.Finalization.Perform(logger);
 
     #endregion
-    #region Needs Reset...
+    #region Input and Output...
 
-    /// <summary>This adds provoked trigger nodes which need to be reset.</summary>
-    /// <param name="nodes">The provoked trigger nodes to add.</param>
-    public void NeedsReset(params ITrigger[] nodes) =>
-        this.PendEval(nodes as IEnumerable<ITrigger>);
+    /// <summary>Gets or creates a new input node with the given name.</summary>
+    /// <param name="type">The type of the output to create.</param>
+    /// <param name="names">The name of the node to look up.</param>
+    /// <returns>The new or existing input node.</returns>
+    public IInput GetInput(Type type, IEnumerable<string> names) =>
+        this.GetInput(type, names.ToArray());
+    
+    /// <summary>Gets or creates a new input node with the given name.</summary>
+    /// <param name="type">The type of the output to create.</param>
+    /// <param name="names">The name of the node to look up.</param>
+    /// <returns>The new or existing input node.</returns>
+    public IInput GetInput(Type type, params string[] names) {
+        if (!this.TryGetNode(names, out INode? node) || node is IExtern) {
+            int max = names.Length-1;
+            Factory factory = new(this);
+            for (int i = 0; i < max; ++i)
+                factory.PushNamespace(names[i]);
+            factory.CreateInput(names[max], type);
+            factory.Build().Perform();
+        }
 
-    /// <summary>This adds provoked trigger nodes which need to be reset.</summary>
-    /// <param name="nodes">The provoked trigger nodes to add.</param>
-    public void NeedsReset(IEnumerable<ITrigger> nodes) => nodes.NotNull().
-        Where(trig => trig.Provoked).Foreach(this.needsReset.Add);
-
-    /// <summary>This will reset all provoked trigger nodes which have been added.</summary>
-    /// <remarks>The needs reset set will be cleared by this call.</remarks>
-    public void ResetTriggers() {
-        this.needsReset.Reset();
-        this.needsReset.Clear();
+        IInput input = this.GetNode<IInput>(names);
+        Type found = Type.TypeOf(input) ??
+            throw new Message("Unable to find type of found input node.").
+                With("node",  input).
+                With("type",  type).
+                With("names", names.Join("."));
+        return found == type ? input :
+            throw new Message("The existing input type didn't match the requested type").
+                With("found", found).
+                With("type",  type).
+                With("names", names.Join("."));
     }
 
-    /// <summary>Indicates if there are any provoked triggers which need results.</summary>
-    public bool HasTriggersNeedingReset => this.needsReset.Count > 0;
+    /// <summary>Gets or creates a new output node on the node with the given name.</summary>
+    /// <param name="type">The type of the output to create.</param>
+    /// <param name="value">Optional default value to set to the output if it doesn't exist yet.</param>
+    /// <param name="names">The name of the node to look up.</param>
+    /// <returns>The new or existing output node.</returns>
+    public IOutput GetOutput(Type type, INode? value, IEnumerable<string> names) =>
+        this.GetOutput(type, value, names.ToArray());
+
+    /// <summary>Gets or creates a new output node on the node with the given name.</summary>
+    /// <param name="type">The type of the output to create.</param>
+    /// <param name="value">Optional default value to set to the output if it doesn't exist yet.</param>
+    /// <param name="names">The name of the node to look up.</param>
+    /// <returns>The new or existing output node.</returns>
+    public IOutput GetOutput(Type type, INode? value, params string[] names) {
+        if (!this.HasNode(names)) {
+            int max = names.Length-1;
+            Factory factory = new(this);
+            for (int i = 0; i < max; ++i)
+                factory.PushNamespace(names[i]);
+            (INode node, bool isExtern) = factory.RequestExtern(names[max], type);
+            if (isExtern && value is not null) factory.AddAssignment(node, value);
+            factory.Build().Perform();
+        }
+
+        IParent  parent = this.GetNode<IParent>(names);
+        IOutput? output = parent.Children.OfType<IOutput>().FirstOrDefault();
+        if (output is not null) {
+            Type found = Type.TypeOf(output) ??
+                throw new Message("Unable to find type of found output node.").
+                    With("node",  output).
+                    With("type",  type).
+                    With("names", names.Join("."));
+            return found == type ? output :
+                throw new Message("The existing output type didn't match the requested type").
+                    With("found", found).
+                    With("type",  type).
+                    With("names", names.Join("."));
+        }
+
+        output = Maker.CreateOutputNode(type) ??
+            throw new Message("Unable to create output node of given type").
+                With("type",  type).
+                With("names", names.Join("."));
+        output.Parents[0] = parent;
+        output.Legitimatize();
+        this.PendEval(output);
+        this.PerformEvaluation();
+        this.FinishEvaluation();
+        return output;
+    }
 
     #endregion
     #region Constants...

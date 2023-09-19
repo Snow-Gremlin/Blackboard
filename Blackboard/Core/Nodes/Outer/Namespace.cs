@@ -12,8 +12,7 @@ sealed public class Namespace : IFieldWriter {
     private readonly SortedDictionary<string, INode> fields;
 
     /// <summary>Creates a new namespace.</summary>
-    public Namespace() =>
-        this.fields = new SortedDictionary<string, INode>();
+    public Namespace() => this.fields = new SortedDictionary<string, INode>();
 
     /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>
     /// <returns>The new instance of this node.</returns>

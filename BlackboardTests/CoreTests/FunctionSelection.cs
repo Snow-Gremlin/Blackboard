@@ -27,17 +27,19 @@ public class FunctionSelection {
             this.stringifier.PreLoadNames(slate);
             this.stringifier.ShowFirstDataValues = false;
                 
-            this.group = slate.Global.Find(names) as FuncGroup;
-            Assert.IsNotNull(this.group);
+            FuncGroup? group = slate.Global.Find(names) as FuncGroup;
+            Assert.IsNotNull(group);
+            this.group = group ??
+                throw new System.Exception("Group may not be null");
             this.funcName = names.Join(".");
 
             this.nodes = new Dictionary<string, INode>();
             this.addNode("T", new InputTrigger());
-            this.addNode("O", new InputValue<Object>());
-            this.addNode("B", new InputValue<Bool>());
-            this.addNode("I", new InputValue<Int>());
-            this.addNode("D", new InputValue<Double>());
-            this.addNode("S", new InputValue<String>());
+            this.addNode("O", new InputValue<Object, object?>());
+            this.addNode("B", new InputValue<Bool,   bool>());
+            this.addNode("I", new InputValue<Int,    int>());
+            this.addNode("D", new InputValue<Double, double>());
+            this.addNode("S", new InputValue<String, string>());
         }
 
         private void addNode(string name, INode node) {
@@ -46,7 +48,7 @@ public class FunctionSelection {
         }
 
         public void Test(string nodeNames, string exp) {
-            INode[] nodes = nodeNames.SplitAndTrim(",").Select(this.nodes.GetValueOrDefault).ToArray();
+            INode[] nodes = nodeNames.SplitAndTrim(",").Select(this.nodes.GetValueOrDefault).NotNull().ToArray();
             string result = this.stringifier.Stringify(this.group.Build(nodes));
             Assert.AreEqual(exp, result, "For "+this.funcName + "(" + nodeNames + ")");
         }

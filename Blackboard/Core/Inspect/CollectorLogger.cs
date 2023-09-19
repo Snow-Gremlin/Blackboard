@@ -14,7 +14,7 @@ public class CollectorLogger : Logger {
     /// <summary>Creates a new message collector logger.</summary>
     /// <param name="next">The next logger the entry is passed to.</param>
     public CollectorLogger(Logger? next = null) : base(next) =>
-        this.entries = new List<Entry>();
+        this.entries = new();
 
     /// <summary>Clears this collection.</summary>
     public void Clear() => this.entries.Clear();

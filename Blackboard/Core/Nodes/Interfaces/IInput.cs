@@ -7,4 +7,4 @@
 /// Some inputs will have parents, they are simply assignable types, like a latch,
 /// which means they can be modified by input not just the parents.
 /// </remarks>
-public interface IInput : IOutput, IParent { }
+public interface IInput : IParent { }

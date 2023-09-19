@@ -73,7 +73,7 @@ static class ResultExt {
     /// <param name="result">This is the parse result to check the value with.</param>
     /// <param name="exp">The expected string value.</param>
     /// <param name="names">The name of the variable to get.</param>
-    static public Result CheckObject(this Result result, object exp, params string[] names) {
+    static public Result CheckObject(this Result result, object? exp, params string[] names) {
         Assert.AreEqual(exp, result.GetObject(names), checkValueMsg("object", names));
         return result;
     }   

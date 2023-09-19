@@ -32,8 +32,8 @@ static public class LoggerExt {
     /// <summary>This adds a new group which is internal to the current entry.</summary>
     /// <param name="inner">The logger to call into from the returned logger.</param>
     /// <param name="label">The label to add to the entry path.</param>
-    /// <returns>The logger for these sub-entries.</returns>
-    static public Logger? SubGroup(this Logger? inner, string label) =>
+    /// <returns>The logger for these grouped entries.</returns>
+    static public Logger? Group(this Logger? inner, string label) =>
         inner is null ? null :
         new(inner, (Entry entry) => {
             entry.AddToGroup(label);
@@ -47,15 +47,6 @@ static public class LoggerExt {
         inner is null ? null :
         new(inner, (Entry entry) =>
         !entry.MatchGroups(false, labels));
-
-    /// <summary>Removes all sub-entry to the group with the given labels.</summary>
-    /// <param name="inner">The logger to call into from the returned logger.</param>
-    /// <param name="labels">The labels of the entry to remove sub-entries from.</param>
-    /// <returns>The logger which filters the group.</returns>
-    static public Logger? FilterSubGroups(this Logger? inner, params string[] labels) =>
-        inner is null ? null :
-        new(inner, (Entry entry) =>
-        !entry.MatchGroups(true, labels));
 
     /// <summary>Removes all entries which do not start with the given labels.</summary>
     /// <param name="inner">The logger to call into from the returned logger.</param>
@@ -96,6 +87,12 @@ static public class LoggerExt {
     /// <param name="inner">The logger to call into from the returned logger.</param>
     /// <returns>The logger which will collect entries in a list.</returns>
     static public CollectorLogger? Collector(this Logger? inner) =>
+        inner is null ? null : new(inner);
+
+    /// <summary>This creates a logger which counts the message levels.</summary>
+    /// <param name="inner">The logger to call into from the returned logger.</param>
+    /// <returns>The logger which will count message levels.</returns>
+    static public LogCounter? Counter(this Logger? inner) =>
         inner is null ? null : new(inner);
 
     #endregion

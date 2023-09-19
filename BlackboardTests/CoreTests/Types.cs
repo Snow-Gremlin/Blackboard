@@ -24,13 +24,13 @@ public class Types {
     [TestMethod]
     [TestTag("bool")]
     public void TestTypes_bool() {
-        new InputValue<Bool>().CheckTypeOf(Type.Bool);
+        new InputValue<Bool, bool>().CheckTypeOf(Type.Bool);
         Type.Bool.
             CheckInheritors("toggler, latch-bool").
             CheckImplicits("trigger, object, string").
             CheckExplicits("");
 
-        InputValue<Bool> node = new();
+        InputValue<Bool, bool> node = new();
         node.CheckInherit (Type.Node, 1);
         node.CheckImplicit(Type.Trigger, 0, "BoolAsTrigger<trigger>[](Input<bool>)");
         node.CheckImplicit(Type.Object, 0, "Implicit<object>[null](Input<bool>)");
@@ -94,7 +94,7 @@ public class Types {
     [TestMethod]
     [TestTag("double")]
     public void TestTypes_double() {
-        new InputValue<Double>().CheckTypeOf(Type.Double);
+        new InputValue<Double, double>().CheckTypeOf(Type.Double);
         Type.Double.
             CheckInheritors("counter-double, latch-double").
             CheckImplicits("object, string").
@@ -104,7 +104,7 @@ public class Types {
     [TestMethod]
     [TestTag("float")]
     public void TestTypes_float() {
-        new InputValue<Float>().CheckTypeOf(Type.Float);
+        new InputValue<Float, float>().CheckTypeOf(Type.Float);
         Type.Float.
             CheckInheritors("").
             CheckImplicits("object, double, string").
@@ -134,7 +134,7 @@ public class Types {
     [TestMethod]
     [TestTag("int")]
     public void TestTypes_int() {
-        new InputValue<Int>().CheckTypeOf(Type.Int);
+        new InputValue<Int, int>().CheckTypeOf(Type.Int);
         Type.Int.
             CheckInheritors("counter-int, latch-int").
             CheckImplicits("object, double, float, string").
@@ -144,7 +144,7 @@ public class Types {
     [TestMethod]
     [TestTag("uint")]
     public void TestTypes_uint() {
-        new InputValue<Uint>().CheckTypeOf(Type.Uint);
+        new InputValue<Uint, uint>().CheckTypeOf(Type.Uint);
         Type.Uint.
             CheckInheritors("").
             CheckImplicits("object, double, float, string").
@@ -241,7 +241,7 @@ public class Types {
     [TestMethod]
     [TestTag("object")]
     public void TestTypes_object() {
-        new InputValue<Object>().CheckTypeOf(Type.Object);
+        new InputValue<Object, object?>().CheckTypeOf(Type.Object);
         Type.Object.
             CheckInheritors("latch-object").
             CheckImplicits("string").
@@ -251,7 +251,7 @@ public class Types {
     [TestMethod]
     [TestTag("string")]
     public void TestTypes_string() {
-        new InputValue<String>().CheckTypeOf(Type.String);
+        new InputValue<String, string>().CheckTypeOf(Type.String);
         Type.String.
             CheckInheritors("latch-string").
             CheckImplicits("object").

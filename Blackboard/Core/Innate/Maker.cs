@@ -1,7 +1,7 @@
-﻿using Blackboard.Core.Actions;
-using Blackboard.Core.Data.Caps;
+﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Formula.Actions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
@@ -71,13 +71,13 @@ static public class Maker {
     /// <param name="type">The type of value to create an input node for.</param>
     /// <returns>The newly created input or null if an unexpected type.</returns>
     static public IInput? CreateInputNode(Type type) =>
-        type == Type.Object  ? new InputValue<Object>() :
-        type == Type.Bool    ? new InputValue<Bool>() :
-        type == Type.Int     ? new InputValue<Int>() :
-        type == Type.Uint    ? new InputValue<Uint>() :
-        type == Type.Float   ? new InputValue<Float>() :
-        type == Type.Double  ? new InputValue<Double>() :
-        type == Type.String  ? new InputValue<String>() :
+        type == Type.Object  ? new InputValue<Object, object?>() :
+        type == Type.Bool    ? new InputValue<Bool,   bool>() :
+        type == Type.Int     ? new InputValue<Int,    int>() :
+        type == Type.Uint    ? new InputValue<Uint,   uint>() :
+        type == Type.Float   ? new InputValue<Float,  float>() :
+        type == Type.Double  ? new InputValue<Double, double>() :
+        type == Type.String  ? new InputValue<String, string>() :
         type == Type.Trigger ? new InputTrigger() :
         null;
 
@@ -98,30 +98,61 @@ static public class Maker {
     /// <summary>Creates a new shell node to wrap the given node.</summary>
     /// <param name="type">The type of value to create a shell node for.</param>
     /// <returns>The newly created shell or null if an unexpected type.</returns>
-    static public INode? CreateShell(INode node) =>
+    static public IChild? CreateShell(INode node) =>
         node is IValueParent<Object> objectNode  ? new ShellValue<Object>(objectNode) :
-        node is IValueParent<Bool>   boolNode    ? new ShellValue<Bool>(boolNode) :
-        node is IValueParent<Int>    intNode     ? new ShellValue<Int>(intNode) :
-        node is IValueParent<Uint>   uintNode    ? new ShellValue<Uint>(uintNode) :
-        node is IValueParent<Float>  floatNode   ? new ShellValue<Float>(floatNode) :
+        node is IValueParent<Bool>   boolNode    ? new ShellValue<Bool>  (boolNode) :
+        node is IValueParent<Int>    intNode     ? new ShellValue<Int>   (intNode) :
+        node is IValueParent<Uint>   uintNode    ? new ShellValue<Uint>  (uintNode) :
+        node is IValueParent<Float>  floatNode   ? new ShellValue<Float> (floatNode) :
         node is IValueParent<Double> doubleNode  ? new ShellValue<Double>(doubleNode) :
         node is IValueParent<String> stringNode  ? new ShellValue<String>(stringNode) :
-        node is ITriggerParent       triggerNode ? new ShellTrigger(triggerNode) :
+        node is ITriggerParent       triggerNode ? new ShellTrigger      (triggerNode) :
         null;
+
+    /// <summary>Creates a new IData for the given C# value.</summary>
+    /// <param name="value">The C# value to create an IData for.</param>
+    /// <returns>The IData for the given C# value.</returns>
+    static public IData WrapData<T>(T value) =>
+        value switch {
+            IData  x => x, 
+            bool   b => new Bool  (b),
+            int    i => new Int   (i),
+            uint   u => new Uint  (u),
+            float  f => new Float (f),
+            double d => new Double(d),
+            string s => new String(s),
+            object o => new Object(o),
+            _        => throw new Message("Unexpected value type in IData creation").
+                           With("Value", value)
+        };
 
     /// <summary>Creates a new constant for the given value.</summary>
     /// <param name="value">The value to create a constant for.</param>
     /// <returns>The constant for the given value.</returns>
     static public IConstant CreateConstant(IData value) =>
         value switch {
-            Bool   b => new Literal<Bool>(b),
-            Int    i => new Literal<Int>(i),
-            Uint   u => new Literal<Uint>(u),
-            Float  f => new Literal<Float>(f),
+            Bool   b => new Literal<Bool>  (b),
+            Int    i => new Literal<Int>   (i),
+            Uint   u => new Literal<Uint>  (u),
+            Float  f => new Literal<Float> (f),
             Double d => new Literal<Double>(d),
             String s => new Literal<String>(s),
             Object o => new Literal<Object>(o),
             _        => throw new Message("Unexpected value type in literal creation").
                            With("Value", value)
         };
+    
+    /// <summary>Creates a new output node of the given type.</summary>
+    /// <param name="type">The type of value to create an output node for.</param>
+    /// <returns>The newly created output or null if an unexpected type.</returns>
+    static public IOutput? CreateOutputNode(Type type) =>
+        type == Type.Object  ? new OutputValue<Object, object?>() :
+        type == Type.Bool    ? new OutputValue<Bool,   bool>() :
+        type == Type.Int     ? new OutputValue<Int,    int>() :
+        type == Type.Uint    ? new OutputValue<Uint,   uint>() :
+        type == Type.Float   ? new OutputValue<Float,  float>() :
+        type == Type.Double  ? new OutputValue<Double, double>() :
+        type == Type.String  ? new OutputValue<String, string>() :
+        type == Type.Trigger ? new OutputTrigger() :
+        null;
 }

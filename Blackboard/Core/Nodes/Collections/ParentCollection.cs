@@ -14,180 +14,8 @@ namespace Blackboard.Core.Nodes.Collections;
 /// For example, if a number is the sum of itself (x + x), then the Sum node will return the 'x' parent twice.
 /// Since null parents are removed, this list may not be the same as the Count even if fixed.
 /// </remarks>
-sealed public class ParentCollection : IEnumerable<IParent> {
-    #region Parent Parameters...
-
-    // TODO: Break up this file into multiple partials if possible
-
-    /// <summary>The definition for a single fixed parent container.</summary>
-    private interface IFixedParent {
-
-        /// <summary>Gets the type of the container.</summary>
-        public S.Type Type { get; }
-
-        /// <summary>Gets or set the parent.</summary>
-        public IParent? Node { get; set; }
-    }
-
-    /// <summary>This is a single fixed parent container.</summary>
-    /// <typeparam name="T">The type of the parent that is being set.</typeparam>
-    private class FixedParent<T> : IFixedParent
-            where T : class, IParent {
-        private IParent? cachedParent;
-        private readonly S.Func<T?> getParent;
-        private readonly S.Action<T?> setParent;
-
-        /// <summary>Creates a new fixed parent container using the given getter or setter.</summary>
-        /// <param name="getParent">The getter to get the parent value from the child.</param>
-        /// <param name="setParent">The setter to set a parent value to the child.</param>
-        public FixedParent(S.Func<T?> getParent, S.Action<T?> setParent) {
-            this.cachedParent = null;
-            this.getParent = getParent;
-            this.setParent = setParent;
-        }
-
-        /// <summary>Gets the type of the parent.</summary>
-        public S.Type Type => typeof(T);
-
-        /// <summary>Gets or sets the parent.</summary>
-        /// <remarks>
-        /// This parent must be able to case to the container type.
-        /// It is known that if the parent is null, then the cache can not provide improvement.
-        /// </remarks>
-        public IParent? Node {
-            get => this.cachedParent ??= this.getParent();
-            set {
-                this.cachedParent = value;
-                this.setParent(value as T);
-            }
-        }
-    }
-
-    /// <summary>The definition for all variable parent container.</summary>
-    private interface IVarParent : IEnumerable<IParent> {
-
-        /// <summary>Gets the type of the container.</summary>
-        public S.Type Type { get; }
-
-        /// <summary>The inclusive minimum allowed number of variable parents.</summary>
-        public int Minimum { get; }
-
-        /// <summary>The inclusive maximum allowed number of variable parents.</summary>
-        public int Maximum { get; }
-
-        /// <summary>This gets the number of variable parents.</summary>
-        public int Count { get; }
-
-        /// <summary>This gets or sets the parent at the given index.</summary>
-        /// <remarks>When setting the parent, the parent must be the type of this collection.</remarks>
-        /// <param name="index">The index for the parent to get or set.</param>
-        /// <returns>The parent at the given index.</returns>
-        public IParent this[int index] { get; set; }
-
-        /// <summary>This adds a new parent to the end of the variable parents.</summary>
-        /// <remarks>
-        /// This will NOT check if this will make the list go above the maximum value.
-        /// When setting the parent, the parent must be the type of this collection.
-        /// </remarks>
-        /// <param name="item">This is the parent to add.</param>
-        public void Add(IParent item);
-
-        /// <summary>This inserts parents into the list at the given index.</summary>
-        /// <remarks>
-        /// This will NOT check if this will make the list go above the maximum value.
-        /// When setting the parent, the parent must be the type of this collection.
-        /// </remarks>
-        /// <param name="index">The index to insert the parents at.</param>
-        /// <param name="parents">The parents to insert into the list.</param>
-        public void Insert(int index, IEnumerable<IParent> parents);
-
-        /// <summary>This removes parents starting from the given index.</summary>
-        /// <remarks>This will NOT check if this will make the list go below the minimum value.</remarks>
-        /// <param name="index">The index of the parents to remove.</param>
-        /// <param name="count">The number of parents to remove.</param>
-        public void Remove(int index, int count);
-    }
-
-    /// <summary>This is a variable parent container.</summary>
-    /// <typeparam name="T">The type of the parent that is being set.</typeparam>
-    private class VarParent<T> : IVarParent
-            where T : class, IParent {
-        private readonly List<T> source;
-
-        /// <summary>Creates a new variable parent container using the given list.</summary>
-        /// <param name="source">The list of parents to read from and modify.</param>
-        /// <param name="min">The optional inclusive minimum allowed number of variable parents.</param>
-        /// <param name="max">The optional inclusive maximum allowed number of variable parents.</param>
-        public VarParent(List<T> source, int min = 0, int max = int.MaxValue) {
-            this.source = source;
-            this.Type = typeof(T);
-            if (min < 0 || max < min)
-                throw new Message("Invalid minimum and maximum range for variable parents collection.").
-                    With("min", min).
-                    With("max", max);
-            this.Minimum = min;
-            this.Maximum = max;
-        }
-
-        /// <summary>Gets the type of the parents.</summary>
-        public S.Type Type { get; }
-
-        /// <summary>The inclusive minimum allowed number of variable parents.</summary>
-        public int Minimum { get; }
-
-        /// <summary>The inclusive maximum allowed number of variable parents.</summary>
-        public int Maximum { get; }
-
-        /// <summary>This gets the number of variable parents.</summary>
-        public int Count => this.source.Count;
-
-        /// <summary>This gets or sets the parent at the given index.</summary>
-        /// <remarks>When setting the parent, the parent must be the type of this collection.</remarks>
-        /// <param name="index">The index for the parent to get or set.</param>
-        /// <returns>The parent at the given index.</returns>
-        public IParent this[int index] {
-            get => this.source[index];
-            set => this.source[index] = value as T ??
-                throw new Message("Given parent can not be cast into variable parent type.").
-                    With("index", index).
-                    With("type", typeof(T)).
-                    With("parent", value);
-        }
-
-        /// <summary>This adds a new parent to the end of the variable parents.</summary>
-        /// <remarks>
-        /// This will NOT check if this will make the list go above the maximum value.
-        /// When setting the parent, the parent must be the type of this collection.
-        /// </remarks>
-        /// <param name="item">This is the parent to add.</param>
-        public void Add(IParent item) => this.source.Add(item as T ??
-            throw new Message("Given parent can not be cast into variable parent type.").
-                With("type", typeof(T)).
-                With("parent", item));
-
-        /// <summary>This inserts parents into the list at the given index.</summary>
-        /// <remarks>
-        /// This will NOT check if this will make the list go above the maximum value.
-        /// When setting the parent, the parent must be the type of this collection.
-        /// </remarks>
-        /// <param name="index">The index to insert the parents at.</param>
-        /// <param name="parents">The parent to insert into the list.</param>
-        public void Insert(int index, IEnumerable<IParent> parents) => this.source.InsertRange(index, parents.OfType<T>());
-
-        /// <summary>This removes parents starting from the given index.</summary>
-        /// <remarks>This will NOT check if this will make the list go below the minimum value.</remarks>
-        /// <param name="index">The index of the parents to remove.</param>
-        /// <param name="count">The number of parents to remove.</param>
-        public void Remove(int index, int count) => this.source.RemoveRange(index, count);
-
-        /// <summary>Gets the enumerator of the variable parents.</summary>
-        /// <returns>The enumerator of the variable parents.</returns>
-        public IEnumerator<IParent> GetEnumerator() => this.source.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-    }
-
-    #endregion
-
+sealed public partial class ParentCollection : IEnumerable<IParent> {
+ 
     /// <summary>The parameters for each fixed parent in this collection.</summary>
     private readonly List<IFixedParent> fixedParents;
 
@@ -252,8 +80,8 @@ sealed public class ParentCollection : IEnumerable<IParent> {
                 With("child", this.Child);
         if (this.HasVariable)
             m.With("variable count", this.VarCount).
-                With("maximum count", this.MinimumCount).
-                With("minimum count", this.MaximumCount);
+              With("maximum count",  this.MinimumCount).
+              With("minimum count",  this.MaximumCount);
         if (this.HasFixed) m.With("fixed count", this.VarCount);
         if (this.HasFixed && this.HasVariable) m.With("total count", this.Count);
         return m;
@@ -318,42 +146,46 @@ sealed public class ParentCollection : IEnumerable<IParent> {
 
     /// <summary>This gets the type of the parent at the given index.</summary>
     /// <param name="index">The index to get the parent's type of.</param>
-    /// <returns>The type of the parent at the given index.s</returns>
+    /// <returns>The type of the parent at the given index.</returns>
     public S.Type TypeAt(int index) =>
         (index < 0 || (!this.HasVariable && index >= this.FixedCount) ?
         throw this.message("Index out of bounds of node's parent types.").
             With("index", index) :
         index < this.FixedCount ? this.fixedParents[index].Type :
         this.varParents?.Type) ??
-        throw this.message("Null parent from node's parent types.");
+            throw this.message("Null parent from node's parent types.");
 
     /// <summary>This gets or sets the parent at the given location.</summary>
     /// <remarks>This will throw an exception if out-of-bounds or wrong type.</remarks>
     /// <param name="index">The index to get or set from.</param>
-    /// <returns>The parent gotten from the given index.</returns>
-    public IParent this[int index] {
-        get => (index < 0 || index >= this.Count ?
+    /// <returns>The parent gotten from the given index. A parent maybe null.</returns>
+    public IParent? this[int index] {
+        get => index < 0 || index >= this.Count ?
             throw this.message("Index out of bounds of node's parents.").
                 With("index", index) :
             index < this.FixedCount ? this.fixedParents[index].Node :
-            this.varParents?[index - this.FixedCount]) ??
-            throw this.message("Null parent from node's parents.");
+                this.varParents?[index - this.FixedCount];
         set {
             IParent? parent = this[index]; // This also will check bounds
             if (ReferenceEquals(parent, value)) return;
 
-            S.Type? type = this.TypeAt(index);
-            if (value.GetType().IsAssignableTo(type))
-                throw this.message("Incorrect type of a parent being set to a node.").
-                    With("index", index).
-                    With("expected type", type).
-                    With("new parent", value);
+            if (value is not null) {
+                S.Type? type = this.TypeAt(index);
+                if (!value.GetType().IsAssignableTo(type))
+                    throw this.message("Incorrect type of a parent being set to a node.").
+                        With("index", index).
+                        With("expected type", type).
+                        With("new parent", value);
+            }
 
             bool removed = parent?.RemoveChildren(this.Child) ?? false;
             if (index < this.FixedCount)
                 this.fixedParents[index].Node = value;
-            else if (this.varParents is not null)
-                this.varParents[index - this.FixedCount] = value;
+            else if (this.varParents is not null) {
+                if (value is null)
+                    this.varParents.Remove(index - this.FixedCount);
+                else this.varParents[index - this.FixedCount] = value;
+            }
             if (removed) value?.AddChildren(this.Child);
         }
     }

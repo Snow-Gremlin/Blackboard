@@ -3,6 +3,7 @@ using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Outer;
+using Blackboard.Core.Nodes.Collections;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using S = System;
@@ -14,16 +15,16 @@ public class Nodes {
 
     [TestMethod]
     public void TestAddNodes() {
-        InputValue<Bool> input1 = new();
-        InputValue<Bool> input2 = new();
-        InputValue<Bool> input3 = new();
+        InputValue<Bool, bool> input1 = new();
+        InputValue<Bool, bool> input2 = new();
+        InputValue<Bool, bool> input3 = new();
         And and12  = new(input1, input2);
         Or  or123  = new(and12, input3);
         Not not123 = new(or123);
 
         not123.LegitimatizeAll();
         not123.UpdateAllParents();
-        not123.EvaluateAllParents();
+        not123.EvaluateAllParents(new Finalization());
 
         and12 .CheckString("And<bool>[false](Input<bool>, Input<bool>)");
         not123.CheckString("Not<bool>[true](Or<bool>(And<bool>, Input<bool>))");
@@ -42,16 +43,16 @@ public class Nodes {
 
     [TestMethod]
     public void TestEvaluateNodes() {
-        InputValue<Bool> input1 = new();
-        InputValue<Bool> input2 = new();
-        InputValue<Bool> input3 = new();
+        InputValue<Bool, bool> input1 = new();
+        InputValue<Bool, bool> input2 = new();
+        InputValue<Bool, bool> input3 = new();
         And and12  = new(input1, input2);
         Or  or123  = new(and12,  input3);
         Not not123 = new(or123);
 
         not123.LegitimatizeAll();
         not123.UpdateAllParents();
-        not123.EvaluateAllParents();
+        not123.EvaluateAllParents(new Finalization());
 
         input1.CheckValue(false);
         input2.CheckValue(false);
@@ -72,7 +73,7 @@ public class Nodes {
             "  Evaluated (changed: False, depth: 1, node: And<bool>[false](One, Two), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: Or<bool>[true](And<bool>(One, Two), Three), remaining: 1)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[false](Or<bool>(And<bool>, Three)), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval ()");
         input1.CheckValue(true);
         input2.CheckValue(false);
         input3.CheckValue(true);
@@ -85,7 +86,7 @@ public class Nodes {
             "Start Eval (pending: 1)",
             "  Evaluated (changed: True, depth: 2, node: Or<bool>[false](And<bool>(One, Two), Three), remaining: 1)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](Or<bool>(And<bool>, Three)), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval ()");
         input1.CheckValue(true);
         input2.CheckValue(false);
         input3.CheckValue(false);
@@ -99,7 +100,7 @@ public class Nodes {
             "  Evaluated (changed: True, depth: 1, node: And<bool>[true](One, Two), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: Or<bool>[true](And<bool>(One, Two), Three), remaining: 1)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[false](Or<bool>(And<bool>, Three)), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval ()");
         input1.CheckValue(true);
         input2.CheckValue(true);
         input3.CheckValue(false);
@@ -110,28 +111,28 @@ public class Nodes {
 
     [TestMethod]
     public void TestTriggerNodes() {
-        Slate drv = new();
+        Slate slate = new();
         InputTrigger inputA = new();
         InputTrigger inputB = new();
         InputTrigger inputC = new();
-        drv.Global["TrigA"] = inputA;
-        drv.Global["TrigB"] = inputB;
-        drv.Global["TrigC"] = inputC;
+        slate.Global["TrigA"] = inputA;
+        slate.Global["TrigB"] = inputB;
+        slate.Global["TrigC"] = inputC;
 
         Any any = new(inputA, inputB, inputC);
         All all = new(inputA, inputB, inputC);
         Counter<Int> counter = new(any, null, all);
-        drv.Global["Count"] = counter;
+        slate.Global["Count"] = counter;
 
         OnTrue over3 = new(new GreaterThanOrEqual<Int>(counter, Literal.Int(3)));
-        drv.Global["High"] = over3;
+        slate.Global["High"] = over3;
 
         Toggler toggle = new(over3);
-        drv.Global["Toggle"] = toggle;
+        slate.Global["Toggle"] = toggle;
 
         bool high;
         OutputTrigger outTrig = new(over3);
-        outTrig.OnProvoked += (object sender, S.EventArgs e) => high = true;
+        outTrig.OnProvoked += (object? sender, S.EventArgs e) => high = true;
 
         outTrig.LegitimatizeAll();
         toggle.LegitimatizeAll();
@@ -140,17 +141,17 @@ public class Nodes {
 
         void check(bool triggerA, bool triggerB, bool triggerC,
             int expCount, bool expHigh, bool expToggle) {
-            if (triggerA) drv.SetTrigger(true, "TrigA");
-            if (triggerB) drv.SetTrigger(true, "TrigB");
-            if (triggerC) drv.SetTrigger(true, "TrigC");
+            if (triggerA) slate.SetTrigger(true, "TrigA");
+            if (triggerB) slate.SetTrigger(true, "TrigB");
+            if (triggerC) slate.SetTrigger(true, "TrigC");
             high = false;
 
-            drv.PerformEvaluation();
-            drv.ResetTriggers();
+            slate.PerformEvaluation();
+            slate.FinishEvaluation();
 
-            drv.CheckValue(expCount, "Count");
+            slate.CheckValue(expCount, "Count");
             Assert.AreEqual(expHigh, high, "High flag state");
-            drv.CheckValue(expToggle, "Toggle");
+            slate.CheckValue(expToggle, "Toggle");
         }
 
         check(true,  false, false, 1, false, false);

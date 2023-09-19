@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -219,7 +220,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](C), remaining: 2)",
             "  Evaluated (changed: True, depth: 4, node: And<bool>[true](B, Not<bool>(C)), remaining: 1)",
             "  Evaluated (changed: False, depth: 5, node: F: Xor<bool>[false](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval ()");
         slate.CheckValue(false, "F");
 
         slate.SetInt(0x4, "A");
@@ -232,7 +233,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 2, node: B: NotEqual<bool>[false](BitwiseAnd<int>(A, <int>[1]), <int>[0]), remaining: 1)",
             "  Evaluated (changed: True, depth: 4, node: And<bool>[false](B, Not<bool>(C)), remaining: 1)",
             "  Evaluated (changed: True, depth: 5, node: F: Xor<bool>[true](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval ()");
         slate.CheckValue(true, "F");
 
         slate.SetInt(0x8, "A");
@@ -245,7 +246,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 2, node: D: NotEqual<bool>[false](BitwiseAnd<int>(A, <int>[4]), <int>[0]), remaining: 2)",
             "  Evaluated (changed: True, depth: 2, node: E: NotEqual<bool>[true](BitwiseAnd<int>(A, <int>[8]), <int>[0]), remaining: 1)",
             "  Evaluated (changed: False, depth: 3, node: Or<bool>[true](D, E), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval ()");
         slate.CheckValue(true, "F");
 
         slate.SetInt(0xF, "A");
@@ -261,7 +262,7 @@ public class Definitions {
             "  Evaluated (changed: False, depth: 3, node: Or<bool>[true](D, E), remaining: 2)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[false](C), remaining: 1)",
             "  Evaluated (changed: False, depth: 4, node: And<bool>[false](B, Not<bool>(C)), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval ()");
         slate.CheckValue(true, "F");
 
         slate.SetInt(0x5, "A");
@@ -277,7 +278,7 @@ public class Definitions {
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](C), remaining: 1)",
             "  Evaluated (changed: True, depth: 4, node: And<bool>[true](B, Not<bool>(C)), remaining: 1)",
             "  Evaluated (changed: True, depth: 5, node: F: Xor<bool>[false](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval ()");
         slate.CheckValue(false, "F");
     }
 
@@ -293,48 +294,46 @@ public class Definitions {
             NoFinish().
             Perform();
 
+        Assert.AreEqual("resets: 2", slate.Finalization.ToString());
+
         slate.SetTrigger(true, "A");
         slate.CheckProvoked(true, "A");
         slate.CheckProvoked(true, "B"); // this was created provoked
         slate.CheckEvaluate(
-            "Start Eval (pending: 5)",
-            "  Evaluated (changed: True, depth: 0, node: A: Input<trigger>[provoked], remaining: 4)",
-            "  Evaluated (changed: True, depth: 0, node: B: Input<trigger>[provoked], remaining: 3)",
+            "Start Eval (pending: 3)",
             "  Evaluated (changed: True, depth: 1, node: D: All<trigger>[provoked](A, B), remaining: 2)",
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: False, depth: 2, node: E: Xor<trigger>[](C, D), remaining: 0)",
-            "End Eval (provoked: 4)");
-        slate.ResetTriggers();
+            "End Eval (resets: 5)");
+        slate.FinishEvaluation();
 
         slate.SetTrigger(true, "A");
         slate.CheckProvoked(true, "A");
         slate.CheckProvoked(false, "B");
         slate.CheckEvaluate(
-            "Start Eval (pending: 3)",
-            "  Evaluated (changed: True, depth: 0, node: A: Input<trigger>[provoked], remaining: 2)",
+            "Start Eval (pending: 2)",
             "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
-            "End Eval (provoked: 3)");
-        slate.ResetTriggers();
+            "End Eval (resets: 3)");
+        slate.FinishEvaluation();
 
         slate.SetTrigger(true, "B");
         slate.CheckProvoked(false, "A");
         slate.CheckProvoked(true, "B");
         slate.CheckEvaluate(
-            "Start Eval (pending: 3)",
-            "  Evaluated (changed: True, depth: 0, node: B: Input<trigger>[provoked], remaining: 2)",
+            "Start Eval (pending: 2)",
             "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
-            "End Eval (provoked: 3)");
-        slate.ResetTriggers();
+            "End Eval (resets: 3)");
+        slate.FinishEvaluation();
 
         slate.CheckProvoked(false, "A");
         slate.CheckProvoked(false, "B");
         slate.CheckEvaluate(
             "Start Eval (pending: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval ()");
     }
 
     [TestMethod]
@@ -382,7 +381,7 @@ public class Definitions {
         slate.CheckProvoked(false, "B");
         slate.CheckProvoked(false, "C");
         slate.CheckValue(3, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "->A;",
@@ -394,7 +393,7 @@ public class Definitions {
         slate.CheckProvoked(false, "B");
         slate.CheckProvoked(false, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "D > 3 -> A;",
@@ -406,7 +405,7 @@ public class Definitions {
         slate.CheckProvoked(true, "B");
         slate.CheckProvoked(true, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "false -> A;",
@@ -418,7 +417,7 @@ public class Definitions {
         slate.CheckProvoked(false, "B");
         slate.CheckProvoked(false, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "-> A -> B;").
@@ -429,7 +428,7 @@ public class Definitions {
         slate.CheckProvoked(true, "B");
         slate.CheckProvoked(true, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "false -> A -> B;").
@@ -440,7 +439,7 @@ public class Definitions {
         slate.CheckProvoked(false, "B");
         slate.CheckProvoked(false, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
 
         slate.Read(
             "true -> A -> B;").
@@ -451,7 +450,7 @@ public class Definitions {
         slate.CheckProvoked(true, "B");
         slate.CheckProvoked(true, "C");
         slate.CheckValue(5, "D");
-        slate.ResetTriggers();
+        slate.FinishEvaluation();
     }
   
     [TestMethod]
@@ -466,5 +465,19 @@ public class Definitions {
         slate.CheckValue(-2, "A");
         slate.CheckValue("false", "B");
         slate.CheckValue("-12346", "C");
+    }
+
+    [TestMethod]
+    public void TestBasicParses_CascadeUpdate() {
+        Slate slate = new();
+        slate.Read(
+            "extern int A = 1;",
+            "extern int B = -1;",
+            "string C := A + B;").
+            Perform();
+
+        slate.CheckValue(1, "A");
+        slate.CheckValue(-1, "B");
+        slate.CheckValue("0", "C");
     }
 }

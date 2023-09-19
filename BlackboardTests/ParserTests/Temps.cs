@@ -50,7 +50,7 @@ public class Temps {
             "  Evaluated (changed: True, depth: 2, node: Sum<int>[7](Mul<int>(A, <int>[2]), <int>[3]), remaining: 2)",
             "  Evaluated (changed: True, depth: 3, node: D: Mul<int>[28](Sum<int>(Mul<int>, <int>[3]), <int>[4]), remaining: 1)",
             "  Evaluated (changed: True, depth: 3, node: C: Sum<int>[12](Sum<int>(Mul<int>, <int>[3]), <int>[5]), remaining: 0)",
-            "End Eval (provoked: 0)");
+            "End Eval ()");
         slate.CheckValue(12, "C");
         slate.CheckValue(28, "D");
     }

@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Bases;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
@@ -60,6 +61,11 @@ static public class NodeExt {
     /// <param name="nodes">The trigger nodes to reset.</param>
     static public void Reset(this IEnumerable<ITrigger> nodes) =>
         nodes.NotNull().Foreach(t => t.Reset());
+    
+    /// <summary>This will emit all the given output nodes.</summary>
+    /// <param name="nodes">The output nodes to emit.</param>
+    static public void Emit(this IEnumerable<IOutput> nodes) =>
+        nodes.NotNull().Foreach(t => t.Emit());
 
     /// <summary>
     /// This will get all the non-virtual nodes from the given nodes.
@@ -305,12 +311,11 @@ static public class NodeExt {
     /// presorted by depth which will usually provide the fastest update.
     /// </remarks>
     /// <param name="pending">The initial set of nodes which are pending depth update.</param>
+    /// <param name="finalization">The set to add nodes to which need finalization.</param>
     /// <param name="logger">The logger to debug the evaluate with.</param>
-    /// <returns>The list of provoked triggers</returns>
-    static public HashSet<ITrigger> Evaluate(this LinkedList<IEvaluable> pending, Logger? logger = null) {
+    static public void Evaluate(this LinkedList<IEvaluable> pending, Finalization finalization, Logger? logger = null) {
         logger.Info("Start Eval (pending: {0})", pending.Count);
 
-        HashSet<ITrigger> provoked = new();
         while (pending.Count > 0) {
             IEvaluable? node = pending.TakeFirst();
             if (node is null) break;
@@ -318,16 +323,14 @@ static public class NodeExt {
             bool changed = false;
             if (node.Evaluate()) {
                 pending.SortInsertUnique(node.Children.NotNull().OfType<IEvaluable>());
-                if (node is ITrigger trigger && trigger.Provoked)
-                    provoked.Add(trigger);
+                finalization.Add(node);
                 changed = true;
             }
 
             logger.Info("  Evaluated (changed: {0}, depth: {1}, node: {2}, remaining: {3})", changed, node.Depth, node, pending.Count);
         }
 
-        logger.Info("End Eval (provoked: {0})", provoked.Count);
-        return provoked;
+        logger.Info("End Eval ({0})", finalization);
     }
 
     /// <summary>Gets the maximum depth from the given nodes.</summary>

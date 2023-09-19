@@ -1,10 +1,11 @@
 ﻿using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Record;
 
 namespace Blackboard.Core.Nodes.Outer;
 
 /// <summary>This is a trigger which can be provoked from user input.</summary>
-sealed public class InputTrigger : TriggerNode, ITriggerInput {
+sealed public class InputTrigger : TriggerNode, ITriggerInput, IInputTrigger {
 
     /// <summary>Creates a new input trigger.</summary>
     public InputTrigger() { }
@@ -21,6 +22,10 @@ sealed public class InputTrigger : TriggerNode, ITriggerInput {
     /// <summary>This is the type name of the node.</summary>
     /// <remarks>Doesn't use nameof since this has both trigger and value nodes.</remarks>
     public override string TypeName => "Input";
+
+    /// <summary>Provokes this trigger.</summary>
+    /// <returns>True if there was any change, false otherwise.</returns>
+    public bool Provoke() => this.Provoke(true);
 
     /// <summary>Provokes this trigger so that this node is provoked during the next evaluation.</summary>
     /// <remarks>This is not intended to be called directly, it should be called via the slate or action.</remarks>

@@ -1,7 +1,5 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Outer;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,7 +12,8 @@ public class Operators {
     [TestMethod]
     public void CheckAllOperatorsAreTested() =>
         TestTools.SetEntriesMatch(
-            TestTools.FuncDefTags(new Slate().Global[Blackboard.Core.Innate.Operators.Namespace] as Namespace),
+            TestTools.FuncDefTags(new Slate().Global[Blackboard.Core.Innate.Operators.Namespace] as Namespace ??
+                throw new System.Exception("Failed to get the operators namespace")),
             TestTools.TestTags(this.GetType()),
             "Tests do not match the existing operators");
 
@@ -60,10 +59,10 @@ public class Operators {
     public void TestOperators_and_All() {
         Slate slate = new Slate().Perform("in trigger A, B; C := A & B;");
         slate.CheckNodeString(Stringifier.Basic(), "C", "C: All<trigger>");
-        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
-        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(false, "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
+        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").FinishEvaluation();
+        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(false, "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(false, "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(true,  "C").FinishEvaluation();
     }
 
     [TestMethod]
@@ -82,8 +81,8 @@ public class Operators {
     public void TestOperators_castTrigger_BoolAsTrigger() {
         Slate slate = new Slate().Perform("in bool A; trigger B := A;");
         slate.CheckNodeString(Stringifier.Basic(), "B", "B: BoolAsTrigger<trigger>");
-        slate.PerformWithoutReset("A = false;").CheckProvoked(false, "B").ResetTriggers();
-        slate.PerformWithoutReset("A = true; ").CheckProvoked(true,  "B").ResetTriggers();
+        slate.PerformWithoutReset("A = false;").CheckProvoked(false, "B").FinishEvaluation();
+        slate.PerformWithoutReset("A = true; ").CheckProvoked(true,  "B").FinishEvaluation();
     }
 
     [TestMethod]
@@ -898,10 +897,10 @@ public class Operators {
     public void TestOperators_logicalAnd_All() {
         Slate slate = new Slate().Perform("in trigger A, B; C := A && B;");
         slate.CheckNodeString(Stringifier.Basic(), "C", "C: All<trigger>");
-        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
-        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(false, "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
+        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").FinishEvaluation();
+        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(false, "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(false, "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(true,  "C").FinishEvaluation();
     }
 
     [TestMethod]
@@ -920,10 +919,10 @@ public class Operators {
     public void TestOperators_logicalOr_Any() {
         Slate slate = new Slate().Perform("in trigger A, B; C := A || B;");
         slate.CheckNodeString(Stringifier.Basic(), "C", "C: Any<trigger>");
-        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
-        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
+        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").FinishEvaluation();
+        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(true,  "C").FinishEvaluation();
     }
 
     [TestMethod]
@@ -942,10 +941,10 @@ public class Operators {
     public void TestOperators_logicalXor_XorTrigger() {
         Slate slate = new Slate().Perform("in trigger A, B; C := A ^^ B;");
         slate.CheckNodeString(Stringifier.Basic(), "C", "C: Xor<trigger>");
-        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
-        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(false, "C").ResetTriggers();
+        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").FinishEvaluation();
+        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(false, "C").FinishEvaluation();
     }
 
     [TestMethod]
@@ -1262,10 +1261,10 @@ public class Operators {
     public void TestOperators_or_Any() {
         Slate slate = new Slate().Perform("in trigger A, B; C := A | B;");
         slate.CheckNodeString(Stringifier.Basic(), "C", "C: Any<trigger>");
-        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
-        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
+        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").FinishEvaluation();
+        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(true,  "C").FinishEvaluation();
     }
 
     [TestMethod]
@@ -1497,14 +1496,14 @@ public class Operators {
     public void TestOperators_ternary_SelectTrigger() {
         Slate slate = new Slate().Perform("in bool A; in trigger B, C; D := A ? B : C;");
         slate.CheckNodeString(Stringifier.Basic(), "D", "D: Select<trigger>");
-        slate.PerformWithoutReset("A = false; B = false; C = false;").CheckProvoked(false, "D").ResetTriggers();
-        slate.PerformWithoutReset("A = false; B = false; C = true; ").CheckProvoked(true, "D").ResetTriggers();
-        slate.PerformWithoutReset("A = false; B = true;  C = false;").CheckProvoked(false, "D").ResetTriggers();
-        slate.PerformWithoutReset("A = false; B = true;  C = true; ").CheckProvoked(true, "D").ResetTriggers();
-        slate.PerformWithoutReset("A = true;  B = false; C = false;").CheckProvoked(false, "D").ResetTriggers();
-        slate.PerformWithoutReset("A = true;  B = false; C = true; ").CheckProvoked(false, "D").ResetTriggers();
-        slate.PerformWithoutReset("A = true;  B = true;  C = false;").CheckProvoked(true, "D").ResetTriggers();
-        slate.PerformWithoutReset("A = true;  B = true;  C = true; ").CheckProvoked(true, "D").ResetTriggers();
+        slate.PerformWithoutReset("A = false; B = false; C = false;").CheckProvoked(false, "D").FinishEvaluation();
+        slate.PerformWithoutReset("A = false; B = false; C = true; ").CheckProvoked(true,  "D").FinishEvaluation();
+        slate.PerformWithoutReset("A = false; B = true;  C = false;").CheckProvoked(false, "D").FinishEvaluation();
+        slate.PerformWithoutReset("A = false; B = true;  C = true; ").CheckProvoked(true,  "D").FinishEvaluation();
+        slate.PerformWithoutReset("A = true;  B = false; C = false;").CheckProvoked(false, "D").FinishEvaluation();
+        slate.PerformWithoutReset("A = true;  B = false; C = true; ").CheckProvoked(false, "D").FinishEvaluation();
+        slate.PerformWithoutReset("A = true;  B = true;  C = false;").CheckProvoked(true,  "D").FinishEvaluation();
+        slate.PerformWithoutReset("A = true;  B = true;  C = true; ").CheckProvoked(true,  "D").FinishEvaluation();
     }
 
     [TestMethod]
@@ -1620,9 +1619,9 @@ public class Operators {
     public void TestOperators_xor_XorTrigger() {
         Slate slate = new Slate().Perform("in trigger A, B; C := A ^ B;");
         slate.CheckNodeString(Stringifier.Basic(), "C", "C: Xor<trigger>");
-        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").ResetTriggers();
-        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").ResetTriggers();
-        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(false, "C").ResetTriggers();
+        slate.PerformWithoutReset("false -> A; false -> B;").CheckProvoked(false, "C").FinishEvaluation();
+        slate.PerformWithoutReset("false -> A; true  -> B;").CheckProvoked(true,  "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; false -> B;").CheckProvoked(true,  "C").FinishEvaluation();
+        slate.PerformWithoutReset("true  -> A; true  -> B;").CheckProvoked(false, "C").FinishEvaluation();
     }
 }

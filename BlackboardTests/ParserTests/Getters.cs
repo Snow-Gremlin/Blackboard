@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core;
-using Blackboard.Core.Actions;
+using Blackboard.Core.Formula;
 using Blackboard.Core.Record;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -127,21 +127,23 @@ public class Getters {
         Slate slate = new();
         slate.Read("in A = 3;").Perform();
 
-        Tools.TestTools.CheckException(() =>
+        TestTools.CheckException(() =>
             slate.Read("get X;").Perform(),
             "Error occurred while parsing input code.",
-            "[Error: No identifier found in the scope stack.",
-            "   [Identifier: X]",
-            "   [Location: Unnamed:1, 5, 5]]");
+            "[Error: Error parsing identifier",
+            "   [Location: Unnamed:1, 5, 5]",
+            "   [Error: No identifier found in the scope stack.",
+            "      [Identifier: X]]]");
 
-        Tools.TestTools.CheckException(() =>
+        TestTools.CheckException(() =>
             slate.Read("get int X = A*2.0;").Perform(),
             "Error occurred while parsing input code.",
-            "[Error: The value type can not be cast to the given type.",
+            "[Error: Error getting typed value",
             "   [Location: Unnamed:1, 17, 17]",
-            "   [Target: int]",
-            "   [Type: double]",
-            "   [Value: Mul<double>[0](Implicit<double>(Input<int>), <double>[2])]]");
+            "   [Error: The value type can not be cast to the given type.",
+            "      [Target: int]",
+            "      [Type: double]",
+            "      [Value: Mul<double>[0](Implicit<double>(Input<int>), <double>[2])]]]");
     }
 
     [TestMethod]

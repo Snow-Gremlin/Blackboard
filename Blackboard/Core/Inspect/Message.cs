@@ -15,9 +15,9 @@ public class Message {
     /// <param name="format">The format text to fill in with the given arguments.</param>
     /// <param name="args">The arguments for the format text.</param>
     public Message(string format, params object?[] args) {
-        this.Format = format;
+        this.Format    = format;
         this.Arguments = args;
-        this.Data = new Dictionary<string, object?>();
+        this.Data      = new();
     }
 
     /// <summary>Creates a copy of this message.</summary>

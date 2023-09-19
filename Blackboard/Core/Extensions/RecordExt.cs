@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Record;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
@@ -493,6 +494,65 @@ static public class RecordExt {
     /// <param name="names">The name of trigger node to provoke.</param>
     static public void SetTrigger(this IWriter writer, bool provoke, params string[] names) =>
         writer.SetTrigger(names, provoke);
+
+    #endregion
+    #region Node
+
+    /// <summary>Determines if the node with the given name exists.</summary>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    static public bool HasNode(this INodeReader reader, params string[] names) =>
+        reader.HasNode(names as IEnumerable<string>);
+
+    /// <summary>Determines if the node with the given name exists.</summary>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    static public bool HasNode(this INodeReader reader, IEnumerable<string> names) =>
+        reader.TryGetNode(names, out INode? _);
+    
+    /// <summary>Determines if the node with the given name and type exists.</summary>
+    /// <typeparam name="T">The type of the node to check for.</typeparam>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    static public bool HasNode<T>(this INodeReader reader, params string[] names) where T : INode =>
+        reader.HasNode<T>(names as IEnumerable<string>);
+
+    /// <summary>Determines if the node with the given name and type exists.</summary>
+    /// <typeparam name="T">The type of the node to check for.</typeparam>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>True if a node by the given name exists, false otherwise</returns>
+    static public bool HasNode<T>(this INodeReader reader, IEnumerable<string> names) where T : INode =>
+        reader.TryGetNode(names, out INode? node) && node is T;
+
+    /// <summary>Gets the node with the given name.</summary>
+    /// <typeparam name="T">The expected type of node to get.</typeparam>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>The node with the given name and type.</returns>
+    static public T GetNode<T>(this INodeReader reader, params string[] names) where T : INode =>
+        reader.GetNode<T>(names as IEnumerable<string>);
+
+    /// <summary>Gets the node with the given name.</summary>
+    /// <remarks>This will throw an exception if no node by that name exists or the found node is the incorrect type.</remarks>
+    /// <typeparam name="T">The expected type of node to get.</typeparam>
+    /// <param name="names">The name of the node to get.</param>
+    /// <returns>The node with the given name and type.</returns>
+    static public T GetNode<T>(this INodeReader reader, IEnumerable<string> names) where T : INode =>
+        reader.TryGetNode(names, out INode? node) ?
+            node is T result ? result :
+            throw new Message("The node found by the given name is not the expected type.").
+                With("Name", names.Join(".")).
+                With("Found", node).
+                With("Expected Type", typeof(T)) :
+            throw new Message("Unable to get a node by the given name.").
+                With("Name", names.Join(".")).
+                With("Value Type", typeof(T));
+
+    /// <summary>Tries to get the node with the given node.</summary>
+    /// <param name="names">The name of the node to get.</param>
+    /// <param name="node">The returned node for the given name or null.</param>
+    /// <returns>True if the node was found, false otherwise.</returns>
+    static public bool TryGetNode(this INodeReader reader, out INode? node, params string[] names) =>
+        reader.TryGetNode(names, out node);
 
     #endregion
 }

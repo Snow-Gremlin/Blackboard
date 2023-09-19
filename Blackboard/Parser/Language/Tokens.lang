@@ -8,8 +8,8 @@
 (Start): '0' => (Zero);
 (Zero): '01' => (PossibleBin);
 (Start): '1' => (PossibleBin): '01' => (PossibleBin);
-(Zero): ^`_` => (UnderBin): `01` => (PossibleBin);
-(PossibleBin): ^`_` => (UnderBin);
+(Zero): ^'_' => (UnderBin): '01' => (PossibleBin);
+(PossibleBin): ^'_' => (UnderBin);
 (Zero):        ^'b' => [Bin];
 (PossibleBin): ^'b' => [Bin];
 

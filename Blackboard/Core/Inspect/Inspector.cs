@@ -5,9 +5,13 @@ using System.Linq;
 
 namespace Blackboard.Core.Inspect;
 
-// TODO: Comment
+/// <summary>A tool for inspecting, validating, and debugging the slate.</summary>
 sealed public class Inspector {
 
+    /// <summary>Validates the given slate.</summary>
+    /// <param name="slate">The slate to validate.</param>
+    /// <param name="logger">The logger to write errors, warnings, and info out to.</param>
+    /// <returns>True if the slate passed validation, otherwise false.</returns>
     static public bool Validate(Slate slate, Logger? logger) {
         logger = logger.Group("Validate");
         logger.Info("Validate:");
@@ -23,6 +27,9 @@ sealed public class Inspector {
     private readonly HashSet<INode> touched;
     private readonly Stringifier    stringifier;
 
+    /// <summary>Creates a new inspector.</summary>
+    /// <param name="slate">The slate to validate.</param>
+    /// <param name="logger">The logger to write errors, warnings, and info out to.</param>
     private Inspector(Slate slate, Logger? logger) {
         this.slate       = slate;
         this.logger      = new(logger);
@@ -31,8 +38,10 @@ sealed public class Inspector {
         this.stringifier.PreLoadNames(this.slate);
     }
 
+    /// <summary>Indicates if there were zero errors.</summary>
     public bool Passed => this.logger.Count(Level.Error) > 0;
 
+    /// <summary>Collects all the nodes in the slate reachable from global.</summary>
     public void CollectNodes() {
         HashSet<INode> pending = new();
 
@@ -61,9 +70,12 @@ sealed public class Inspector {
         }
     }
 
+    /// <summary>Checks that every parent's child has the parent as a parent.</summary>
     public void CheckParents() =>
         this.touched.OfType<IParent>().Foreach(this.checkParent);
 
+    /// <summary>Checks that the children of the given parent has this parent as a parent.</summary>
+    /// <param name="parent">The parent to check.</param>
     private void checkParent(IParent parent) {
         foreach (IChild child in parent.Children) {
             if (!child.Parents.Contains(parent))
@@ -73,9 +85,12 @@ sealed public class Inspector {
         }
     }
 
+    /// <summary>Checks that every child's parent has the child as a child.</summary>
     public void CheckChildren() =>
         this.touched.OfType<IChild>().Foreach(this.checkChild);
 
+    /// <summary>Checks that the parents of the given child has this child as a child.</summary>
+    /// <param name="child">The child to check.</param>
     private void checkChild(IChild child) {
         foreach (IParent parent in child.Parents) {
             if (!parent.Children.Contains(child))

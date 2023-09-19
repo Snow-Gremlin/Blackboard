@@ -13,12 +13,18 @@ namespace Blackboard.Core.Formula.Actions;
 /// Typically this is for defining a new node into the namespaces reachable from global.
 /// </summary>
 sealed public class Define : IAction {
-
+    
     /// <summary>
     /// This is a subset of all the node for this node to write which need to be
     /// added to parents their parents to make this node reactive to changes.
     /// </summary>
     private readonly IChild[] needParents;
+
+    /// <summary>
+    /// This is a subset of all the node for this node to evaluate when
+    /// this action is performed.
+    /// </summary>
+    private readonly IEvaluable[] allNewEvals;
 
     /// <summary>Creates a new define action.</summary>
     /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
@@ -34,6 +40,7 @@ sealed public class Define : IAction {
         this.Name        = name;
         this.Node        = node;
         this.needParents = (allNewNodes ?? Enumerable.Empty<INode>()).Illegitimates().ToArray();
+        this.allNewEvals = (allNewNodes ?? Enumerable.Empty<INode>()).OfType<IEvaluable>().ToArray();
     }
 
     /// <summary>This is the receiver that will be written to.</summary>
@@ -47,6 +54,9 @@ sealed public class Define : IAction {
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
     public IReadOnlyList<IChild> NeedParents => this.needParents;
+
+    /// <summary>All the nodes which are new evaluable nodes to write.</summary>
+    public IReadOnlyList<IEvaluable> AddNewNodes => this.allNewEvals;
 
     /// <summary>This will perform the action.</summary>
     /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
@@ -114,7 +124,7 @@ sealed public class Define : IAction {
         this.Receiver.WriteField(this.Name, this.Node);
         List<IChild> changed = this.needParents.Where(child => child.Legitimatize()).ToList();
         slate.PendUpdate(changed);
-        slate.PendEval(changed);
+        slate.PendEval(this.allNewEvals);
     }
 
     /// <summary>Gets a human readable string for this define.</summary>

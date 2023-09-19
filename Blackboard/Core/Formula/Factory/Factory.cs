@@ -143,7 +143,7 @@ sealed public class Factory {
         INode casted = castGroup?.Build(value) ??
             throw new Message("Unsupported type for new definition cast").
                 With("Type", type);
-        if (casted is IEvaluable eval) eval.Evaluate();
+        //if (casted is IEvaluable eval) eval.Evaluate(); TODO: Remove?
         return casted;
     }
 
@@ -173,7 +173,7 @@ sealed public class Factory {
                 throw new Message("The root for a define could not be shelled.").
                     With("Name", name).
                     With("Root", root);
-            shell.Legitimatize();
+            newNodes.Add(shell);
             root = shell;
         }
 

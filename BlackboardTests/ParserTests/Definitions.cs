@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core;
 using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -464,5 +465,19 @@ public class Definitions {
         slate.CheckValue(-2, "A");
         slate.CheckValue("false", "B");
         slate.CheckValue("-12346", "C");
+    }
+
+    [TestMethod]
+    public void TestBasicParses_CascadeUpdate() {
+        Slate slate = new();
+        slate.Read(
+            "extern int A = 1;",
+            "extern int B = -1;",
+            "string C := A + B;").
+            Perform();
+
+        slate.CheckValue(1, "A");
+        slate.CheckValue(-1, "B");
+        slate.CheckValue("0", "C");
     }
 }

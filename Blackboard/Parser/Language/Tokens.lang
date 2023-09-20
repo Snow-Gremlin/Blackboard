@@ -8,6 +8,8 @@
 (Start): '0' => (Zero);
 (Zero): '01' => (PossibleBin);
 (Start): '1' => (PossibleBin): '01' => (PossibleBin);
+(Zero): ^'_' => (UnderBin): '01' => (PossibleBin);
+(PossibleBin): ^'_' => (UnderBin);
 (Zero):        ^'b' => [Bin];
 (PossibleBin): ^'b' => [Bin];
 
@@ -15,6 +17,8 @@
 (Start):       '2'..'7' => (PossibleOct): '0'..'7' => (PossibleOct);
 (Zero):        '2'..'7' => (PossibleOct);
 (PossibleBin): '2'..'7' => (PossibleOct);
+(UnderBin):    '2'..'7' => (PossibleOct);
+(PossibleOct): ^'_' => (UnderOct): '0'..'7' => (PossibleOct);
 (Zero):        ^'o' => [Oct];
 (PossibleBin): ^'o' => [Oct];
 (PossibleOct): ^'o' => [Oct];
@@ -22,8 +26,11 @@
 # Integers (Decimal)
 (Start): '89' => (Int): '0'..'9' => (Int);
 (Zero):  '89' => (Int);
-(PossibleBin): '2'..'9' => (Int);
+(PossibleBin): '89' => (Int);
 (PossibleOct): '89' => (Int);
+(UnderBin):    '89' => (Int);
+(UnderOct):    '89' => (Int);
+(Int): ^'_' => (UnderInt): '0'..'9' => (Int);
 
 (Zero)        => [Int];
 (PossibleBin) => [Int];
@@ -36,6 +43,7 @@
 
 # Hexadecimals
 (Zero): 'x' => (HexStart): '0'..'9', 'a'..'f', 'A'..'F' => (Hex): '0'..'9', 'a'..'f', 'A'..'F' => [Hex];
+(Hex): ^'_' => (UnderHex): '0'..'9', 'a'..'f', 'A'..'F' => (Hex);
 
 # Doubles
 (Zero):        '.' => (Decimal);
@@ -43,14 +51,16 @@
 (PossibleOct): '.' => (Decimal);
 (Int):         '.' => (Decimal);
 (Decimal): '0'..'9' => (DoubleDec): '0'..'9' => (DoubleDec) => [Double];
+(DoubleDec): ^'_' => (UnderDec): '0'..'9' => (DoubleDec);
 
 (Zero):        'eE' => (DoubleExpStart);
 (Int):         'eE' => (DoubleExpStart);
 (PossibleBin): 'eE' => (DoubleExpStart);
 (PossibleOct): 'eE' => (DoubleExpStart);
 (DoubleDec):   'eE' => (DoubleExpStart);
-(DoubleExpStart): '-' => (DoubleExpNeg): '0'..'9' => (DoubleExp);
+(DoubleExpStart): '-', '+' => (DoubleExpSign): '0'..'9' => (DoubleExp);
 (DoubleExpStart): '0'..'9' => (DoubleExp): '0'..'9' => (DoubleExp) => [Double];
+(DoubleExp): ^'_' => (UnderExp): '0'..'9' => (DoubleExp);
 
 # Identifiers
 (Start): 'a'..'z', 'A'..'Z', '_$' => (Identifier): '0'..'9', 'a'..'z', 'A'..'Z', '_' => [Identifier];
@@ -58,7 +68,7 @@
 # Strings
 (Start): ^"'" => (String1Body): ^"'" => [String];
 (String1Body): '\\' => (Escaped1);
-(Escaped1): '\\\'"0abfnrtv' => (String1Body);
+(Escaped1): '\\\'"0bfnrtv' => (String1Body);
 (Escaped1): 'x' => (Ascii1_0):   '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Ascii1_1):   '0'..'9', 'a'..'f', 'A'..'F' => (String1Body);
 (Escaped1): 'u' => (Unicode1_0): '0'..'9', 'a'..'f', 'A'..'F' =>
@@ -73,11 +83,11 @@
                    (Rune1_5): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Rune1_6): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Rune1_7): '0'..'9', 'a'..'f', 'A'..'F' => (String1Body);
-(String1Body): * => (String1Body);
+(String1Body): !'\n\r' => (String1Body);
 
 (Start): ^'"' => (String2Body): ^'"' => [String];
 (String2Body): '\\' => (Escaped2);
-(Escaped2): '\\\'"0abfnrtv' => (String2Body);
+(Escaped2): '\\\'"0bfnrtv' => (String2Body);
 (Escaped2): 'x' => (Ascii2_0):   '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Ascii2_1):   '0'..'9', 'a'..'f', 'A'..'F' => (String2Body);
 (Escaped2): 'u' => (Unicode2_0): '0'..'9', 'a'..'f', 'A'..'F' =>
@@ -92,7 +102,7 @@
                    (Rune2_5): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Rune2_6): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Rune2_7): '0'..'9', 'a'..'f', 'A'..'F' => (String2Body);
-(String2Body): * => (String2Body);
+(String2Body): !'\n\r' => (String2Body);
 
 # Symbols
 (Start): '&' => [And]: '&' => [LogicalAnd];

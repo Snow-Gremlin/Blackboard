@@ -68,7 +68,7 @@
 # Strings
 (Start): ^"'" => (String1Body): ^"'" => [String];
 (String1Body): '\\' => (Escaped1);
-(Escaped1): '\\\'"0abfnrtv' => (String1Body);
+(Escaped1): '\\\'"0bfnrtv' => (String1Body);
 (Escaped1): 'x' => (Ascii1_0):   '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Ascii1_1):   '0'..'9', 'a'..'f', 'A'..'F' => (String1Body);
 (Escaped1): 'u' => (Unicode1_0): '0'..'9', 'a'..'f', 'A'..'F' =>
@@ -83,11 +83,11 @@
                    (Rune1_5): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Rune1_6): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Rune1_7): '0'..'9', 'a'..'f', 'A'..'F' => (String1Body);
-(String1Body): * => (String1Body);
+(String1Body): !'\n\r' => (String1Body);
 
 (Start): ^'"' => (String2Body): ^'"' => [String];
 (String2Body): '\\' => (Escaped2);
-(Escaped2): '\\\'"0abfnrtv' => (String2Body);
+(Escaped2): '\\\'"0bfnrtv' => (String2Body);
 (Escaped2): 'x' => (Ascii2_0):   '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Ascii2_1):   '0'..'9', 'a'..'f', 'A'..'F' => (String2Body);
 (Escaped2): 'u' => (Unicode2_0): '0'..'9', 'a'..'f', 'A'..'F' =>
@@ -102,7 +102,7 @@
                    (Rune2_5): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Rune2_6): '0'..'9', 'a'..'f', 'A'..'F' =>
                    (Rune2_7): '0'..'9', 'a'..'f', 'A'..'F' => (String2Body);
-(String2Body): * => (String2Body);
+(String2Body): !'\n\r' => (String2Body);
 
 # Symbols
 (Start): '&' => [And]: '&' => [LogicalAnd];

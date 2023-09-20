@@ -156,11 +156,31 @@ public class Literals {
     
     [TestMethod]
     public void TestLiteral_String() {
-        checkLit("\"Hello\"", "Hello");
-        checkLit("'Hello'", "Hello");
-        checkLit("\"'ello\"", "'ello");
-        checkLit("'\\'ello'", "'ello");
-        checkLit("\"\\\"ello\"", "\"ello");
-        checkLit("'\\\"ello'", "\"ello");
+        checkLit("\"\"",            "");
+        checkLit("''",              "");
+        checkLit("\"   \"",         "   ");
+        checkLit("'   '",           "   ");
+        checkLit("\"Hello\"",       "Hello");
+        checkLit("'Hello'",         "Hello");
+        checkLit("\"'ello\"",       "'ello");
+        checkLit("'\\'ello'",       "'ello");
+        checkLit("\"\\\"ello\"",    "\"ello");
+        checkLit("'\\\"ello'",      "\"ello");
+        checkLit("\"🎃☠️\"",        "🎃☠️");
+        checkLit("'🎃☠️'",          "🎃☠️");
+        checkLit("\"\\\\ \\0\"",    "\\ \0");
+        checkLit("'\\\\ \\0'",      "\\ \0");
+        checkLit("\"\\b\\f\\v\"",   "\b\f\v");
+        checkLit("'\\b\\f\\v'",     "\b\f\v");
+        checkLit("\"\\n\\r\\t\"",   "\n\r\t");
+        checkLit("'\\n\\r\\t'",     "\n\r\t");
+        checkLit("\"\\x0A\"",       "\n");
+        checkLit("'\\x0A'",         "\n");
+        checkLit("\"\\u000A\"",     "\n");
+        checkLit("'\\u000A'",       "\n");
+        checkLit("\"\\u2029\"",     "\x2029");
+        checkLit("'\\u2029'",       "\x2029");
+        checkLit("\"\\U0001F47D\"", "👽");
+        checkLit("'\\U0001F47D'",   "👽");
     }
 }

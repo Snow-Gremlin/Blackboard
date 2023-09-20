@@ -25,6 +25,11 @@ static public class Literal {
     /// <returns>The new literal node.</returns>
     static public Literal<Uint> Uint(uint value) => new(new Uint(value));
 
+    /// <summary>Creates a new float literal.</summary>
+    /// <param name="value">The value to use for the literal.</param>
+    /// <returns>The new literal node.</returns>
+    static public Literal<Float> Float(float value) => new(new Float(value));
+
     /// <summary>Creates a new double literal.</summary>
     /// <param name="value">The value to use for the literal.</param>
     /// <returns>The new literal node.</returns>

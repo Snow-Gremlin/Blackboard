@@ -51,14 +51,14 @@
 (PossibleOct): '.' => (Decimal);
 (Int):         '.' => (Decimal);
 (Decimal): '0'..'9' => (DoubleDec): '0'..'9' => (DoubleDec) => [Double];
-(DecimalDec): ^'_' => (UnderDec): '0'..'9' => (DoubleDec);
+(DoubleDec): ^'_' => (UnderDec): '0'..'9' => (DoubleDec);
 
 (Zero):        'eE' => (DoubleExpStart);
 (Int):         'eE' => (DoubleExpStart);
 (PossibleBin): 'eE' => (DoubleExpStart);
 (PossibleOct): 'eE' => (DoubleExpStart);
 (DoubleDec):   'eE' => (DoubleExpStart);
-(DoubleExpStart): '-' => (DoubleExpNeg): '0'..'9' => (DoubleExp);
+(DoubleExpStart): '-', '+' => (DoubleExpSign): '0'..'9' => (DoubleExp);
 (DoubleExpStart): '0'..'9' => (DoubleExp): '0'..'9' => (DoubleExp) => [Double];
 (DoubleExp): ^'_' => (UnderExp): '0'..'9' => (DoubleExp);
 

@@ -22,7 +22,7 @@ static public class DataExt {
             Int    => default(T) is ICast<Int,    T>,
             Uint   => default(T) is ICast<Uint,   T>,
             String => default(T) is ICast<String, T>,
-            _      => throw new Message("Unexpected input type in cast").
+            _      => throw new BlackboardException("Unexpected input type in cast").
                             With("Input", value)
         };
 
@@ -40,7 +40,7 @@ static public class DataExt {
             Int    => default(T) is IImplicit<Int,    T>,
             Uint   => default(T) is IImplicit<Uint,   T>,
             String => default(T) is IImplicit<String, T>,
-            _      => throw new Message("Unexpected input type in implicit cast").
+            _      => throw new BlackboardException("Unexpected input type in implicit cast").
                             With("Input", value)
         };
 
@@ -58,7 +58,7 @@ static public class DataExt {
             Int    => default(T) is IExplicit<Int,    T>,
             Uint   => default(T) is IExplicit<Uint,   T>,
             String => default(T) is IExplicit<String, T>,
-            _      => throw new Message("Unexpected input type in explicit cast").
+            _      => throw new BlackboardException("Unexpected input type in explicit cast").
                             With("Input", value)
         };
 
@@ -74,7 +74,7 @@ static public class DataExt {
         where Tout  : IData
         where TCast : ICast<Tin, Tout> =>
         default(Tout) is ICast<Tin, Tout> cast ? cast.CastFrom(value) :
-            throw new Message("Unable to cast from the given input into the given output.").
+            throw new BlackboardException("Unable to cast from the given input into the given output.").
                 With("Input",     value).
                 With("In Type",   typeof(Tin)).
                 With("Out Type",  typeof(Tout)).
@@ -94,7 +94,7 @@ static public class DataExt {
             Int    vi => castTo<Int,    T, ICast<Int,    T>>(vi),
             Uint   vu => castTo<Uint,   T, ICast<Uint,   T>>(vu),
             String vs => castTo<String, T, ICast<String, T>>(vs),
-            _         => throw new Message("Unexpected input type in cast").
+            _         => throw new BlackboardException("Unexpected input type in cast").
                             With("Input", value)
         };
 
@@ -112,7 +112,7 @@ static public class DataExt {
             Int    vi => castTo<Int,    T, IImplicit<Int,    T>>(vi),
             Uint   vu => castTo<Uint,   T, IImplicit<Uint,   T>>(vu),
             String vs => castTo<String, T, IImplicit<String, T>>(vs),
-            _         => throw new Message("Unexpected input type in implicit cast").
+            _         => throw new BlackboardException("Unexpected input type in implicit cast").
                             With("Input", value)
         };
 
@@ -130,7 +130,7 @@ static public class DataExt {
             Int    vi => castTo<Int,    T, IExplicit<Int,    T>>(vi),
             Uint   vu => castTo<Uint,   T, IExplicit<Uint,   T>>(vu),
             String vs => castTo<String, T, IExplicit<String, T>>(vs),
-            _         => throw new Message("Unexpected input type in explicit cast").
+            _         => throw new BlackboardException("Unexpected input type in explicit cast").
                             With("Input", value)
         };
 

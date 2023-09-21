@@ -56,7 +56,7 @@ public abstract class Evaluable : IEvaluable {
     /// <returns>True if any children were added, false otherwise.</returns>
     public bool AddChildren(IEnumerable<IChild> children) {
         if (this.CanReachAny(children.OfType<IParent>()))
-            throw new Message("May not add children to a parent which would cause a loop").
+            throw new BlackboardException("May not add children to a parent which would cause a loop").
                 With("parent", this).
                 With("children", children);
 

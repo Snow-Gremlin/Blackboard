@@ -34,7 +34,7 @@ sealed public class Define : IAction {
     /// <param name="allNewNodes">All the nodes which are new children of the node to write.</param>
     public Define(IFieldWriter receiver, string name, INode node, IEnumerable<INode>? allNewNodes = null) {
         if (receiver is null or VirtualNode)
-            throw new Message("May not use a null or {0} as the receiver in a {1}.", nameof(VirtualNode), nameof(Define));
+            throw new BlackboardException("May not use a null or {0} as the receiver in a {1}.", nameof(VirtualNode), nameof(Define));
 
         this.Receiver    = receiver;
         this.Name        = name;
@@ -72,26 +72,26 @@ sealed public class Define : IAction {
 
             // Check if the existing node is an extern node. If not then error.
             if (existing is not IExtern existingExtern)
-                throw new Message("May not define node, a node already exists with the given name.").
+                throw new BlackboardException("May not define node, a node already exists with the given name.").
                     With("Name",     this.Name).
                     With("Node",     this.Node).
                     With("Existing", existing);
 
             // Check the extern type and the new node type's match.
             Type externType = Type.TypeOf(existingExtern) ??
-                throw new Message("Unable to find existing extern type while setting input.").
+                throw new BlackboardException("Unable to find existing extern type while setting input.").
                     With("Name",     this.Name).
                     With("Node",     this.Node).
                     With("Existing", existingExtern);
 
             Type inputType = Type.TypeOf(this.Node) ??
-                throw new Message("Unable to find input type while setting input.").
+                throw new BlackboardException("Unable to find input type while setting input.").
                     With("Name",     this.Name).
                     With("Node",     this.Node).
                     With("Existing", existingExtern);
 
             if (!inputType.IsInheritorOf(externType))
-                throw new Message("Input node does not match existing extern node type.").
+                throw new BlackboardException("Input node does not match existing extern node type.").
                     With("Name",          this.Name).
                     With("Node",          this.Node).
                     With("Existing",      existingExtern).
@@ -107,7 +107,7 @@ sealed public class Define : IAction {
             // Copy over any children which have been added to the extern node to this node.
             if (existingExtern.Children.Any()) {
                 if (this.Node is not IParent parent)
-                    throw new Message("A non-parent node can not replace an extern with children.").
+                    throw new BlackboardException("A non-parent node can not replace an extern with children.").
                         With("Name",     this.Name).
                         With("Node",     this.Node).
                         With("Existing", existingExtern);

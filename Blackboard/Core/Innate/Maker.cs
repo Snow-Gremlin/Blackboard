@@ -122,7 +122,7 @@ static public class Maker {
             double d => new Double(d),
             string s => new String(s),
             object o => new Object(o),
-            _        => throw new Message("Unexpected value type in IData creation").
+            _        => throw new BlackboardException("Unexpected value type in IData creation").
                            With("Value", value)
         };
 
@@ -138,7 +138,7 @@ static public class Maker {
             Double d => new Literal<Double>(d),
             String s => new Literal<String>(s),
             Object o => new Literal<Object>(o),
-            _        => throw new Message("Unexpected value type in literal creation").
+            _        => throw new BlackboardException("Unexpected value type in literal creation").
                            With("Value", value)
         };
     

@@ -412,7 +412,7 @@ static public class RecordExt {
         where T : IData {
         IData data = reader.GetData(names);
         return data is T value ? value :
-            throw new Message("The data found by the given name is not the expected type.").
+            throw new BlackboardException("The data found by the given name is not the expected type.").
                 With("Name", names.Join(".")).
                 With("Found Type", data.GetType()).
                 With("Expected Type", typeof(T));
@@ -456,7 +456,7 @@ static public class RecordExt {
     /// <returns>The value from the data.</returns>
     static public IData GetData(this IReader reader, IEnumerable<string> names) =>
         reader.TryGetData(names, out IData? data) && data is not null ? data :
-            throw new Message("Unable to get data by the given name.").
+            throw new BlackboardException("Unable to get data by the given name.").
                 With("Name", names.Join("."));
 
     #endregion
@@ -485,7 +485,7 @@ static public class RecordExt {
     /// <returns>True if a node by that name is found and it is provoked, false otherwise.</returns>
     static public bool Provoked(this IReader reader, IEnumerable<string> names) =>
         reader.TryGetProvoked(names, out bool provoked) ? provoked :
-            throw new Message("Unable to get provoked state by the given name.").
+            throw new BlackboardException("Unable to get provoked state by the given name.").
                 With("Name", names.Join("."));
 
     /// <summary>This will provoke the node with the given name.</summary>
@@ -539,11 +539,11 @@ static public class RecordExt {
     static public T GetNode<T>(this INodeReader reader, IEnumerable<string> names) where T : INode =>
         reader.TryGetNode(names, out INode? node) ?
             node is T result ? result :
-            throw new Message("The node found by the given name is not the expected type.").
+            throw new BlackboardException("The node found by the given name is not the expected type.").
                 With("Name", names.Join(".")).
                 With("Found", node).
                 With("Expected Type", typeof(T)) :
-            throw new Message("Unable to get a node by the given name.").
+            throw new BlackboardException("Unable to get a node by the given name.").
                 With("Name", names.Join(".")).
                 With("Value Type", typeof(T));
 

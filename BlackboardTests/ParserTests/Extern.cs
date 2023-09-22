@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Record;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Blackboard.Core.Record;
 
 namespace BlackboardTests.ParserTests;
 

@@ -1,7 +1,6 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Formula.Actions;
-using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;

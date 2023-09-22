@@ -1,17 +1,17 @@
 ﻿using Blackboard.Core.Data.Interfaces;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Collections;
-using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
 using S = System;
 
-namespace Blackboard.Core.Extensions;
+namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>The set of extensions for working with different types of Nodes.</summary>
-static public class NodeExt {
+static public class Extensions {
     #region INode...
 
     /// <summary>The values from the given input values.</summary>

@@ -1,12 +1,10 @@
 ﻿using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Outer;
 
-namespace Blackboard.Core.Extensions;
+namespace Blackboard.Core.Data.Interfaces;
 
 /// <summary>Extensions to add to data specific methods.</summary>
-static public class DataExt {
+static public class Extensions {
 
     /// <summary>Determines if this data can be cast implicitly, cast explicitly, or is already an inherited type.</summary>
     /// <typeparam name="T">The type of the data to cast to.</typeparam>

@@ -1,15 +1,14 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
-using Blackboard.Core.Record;
 using Blackboard.Core.Types;
 using System.Collections.Generic;
 
-namespace Blackboard.Core.Extensions;
+namespace Blackboard.Core.Record;
 
 /// <summary>Extensions for the value reader interface.</summary>
-static public class RecordExt {
+static public class Extensions {
     #region Type
 
     /// <summary>Gets the type of the value at the given data.</summary>

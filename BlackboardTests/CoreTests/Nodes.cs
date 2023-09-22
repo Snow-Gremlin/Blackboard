@@ -1,12 +1,12 @@
 using Blackboard.Core;
 using Blackboard.Core.Data.Caps;
-using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Nodes.Collections;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using S = System;
+using Blackboard.Core.Record;
 
 namespace BlackboardTests.CoreTests;
 

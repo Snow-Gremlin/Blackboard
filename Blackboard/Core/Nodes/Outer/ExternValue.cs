@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Inner;
 using Blackboard.Core.Nodes.Interfaces;
@@ -42,7 +41,7 @@ sealed public class ExternValue<T> : ValueNode<T>, IValueExtern<T>
     /// <param name="data">The data value to assign to the input.</param>
     /// <returns>True if there was any change, false otherwise.</returns>
     public bool SetData(IData data) => data is T value ? this.SetValue(value) :
-        throw new Message("Setting the wrong type of data to a extern").
+        throw new BlackboardException("Setting the wrong type of data to a extern").
             With("data", data).
             With("type", typeof(T));
 

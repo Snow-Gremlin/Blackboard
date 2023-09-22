@@ -1,18 +1,16 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Interfaces;
+using PetiteParser.Logger;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using S = System;
 
 namespace Blackboard.Core;
 
 /// <summary>This is an exception for Blackboard.</summary>
 public class BlackboardException : S.Exception {
-
-    /// <summary>Creates a new exception for the given message.</summary>
-    /// <param name="message">The message to create an exception with.</param>
-    /// <param name="inner">The inner exception from this message.</param>
-    public BlackboardException(string message, S.Exception? inner = null) :
-        base(message, inner) { }
 
     /// <summary>Creates a new exception for the given message.</summary>
     /// <remarks>Uses a shallow stringifier to get strings for the arguments.</remarks>
@@ -50,7 +48,7 @@ public class BlackboardException : S.Exception {
     /// <param name="message">The message to create an exception with.</param>
     /// <param name="args">The arguments to fill in the formatting message.</param>
     public BlackboardException(S.Exception? inner, Stringifier? stringifier, string message, IEnumerable<object?> args) :
-        base(string.Format(message, (stringifier ?? Stringifier.Shallow()).StringifyObject(args)), inner) { }
+        base(string.Format(message, (stringifier ?? Stringifier.Shallow()).StringifyObject(args).ToArray()), inner) { }
 
     /// <summary>Adds additional key value pair of data to this exception.</summary>
     /// <param name="key">The key for the additional data.</param>
@@ -76,14 +74,22 @@ public class BlackboardException : S.Exception {
     /// <summary>Gets the message for this exception.</summary>
     public override string Message {
         get {
-            string msg = base.Message;
-            if (this.Data.Count > 0) {
-                List<string> parts = new();
-                foreach (KeyValuePair<string, object?> pair in this.Data)
-                    parts.Add(pair.Key + ": " + pair.Value);
-                msg += " {" + parts.Join(", ") + "}";
-            }
-            return msg;
+            List<string> lines = new() { base.Message };
+            foreach (DictionaryEntry entry in this.Data)
+                lines.Add(entryString(entry));
+            return lines.Join("\n");
         }
+    }
+
+    /// <summary>This gets the string for the given data entry.</summary>
+    /// <param name="entry">The entry to convert to a string.</param>
+    /// <returns>The string for the given entry.</returns>
+    static private string entryString(DictionaryEntry entry) {
+        string strKey = entry.Key?.ToString() ?? "null";
+        string strVal = entry.Value is S.Exception ex ?
+           ex.Message :
+           entry.Value?.ToString() ?? "null";
+        strVal = strVal.Replace("\n", "\n   ");
+        return "[" + strKey + ": " + strVal + "]";
     }
 }

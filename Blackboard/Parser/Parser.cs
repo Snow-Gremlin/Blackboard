@@ -69,7 +69,7 @@ sealed public class Parser {
         // Check for parser errors.
         PP.ParseTree.ITreeNode? tree = result.Tree;
         if (result.Errors.Length > 0 || tree is null)
-            throw new Message("Errors while reading code source").
+            throw new BlackboardException("Errors while reading code source").
                 With("Errors", result.Errors.Join("\n"));
 
         // process the resulting tree to build the formula.
@@ -87,7 +87,7 @@ sealed public class Parser {
             this.logger.Info("Parser Done");
             return factory.Build();
         } catch (S.Exception ex) {
-            throw new Message("Error occurred while parsing input code.").
+            throw new BlackboardException("Error occurred while parsing input code.").
                 With("Error", ex);
         }
     }
@@ -176,7 +176,7 @@ sealed public class Parser {
             try {
                 this.logger.Info("Handle {0} [{1}]", name, builder.LastLocation);
                 hndl(builder);
-            } catch (Exception ex) {
+            } catch (S.Exception ex) {
                 this.logger.Error("Error while handling {0} [{1}]: {2}", name, builder.LastLocation, ex);
                 throw;
             }
@@ -187,7 +187,7 @@ sealed public class Parser {
     /// <param name="name">The name of the prompt to add to.</param>
     private void addProcess(int count, string name) {
         if (this.slate.Global.Find(Operators.Namespace, name) is not IFuncGroup funcGroup)
-            throw new Message("Could not find the operation by the given name.").
+            throw new BlackboardException("Could not find the operation by the given name.").
                 With("Name", name);
         this.prompts[name] = (Builder.Builder builder) =>
             builder.HandleProcesses(count, name, funcGroup);
@@ -198,7 +198,7 @@ sealed public class Parser {
         string[] unneeded = baseParser.UnneededPrompts(this.prompts);
         string[] missing  = baseParser.MissingPrompts(this.prompts);
         if (unneeded.Length > 0 || missing.Length > 0)
-            throw new Message("Blackboard's parser grammar has prompts which do not match prompt handlers.").
+            throw new BlackboardException("Blackboard's parser grammar has prompts which do not match prompt handlers.").
                 With("Not handled", unneeded.Join(", ")).
                 With("Not in grammar", missing.Join(", "));
     }

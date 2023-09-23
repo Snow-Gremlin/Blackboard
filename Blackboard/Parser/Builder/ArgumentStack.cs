@@ -1,5 +1,5 @@
-﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
+﻿using Blackboard.Core;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +23,7 @@ sealed internal class ArgumentStack {
     /// <param name="node">The node to add to the argument list.</param>
     public void Add(INode node) {
         LinkedListNode<LinkedList<INode>> first = this.argStacks.First ??
-            throw new Message("May not add an argument without first starting an argument list.");
+            throw new BlackboardException("May not add an argument without first starting an argument list.");
         first.Value.AddLast(node);
     }
 
@@ -31,7 +31,7 @@ sealed internal class ArgumentStack {
     /// <returns>The nodes which were in the current argument list.</returns>
     public INode[] End() =>
         this.argStacks.First?.Value?.ToArray() ??
-            throw new Message("May not end an argument without first starting an argument list.");
+            throw new BlackboardException("May not end an argument without first starting an argument list.");
 
     /// <summary>Gets the human readable string of the current actions.</summary>
     /// <returns>The human readable string.</returns>

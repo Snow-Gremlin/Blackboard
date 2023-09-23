@@ -1,5 +1,4 @@
-﻿using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Nodes.Interfaces;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +22,7 @@ partial class ParentCollection {
             this.source = source;
             this.Type = typeof(T);
             if (min < 0 || max < min)
-                throw new Message("Invalid minimum and maximum range for variable parents collection.").
+                throw new BlackboardException("Invalid minimum and maximum range for variable parents collection.").
                     With("min", min).
                     With("max", max);
             this.Minimum = min;
@@ -49,7 +48,7 @@ partial class ParentCollection {
         public IParent this[int index] {
             get => this.source[index];
             set => this.source[index] = value as T ??
-                throw new Message("Given parent can not be cast into variable parent type.").
+                throw new BlackboardException("Given parent can not be cast into variable parent type.").
                     With("index", index).
                     With("type", typeof(T)).
                     With("parent", value);
@@ -62,7 +61,7 @@ partial class ParentCollection {
         /// </remarks>
         /// <param name="item">This is the parent to add.</param>
         public void Add(IParent item) => this.source.Add(item as T ??
-            throw new Message("Given parent can not be cast into variable parent type.").
+            throw new BlackboardException("Given parent can not be cast into variable parent type.").
                 With("type", typeof(T)).
                 With("parent", item));
 

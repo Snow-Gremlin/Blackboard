@@ -1,6 +1,6 @@
-﻿using Blackboard.Core.Extensions;
+﻿using Blackboard.Core;
+using Blackboard.Core.Extensions;
 using Blackboard.Core.Formula.Factory;
-using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
@@ -63,7 +63,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
         try {
             this.nodes.Push(parseMethod(text));
         } catch (S.Exception ex) {
-            throw new Message("Failed to " + usage + ".").
+            throw new BlackboardException("Failed to " + usage + ".").
                 With("Location", this.LastLocation).
                 With("Error",    ex).
                 With("Text",     text);
@@ -80,7 +80,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
     public void HandleProcesses(int count, string name, IFuncGroup funcGroup) {
         INode[] inputs = this.nodes.Pop(count).Actualize().ToArray();
         INode result = funcGroup.Build(inputs) ??
-                throw new Message("Could not perform the operation with the given input.").
+                throw new BlackboardException("Could not perform the operation with the given input.").
                     With("Location",  this.LastLocation).
                     With("Operation", name).
                     With("Input",     inputs.Types().Strings().Join(", "));
@@ -97,7 +97,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             this.identifiers.Clear();
             this.arguments.Clear();
         } catch (S.Exception inner) {
-            throw new Message("Error clearing stacks at end of command").
+            throw new BlackboardException("Error clearing stacks at end of command").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -108,7 +108,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
         try {
             this.identifiers.Push(this.LastText);
         } catch (S.Exception inner) {
-            throw new Message("Error defining identifier").
+            throw new BlackboardException("Error defining identifier").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -119,7 +119,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
         try {
             this.factory.PushNamespace(this.LastText);
         } catch (S.Exception inner) {
-            throw new Message("Error parsing namespace").
+            throw new BlackboardException("Error parsing namespace").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -130,7 +130,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
         try {
             this.factory.PopNamespace();
         } catch (S.Exception inner) {
-            throw new Message("Error closing namespace").
+            throw new BlackboardException("Error closing namespace").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -144,7 +144,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             string name  = this.identifiers.Pop();
             this.factory.AddDefine(value, type, name);
         } catch (S.Exception inner) {
-            throw new Message("Error creating a typed define").
+            throw new BlackboardException("Error creating a typed define").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -157,7 +157,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             string name  = this.identifiers.Pop();
             this.factory.AddDefine(value, null, name);
         } catch (S.Exception inner) {
-            throw new Message("Error creating a variable typed define").
+            throw new BlackboardException("Error creating a variable typed define").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -169,7 +169,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             INode target = this.nodes.Pop();
             this.factory.AddProvokeTrigger(target, null);
         } catch (S.Exception inner) {
-            throw new Message("Error provoking a trigger").
+            throw new BlackboardException("Error provoking a trigger").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -181,13 +181,13 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             INode target = this.nodes.Pop();
             INode value  = this.nodes.Pop();
             INode root   = this.factory.AddProvokeTrigger(target, value) ??
-                throw new Message("Unable to create conditional provoke trigger");
+                throw new BlackboardException("Unable to create conditional provoke trigger");
 
             // Push the condition onto the stack for any following trigger pulls.
             // See comment in `handleAssignment` about pushing cast value back onto the stack.
             this.nodes.Push(root);
         } catch (S.Exception inner) {
-            throw new Message("Error conditionally provoking a trigger").
+            throw new BlackboardException("Error conditionally provoking a trigger").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -201,7 +201,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             string name  = this.identifiers.Pop();
             this.factory.AddGetter(type, name, value);
         } catch (S.Exception inner) {
-            throw new Message("Error getting typed value").
+            throw new BlackboardException("Error getting typed value").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -213,10 +213,10 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             INode  value = this.nodes.Pop();
             string name  = this.identifiers.Pop();
             Type   type  = Type.TypeOf(value) ??
-                throw new Message("Unable to determine node type for getter.");
+                throw new BlackboardException("Unable to determine node type for getter.");
             this.factory.AddGetter(type, name, value);
         } catch (S.Exception inner) {
-            throw new Message("Error getting variable typed value").
+            throw new BlackboardException("Error getting variable typed value").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -230,7 +230,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             string name  = this.identifiers.Pop();
             this.factory.AddTemp(type, name, value);
         } catch (S.Exception inner) {
-            throw new Message("Error creating a typed temp").
+            throw new BlackboardException("Error creating a typed temp").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -242,10 +242,10 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             INode  value = this.nodes.Pop();
             string name  = this.identifiers.Pop();
             Type   type  = Type.TypeOf(value) ??
-                throw new Message("Unable to determine node type for temp.");
+                throw new BlackboardException("Unable to determine node type for temp.");
             this.factory.AddTemp(type, name, value);
         } catch (S.Exception inner) {
-            throw new Message("Error creating a variable typed temp").
+            throw new BlackboardException("Error creating a variable typed temp").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -258,7 +258,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             Type   type = this.types.Peek();
             this.factory.CreateInput(name, type);
         } catch (S.Exception inner) {
-            throw new Message("Error parsing input").
+            throw new BlackboardException("Error parsing input").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -273,7 +273,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             INode  target = this.factory.CreateInput(name, type);
             this.factory.AddAssignment(target, value);
         } catch (S.Exception inner) {
-            throw new Message("Error parsing input").
+            throw new BlackboardException("Error parsing input").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -285,11 +285,11 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             INode  value = this.nodes.Pop();
             string name  = this.identifiers.Pop();
             Type   type  = Type.TypeOf(value) ??
-                throw new Message("Unable to determine node type for new variable with assignment.");
+                throw new BlackboardException("Unable to determine node type for new variable with assignment.");
             INode target = this.factory.CreateInput(name, type);
             this.factory.AddAssignment(target, value);
         } catch (S.Exception inner) {
-            throw new Message("Error parsing input").
+            throw new BlackboardException("Error parsing input").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -305,7 +305,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             Type   type = this.types.Peek();
             this.factory.RequestExtern(name, type);
         } catch (S.Exception inner) {
-            throw new Message("Error parsing extern").
+            throw new BlackboardException("Error parsing extern").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -323,14 +323,14 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             string name  = this.identifiers.Pop();
 
             if (type == Type.Trigger)
-                throw new Message("May not initialize an extern trigger.").
+                throw new BlackboardException("May not initialize an extern trigger.").
                     With("Name", name).
                     With("Type", type);
 
             (INode node, bool isExtern) = this.factory.RequestExtern(name, type);
             if (isExtern) this.factory.AddAssignment(node, value);
         } catch (S.Exception inner) {
-            throw new Message("Error parsing extern with assign").
+            throw new BlackboardException("Error parsing extern with assign").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -354,7 +354,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             // Alternatively, if we push the value then `X=Y=Z` will be like `Y=Z; X=Z;`, but we won't.
             this.nodes.Push(root);
         } catch (S.Exception inner) {
-            throw new Message("Error in assignment").
+            throw new BlackboardException("Error in assignment").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -368,7 +368,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             INode root  = this.factory.PerformCast(type, value, true);
             this.nodes.Push(root);
         } catch (S.Exception inner) {
-            throw new Message("Error while casting").
+            throw new BlackboardException("Error while casting").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -379,13 +379,13 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
         string name  = this.LastText;
         INode  rNode = this.nodes.Pop();
         if (rNode is not IFieldReader receiver)
-            throw new Message("Unexpected node type for a member access. Expected a field reader.").
+            throw new BlackboardException("Unexpected node type for a member access. Expected a field reader.").
                 With("Node", rNode).
                 With("Name", name).
                 With("Location", this.LastLocation);
 
         INode node = receiver.ReadField(name) ??
-            throw new Message("No identifier found in the receiver stack.").
+            throw new BlackboardException("No identifier found in the receiver stack.").
                 With("Identifier", name).
                 With("Location", this.LastLocation);
 
@@ -408,7 +408,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
         INode[] args = this.arguments.End();
         INode   node = this.nodes.Pop();
         if (node is not IFuncGroup group)
-            throw new Message("Unexpected node type for a method call. Expected a function group.").
+            throw new BlackboardException("Unexpected node type for a method call. Expected a function group.").
                 With("Node", node).
                 With("Input", args.Types().Strings().Join(", ")).
                 With("Location", this.LastLocation);
@@ -416,10 +416,10 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
         INode? result = group.Build(args);
         if (result is null) {
             if (args.Length <= 0)
-                throw new Message("Could not perform the function without any inputs.").
+                throw new BlackboardException("Could not perform the function without any inputs.").
                     With("Function", group).
                     With("Location", this.LastLocation);
-            throw new Message("Could not perform the function with the given input types.").
+            throw new BlackboardException("Could not perform the function with the given input types.").
                 With("Function", group).
                 With("Input", args.Types().Strings().Join(", ")).
                 With("Location", this.LastLocation);
@@ -435,7 +435,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             INode node = this.factory.FindInNamespace(name);
             this.nodes.Push(node);
         } catch (S.Exception inner) {
-            throw new Message("Error parsing identifier").
+            throw new BlackboardException("Error parsing identifier").
                 With("Location", this.LastLocation).
                 With("Error",    inner);
         }
@@ -473,7 +473,7 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
     public void HandlePushType() {
         string text = this.LastText;
         Type t = Type.FromName(text) ??
-            throw new Message("Unrecognized type name.").
+            throw new BlackboardException("Unrecognized type name.").
                 With("Text",     text).
                 With("Location", this.LastLocation);
         this.types.Push(t);

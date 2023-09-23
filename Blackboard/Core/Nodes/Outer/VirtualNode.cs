@@ -1,5 +1,4 @@
-﻿using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
 namespace Blackboard.Core.Nodes.Outer;
@@ -26,7 +25,7 @@ sealed public class VirtualNode : IFieldWriter {
         this.overrides = new Dictionary<string, INode?>();
 
         if (receiver is null or VirtualNode)
-            throw new Message("May not construct a virtual node with a null or virtual node receiver.");
+            throw new BlackboardException("May not construct a virtual node with a null or virtual node receiver.");
     }
 
     /// <summary>Creates a new instance of this node with no parents but similar configuration.</summary>

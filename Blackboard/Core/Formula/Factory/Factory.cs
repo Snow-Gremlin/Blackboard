@@ -88,7 +88,7 @@ sealed public class Factory {
         INode? next = scope.ReadField(name);
         if (next is not null) {
             if (next is not VirtualNode nextspace)
-                throw new Message("Can not open namespace. Another non-namespace exists by that name.").
+                throw new BlackboardException("Can not open namespace. Another non-namespace exists by that name.").
                      With("Identifier", name);
             this.scope.Push(nextspace);
             return;
@@ -112,7 +112,7 @@ sealed public class Factory {
     /// <param name="name"></param>
     public INode FindInNamespace(string name) {
         INode node = this.scope.FindId(name) ??
-            throw new Message("No identifier found in the scope stack.").
+            throw new BlackboardException("No identifier found in the scope stack.").
                 With("Identifier", name);
         if (node is IExtern externNode)
             node = externNode.Shell;
@@ -134,14 +134,14 @@ sealed public class Factory {
         TypeMatch match = type.Match(valueType, explicitCasts);
         if (!match.IsAnyCast)
             return match.IsMatch ? value :
-                throw new Message("The value type can not be cast to the given type.").
+                throw new BlackboardException("The value type can not be cast to the given type.").
                     With("Target", type).
                     With("Type",   valueType).
                     With("Value",  value);
 
         IFuncGroup? castGroup = Maker.GetCastMethod(this.slate, type);
         INode casted = castGroup?.Build(value) ??
-            throw new Message("Unsupported type for new definition cast").
+            throw new BlackboardException("Unsupported type for new definition cast").
                 With("Type", type);
         //if (casted is IEvaluable eval) eval.Evaluate(); TODO: Remove?
         return casted;
@@ -162,7 +162,7 @@ sealed public class Factory {
         INode? existing = scope.ReadField(name);
         if (existing is not null) {
             if (existing is not IExtern)
-                throw new Message("A node already exists with the given name.").
+                throw new BlackboardException("A node already exists with the given name.").
                     With("Name", name).
                     With("Type", type);
             scope.RemoveFields(name);
@@ -170,7 +170,7 @@ sealed public class Factory {
 
         if (root is IInput) {
             IChild shell = Maker.CreateShell(root) ??
-                throw new Message("The root for a define could not be shelled.").
+                throw new BlackboardException("The root for a define could not be shelled.").
                     With("Name", name).
                     With("Root", root);
             newNodes.Add(shell);
@@ -189,14 +189,14 @@ sealed public class Factory {
     public INode? AddProvokeTrigger(INode target, INode? value) {
         this.logger.Info("Add Provoke Trigger:");
         if (target is not ITriggerInput input)
-            throw new Message("Target node is not an input trigger.").
+            throw new BlackboardException("Target node is not an input trigger.").
                 With("Target", target).
                 With("Value",  value);
 
         // If there is no condition, add an unconditional provoke.
         if (value is null) {
             IAction assign = Provoke.Create(target) ??
-                throw new Message("Unexpected node types for a unconditional provoke.").
+                throw new BlackboardException("Unexpected node types for a unconditional provoke.").
                     With("Target", target);
 
             this.actions.Add(assign);
@@ -208,7 +208,7 @@ sealed public class Factory {
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
 
         IAction condAssign = Provoke.Create(input, root, newNodes) ??
-            throw new Message("Unexpected node types for a conditional provoke.").
+            throw new BlackboardException("Unexpected node types for a conditional provoke.").
                 With("Target", target).
                 With("Value",  value);
         this.actions.Add(condAssign);
@@ -225,14 +225,14 @@ sealed public class Factory {
     public INode AddAssignment(INode target, INode value) {
         this.logger.Info("Add Assignment:");
         if (target is not IInput)
-            throw new Message("May not assign to a node which is not an input.").
+            throw new BlackboardException("May not assign to a node which is not an input.").
                 With("Input", target).
                 With("Value", value);
 
         // Check if the base types match. Don't need to check that the type is
         // a data type or trigger since only those can be reduced to constants.
         Type targetType = Type.TypeOf(target) ??
-            throw new Message("Unable to find target type.").
+            throw new BlackboardException("Unable to find target type.").
                 With("Input", target).
                 With("Value", value);
 
@@ -241,7 +241,7 @@ sealed public class Factory {
         root = this.optimizer.Optimize(this.slate, root, newNodes, this.logger);
 
         IAction assign = Maker.CreateAssignAction(targetType, target, root, newNodes) ??
-            throw new Message("Unsupported types for an assignment action.").
+            throw new BlackboardException("Unsupported types for an assignment action.").
                 With("Type",  targetType).
                 With("Input", target).
                 With("Value", value);
@@ -270,7 +270,7 @@ sealed public class Factory {
         // TODO: Add a way to check if the getter by the names is already set or part of a path.
 
         IAction getter = Maker.CreateGetterAction(targetType, names, root, newNodes) ??
-            throw new Message("Unsupported type for a getter action.").
+            throw new BlackboardException("Unsupported type for a getter action.").
                 With("Type",  targetType).
                 With("Name",  names.Join(".")).
                 With("Value", value);
@@ -289,7 +289,7 @@ sealed public class Factory {
 
         VirtualNode scope = this.scope.Current;
         if (scope.ContainsField(name))
-            throw new Message("A node already exists with the given name.").
+            throw new BlackboardException("A node already exists with the given name.").
                 With("Name", name).
                 With("Type", targetType);
 
@@ -309,7 +309,7 @@ sealed public class Factory {
     public IInput CreateInput(string name, Type type) {
         this.logger.Info("Create Input:");
         IInput node = Maker.CreateInputNode(type) ??
-            throw new Message("Unsupported type for new typed input").
+            throw new BlackboardException("Unsupported type for new typed input").
                 With("Name", name).
                 With("Type", type);
 
@@ -317,7 +317,7 @@ sealed public class Factory {
         INode? existing = scope.ReadField(name);
         if (existing is not null) {
             if (existing is not IExtern)
-                throw new Message("A node already exists with the given name.").
+                throw new BlackboardException("A node already exists with the given name.").
                     With("Name", name).
                     With("Type", type);
             scope.RemoveFields(name);
@@ -342,13 +342,13 @@ sealed public class Factory {
         if (existing is not null) {
 
             Type existType = Type.TypeOf(existing) ??
-                throw new Message("Unable to find existing type.").
+                throw new BlackboardException("Unable to find existing type.").
                     With("Name",     name).
                     With("Existing", existing).
                     With("New Type", type);
 
             if (existType != type)
-                throw new Message("Extern node does not match existing node type.").
+                throw new BlackboardException("Extern node does not match existing node type.").
                     With("Name",          name).
                     With("Existing",      existing).
                     With("Existing Type", existType).
@@ -360,7 +360,7 @@ sealed public class Factory {
 
         // Node doesn't exist, create the extern placeholder.
         IExtern node = Maker.CreateExternNode(type) ??
-            throw new Message("Unsupported type for new extern").
+            throw new BlackboardException("Unsupported type for new extern").
                 With("Name", name).
                 With("Type", type);
 

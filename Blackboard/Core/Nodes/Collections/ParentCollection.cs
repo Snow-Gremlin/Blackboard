@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections;
 using System.Collections.Generic;
@@ -66,25 +65,25 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
     internal ParentCollection With<T>(List<T> source, int min = 0, int max = int.MaxValue)
         where T : class, IParent {
         if (this.HasVariable)
-            throw this.message("May not set a variable parent part after one has already been set.");
+            throw this.newException("May not set a variable parent part after one has already been set.");
         this.varParents = new VarParent<T>(source, min, max);
         return this;
     }
 
-    /// <summary>Creates a message with information about this parent collection already added to it.</summary>
+    /// <summary>Creates an exception with information about this parent collection already added to it.</summary>
     /// <param name="format">The format for the message to create.</param>
     /// <param name="args">The arguments to fill out the format for the message.</param>
-    /// <returns>The new message with the parent context.</returns>
-    private Message message(string format, params object[] args) {
-        Message m = new Message(format, args).
-                With("child", this.Child);
+    /// <returns>The new exception with the parent context.</returns>
+    private BlackboardException newException(string format, params object[] args) {
+        BlackboardException ex = new BlackboardException(format, args).
+            With("child", this.Child);
         if (this.HasVariable)
-            m.With("variable count", this.VarCount).
-              With("maximum count",  this.MinimumCount).
-              With("minimum count",  this.MaximumCount);
-        if (this.HasFixed) m.With("fixed count", this.VarCount);
-        if (this.HasFixed && this.HasVariable) m.With("total count", this.Count);
-        return m;
+            ex.With("variable count", this.VarCount).
+               With("maximum count",  this.MinimumCount).
+               With("minimum count",  this.MaximumCount);
+        if (this.HasFixed) ex.With("fixed count", this.VarCount);
+        if (this.HasFixed && this.HasVariable) ex.With("total count", this.Count);
+        return ex;
     }
 
     /// <summary>The child that this parent collection is from.</summary>
@@ -149,11 +148,11 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
     /// <returns>The type of the parent at the given index.</returns>
     public S.Type TypeAt(int index) =>
         (index < 0 || (!this.HasVariable && index >= this.FixedCount) ?
-        throw this.message("Index out of bounds of node's parent types.").
+        throw this.newException("Index out of bounds of node's parent types.").
             With("index", index) :
         index < this.FixedCount ? this.fixedParents[index].Type :
         this.varParents?.Type) ??
-            throw this.message("Null parent from node's parent types.");
+            throw this.newException("Null parent from node's parent types.");
 
     /// <summary>This gets or sets the parent at the given location.</summary>
     /// <remarks>This will throw an exception if out-of-bounds or wrong type.</remarks>
@@ -161,7 +160,7 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
     /// <returns>The parent gotten from the given index. A parent maybe null.</returns>
     public IParent? this[int index] {
         get => index < 0 || index >= this.Count ?
-            throw this.message("Index out of bounds of node's parents.").
+            throw this.newException("Index out of bounds of node's parents.").
                 With("index", index) :
             index < this.FixedCount ? this.fixedParents[index].Node :
                 this.varParents?[index - this.FixedCount];
@@ -172,7 +171,7 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
             if (value is not null) {
                 S.Type? type = this.TypeAt(index);
                 if (!value.GetType().IsAssignableTo(type))
-                    throw this.message("Incorrect type of a parent being set to a node.").
+                    throw this.newException("Incorrect type of a parent being set to a node.").
                         With("index", index).
                         With("expected type", type).
                         With("new parent", value);
@@ -203,7 +202,7 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
             if (!ReferenceEquals(param.Node, oldParent) || ReferenceEquals(param.Node, newParent)) continue;
 
             if (newParent is not null && !newParent.GetType().IsAssignableTo(param.Type))
-                throw this.message("Unable to replace old parent with new parent in fixed parent part.").
+                throw this.newException("Unable to replace old parent with new parent in fixed parent part.").
                     With("index", i).
                     With("old parent", oldParent).
                     With("new parent", newParent).
@@ -224,7 +223,7 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
             if (!ReferenceEquals(parent, oldParent) || ReferenceEquals(parent, newParent)) continue;
 
             if (newParent is not null && !newParent.GetType().IsAssignableTo(this.varParents.Type))
-                throw this.message("Unable to replace old parent with new parent in variable parent part.").
+                throw this.newException("Unable to replace old parent with new parent in variable parent part.").
                     With("index", i + this.FixedCount).
                     With("old parent", oldParent).
                     With("new parent", newParent).
@@ -301,7 +300,7 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
             IParent newParent = newParents[i];
             S.Type type = this.fixedParents[i].Type;
             if (!newParent.GetType().IsAssignableTo(type))
-                throw this.message("Incorrect type of a parent in the list of fixed parents to set to a node.").
+                throw this.newException("Incorrect type of a parent in the list of fixed parents to set to a node.").
                     With("index", i).
                     With("expected type", type).
                     With("new parent", newParent);
@@ -319,7 +318,7 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
         for (int i = this.FixedCount, j = 0; i < minCount; ++i, ++j) {
             IParent newParent = newParents[i];
             if (!newParent.GetType().IsAssignableTo(this.varParents?.Type))
-                throw this.message("Incorrect type of a parent in the list of parents to set to a node.").
+                throw this.newException("Incorrect type of a parent in the list of parents to set to a node.").
                     With("index", i).
                     With("expected type", this.varParents?.Type).
                     With("new parent", newParent);
@@ -330,7 +329,7 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
         for (int i = minCount; i < newParents.Count; i++) {
             IParent newParent = newParents[i];
             if (!newParent.GetType().IsAssignableTo(this.varParents?.Type))
-                throw this.message("Incorrect type of a parent in the list of parents to set to a node.").
+                throw this.newException("Incorrect type of a parent in the list of parents to set to a node.").
                     With("index", i).
                     With("expected type", this.varParents?.Type).
                     With("new parent", newParent);
@@ -395,11 +394,11 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
     /// <returns>True if any parents changed, false if they were all the same.</returns>
     public bool SetAll(List<IParent> newParents) {
         if (newParents.Count < this.FixedCount || (!this.HasVariable && newParents.Count > this.FixedCount))
-            throw this.message("Incorrect number of parents in the list of parents to set to a node.").
+            throw this.newException("Incorrect number of parents in the list of parents to set to a node.").
                 With("new parent count", newParents.Count);
 
         if (newParents.Count < this.MinimumCount || newParents.Count > this.MaximumCount)
-            throw this.message("The number of parents to set is not within the allowed maximum and minimum counts.").
+            throw this.newException("The number of parents to set is not within the allowed maximum and minimum counts.").
                 With("new parent count", newParents.Count);
 
         bool fixChange = this.checkFixSetAll(newParents);
@@ -427,25 +426,25 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
     /// <returns>True if any parents were added, false otherwise.</returns>
     public bool Insert(int index, IEnumerable<IParent> newParents, IChild? oldChild = null) {
         if (index < 0 || index > this.Count)
-            throw this.message("Index out of bounds of node's parents.").
+            throw this.newException("Index out of bounds of node's parents.").
                 With("index", index);
 
         if (index < this.FixedCount)
-            throw this.message("May not insert a parent into the fixed parent part.").
+            throw this.newException("May not insert a parent into the fixed parent part.").
                 With("index", index);
 
         int newCount = newParents.Count();
         if (newCount <= 0) return false;
 
         if (this.Count + newCount > this.MaximumCount || this.varParents is null)
-            throw this.message("Inserting the given number of parents would cause there to be more than the maximum allowed count.").
+            throw this.newException("Inserting the given number of parents would cause there to be more than the maximum allowed count.").
                 With("new total count", this.Count + newCount).
                 With("new parent count", newCount);
 
         S.Type type = this.varParents.Type;
         foreach ((IParent newParent, int i) in newParents.WithIndex()) {
             if (!newParent.GetType().IsAssignableTo(type))
-                throw new Message("Incorrect type of a parent in the list of parents to insert into a node.").
+                throw this.newException("Incorrect type of a parent in the list of parents to insert into a node.").
                     With("insert index", index).
                     With("new parent index", i).
                     With("expected type", type).
@@ -473,17 +472,17 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
         if (length <= 0) return false;
 
         if (index < 0 || index + length > this.Count)
-            throw this.message("Index, with length taken into account, is out of bounds of node's parents.").
+            throw this. newException("Index, with length taken into account, is out of bounds of node's parents.").
                 With("index", index).
                 With("length", length);
 
         if (index < this.FixedCount)
-            throw this.message("May not remove a parent from the fixed parent part.").
+            throw this.newException("May not remove a parent from the fixed parent part.").
                 With("index", index).
                 With("length", length);
 
         if (this.Count - length < this.MinimumCount)
-            throw this.message("Removing the given number of parents would cause there to be fewer than the minimum allowed count.").
+            throw this.newException("Removing the given number of parents would cause there to be fewer than the minimum allowed count.").
                 With("index", index).
                 With("length", length);
 

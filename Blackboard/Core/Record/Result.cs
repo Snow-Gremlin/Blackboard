@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Inspect;
 using PetiteParser.Formatting;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,11 +32,11 @@ sealed public class Result : IReader, IWriter {
         foreach (string name in names) {
             dic = dic.TryGetValue(name, out object? value) ?
                 value is Dictionary<string, object> next ? next :
-                    throw new Message("Path does not exist. Name in path is not a namespace.").
+                    throw new BlackboardException("Path does not exist. Name in path is not a namespace.").
                         With("Name", name).
                         With("Path", names.Join(".")).
                         With("Found", value) :
-                throw new Message("Path does not exist. Name in path is missing.").
+                throw new BlackboardException("Path does not exist. Name in path is missing.").
                     With("Name", name).
                     With("Path", names.Join("."));
         }
@@ -98,7 +97,7 @@ sealed public class Result : IReader, IWriter {
     public void SetValue<T>(T value, IEnumerable<string> names) where T : IData {
         (Dictionary<string, object> dic, string lastName) = this.find(names, true);
         if (dic.ContainsKey(lastName))
-            throw new Message("Value already exists so can not be set.").
+            throw new BlackboardException("Value already exists so can not be set.").
                 With("Path", names.Join(".")).
                 With("Value", value);
         dic[lastName] = value;
@@ -110,7 +109,7 @@ sealed public class Result : IReader, IWriter {
     public void SetTrigger(IEnumerable<string> names, bool provoke = true) {
         (Dictionary<string, object> dic, string lastName) = this.find(names, true);
         if (dic.ContainsKey(lastName))
-            throw new Message("Value already exists so can not be provoked.").
+            throw new BlackboardException("Value already exists so can not be provoked.").
                 With("Path", names.Join("."));
         dic[lastName] = provoke;
     }
@@ -128,7 +127,7 @@ sealed public class Result : IReader, IWriter {
             else {
                 if (dic.TryGetValue(lastName, out object? value)) {
                     dic = value is Dictionary<string, object> next ? next :
-                        throw new Message("Path does not exist. Name in path is not a namespace.").
+                        throw new BlackboardException("Path does not exist. Name in path is not a namespace.").
                             With("Name", lastName).
                             With("Path", names.Join(".")).
                             With("Found", value);
@@ -136,14 +135,14 @@ sealed public class Result : IReader, IWriter {
                     Dictionary<string, object> next = new();
                     dic.Add(lastName, next);
                     dic = next;
-                } else throw new Message("Path does not exist. Name in path is missing.").
+                } else throw new BlackboardException("Path does not exist. Name in path is missing.").
                     With("Name", lastName).
                     With("Path", names.Join("."));
             }
             lastName = name;
         }
         return !first ? (dic, lastName) :
-            throw new Message("Path was empty.");
+            throw new BlackboardException("Path was empty.");
     }
 
     /// <summary>Remove the value at the given path if it exists.</summary>
@@ -161,7 +160,7 @@ sealed public class Result : IReader, IWriter {
             lastName = name;
         }
         return !first ? dic.Remove(lastName) :
-            throw new Message("Path was empty.");
+            throw new BlackboardException("Path was empty.");
     }
 
     /// <summary>Gets the string for the value stored in the results.</summary>

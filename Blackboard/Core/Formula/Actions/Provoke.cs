@@ -1,5 +1,6 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,12 +34,6 @@ sealed public class Provoke : IAction {
         target is ITriggerInput input ?
         new Provoke(input, null, allNodes) : null;
 
-    /// <summary>
-    /// This is a subset of all the node for the trigger which need to be pended
-    /// for evaluation in order to perform this assignment.
-    /// </summary>
-    private readonly IEvaluable[] needPending;
-
     /// <summary>Creates a new provoke action.</summary>
     /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
     /// <param name="target">The input trigger to provoke.</param>
@@ -48,10 +43,10 @@ sealed public class Provoke : IAction {
         this.Target  = target;
         this.Trigger = trigger;
 
-        // Pre-sort the evaluable nodes.
-        LinkedList<IEvaluable> nodes = new();
-        nodes.SortInsertUnique(allNewNodes?.NotNull()?.OfType<IEvaluable>());
-        this.needPending = nodes.ToArray();
+        // Pre-group the evaluable nodes.
+        this.NeedPending = new();
+        IEnumerable<IEvaluable>? pending = allNewNodes?.NotNull()?.OfType<IEvaluable>();
+        if (pending is not null) this.NeedPending.Insert(pending);
     }
 
     /// <summary>The target input trigger to provoke.</summary>
@@ -61,7 +56,7 @@ sealed public class Provoke : IAction {
     public readonly ITrigger? Trigger;
 
     /// <summary>All the nodes which are new children of the node to provoke.</summary>
-    public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
+    public EvalPending NeedPending { get; }
 
     /// <summary>This will perform the action.</summary>
     /// <param name="slate">The slate for this action.</param>
@@ -69,7 +64,7 @@ sealed public class Provoke : IAction {
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Provoke: {0}", this);
-        slate.PendEval(this.needPending);
+        slate.PendEval(this.NeedPending);
         slate.PerformEvaluation(logger.Group(nameof(Provoke)));
         slate.SetTrigger(this.Target, this.Trigger?.Provoked ?? true);
     }

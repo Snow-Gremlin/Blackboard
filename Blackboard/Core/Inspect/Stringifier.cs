@@ -501,14 +501,14 @@ sealed public class Stringifier {
     /// <returns>The string for the given output action.</returns>
     private string stringGetter(IGetter getter) =>
         getter.Names.Join(".") + " <= " + this.Stringify(getter.Node) +
-            " {" + Simple().PreLoadNames(this).Stringify(getter.NeedPending) + "};";
+            " {" + Simple().PreLoadNames(this).Stringify(getter.NeedPending.Nodes) + "};";
 
     /// <summary>Get the string for the given assign action.</summary>
     /// <param name="assign">The assign action to stringify.</param>
     /// <returns>The string for the given assign action.</returns>
     private string stringAssign(IAssign assign) =>
         this.Stringify(assign.Target) + " = " + this.Stringify(assign.Value) +
-            " {" + Simple().PreLoadNames(this).Stringify(assign.NeedPending) + "};";
+            " {" + Simple().PreLoadNames(this).Stringify(assign.NeedPending.Nodes) + "};";
 
     /// <summary>Get the string for the given define action.</summary>
     /// <param name="define">The define action to stringify.</param>
@@ -535,7 +535,7 @@ sealed public class Stringifier {
     /// <returns>The string for the given provoke action.</returns>
     private string stringProvoke(Provoke provoke) =>
         this.Stringify(provoke.Trigger) + " -> " + this.Stringify(provoke.Target) +
-            " {" + Simple().PreLoadNames(this).Stringify(provoke.NeedPending) + "};";
+            " {" + Simple().PreLoadNames(this).Stringify(provoke.NeedPending.Nodes) + "};";
 
     #endregion
     #region Other...

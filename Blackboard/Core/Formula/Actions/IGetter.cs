@@ -1,5 +1,5 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
+﻿using Blackboard.Core.Nodes.Collections;
+using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Formula.Actions;
 
@@ -13,5 +13,5 @@ public interface IGetter : IAction {
     public INode Node { get; }
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
-    public IReadOnlyList<IEvaluable> NeedPending { get; }
+    public EvalPending NeedPending { get; }
 }

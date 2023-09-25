@@ -20,10 +20,10 @@ namespace Blackboard.Core;
 public class Slate: INodeReader, IReader, IWriter {
 
     /// <summary>The nodes which have had one or more parent modified and they need to have their depth updated.</summary>
-    private readonly LinkedList<IEvaluable> pendingUpdate;
+    private readonly EvalPending pendingUpdate;
 
     /// <summary>The nodes which have had one or more parent modified and they need to be reevaluated.</summary>
-    private readonly LinkedList<IEvaluable> pendingEval;
+    private readonly EvalPending pendingEval;
 
     /// <summary>A collection of literals and constants used in the graph.</summary>
     /// <remarks>
@@ -146,17 +146,17 @@ public class Slate: INodeReader, IReader, IWriter {
     public void PendUpdate(params INode[] nodes) =>
         this.PendUpdate(nodes as IEnumerable<INode>);
 
-    /// <summaryThis indicates that the given nodes have had parents added or removed and need to be updated.</summary>
+    /// <summary>This indicates that the given nodes have had parents added or removed and need to be updated.</summary>
     /// <remarks>This will pend the given nodes to update the depths prior to evaluation.</remarks>
     /// <param name="nodes">The nodes to pend evaluation for.</param>
     public void PendUpdate(IEnumerable<INode> nodes) =>
-        this.pendingUpdate.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
+        this.pendingUpdate.Insert(nodes.NotNull().OfType<IEvaluable>());
 
     /// <summary>This gets all the nodes pending update.</summary>
-    public IEnumerable<INode> PendingUpdate => this.pendingEval;
+    public IEnumerable<IEvaluable> PendingUpdate => this.pendingUpdate.Nodes;
 
     /// <summary>This indicates if any nodes are pending update.</summary>
-    public bool HasPendingUpdate => this.pendingUpdate.Count > 0;
+    public bool HasPendingUpdate => this.pendingUpdate.HasPending;
 
     /// <summary>
     /// This updates the depth values of the given pending nodes and
@@ -184,13 +184,20 @@ public class Slate: INodeReader, IReader, IWriter {
     /// </summary>
     /// <param name="nodes">The nodes to pend evaluation for.</param>
     public void PendEval(IEnumerable<INode> nodes) =>
-        this.pendingEval.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
+        this.pendingEval.Insert(nodes.NotNull().OfType<IEvaluable>());
+    
+    /// <summary>
+    /// This indicates that the given nodes have had parents changed
+    /// and need to be recalculated during evaluation.
+    /// </summary>
+    /// <param name="nodes">The nodes to pend evaluation for.</param>
+    public void PendEval(EvalPending nodes) => this.PendEval(nodes);
 
-    /// <summary>This gets all the nodes pending evaluation.</summary>
-    public IEnumerable<INode> PendingEval => this.pendingEval;
+       /// <summary>This gets all the nodes pending evaluation.</summary>
+    public IEnumerable<IEvaluable> PendingEval => this.pendingEval.Nodes;
 
     /// <summary>This indicates if any changes are pending evaluation.</summary>
-    public bool HasPendingEval => this.pendingEval.Count > 0;
+    public bool HasPendingEval => this.pendingEval.HasPending;
 
     /// <summary>
     /// Performs an evaluation of all pending nodes and

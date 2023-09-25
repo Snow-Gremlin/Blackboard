@@ -31,8 +31,8 @@
                'private', 'protected', 'public', 'static'
              => [ReservedScoping];
 
-[Identifier] = 'abstract', 'class', 'const', 'def', 'func', 'interface',
-               'operator', 'override', 'typedef', 'void', 'virtual'
+[Identifier] = 'abstract', 'class', 'const', 'def', 'do', 'event', 'func',
+               'interface', 'operator', 'override', 'typedef', 'void', 'virtual'
              => [ReservedDefinitions];
 
 [Identifier] = 'as', 'break', 'catch', 'case', 'continue', 'default', 'else',
@@ -41,6 +41,6 @@
                'using', 'when', 'yield'
              => [ReservedConstructs];
 
-[Identifier] = 'complex', 'do', 'dynamic', 'for', 'foreach', 'goto',
+[Identifier] = 'complex', 'dynamic', 'for', 'foreach', 'goto',
                'label', 'readonly', 'sealed', 'until', 'while'
              => [ReservedUnsupported];

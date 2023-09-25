@@ -163,13 +163,13 @@ static class NodeExt {
         }
     }
 
-    /// <summary>Gets a sorted link list of all the evaluable nodes from the given nodes.</summary>
-    /// <param name="nodes">The nodes to get the sorted link list from.</param>
-    /// <returns>The sorted link list of evaluable nodes.</returns>
-    static public LinkedList<IEvaluable> ToEvalList(this IEnumerable<INode> nodes) {
-        LinkedList<IEvaluable> list = new();
-        list.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
-        return list;
+    /// <summary>Gets an eval pending list of all the evaluable nodes from the given nodes.</summary>
+    /// <param name="nodes">The nodes to get the eval pending from.</param>
+    /// <returns>The eval pending of evaluable nodes.</returns>
+    static public EvalPending ToEvalPending(this IEnumerable<INode> nodes) {
+        EvalPending pending = new();
+        pending.Insert(nodes.NotNull().OfType<IEvaluable>());
+        return pending;
     }
 
     /// <summary>Will assign all the children reachable via parents to the parents.</summary>
@@ -185,7 +185,7 @@ static class NodeExt {
     /// <param name="logger">Optional logger to use to debug the update with.</param>
     /// <returns>The given node so that method calls can be chained.</returns>
     static public INode UpdateAllParents(this INode node, Logger? logger = null) {
-        node.GetAllParents().ToEvalList().UpdateDepths(logger);
+        node.GetAllParents().ToEvalPending().UpdateDepths(logger);
         return node;
     }
 
@@ -194,5 +194,5 @@ static class NodeExt {
     /// <param name="finalization">The set of the triggers which have been provoked and need to be reset.</param>
     /// <param name="logger">Optional logger to use to debug the update with.</param>
     static public void EvaluateAllParents(this INode node, Finalization finalization, Logger? logger = null) =>
-        node.GetAllParents().ToEvalList().Evaluate(finalization, logger);
+        node.GetAllParents().ToEvalPending().Evaluate(finalization, logger);
 }

@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
+﻿using Blackboard.Core.Nodes.Collections;
+using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 
 namespace Blackboard.Core.Formula.Actions;
@@ -17,5 +18,5 @@ public interface IAssign : IAction {
     public IDataNode Value { get; }
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
-    public IReadOnlyList<IEvaluable> NeedPending { get; }
+    public EvalPending NeedPending { get; }
 }

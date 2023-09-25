@@ -15,7 +15,6 @@ static public class StringExt {
     static public IEnumerable<string> Strings<T>(this IEnumerable<T> values, string nullStr = "null") =>
         from v in values select v?.ToString() ?? nullStr;
 
-
     /// <summary>This will indent all the lines in the given string with the given indent.</summary>
     /// <param name="part">The string to indent all the lines with.</param>
     /// <param name="indent">The indent to add to the front of each line.</param>

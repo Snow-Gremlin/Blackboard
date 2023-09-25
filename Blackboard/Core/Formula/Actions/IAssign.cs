@@ -1,6 +1,5 @@
 ﻿using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
 
 namespace Blackboard.Core.Formula.Actions;
 

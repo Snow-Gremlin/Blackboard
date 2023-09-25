@@ -1,9 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;

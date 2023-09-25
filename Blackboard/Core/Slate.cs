@@ -238,12 +238,12 @@ public class Slate: INodeReader, IReader, IWriter {
 
         IInput input = this.GetNode<IInput>(names);
         Type found = Type.TypeOf(input) ??
-            throw new Message("Unable to find type of found input node.").
+            throw new BlackboardException("Unable to find type of found input node.").
                 With("node",  input).
                 With("type",  type).
                 With("names", names.Join("."));
         return found == type ? input :
-            throw new Message("The existing input type didn't match the requested type").
+            throw new BlackboardException("The existing input type didn't match the requested type").
                 With("found", found).
                 With("type",  type).
                 With("names", names.Join("."));
@@ -277,19 +277,19 @@ public class Slate: INodeReader, IReader, IWriter {
         IOutput? output = parent.Children.OfType<IOutput>().FirstOrDefault();
         if (output is not null) {
             Type found = Type.TypeOf(output) ??
-                throw new Message("Unable to find type of found output node.").
+                throw new BlackboardException("Unable to find type of found output node.").
                     With("node",  output).
                     With("type",  type).
                     With("names", names.Join("."));
             return found == type ? output :
-                throw new Message("The existing output type didn't match the requested type").
+                throw new BlackboardException("The existing output type didn't match the requested type").
                     With("found", found).
                     With("type",  type).
                     With("names", names.Join("."));
         }
 
         output = Maker.CreateOutputNode(type) ??
-            throw new Message("Unable to create output node of given type").
+            throw new BlackboardException("Unable to create output node of given type").
                 With("type",  type).
                 With("names", names.Join("."));
         output.Parents[0] = parent;

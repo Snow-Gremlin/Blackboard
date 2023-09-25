@@ -82,7 +82,7 @@ public abstract class FuncDef<TReturn> : IFuncDef
         Type[] nnTypes = argTypes.NotNull().ToArray();
 
         void throwExp(string message) =>
-            throw new Message(message).
+            throw new BlackboardException(message).
                 With("Minimum", min).
                 With("Maximum", max).
                 With("Need one no cast", needsOneNoCast).
@@ -179,7 +179,7 @@ public abstract class FuncDef<TReturn> : IFuncDef
     static private INode castParam(INode node, Type? t) {
         INode? cast = t?.Implicit(node);
         return cast is not null ? cast :
-            throw new Message("Error implicitly casting parameter").
+            throw new BlackboardException("Error implicitly casting parameter").
                 With("Node", node).
                 With("Implicit", t).
                 With("Result", cast);

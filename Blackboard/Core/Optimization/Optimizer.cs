@@ -131,7 +131,7 @@ sealed internal class Optimizer {
                 // Clean up and prepare for next rule or to be finished.
                 if (args.Removed.Count > 0) {
                     if (args.Removed.Contains(args.Root))
-                        throw new Message("Optimization rule {0} removed the root without updating the root.", ruleName).
+                        throw new BlackboardException("Optimization rule {0} removed the root without updating the root.", ruleName).
                             With("Old Root", root).
                             With("Root", args.Root).
                             With("Nodes", args.Nodes).
@@ -151,7 +151,7 @@ sealed internal class Optimizer {
 
             i++;
             if (i >= maxCycles)
-                throw new Message("Optimization took more than {0} cycles.", maxCycles).
+                throw new BlackboardException("Optimization took more than {0} cycles.", maxCycles).
                     With("Root", root).
                     With("Nodes", nodes);
         }

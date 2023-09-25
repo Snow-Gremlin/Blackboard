@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Bases;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Record;
@@ -32,7 +31,7 @@ sealed public class InputValue<T1, T2> : ValueNode<T1>, IValueInput<T1>, IInputV
     /// <param name="data">The data value to assign to the input.</param>
     /// <returns>True if there was any change, false otherwise.</returns>
     public bool SetData(IData data) => data is T1 value ? this.SetValue(value) :
-        throw new Message("Setting the wrong type of data to an input").
+        throw new BlackboardException("Setting the wrong type of data to an input").
             With("data", data).
             With("type", typeof(T1));
 

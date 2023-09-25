@@ -2,6 +2,7 @@
 using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
+using Blackboard.Core.Record;
 using System.Collections.Generic;
 using System.Linq;
 

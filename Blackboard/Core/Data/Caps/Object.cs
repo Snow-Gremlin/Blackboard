@@ -38,7 +38,7 @@ public readonly struct Object :
     /// If the value in the object is unable to be cast, this exception will be thrown.
     /// </exception>
     internal T CastTo<T>(string typeName) where T : struct => this.Value as T? ??
-        throw new Message("Unable to cast {0} value ({1}) to {2} type.",
+        throw new BlackboardException("Unable to cast {0} value ({1}) to {2} type.",
             Type.Object.Name, this.Value?.GetType()?.FullName ?? "null", typeName);
     
     #region BaseValue...

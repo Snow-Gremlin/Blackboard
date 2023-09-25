@@ -18,7 +18,7 @@ sealed public class Extern : IAction {
     /// <param name="node">The node being set to the receiver with the given name.</param>
     public Extern(IFieldWriter receiver, string name, IExtern node) {
         if (receiver is null or VirtualNode)
-            throw new Message("May not use a null or {0} as the receiver in a {1}.", nameof(VirtualNode), nameof(Extern));
+            throw new BlackboardException("May not use a null or {0} as the receiver in a {1}.", nameof(VirtualNode), nameof(Extern));
 
         this.Receiver = receiver;
         this.Name     = name;
@@ -45,19 +45,19 @@ sealed public class Extern : IAction {
         if (existing is not null) {
 
             Type existType = Type.TypeOf(existing) ??
-                throw new Message("Unable to find existing type while setting extern.").
+                throw new BlackboardException("Unable to find existing type while setting extern.").
                     With("Name",     this.Name).
                     With("Existing", existing).
                     With("Node",     this.Node);
 
             Type externType = Type.TypeOf(this.Node) ??
-                throw new Message("Unable to find extern type while setting extern.").
+                throw new BlackboardException("Unable to find extern type while setting extern.").
                     With("Name",     this.Name).
                     With("Existing", existing).
                     With("Node",     this.Node);
 
             if (existType != externType)
-                throw new Message("Extern node does not match existing node type.").
+                throw new BlackboardException("Extern node does not match existing node type.").
                     With("Name",          this.Name).
                     With("Existing",      existing).
                     With("Existing Type", existType).

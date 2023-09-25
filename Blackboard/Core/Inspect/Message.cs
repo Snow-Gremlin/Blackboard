@@ -85,7 +85,7 @@ public class Message {
             string strKey = key?.ToString() ?? "null";
             string strVal = value switch {
                 null          => "null",
-                Exception e   => e.FullMessage.ToString(),
+                S.Exception e => e.Message,
                 Message   msg => msg.ToString(),
                 _             => value.ToString() ?? "null",
             };
@@ -93,18 +93,5 @@ public class Message {
             lines.Add("[" + strKey + ": " + strVal + "]");
         }
         return lines.Join("\n");
-    }
-
-    /// <summary>Implicitly convert to an exception when needed.</summary>
-    /// <param name="msg">The message to convert.</param>
-    public static implicit operator Exception(Message msg) {
-        S.Exception? inner = null;
-        foreach (object value in msg.Data.Keys) {
-            if (value is S.Exception e) {
-                inner = e;
-                break;
-            }
-        }
-        return new(msg.Stringify(), inner);
     }
 }

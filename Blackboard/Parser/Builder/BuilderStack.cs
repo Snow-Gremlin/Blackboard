@@ -1,5 +1,5 @@
-﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
+﻿using Blackboard.Core;
+using Blackboard.Core.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -23,7 +23,7 @@ sealed internal class BuilderStack<T> {
     /// <returns>The value that is on the top of the stack.</returns>
     public T Peek() {
         LinkedListNode<T> last = this.stack.Last ??
-            throw new Message("May not peek in an empty map.");
+            throw new BlackboardException("May not peek in an empty map.");
         return last.Value;
     }
 

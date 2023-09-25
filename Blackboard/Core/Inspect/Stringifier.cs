@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Formula;
 using Blackboard.Core.Formula.Actions;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Nodes.Interfaces;
@@ -552,7 +551,6 @@ sealed public class Stringifier {
             INode               node   => this.Stringify(node),
             IAction             action => this.Stringify(action),
             Message             msg    => msg.Stringify(this),
-            Exception           e      => e.Stringify(this),
             IEnumerable<object> list   => list.Select(this.StringifyObject).Join(", "),
             S.Type              type   => type.FormattedTypeName(),
             _                          => value

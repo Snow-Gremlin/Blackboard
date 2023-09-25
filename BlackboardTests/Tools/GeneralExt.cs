@@ -1,5 +1,4 @@
-﻿using Blackboard.Core.Nodes.Inner;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 using System.Text;
 using S = System;

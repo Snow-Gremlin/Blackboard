@@ -77,7 +77,7 @@ sealed public partial class Blackboard {
     static private string[] splitUpName(string name) =>
         // TODO: Should check that the given name isn't a reserved word.
         nameRegex().IsMatch(name) ? name.Split('.') :
-            throw new Message("Invalid identifier with optional namespace.").
+            throw new BlackboardException("Invalid identifier with optional namespace.").
                 With("name", name);
     
     /// <summary>Creates or gets a trigger input.</summary>
@@ -87,7 +87,7 @@ sealed public partial class Blackboard {
         string[] parts = splitUpName(name);
         IInput input = this.slate.GetInput(Type.Trigger, parts);
         return new InputTrigger(this.slate, input as IInputTrigger ??
-            throw new Message("Failed to create input trigger").
+            throw new BlackboardException("Failed to create input trigger").
                 With("name",     name).
                 With("existing", input));
     }
@@ -98,14 +98,14 @@ sealed public partial class Blackboard {
     /// <returns>The value setter.</returns>
     public InputValue<T> ValueInput<T>(string name) {
         Type type = Type.FromValueType(typeof(T)) ??
-            throw new Message("The given type is unsupported").
+            throw new BlackboardException("The given type is unsupported").
                 With("name", name).
                 With("Type", typeof(T));
 
         string[] parts = splitUpName(name);
         IInput input = this.slate.GetInput(type, parts);
         return new InputValue<T>(this.slate, input as IInputValue<T> ??
-            throw new Message("Failed to create value input").
+            throw new BlackboardException("Failed to create value input").
                 With("type",     type).
                 With("name",     name).
                 With("existing", input));
@@ -118,7 +118,7 @@ sealed public partial class Blackboard {
         string[] parts = splitUpName(name);
         IOutput output = this.slate.GetOutput(Type.Trigger, null, parts);
         return output as ITriggerWatcher ??
-            throw new Message("Failed to create output trigger").
+            throw new BlackboardException("Failed to create output trigger").
                 With("name",     name).
                 With("existing", output);
     }
@@ -129,14 +129,14 @@ sealed public partial class Blackboard {
     /// <returns>The value watcher.</returns>
     public IValueWatcher<T> OnChange<T>(string name) {
         Type type = Type.FromValueType(typeof(T)) ??
-            throw new Message("The given type is unsupported").
+            throw new BlackboardException("The given type is unsupported").
                 With("name", name).
                 With("Type", typeof(T));
         
         string[] parts = splitUpName(name);
         IOutput output = this.slate.GetOutput(type, null, parts);
         return output as IValueWatcher<T> ??
-            throw new Message("Failed to create value output").
+            throw new BlackboardException("Failed to create value output").
                 With("type",     type).
                 With("name",     name).
                 With("existing", output);
@@ -149,7 +149,7 @@ sealed public partial class Blackboard {
     /// <returns>The value watcher.</returns>
     public IValueWatcher<T> OnChange<T>(string name, T value) {
         Type type = Type.FromValueType(typeof(T)) ??
-            throw new Message("The given type is unsupported").
+            throw new BlackboardException("The given type is unsupported").
                 With("name", name).
                 With("Type", typeof(T));
         
@@ -157,7 +157,7 @@ sealed public partial class Blackboard {
         IConstant lit = Maker.CreateConstant(Maker.WrapData<T>(value));
         IOutput output = this.slate.GetOutput(type, lit, parts);
         return output as IValueWatcher<T> ??
-            throw new Message("Failed to create value output").
+            throw new BlackboardException("Failed to create value output").
                 With("type",     type).
                 With("name",     name).
                 With("existing", output);

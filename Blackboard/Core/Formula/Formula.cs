@@ -15,12 +15,12 @@ sealed public class Formula {
     /// <returns>The joined formula to run several formulas together.</returns>
     static public Formula Join(params Formula[] formulas) {
         if (formulas.Length <= 0)
-            throw new Message("Join must have at least one formula in it.");
+            throw new BlackboardException("Join must have at least one formula in it.");
         Slate slate = formulas[0].Slate;
         List<IAction> actions = new();
         foreach (Formula f in formulas) {
             if (f.Slate != slate)
-                throw new Message("May only join formulas from the same blackboard.");
+                throw new BlackboardException("May only join formulas from the same blackboard.");
             actions.AddRange(f.Actions.Where(action => action is not Finish));
         }
         actions.Add(new Finish());

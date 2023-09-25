@@ -208,7 +208,7 @@ public class Assignments {
     public void TestBasicParses_DoubleToIntAssignError() {
         Slate slate = new();
         Parser parser = new(slate);
-        Tools.TestTools.CheckException(() => parser.Read("in int A = 3.14;"),
+        TestTools.CheckException(() => parser.Read("in int A = 3.14;"),
            "Error occurred while parsing input code.",
            "[Error: Error parsing input",
            "   [Location: Unnamed:1, 15, 15]",

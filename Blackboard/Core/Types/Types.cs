@@ -122,7 +122,32 @@ partial class Type {
     /// <param name="input">This is the type to cast from.</param>
     /// <param name="output">This is the type to cast too.</param>
     /// <returns>The result of the match.</returns>
-    static public TypeMatch Match(Type input, Type output) => output.Match(input);
+    static public TypeMatch Match(Type input, Type output) =>
+        output.Match(input);
+    
+    /// <summary>This determines the implicit and inheritance match.</summary>
+    /// <param name="node">The node to try casting from.</param>
+    /// <returns>The result of the match.</returns>
+    static public TypeMatch Match<T>(INode node) where T : INode =>
+        Match<T>(TypeOf(node));
+
+    /// <summary>This determines the implicit and inheritance match.</summary>
+    /// <param name="t">The type to try casting from.</param>
+    /// <returns>The result of the match.</returns>
+    static public TypeMatch Match<T>(Type? t) where T : INode =>
+        FromType<T>()?.Match(t) ?? TypeMatch.NoMatch;
+
+    /// <summary>Performs an implicit cast of the given node into this type.</summary>
+    /// <param name="node">The node to implicitly cast.</param>
+    /// <returns>The node cast into this type or null if the cast is not possible.</returns>
+    static public T? Implicit<T>(INode node) where T : class, INode =>
+        FromType<T>()?.Implicit(node) as T;
+
+    /// <summary>Performs an explicit cast of the given node into this type.</summary>
+    /// <param name="node">The node to explicitly cast.</param>
+    /// <returns>The node cast into this type or null if the cast is not possible.</returns>
+    static public T? Explicit<T>(INode node) where T : class, INode =>
+        FromType<T>()?.Explicit(node) as T;
 
     #endregion
     #region Initialization

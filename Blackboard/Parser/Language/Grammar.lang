@@ -76,7 +76,7 @@
 #   - define var A = B + "cat";                           #
 # New define group                                        #
 #   - define { int A = B + C; D = E + "cat"; }            #
-#   - define { namespace A { int B; } }                   #
+#   - define { namespace A { int B = C + E; } }           #
 #=========================================================#
 
 <DefineRule> := <DefineDefine> [End]

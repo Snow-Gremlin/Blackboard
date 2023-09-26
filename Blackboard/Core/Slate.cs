@@ -77,7 +77,7 @@ public class Slate: INodeReader, IReader, IWriter {
         data = (node as IDataNode)?.Data;
         return data is not null;
     }
-    
+
     /// <summary>Sets a value for the given named input.</summary>
     /// <remarks>
     /// This will not cause an evaluation,
@@ -86,11 +86,19 @@ public class Slate: INodeReader, IReader, IWriter {
     /// <typeparam name="T">The type of the value to set to the input.</typeparam>
     /// <param name="value">The value to set to that node.</param>
     /// <param name="names">The name of the input node to set.</param>
-    public void SetValue<T>(T value, IEnumerable<string> names) where T : IData =>
-        this.SetValue(value, this.GetNode<IValueInput<T>>(names));
+    public void SetValue<T>(T value, IEnumerable<string> names) where T : IData {
+        IValueInput<T> input = this.TryGetNode(names, out INode? node) ?
+            node is IValueInput<T> result ? result :
+            throw new BlackboardException("The value by the given name is not an input value with the given type.").
+                With("Name", names.Join(".")).
+                With("Node", node).
+                With("Type", typeof(T)) :
+            throw new BlackboardException("No value with the given name exists.").
+                With("Name", names.Join(".")).
+                With("Type", typeof(T));
+        this.SetValue(value, input);
+    }
 
-    // TODO: Change above and below to use TryGetNode and throw errors.
-    
     /// <summary>This will provoke the node with the given name.</summary>
     /// <remarks>
     /// This will not cause an evaluation,
@@ -98,8 +106,16 @@ public class Slate: INodeReader, IReader, IWriter {
     /// </remarks>
     /// <param name="names">The name of trigger node to provoke.</param>
     /// <param name="provoke">True to provoke, false to reset.</param>
-    public void SetTrigger(IEnumerable<string> names, bool provoke = true) =>
-        this.SetTrigger(this.GetNode<ITriggerInput>(names), provoke);
+    public void SetTrigger(IEnumerable<string> names, bool provoke = true) {
+        ITriggerInput input = this.TryGetNode(names, out INode? node) ?
+            node is ITriggerInput result ? result :
+            throw new BlackboardException("The node by the given name is not an input trigger.").
+                With("Name", names.Join(".")).
+                With("Node", node) :
+            throw new BlackboardException("No trigger with the given name exists.").
+                With("Name", names.Join("."));
+        this.SetTrigger(input, provoke);
+    }
       
     /// <summary>Tries to get the node with the given node.</summary>
     /// <param name="names">The name of the node to get.</param>

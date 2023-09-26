@@ -105,18 +105,6 @@ sealed public partial class Type {
     }
 
     /// <summary>This determines the implicit and inheritance match.</summary>
-    /// <param name="node">The node to try casting from.</param>
-    /// <returns>The result of the match.</returns>
-    static public TypeMatch Match<T>(INode node) where T : INode =>
-        Match<T>(TypeOf(node));
-
-    /// <summary>This determines the implicit and inheritance match.</summary>
-    /// <param name="t">The type to try casting from.</param>
-    /// <returns>The result of the match.</returns>
-    static public TypeMatch Match<T>(Type? t) where T : INode =>
-        FromType<T>()?.Match(t) ?? TypeMatch.NoMatch;
-
-    /// <summary>This determines the implicit and inheritance match.</summary>
     /// <param name="t">The type to try casting from.</param>
     /// <param name="explicitCasts">
     /// True to also check if it can be cast explicitly, false to ignore explicit casts.
@@ -169,26 +157,12 @@ sealed public partial class Type {
     /// <summary>Performs an implicit cast of the given node into this type.</summary>
     /// <param name="node">The node to implicitly cast.</param>
     /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-    static public T? Implicit<T>(INode node) where T : class, INode =>
-        FromType<T>()?.Implicit(node) as T;
-
-    /// <summary>Performs an implicit cast of the given node into this type.</summary>
-    /// <param name="node">The node to implicitly cast.</param>
-    /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-    public INode? Implicit(INode node) =>
-        cast(true, node, TypeOf(node), this);
+    public INode? Implicit(INode node) => cast(true, node, TypeOf(node), this);
 
     /// <summary>Performs an explicit cast of the given node into this type.</summary>
     /// <param name="node">The node to explicitly cast.</param>
     /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-    static public T? Explicit<T>(INode node) where T : class, INode =>
-        FromType<T>()?.Explicit(node) as T;
-
-    /// <summary>Performs an explicit cast of the given node into this type.</summary>
-    /// <param name="node">The node to explicitly cast.</param>
-    /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-    public INode? Explicit(INode node) =>
-        cast(false, node, TypeOf(node), this);
+    public INode? Explicit(INode node) => cast(false, node, TypeOf(node), this);
 
     /// <summary>Performs a cast of the given node into the destination type.</summary>
     /// <param name="imp">True for implicitly cast, false for explicitly cast.</param>

@@ -3,7 +3,7 @@
 namespace Blackboard.Core.Data.Interfaces;
 
 /// <summary>Indicates when a class is a data type.</summary>
-public interface IData {
+internal interface IData {
 
     /// <summary>Gets the type for the type of data.</summary>
     public Type Type { get; }

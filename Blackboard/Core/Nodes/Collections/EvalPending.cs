@@ -8,7 +8,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Collections;
 
 /// <summary>The list of evaluable nodes pending to update.</summary>
-sealed public class EvalPending {
+sealed internal class EvalPending {
 
     /// <summary>The group of nodes with the same depth.</summary>
     sealed private class DepthGroup {

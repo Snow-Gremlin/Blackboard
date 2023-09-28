@@ -7,7 +7,7 @@ using S = System;
 namespace Blackboard.Core.Data.Caps;
 
 /// <summary>This is the data storage for an IEEE 754 float value such that it can be used in generics.</summary>
-public readonly struct Float :
+internal readonly struct Float :
     IAdditive<Float>,
     IBaseValue<Float, float>,
     IComparable<Float>,

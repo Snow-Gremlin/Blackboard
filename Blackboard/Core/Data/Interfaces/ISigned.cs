@@ -4,7 +4,7 @@ namespace Blackboard.Core.Data.Interfaces;
 
 /// <summary>This indicates that this Blackboard data type is signed so can be negative.</summary>
 /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
-public interface ISigned<out T> : IData
+internal interface ISigned<out T> : IData
     where T : IData {
 
     /// <summary>Gets the absolute value of this data value.</summary>

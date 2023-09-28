@@ -3,7 +3,7 @@
 /// <summary>An interface for reading the base value.</summary>
 /// <typeparam name="T1">The type of data that this part of.</typeparam>
 /// <typeparam name="T2">The C# base type in the data.</typeparam>
-public interface IBaseValue<T1, T2> : IData
+internal interface IBaseValue<T1, T2> : IData
     where T1 : IData, IBaseValue<T1, T2> {
 
     /// <summary>Gets the C# base value in the data.</summary>

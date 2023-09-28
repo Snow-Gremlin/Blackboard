@@ -5,7 +5,7 @@ namespace Blackboard.Core.Data.Interfaces;
 /// <summary>This indicates that this Blackboard data type can be multiplied with another of the same type.</summary>
 /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
 /// <see cref="https://en.wikipedia.org/wiki/Multiplication"/>
-public interface IMultiplicative<T> : IData
+internal interface IMultiplicative<T> : IData
     where T : IData {
 
     /// <summary>Gets the product of this value and the other value.</summary>

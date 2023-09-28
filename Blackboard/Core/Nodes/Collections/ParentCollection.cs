@@ -13,7 +13,7 @@ namespace Blackboard.Core.Nodes.Collections;
 /// For example, if a number is the sum of itself (x + x), then the Sum node will return the 'x' parent twice.
 /// Since null parents are removed, this list may not be the same as the Count even if fixed.
 /// </remarks>
-sealed public partial class ParentCollection : IEnumerable<IParent> {
+sealed internal partial class ParentCollection : IEnumerable<IParent> {
  
     /// <summary>The parameters for each fixed parent in this collection.</summary>
     private readonly List<IFixedParent> fixedParents;

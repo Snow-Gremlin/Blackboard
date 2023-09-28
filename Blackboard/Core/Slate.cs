@@ -17,7 +17,7 @@ namespace Blackboard.Core;
 /// The slate stores all blackboard data via a node graph and
 /// perform evaluations/updates of change the values of the nodes.
 /// </summary>
-public class Slate: INodeReader, IReader, IWriter {
+sealed internal class Slate: INodeReader, IReader, IWriter {
 
     /// <summary>The nodes which have had one or more parent modified and they need to have their depth updated.</summary>
     private readonly EvalPending pendingUpdate;

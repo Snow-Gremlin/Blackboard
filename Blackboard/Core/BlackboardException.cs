@@ -21,7 +21,7 @@ public class BlackboardException : S.Exception {
     /// <param name="stringifier">The stringifier to get string for the arguments or shallow if null.</param>
     /// <param name="message">The formatting message to create an exception with.</param>
     /// <param name="args">The arguments to fill in the formatting message.</param>
-    public BlackboardException(Stringifier? stringifier, string message, params object?[] args) :
+    internal BlackboardException(Stringifier? stringifier, string message, params object?[] args) :
         this(null, stringifier, message, args) { }
 
     /// <summary>Creates a new exception for the given message.</summary>
@@ -37,7 +37,7 @@ public class BlackboardException : S.Exception {
     /// <param name="stringifier">The stringifier to get string for the arguments or shallow if null.</param>
     /// <param name="message">The message to create an exception with.</param>
     /// <param name="args">The arguments to fill in the formatting message.</param>
-    public BlackboardException(S.Exception? inner, Stringifier? stringifier, string message, params object?[] args) :
+    internal BlackboardException(S.Exception? inner, Stringifier? stringifier, string message, params object?[] args) :
         this(inner, stringifier, message, (IEnumerable<object?>)args) { }
 
     /// <summary>Creates a new exception for the given message.</summary>
@@ -45,15 +45,28 @@ public class BlackboardException : S.Exception {
     /// <param name="stringifier">The stringifier to get string for the arguments or shallow if null.</param>
     /// <param name="message">The message to create an exception with.</param>
     /// <param name="args">The arguments to fill in the formatting message.</param>
-    public BlackboardException(S.Exception? inner, Stringifier? stringifier, string message, IEnumerable<object?> args) :
+    internal BlackboardException(S.Exception? inner, Stringifier? stringifier, string message, IEnumerable<object?> args) :
         base(string.Format(message, (stringifier ?? Stringifier.Shallow()).StringifyObject(args).ToArray()), inner) { }
+
+    /// <summary>Adds additional key value pair of data to this exception.</summary>
+    /// <param name="key">The key for the additional data.</param>
+    /// <param name="value">The value for the additional data.</param>
+    /// <returns>This message so that these calls can be chained.</returns>
+    internal BlackboardException With(string key, object? value) =>
+        this.With(key, value, null);
+
+    /// <summary>Adds a collection of additional key value pair of data to this exception.</summary>
+    /// <param name="data">The collection of key value pairs to add.</param>
+    /// <returns>This exception so that these calls can be chained.</returns>
+    internal BlackboardException With(IEnumerable<(string key, object value)> data) =>
+        this.With(data, null);
 
     /// <summary>Adds additional key value pair of data to this exception.</summary>
     /// <param name="key">The key for the additional data.</param>
     /// <param name="value">The value for the additional data.</param>
     /// <param name="stringifier">The stringifier to apply or null to use shallow.</param>
     /// <returns>This message so that these calls can be chained.</returns>
-    public BlackboardException With(string key, object? value, Stringifier? stringifier = null) {
+    internal BlackboardException With(string key, object? value, Stringifier? stringifier) {
         stringifier ??= Stringifier.Shallow();
         this.Data.Add(key, stringifier.StringifyObject(value));
         return this;
@@ -63,7 +76,7 @@ public class BlackboardException : S.Exception {
     /// <param name="data">The collection of key value pairs to add.</param>
     /// <param name="stringifier">The stringifier to apply or null to use shallow.</param>
     /// <returns>This exception so that these calls can be chained.</returns>
-    public BlackboardException With(IEnumerable<(string key, object value)> data, Stringifier? stringifier = null) {
+    internal BlackboardException With(IEnumerable<(string key, object value)> data, Stringifier? stringifier) {
         stringifier ??= Stringifier.Shallow();
         foreach ((string key, object value) in data) this.With(key, value, stringifier);
         return this;

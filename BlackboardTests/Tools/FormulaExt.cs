@@ -22,7 +22,7 @@ static class FormulaExt {
     /// <returns>The result from the perform.</returns>
     static public Result CheckPerform(this Formula formula, params string[] lines) {
         BufferLogger logger = new();
-        Result result = formula.Perform(logger.Stringify(Stringifier.Shallow().PreLoadNames(formula.Slate)));
+        Result result = formula.Perform(logger.Stringify(Stringifier.Shallow().PreLoadNames(formula.slate)));
         TestTools.NoDiff(lines.Join("\n"), logger.ToString().Trim());
         return result;
     }
@@ -40,5 +40,5 @@ static class FormulaExt {
     /// <param name="formula">The formula to copy without the finish action.</param>
     /// <returns>The new formula copy from the given formula but without the finish action.</returns>
     static public Formula NoFinish(this Formula formula) =>
-        new(formula.Slate, formula.Actions.Where(action => action is not Finish));
+        new(formula.slate, formula.Actions.Where(action => action is not Finish));
 }

@@ -461,7 +461,7 @@ sealed internal class Stringifier {
     /// <param name="formula">The formula to stringify.</param>
     /// <returns>The string for the given formula.</returns>
     public string Stringify(Formula.Formula formula) {
-        this.PreLoadNames(formula.Slate);
+        this.PreLoadNames(formula.slate);
         const string nl = "\n";
         return formula is null ? "null" : formula.Actions.Count <= 0 ? "[]" :
             "[" + nl + this.Stringify(formula.Actions).Indent(this.Indent) + nl + "]";

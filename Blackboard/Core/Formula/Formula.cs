@@ -16,10 +16,10 @@ sealed public class Formula {
     static public Formula Join(params Formula[] formulas) {
         if (formulas.Length <= 0)
             throw new BlackboardException("Join must have at least one formula in it.");
-        Slate slate = formulas[0].Slate;
+        Slate slate = formulas[0].slate;
         List<IAction> actions = new();
         foreach (Formula f in formulas) {
-            if (f.Slate != slate)
+            if (f.slate != slate)
                 throw new BlackboardException("May only join formulas from the same blackboard.");
             actions.AddRange(f.Actions.Where(action => action is not Finish));
         }
@@ -41,11 +41,11 @@ sealed public class Formula {
     /// <param name="actions">The actions that this formula will perform.</param>
     internal Formula(Slate slate, IEnumerable<IAction> actions) {
         this.actions = actions.NotNull().ToArray();
-        this.Slate   = slate;
+        this.slate   = slate;
     }
 
     /// <summary>The slate that this formula was built for and will be run on.</summary>
-    internal readonly Slate Slate;
+    internal readonly Slate slate;
 
     /// <summary>The actions for this formula.</summary>
     internal IReadOnlyList<IAction> Actions => this.actions;
@@ -58,7 +58,7 @@ sealed public class Formula {
         Logger? sub = logger.Group(nameof(Formula));
         Record.Result result = new();
         foreach (IAction action in this.actions)
-            action.Perform(this.Slate, result, sub);
+            action.Perform(this.slate, result, sub);
         return result;
     }
 

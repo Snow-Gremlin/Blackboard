@@ -7,7 +7,7 @@ using System.Linq;
 namespace Blackboard.Core.Optimization;
 
 /// <summary>The arguments for rules of optimization.</summary>
-internal class RuleArgs {
+sealed internal class RuleArgs {
 
     /// <summary>The slate the formula is for.</summary>
     public readonly Slate Slate;

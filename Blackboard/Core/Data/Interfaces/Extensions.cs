@@ -4,7 +4,7 @@ using Blackboard.Core.Nodes.Outer;
 namespace Blackboard.Core.Data.Interfaces;
 
 /// <summary>Extensions to add to data specific methods.</summary>
-static internal class Extensions {
+static public class Extensions {
 
     /// <summary>Determines if this data can be cast implicitly, cast explicitly, or is already an inherited type.</summary>
     /// <typeparam name="T">The type of the data to cast to.</typeparam>

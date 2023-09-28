@@ -4,7 +4,7 @@ namespace Blackboard.Core.Data.Interfaces;
 
 /// <summary>This indicates that this Blackboard data type can be added to another of the same type.</summary>
 /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
-internal interface IAdditive<T> : IData
+public interface IAdditive<T> : IData
     where T : IData {
 
     /// <summary>This will get the summation of the given other data.</summary>

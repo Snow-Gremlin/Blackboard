@@ -4,7 +4,7 @@
 /// <remarks>The subtraction subtrahend identity is the same as the summation identity.</remarks>
 /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
 /// <see cref="https://en.wikipedia.org/wiki/Subtraction"/>
-internal interface ISubtractive<T> : IAdditive<T>
+public interface ISubtractive<T> : IAdditive<T>
     where T : IData {
 
     /// <summary>Gets the difference between this value and the other value.</summary>

@@ -8,7 +8,7 @@ using S = System;
 namespace Blackboard.Core.Types;
 
 /// <summary>The types implemented for Blackboard.</summary>
-sealed public partial class Type {
+sealed internal partial class Type {
 
     /// <summary>This is a delegate for a casting method.</summary>
     /// <param name="node">The node to cast.</param>

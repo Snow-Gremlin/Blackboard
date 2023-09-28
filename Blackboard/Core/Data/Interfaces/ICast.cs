@@ -7,7 +7,7 @@
 /// </remarks>
 /// <typeparam name="Tin">This is the type to cast from.</typeparam>
 /// <typeparam name="Tout">This is the type to cast to, this should be the implementing type.</typeparam>
-internal interface ICast<in Tin, out Tout> : IData
+public interface ICast<in Tin, out Tout> : IData
     where Tin  : IData
     where Tout : IData {
 

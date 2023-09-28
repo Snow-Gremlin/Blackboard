@@ -5,7 +5,7 @@ using Blackboard.Core.Types;
 namespace Blackboard.Core.Data.Caps;
 
 /// <summary>This is the data storage for a base value type, object, such that it can be used in generics.</summary>
-internal readonly struct Object :
+public readonly struct Object :
     IBaseValue<Object, object?>,
     IData,
     IEquatable<Object>,

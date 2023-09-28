@@ -4,7 +4,7 @@ using Blackboard.Core.Types;
 namespace Blackboard.Core.Data.Caps;
 
 /// <summary>This is the data storage for a boolean value such that it can be used in generics.</summary>
-internal readonly struct Bool :
+public readonly struct Bool :
     IBaseValue<Bool, bool>,
     IData,
     IEquatable<Bool>,

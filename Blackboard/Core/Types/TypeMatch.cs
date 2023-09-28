@@ -4,7 +4,7 @@ namespace Blackboard.Core.Types;
 
 /// <summary>This is a match for a single type.</summary>
 /// <remarks>This is used for choosing the most specific method for a function.</remarks>
-sealed public class TypeMatch : S.IComparable<TypeMatch> {
+sealed internal class TypeMatch : S.IComparable<TypeMatch> {
 
     /// <summary>This is the possible types that a match or non-match can have.</summary>
     private enum Kind {

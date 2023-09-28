@@ -6,7 +6,7 @@ using S = System;
 namespace Blackboard.Core.Types;
 
 /// <summary>The set of extensions for working with Blackboard Types.</summary>
-static public class Extensions {
+static internal class Extensions {
 
     /// <summary>The type nodes for all the given nodes.</summary>
     /// <param name="nodes">The nodes to get the types for.</param>

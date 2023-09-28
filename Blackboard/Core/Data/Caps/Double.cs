@@ -7,7 +7,7 @@ using S = System;
 namespace Blackboard.Core.Data.Caps;
 
 /// <summary>This is the data storage for an IEEE 754 double value such that it can be used in generics.</summary>
-internal readonly struct Double :
+public readonly struct Double :
     IAdditive<Double>,
     IBaseValue<Double, double>,
     IComparable<Double>,

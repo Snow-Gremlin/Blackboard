@@ -4,7 +4,7 @@
 /// <remarks>The division denominator identity is the same as the multiplication identity.</remarks>
 /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
 /// <see cref="https://en.wikipedia.org/wiki/Division_(mathematics)"/>
-internal interface IDivisible<T> : IMultiplicative<T>
+public interface IDivisible<T> : IMultiplicative<T>
     where T : IData {
 
     /// <summary>Gets the division of this value and the other value.</summary>

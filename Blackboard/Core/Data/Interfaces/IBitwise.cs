@@ -5,7 +5,7 @@ namespace Blackboard.Core.Data.Interfaces;
 
 /// <summary>This indicates that this Blackboard data type can be bitwise modified.</summary>
 /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
-internal interface IBitwise<T> : IData
+public interface IBitwise<T> : IData
     where T : IData {
 
     /// <summary>This gets the bitwise NOT of this data value.</summary>

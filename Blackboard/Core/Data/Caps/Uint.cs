@@ -6,7 +6,7 @@ using System.Linq;
 namespace Blackboard.Core.Data.Caps;
 
 /// <summary>This is the data storage for a 32 bit unsigned integer value such that it can be used in generics.</summary>
-internal readonly struct Uint :
+public readonly struct Uint :
     IAdditive<Uint>,
     IBaseValue<Uint, uint>,
     IBitwise<Uint>,

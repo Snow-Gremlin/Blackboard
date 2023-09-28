@@ -14,7 +14,7 @@ using S = System;
 namespace Blackboard.Parser;
 
 /// <summary>This will parse the Blackboard language into actions and nodes to apply to the slate.</summary>
-sealed public class Parser {
+sealed internal class Parser {
 
     /// <summary>Prepares the parser's static variables before they are used.</summary>
     static Parser() => baseParser = PP.Loader.Loader.LoadParser(

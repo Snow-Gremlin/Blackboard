@@ -10,11 +10,11 @@ public interface IReader {
     /// <param name="names">The name of the data to read the value from.</param>
     /// <param name="data">The output data or null if not found.</param>
     /// <returns>True if found, false otherwise.</returns>
-    public bool TryGetData(IEnumerable<string> names, out IData? data);
+    internal bool TryGetData(IEnumerable<string> names, out IData? data);
 
     /// <summary>Tries to get provoke state with the given name.</summary>
     /// <param name="names">The name of trigger node to get the state from.</param>
     /// <param name="provoked">True if provoked, false otherwise, null if not found.</param>
     /// <returns>True if the trigger node exists, false otherwise.</returns>
-    public bool TryGetProvoked(IEnumerable<string> names, out bool provoked);
+    internal bool TryGetProvoked(IEnumerable<string> names, out bool provoked);
 }

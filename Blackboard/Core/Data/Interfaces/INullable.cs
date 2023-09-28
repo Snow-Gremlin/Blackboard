@@ -3,7 +3,7 @@
 namespace Blackboard.Core.Data.Interfaces;
 
 /// <summary>This indicates that this Blackboard data type is nullable.</summary>
-internal interface INullable {
+public interface INullable {
 
     /// <summary>Determines if the this value is null.</summary>
     /// <returns>True if null, false otherwise.</returns>

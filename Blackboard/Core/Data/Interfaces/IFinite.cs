@@ -2,7 +2,7 @@
 
 /// <summary>This indicates that this Blackboard data type can get basic arithmetic values for a finite range.</summary>
 /// <typeparam name="T">The type of the data implementing this interface.</typeparam>
-internal interface IFinite<out T> : IData
+public interface IFinite<out T> : IData
     where T : IData {
 
     /// <summary>Gets this additive identity, which is typically zero.</summary>

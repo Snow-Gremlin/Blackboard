@@ -137,9 +137,6 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
         }
     }
 
-    // TODO: Add grammar for `in trigger A -> B;` which becomes `in trigger A; B := A;`, also allow for chaining, i.e. `in trigger A -> B -> C -> D;`.
-    // TODO: Add grammar for `extern trigger A -> B;` which becomes `extern trigger A; B := A;`, also allow for chaining.
-
     /// <summary>This handles defining a new typed named node.</summary>
     public void HandleTypeDefine() {
         try {

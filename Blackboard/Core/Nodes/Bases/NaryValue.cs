@@ -62,7 +62,13 @@ public abstract class NaryValue<TIn, TResult> : ValueNode<TResult>, INaryChild<I
 
     /// <summary>The set of parent nodes to this node in the graph.</summary>
     public ParentCollection Parents => new ParentCollection(this).
-        With(this.sources); // TODO: Set the min and max
+        With(this.sources, this.MinParents, this.MaxParents);
+
+    /// <summary>The minimum number of required parent nodes.</summary>
+    virtual protected int MinParents => 1;
+    
+    /// <summary>The maximum allowed number of parent nodes.</summary>
+    virtual protected int MaxParents => int.MaxValue;
 
     /// <summary>This handles updating this node's value given the parents' values during evaluation.</summary>
     /// <remarks>Any null parents are ignored.</remarks>

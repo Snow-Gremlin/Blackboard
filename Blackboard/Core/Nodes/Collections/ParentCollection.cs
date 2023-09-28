@@ -345,7 +345,8 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
             IFixedParent param = this.fixedParents[i];
             IParent? node = param.Node;
             if (ReferenceEquals(node, newParent)) continue;
-
+            
+            // TODO: Need to check if the oldParent is used anywhere in rest of newParents
             bool removed = node?.RemoveChildren(this.Child) ?? false;
             param.Node = newParent;
             if (removed) newParent?.AddChildren(this.Child);
@@ -379,7 +380,7 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
                 this.varParents?[i]?.RemoveChildren(this.Child);
             this.varParents?.Remove(minCount, extraCount);
         }
-
+        
         // Add any new parents which are beyond the old variable parents
         for (int i = minCount; i < remaining; ++i) {
             IParent newParent = newParents[i];
@@ -404,6 +405,8 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
         bool fixChange = this.checkFixSetAll(newParents);
         bool varChange = this.checkVarSetAll(newParents);
         if (!fixChange && !varChange) return false;
+
+        HashSet<IParent> removed = this.Parents.NotNull().WhereNot(newParents.Contains).ToHashSet();
 
         if (fixChange) this.setAllFix(newParents);
         if (varChange) this.setAllVar(newParents);
@@ -451,9 +454,11 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
                     With("new parent", newParent);
         }
 
-        foreach (IParent parent in newParents) {
-            bool removed = oldChild is not null && (parent?.RemoveChildren(oldChild) ?? false);
-            if (removed) parent?.AddChildren(this.Child);
+        if (oldChild is not null) {
+            // For any new parent which was a parent of the old child,
+            // remove the old child and add this child to that parent.
+            newParents.Where(p => p.RemoveChildren(oldChild)).
+                Foreach(p => p.AddChildren(this.Child));
         }
 
         this.varParents.Insert(index, newParents);
@@ -462,6 +467,9 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
 
     #endregion
     #region Remove Method...
+
+    // TODO: Add tests which checks these removal of fixed and var parents cases specifically
+    //       including when the parent is used multiple times and at least one instance is not removed.
 
     /// <summary>This remove one or more parent at the given location.</summary>
     /// <remarks>This will throw an exception for fixed parent collections.</remarks>>
@@ -485,14 +493,24 @@ sealed public partial class ParentCollection : IEnumerable<IParent> {
             throw this.newException("Removing the given number of parents would cause there to be fewer than the minimum allowed count.").
                 With("index", index).
                 With("length", length);
+        
+        // Because the above passed, the variable parents list should not be null.
+        IVarParent? varPars = this.varParents;
+        if (varPars is null) return false;
 
-        // TODO: Need to check if the parent is used for more than the one being removed
-        for (int i = 0, j = index-this.FixedCount; i < length; ++i, ++j) {
-            IParent? parent = this.varParents?[j];
-            parent?.RemoveChildren(this.Child);
-        }
+        // Adjust the index to the var list itself.
+        index -= this.FixedCount;
 
-        this.varParents?.Remove(index-this.FixedCount, length);
+        // Collect a set of non-null parents which will be removed.
+        HashSet<IParent> remove = varPars.GetRange(index, length).NotNull().ToHashSet();
+
+        // Remove the range of parents.
+        varPars.Remove(index, length);
+        
+        // Remove the child from the removed parent, if there isn't another copy of the parent not being removed.
+        remove.WhereNot(varPars.Contains).
+            WhereNot(p => this.fixedParents.Contains(p)).
+            Foreach(p => p.RemoveChildren(this.Child));
         return true;
     }
 

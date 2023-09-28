@@ -10,7 +10,7 @@ namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>This is an action that will get a value to the result.</summary>
 /// <typeparam name="T">The type of data for the gotten value.</typeparam>
-sealed public class ValueGetter<T> : IGetter
+sealed internal class ValueGetter<T> : IGetter
     where T : IData {
 
     /// <summary>

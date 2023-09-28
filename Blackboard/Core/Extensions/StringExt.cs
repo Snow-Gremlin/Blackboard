@@ -5,7 +5,7 @@ using System.Linq;
 namespace Blackboard.Core.Extensions;
 
 /// <summary>The set of extensions for working with strings.</summary>
-static public class StringExt {
+static internal class StringExt {
 
     /// <summary>The strings for all the given values.</summary>
     /// <typeparam name="T">The types of values to convert into strings.</typeparam>

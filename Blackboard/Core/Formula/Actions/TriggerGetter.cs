@@ -9,7 +9,7 @@ using System.Linq;
 namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>This is an action that will get a provoke state to the result.</summary>
-sealed public class TriggerGetter : IGetter {
+sealed internal class TriggerGetter : IGetter {
 
     /// <summary>
     /// Creates a getter from the given nodes after first checking

@@ -9,7 +9,7 @@ namespace Blackboard.Core.Formula.Actions;
 /// This is an action to update a temporary node.
 /// The temporary node will only evaluate but not written to the slate.
 /// </summary>
-sealed public class Temp : IAction {
+sealed internal class Temp : IAction {
 
     /// <summary>
     /// This is a subset of all the node for this node to write which need to be

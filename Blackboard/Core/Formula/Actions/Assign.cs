@@ -9,7 +9,7 @@ namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>This is an action that will assign an input node to a data.</summary>
 /// <typeparam name="T">The type of data for the input node.</typeparam>
-sealed public class Assign<T> : IAssign
+sealed internal class Assign<T> : IAssign
     where T : IData {
 
     /// <summary>

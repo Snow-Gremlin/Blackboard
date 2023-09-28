@@ -12,7 +12,7 @@ using System.Linq;
 namespace Blackboard.Core.Formula.Factory;
 
 /// <summary>The collection of actions which have been parsed.</summary>
-sealed public class Factory {
+sealed internal class Factory {
     private readonly Slate slate;
     private readonly Logger? logger;
     private readonly ActionCollection actions;

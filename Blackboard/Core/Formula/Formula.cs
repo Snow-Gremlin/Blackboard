@@ -33,22 +33,22 @@ sealed public class Formula {
     /// <summary>Creates a new formula to perform changes to the slate.</summary>
     /// <param name="slate">The slate that these actions were created for.</param>
     /// <param name="actions">The actions that this formula will perform.</param>
-    public Formula(Slate slate, params IAction[] actions) :
+    internal Formula(Slate slate, params IAction[] actions) :
         this(slate, actions as IEnumerable<IAction>) { }
 
     /// <summary>Creates a new formula to perform changes to the slate.</summary>
     /// <param name="slate">The slate that these actions were created for.</param>
     /// <param name="actions">The actions that this formula will perform.</param>
-    public Formula(Slate slate, IEnumerable<IAction> actions) {
+    internal Formula(Slate slate, IEnumerable<IAction> actions) {
         this.actions = actions.NotNull().ToArray();
         this.Slate   = slate;
     }
 
     /// <summary>The slate that this formula was built for and will be run on.</summary>
-    public readonly Slate Slate;
+    internal readonly Slate Slate;
 
     /// <summary>The actions for this formula.</summary>
-    public IReadOnlyList<IAction> Actions => this.actions;
+    internal IReadOnlyList<IAction> Actions => this.actions;
 
     /// <summary>Performs all the actions for this formula.</summary>
     /// <param name="logger">The optional logger to debug with.</param>

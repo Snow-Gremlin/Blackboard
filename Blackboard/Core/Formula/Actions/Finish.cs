@@ -3,7 +3,7 @@
 namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>This is an action for performing any remaining evaluation and resets any provoked triggers.</summary>
-sealed public class Finish : IAction {
+sealed internal class Finish : IAction {
 
     /// <summary>Creates a new finish action.</summary>
     public Finish() { }

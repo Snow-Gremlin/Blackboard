@@ -8,7 +8,7 @@ namespace Blackboard.Core.Formula.Actions;
 /// This is only implemented by Assign but has no type parameter
 /// so that all typed Assigns can easily be used generically.
 /// </remarks>
-public interface IAssign : IAction {
+internal interface IAssign : IAction {
 
     /// <summary>The target input node to set the value of.</summary>
     public IInput Target { get; }

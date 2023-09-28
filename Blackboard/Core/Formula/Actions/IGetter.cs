@@ -4,7 +4,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>The interface for all the typed and trigger getter actions.</summary>
-public interface IGetter : IAction {
+internal interface IGetter : IAction {
 
     /// <summary>The names in the path to write the value to.</summary>
     public string[] Names { get; }

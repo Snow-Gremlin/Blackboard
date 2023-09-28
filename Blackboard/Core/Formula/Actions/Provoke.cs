@@ -8,7 +8,7 @@ using System.Linq;
 namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>This is an action that will provoke an input trigger with an optional conditional trigger.</summary>
-sealed public class Provoke : IAction {
+sealed internal class Provoke : IAction {
 
     /// <summary>
     /// Creates a conditional provoke from the given nodes after

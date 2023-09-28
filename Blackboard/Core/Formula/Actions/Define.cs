@@ -11,7 +11,7 @@ namespace Blackboard.Core.Formula.Actions;
 /// This is an action to define a named node in a field writer.
 /// Typically this is for defining a new node into the namespaces reachable from global.
 /// </summary>
-sealed public class Define : IAction {
+sealed internal class Define : IAction {
 
     /// <summary>
     /// This is a subset of all the node for this node to write which need to be

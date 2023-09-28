@@ -10,7 +10,7 @@ using S = System;
 namespace Blackboard.Core.Inspect;
 
 /// <summary>This is a tool for making human readable strings from he nodes.</summary>
-sealed public class Stringifier {
+sealed internal class Stringifier {
     #region Simple...
 
     /// <summary>Creates a stringifier configured for simple strings.</summary>

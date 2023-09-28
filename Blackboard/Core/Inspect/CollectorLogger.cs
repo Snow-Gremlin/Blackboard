@@ -6,7 +6,7 @@ namespace Blackboard.Core.Inspect;
 /// This is a message collector logger used for keeping a list of messages,
 /// via entries, which have been logged still in the form of a message instance.
 /// </summary>
-public class CollectorLogger : Logger {
+sealed public class CollectorLogger : Logger {
 
     /// <summary>The string buffer to write to.</summary>
     private readonly List<Entry> entries;

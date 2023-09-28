@@ -6,7 +6,7 @@ using System.Linq;
 namespace Blackboard.Core.Inspect;
 
 /// <summary>A tool for inspecting, validating, and debugging the slate.</summary>
-sealed public class Inspector {
+sealed internal class Inspector {
 
     /// <summary>Validates the given slate.</summary>
     /// <param name="slate">The slate to validate.</param>

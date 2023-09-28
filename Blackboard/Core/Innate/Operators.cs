@@ -7,14 +7,14 @@ using Blackboard.Core.Nodes.Outer;
 namespace Blackboard.Core.Innate;
 
 /// <summary>Group of all operators for Blackboard.</summary>
-static public class Operators {
+static internal class Operators {
 
     /// <summary>The namespace for all the operators.</summary>
     public const string Namespace = "$operators";
 
     /// <summary>This adds all the operators used by the language.</summary>
     /// <param name="global">The global namespace for the slate.</param>
-    static internal void Add(Namespace global) {
+    static public void Add(Namespace global) {
         Namespace operators = new();
         global[Namespace] = operators;
         void add(string name, params IFuncDef[] defs) =>

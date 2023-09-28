@@ -10,7 +10,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Innate;
 
 /// <summary>A collection of creation methods which switch based on type.</summary>
-static public class Maker {
+static internal class Maker {
 
     /// <summary>This gets the function group to cast to the given type.</summary>
     /// <param name="slate">The slate to look up the casts with.</param>

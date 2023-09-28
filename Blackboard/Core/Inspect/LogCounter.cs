@@ -6,7 +6,7 @@ namespace Blackboard.Core.Inspect;
 /// This is a message counter logger used for keeping
 /// a count of messages by different levels.
 /// </summary>
-public class LogCounter : Logger {
+sealed public class LogCounter : Logger {
     private readonly Dictionary<Level, int> counts;
 
     /// <summary>Creates a new message counter logger.</summary>

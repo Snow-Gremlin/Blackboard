@@ -208,7 +208,7 @@ sealed internal class Slate: INodeReader, IReader, IWriter {
     /// and need to be recalculated during evaluation.
     /// </summary>
     /// <param name="nodes">The nodes to pend evaluation for.</param>
-    public void PendEval(EvalPending nodes) => this.PendEval(nodes);
+    public void PendEval(EvalPending nodes) => this.pendingEval.Insert(nodes);
 
     /// <summary>This gets all the nodes pending evaluation.</summary>
     public IEnumerable<IEvaluable> PendingEval => this.pendingEval.Nodes;

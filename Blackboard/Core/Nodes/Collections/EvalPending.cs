@@ -29,7 +29,10 @@ sealed internal class EvalPending {
         public void Add(IEvaluable node) => this.nodes.Add(node);
 
         /// <summary>Indicates if this set is empty.</summary>
-        public bool Empty => this.nodes?.Count <= 0;
+        public bool Empty => this.nodes.Count <= 0;
+
+        /// <summary>Gets the number of nodes in this depth.</summary>
+        public int Count => this.nodes.Count;
 
         /// <summary>Removes and returns a node from this set.</summary>
         /// <remarks>Set may not be empty, otherwise this will throw an exception.</remarks>
@@ -62,6 +65,9 @@ sealed internal class EvalPending {
 
     /// <summary>Indicates if there are any pending nodes.</summary>
     public bool HasPending => this.pending.Count > 0;
+
+    /// <summary>Determines the total count of all the nodes being stored.</summary>
+    public int Count => this.pending.Sum(group => group.Count);
     
     /// <summary>This inserts and groups unique evaluable nodes.</summary>
     /// <param name="nodes">The set of nodes to insert.</param>
@@ -112,7 +118,7 @@ sealed internal class EvalPending {
     /// <summary>This updates the depth values of the pending nodes.</summary>
     /// <param name="logger">The logger to debug the update with.</param>
     public void UpdateDepths(Logger? logger = null) {
-        logger.Info("Start Update");
+        logger.Info("Start Update (pending: {0})", this.Count);
 
         while (this.HasPending) {
             IEvaluable? node = this.TakeFirst();
@@ -129,7 +135,7 @@ sealed internal class EvalPending {
                 changed = true;
             }
 
-            logger.Info("  Updated (changed: {0}, depth: {1}, node: {2})", changed, node.Depth, node);
+            logger.Info("  Updated (changed: {0}, depth: {1}, node: {2}, remaining: {3})", changed, node.Depth, node, this.Count);
         }
 
         logger.Info("End Update");
@@ -139,7 +145,7 @@ sealed internal class EvalPending {
     /// <param name="finalization">The set to add nodes to which need finalization.</param>
     /// <param name="logger">The logger to debug the evaluate with.</param>
     public void Evaluate(Finalization finalization, Logger? logger = null) {
-        logger.Info("Start Eval");
+        logger.Info("Start Eval (pending: {0})", this.Count);
 
         while (this.HasPending) {
             IEvaluable? node = this.TakeFirst();
@@ -152,7 +158,7 @@ sealed internal class EvalPending {
                 changed = true;
             }
 
-            logger.Info("  Evaluated (changed: {0}, depth: {1}, node: {2})", changed, node.Depth, node);
+            logger.Info("  Evaluated (changed: {0}, depth: {1}, node: {2}, remaining: {3})", changed, node.Depth, node, this.Count);
         }
 
         logger.Info("End Eval ({0})", finalization);

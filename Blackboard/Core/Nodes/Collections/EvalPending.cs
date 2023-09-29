@@ -12,7 +12,7 @@ sealed internal class EvalPending {
 
     /// <summary>The group of nodes with the same depth.</summary>
     sealed private class DepthGroup {
-        public readonly HashSet<IEvaluable> nodes;
+        private readonly HashSet<IEvaluable> nodes;
 
         /// <summary>The node depth for all contained nodes.</summary>
         public readonly int Depth;
@@ -23,6 +23,18 @@ sealed internal class EvalPending {
             this.Depth = first.Depth;
             this.nodes = new() { first };
         }
+
+        /// <summary>Creates a new depth group with the given depth and nodes.</summary>
+        /// <param name="depth">The depth value to set.</param>
+        /// <param name="nodes">The nodes to add, there should be at least one.</param>
+        private DepthGroup(int depth, IEnumerable<IEvaluable> nodes) {
+            this.Depth = depth;
+            this.nodes = new(nodes);
+        }
+
+        /// <summary>Creates a copy of this group.</summary>
+        /// <returns>The copy of this group.</returns>
+        public DepthGroup Copy() => new(this.Depth, this.nodes);
         
         /// <summary>Adds a new node if it doesn't already exist.</summary>
         /// <param name="node">The node to add.</param>
@@ -34,6 +46,9 @@ sealed internal class EvalPending {
         /// <summary>Gets the number of nodes in this depth.</summary>
         public int Count => this.nodes.Count;
 
+        /// <summary>Gets the nodes in this group.</summary>
+        public IEnumerable<IEvaluable> Nodes => this.nodes;
+
         /// <summary>Removes and returns a node from this set.</summary>
         /// <remarks>Set may not be empty, otherwise this will throw an exception.</remarks>
         /// <returns>The node removed from the set.</returns>
@@ -42,6 +57,10 @@ sealed internal class EvalPending {
             this.nodes.Remove(e);
             return e;
         }
+
+        /// <summary>Gets the string for this group.</summary>
+        /// <returns>The group's string.</returns>
+        public override string ToString() => this.Depth+" => "+this.Count;
     }
 
     /// <summary>A comparer for comparing the depth groups by the depth value.</summary>
@@ -58,6 +77,7 @@ sealed internal class EvalPending {
         }
     }
 
+    /// <summary>The pending nodes grouped by their depths.</summary>
     private readonly SortedSet<DepthGroup> pending;
 
     /// <summary>Creates a new list of pending nodes.</summary>
@@ -97,20 +117,18 @@ sealed internal class EvalPending {
     /// <param name="group">The group to insert.</param>
     private void insertGroup(DepthGroup group) {
         if (this.pending.TryGetValue(group, out DepthGroup? existing))
-            group.nodes.Foreach(existing.Add);
-        else this.pending.Add(group);
+            group.Nodes.Foreach(existing.Add);
+        else this.pending.Add(group.Copy());
     }
 
     /// <summary>Gets all the pending nodes.</summary>
-    public IEnumerable<IEvaluable> Nodes => this.pending.SelectMany(group => group.nodes);
+    public IEnumerable<IEvaluable> Nodes => this.pending.SelectMany(group => group.Nodes);
 
     /// <summary>Removes the first pending node and returns it.</summary>
     /// <returns>The node which was removed.</returns>
-    public IEvaluable? TakeFirst() {
-        DepthGroup? group = this.pending.FirstOrDefault();
-        if (group is null) return null;
-
-        IEvaluable? e = group.TakeOne();
+    private IEvaluable takeFirst() {
+        DepthGroup group = this.pending.First();
+        IEvaluable e = group.TakeOne();
         if (group.Empty) this.pending.Remove(group);
         return e;
     }
@@ -121,8 +139,7 @@ sealed internal class EvalPending {
         logger.Info("Start Update (pending: {0})", this.Count);
 
         while (this.HasPending) {
-            IEvaluable? node = this.TakeFirst();
-            if (node is null) break;
+            IEvaluable node = this.takeFirst();
 
             // Determine the depth that this node should be at based on its parents.
             int depth = node.MinimumAllowedDepth();
@@ -148,8 +165,7 @@ sealed internal class EvalPending {
         logger.Info("Start Eval (pending: {0})", this.Count);
 
         while (this.HasPending) {
-            IEvaluable? node = this.TakeFirst();
-            if (node is null) break;
+            IEvaluable node = this.takeFirst();
 
             bool changed = false;
             if (node.Evaluate()) {

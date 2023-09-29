@@ -66,14 +66,15 @@ public class Constants {
     [TestTag("nan")]
     public void TestOperators_nan() => checkDouble("nan", double.NaN);
     
-    // Constant Value Keywords
-
     [TestMethod]
+    [TestTag("false")]
     public void TestOperators_false() => checkBool("false", false);
     
     [TestMethod]
+    [TestTag("true")]
     public void TestOperators_true() => checkBool("true", true);
 
     [TestMethod]
+    [TestTag("null")]
     public void TestOperators_null() => checkObject("null", null);
 }

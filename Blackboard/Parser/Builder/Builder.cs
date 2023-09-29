@@ -445,10 +445,9 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
     /// <summary>This handles pushing a bool literal value onto the stack.</summary>
     public void HandlePushBool() =>
         this.parseLiteral("parse a bool", (string text) => Literal.Bool(bool.Parse(text)));
-    
+
     /// <summary>This handles pushing a null literal value onto the stack.</summary>
-    public void HandlePushNull() =>
-        this.nodes.Push(Literal.Object(Object.Null));
+    public void HandlePushNull() => this.nodes.Push(Literal.Data(Object.Null));
 
     /// <summary>This handles pushing a binary int literal value onto the stack.</summary>
     public void HandlePushBin() =>

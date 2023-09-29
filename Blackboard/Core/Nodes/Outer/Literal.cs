@@ -59,7 +59,7 @@ static internal class Literal {
 
 /// <summary>This is a literal value.</summary>
 /// <typeparam name="T">The type of this literal.</typeparam>
-sealed public class Literal<T> : ValueNode<T>, IConstant
+sealed internal class Literal<T> : ValueNode<T>, IConstant
     where T : struct, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

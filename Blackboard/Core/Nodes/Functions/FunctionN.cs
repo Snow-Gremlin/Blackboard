@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Functions;
 /// <summary>This is the factory for a node which has arbitrary number of parents as the source of the value.</summary>
 /// <typeparam name="Tn">The type of the parents' values for this node.</typeparam>
 /// <typeparam name="TReturn">The type of this function will return.</typeparam>
-sealed public class FunctionN<Tn, TReturn> : FuncDef<TReturn>
+sealed internal class FunctionN<Tn, TReturn> : FuncDef<TReturn>
     where Tn : class, INode
     where TReturn : class, INode {
 

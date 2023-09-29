@@ -145,7 +145,7 @@ static internal class UnaryFloatingPoint<T>
 
 /// <summary>Unary nodes for signed value mathematics.</summary>
 /// <typeparam name="T">The type of signed number to perform the methods on.</typeparam>
-static public class UnarySigned<T>
+static internal class UnarySigned<T>
     where T : struct, ISigned<T>, IEquatable<T> {
 
     /// <summary>This is a factory for creating a new IsNegative instance of this node.</summary>
@@ -155,7 +155,7 @@ static public class UnarySigned<T>
 
 /// <summary>Unary nodes for nullable values.</summary>
 /// <typeparam name="T">The type of nullable object to perform the methods on.</typeparam>
-static public class UnaryNullable<T>
+static internal class UnaryNullable<T>
     where T : struct, INullable, IEquatable<T> {
 
     /// <summary>This is a factory for creating a new IsNull instance of this node.</summary>
@@ -164,7 +164,7 @@ static public class UnaryNullable<T>
 }
 
 /// <summary>Unary nodes for specific hard-coded data types.</summary>
-static public class Unary {
+static internal class Unary {
 
     /// <summary>This is a factory for creating a new IsEmpty instance of this node.</summary>
     /// <remarks>Determines if the string is empty.</remarks>
@@ -197,7 +197,7 @@ static public class Unary {
 /// This uses a little more computation time and more memory that hard coded nodes,
 /// therefor this should be used to perform less commonly used nodes.
 /// </remarks>
-sealed public class UnaryFuncs<T1, TResult> : UnaryValue<T1, TResult>
+sealed internal class UnaryFuncs<T1, TResult> : UnaryValue<T1, TResult>
     where T1 : struct, IEquatable<T1>
     where TResult : struct, IEquatable<TResult> {
 

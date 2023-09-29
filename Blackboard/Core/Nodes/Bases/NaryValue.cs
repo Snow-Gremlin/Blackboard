@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Bases;
 /// <typeparam name="TIn">The type of the all the parents' value for this node.</typeparam>
 /// <typeparam name="TResult">The type of value this node holds.</typeparam>
 /// <see cref="https://en.wikipedia.org/wiki/Arity#n-ary"/>
-public abstract class NaryValue<TIn, TResult> : ValueNode<TResult>, INaryChild<IValueParent<TIn>>, ICoalescable
+internal abstract class NaryValue<TIn, TResult> : ValueNode<TResult>, INaryChild<IValueParent<TIn>>, ICoalescable
     where TIn : struct, IData
     where TResult : struct, IEquatable<TResult> {
 

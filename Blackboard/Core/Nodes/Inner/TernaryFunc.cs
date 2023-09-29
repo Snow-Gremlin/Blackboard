@@ -73,7 +73,7 @@ static internal class Ternary {
 /// This uses a little more computation time and more memory that hard coded nodes,
 /// therefor this should be used to perform less commonly used nodes.
 /// </remarks>
-sealed public class TernaryFunc<T1, T2, T3, TResult> : TernaryValue<T1, T2, T3, TResult>
+sealed internal class TernaryFunc<T1, T2, T3, TResult> : TernaryValue<T1, T2, T3, TResult>
     where T1 : struct, IEquatable<T1>
     where T2 : struct, IEquatable<T2>
     where T3 : struct, IEquatable<T3>

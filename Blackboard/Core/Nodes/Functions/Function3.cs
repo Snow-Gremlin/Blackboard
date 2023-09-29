@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Functions;
 /// <typeparam name="T2">The type of the second parent's value for this node.</typeparam>
 /// <typeparam name="T3">The type of the third parent's value for this node.</typeparam>
 /// <typeparam name="TReturn">The type of this function will return.</typeparam>
-sealed public class Function<T1, T2, T3, TReturn> : FuncDef<TReturn>
+sealed internal class Function<T1, T2, T3, TReturn> : FuncDef<TReturn>
     where T1 : class, INode
     where T2 : class, INode
     where T3 : class, INode

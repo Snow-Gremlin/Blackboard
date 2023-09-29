@@ -116,7 +116,7 @@ static public class TestTools {
     /// <param name="group">The namespace to look for constants within.</param>
     /// <param name="prefix">Any prefix namespace to add to the tags.</param>
     /// <returns>All tags for constants reachable from the given namespace.</returns>
-    static public IEnumerable<string> ConstTags(Namespace group, string prefix = "") {
+    static internal IEnumerable<string> ConstTags(Namespace group, string prefix = "") {
         foreach (KeyValuePair<string, INode> pair in group.Fields) {
             if (pair.Value is IConstant)
                 yield return prefix+pair.Key;
@@ -134,7 +134,7 @@ static public class TestTools {
     /// <param name="group">The namespace to look for function definitions within.</param>
     /// <param name="prefix">Any prefix namespace to add to the tags.</param>
     /// <returns>All tags for function definitions reachable from the given namespace.</returns>
-    static public IEnumerable<string> FuncDefTags(Namespace group, string prefix = "") {
+    static internal IEnumerable<string> FuncDefTags(Namespace group, string prefix = "") {
         foreach (KeyValuePair<string, INode> pair in group.Fields) {
             if (pair.Value is IFuncGroup funcGroup) {
                 foreach (IFuncDef def in funcGroup.Definitions)

@@ -508,9 +508,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
         varPars.Remove(index, length);
         
         // Remove the child from the removed parent, if there isn't another copy of the parent not being removed.
-        remove.WhereNot(varPars.Contains).
-            WhereNot(p => p is IFixedParent fp && this.fixedParents.Contains(fp)).
-            Foreach(p => p.RemoveChildren(this.Child));
+        remove.WhereNot(this.Contains).Foreach(p => p.RemoveChildren(this.Child));
         return true;
     }
 

@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Bases;
 /// <typeparam name="T1">The type of the parent's value for this node.</typeparam>
 /// <typeparam name="TResult">The type of value this node holds.</typeparam>
 /// <see cref="https://en.wikipedia.org/wiki/Arity#Unary"/>
-public abstract class UnaryValue<T1, TResult> : ValueNode<TResult>, IChild
+internal abstract class UnaryValue<T1, TResult> : ValueNode<TResult>, IChild
     where T1 : struct, IData
     where TResult : struct, IEquatable<TResult> {
 

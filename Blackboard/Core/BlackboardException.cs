@@ -52,13 +52,13 @@ public class BlackboardException : S.Exception {
     /// <param name="key">The key for the additional data.</param>
     /// <param name="value">The value for the additional data.</param>
     /// <returns>This message so that these calls can be chained.</returns>
-    internal BlackboardException With(string key, object? value) =>
+    public BlackboardException With(string key, object? value) =>
         this.With(key, value, null);
 
     /// <summary>Adds a collection of additional key value pair of data to this exception.</summary>
     /// <param name="data">The collection of key value pairs to add.</param>
     /// <returns>This exception so that these calls can be chained.</returns>
-    internal BlackboardException With(IEnumerable<(string key, object value)> data) =>
+    public BlackboardException With(IEnumerable<(string key, object value)> data) =>
         this.With(data, null);
 
     /// <summary>Adds additional key value pair of data to this exception.</summary>

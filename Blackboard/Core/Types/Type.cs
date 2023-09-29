@@ -157,12 +157,12 @@ sealed public partial class Type {
     /// <summary>Performs an implicit cast of the given node into this type.</summary>
     /// <param name="node">The node to implicitly cast.</param>
     /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-    public INode? Implicit(INode node) => cast(true, node, TypeOf(node), this);
+    internal INode? Implicit(INode node) => cast(true, node, TypeOf(node), this);
 
     /// <summary>Performs an explicit cast of the given node into this type.</summary>
     /// <param name="node">The node to explicitly cast.</param>
     /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-    public INode? Explicit(INode node) => cast(false, node, TypeOf(node), this);
+    internal INode? Explicit(INode node) => cast(false, node, TypeOf(node), this);
 
     /// <summary>Performs a cast of the given node into the destination type.</summary>
     /// <param name="imp">True for implicitly cast, false for explicitly cast.</param>

@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Bases;
 
 /// <summary>This is a trigger node which has several parents.</summary>
 /// <see cref="https://en.wikipedia.org/wiki/Arity#n-ary"/>
-public abstract class NaryTrigger : TriggerNode, INaryChild<ITriggerParent>, ICoalescable {
+internal abstract class NaryTrigger : TriggerNode, INaryChild<ITriggerParent>, ICoalescable {
 
     /// <summary>This is a helper for creating unary node factories quickly.</summary>
     /// <param name="handle">The handler for calling the node constructor.</param>

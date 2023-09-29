@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Bases;
 /// This is the base node for all nodes within the main part of the blackboard graph
 /// which propagates updates when a change occurs.
 /// </summary>
-public abstract class Evaluable : IEvaluable {
+internal abstract class Evaluable : IEvaluable {
 
     /// <summary>The collection of children nodes to this node.</summary>
     private readonly List<IChild> children;

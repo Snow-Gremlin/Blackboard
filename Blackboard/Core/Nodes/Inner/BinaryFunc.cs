@@ -116,7 +116,7 @@ static internal class Binary {
 /// This uses a little more computation time and more memory that hard coded nodes,
 /// therefor this should be used to perform less commonly used nodes.
 /// </remarks>
-sealed public class BinaryFunc<T1, T2, TResult> : BinaryValue<T1, T2, TResult>
+sealed internal class BinaryFunc<T1, T2, TResult> : BinaryValue<T1, T2, TResult>
     where T1 : struct, IEquatable<T1>
     where T2 : struct, IEquatable<T2>
     where TResult : struct, IEquatable<TResult> {

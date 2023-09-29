@@ -92,12 +92,12 @@ partial class Type {
     /// <summary>This gets the type given a node.</summary>
     /// <param name="node">The node to get the type of.</param>
     /// <returns>The type for the given node or null if not found.</returns>
-    static public Type? TypeOf(INode node) => FromType(node.GetType());
+    static internal Type? TypeOf(INode node) => FromType(node.GetType());
 
     /// <summary>This gets the type from the given node type.</summary>
     /// <typeparam name="T">The generic type to get the type of.</typeparam>
     /// <returns>The type for the given generic or null if not found.</returns>
-    static public Type? FromType<T>() where T : INode => FromType(typeof(T));
+    static internal Type? FromType<T>() where T : INode => FromType(typeof(T));
 
     /// <summary>This gets the type from the given node type.</summary>
     /// <param name="type">The C# type to get this type of.</param>
@@ -128,25 +128,25 @@ partial class Type {
     /// <summary>This determines the implicit and inheritance match.</summary>
     /// <param name="node">The node to try casting from.</param>
     /// <returns>The result of the match.</returns>
-    static public TypeMatch Match<T>(INode node) where T : INode =>
+    static internal TypeMatch Match<T>(INode node) where T : INode =>
         Match<T>(TypeOf(node));
 
     /// <summary>This determines the implicit and inheritance match.</summary>
     /// <param name="t">The type to try casting from.</param>
     /// <returns>The result of the match.</returns>
-    static public TypeMatch Match<T>(Type? t) where T : INode =>
+    static internal TypeMatch Match<T>(Type? t) where T : INode =>
         FromType<T>()?.Match(t) ?? TypeMatch.NoMatch;
 
     /// <summary>Performs an implicit cast of the given node into this type.</summary>
     /// <param name="node">The node to implicitly cast.</param>
     /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-    static public T? Implicit<T>(INode node) where T : class, INode =>
+    static internal T? Implicit<T>(INode node) where T : class, INode =>
         FromType<T>()?.Implicit(node) as T;
 
     /// <summary>Performs an explicit cast of the given node into this type.</summary>
     /// <param name="node">The node to explicitly cast.</param>
     /// <returns>The node cast into this type or null if the cast is not possible.</returns>
-    static public T? Explicit<T>(INode node) where T : class, INode =>
+    static internal T? Explicit<T>(INode node) where T : class, INode =>
         FromType<T>()?.Explicit(node) as T;
 
     #endregion

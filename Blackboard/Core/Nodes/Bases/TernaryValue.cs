@@ -12,7 +12,7 @@ namespace Blackboard.Core.Nodes.Bases;
 /// <typeparam name="T3">The type of the third parent's value for this node.</typeparam>
 /// <typeparam name="TResult">The type of value this node holds.</typeparam>
 /// <see cref="https://en.wikipedia.org/wiki/Arity#Ternary"/>
-public abstract class TernaryValue<T1, T2, T3, TResult> : ValueNode<TResult>, IChild
+internal abstract class TernaryValue<T1, T2, T3, TResult> : ValueNode<TResult>, IChild
     where T1 : struct, IData
     where T2 : struct, IData
     where T3 : struct, IData

@@ -13,7 +13,7 @@ namespace Blackboard.Core.Nodes.Bases;
 /// This represents a single function definition with a specific signature.
 /// </summary>
 /// <typeparam name="TReturn">The type of this function will return.</typeparam>
-public abstract class FuncDef<TReturn> : IFuncDef
+internal abstract class FuncDef<TReturn> : IFuncDef
     where TReturn : INode {
 
     /// <summary>The minimum required nodes for the new node's arguments.</summary>

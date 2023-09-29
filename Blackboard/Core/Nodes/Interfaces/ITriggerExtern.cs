@@ -5,4 +5,4 @@
 /// An external node is a placeholder for a node that will be defined later.
 /// An external trigger may not be initialized and will always be unprovoked until replaced.
 /// </remarks>
-public interface ITriggerExtern : ITrigger, IExtern { }
+internal interface ITriggerExtern : ITrigger, IExtern { }

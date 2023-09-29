@@ -8,7 +8,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Outer;
 
 /// <summary>These are factories for easily making literals.</summary>
-static public class Literal {
+static internal class Literal {
 
     /// <summary>Creates a new boolean literal.</summary>
     /// <param name="value">The value to use for the literal.</param>

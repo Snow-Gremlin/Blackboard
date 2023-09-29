@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Performs a boolean AND of all the boolean parents.</summary>
 /// <see cref="https://mathworld.wolfram.com/AND.html"/>
-sealed public class And : NaryValue<Bool, Bool> {
+sealed internal class And : NaryValue<Bool, Bool> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
     static public readonly IFuncDef Factory = CreateFactory((values) => new And(values));

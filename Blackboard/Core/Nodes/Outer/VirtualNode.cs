@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Outer;
 /// without changing the field writer. This makes it easier to cancel a parse.
 /// This node should only be held onto while parsing and never actually written into the graph.
 /// </remarks>
-sealed public class VirtualNode : IFieldWriter {
+sealed internal class VirtualNode : IFieldWriter {
 
     /// <summary>The overridden nodes for this receiver.</summary>
     /// <remarks>If the node value is null, then the node has been deleted.</remarks>

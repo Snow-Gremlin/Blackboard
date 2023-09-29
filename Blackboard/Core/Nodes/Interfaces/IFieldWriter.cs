@@ -3,7 +3,7 @@
 namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>This indicates that the node has fields that can be read and written.</summary>
-public interface IFieldWriter : IFieldReader {
+internal interface IFieldWriter : IFieldReader {
 
     /// <summary>Writes or overwrites a new field to this node.</summary>
     /// <param name="name">The name of the field to write.</param>

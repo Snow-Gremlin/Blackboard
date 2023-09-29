@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Performs a boolean NOT of one boolean parent.</summary>
 /// <see cref="https://mathworld.wolfram.com/NOT.html"/>
-sealed public class Not : UnaryValue<Bool, Bool> {
+sealed internal class Not : UnaryValue<Bool, Bool> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
     static public readonly IFuncDef Factory = CreateFactory(input => new Not(input));

@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Performs a boolean implies of two boolean parents.</summary>
 /// <see cref="https://mathworld.wolfram.com/Implies.html"/>
-sealed public class Implies : BinaryValue<Bool, Bool, Bool> {
+sealed internal class Implies : BinaryValue<Bool, Bool, Bool> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
     static public readonly IFuncDef Factory = CreateFactory((left, right) => new Implies(left, right));

@@ -5,7 +5,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>The interface for a collection of function factories.</summary>
-public interface IFuncGroup : INode {
+internal interface IFuncGroup : INode {
 
     /// <summary>Gets the full list of function definitions in this group.</summary>
     public IEnumerable<IFuncDef> Definitions { get; }

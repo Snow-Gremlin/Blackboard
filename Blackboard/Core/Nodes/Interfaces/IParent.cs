@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Interfaces;
 /// Any child known by the parent is automatically updated when the parent is changed.
 /// There may be children which listen to a parent 
 /// </remarks>
-public interface IParent : INode {
+internal interface IParent : INode {
 
     /// <summary>The set of children nodes to this node.</summary>
     public IEnumerable<IChild> Children { get; }

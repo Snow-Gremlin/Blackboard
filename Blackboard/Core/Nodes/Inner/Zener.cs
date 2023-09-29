@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Inner;
 /// will not return false until the value is or goes below the minimum.
 /// </summary>
 /// <see cref="https://en.wikipedia.org/wiki/Zener_diode"/>
-sealed public class Zener<T> : TernaryValue<T, T, T, Bool>
+sealed internal class Zener<T> : TernaryValue<T, T, T, Bool>
     where T : struct, IComparable<T> {
 
     // TODO: Think about allowing Zener be assignable so that it can be set true or false while within the range.

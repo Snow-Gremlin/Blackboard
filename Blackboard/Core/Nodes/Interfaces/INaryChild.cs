@@ -4,7 +4,7 @@ namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>A child node is a node which may specify many parents of the same type.</summary>
 /// <typeparam name="T">The type of parent used for this child.</typeparam>
-public interface INaryChild<T> : IChild
+internal interface INaryChild<T> : IChild
     where T : IParent {
 
     /// <summary>This adds parents to this node.</summary>

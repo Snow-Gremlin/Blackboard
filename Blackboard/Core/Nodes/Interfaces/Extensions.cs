@@ -8,7 +8,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>The set of extensions for working with different types of Nodes.</summary>
-static public class Extensions {
+static internal class Extensions {
     #region INode...
 
     /// <summary>The values from the given input values.</summary>

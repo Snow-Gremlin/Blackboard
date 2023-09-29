@@ -3,7 +3,7 @@
 namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>The interface for an input which has a value as data.</summary>
-public interface IDataInput: IInput {
+internal interface IDataInput: IInput {
 
     /// <summary>Sets the value of this input via data.</summary>
     /// <remarks>

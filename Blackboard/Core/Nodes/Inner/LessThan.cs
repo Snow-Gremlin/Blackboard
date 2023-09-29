@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Determines if the two values are less than.</summary>
 /// <typeparam name="T">The type being compared.</typeparam>
-sealed public class LessThan<T> : BinaryValue<T, T, Bool>
+sealed internal class LessThan<T> : BinaryValue<T, T, Bool>
     where T : struct, IComparable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

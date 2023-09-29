@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Gets the sum of all of the parent values.</summary>
-sealed public class Sum<T> : NaryValue<T, T>
+sealed internal class Sum<T> : NaryValue<T, T>
     where T : struct, IAdditive<T>, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

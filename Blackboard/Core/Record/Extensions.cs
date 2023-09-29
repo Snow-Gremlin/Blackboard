@@ -500,34 +500,34 @@ static public class Extensions {
     /// <summary>Determines if the node with the given name exists.</summary>
     /// <param name="names">The name of the node to get.</param>
     /// <returns>True if a node by the given name exists, false otherwise</returns>
-    static public bool HasNode(this INodeReader reader, params string[] names) =>
+    static internal bool HasNode(this INodeReader reader, params string[] names) =>
         reader.HasNode(names as IEnumerable<string>);
 
     /// <summary>Determines if the node with the given name exists.</summary>
     /// <param name="names">The name of the node to get.</param>
     /// <returns>True if a node by the given name exists, false otherwise</returns>
-    static public bool HasNode(this INodeReader reader, IEnumerable<string> names) =>
+    static internal bool HasNode(this INodeReader reader, IEnumerable<string> names) =>
         reader.TryGetNode(names, out INode? _);
     
     /// <summary>Determines if the node with the given name and type exists.</summary>
     /// <typeparam name="T">The type of the node to check for.</typeparam>
     /// <param name="names">The name of the node to get.</param>
     /// <returns>True if a node by the given name exists, false otherwise</returns>
-    static public bool HasNode<T>(this INodeReader reader, params string[] names) where T : INode =>
+    static internal bool HasNode<T>(this INodeReader reader, params string[] names) where T : INode =>
         reader.HasNode<T>(names as IEnumerable<string>);
 
     /// <summary>Determines if the node with the given name and type exists.</summary>
     /// <typeparam name="T">The type of the node to check for.</typeparam>
     /// <param name="names">The name of the node to get.</param>
     /// <returns>True if a node by the given name exists, false otherwise</returns>
-    static public bool HasNode<T>(this INodeReader reader, IEnumerable<string> names) where T : INode =>
+    static internal bool HasNode<T>(this INodeReader reader, IEnumerable<string> names) where T : INode =>
         reader.TryGetNode(names, out INode? node) && node is T;
 
     /// <summary>Gets the node with the given name.</summary>
     /// <typeparam name="T">The expected type of node to get.</typeparam>
     /// <param name="names">The name of the node to get.</param>
     /// <returns>The node with the given name and type.</returns>
-    static public T GetNode<T>(this INodeReader reader, params string[] names) where T : INode =>
+    static internal T GetNode<T>(this INodeReader reader, params string[] names) where T : INode =>
         reader.GetNode<T>(names as IEnumerable<string>);
 
     /// <summary>Gets the node with the given name.</summary>
@@ -535,7 +535,7 @@ static public class Extensions {
     /// <typeparam name="T">The expected type of node to get.</typeparam>
     /// <param name="names">The name of the node to get.</param>
     /// <returns>The node with the given name and type.</returns>
-    static public T GetNode<T>(this INodeReader reader, IEnumerable<string> names) where T : INode =>
+    static internal T GetNode<T>(this INodeReader reader, IEnumerable<string> names) where T : INode =>
         reader.TryGetNode(names, out INode? node) ?
             node is T result ? result :
             throw new BlackboardException("The node found by the given name is not the expected type.").
@@ -550,7 +550,7 @@ static public class Extensions {
     /// <param name="names">The name of the node to get.</param>
     /// <param name="node">The returned node for the given name or null.</param>
     /// <returns>True if the node was found, false otherwise.</returns>
-    static public bool TryGetNode(this INodeReader reader, out INode? node, params string[] names) =>
+    static internal bool TryGetNode(this INodeReader reader, out INode? node, params string[] names) =>
         reader.TryGetNode(names, out node);
 
     #endregion

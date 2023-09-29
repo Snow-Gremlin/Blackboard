@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Interfaces;
 /// This loop is fine but means that algorithms must make sure algorithms
 /// do not get stuck in that loop.
 /// </remarks>
-public interface IFieldReader : INode {
+internal interface IFieldReader : INode {
 
     /// <summary>Determines if the given field by name exists.</summary>
     /// <param name="name">The name of the field to look for.</param>

@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Determines if the two values are equal.</summary>
 /// <typeparam name="T">The type being compared.</typeparam>
-sealed public class Equal<T> : BinaryValue<T, T, Bool>
+sealed internal class Equal<T> : BinaryValue<T, T, Bool>
     where T : struct, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

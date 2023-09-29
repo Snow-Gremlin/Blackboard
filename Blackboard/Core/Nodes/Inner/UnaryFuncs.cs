@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Unary nodes for floating point mathematics.</summary>
 /// <typeparam name="T">The type of floating point to perform the math on.</typeparam>
-static public class UnaryFloatingPoint<T>
+static internal class UnaryFloatingPoint<T>
     where T : struct, IFloatingPoint<T>, IEquatable<T> {
 
     /// <summary>This is a factory for creating a new IsNaN instance of this node.</summary>

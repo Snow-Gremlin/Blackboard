@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Interfaces;
 /// the input values into a node so there may be a specific number of them and
 /// they may be required to be a specific type of nodes.
 /// </remarks>
-public interface IChild : INode {
+internal interface IChild : INode {
 
     /// <summary>This is a helper method for setting a parent to the given node.</summary>
     /// <remarks>

@@ -6,7 +6,7 @@ namespace Blackboard.Core.Nodes.Interfaces;
 /// This interface indicates a node can be coalesced while optimizing.
 /// This is used by several optimization rules and may be extended for new optimizations.
 /// </summary>
-public interface ICoalescable : IChild {
+internal interface ICoalescable : IChild {
 
     /// <summary>
     /// The identity element for the node which is a constant to use when coalescing the node for optimization.

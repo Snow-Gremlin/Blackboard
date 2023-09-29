@@ -5,7 +5,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Implicit casts a value node into another value node.</summary>
-sealed public class Implicit<Tin, Tout> : UnaryValue<Tin, Tout>
+sealed internal class Implicit<Tin, Tout> : UnaryValue<Tin, Tout>
     where Tin : struct, IData
     where Tout : struct, IImplicit<Tin, Tout>, IEquatable<Tout> {
 

@@ -4,7 +4,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Outer;
 
 /// <summary>This is a trigger which can be provoked from user output.</summary>
-sealed public class OutputTrigger : UnaryTrigger, ITriggerOutput {
+sealed internal class OutputTrigger : UnaryTrigger, ITriggerOutput {
 
     /// <summary>Creates a new output trigger.</summary>
     public OutputTrigger() => this.Pending = false;

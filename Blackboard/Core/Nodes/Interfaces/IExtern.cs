@@ -1,7 +1,7 @@
 ﻿namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>The interface for an external node.</summary>
-public interface IExtern : IParent {
+internal interface IExtern : IParent {
 
     /// <summary>This is the child shell node for the extern.</summary>
     /// <remarks>

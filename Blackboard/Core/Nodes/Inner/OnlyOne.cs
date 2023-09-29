@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Provokes when one and only one of the parents is provoked.</summary>
-sealed public class OnlyOne : NaryTrigger {
+sealed internal class OnlyOne : NaryTrigger {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
     static public readonly IFuncDef Factory = CreateFactory(inputs => new OnlyOne(inputs));

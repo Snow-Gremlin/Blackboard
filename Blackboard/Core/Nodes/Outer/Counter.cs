@@ -7,7 +7,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Outer;
 
 /// <summary>Provides a node which can be used to count trigger events.</summary>
-sealed public class Counter<T> : ValueNode<T>, IValueInput<T>, IChild
+sealed internal class Counter<T> : ValueNode<T>, IValueInput<T>, IChild
     where T : struct, ISubtractive<T>, IAdditive<T>, IFinite<T>, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

@@ -9,7 +9,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Gets the a formatted string from the parent values.</summary>
-sealed public class Format : ValueNode<String>, IChild {
+sealed internal class Format : ValueNode<String>, IChild {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
     static public IFuncDef Factory =>

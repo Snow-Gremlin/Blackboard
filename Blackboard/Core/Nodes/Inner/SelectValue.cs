@@ -6,7 +6,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>This is a node for a ternary selection between two values.</summary>
-sealed public class SelectValue<T> : Select<IValueParent<T>>, IValueParent<T>
+sealed internal class SelectValue<T> : Select<IValueParent<T>>, IValueParent<T>
     where T : struct, IData {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

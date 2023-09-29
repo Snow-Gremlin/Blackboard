@@ -5,7 +5,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>The interface for function factory.</summary>
-public interface IFuncDef : INode {
+internal interface IFuncDef : INode {
 
     /// <summary>The collection of argument types.</summary>
     /// <remarks>

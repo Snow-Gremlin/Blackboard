@@ -5,7 +5,7 @@ using Blackboard.Core.Record;
 namespace Blackboard.Core.Nodes.Outer;
 
 /// <summary>This is a trigger which can be provoked from user input.</summary>
-sealed public class InputTrigger : TriggerNode, ITriggerInput, IInputTrigger {
+sealed internal class InputTrigger : TriggerNode, ITriggerInput, IInputTrigger {
 
     /// <summary>Creates a new input trigger.</summary>
     public InputTrigger() { }

@@ -2,16 +2,22 @@
 #----------------------------------------------------------
 # Specific Keywords
 
+# Constants Keywords
 [Identifier] = 'true', 'false' => [Bool];
-[Identifier] = 'namespace' => [Namespace];
-[Identifier] = 'var' => [Var];
+[Identifier] = 'null'          => [Null];
 
+# Pseudo-type Keywords
+[Identifier] = 'namespace' => [Namespace];
+[Identifier] = 'var'       => [Var];
+
+# Declare Keywords
 [Identifier] = 'in'     => [DeclareIn];
 [Identifier] = 'get'    => [DeclareGet];
 [Identifier] = 'define' => [DeclareDefine];
 [Identifier] = 'temp'   => [DeclareTemp];
 [Identifier] = 'extern' => [DeclareExtern];
 
+# Type Keywords
 [Identifier] = 'bool'    => [TypeBool];
 [Identifier] = 'int'     => [TypeInt];
 [Identifier] = 'uint'    => [TypeUint];

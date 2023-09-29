@@ -15,6 +15,5 @@ static internal class Constants {
         global["sqrt2"] = Literal.Double(System.Math.Sqrt(2.0));
         global["nan"  ] = Literal.Data(Double.NaN);
         global["inf"  ] = Literal.Data(Double.Infinity);
-        global["null" ] = Literal.Data(Object.Null);
     }
 }

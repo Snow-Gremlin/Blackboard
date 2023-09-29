@@ -299,6 +299,7 @@
 
 <Value> := [Identifier] {pushId}
     | [Bool]   {pushBool}
+    | [Null]   {pushNull}
     | [Bin]    {pushBin}
     | [Oct]    {pushOct}
     | [Int]    {pushInt}

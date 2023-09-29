@@ -97,7 +97,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     public IEnumerable<S.Type> Types {
         get {
             IEnumerable<S.Type> e = this.fixedParents.Select(p => p.Type);
-            if (this.varParents is not null) e = e.Concat(Enumerable.Repeat(this.varParents.Type, 1000));
+            if (this.varParents is not null) e = e.Concat(Enumerable.Repeat(this.varParents.Type, 10_000));
             return e;
         }
     }
@@ -239,32 +239,24 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// <summary>This performs replace on the fixed parents.</summary>
     /// <param name="oldParent">The old parent to find all instances with.</param>
     /// <param name="newParent">The new parent to replace each instance with.</param>
-    /// <returns>True if the parent had this child when it was replaced, false otherwise.</returns>
-    private bool replaceFix(IParent oldParent, IParent newParent) {
-        bool removed = false;
+    private void replaceFix(IParent oldParent, IParent newParent) {
         for (int i = this.fixedParents.Count - 1; i >= 0; --i) {
             IFixedParent parent = this.fixedParents[i];
             if (!ReferenceEquals(parent.Node, oldParent)) continue;
-            removed = (parent.Node?.RemoveChildren(this.Child) ?? false) || removed;
             parent.Node = newParent;
         }
-        return removed;
     }
 
     /// <summary>This performs replace on the variable parents.</summary>
     /// <param name="oldParent">The old parent to find all instances with.</param>
     /// <param name="newParent">The new parent to replace each instance with.</param>
-    /// <returns>True if the parent had this child when it was replaced, false otherwise.</returns>
-    private bool replaceVar(IParent oldParent, IParent newParent) {
-        if (this.varParents is null) return false;
-        bool removed = false;
+    private void replaceVar(IParent oldParent, IParent newParent) {
+        if (this.varParents is null) return;
         for (int i = this.varParents.Count - 1; i >= 0; --i) {
             IParent node = this.varParents[i];
             if (!ReferenceEquals(node, oldParent)) continue;
-            removed = (node?.RemoveChildren(this.Child) ?? false) || removed;
             this.varParents[i] = newParent;
         }
-        return removed;
     }
 
     /// <summary>This replaces all instances of the given old parent with the given new parent.</summary>
@@ -277,115 +269,58 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
     public bool Replace(IParent oldParent, IParent newParent) {
         if (ReferenceEquals(oldParent, newParent)) return false;
+
         bool fixChange = this.checkFixReplace(oldParent, newParent);
         bool varChange = this.checkVarReplace(oldParent, newParent);
         if (!fixChange && !varChange) return false;
 
-        bool removed = false;
-        if (fixChange) removed = this.replaceFix(oldParent, newParent) || removed;
-        if (varChange) removed = this.replaceVar(oldParent, newParent) || removed;
-        if (removed) newParent?.AddChildren(this.Child);
+        if (fixChange) this.replaceFix(oldParent, newParent);
+        if (varChange) this.replaceVar(oldParent, newParent);
+
+        if (oldParent.RemoveChildren(this.Child))
+            newParent.AddChildren(this.Child);
         return true;
     }
 
     #endregion
     #region SetAll Method...
 
-    /// <summary>This checks if the setting all the fixed parents would work and cause a change.</summary>
-    /// <param name="newParents">The new parents that would be set.</param>
-    /// <returns>True if any parent was changed, false otherwise.</returns>
-    private bool checkFixSetAll(List<IParent> newParents) {
-        bool wouldChange = false;
-        for (int i = this.FixedCount-1; i >= 0; --i) {
+    /// <summary>Checks if there would be any change from a SetAll.</summary>
+    /// <param name="newParents">The parents to set.</param>
+    /// <returns>True if it would change, false if it has n change.</returns>
+    private bool setAllIsChanged(List<IParent> newParents) {
+        if (newParents.Count != this.Count) return true;
+        int i= 0;
+        foreach (IParent oldParent in this.Parents) {
+            if (!ReferenceEquals(oldParent, newParents[i])) return true;
+            i++;
+        }
+        return false;
+    }
+
+    /// <summary>Verifies that the SetAll has the correct types.</summary>
+    /// <param name="newParents">The parents to set.</param>
+    private void verifySetAll(List<IParent> newParents) {
+        int newCount = newParents.Count;
+
+        if (newCount < this.FixedCount || (!this.HasVariable && newCount > this.FixedCount))
+            throw this.newException("Incorrect number of parents in the list of parents to set to a node.").
+                With("new parent count", newCount);
+
+        if (newCount < this.MinimumCount || newCount > this.MaximumCount)
+            throw this.newException("The number of parents to set is not within the allowed maximum and minimum counts.").
+                With("new parent count", newCount);
+
+        int i = 0;
+        foreach (S.Type type in this.Types) {
+            if (i >= newCount) break;
             IParent newParent = newParents[i];
-            S.Type type = this.fixedParents[i].Type;
             if (!newParent.GetType().IsAssignableTo(type))
-                throw this.newException("Incorrect type of a parent in the list of fixed parents to set to a node.").
+                throw this.newException("Incorrect type of a parent in the list of parents to set to a node.").
                     With("index", i).
                     With("expected type", type).
                     With("new parent", newParent);
-            wouldChange = wouldChange || !ReferenceEquals(this.fixedParents[i].Node, newParent);
-        }
-        return wouldChange;
-    }
-
-    /// <summary>This checks if the setting all the variable parents would work and cause a change.</summary>
-    /// <param name="newParents">The new parents that would be set.</param>
-    /// <returns>True if any parent was changed, false otherwise.</returns>
-    private bool checkVarSetAll(List<IParent> newParents) {
-        bool wouldChange = newParents.Count != this.Count;
-        int minCount = S.Math.Min(newParents.Count, this.VarCount);
-        for (int i = this.FixedCount, j = 0; i < minCount; ++i, ++j) {
-            IParent newParent = newParents[i];
-            if (!newParent.GetType().IsAssignableTo(this.varParents?.Type))
-                throw this.newException("Incorrect type of a parent in the list of parents to set to a node.").
-                    With("index", i).
-                    With("expected type", this.varParents?.Type).
-                    With("new parent", newParent);
-            wouldChange = wouldChange || !ReferenceEquals(this.varParents[j], newParent);
-        }
-
-        // Check any new parents past the currently set parents.
-        for (int i = minCount; i < newParents.Count; i++) {
-            IParent newParent = newParents[i];
-            if (!newParent.GetType().IsAssignableTo(this.varParents?.Type))
-                throw this.newException("Incorrect type of a parent in the list of parents to set to a node.").
-                    With("index", i).
-                    With("expected type", this.varParents?.Type).
-                    With("new parent", newParent);
-        }
-        return wouldChange;
-    }
-
-    /// <summary>This changes the fixed parents by setting the given new parents.</summary>
-    /// <param name="newParents">The new parents that would be set.</param>
-    private void setAllFix(List<IParent> newParents) {
-        for (int i = 0; i < this.FixedCount; ++i) {
-            IParent newParent = newParents[i];
-            IFixedParent param = this.fixedParents[i];
-            IParent? node = param.Node;
-            if (ReferenceEquals(node, newParent)) continue;
-            
-            // TODO: Need to check if the oldParent is used anywhere in rest of newParents
-            bool removed = node?.RemoveChildren(this.Child) ?? false;
-            param.Node = newParent;
-            if (removed) newParent?.AddChildren(this.Child);
-        }
-    }
-
-    /// <summary>This changes the variable parents by setting the given new parents.</summary>
-    /// <param name="newParents">The new parents that would be set.</param>
-    private void setAllVar(List<IParent> newParents) {
-        int count = newParents.Count;
-        int remaining = count - this.FixedCount;
-
-        // Update variable parents which overlap with new parents
-        int minCount = S.Math.Min(remaining, this.VarCount);
-        for (int i = this.FixedCount, j = 0; j < minCount; ++i, ++j) {
-            IParent newParent = newParents[i];
-            IParent? oldParent = this.varParents?[i];
-            if (ReferenceEquals(oldParent, newParent)) continue;
-
-            // TODO: Need to check if the oldParent is used anywhere in rest of newParents
-            bool removed = oldParent?.RemoveChildren(this.Child) ?? false;
-            if (removed) newParent.AddChildren(this.Child);
-            if (this.varParents is not null) this.varParents[i] = newParent;
-        }
-
-        // Remove any old variable parents which are beyond the new parents
-        int extraCount = this.VarCount - minCount;
-        if (extraCount > 0) {
-            // TODO: Need to check if the parent is used for more than the one being removed
-            for (int i = this.VarCount - 1; i >= minCount; --i)
-                this.varParents?[i]?.RemoveChildren(this.Child);
-            this.varParents?.Remove(minCount, extraCount);
-        }
-
-        // Add any new parents which are beyond the old variable parents
-        for (int i = minCount; i < remaining; ++i) {
-            IParent newParent = newParents[i];
-            newParent.AddChildren(this.Child);
-            this.varParents?.Add(newParent);
+            i++;
         }
     }
 
@@ -394,22 +329,25 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// <param name="newParents">The parents to set.</param>
     /// <returns>True if any parents changed, false if they were all the same.</returns>
     public bool SetAll(List<IParent> newParents) {
-        if (newParents.Count < this.FixedCount || (!this.HasVariable && newParents.Count > this.FixedCount))
-            throw this.newException("Incorrect number of parents in the list of parents to set to a node.").
-                With("new parent count", newParents.Count);
+        if (!this.setAllIsChanged(newParents)) return false;
+        this.verifySetAll(newParents);
 
-        if (newParents.Count < this.MinimumCount || newParents.Count > this.MaximumCount)
-            throw this.newException("The number of parents to set is not within the allowed maximum and minimum counts.").
-                With("new parent count", newParents.Count);
+        bool illegitimate = this.Child.Illegitimate();
+            
+        HashSet<IParent> removed = this.Parents.WhereNot(newParents.Contains).ToHashSet();
+        removed.Foreach(p => p.RemoveChildren(this.Child));
+         
+        if (!illegitimate) {
+            HashSet<IParent> legitimize = newParents.WhereNot(this.Parents.Contains).ToHashSet();
+            legitimize.Foreach(p => p.AddChildren(this.Child));
+        }
 
-        bool fixChange = this.checkFixSetAll(newParents);
-        bool varChange = this.checkVarSetAll(newParents);
-        if (!fixChange && !varChange) return false;
+        for (int i = 0; i < this.FixedCount; ++i)
+            this.fixedParents[i].Node = newParents[i];
 
-        HashSet<IParent> removed = this.Parents.NotNull().WhereNot(newParents.Contains).ToHashSet();
+        this.varParents?.Remove(0, this.VarCount);
+        this.varParents?.Insert(0, newParents.Skip(this.FixedCount));
 
-        if (fixChange) this.setAllFix(newParents);
-        if (varChange) this.setAllVar(newParents);
         return true;
     }
 

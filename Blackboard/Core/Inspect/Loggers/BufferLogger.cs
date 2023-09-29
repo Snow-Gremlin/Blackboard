@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>
 /// This is a buffer logger used as a temporary text based output, like a virtual console,

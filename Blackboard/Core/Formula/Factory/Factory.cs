@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Formula.Actions;
 using Blackboard.Core.Innate;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Optimization;

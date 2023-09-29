@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Linq;
 

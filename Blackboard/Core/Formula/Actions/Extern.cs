@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;

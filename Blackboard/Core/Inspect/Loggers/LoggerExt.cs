@@ -1,6 +1,6 @@
 ﻿using S = System;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>Null-aware extensions to add to or post to a given logger.</summary>
 static public class LoggerExt {

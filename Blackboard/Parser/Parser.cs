@@ -3,7 +3,7 @@ using Blackboard.Core.Extensions;
 using Blackboard.Core.Formula;
 using Blackboard.Core.Formula.Factory;
 using Blackboard.Core.Innate;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using S = System;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>
 /// Message is a common object used for exceptions and logging which carries

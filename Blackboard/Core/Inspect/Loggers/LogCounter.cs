@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>
 /// This is a message counter logger used for keeping

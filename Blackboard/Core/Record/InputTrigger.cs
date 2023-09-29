@@ -1,4 +1,4 @@
-﻿using Blackboard.Core.Inspect;
+﻿using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Record;

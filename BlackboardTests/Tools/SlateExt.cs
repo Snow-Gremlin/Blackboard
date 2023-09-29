@@ -2,6 +2,7 @@
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Formula;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Record;
 using Blackboard.Parser;

@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Types;
 
 namespace Blackboard.Core.Data.Caps;

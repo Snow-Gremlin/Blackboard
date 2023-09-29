@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using S = System;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>An entry contains a message in the process of being logged.</summary>
 sealed public class Entry {

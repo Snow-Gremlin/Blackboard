@@ -380,7 +380,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
                 this.varParents?[i]?.RemoveChildren(this.Child);
             this.varParents?.Remove(minCount, extraCount);
         }
-        
+
         // Add any new parents which are beyond the old variable parents
         for (int i = minCount; i < remaining; ++i) {
             IParent newParent = newParents[i];

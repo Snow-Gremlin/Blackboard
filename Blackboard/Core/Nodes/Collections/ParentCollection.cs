@@ -29,9 +29,9 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// This should be set when this parent collection has a fixed part.
     /// </param>
     internal ParentCollection(IChild child, int fixedCapacity = 0) {
-        this.Child = child;
+        this.Child        = child;
         this.fixedParents = new List<IFixedParent>(fixedCapacity);
-        this.varParents = null;
+        this.varParents   = null;
     }
 
     /// <summary>This adds a new parent parameter type to this fixed parameter list.</summary>
@@ -81,7 +81,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
             ex.With("variable count", this.VarCount).
                With("maximum count",  this.MinimumCount).
                With("minimum count",  this.MaximumCount);
-        if (this.HasFixed) ex.With("fixed count", this.VarCount);
+        if (this.HasFixed) ex.With("fixed count", this.FixedCount);
         if (this.HasFixed && this.HasVariable) ex.With("total count", this.Count);
         return ex;
     }
@@ -97,7 +97,8 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     public IEnumerable<S.Type> Types {
         get {
             IEnumerable<S.Type> e = this.fixedParents.Select(p => p.Type);
-            if (this.varParents is not null) e = e.Concat(Enumerable.Repeat(this.varParents.Type, 10_000));
+            if (this.varParents is not null)
+                e = e.Concat(Enumerable.Repeat(this.varParents.Type, this.varParents.Maximum));
             return e;
         }
     }
@@ -138,10 +139,10 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     public int Count => this.FixedCount + this.VarCount;
 
     /// <summary>The maximum allowed number of parents in this collection.</summary>
-    public int MaximumCount => this.FixedCount + this.varParents?.Maximum ?? 0;
+    public int MaximumCount => this.FixedCount + (this.varParents?.Maximum ?? 0);
 
     /// <summary>The minimum allowed number of parents in this collection.</summary>
-    public int MinimumCount => this.FixedCount + this.varParents?.Minimum ?? 0;
+    public int MinimumCount => this.FixedCount + (this.varParents?.Minimum ?? 0);
 
     /// <summary>This gets the type of the parent at the given index.</summary>
     /// <param name="index">The index to get the parent's type of.</param>
@@ -379,7 +380,6 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
 
         if (this.Count + newCount > this.MaximumCount || this.varParents is null)
             throw this.newException("Inserting the given number of parents would cause there to be more than the maximum allowed count.").
-                With("new total count", this.Count + newCount).
                 With("new parent count", newCount);
 
         S.Type type = this.varParents.Type;
@@ -405,9 +405,6 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
 
     #endregion
     #region Remove Method...
-
-    // TODO: Add tests which checks these removal of fixed and var parents cases specifically
-    //       including when the parent is used multiple times and at least one instance is not removed.
 
     /// <summary>This remove one or more parent at the given location.</summary>
     /// <remarks>This will throw an exception for fixed parent collections.</remarks>>

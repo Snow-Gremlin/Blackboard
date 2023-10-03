@@ -79,8 +79,8 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
             With("child", this.Child);
         if (this.HasVariable)
             ex.With("variable count", this.VarCount).
-               With("maximum count",  this.MinimumCount).
-               With("minimum count",  this.MaximumCount);
+               With("minimum count",  this.MinimumCount).
+               With("maximum count",  this.MaximumCount);
         if (this.HasFixed) ex.With("fixed count", this.FixedCount);
         if (this.HasFixed && this.HasVariable) ex.With("total count", this.Count);
         return ex;
@@ -196,7 +196,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// <param name="oldParent">The old parent to find all instances with.</param>
     /// <param name="newParent">The new parent to replace each instance with.</param>
     /// <returns>True if any parents would be replaced, false otherwise.</returns>
-    private bool checkFixReplace(IParent oldParent, IParent newParent) {
+    private bool checkFixReplace(IParent? oldParent, IParent? newParent) {
         bool wouldChange = false;
         for (int i = this.FixedCount-1; i >= 0; --i) {
             IFixedParent param = this.fixedParents[i];
@@ -217,7 +217,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// <param name="oldParent">The old parent to find all instances with.</param>
     /// <param name="newParent">The new parent to replace each instance with.</param>
     /// <returns>True if any parents would be replaced, false otherwise.</returns>
-    private bool checkVarReplace(IParent oldParent, IParent newParent) {
+    private bool checkVarReplace(IParent? oldParent, IParent? newParent) {
         if (this.varParents is null) return false;
         for (int i = this.VarCount-1; i >= 0; --i) {
             IParent parent = this.varParents[i];
@@ -240,7 +240,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// <summary>This performs replace on the fixed parents.</summary>
     /// <param name="oldParent">The old parent to find all instances with.</param>
     /// <param name="newParent">The new parent to replace each instance with.</param>
-    private void replaceFix(IParent oldParent, IParent newParent) {
+    private void replaceFix(IParent? oldParent, IParent? newParent) {
         for (int i = this.fixedParents.Count - 1; i >= 0; --i) {
             IFixedParent parent = this.fixedParents[i];
             if (!ReferenceEquals(parent.Node, oldParent)) continue;
@@ -251,12 +251,14 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// <summary>This performs replace on the variable parents.</summary>
     /// <param name="oldParent">The old parent to find all instances with.</param>
     /// <param name="newParent">The new parent to replace each instance with.</param>
-    private void replaceVar(IParent oldParent, IParent newParent) {
+    private void replaceVar(IParent? oldParent, IParent? newParent) {
         if (this.varParents is null) return;
         for (int i = this.varParents.Count - 1; i >= 0; --i) {
             IParent node = this.varParents[i];
             if (!ReferenceEquals(node, oldParent)) continue;
-            this.varParents[i] = newParent;
+            if (newParent is not null)
+                this.varParents[i] = newParent;
+            else this.varParents.Remove(i);
         }
     }
 
@@ -268,7 +270,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// <param name="oldParent">The old parent to find all instances with.</param>
     /// <param name="newParent">The new parent to replace each instance with.</param>
     /// <returns>True if any parent was replaced, false if that old parent wasn't found.</returns>
-    public bool Replace(IParent oldParent, IParent newParent) {
+    public bool Replace(IParent? oldParent, IParent? newParent) {
         if (ReferenceEquals(oldParent, newParent)) return false;
 
         bool fixChange = this.checkFixReplace(oldParent, newParent);
@@ -278,8 +280,9 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
         if (fixChange) this.replaceFix(oldParent, newParent);
         if (varChange) this.replaceVar(oldParent, newParent);
 
-        if (oldParent.RemoveChildren(this.Child))
+        if (newParent is not null && !this.Child.Illegitimate())
             newParent.AddChildren(this.Child);
+        oldParent?.RemoveChildren(this.Child);
         return true;
     }
 

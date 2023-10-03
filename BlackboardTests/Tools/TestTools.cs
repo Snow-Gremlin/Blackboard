@@ -23,7 +23,7 @@ static public class TestTools {
             NoDiff(exp, ex.Message.Split("\n"));
             return;
         }
-        Assert.Fail("Expected an exception to be thrown.\n%s", exp.Join("\n"));
+        Assert.Fail("Expected an exception to be thrown.\n{0}", exp.Join("\n"));
     }
 
     /// <summary>Asserts that all the given lines are equal, otherwise shows the diff.</summary>

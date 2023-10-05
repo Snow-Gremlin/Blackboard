@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Formula;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Record;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -284,6 +285,7 @@ public class BlackboardTests {
             "           (curYear < person.birthYear ? \" hasn't been born yet.\" : ",
             "           \" has passed away at \" + person.age + \" years old.\"));",
             "");
+        Assert.IsTrue(b.Validate());
         
         InputValue<int> curYear = b.ValueInput<int>("curYear");
         IValueWatcher<string> output = b.OnChange<string>("summary");

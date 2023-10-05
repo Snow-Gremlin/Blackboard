@@ -1,5 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -135,7 +137,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// <summary>The number of parents currently in the variable part of the collection.</summary>
     public int VarCount => this.varParents?.Count ?? 0;
 
-    /// <summary>The number of parents currently in the collection.</summary>
+    /// <summary>The number of parents currently in the collection including null parents.</summary>
     public int Count => this.FixedCount + this.VarCount;
 
     /// <summary>The maximum allowed number of parents in this collection.</summary>
@@ -280,9 +282,8 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
         if (fixChange) this.replaceFix(oldParent, newParent);
         if (varChange) this.replaceVar(oldParent, newParent);
 
-        if (newParent is not null && !this.Child.Illegitimate())
-            newParent.AddChildren(this.Child);
-        oldParent?.RemoveChildren(this.Child);
+        if (oldParent?.RemoveChildren(this.Child) ?? !this.Child.Illegitimate())
+            newParent?.AddChildren(this.Child);
         return true;
     }
 

@@ -40,7 +40,7 @@ sealed internal class Inspector {
     }
 
     /// <summary>Indicates if there were zero errors.</summary>
-    public bool Passed => this.logger.Count(Level.Error) > 0;
+    public bool Passed => this.logger.Count(Level.Error) <= 0;
 
     /// <summary>Collects all the nodes in the slate reachable from global.</summary>
     public void CollectNodes() {

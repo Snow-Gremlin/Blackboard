@@ -20,7 +20,7 @@ sealed public class LogCounter : Logger {
     /// <summary>Gets the count for the given level.</summary>
     /// <param name="level">The level to get the count from.</param>
     /// <returns>The number of messages with the given level.</returns>
-    public int Count(Level level) => this.counts.GetValueOrDefault(level);
+    public int Count(Level level) => this.counts.GetValueOrDefault(level, 0);
 
     /// <summary>This counters the given entry.</summary>
     /// <param name="entry">The entry to count.</param>

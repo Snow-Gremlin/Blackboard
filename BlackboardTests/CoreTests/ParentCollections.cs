@@ -118,13 +118,13 @@ sealed public class ParentCollections {
 
         TestTools.CheckException(() => _ = pc[-1],
             "Index out of bounds of node's parents.",
-            "[child: Child()]",
+            "[child: Child]",
             "[fixed count: 1]",
             "[index: -1]");
         Assert.IsNull(pc[0]);
         TestTools.CheckException(() => _ = pc[1],
             "Index out of bounds of node's parents.",
-            "[child: Child()]",
+            "[child: Child]",
             "[fixed count: 1]",
             "[index: 1]");
         
@@ -181,7 +181,7 @@ sealed public class ParentCollections {
 
         TestTools.CheckException(() => _ = pc[-1],
             "Index out of bounds of node's parents.",
-            "[child: Child()]",
+            "[child: Child]",
             "[fixed count: 3]",
             "[index: -1]");
         Assert.IsNull(pc[0]);
@@ -189,7 +189,7 @@ sealed public class ParentCollections {
         Assert.IsNull(pc[2]);
         TestTools.CheckException(() => _ = pc[3],
             "Index out of bounds of node's parents.",
-            "[child: Child()]",
+            "[child: Child]",
             "[fixed count: 3]",
             "[index: 3]");
         
@@ -245,6 +245,42 @@ sealed public class ParentCollections {
             "[fixed count: 3]",
             "[index: 0]",
             "[length: 1]");
+
+        Assert.IsTrue(pc.Replace(testP4, null));
+        Assert.IsNull(pc[0]);
+        Assert.AreEqual(testP2, pc[1]);
+        Assert.IsNull(pc[2]);
+        
+        Assert.IsTrue(pc.Replace(null, testP4));
+        Assert.AreEqual(testP4, pc[0]);
+        Assert.AreEqual(testP2, pc[1]);
+        Assert.AreEqual(testP4, pc[2]);
+
+        TestTools.CheckException(() => pc.SetAll(new List<IParent> { testP1, testP4 }),
+            "Incorrect number of parents in the list of parents to set to a node.",
+            "[child: Child(Four, Two, Four)]",
+            "[fixed count: 3]",
+            "[new parent count: 2]");
+
+        TestTools.CheckException(() => pc.SetAll(new List<IParent> { testP1, testP4, testP1, testP4 }),
+            "Incorrect number of parents in the list of parents to set to a node.",
+            "[child: Child(Four, Two, Four)]",
+            "[fixed count: 3]",
+            "[new parent count: 4]");
+        
+        TestTools.CheckException(() => pc.SetAll(new List<IParent> { testP1, testP4, testP2 }),
+            "Incorrect type of a parent in the list of parents to set to a node.",
+            "[child: Child(Four, Two, Four)]",
+            "[fixed count: 3]",
+            "[index: 1]",
+            "[expected type: TestTypedParent<Int32>]",
+            "[new parent: Four]");
+        
+        TestTypedParent<int> testP5 = new("Five");
+        pc.SetAll(new List<IParent> { testP1, testP5, testP1 });
+        Assert.AreEqual(testP1, pc[0]);
+        Assert.AreEqual(testP5, pc[1]);
+        Assert.AreEqual(testP1, pc[2]);
     }
 
     [TestMethod]
@@ -431,6 +467,37 @@ sealed public class ParentCollections {
         Assert.IsTrue(pc.Replace(testP4, null));
         Assert.AreEqual(testP2, pc[0]);
         Assert.AreEqual(testP1, pc[1]);
+
+        TestTools.CheckException(() => pc.SetAll(new List<IParent>()),
+            "The number of parents to set is not within the allowed maximum and minimum counts.",
+            "[child: Child(Two, One)]",
+            "[variable count: 2]",
+            "[minimum count: 1]",
+            "[maximum count: 5]",
+            "[new parent count: 0]");
+
+        TestTools.CheckException(() => pc.SetAll(new List<IParent>() { testP1, testP1, testP1, testP1, testP1, testP1 }),
+            "The number of parents to set is not within the allowed maximum and minimum counts.",
+            "[child: Child(Two, One)]",
+            "[variable count: 2]",
+            "[minimum count: 1]",
+            "[maximum count: 5]",
+            "[new parent count: 6]");
+
+        TestTools.CheckException(() => pc.SetAll(new List<IParent>() { testP1, testP3, testP1 }),
+            "Incorrect type of a parent in the list of parents to set to a node.",
+            "[child: Child(Two, One)]",
+            "[variable count: 2]",
+            "[minimum count: 1]",
+            "[maximum count: 5]",
+            "[index: 1]",
+            "[expected type: TestTypedParent<Boolean>]",
+            "[new parent: Three]");
+
+        pc.SetAll(new List<IParent>() { testP1, testP2, testP1 });
+        Assert.AreEqual(testP1, pc[0]);
+        Assert.AreEqual(testP2, pc[1]);
+        Assert.AreEqual(testP1, pc[2]);
     }
 
     [TestMethod]
@@ -455,9 +522,10 @@ sealed public class ParentCollections {
         Assert.AreEqual(4, pc.MinimumCount);
         Assert.AreEqual(7, pc.MaximumCount);
 
-
-        // TODO: Add tests which checks these removal of fixed and var parents cases specifically
-        //       including when the parent is used multiple times and at least one instance is not removed.
-        // TODO: Test replace, set, remove with illegitimate.
+        // TODO: Finish
     }
+
+    // TODO: Add tests which checks these removal of fixed and var parents cases specifically
+    //       including when the parent is used multiple times and at least one instance is not removed.
+    // TODO: Test replace, set, remove with illegitimate.
 }

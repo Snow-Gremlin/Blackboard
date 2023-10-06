@@ -75,6 +75,12 @@ static public class TestTools {
         }
     }
 
+    /// <summary>Asserts that all the given values are equal, otherwise shows the diff.</summary>
+    /// <param name="results">The result that is being checked.</param>
+    /// <param name="exp">The expected result to check against.</param>
+    static public void NoDiff<T>(IEnumerable<T> results, params T[] exp) =>
+        NoDiff(exp, results.ToArray());
+
     /// <summary>Check if the entries in the given sets of information match each other (repeats are ignored).</summary>
     /// <typeparam name="T">The type of the value to compare.</typeparam>
     /// <param name="exp">The set of expected values.</param>

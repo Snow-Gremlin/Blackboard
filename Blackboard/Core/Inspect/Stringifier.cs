@@ -387,7 +387,7 @@ sealed internal class Stringifier {
     private string nodeDataValue(INode? node, int depth, bool first) =>
         this.ShowAllDataValues ? getDataValue(node) :
         this.ShowFirstDataValues && first ? getDataValue(node) :
-        this.ShowLastDataValues && (depth <= 1 || node is not IChild child || !child.Parents.Any()) ? getDataValue(node) : "";
+        this.ShowLastDataValues && (depth <= 1 || node is not IChild child || !child.Parents.HasNonNullParents) ? getDataValue(node) : "";
 
     /// <summary>Gets a string for the parents of the given node</summary>
     /// <param name="node">The node to get the parents from.</param>

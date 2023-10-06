@@ -106,7 +106,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     }
 
     /// <summary>This gets the enumerator for all the parents currently set.</summary>
-    public IEnumerable<IParent> Parents {
+    private IEnumerable<IParent> parents {
         get {
             IEnumerable<IParent> e = this.fixedParents.Select(p => p.Node).NotNull();
             if (this.varParents is not null) e = e.Concat(this.varParents);
@@ -121,8 +121,13 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// then the Sum node will return the 'x' parent twice.
     /// </remarks>
     /// <returns>An enumerator for all the parents.</returns>
-    public IEnumerator<IParent> GetEnumerator() => this.Parents.GetEnumerator();
+    public IEnumerator<IParent> GetEnumerator() => this.parents.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+    /// <summary>Determines if there is one or more non-null parent.</summary>
+    public bool HasNonNullParents =>
+        (this.varParents is not null && this.varParents.Count > 0) ||
+        this.fixedParents.Any(p => p.Node is not null);
 
     /// <summary>Indicates if this collection has a fixed parent part.</summary>
     public bool HasFixed => this.fixedParents.Count > 0;
@@ -136,6 +141,9 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
 
     /// <summary>The number of parents currently in the variable part of the collection.</summary>
     public int VarCount => this.varParents?.Count ?? 0;
+
+    /// <summary>The number of parents currently in the collection which are not null.</summary>
+    public int NonNullCount => this.parents.Count();
 
     /// <summary>The number of parents currently in the collection including null parents.</summary>
     public int Count => this.FixedCount + this.VarCount;
@@ -296,7 +304,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     private bool setAllIsChanged(List<IParent> newParents) {
         if (newParents.Count != this.Count) return true;
         int i= 0;
-        foreach (IParent oldParent in this.Parents) {
+        foreach (IParent oldParent in this.parents) {
             if (!ReferenceEquals(oldParent, newParents[i])) return true;
             i++;
         }
@@ -312,8 +320,12 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
             throw this.newException("Incorrect number of parents in the list of parents to set to a node.").
                 With("new parent count", newCount);
 
-        if (newCount < this.MinimumCount || newCount > this.MaximumCount)
-            throw this.newException("The number of parents to set is not within the allowed maximum and minimum counts.").
+        if (newCount < this.MinimumCount)
+            throw this.newException("The number of parents to set is less than the minimum allowed count.").
+                With("new parent count", newCount);
+
+        if (newCount > this.MaximumCount)
+            throw this.newException("The number of parents to set is more than the maximum allowed count.").
                 With("new parent count", newCount);
 
         int i = 0;
@@ -339,11 +351,11 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
 
         bool illegitimate = this.Child.Illegitimate();
             
-        HashSet<IParent> removed = this.Parents.WhereNot(newParents.Contains).ToHashSet();
+        HashSet<IParent> removed = this.parents.WhereNot(newParents.Contains).ToHashSet();
         removed.Foreach(p => p.RemoveChildren(this.Child));
          
         if (!illegitimate) {
-            HashSet<IParent> legitimize = newParents.WhereNot(this.Parents.Contains).ToHashSet();
+            HashSet<IParent> legitimize = newParents.WhereNot(this.parents.Contains).ToHashSet();
             legitimize.Foreach(p => p.AddChildren(this.Child));
         }
 
@@ -403,7 +415,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
                 Foreach(p => p.AddChildren(this.Child));
         }
 
-        this.varParents.Insert(index, newParents);
+        this.varParents.Insert(index-this.FixedCount, newParents);
         return true;
     }
 

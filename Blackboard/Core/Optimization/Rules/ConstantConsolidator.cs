@@ -24,7 +24,7 @@ sealed internal class ConstantConsolidator : IRule {
     /// <param name="identity">The identity value for this node.</param>
     /// <param name="constants">The set of constants to reduce.</param>
     /// <returns>The reduced set of constants.</returns>
-    static private List<IParent> reduceConstants(RuleArgs args, ICoalescable node, IConstant identity, List<IParent> constants) {
+    static private List<IParent?> reduceConstants(RuleArgs args, ICoalescable node, IConstant identity, List<IParent?> constants) {
         if (constants.Count <= 1) return constants;
 
         // Create a new instance of the current node, set the constants as the
@@ -65,9 +65,9 @@ sealed internal class ConstantConsolidator : IRule {
 
         // Find all parents which are NOT constant and all parents which are constant,
         // but skip any constants which are equal to the identity.
-        List<IParent> remainder = new();
-        List<IParent> constants = new();
-        foreach (IParent parent in parents) {
+        List<IParent?> remainder = new();
+        List<IParent?> constants = new();
+        foreach (IParent parent in parents.NotNull()) {
             if (parent.IsConstant()) {
                 if (!parent.SameValue(identity)) constants.Add(parent);
             } else remainder.Add(parent);
@@ -112,9 +112,9 @@ sealed internal class ConstantConsolidator : IRule {
 
         // Find consecutive parents which are constant, but skip any constants which are equal to the identity,
         // put reduced constants and parents which are NOT constant into the remainder.
-        List<IParent> remainder = new();
-        List<IParent> constants = new();
-        foreach (IParent parent in parents) {
+        List<IParent?> remainder = new();
+        List<IParent?> constants = new();
+        foreach (IParent parent in parents.NotNull()) {
             if (parent.IsConstant()) {
                 if (!parent.SameValue(identity)) constants.Add(parent);
             } else {

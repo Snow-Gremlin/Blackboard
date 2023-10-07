@@ -57,7 +57,7 @@ sealed internal class RuleArgs {
         if (node is IChild child) {
             // Copy parents into a list so they can be modified and
             // filter from the list any which are no longer in the nodes.
-            foreach (INode parent in child.Parents.ToList().
+            foreach (INode parent in child.Parents.NotNull().ToList().
                 Where(this.Nodes.Contains).WhereNot(Removed.Contains).
                 SelectMany(this.PostReachable))
                 yield return parent;
@@ -73,7 +73,7 @@ sealed internal class RuleArgs {
         if (node is IChild child) {
             // Copy parents into a list so they can be modified and
             // filter from the list any which are no longer in the nodes.
-            foreach (INode parent in child.Parents.ToList().
+            foreach (INode parent in child.Parents.NotNull().ToList().
                 Where(this.Nodes.Contains).WhereNot(Removed.Contains).
                 SelectMany(this.PreReachable))
                 yield return parent;

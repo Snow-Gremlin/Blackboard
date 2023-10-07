@@ -1,5 +1,4 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
 using Blackboard.Core.Nodes.Interfaces;
 using System;
 using System.Collections;
@@ -15,7 +14,7 @@ namespace Blackboard.Core.Nodes.Collections;
 /// For example, if a number is the sum of itself (x + x), then the Sum node will return the 'x' parent twice.
 /// Since null parents are removed, this list may not be the same as the Count even if fixed.
 /// </remarks>
-sealed internal partial class ParentCollection : IEnumerable<IParent> {
+sealed internal partial class ParentCollection : IEnumerable<IParent?> {
  
     /// <summary>The parameters for each fixed parent in this collection.</summary>
     private readonly List<IFixedParent> fixedParents;
@@ -106,9 +105,9 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     }
 
     /// <summary>This gets the enumerator for all the parents currently set.</summary>
-    private IEnumerable<IParent> parents {
+    private IEnumerable<IParent?> parents {
         get {
-            IEnumerable<IParent> e = this.fixedParents.Select(p => p.Node).NotNull();
+            IEnumerable<IParent?> e = this.fixedParents.Select(p => p.Node);
             if (this.varParents is not null) e = e.Concat(this.varParents);
             return e;
         }
@@ -121,13 +120,13 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// then the Sum node will return the 'x' parent twice.
     /// </remarks>
     /// <returns>An enumerator for all the parents.</returns>
-    public IEnumerator<IParent> GetEnumerator() => this.parents.GetEnumerator();
+    public IEnumerator<IParent?> GetEnumerator() => this.parents.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-    /// <summary>Determines if there is one or more non-null parent.</summary>
-    public bool HasNonNullParents =>
-        (this.varParents is not null && this.varParents.Count > 0) ||
-        this.fixedParents.Any(p => p.Node is not null);
+    /// <summary>Determines if there is one or more parent even if they are null.</summary>
+    public bool HasParents =>
+        this.fixedParents.Count > 0 ||
+        (this.varParents is not null && this.varParents.Count > 0);
 
     /// <summary>Indicates if this collection has a fixed parent part.</summary>
     public bool HasFixed => this.fixedParents.Count > 0;
@@ -141,9 +140,6 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
 
     /// <summary>The number of parents currently in the variable part of the collection.</summary>
     public int VarCount => this.varParents?.Count ?? 0;
-
-    /// <summary>The number of parents currently in the collection which are not null.</summary>
-    public int NonNullCount => this.parents.Count();
 
     /// <summary>The number of parents currently in the collection including null parents.</summary>
     public int Count => this.FixedCount + this.VarCount;
@@ -301,10 +297,10 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// <summary>Checks if there would be any change from a SetAll.</summary>
     /// <param name="newParents">The parents to set.</param>
     /// <returns>True if it would change, false if it has n change.</returns>
-    private bool setAllIsChanged(List<IParent> newParents) {
+    private bool setAllIsChanged(List<IParent?> newParents) {
         if (newParents.Count != this.Count) return true;
         int i= 0;
-        foreach (IParent oldParent in this.parents) {
+        foreach (IParent? oldParent in this.parents) {
             if (!ReferenceEquals(oldParent, newParents[i])) return true;
             i++;
         }
@@ -313,7 +309,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
 
     /// <summary>Verifies that the SetAll has the correct types.</summary>
     /// <param name="newParents">The parents to set.</param>
-    private void verifySetAll(List<IParent> newParents) {
+    private void verifySetAll(List<IParent?> newParents) {
         int newCount = newParents.Count;
 
         if (newCount < this.FixedCount || (!this.HasVariable && newCount > this.FixedCount))
@@ -331,8 +327,13 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
         int i = 0;
         foreach (S.Type type in this.Types) {
             if (i >= newCount) break;
-            IParent newParent = newParents[i];
-            if (!newParent.GetType().IsAssignableTo(type))
+            IParent? newParent = newParents[i];
+            if (newParent is null) {
+                if (i >= this.FixedCount)
+                    throw this.newException("May not have a null parent in the variable parents.").
+                        With("index", i).
+                        With("expected type", type);
+            } else if (!newParent.GetType().IsAssignableTo(type))
                 throw this.newException("Incorrect type of a parent in the list of parents to set to a node.").
                     With("index", i).
                     With("expected type", type).
@@ -345,25 +346,24 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// <remarks>This will throw an exception if there isn't the correct count or types.</remarks>
     /// <param name="newParents">The parents to set.</param>
     /// <returns>True if any parents changed, false if they were all the same.</returns>
-    public bool SetAll(List<IParent> newParents) {
+    public bool SetAll(List<IParent?> newParents) {
         if (!this.setAllIsChanged(newParents)) return false;
         this.verifySetAll(newParents);
 
         bool illegitimate = this.Child.Illegitimate();
             
-        HashSet<IParent> removed = this.parents.WhereNot(newParents.Contains).ToHashSet();
-        removed.Foreach(p => p.RemoveChildren(this.Child));
+        this.parents.NotNull().WhereNot(newParents.Contains).
+            Distinct().Foreach(p => p.RemoveChildren(this.Child));
          
-        if (!illegitimate) {
-            HashSet<IParent> legitimize = newParents.WhereNot(this.parents.Contains).ToHashSet();
-            legitimize.Foreach(p => p.AddChildren(this.Child));
-        }
+        if (!illegitimate)
+            newParents.NotNull().WhereNot(this.parents.Contains).
+                Distinct().Foreach(p => p.AddChildren(this.Child));
 
         for (int i = 0; i < this.FixedCount; ++i)
             this.fixedParents[i].Node = newParents[i];
 
         this.varParents?.Remove(0, this.VarCount);
-        this.varParents?.Insert(0, newParents.Skip(this.FixedCount));
+        this.varParents?.Insert(0, newParents.Skip(this.FixedCount).NotNull());
 
         return true;
     }
@@ -382,7 +382,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
     /// If there is no old child then this child is not set to the new parents.
     /// </param>
     /// <returns>True if any parents were added, false otherwise.</returns>
-    public bool Insert(int index, IEnumerable<IParent> newParents, IChild? oldChild = null) {
+    public bool Insert(int index, IEnumerable<IParent?> newParents, IChild? oldChild = null) {
         if (index < 0 || index > this.Count)
             throw this.newException("Index out of bounds of node's parents.").
                 With("index", index);
@@ -399,8 +399,13 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
                 With("new parent count", newCount);
 
         S.Type type = this.varParents.Type;
-        foreach ((IParent newParent, int i) in newParents.WithIndex()) {
-            if (!newParent.GetType().IsAssignableTo(type))
+        foreach ((IParent? newParent, int i) in newParents.WithIndex()) {
+            if (newParent is null)
+                throw this.newException("May not insert a null parent into the variable parents.").
+                    With("insert index", index).
+                    With("new parent index", i).
+                    With("expected type", type);
+            else if (!newParent.GetType().IsAssignableTo(type))
                 throw this.newException("Incorrect type of a parent in the list of parents to insert into a node.").
                     With("insert index", index).
                     With("new parent index", i).
@@ -411,11 +416,11 @@ sealed internal partial class ParentCollection : IEnumerable<IParent> {
         if (oldChild is not null) {
             // For any new parent which was a parent of the old child,
             // remove the old child and add this child to that parent.
-            newParents.Where(p => p.RemoveChildren(oldChild)).
+            newParents.NotNull().Where(p => p.RemoveChildren(oldChild)).
                 Foreach(p => p.AddChildren(this.Child));
         }
 
-        this.varParents.Insert(index-this.FixedCount, newParents);
+        this.varParents.Insert(index-this.FixedCount, newParents.NotNull());
         return true;
     }
 

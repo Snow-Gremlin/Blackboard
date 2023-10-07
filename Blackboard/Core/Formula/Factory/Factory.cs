@@ -64,7 +64,7 @@ sealed internal class Factory {
 
         // Continue up to all the parents.
         if (node is IChild child) {
-            foreach (IParent par in child.Parents) {
+            foreach (IParent par in child.Parents.NotNull()) {
                 if (this.collectAndOrder(par, newNodes))
                     par.AddChildren(child);
             }

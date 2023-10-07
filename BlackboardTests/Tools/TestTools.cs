@@ -31,27 +31,27 @@ static public class TestTools {
     /// <param name="results">The result that is being checked.</param>
     /// <param name="message">The message to go along with the test.</param>
     static public void NoDiff(string exp, string results, string message = "") =>
-        NoDiff(exp.Split("\n").ToArray(), results.Split("\n").ToArray(), message);
+        noDiff(exp.Split("\n").ToArray(), results.Split("\n").ToArray(), message);
 
     /// <summary>Asserts that all the given lists as strings are equal, otherwise shows the diff.</summary>
     /// <param name="exp">The expected result to check against.</param>
     /// <param name="results">The result that is being checked.</param>
     /// <param name="message">The message to go along with the test.</param>
     static public void NoDiff<T1, T2>(IEnumerable<string> exp, IEnumerable<string> results, string message = "") =>
-        NoDiff(exp.Split("\n").ToArray(), results.Split("\n").ToArray(), message);
+        noDiff(exp.Split("\n").ToArray(), results.Split("\n").ToArray(), message);
 
     /// <summary>Asserts that all the given lines are equal, otherwise shows the diff.</summary>
     /// <param name="exp">The expected result to check against.</param>
     /// <param name="results">The result that is being checked.</param>
     /// <param name="message">The message to go along with the test.</param>
     static public void NoDiff<T>(IEnumerable<T> exp, IEnumerable<T> results, string message = "") =>
-        NoDiff(exp.ToArray(), results.ToArray(), message);
+        noDiff(exp.ToArray(), results.ToArray(), message);
 
     /// <summary>Asserts that all the given values are equal, otherwise shows the diff.</summary>
     /// <param name="exp">The expected result to check against.</param>
     /// <param name="results">The result that is being checked.</param>
     /// <param name="message">The message to go along with the test.</param>
-    static public void NoDiff<T>(IReadOnlyList<T> exp, IReadOnlyList<T> results, string message = "") {
+    static private void noDiff<T>(IReadOnlyList<T> exp, IReadOnlyList<T> results, string message = "") {
         if (!exp.SequenceEqual(results)) {
             StringBuilder buf = new();
             if (!string.IsNullOrEmpty(message)) {
@@ -78,8 +78,8 @@ static public class TestTools {
     /// <summary>Asserts that all the given values are equal, otherwise shows the diff.</summary>
     /// <param name="results">The result that is being checked.</param>
     /// <param name="exp">The expected result to check against.</param>
-    static public void NoDiff<T>(IEnumerable<T> results, params T[] exp) =>
-        NoDiff(exp, results.ToArray());
+    static public void ValuesAreEqual<T>(IEnumerable<T> results, params T[] exp) =>
+        noDiff(exp, results.ToArray());
 
     /// <summary>Check if the entries in the given sets of information match each other (repeats are ignored).</summary>
     /// <typeparam name="T">The type of the value to compare.</typeparam>

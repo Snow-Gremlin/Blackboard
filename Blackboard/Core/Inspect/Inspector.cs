@@ -46,8 +46,9 @@ sealed internal class Inspector {
     public void CollectNodes() {
         HashSet<INode> pending = new();
 
-        void addToPending(INode node) {
-            if (this.touched.Contains(node) ||
+        void addToPending(INode? node) {
+            if (node is null ||
+                this.touched.Contains(node) ||
                 pending.Contains(node)) return;
             pending.Add(node);
         }
@@ -93,7 +94,7 @@ sealed internal class Inspector {
     /// <summary>Checks that the parents of the given child has this child as a child.</summary>
     /// <param name="child">The child to check.</param>
     private void checkChild(IChild child) {
-        foreach (IParent parent in child.Parents) {
+        foreach (IParent parent in child.Parents.NotNull()) {
             if (!parent.Children.Contains(child))
                 this.logger.Error(new Message("Parent doesn't know it's child").
                     With("Child",  this.stringifier.Stringify(child)).

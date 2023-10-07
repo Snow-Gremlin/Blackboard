@@ -31,7 +31,7 @@ static internal class Extensions {
     static public bool IsConstant(this INode node) =>
         node is IConstant ||
         (node is not IInput && node is not IExtern &&
-        node is IChild child && child.Parents.IsConstant());
+        node is IChild child && child.Parents.NotNull().IsConstant());
 
     /// <summary>This determines if all the given nodes are constant.</summary>
     /// <param name="nodes">The nodes to check if constant.</param>
@@ -118,7 +118,7 @@ static internal class Extensions {
     /// <returns>True if this child was added to any parent.</returns>
     static public bool Legitimatize(this IChild child) {
         bool anyAdded = false;
-        foreach (IParent parent in child.Parents)
+        foreach (IParent? parent in child.Parents)
             anyAdded = (parent?.AddChildren(child) ?? false) || anyAdded;
         return anyAdded;
     }
@@ -143,7 +143,7 @@ static internal class Extensions {
     /// <param name="child">The child to check all the parents of.</param>
     /// <returns>True if any parent doesn't contain this child, false otherwise.</returns>
     static public bool Illegitimate(this IChild child) =>
-        child.Parents.Any(parent => !parent.Children.Contains(child));
+        child.Parents.NotNull().Any(parent => !parent.Children.Contains(child));
 
     #endregion
     #region INaryChild...
@@ -210,7 +210,7 @@ static internal class Extensions {
             if (targets.Contains(node)) return true;
 
             if (node is IChild child) {
-                foreach (IParent parent in child.Parents.WhereNot(reached.Contains)) {
+                foreach (IParent parent in child.Parents.NotNull().WhereNot(reached.Contains)) {
                     pending.Enqueue(parent);
                     reached.Add(parent);
                 }

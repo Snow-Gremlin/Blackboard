@@ -164,6 +164,16 @@ static class NodeExt {
         }
     }
 
+    /// <summary>Checks that the legitimate parents of the child<./summary>
+    /// <remarks>
+    /// The legitimate parents are parents of a child which have that child in their child list.
+    /// The constructed string does not contain any null parents.
+    /// </remarks>
+    /// <param name="child">The child to check the parents inside of.</param>
+    /// <param name="exp">The string indicating which parents were legitimate or not.</param>
+    static public void CheckLegitParents(this IChild child, string exp) =>
+        Assert.AreEqual(exp, child.Parents.Select(p => p.HasChild(child) ? "[█]" : "[ ]").Join());
+
     /// <summary>Gets an eval pending list of all the evaluable nodes from the given nodes.</summary>
     /// <param name="nodes">The nodes to get the eval pending from.</param>
     /// <returns>The eval pending of evaluable nodes.</returns>

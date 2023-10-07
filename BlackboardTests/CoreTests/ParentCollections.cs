@@ -1,6 +1,4 @@
-﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Collections;
+﻿using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -527,7 +525,7 @@ sealed public class ParentCollections {
 
         TestTools.CheckException(() => _ = pc[-1],
             "Index out of bounds of node's parents.",
-            "[child: Child(null, null, null)]",
+            "[child: Child(null, null, null, null)]",
             "[variable count: 0]",
             "[minimum count: 4]",
             "[maximum count: 7]",
@@ -539,7 +537,7 @@ sealed public class ParentCollections {
         Assert.IsNull(pc[2]);
         TestTools.CheckException(() => _ = pc[3],
             "Index out of bounds of node's parents.",
-            "[child: Child(null, null, null)]",
+            "[child: Child(null, null, null, null)]",
             "[variable count: 0]",
             "[minimum count: 4]",
             "[maximum count: 7]",
@@ -553,7 +551,7 @@ sealed public class ParentCollections {
         TestTypedParent<int>  testP4 = new("Four");
         TestTools.CheckException(() => _ = pc.Insert(0, new IParent[] { testP1, testP2, testP4 }),
             "May not insert a parent into the fixed parent part.",
-            "[child: Child(null, null, null)]",
+            "[child: Child(null, null, null, null)]",
             "[variable count: 0]",
             "[minimum count: 4]",
             "[maximum count: 7]",
@@ -562,7 +560,7 @@ sealed public class ParentCollections {
             "[index: 0]");
         TestTools.CheckException(() => _ = pc.Insert(3, new IParent[] { testP1, testP2, testP4 }),
             "Incorrect type of a parent in the list of parents to insert into a node.",
-            "[child: Child(null, null, null)]",
+            "[child: Child(null, null, null, null)]",
             "[variable count: 0]",
             "[minimum count: 4]",
             "[maximum count: 7]",

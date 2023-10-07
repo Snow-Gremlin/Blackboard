@@ -105,10 +105,19 @@ sealed internal partial class ParentCollection : IEnumerable<IParent?> {
     }
 
     /// <summary>This gets the enumerator for all the parents currently set.</summary>
+    /// <remarks>
+    /// This will at return enough null parents to fill the minimum parent count
+    /// if there aren't enough variable parents to do so.
+    /// </remarks>
     private IEnumerable<IParent?> parents {
         get {
             IEnumerable<IParent?> e = this.fixedParents.Select(p => p.Node);
-            if (this.varParents is not null) e = e.Concat(this.varParents);
+            if (this.varParents is not null) {
+                e = e.Concat(this.varParents);
+                int minDiff = this.varParents.Minimum - this.varParents.Count;
+                if (minDiff > 0)
+                    e = e.Concat(Enumerable.Repeat<IParent?>(null, minDiff));
+            }
             return e;
         }
     }

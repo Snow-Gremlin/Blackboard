@@ -715,11 +715,8 @@ sealed public class ParentCollections {
         TestParent testP2 = new("Two");
         TestParent testP3 = new("Three");
         TestParent testP4 = new("Four");
-        TestParent testP5 = new("Five");
-        TestParent testP6 = new("Six");
         testP1.AddChildren(child);
         testP3.AddChildren(child);
-        testP5.AddChildren(child);
 
         TestParent? parent1 = testP1;
         TestParent? parent2 = testP2;
@@ -731,6 +728,45 @@ sealed public class ParentCollections {
 
         Assert.IsTrue(child.Illegitimate());
         child.CheckLegitParents("[█][ ][█][ ]");
+        
+        TestParent testP5 = new("Five");
+        Assert.IsTrue(testP1.HasChild(child));
+        pc[0] = testP5;
+        child.CheckLegitParents("[█][ ][█][ ]");
+        Assert.IsFalse(testP1.HasChild(child));
+        Assert.IsTrue(testP5.HasChild(child));
+
+        TestParent testP6 = new("Six");
+        Assert.IsFalse(testP2.HasChild(child));
+        pc[1] = testP6;
+        child.CheckLegitParents("[█][ ][█][ ]");
+        Assert.IsFalse(testP2.HasChild(child));
+        Assert.IsFalse(testP6.HasChild(child));
+
+        TestParent testP7 = new("Seven");
+        Assert.IsTrue(testP3.HasChild(child));
+        pc[2] = testP7;
+        child.CheckLegitParents("[█][ ][█][ ]");
+        Assert.IsFalse(testP3.HasChild(child));
+        Assert.IsTrue(testP7.HasChild(child));
+
+        TestParent testP8 = new("Eight");
+        Assert.IsFalse(testP4.HasChild(child));
+        pc[3] = testP8;
+        child.CheckLegitParents("[█][ ][█][ ]");
+        Assert.IsFalse(testP4.HasChild(child));
+        Assert.IsFalse(testP8.HasChild(child));
+
+        pc[1] = testP5;
+        child.CheckLegitParents("[█][█][█][ ]");
+        Assert.IsTrue(testP5.HasChild(child));
+        Assert.IsFalse(testP6.HasChild(child));
+        
+        pc[1] = testP6;
+        child.CheckLegitParents("[█][█][█][ ]");
+        Assert.IsTrue(testP5.HasChild(child));
+        Assert.IsTrue(testP6.HasChild(child));
+
 
 
         // TODO: Add tests which checks these removal of fixed and var parents cases specifically

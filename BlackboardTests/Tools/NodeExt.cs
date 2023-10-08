@@ -160,7 +160,7 @@ static class NodeExt {
             yield return node;
 
             if (node is IChild child)
-                child.Parents.Foreach(stack.Push);
+                child.Parents.NotNull().Foreach(stack.Push);
         }
     }
 
@@ -172,7 +172,7 @@ static class NodeExt {
     /// <param name="child">The child to check the parents inside of.</param>
     /// <param name="exp">The string indicating which parents were legitimate or not.</param>
     static public void CheckLegitParents(this IChild child, string exp) =>
-        Assert.AreEqual(exp, child.Parents.Select(p => p.HasChild(child) ? "[█]" : "[ ]").Join());
+        Assert.AreEqual(exp, child.Parents.Select(p => p is not null && p.HasChild(child) ? "[█]" : "[ ]").Join());
 
     /// <summary>Gets an eval pending list of all the evaluable nodes from the given nodes.</summary>
     /// <param name="nodes">The nodes to get the eval pending from.</param>

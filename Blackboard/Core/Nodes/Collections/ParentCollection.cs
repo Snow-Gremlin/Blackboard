@@ -193,7 +193,6 @@ sealed internal partial class ParentCollection : IEnumerable<IParent?> {
                         With("new parent", value);
             }
 
-            bool removed = parent?.RemoveChildren(this.Child) ?? false;
             if (index < this.FixedCount)
                 this.fixedParents[index].Node = value;
             else if (this.varParents is not null) {
@@ -201,7 +200,13 @@ sealed internal partial class ParentCollection : IEnumerable<IParent?> {
                     this.varParents.Remove(index - this.FixedCount);
                 else this.varParents[index - this.FixedCount] = value;
             }
-            if (removed) value?.AddChildren(this.Child);
+            
+            if (parent is not null) {
+                bool addChild = this.Contains(parent) ?
+                    parent.HasChild(this.Child) :
+                    parent.RemoveChildren(this.Child);
+                if (addChild) value?.AddChildren(this.Child);
+            }
         }
     }
 
@@ -215,7 +220,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent?> {
         bool wouldChange = false;
         for (int i = this.FixedCount-1; i >= 0; --i) {
             IFixedParent param = this.fixedParents[i];
-            if (!ReferenceEquals(param.Node, oldParent) || ReferenceEquals(param.Node, newParent)) continue;
+            if (!ReferenceEquals(param.Node, oldParent)) continue;
 
             if (newParent is not null && !newParent.GetType().IsAssignableTo(param.Type))
                 throw this.newException("Unable to replace old parent with new parent in fixed parent part.").

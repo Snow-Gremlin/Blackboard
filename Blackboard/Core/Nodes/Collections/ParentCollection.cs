@@ -154,7 +154,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent?> {
     public int Count => this.FixedCount + this.VarCount;
 
     /// <summary>The maximum allowed number of parents in this collection.</summary>
-    public int MaximumCount => this.FixedCount + (this.varParents?.Maximum ?? 0);
+    public int MaximumCount => int.Max(unchecked(this.FixedCount + (this.varParents?.Maximum ?? 0)), int.MaxValue);
 
     /// <summary>The minimum allowed number of parents in this collection.</summary>
     public int MinimumCount => this.FixedCount + (this.varParents?.Minimum ?? 0);
@@ -426,13 +426,12 @@ sealed internal partial class ParentCollection : IEnumerable<IParent?> {
                     With("expected type", type).
                     With("new parent", newParent);
         }
-
-        if (oldChild is not null) {
-            // For any new parent which was a parent of the old child,
-            // remove the old child and add this child to that parent.
+        
+        // For any new parent which was a parent of the old child,
+        // remove the old child and add this child to that parent.
+        if (oldChild is not null)
             newParents.NotNull().Where(p => p.RemoveChildren(oldChild)).
                 Foreach(p => p.AddChildren(this.Child));
-        }
 
         this.varParents.Insert(index-this.FixedCount, newParents.NotNull());
         return true;

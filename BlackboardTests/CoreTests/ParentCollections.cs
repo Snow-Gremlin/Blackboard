@@ -1,4 +1,5 @@
-﻿using Blackboard.Core.Nodes.Collections;
+﻿using Blackboard.Core.Inspect;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using BlackboardTests.Tools;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,6 +20,7 @@ sealed public class ParentCollections {
         public string TypeName { get; init; }
         public ParentCollection Parents { get; init; }
         public INode NewInstance() => new TestChild(this.TypeName);
+        public override string ToString() => Stringifier.Simple(this);
     }
 
     private class TestParent : IParent {
@@ -710,7 +712,7 @@ sealed public class ParentCollections {
 
     [TestMethod]
     public void AddingAndRemovingChildrenWithIndexer() {
-        TestChild child = new("Child", 3);
+        TestChild child = new("Child", 2);
         TestParent testP1 = new("One");
         TestParent testP2 = new("Two");
         TestParent testP3 = new("Three");
@@ -756,6 +758,7 @@ sealed public class ParentCollections {
         child.CheckLegitParents("[█][ ][█][ ]");
         Assert.IsFalse(testP4.HasChild(child));
         Assert.IsFalse(testP8.HasChild(child));
+        child.CheckString("Child(Five, Six, Seven, Eight)");
 
         pc[1] = testP5;
         child.CheckLegitParents("[█][█][█][ ]");
@@ -766,36 +769,210 @@ sealed public class ParentCollections {
         child.CheckLegitParents("[█][█][█][ ]");
         Assert.IsTrue(testP5.HasChild(child));
         Assert.IsTrue(testP6.HasChild(child));
+        child.CheckString("Child(Five, Six, Seven, Eight)");
+        Assert.IsTrue(child.Illegitimate());
 
+        pc[2] = testP8;
+        child.CheckLegitParents("[█][█][█][█]");
+        Assert.IsTrue(testP8.HasChild(child));
+        Assert.IsFalse(testP7.HasChild(child));
+        child.CheckString("Child(Five, Six, Eight, Eight)"); 
+        Assert.IsFalse(child.Illegitimate());
 
+        pc[0] = null;
+        child.CheckLegitParents("[ ][█][█][█]");
+        Assert.IsFalse(testP5.HasChild(child));
+        child.CheckString("Child(null, Six, Eight, Eight)");
+        Assert.IsFalse(child.Illegitimate());
 
-        // TODO: Add tests which checks these removal of fixed and var parents cases specifically
-        //       including when the parent is used multiple times and at least one instance is not removed.
-        // TODO: Test replace, set, remove with illegitimate.
+        pc[0] = testP1;
+        child.CheckLegitParents("[ ][█][█][█]");
+        Assert.IsFalse(testP5.HasChild(child));
+        child.CheckString("Child(One, Six, Eight, Eight)");
+        Assert.IsTrue(child.Illegitimate());
     }
 
     [TestMethod]
     public void AddingAndRemovingChildrenWithInsertAndRemove() {
-        
+        TestChild child1 = new("Child", 2);
+        TestParent testP1 = new("One");
+        TestParent testP2 = new("Two");
+        TestParent testP3 = new("Three");
+        TestParent testP4 = new("Four");
+        testP1.AddChildren(child1);
+        testP3.AddChildren(child1);
 
-        // TODO: Add tests which checks these removal of fixed and var parents cases specifically
-        //       including when the parent is used multiple times and at least one instance is not removed.
-        // TODO: Test replace, set, remove with illegitimate.
+        TestParent? parent1 = testP1;
+        TestParent? parent2 = testP2;
+        List<TestParent> parents = new() { testP3, testP4 };
+        ParentCollection pc1 = child1.Parents.
+            With(() => parent1, p => parent1 = p).
+            With(() => parent2, p => parent2 = p).
+            With(parents);
+        
+        Assert.IsTrue(child1.Illegitimate());
+        child1.CheckLegitParents("[█][ ][█][ ]");
+
+        Assert.IsTrue(pc1.Insert(2, new IParent[] { testP1, testP2, testP1 }));
+        child1.CheckLegitParents("[█][ ][█][ ][█][█][ ]");
+        child1.CheckString("Child(One, Two, One, Two, One, Three, Four)");
+
+        Assert.IsTrue(pc1.Remove(2, 2));
+        child1.CheckLegitParents("[█][ ][█][█][ ]");
+        child1.CheckString("Child(One, Two, One, Three, Four)");
+        
+        pc1[0] = null;
+        child1.CheckLegitParents("[ ][ ][█][█][ ]");
+        child1.CheckString("Child(null, Two, One, Three, Four)");
+        Assert.IsTrue(testP1.Children.Contains(child1));
+        Assert.IsTrue(testP3.Children.Contains(child1));
+
+        Assert.IsTrue(pc1.Remove(2, 1));
+        child1.CheckLegitParents("[ ][ ][█][ ]");
+        child1.CheckString("Child(null, Two, Three, Four)");
+        Assert.IsFalse(testP1.Children.Contains(child1));
+        Assert.IsTrue(testP3.Children.Contains(child1));
+
+        Assert.IsTrue(pc1.Remove(2, 1));
+        child1.CheckLegitParents("[ ][ ][ ]");
+        child1.CheckString("Child(null, Two, Four)");
+        Assert.IsFalse(testP1.Children.Contains(child1));
+        Assert.IsFalse(testP3.Children.Contains(child1));
+        
+        Assert.IsTrue(pc1.Insert(2, new IParent[] { testP1, testP3 }));
+        child1.CheckLegitParents("[ ][ ][ ][ ][ ]");
+        child1.CheckString("Child(null, Two, One, Three, Four)");
+
+        TestChild child2 = new("Child", 2);
+        TestParent testP5 = new("Five");
+        TestParent testP6 = new("Six");
+        testP5.AddChildren(child2);
+        testP6.AddChildren(child2);
+
+        TestParent? parent3 = testP5;
+        TestParent? parent4 = testP6;
+        ParentCollection pc2 = child2.Parents.
+            With(() => parent3, p => parent3 = p).
+            With(() => parent4, p => parent4 = p);
+        
+        child2.CheckLegitParents("[█][█]");
+        child2.CheckString("Child(Five, Six)");
+
+        TestChild child3 = new("Child", 2);
+        TestParent testP7 = new("Seven");
+        TestParent testP8 = new("Eight");
+        testP7.AddChildren(child3);
+        testP8.AddChildren(child3);
+
+        TestParent? parent5 = testP7;
+        TestParent? parent6 = testP8;
+        ParentCollection pc3 = child3.Parents.
+            With(() => parent5, p => parent5 = p).
+            With(() => parent6, p => parent6 = p);
+
+        child3.CheckLegitParents("[█][█]");
+        child3.CheckString("Child(Seven, Eight)");
+
+        Assert.IsTrue(pc1.Insert(2, new IParent[] { testP5, testP6, testP7, testP8 }, child2));
+        child1.CheckLegitParents("[ ][ ][█][█][ ][ ][ ][ ][ ]");
+        child1.CheckString("Child(null, Two, Five, Six, Seven, Eight, One, Three, Four)");
+        child2.CheckLegitParents("[ ][ ]");
+        child2.CheckString("Child(Five, Six)");
+        child3.CheckLegitParents("[█][█]");
+        child3.CheckString("Child(Seven, Eight)");
     }
 
     [TestMethod]
     public void AddingAndRemovingChildrenWithReplace() {
+        TestChild child = new("Child", 2);
+        TestParent testP1 = new("One");
+        TestParent testP2 = new("Two");
+        TestParent testP3 = new("Three");
+        TestParent testP4 = new("Four");
+        testP1.AddChildren(child);
+        testP3.AddChildren(child);
 
-        // TODO: Add tests which checks these removal of fixed and var parents cases specifically
-        //       including when the parent is used multiple times and at least one instance is not removed.
-        // TODO: Test replace, set, remove with illegitimate.
+        TestParent? parent1 = testP1;
+        TestParent? parent2 = testP2;
+        List<TestParent> parents = new() { testP3, testP4 };
+        ParentCollection pc = child.Parents.
+            With(() => parent1, p => parent1 = p).
+            With(() => parent2, p => parent2 = p).
+            With(parents);
+
+        Assert.IsTrue(child.Illegitimate());
+        child.CheckLegitParents("[█][ ][█][ ]");
+        
+        TestParent testP5 = new("Five");
+        Assert.IsTrue(pc.Replace(testP1, testP5));
+        child.CheckLegitParents("[█][ ][█][ ]");
+        Assert.IsFalse(testP1.Children.Contains(child));
+        Assert.IsTrue(testP5.Children.Contains(child));
+        child.CheckString("Child(Five, Two, Three, Four)");
+
+        Assert.IsTrue(pc.Replace(testP5, null));
+        child.CheckLegitParents("[ ][ ][█][ ]");
+        Assert.IsFalse(testP5.Children.Contains(child));
+        child.CheckString("Child(null, Two, Three, Four)");
+        
+        Assert.IsTrue(pc.Replace(null, testP5));
+        child.CheckLegitParents("[ ][ ][█][ ]");
+        Assert.IsFalse(testP5.Children.Contains(child));
+        child.CheckString("Child(Five, Two, Three, Four)");
+
+        Assert.IsTrue(pc.Replace(testP5, testP3));
+        child.CheckLegitParents("[█][ ][█][ ]");
+        child.CheckString("Child(Three, Two, Three, Four)");
+        
+        Assert.IsTrue(pc.Replace(testP3, null));
+        child.CheckLegitParents("[ ][ ][ ]");
+        Assert.IsFalse(testP3.Children.Contains(child));
+        child.CheckString("Child(null, Two, Four)");
     }
 
     [TestMethod]
     public void AddingAndRemovingChildrenWithSetAll() {
+        TestChild child = new("Child", 2);
+        TestParent testP1 = new("One");
+        TestParent testP2 = new("Two");
+        TestParent testP3 = new("Three");
+        TestParent testP4 = new("Four");
+        testP1.AddChildren(child);
+        testP3.AddChildren(child);
 
-        // TODO: Add tests which checks these removal of fixed and var parents cases specifically
-        //       including when the parent is used multiple times and at least one instance is not removed.
-        // TODO: Test replace, set, remove with illegitimate.
+        TestParent? parent1 = testP1;
+        TestParent? parent2 = testP2;
+        List<TestParent> parents = new() { testP3, testP4 };
+        ParentCollection pc = child.Parents.
+            With(() => parent1, p => parent1 = p).
+            With(() => parent2, p => parent2 = p).
+            With(parents);
+
+        Assert.IsTrue(child.Illegitimate());
+        child.CheckLegitParents("[█][ ][█][ ]");
+
+        TestParent testP5 = new("Five");
+        Assert.IsTrue(pc.SetAll(new() { testP5, testP1, testP2, testP4 }));
+        child.CheckLegitParents("[ ][█][ ][ ]");
+        Assert.IsTrue(testP1.Children.Contains(child));
+        Assert.IsFalse(testP2.Children.Contains(child));
+        Assert.IsFalse(testP3.Children.Contains(child));
+        Assert.IsFalse(testP4.Children.Contains(child));
+        Assert.IsFalse(testP5.Children.Contains(child));
+        child.CheckString("Child(Five, One, Two, Four)");
+
+        Assert.IsTrue(pc.SetAll(new() { testP1, testP1, testP1, testP1 }));
+        child.CheckLegitParents("[█][█][█][█]");
+        child.CheckString("Child(One, One, One, One)");
+        Assert.IsFalse(child.Illegitimate());
+        
+        Assert.IsTrue(pc.SetAll(new() { testP4, testP3, testP2, testP1 }));
+        child.CheckLegitParents("[█][█][█][█]");
+        Assert.IsTrue(testP1.Children.Contains(child));
+        Assert.IsTrue(testP2.Children.Contains(child));
+        Assert.IsTrue(testP3.Children.Contains(child));
+        Assert.IsTrue(testP4.Children.Contains(child));
+        Assert.IsFalse(testP5.Children.Contains(child));
+        child.CheckString("Child(Four, Three, Two, One)");
     }
 }

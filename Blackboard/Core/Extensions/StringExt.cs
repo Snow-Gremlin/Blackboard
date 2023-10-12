@@ -35,7 +35,7 @@ static public class StringExt {
     /// <param name="separator">The separator to put between the parts.</param>
     /// <returns>The string from the joined parts.</returns>
     static public string Join<T>(this IEnumerable<T> parts, string separator = "") =>
-        string.Join(separator, parts);
+        string.Join(separator, parts.Strings());
 
     /// <summary>This is short hand to make joining strings into one.</summary>
     /// <typeparam name="T">The types of values to convert into strings and join.</typeparam>
@@ -43,7 +43,7 @@ static public class StringExt {
     /// <param name="separator">The separator to put between the parts.</param>
     /// <returns>The string from the joined parts.</returns>
     static public string Join<T>(this IEnumerable<T> parts, char separator) =>
-        string.Join(separator, parts);
+        string.Join(separator, parts.Strings());
 
     /// <summary>This will split all of the strings by the given separator and return all of the strings.</summary>
     /// <remarks>This is useful for dealing with a collection of lines as strings which might be multi-lined.</remarks>

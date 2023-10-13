@@ -154,7 +154,7 @@ sealed internal partial class ParentCollection : IEnumerable<IParent?> {
     public int Count => this.FixedCount + this.VarCount;
 
     /// <summary>The maximum allowed number of parents in this collection.</summary>
-    public int MaximumCount => int.Max(unchecked(this.FixedCount + (this.varParents?.Maximum ?? 0)), int.MaxValue);
+    public int MaximumCount => (int)long.Min((long)this.FixedCount + (this.varParents?.Maximum ?? 0), int.MaxValue);
 
     /// <summary>The minimum allowed number of parents in this collection.</summary>
     public int MinimumCount => this.FixedCount + (this.varParents?.Minimum ?? 0);

@@ -94,10 +94,10 @@ public class Extern {
         slate.CheckGraphString(
             "Global: Namespace{",
             "  A: Namespace{",
-            "    B: Shell<int>[3](C[3]),",
+            "    B: Shell<int>[3](A.C[3]),",
             "    C: Extern<int>[3]",
             "  },",
-            "  D: Shell<int>[3](B)",
+            "  D: Shell<int>[3](A.B)",
             "}");
 
         slate.Read(
@@ -108,10 +108,10 @@ public class Extern {
         slate.CheckGraphString(
             "Global: Namespace{",
             "  A: Namespace{",
-            "    B: Shell<int>[8](C[8]),",
+            "    B: Shell<int>[8](A.C[8]),",
             "    C: Literal<int>[8]",
             "  },",
-            "  D: Shell<int>[8](B)",
+            "  D: Shell<int>[8](A.B)",
             "}");
     }
 
@@ -135,10 +135,10 @@ public class Extern {
         slate.CheckGraphString(
             "Global: Namespace{",
             "  A: Namespace{",
-            "    B: Shell<int>[3](C[3]),",
+            "    B: Shell<int>[3](A.C[3]),",
             "    C: Extern<int>[3]",
             "  },",
-            "  D: Shell<int>[3](B)",
+            "  D: Shell<int>[3](A.B)",
             "}");
 
         slate.Read(
@@ -149,10 +149,10 @@ public class Extern {
         slate.CheckGraphString(
             "Global: Namespace{",
             "  A: Namespace{",
-            "    B: Shell<int>[8](C[8]),",
+            "    B: Shell<int>[8](A.C[8]),",
             "    C: Literal<int>[8]",
             "  },",
-            "  D: Shell<int>[8](B)",
+            "  D: Shell<int>[8](A.B)",
             "}");
     }
 

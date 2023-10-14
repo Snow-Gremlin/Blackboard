@@ -4,6 +4,7 @@ using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Types;
+using Microsoft.VisualBasic;
 using System.Collections.Generic;
 using System.Linq;
 using S = System;
@@ -244,8 +245,6 @@ sealed internal class Stringifier {
 
     #region Naming...
 
-    // TODO: May want to add namespaces to the names based on the namespace being outputted from.
-
     /// <summary>Sets the name to show for a node.</summary>
     /// <remarks>If the node is already named, the name is overwritten with this new name.</remarks>
     /// <param name="name">The name to show for the node.</param>
@@ -275,12 +274,21 @@ sealed internal class Stringifier {
     /// <summary>Preloads the node names to use when outputting the parents of nodes.</summary>
     /// <param name="node">The node with the readers to start preloading names with.</param>
     /// <returns>The stringifier so that calls can be chained.</returns>
-    public Stringifier PreLoadNames(IFieldReader node) {
+    public Stringifier PreLoadNames(IFieldReader node) =>
+        this.preLoadNames(node, "");
+    
+    /// <summary>Preloads the node names to use when outputting the parents of nodes.</summary>
+    /// <param name="node">The node with the readers to start preloading names with.</param>
+    /// <param name="prefix">The part of the name to add at the from of the names for the namespace.</param>
+    /// <returns>The stringifier so that calls can be chained.</returns>
+    private Stringifier preLoadNames(IFieldReader node, string prefix) {
         if (this.readFieldNodes.Contains(node)) return this;
         this.readFieldNodes.Add(node);
         foreach (KeyValuePair<string, INode> pair in node.Fields) {
-            if (pair.Value is IFieldReader fieldReader) this.PreLoadNames(fieldReader);
-            this.SetNodeName(pair.Key, pair.Value);
+            string name = pair.Key;
+            if (prefix.Length > 0) name = prefix + "." + name;
+            if (pair.Value is IFieldReader fieldReader) this.preLoadNames(fieldReader, name);
+            this.SetNodeName(name, pair.Value);
         }
         return this;
     }

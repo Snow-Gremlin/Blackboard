@@ -6,6 +6,7 @@ using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Record;
 using Blackboard.Core.Types;
+using System.Linq;
 using System.Text.RegularExpressions;
 using S = System;
 
@@ -19,7 +20,7 @@ sealed public partial class Blackboard {
 
     /// <summary>A regular expression for matching an identifier with an optional namespace.</summary>
     /// <returns>The regular expression for matching a name.</returns>
-    [GeneratedRegex(@"[a-zA-Z_$][0-9a-zA-Z_]*(\.[a-zA-Z_$][0-9a-zA-Z_]*)*", RegexOptions.Compiled)]
+    [GeneratedRegex(@"^[a-zA-Z_$][0-9a-zA-Z_]*(?:\.[a-zA-Z_$][0-9a-zA-Z_]*)*$", RegexOptions.Compiled)]
     private static partial Regex nameRegex();
 
     /// <summary>The slate storing the data for this blackboard.</summary>
@@ -75,11 +76,16 @@ sealed public partial class Blackboard {
     /// </summary>
     /// <param name="name">The name to split.</param>
     /// <returns>The namespace identifiers followed by the main identifier.</returns>
-    static private string[] splitUpName(string name) =>
-        // TODO: Should check that the given name isn't a reserved word.
-        nameRegex().IsMatch(name) ? name.Split('.') :
+    static private string[] splitUpName(string name) {
+        if (!nameRegex().IsMatch(name))
             throw new BlackboardException("Invalid identifier with optional namespace.").
                 With("name", name);
+        string[] parts = name.Split('.');
+        if (parts.Any(Parser.Parser.Keywords.Contains))
+            throw new BlackboardException("Identifier with optional namespace may not contain any keywords.").
+                With("name", name);
+        return parts;
+    }
     
     /// <summary>Creates or gets a trigger input.</summary>
     /// <param name="name">The name of the trigger to get the provoker of.</param>

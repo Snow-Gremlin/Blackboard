@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Performs a trigger when any parent is changed.</summary>
-sealed public class OnChange : TriggerNode, IChild {
+sealed internal class OnChange : TriggerNode, IChild {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
     static public readonly IFuncDef Factory =

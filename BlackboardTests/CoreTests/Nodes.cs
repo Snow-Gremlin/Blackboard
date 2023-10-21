@@ -112,9 +112,9 @@ public class Nodes {
     [TestMethod]
     public void TestTriggerNodes() {
         Slate slate = new();
-        InputTrigger inputA = new();
-        InputTrigger inputB = new();
-        InputTrigger inputC = new();
+        Blackboard.Core.Nodes.Outer.InputTrigger inputA = new();
+        Blackboard.Core.Nodes.Outer.InputTrigger inputB = new();
+        Blackboard.Core.Nodes.Outer.InputTrigger inputC = new();
         slate.Global["TrigA"] = inputA;
         slate.Global["TrigB"] = inputB;
         slate.Global["TrigC"] = inputC;

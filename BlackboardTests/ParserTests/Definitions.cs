@@ -209,14 +209,14 @@ public class Definitions {
         slate.SetInt(0x5, "A");
         slate.CheckEvaluate(
             "Start Eval (pending: 4)",
-            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, <int>[8]), remaining: 3)",
-            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[4](A, <int>[4]), remaining: 3)",
+            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[1](A, <int>[1]), remaining: 3)",
             "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, <int>[2]), remaining: 3)",
-            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[1](A, <int>[1]), remaining: 2)",
+            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[4](A, <int>[4]), remaining: 3)",
+            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, <int>[8]), remaining: 2)",
             "  Evaluated (changed: True, depth: 2, node: C: NotEqual<bool>[false](BitwiseAnd<int>(A, <int>[2]), <int>[0]), remaining: 2)",
             "  Evaluated (changed: True, depth: 2, node: D: NotEqual<bool>[true](BitwiseAnd<int>(A, <int>[4]), <int>[0]), remaining: 2)",
-            "  Evaluated (changed: True, depth: 3, node: Or<bool>[true](D, E), remaining: 2)",
             "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](C), remaining: 2)",
+            "  Evaluated (changed: True, depth: 3, node: Or<bool>[true](D, E), remaining: 2)",
             "  Evaluated (changed: True, depth: 4, node: And<bool>[true](B, Not<bool>(C)), remaining: 1)",
             "  Evaluated (changed: False, depth: 5, node: F: Xor<bool>[false](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
             "End Eval ()");
@@ -225,10 +225,10 @@ public class Definitions {
         slate.SetInt(0x4, "A");
         slate.CheckEvaluate(
             "Start Eval (pending: 4)",
-            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, <int>[8]), remaining: 3)",
+            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, <int>[1]), remaining: 4)",
+            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, <int>[2]), remaining: 3)",
             "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[4](A, <int>[4]), remaining: 2)",
-            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, <int>[2]), remaining: 1)",
-            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, <int>[1]), remaining: 1)",
+            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, <int>[8]), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: B: NotEqual<bool>[false](BitwiseAnd<int>(A, <int>[1]), <int>[0]), remaining: 1)",
             "  Evaluated (changed: True, depth: 4, node: And<bool>[false](B, Not<bool>(C)), remaining: 1)",
             "  Evaluated (changed: True, depth: 5, node: F: Xor<bool>[true](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
@@ -238,10 +238,10 @@ public class Definitions {
         slate.SetInt(0x8, "A");
         slate.CheckEvaluate(
             "Start Eval (pending: 4)",
-            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[8](A, <int>[8]), remaining: 4)",
-            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, <int>[4]), remaining: 4)",
-            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, <int>[2]), remaining: 3)",
-            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, <int>[1]), remaining: 2)",
+            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, <int>[1]), remaining: 3)",
+            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[0](A, <int>[2]), remaining: 2)",
+            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, <int>[4]), remaining: 2)",
+            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[8](A, <int>[8]), remaining: 2)",
             "  Evaluated (changed: True, depth: 2, node: D: NotEqual<bool>[false](BitwiseAnd<int>(A, <int>[4]), <int>[0]), remaining: 2)",
             "  Evaluated (changed: True, depth: 2, node: E: NotEqual<bool>[true](BitwiseAnd<int>(A, <int>[8]), <int>[0]), remaining: 1)",
             "  Evaluated (changed: False, depth: 3, node: Or<bool>[true](D, E), remaining: 0)",
@@ -251,15 +251,15 @@ public class Definitions {
         slate.SetInt(0xF, "A");
         slate.CheckEvaluate(
             "Start Eval (pending: 4)",
+            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[1](A, <int>[1]), remaining: 4)",
+            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[2](A, <int>[2]), remaining: 4)",
+            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[4](A, <int>[4]), remaining: 4)",
             "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[8](A, <int>[8]), remaining: 3)",
-            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[4](A, <int>[4]), remaining: 3)",
-            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[2](A, <int>[2]), remaining: 3)",
-            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[1](A, <int>[1]), remaining: 3)",
             "  Evaluated (changed: True, depth: 2, node: B: NotEqual<bool>[true](BitwiseAnd<int>(A, <int>[1]), <int>[0]), remaining: 3)",
             "  Evaluated (changed: True, depth: 2, node: C: NotEqual<bool>[true](BitwiseAnd<int>(A, <int>[2]), <int>[0]), remaining: 3)",
             "  Evaluated (changed: True, depth: 2, node: D: NotEqual<bool>[true](BitwiseAnd<int>(A, <int>[4]), <int>[0]), remaining: 3)",
-            "  Evaluated (changed: False, depth: 3, node: Or<bool>[true](D, E), remaining: 2)",
-            "  Evaluated (changed: True, depth: 3, node: Not<bool>[false](C), remaining: 1)",
+            "  Evaluated (changed: True, depth: 3, node: Not<bool>[false](C), remaining: 2)",
+            "  Evaluated (changed: False, depth: 3, node: Or<bool>[true](D, E), remaining: 1)",
             "  Evaluated (changed: False, depth: 4, node: And<bool>[false](B, Not<bool>(C)), remaining: 0)",
             "End Eval ()");
         slate.CheckValue(true, "F");
@@ -267,14 +267,14 @@ public class Definitions {
         slate.SetInt(0x5, "A");
         slate.CheckEvaluate(
             "Start Eval (pending: 4)",
-            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, <int>[8]), remaining: 4)",
-            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[4](A, <int>[4]), remaining: 3)",
+            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[1](A, <int>[1]), remaining: 3)",
             "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, <int>[2]), remaining: 3)",
-            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[1](A, <int>[1]), remaining: 2)",
+            "  Evaluated (changed: False, depth: 1, node: BitwiseAnd<int>[4](A, <int>[4]), remaining: 2)",
+            "  Evaluated (changed: True, depth: 1, node: BitwiseAnd<int>[0](A, <int>[8]), remaining: 2)",
             "  Evaluated (changed: True, depth: 2, node: C: NotEqual<bool>[false](BitwiseAnd<int>(A, <int>[2]), <int>[0]), remaining: 2)",
             "  Evaluated (changed: True, depth: 2, node: E: NotEqual<bool>[false](BitwiseAnd<int>(A, <int>[8]), <int>[0]), remaining: 2)",
+            "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](C), remaining: 2)",
             "  Evaluated (changed: False, depth: 3, node: Or<bool>[true](D, E), remaining: 1)",
-            "  Evaluated (changed: True, depth: 3, node: Not<bool>[true](C), remaining: 1)",
             "  Evaluated (changed: True, depth: 4, node: And<bool>[true](B, Not<bool>(C)), remaining: 1)",
             "  Evaluated (changed: True, depth: 5, node: F: Xor<bool>[false](And<bool>(B, Not<bool>), Or<bool>(D, E)), remaining: 0)",
             "End Eval ()");
@@ -300,8 +300,8 @@ public class Definitions {
         slate.CheckProvoked(true, "B"); // this was created provoked
         slate.CheckEvaluate(
             "Start Eval (pending: 3)",
-            "  Evaluated (changed: True, depth: 1, node: D: All<trigger>[provoked](A, B), remaining: 2)",
-            "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
+            "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 2)",
+            "  Evaluated (changed: True, depth: 1, node: D: All<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: False, depth: 2, node: E: Xor<trigger>[](C, D), remaining: 0)",
             "End Eval (resets: 5)");
         slate.FinishEvaluation();
@@ -311,8 +311,8 @@ public class Definitions {
         slate.CheckProvoked(false, "B");
         slate.CheckEvaluate(
             "Start Eval (pending: 2)",
+            "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 2)",
             "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
-            "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
             "End Eval (resets: 3)");
         slate.FinishEvaluation();
@@ -322,8 +322,8 @@ public class Definitions {
         slate.CheckProvoked(true, "B");
         slate.CheckEvaluate(
             "Start Eval (pending: 2)",
+            "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 2)",
             "  Evaluated (changed: False, depth: 1, node: D: All<trigger>[](A, B), remaining: 1)",
-            "  Evaluated (changed: True, depth: 1, node: C: Any<trigger>[provoked](A, B), remaining: 1)",
             "  Evaluated (changed: True, depth: 2, node: E: Xor<trigger>[provoked](C, D), remaining: 0)",
             "End Eval (resets: 3)");
         slate.FinishEvaluation();

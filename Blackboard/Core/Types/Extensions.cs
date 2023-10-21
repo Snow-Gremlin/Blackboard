@@ -11,7 +11,7 @@ static public class Extensions {
     /// <summary>The type nodes for all the given nodes.</summary>
     /// <param name="nodes">The nodes to get the types for.</param>
     /// <returns>The types of the given nodes.</returns>
-    static public IEnumerable<Type> Types(this IEnumerable<INode> nodes) =>
+    static internal IEnumerable<Type> Types(this IEnumerable<INode> nodes) =>
         from node in nodes select Type.TypeOf(node);
 
     /// <summary>The real types for all the given node types.</summary>

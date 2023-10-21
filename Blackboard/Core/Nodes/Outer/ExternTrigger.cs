@@ -5,7 +5,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Outer;
 
 /// <summary>An external node as a placeholder for a trigger node.</summary>
-sealed public class ExternTrigger : TriggerNode, ITriggerExtern {
+sealed internal class ExternTrigger : TriggerNode, ITriggerExtern {
 
     /// <summary>The shell to use in place of an extern in a define.</summary>
     readonly private ShellTrigger shell;

@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Linq;
@@ -17,6 +17,7 @@ sealed internal class ParentIncorporator : IRule {
     /// Find any parents of the same type of node with the given node as its only child
     /// and replace that parent with the parent parents at the same location and in the same order.
     /// </summary>
+    /// <remarks>See comments on ICoalescable.</remarks>
     /// <param name="node">The node to incorporate parents into.</param>
     static private void incorporateParents(RuleArgs args, ICoalescable node) {
         ParentCollection parents = node.Parents;

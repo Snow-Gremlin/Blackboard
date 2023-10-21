@@ -106,7 +106,7 @@ static public class GeneralExt {
     /// <param name="values">The values to enumerate and then repeat the last of.</param>
     /// <param name="maxLoops">The maximum number of times the last value is repeated.</param>
     /// <returns>The enumeration of the values and repeated last. If no input values then default is returned.</returns>
-    static public IEnumerable<T?> RepeatLast<T>(this IEnumerable<T> values, int maxLoops = 1000) {
+    static public IEnumerable<T?> RepeatLast<T>(this IEnumerable<T> values, int maxLoops = 1_000) {
         T? last = default;
         foreach (T value in values) {
             last = value;

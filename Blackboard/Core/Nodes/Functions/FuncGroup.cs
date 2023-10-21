@@ -8,7 +8,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Functions;
 
 /// <summary>A collection of function signatures.</summary>
-sealed public class FuncGroup : IFuncGroup {
+sealed internal class FuncGroup : IFuncGroup {
 
     /// <summary>
     /// The children functions of this group.

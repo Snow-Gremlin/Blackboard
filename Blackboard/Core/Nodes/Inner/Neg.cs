@@ -5,7 +5,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Negates the given parents value.</summary>
-sealed public class Neg<T> : UnaryValue<T, T>
+sealed internal class Neg<T> : UnaryValue<T, T>
     where T : struct, ISigned<T>, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

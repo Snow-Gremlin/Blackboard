@@ -6,7 +6,7 @@ namespace Blackboard.Core.Types;
 
 /// <summary>This is a match for a single function.</summary>
 /// <remarks>This is used for choosing the most specific method for a function.</remarks>
-public class FuncMatch : S.IComparable<FuncMatch> {
+sealed public class FuncMatch : S.IComparable<FuncMatch> {
 
     /// <summary>Indicates there was no match for this function.</summary>
     static public readonly FuncMatch NoMatch = new(false, S.Array.Empty<TypeMatch>());

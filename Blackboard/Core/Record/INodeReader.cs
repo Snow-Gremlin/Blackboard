@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Blackboard.Core.Record;
 
 /// <summary>An interface for getting nodes.</summary>
-public interface INodeReader {
+internal interface INodeReader {
 
     /// <summary>Tries to get the node with the given node.</summary>
     /// <param name="names">The name of the node to get.</param>

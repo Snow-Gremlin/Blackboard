@@ -1,7 +1,7 @@
 ﻿namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>The interface for all nodes in the blackboard.</summary>
-public interface INode {
+internal interface INode {
 
     /// <summary>This is the type name of the node without any type parameters.</summary>
     /// <remarks>

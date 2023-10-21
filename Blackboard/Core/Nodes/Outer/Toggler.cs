@@ -7,7 +7,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Outer;
 
 /// <summary>This is a boolean value which can be toggled by triggers.</summary>
-sealed public class Toggler : ValueNode<Bool>, IChild {
+sealed internal class Toggler : ValueNode<Bool>, IChild {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
     /// <remarks>This will not initialize a reset or resetValue sources which can be set later.</remarks>

@@ -11,7 +11,7 @@ namespace Blackboard.Core.Nodes.Inner;
 /// just a node. This prevents a define from making a named copy which cannot be
 /// updated with an extern being defined or to be assigned as a define.
 /// </remarks>
-sealed public class ShellTrigger : Evaluable, ITriggerParent, IChild {
+sealed internal class ShellTrigger : Evaluable, ITriggerParent, IChild {
     
     /// <summary>The parent source to listen to.</summary>
     private ITriggerParent? source;

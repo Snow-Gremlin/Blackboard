@@ -1,5 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Record;
 using System.Collections.Generic;
@@ -8,7 +10,7 @@ using System.Linq;
 namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>This is an action that will get a provoke state to the result.</summary>
-sealed public class TriggerGetter : IGetter {
+sealed internal class TriggerGetter : IGetter {
 
     /// <summary>
     /// Creates a getter from the given nodes after first checking
@@ -25,12 +27,6 @@ sealed public class TriggerGetter : IGetter {
     /// <summary>The data node to get the data from.</summary>
     private readonly ITrigger trigger;
 
-    /// <summary>
-    /// This is a subset of all the node for the value which need to be pended
-    /// for evaluation in order to perform this get.
-    /// </summary>
-    private readonly IEvaluable[] needPending;
-
     /// <summary>Creates a new getter.</summary>
     /// <remarks>It is assumed that these nodes have been run through the optimizer and validated.</remarks>
     /// <param name="names">The name in the path to write the provoke state to.</param>
@@ -40,10 +36,9 @@ sealed public class TriggerGetter : IGetter {
         this.Names   = names;
         this.trigger = node;
 
-        // Pre-sort the evaluable nodes.
-        LinkedList<IEvaluable> nodes = new();
-        nodes.SortInsertUnique(allNewNodes.NotNull().OfType<IEvaluable>());
-        this.needPending = nodes.ToArray();
+        // Pre-group the evaluable nodes.
+        this.NeedPending = new();
+        this.NeedPending.Insert(allNewNodes.NotNull().OfType<IEvaluable>());
     }
 
     /// <summary>The names in the path to write the provoke state to.</summary>
@@ -53,7 +48,7 @@ sealed public class TriggerGetter : IGetter {
     public INode Node => this.trigger;
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
-    public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
+    public EvalPending NeedPending { get; }
 
     /// <summary>This will perform the action.</summary>
     /// <param name="slate">The slate for this action.</param>
@@ -61,7 +56,7 @@ sealed public class TriggerGetter : IGetter {
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Trigger Getter: {0}", this);
-        slate.PendEval(this.needPending);
+        slate.PendEval(this.NeedPending);
         slate.PerformEvaluation(logger);
         result.SetTrigger(this.trigger.Provoked, this.Names);
         logger.Info("Trigger Getter Done {0}", this.Names.Join("."));

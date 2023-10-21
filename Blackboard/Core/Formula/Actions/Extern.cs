@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Types;
@@ -9,7 +10,7 @@ namespace Blackboard.Core.Formula.Actions;
 /// This is an action to add an extern node in a field writer.
 /// Typically this is for defining a new node into the namespaces reachable from global.
 /// </summary>
-sealed public class Extern : IAction {
+sealed internal class Extern : IAction {
 
     /// <summary>Creates a new extern define action.</summary>
     /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>

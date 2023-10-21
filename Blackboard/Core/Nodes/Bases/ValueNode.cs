@@ -5,7 +5,7 @@ namespace Blackboard.Core.Nodes.Bases;
 
 /// <summary>A base node for a node which has a value.</summary>
 /// <typeparam name="T">The type of the value being held.</typeparam>
-public abstract class ValueNode<T> : Evaluable, IValueParent<T>
+internal abstract class ValueNode<T> : Evaluable, IValueParent<T>
     where T : struct, IEquatable<T> {
 
     /// <summary>Creates a new value node.</summary>

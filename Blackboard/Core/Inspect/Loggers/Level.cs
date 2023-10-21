@@ -1,4 +1,4 @@
-﻿namespace Blackboard.Core.Inspect;
+﻿namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>The level for messages being logged at.</summary>
 public enum Level {

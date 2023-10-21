@@ -9,5 +9,5 @@ namespace Blackboard.Core.Nodes.Interfaces;
 /// Extern are input nodes so that they can be initialized.
 /// </remarks>
 /// <typeparam name="T">The type of the value to external.</typeparam>
-public interface IValueExtern<T> : IValueInput<T>, IExtern
+internal interface IValueExtern<T> : IValueInput<T>, IExtern
     where T : IData { }

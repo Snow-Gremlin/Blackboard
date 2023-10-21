@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Performs a bitwise AND of all the integer parents.</summary>
 /// <see cref="https://mathworld.wolfram.com/AND.html"/>
-sealed public class BitwiseAnd<T> : NaryValue<T, T>
+sealed internal class BitwiseAnd<T> : NaryValue<T, T>
     where T : struct, IBitwise<T>, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

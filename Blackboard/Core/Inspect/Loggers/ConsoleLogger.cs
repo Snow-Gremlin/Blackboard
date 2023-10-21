@@ -1,10 +1,10 @@
 ﻿using IO = System.IO;
 using S = System;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>A logger that outputs to a console.</summary>
-public class ConsoleLogger : Logger {
+sealed public class ConsoleLogger : Logger {
 
     /// <summary>Creates a new logger which outputs to a console.</summary>
     /// <param name="next">The next logger the entry is passed to.</param>

@@ -5,7 +5,7 @@ namespace Blackboard.Core.Nodes.Collections;
 
 /// <summary>A comparer which compares the values of the given nodes.</summary>
 /// <typeparam name="T">The node type to compare.</typeparam>
-sealed public class NodeValueComparer<T> : IEqualityComparer<T>
+sealed internal class NodeValueComparer<T> : IEqualityComparer<T>
     where T : INode {
 
     /// <summary>Checks if the nodes have the same value.</summary>

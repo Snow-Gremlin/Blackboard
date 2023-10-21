@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Types;
@@ -159,17 +160,27 @@ static class NodeExt {
             yield return node;
 
             if (node is IChild child)
-                child.Parents.Foreach(stack.Push);
+                child.Parents.NotNull().Foreach(stack.Push);
         }
     }
 
-    /// <summary>Gets a sorted link list of all the evaluable nodes from the given nodes.</summary>
-    /// <param name="nodes">The nodes to get the sorted link list from.</param>
-    /// <returns>The sorted link list of evaluable nodes.</returns>
-    static public LinkedList<IEvaluable> ToEvalList(this IEnumerable<INode> nodes) {
-        LinkedList<IEvaluable> list = new();
-        list.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
-        return list;
+    /// <summary>Checks that the legitimate parents of the child<./summary>
+    /// <remarks>
+    /// The legitimate parents are parents of a child which have that child in their child list.
+    /// The constructed string does not contain any null parents.
+    /// </remarks>
+    /// <param name="child">The child to check the parents inside of.</param>
+    /// <param name="exp">The string indicating which parents were legitimate or not.</param>
+    static public void CheckLegitParents(this IChild child, string exp) =>
+        Assert.AreEqual(exp, child.Parents.Select(p => p is not null && p.HasChild(child) ? "[█]" : "[ ]").Join());
+
+    /// <summary>Gets an eval pending list of all the evaluable nodes from the given nodes.</summary>
+    /// <param name="nodes">The nodes to get the eval pending from.</param>
+    /// <returns>The eval pending of evaluable nodes.</returns>
+    static public EvalPending ToEvalPending(this IEnumerable<INode> nodes) {
+        EvalPending pending = new();
+        pending.Insert(nodes.NotNull().OfType<IEvaluable>());
+        return pending;
     }
 
     /// <summary>Will assign all the children reachable via parents to the parents.</summary>
@@ -185,7 +196,7 @@ static class NodeExt {
     /// <param name="logger">Optional logger to use to debug the update with.</param>
     /// <returns>The given node so that method calls can be chained.</returns>
     static public INode UpdateAllParents(this INode node, Logger? logger = null) {
-        node.GetAllParents().ToEvalList().UpdateDepths(logger);
+        node.GetAllParents().ToEvalPending().UpdateDepths(logger);
         return node;
     }
 
@@ -194,5 +205,5 @@ static class NodeExt {
     /// <param name="finalization">The set of the triggers which have been provoked and need to be reset.</param>
     /// <param name="logger">Optional logger to use to debug the update with.</param>
     static public void EvaluateAllParents(this INode node, Finalization finalization, Logger? logger = null) =>
-        node.GetAllParents().ToEvalList().Evaluate(finalization, logger);
+        node.GetAllParents().ToEvalPending().Evaluate(finalization, logger);
 }

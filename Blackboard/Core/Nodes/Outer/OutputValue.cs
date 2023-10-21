@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Outer;
 /// <summary>A node for listening for changes in values used for outputting to the user.</summary>
 /// <typeparam name="T1">The type of the value to hold.</typeparam>
 /// <typeparam name="T2">The C# type behind the blackboard type.</typeparam>
-sealed public class OutputValue<T1, T2> : UnaryValue<T1, T1>, IValueOutput<T1>, IValueWatcher<T2>
+sealed internal class OutputValue<T1, T2> : UnaryValue<T1, T1>, IValueOutput<T1>, IValueWatcher<T2>
     where T1 : struct, IEquatable<T1>, IBaseValue<T1, T2> {
     private T2 previous;
 

@@ -1,7 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Formula.Actions;
 using Blackboard.Core.Innate;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
 using Blackboard.Core.Optimization;
@@ -12,7 +12,7 @@ using System.Linq;
 namespace Blackboard.Core.Formula.Factory;
 
 /// <summary>The collection of actions which have been parsed.</summary>
-sealed public class Factory {
+sealed internal class Factory {
     private readonly Slate slate;
     private readonly Logger? logger;
     private readonly ActionCollection actions;
@@ -64,7 +64,7 @@ sealed public class Factory {
 
         // Continue up to all the parents.
         if (node is IChild child) {
-            foreach (IParent par in child.Parents) {
+            foreach (IParent par in child.Parents.NotNull()) {
                 if (this.collectAndOrder(par, newNodes))
                     par.AddChildren(child);
             }

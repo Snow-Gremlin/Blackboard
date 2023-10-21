@@ -262,6 +262,23 @@ public class BlackboardTests {
         test<string> ("",      "Hello", "Small", "Blue", "World", "");
         test<uint>   (default, 1, 3, 18, 34, 158, 0);
     }
+    
+    [TestMethod]
+    public void TestNameValidation() {
+        Blackboard.Blackboard b = new();
+        TestTools.CheckException(() => b.ValueInput<bool>(""),
+            "Invalid identifier with optional namespace.",
+            "[name: ]");
+        TestTools.CheckException(() => b.ValueInput<bool>("float"),
+            "Identifier with optional namespace may not contain any keywords.",
+            "[name: float]");
+        TestTools.CheckException(() => b.ValueInput<bool>("a..b"),
+            "Invalid identifier with optional namespace.",
+            "[name: a..b]");
+        TestTools.CheckException(() => b.ValueInput<bool>("cat.dog.do"),
+            "Identifier with optional namespace may not contain any keywords.",
+            "[name: cat.dog.do]");
+    }
 
     [TestMethod]
     public void TestExample1() {
@@ -284,6 +301,7 @@ public class BlackboardTests {
             "           (curYear < person.birthYear ? \" hasn't been born yet.\" : ",
             "           \" has passed away at \" + person.age + \" years old.\"));",
             "");
+        Assert.IsTrue(b.Validate());
         
         InputValue<int> curYear = b.ValueInput<int>("curYear");
         IValueWatcher<string> output = b.OnChange<string>("summary");

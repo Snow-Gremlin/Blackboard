@@ -13,7 +13,7 @@ namespace Blackboard.Core.Nodes.Inner;
 /// updated with an extern being defined or to be assigned as a define.
 /// </remarks>
 /// <typeparam name="T">The type of the value to hold.</typeparam>
-sealed public class ShellValue<T> : Evaluable, IValueParent<T>, IChild
+sealed internal class ShellValue<T> : Evaluable, IValueParent<T>, IChild
     where T : struct, IData, IEquatable<T> {
     
     /// <summary>This is the parent node to read from.</summary>

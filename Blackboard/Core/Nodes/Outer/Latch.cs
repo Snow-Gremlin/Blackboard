@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Outer;
 
 /// <summary>This is a latching value node.</summary>
 /// <typeparam name="T">The type of the value for this node.</typeparam>
-sealed public class Latch<T> : ValueNode<T>, IChild
+sealed internal class Latch<T> : ValueNode<T>, IChild
     where T : struct, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

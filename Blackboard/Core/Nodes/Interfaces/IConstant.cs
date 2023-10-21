@@ -1,4 +1,4 @@
 ﻿namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>The interface for a constant or literal.</summary>
-public interface IConstant : INode { }
+internal interface IConstant : INode { }

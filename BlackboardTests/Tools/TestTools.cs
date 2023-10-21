@@ -23,7 +23,7 @@ static public class TestTools {
             NoDiff(exp, ex.Message.Split("\n"));
             return;
         }
-        Assert.Fail("Expected an exception to be thrown.\n%s", exp.Join("\n"));
+        Assert.Fail("Expected an exception to be thrown.\n{0}", exp.Join("\n"));
     }
 
     /// <summary>Asserts that all the given lines are equal, otherwise shows the diff.</summary>
@@ -31,16 +31,28 @@ static public class TestTools {
     /// <param name="results">The result that is being checked.</param>
     /// <param name="message">The message to go along with the test.</param>
     static public void NoDiff(string exp, string results, string message = "") =>
-        NoDiff(exp.Split("\n"), results.Split("\n"), message);
+        noDiff(exp.Split("\n").ToArray(), results.Split("\n").ToArray(), message);
+
+    /// <summary>Asserts that all the given lists as strings are equal, otherwise shows the diff.</summary>
+    /// <param name="exp">The expected result to check against.</param>
+    /// <param name="results">The result that is being checked.</param>
+    /// <param name="message">The message to go along with the test.</param>
+    static public void NoDiff<T1, T2>(IEnumerable<string> exp, IEnumerable<string> results, string message = "") =>
+        noDiff(exp.Split("\n").ToArray(), results.Split("\n").ToArray(), message);
 
     /// <summary>Asserts that all the given lines are equal, otherwise shows the diff.</summary>
     /// <param name="exp">The expected result to check against.</param>
     /// <param name="results">The result that is being checked.</param>
     /// <param name="message">The message to go along with the test.</param>
-    static public void NoDiff(IEnumerable<string> exp, IEnumerable<string> results, string message = "") {
-        string[] expLines = exp.Split("\n").ToArray();
-        string[] gotLines = results.Split("\n").ToArray();
-        if (!expLines.SequenceEqual(gotLines)) {
+    static public void NoDiff<T>(IEnumerable<T> exp, IEnumerable<T> results, string message = "") =>
+        noDiff(exp.ToArray(), results.ToArray(), message);
+
+    /// <summary>Asserts that all the given values are equal, otherwise shows the diff.</summary>
+    /// <param name="exp">The expected result to check against.</param>
+    /// <param name="results">The result that is being checked.</param>
+    /// <param name="message">The message to go along with the test.</param>
+    static private void noDiff<T>(IReadOnlyList<T> exp, IReadOnlyList<T> results, string message = "") {
+        if (!exp.SequenceEqual(results)) {
             StringBuilder buf = new();
             if (!string.IsNullOrEmpty(message)) {
                 buf.AppendLine(message);
@@ -48,20 +60,26 @@ static public class TestTools {
             }
 
             buf.AppendLine("Diff:");
-            gotLines.Diff(expLines).Indent("  ").Foreach(buf.AppendLine);
+            results.Diff(exp).Indent("  ").Foreach(buf.AppendLine);
             buf.AppendLine();
 
             buf.AppendLine("Expected:");
-            expLines.Indent("  ").Foreach(buf.AppendLine);
+            exp.Strings().Indent("  ").Foreach(buf.AppendLine);
             buf.AppendLine();
 
             buf.AppendLine("Results:");
-            gotLines.Indent("  ").Foreach(buf.AppendLine);
+            results.Strings().Indent("  ").Foreach(buf.AppendLine);
             buf.AppendLine();
 
             Assert.Fail(buf.ToString());
         }
     }
+
+    /// <summary>Asserts that all the given values are equal, otherwise shows the diff.</summary>
+    /// <param name="results">The result that is being checked.</param>
+    /// <param name="exp">The expected result to check against.</param>
+    static public void ValuesAreEqual<T>(IEnumerable<T> results, params T[] exp) =>
+        noDiff(exp, results.ToArray());
 
     /// <summary>Check if the entries in the given sets of information match each other (repeats are ignored).</summary>
     /// <typeparam name="T">The type of the value to compare.</typeparam>
@@ -116,7 +134,7 @@ static public class TestTools {
     /// <param name="group">The namespace to look for constants within.</param>
     /// <param name="prefix">Any prefix namespace to add to the tags.</param>
     /// <returns>All tags for constants reachable from the given namespace.</returns>
-    static public IEnumerable<string> ConstTags(Namespace group, string prefix = "") {
+    static internal IEnumerable<string> ConstTags(Namespace group, string prefix = "") {
         foreach (KeyValuePair<string, INode> pair in group.Fields) {
             if (pair.Value is IConstant)
                 yield return prefix+pair.Key;
@@ -134,7 +152,7 @@ static public class TestTools {
     /// <param name="group">The namespace to look for function definitions within.</param>
     /// <param name="prefix">Any prefix namespace to add to the tags.</param>
     /// <returns>All tags for function definitions reachable from the given namespace.</returns>
-    static public IEnumerable<string> FuncDefTags(Namespace group, string prefix = "") {
+    static internal IEnumerable<string> FuncDefTags(Namespace group, string prefix = "") {
         foreach (KeyValuePair<string, INode> pair in group.Fields) {
             if (pair.Value is IFuncGroup funcGroup) {
                 foreach (IFuncDef def in funcGroup.Definitions)

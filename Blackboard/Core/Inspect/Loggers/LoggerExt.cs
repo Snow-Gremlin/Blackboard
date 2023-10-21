@@ -1,6 +1,6 @@
 ﻿using S = System;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>Null-aware extensions to add to or post to a given logger.</summary>
 static public class LoggerExt {
@@ -61,7 +61,7 @@ static public class LoggerExt {
     /// <param name="inner">The logger to call into from the returned logger.</param>
     /// <param name="stringifier">The stringifier to apply or null to use shallow.</param>
     /// <returns>The logger which will stringify values in the message.</returns>
-    static public Logger? Stringify(this Logger? inner, Stringifier? stringifier = null) =>
+    static internal Logger? Stringify(this Logger? inner, Stringifier? stringifier = null) =>
         inner is null ? null :
         new(inner, (Entry entry) => {
             entry.AddProcessing((Message msg) => {

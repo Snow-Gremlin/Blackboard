@@ -16,10 +16,19 @@ public class Constants {
             "Tests do not match the existing constant");
 
     /// <summary>
+    /// Checks if the given boolean constant name can be gotten from a new slate
+    /// and it matches the expected value.
+    /// </summary>
+    /// <param name="name">The name of the bool constant with any required namespaces.</param>
+    /// <param name="exp">The expected value to compare against.</param>
+    static private void checkBool(string name, bool exp) =>
+        new Slate().Read("get A = " + name + ";").Perform().CheckValue(exp, "A");
+
+    /// <summary>
     /// Checks if the given double constant name can be gotten from a new slate
     /// and it matches the expected value.
     /// </summary>
-    /// <param name="name">The name of the double constant with any required namespaces</param>
+    /// <param name="name">The name of the double constant with any required namespaces.</param>
     /// <param name="exp">The expected value to compare against.</param>
     static private void checkDouble(string name, double exp) =>
         new Slate().Read("get A = " + name + ";").Perform().CheckValue(exp, "A");
@@ -28,7 +37,7 @@ public class Constants {
     /// Checks if the given constant name can be gotten from a new slate
     /// and it matches the expected value.
     /// </summary>
-    /// <param name="name">The name of the constant with any required namespaces</param>
+    /// <param name="name">The name of the constant with any required namespaces.</param>
     /// <param name="exp">The expected value to compare against.</param>
     static private void checkObject(string name, object? exp) =>
         new Slate().Read("get A = " + name + ";").Perform().CheckObject(exp, "A");
@@ -56,6 +65,14 @@ public class Constants {
     [TestMethod]
     [TestTag("nan")]
     public void TestOperators_nan() => checkDouble("nan", double.NaN);
+    
+    [TestMethod]
+    [TestTag("false")]
+    public void TestOperators_false() => checkBool("false", false);
+    
+    [TestMethod]
+    [TestTag("true")]
+    public void TestOperators_true() => checkBool("true", true);
 
     [TestMethod]
     [TestTag("null")]

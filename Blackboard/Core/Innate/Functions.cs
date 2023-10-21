@@ -7,11 +7,11 @@ using Blackboard.Core.Nodes.Outer;
 namespace Blackboard.Core.Innate;
 
 /// <summary>Group of all initial methods for Blackboard.</summary>
-static public class Functions {
+static internal class Functions {
 
     /// <summary>This adds all global initial methods for Blackboard.</summary>
     /// <param name="global">The global namespace for the slate.</param>
-    static internal void Add(Namespace global) {
+    static public void Add(Namespace global) {
         void add(string name, params IFuncDef[] defs) =>
             global[name] = new FuncGroup(defs);
 

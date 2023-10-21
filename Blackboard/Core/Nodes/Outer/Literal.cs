@@ -8,7 +8,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Outer;
 
 /// <summary>These are factories for easily making literals.</summary>
-static public class Literal {
+static internal class Literal {
 
     /// <summary>Creates a new boolean literal.</summary>
     /// <param name="value">The value to use for the literal.</param>
@@ -59,7 +59,7 @@ static public class Literal {
 
 /// <summary>This is a literal value.</summary>
 /// <typeparam name="T">The type of this literal.</typeparam>
-sealed public class Literal<T> : ValueNode<T>, IConstant
+sealed internal class Literal<T> : ValueNode<T>, IConstant
     where T : struct, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

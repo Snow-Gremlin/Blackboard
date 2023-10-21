@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Performs a bitwise Exclusive OR of two integer parents.</summary>
 /// <see cref="https://mathworld.wolfram.com/XOR.html"/>
-sealed public class BitwiseXor<T> : NaryValue<T, T>
+sealed internal class BitwiseXor<T> : NaryValue<T, T>
     where T : struct, IBitwise<T>, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

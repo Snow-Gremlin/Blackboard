@@ -1,8 +1,5 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
-using Blackboard.Core.Nodes.Bases;
-using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Outer;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +8,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>The set of extensions for working with different types of Nodes.</summary>
-static public class Extensions {
+static internal class Extensions {
     #region INode...
 
     /// <summary>The values from the given input values.</summary>
@@ -34,7 +31,7 @@ static public class Extensions {
     static public bool IsConstant(this INode node) =>
         node is IConstant ||
         (node is not IInput && node is not IExtern &&
-        node is IChild child && child.Parents.IsConstant());
+        node is IChild child && child.Parents.NotNull().IsConstant());
 
     /// <summary>This determines if all the given nodes are constant.</summary>
     /// <param name="nodes">The nodes to check if constant.</param>
@@ -121,7 +118,7 @@ static public class Extensions {
     /// <returns>True if this child was added to any parent.</returns>
     static public bool Legitimatize(this IChild child) {
         bool anyAdded = false;
-        foreach (IParent parent in child.Parents)
+        foreach (IParent? parent in child.Parents)
             anyAdded = (parent?.AddChildren(child) ?? false) || anyAdded;
         return anyAdded;
     }
@@ -146,7 +143,7 @@ static public class Extensions {
     /// <param name="child">The child to check all the parents of.</param>
     /// <returns>True if any parent doesn't contain this child, false otherwise.</returns>
     static public bool Illegitimate(this IChild child) =>
-        child.Parents.Any(parent => !parent.Children.Contains(child));
+        child.Parents.NotNull().Any(parent => !parent.Children.Contains(child));
 
     #endregion
     #region INaryChild...
@@ -213,7 +210,7 @@ static public class Extensions {
             if (targets.Contains(node)) return true;
 
             if (node is IChild child) {
-                foreach (IParent parent in child.Parents.WhereNot(reached.Contains)) {
+                foreach (IParent parent in child.Parents.NotNull().WhereNot(reached.Contains)) {
                     pending.Enqueue(parent);
                     reached.Add(parent);
                 }
@@ -240,98 +237,6 @@ static public class Extensions {
 
     #endregion
     #region Evaluable...
-
-    /// <summary>This sort inserts unique nodes into the given linked list.</summary>
-    /// <typeparam name="T">The type of evaluable node being worked with.</typeparam>
-    /// <param name="list">The list of values to sort insert into.</param>
-    /// <param name="nodes">The set of nodes to insert.</param>
-    static public void SortInsertUnique<T>(this LinkedList<T> list, params T[] nodes)
-        where T : IEvaluable =>
-        list.SortInsertUnique(nodes as IEnumerable<T>);
-
-    /// <summary>This sort inserts unique evaluable nodes into the given linked list.</summary>
-    /// <remarks>This assumes that lower depth nodes will be added after their parents typically.</remarks>
-    /// <typeparam name="T">The type of evaluable node being worked with.</typeparam>
-    /// <param name="list">The list of values to sort insert into.</param>
-    /// <param name="nodes">The set of nodes to insert.</param>
-    static public void SortInsertUnique<T>(this LinkedList<T> list, IEnumerable<T>? nodes)
-        where T : IEvaluable {
-        if (nodes is null) return;
-        foreach (T node in nodes) {
-            bool addToEnd = true;
-            for (LinkedListNode<T>? pend = list.Last; pend is not null; pend = pend.Previous) {
-                if (ReferenceEquals(node, pend.Value)) {
-                    addToEnd = false;
-                    break;
-                }
-                if (node.Depth > pend.Value.Depth) {
-                    list.AddAfter(pend, node);
-                    addToEnd = false;
-                    break;
-                }
-            }
-            if (addToEnd) list.AddFirst(node);
-        }
-    }
-
-    /// <summary>This updates the depth values of the given pending nodes.</summary>
-    /// <remarks>
-    /// The given list will be emptied by this call. The pending nodes are expected to be
-    /// presorted by depth which will usually provide the fastest update.
-    /// </remarks>
-    /// <param name="pending">The initial set of nodes which are pending depth update.</param>
-    /// <param name="logger">The logger to debug the update with.</param>
-    static public void UpdateDepths(this LinkedList<IEvaluable> pending, Logger? logger = null) {
-        logger.Info("Start Update (pending: {0})", pending.Count);
-
-        while (pending.Count > 0) {
-            IEvaluable? node = pending.TakeFirst();
-            if (node is null) break;
-
-            // Determine the depth that this node should be at based on its parents.
-            int depth = node.MinimumAllowedDepth();
-
-            // If the depth has changed then its children also need to be updated.
-            bool changed = false;
-            if (node.Depth != depth) {
-                node.Depth = depth;
-                pending.SortInsertUnique(node.Children.OfType<Evaluable>());
-                changed = true;
-            }
-
-            logger.Info("  Updated (changed: {0}, depth: {1}, node: {2}, remaining: {3})", changed, node.Depth, node, pending.Count);
-        }
-
-        logger.Info("End Update");
-    }
-
-    /// <summary>Updates and propagates the changes from the given inputs through the blackboard nodes.</summary>
-    /// <remarks>
-    /// The given list will be emptied by this call. The pending nodes are expected to be
-    /// presorted by depth which will usually provide the fastest update.
-    /// </remarks>
-    /// <param name="pending">The initial set of nodes which are pending depth update.</param>
-    /// <param name="finalization">The set to add nodes to which need finalization.</param>
-    /// <param name="logger">The logger to debug the evaluate with.</param>
-    static public void Evaluate(this LinkedList<IEvaluable> pending, Finalization finalization, Logger? logger = null) {
-        logger.Info("Start Eval (pending: {0})", pending.Count);
-
-        while (pending.Count > 0) {
-            IEvaluable? node = pending.TakeFirst();
-            if (node is null) break;
-
-            bool changed = false;
-            if (node.Evaluate()) {
-                pending.SortInsertUnique(node.Children.NotNull().OfType<IEvaluable>());
-                finalization.Add(node);
-                changed = true;
-            }
-
-            logger.Info("  Evaluated (changed: {0}, depth: {1}, node: {2}, remaining: {3})", changed, node.Depth, node, pending.Count);
-        }
-
-        logger.Info("End Eval ({0})", finalization);
-    }
 
     /// <summary>Gets the maximum depth from the given nodes.</summary>
     /// <param name="nodes">The nodes to get the maximum depth from.</param>

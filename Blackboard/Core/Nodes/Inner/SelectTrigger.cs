@@ -5,7 +5,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>This is a node for a ternary selection between two triggers.</summary>
-sealed public class SelectTrigger : Select<ITriggerParent>, ITriggerParent {
+sealed internal class SelectTrigger : Select<ITriggerParent>, ITriggerParent {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
     static public readonly IFuncDef Factory = CreateFactory((test, left, right) => new SelectTrigger(test, left, right));

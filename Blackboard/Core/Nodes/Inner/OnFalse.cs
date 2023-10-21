@@ -7,7 +7,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Performs a trigger when the parent becomes false.</summary>
-sealed public class OnFalse : TriggerNode, IChild {
+sealed internal class OnFalse : TriggerNode, IChild {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
     static public readonly IFuncDef Factory =

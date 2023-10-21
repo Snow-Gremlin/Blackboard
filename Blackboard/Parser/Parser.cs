@@ -3,7 +3,7 @@ using Blackboard.Core.Extensions;
 using Blackboard.Core.Formula;
 using Blackboard.Core.Formula.Factory;
 using Blackboard.Core.Innate;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,7 @@ using S = System;
 namespace Blackboard.Parser;
 
 /// <summary>This will parse the Blackboard language into actions and nodes to apply to the slate.</summary>
-sealed public class Parser {
+sealed internal class Parser {
 
     /// <summary>Prepares the parser's static variables before they are used.</summary>
     static Parser() => baseParser = PP.Loader.Loader.LoadParser(
@@ -23,6 +23,45 @@ sealed public class Parser {
             PP.Scanner.DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Keywords.lang"),
             PP.Scanner.DefaultScanner.FromResource(Assembly.GetExecutingAssembly(), "Blackboard.Parser.Language.Tokens.lang")
         ), ignoreConflicts: false);
+
+    /// <summary>Gets the list of all reserved keywords in the language.</summary>
+    /// <remarks>This must match the Keywords.lang file's set of keywords.</remarks>
+    static readonly public IReadOnlyList<string> Keywords = new string[] {
+        // Constants Keywords
+        "true", "false", "null",
+        
+        // Pseudo-type Keywords
+        "namespace", "var",
+
+        // Declare Keywords
+        "in", "get", "define", "temp", "extern",
+
+        // Type Keywords
+        "bool", "int", "uint", "float", "double", "string", "trigger", "object",
+
+        // Reserved Types
+        "byte", "char", "enum", "int8", "int16", "int32", "int64",
+        "list", "long", "map", "set", "short", "struct", "type",
+        "uint8", "uint16", "uint32", "uint64", "ulong", "ushort",
+
+        // Reserved Scoping
+        "internal", "global", "local",
+        "private", "protected", "public", "static",
+
+        // Reserved Definitions
+        "abstract", "class", "const", "def", "do", "event", "func",
+        "interface", "operator", "override", "typedef", "void", "virtual",
+
+        // Reserved Constructs
+        "as", "break", "catch", "case", "continue", "default", "else",
+        "finally", "go", "if", "import", "intersect", "is", "out",
+        "return", "switch", "then", "try", "typeof", "union",
+        "using", "when", "yield",
+
+        // Reserved Unsupported
+        "complex", "dynamic", "for", "foreach", "goto",
+        "label", "readonly", "sealed", "until", "while"
+    };
 
     /// <summary>The Blackboard language base parser singleton.</summary>
     static private readonly PP.Parser.Parser baseParser;
@@ -43,8 +82,6 @@ sealed public class Parser {
         this.slate   = slate;
         this.prompts = new Dictionary<string, PP.ParseTree.PromptHandle<Builder.Builder>>();
         this.logger  = logger.Group(nameof(Parser));
-
-        // Console.WriteLine(PP.Parser.Parser.GetDebugStateString(BaseParser.Grammar));
 
         this.initPrompts();
         this.validatePrompts();
@@ -134,6 +171,7 @@ sealed public class Parser {
         this.addHandler("endCall",      handleEndCall);
         this.addHandler("pushId",       handlePushId);
         this.addHandler("pushBool",     handlePushBool);
+        this.addHandler("pushNull",     handlePushNull);
         this.addHandler("pushBin",      handlePushBin);
         this.addHandler("pushOct",      handlePushOct);
         this.addHandler("pushInt",      handlePushInt);
@@ -308,6 +346,10 @@ sealed public class Parser {
     /// <summary>This handles pushing a bool literal value onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>
     static private void handlePushBool(Builder.Builder builder) => builder.HandlePushBool();
+
+    /// <summary>This handles pushing a null literal value onto the stack.</summary>
+    /// <param name="builder">The formula builder being worked on.</param>
+    static private void handlePushNull(Builder.Builder builder) => builder.HandlePushNull();
 
     /// <summary>This handles pushing a binary int literal value onto the stack.</summary>
     /// <param name="builder">The formula builder being worked on.</param>

@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>
 /// This is a message counter logger used for keeping
 /// a count of messages by different levels.
 /// </summary>
-public class LogCounter : Logger {
+sealed public class LogCounter : Logger {
     private readonly Dictionary<Level, int> counts;
 
     /// <summary>Creates a new message counter logger.</summary>
@@ -20,7 +20,7 @@ public class LogCounter : Logger {
     /// <summary>Gets the count for the given level.</summary>
     /// <param name="level">The level to get the count from.</param>
     /// <returns>The number of messages with the given level.</returns>
-    public int Count(Level level) => this.counts.GetValueOrDefault(level);
+    public int Count(Level level) => this.counts.GetValueOrDefault(level, 0);
 
     /// <summary>This counters the given entry.</summary>
     /// <param name="entry">The entry to count.</param>

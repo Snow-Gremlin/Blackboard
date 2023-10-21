@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Determines if the two values are equal with an allowed variance called the epsilon.</summary>
 /// <typeparam name="T">The type being compared.</typeparam>
-sealed public class EpsilonEqual<T> : TernaryValue<T, T, T, Bool>
+sealed internal class EpsilonEqual<T> : TernaryValue<T, T, T, Bool>
     where T : struct, ISubtractive<T>, ISigned<T>, IComparable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

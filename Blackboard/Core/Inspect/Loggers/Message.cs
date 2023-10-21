@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using S = System;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>
 /// Message is a common object used for exceptions and logging which carries
 /// a string of text for the message and additional information for the message.
 /// </summary>
-public class Message {
+sealed public class Message {
 
     /// <summary>Creates a new message with the given format text and arguments.</summary>
     /// <param name="format">The format text to fill in with the given arguments.</param>
@@ -67,7 +67,7 @@ public class Message {
     /// <summary>This applies the given stringifier to the arguments and data.</summary>
     /// <param name="stringifier">The stringifier to apply or null to use shallow.</param>
     /// <returns>The logger which will stringify values in the message.</returns>
-    public Message Stringify(Stringifier? stringifier = null) {
+    internal Message Stringify(Stringifier? stringifier = null) {
         stringifier ??= Stringifier.Shallow();
         for (int i = this.Arguments.Length-1; i >= 0; --i)
             this.Arguments[i] = stringifier.StringifyObject(this.Arguments[i]);

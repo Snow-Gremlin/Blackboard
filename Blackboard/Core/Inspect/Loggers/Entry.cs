@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using S = System;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>An entry contains a message in the process of being logged.</summary>
-public class Entry {
+sealed public class Entry {
 
     /// <summary>Gets the string for the given level.</summary>
     /// <param name="level">The level to get the string for.</param>

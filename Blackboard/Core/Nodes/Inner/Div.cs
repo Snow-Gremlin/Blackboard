@@ -5,7 +5,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>This will divide the first parent value by the second parent value.</summary>
-sealed public class Div<T> : BinaryValue<T, T, T>
+sealed internal class Div<T> : BinaryValue<T, T, T>
     where T : struct, IDivisible<T>, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

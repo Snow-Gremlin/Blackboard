@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Bases;
 /// <summary>This will return the value of one of two parents based on a boolean parent.</summary>
 /// <remarks>This functions just like a typical ternary (i.e. `test ? left : right`) statement.</remarks>
 /// <typeparam name="T">The parent type to select between and return.</typeparam>
-public abstract class Select<T> : Evaluable, IChild
+internal abstract class Select<T> : Evaluable, IChild
     where T : class, IParent {
 
     /// <summary>This is a helper for creating a select node factories quickly.</summary>

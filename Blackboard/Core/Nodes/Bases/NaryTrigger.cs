@@ -10,7 +10,7 @@ namespace Blackboard.Core.Nodes.Bases;
 
 /// <summary>This is a trigger node which has several parents.</summary>
 /// <see cref="https://en.wikipedia.org/wiki/Arity#n-ary"/>
-public abstract class NaryTrigger : TriggerNode, INaryChild<ITriggerParent>, ICoalescable {
+internal abstract class NaryTrigger : TriggerNode, INaryChild<ITriggerParent>, ICoalescable {
 
     /// <summary>This is a helper for creating unary node factories quickly.</summary>
     /// <param name="handle">The handler for calling the node constructor.</param>
@@ -54,7 +54,13 @@ public abstract class NaryTrigger : TriggerNode, INaryChild<ITriggerParent>, ICo
 
     /// <summary>The set of parent nodes to this node in the graph.</summary>
     public ParentCollection Parents => new ParentCollection(this).
-        With(this.sources); // TODO: Set the min and max
+        With(this.sources, this.MinParents, this.MaxParents);
+
+    /// <summary>The minimum number of required parent nodes.</summary>
+    virtual protected int MinParents => 1;
+    
+    /// <summary>The maximum allowed number of parent nodes.</summary>
+    virtual protected int MaxParents => int.MaxValue;
 
     /// <summary>
     /// This handles updating this node's state given the

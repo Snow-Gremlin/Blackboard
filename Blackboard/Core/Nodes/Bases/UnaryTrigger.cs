@@ -6,7 +6,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Bases;
 
 /// <summary>This is a trigger which has a single parent as a source.</summary>
-public abstract class UnaryTrigger : TriggerNode, IChild {
+internal abstract class UnaryTrigger : TriggerNode, IChild {
     
     /// <summary>This is a helper for creating unary node factories quickly.</summary>
     /// <param name="handle">The handler for calling the node constructor.</param>

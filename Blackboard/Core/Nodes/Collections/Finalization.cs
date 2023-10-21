@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Collections;
 
 /// <summary>This is a collection of values returned from evaluating nodes.</summary>
-sealed public class Finalization {
+sealed internal class Finalization {
     
     /// <summary>The set of provoked triggers which need to be reset.</summary>
     private readonly HashSet<ITrigger> needsReset;

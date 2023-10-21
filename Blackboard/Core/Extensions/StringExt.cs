@@ -15,7 +15,6 @@ static public class StringExt {
     static public IEnumerable<string> Strings<T>(this IEnumerable<T> values, string nullStr = "null") =>
         from v in values select v?.ToString() ?? nullStr;
 
-
     /// <summary>This will indent all the lines in the given string with the given indent.</summary>
     /// <param name="part">The string to indent all the lines with.</param>
     /// <param name="indent">The indent to add to the front of each line.</param>
@@ -36,7 +35,7 @@ static public class StringExt {
     /// <param name="separator">The separator to put between the parts.</param>
     /// <returns>The string from the joined parts.</returns>
     static public string Join<T>(this IEnumerable<T> parts, string separator = "") =>
-        string.Join(separator, parts);
+        string.Join(separator, parts.Strings());
 
     /// <summary>This is short hand to make joining strings into one.</summary>
     /// <typeparam name="T">The types of values to convert into strings and join.</typeparam>
@@ -44,7 +43,7 @@ static public class StringExt {
     /// <param name="separator">The separator to put between the parts.</param>
     /// <returns>The string from the joined parts.</returns>
     static public string Join<T>(this IEnumerable<T> parts, char separator) =>
-        string.Join(separator, parts);
+        string.Join(separator, parts.Strings());
 
     /// <summary>This will split all of the strings by the given separator and return all of the strings.</summary>
     /// <remarks>This is useful for dealing with a collection of lines as strings which might be multi-lined.</remarks>

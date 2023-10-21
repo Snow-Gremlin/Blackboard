@@ -1,7 +1,7 @@
 ﻿namespace Blackboard.Core.Nodes.Interfaces;
 
 /// <summary>An interface for anything evaluable.</summary>
-public interface IEvaluable : IParent {
+internal interface IEvaluable : IParent {
 
     /// <summary>The depth in the graph from the furthest input of this node.</summary>
     public int Depth { get; set; }

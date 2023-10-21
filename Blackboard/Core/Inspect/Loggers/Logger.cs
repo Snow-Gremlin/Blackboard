@@ -1,6 +1,6 @@
 ﻿using S = System;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>
 /// An abstract logger to simplify making other loggers for debugging the evaluation,

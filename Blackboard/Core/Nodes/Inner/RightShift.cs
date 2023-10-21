@@ -6,7 +6,7 @@ using Blackboard.Core.Nodes.Interfaces;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Performs a right shifts the first parent the amount of the second parent.</summary>
-sealed public class RightShift<T> : BinaryValue<T, Int, T>
+sealed internal class RightShift<T> : BinaryValue<T, Int, T>
     where T : struct, IBitwise<T>, IEquatable<T> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>

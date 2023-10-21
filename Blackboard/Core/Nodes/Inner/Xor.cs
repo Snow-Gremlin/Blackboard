@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Performs a boolean Exclusive OR of the boolean parents.</summary>
 /// <see cref="https://mathworld.wolfram.com/XOR.html"/>
-sealed public class Xor : NaryValue<Bool, Bool> {
+sealed internal class Xor : NaryValue<Bool, Bool> {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
     static public readonly IFuncDef Factory = CreateFactory(inputs => new Xor(inputs));

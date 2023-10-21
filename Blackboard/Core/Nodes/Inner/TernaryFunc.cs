@@ -8,7 +8,7 @@ using S = System;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Ternary nodes for specific hard-coded data types.</summary>
-static public class TernaryComparable<T>
+static internal class TernaryComparable<T>
     where T : struct, IComparable<T> {
 
     /// <summary>This is a factory for creating a new InRange instance of this node.</summary>
@@ -23,7 +23,7 @@ static public class TernaryComparable<T>
 }
 
 /// <summary>Ternary nodes for specific hard-coded data types.</summary>
-static public class Ternary {
+static internal class Ternary {
 
     /// <summary>This is a factory for creating a new PadLeft instance of this node.</summary>
     /// <remarks>
@@ -73,7 +73,7 @@ static public class Ternary {
 /// This uses a little more computation time and more memory that hard coded nodes,
 /// therefor this should be used to perform less commonly used nodes.
 /// </remarks>
-sealed public class TernaryFunc<T1, T2, T3, TResult> : TernaryValue<T1, T2, T3, TResult>
+sealed internal class TernaryFunc<T1, T2, T3, TResult> : TernaryValue<T1, T2, T3, TResult>
     where T1 : struct, IEquatable<T1>
     where T2 : struct, IEquatable<T2>
     where T3 : struct, IEquatable<T3>

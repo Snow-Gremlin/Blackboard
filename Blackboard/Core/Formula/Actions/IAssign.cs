@@ -1,5 +1,5 @@
-﻿using Blackboard.Core.Nodes.Interfaces;
-using System.Collections.Generic;
+﻿using Blackboard.Core.Nodes.Collections;
+using Blackboard.Core.Nodes.Interfaces;
 
 namespace Blackboard.Core.Formula.Actions;
 
@@ -8,7 +8,7 @@ namespace Blackboard.Core.Formula.Actions;
 /// This is only implemented by Assign but has no type parameter
 /// so that all typed Assigns can easily be used generically.
 /// </remarks>
-public interface IAssign : IAction {
+internal interface IAssign : IAction {
 
     /// <summary>The target input node to set the value of.</summary>
     public IInput Target { get; }
@@ -17,5 +17,5 @@ public interface IAssign : IAction {
     public IDataNode Value { get; }
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
-    public IReadOnlyList<IEvaluable> NeedPending { get; }
+    public EvalPending NeedPending { get; }
 }

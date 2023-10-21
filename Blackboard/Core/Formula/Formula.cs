@@ -1,6 +1,7 @@
 ﻿using Blackboard.Core.Extensions;
 using Blackboard.Core.Formula.Actions;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,10 +17,10 @@ sealed public class Formula {
     static public Formula Join(params Formula[] formulas) {
         if (formulas.Length <= 0)
             throw new BlackboardException("Join must have at least one formula in it.");
-        Slate slate = formulas[0].Slate;
+        Slate slate = formulas[0].slate;
         List<IAction> actions = new();
         foreach (Formula f in formulas) {
-            if (f.Slate != slate)
+            if (f.slate != slate)
                 throw new BlackboardException("May only join formulas from the same blackboard.");
             actions.AddRange(f.Actions.Where(action => action is not Finish));
         }
@@ -33,22 +34,22 @@ sealed public class Formula {
     /// <summary>Creates a new formula to perform changes to the slate.</summary>
     /// <param name="slate">The slate that these actions were created for.</param>
     /// <param name="actions">The actions that this formula will perform.</param>
-    public Formula(Slate slate, params IAction[] actions) :
+    internal Formula(Slate slate, params IAction[] actions) :
         this(slate, actions as IEnumerable<IAction>) { }
 
     /// <summary>Creates a new formula to perform changes to the slate.</summary>
     /// <param name="slate">The slate that these actions were created for.</param>
     /// <param name="actions">The actions that this formula will perform.</param>
-    public Formula(Slate slate, IEnumerable<IAction> actions) {
+    internal Formula(Slate slate, IEnumerable<IAction> actions) {
         this.actions = actions.NotNull().ToArray();
-        this.Slate   = slate;
+        this.slate   = slate;
     }
 
     /// <summary>The slate that this formula was built for and will be run on.</summary>
-    public readonly Slate Slate;
+    internal readonly Slate slate;
 
     /// <summary>The actions for this formula.</summary>
-    public IReadOnlyList<IAction> Actions => this.actions;
+    internal IReadOnlyList<IAction> Actions => this.actions;
 
     /// <summary>Performs all the actions for this formula.</summary>
     /// <param name="logger">The optional logger to debug with.</param>
@@ -58,7 +59,7 @@ sealed public class Formula {
         Logger? sub = logger.Group(nameof(Formula));
         Record.Result result = new();
         foreach (IAction action in this.actions)
-            action.Perform(this.Slate, result, sub);
+            action.Perform(this.slate, result, sub);
         return result;
     }
 

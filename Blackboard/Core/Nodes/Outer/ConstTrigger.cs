@@ -8,7 +8,7 @@ namespace Blackboard.Core.Nodes.Outer;
 /// This will store a trigger's provide state as a constant to take the
 /// place of the trigger this was made a constant of.
 /// </summary>
-sealed public class ConstTrigger : TriggerNode, IConstant {
+sealed internal class ConstTrigger : TriggerNode, IConstant {
 
     /// <summary>Creates a new constant trigger value node.</summary>
     public ConstTrigger() { }

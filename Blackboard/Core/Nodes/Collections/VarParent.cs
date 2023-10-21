@@ -74,6 +74,12 @@ partial class ParentCollection {
         /// <param name="parents">The parent to insert into the list.</param>
         public void Insert(int index, IEnumerable<IParent> parents) => this.source.InsertRange(index, parents.OfType<T>());
 
+        /// <summary>This gets a subset of the list for the given range.</summary>
+        /// <param name="index">The index of the parents to get.</param>
+        /// <param name="count">The number of parents to get.</param>
+        /// <returns>The parents in the range.</returns>
+        public IEnumerable<IParent> GetRange(int index, int count) => this.source.GetRange(index, count);
+
         /// <summary>This removes parents starting from the given index.</summary>
         /// <remarks>This will NOT check if this will make the list go below the minimum value.</remarks>
         /// <param name="index">The index of the parents to remove.</param>

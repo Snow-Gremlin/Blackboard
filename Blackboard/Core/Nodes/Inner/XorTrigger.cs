@@ -6,7 +6,7 @@ using System.Linq;
 namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Provokes when the XOR of the parents is provoked.</summary>
-sealed public class XorTrigger : NaryTrigger {
+sealed internal class XorTrigger : NaryTrigger {
 
     /// <summary>This is a factory function for creating new instances of this node easily.</summary>
     static public readonly IFuncDef Factory = CreateFactory(inputs => new XorTrigger(inputs));

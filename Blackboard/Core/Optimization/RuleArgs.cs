@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Linq;
 namespace Blackboard.Core.Optimization;
 
 /// <summary>The arguments for rules of optimization.</summary>
-internal class RuleArgs {
+sealed internal class RuleArgs {
 
     /// <summary>The slate the formula is for.</summary>
     public readonly Slate Slate;
@@ -57,8 +57,8 @@ internal class RuleArgs {
         if (node is IChild child) {
             // Copy parents into a list so they can be modified and
             // filter from the list any which are no longer in the nodes.
-            foreach (INode parent in child.Parents.ToList().
-                Where(this.Nodes.Contains).WhereNot(Removed.Contains).
+            foreach (INode parent in child.Parents.NotNull().ToList().
+                Where(this.Nodes.Contains).WhereNot(this.Removed.Contains).
                 SelectMany(this.PostReachable))
                 yield return parent;
         }
@@ -73,8 +73,8 @@ internal class RuleArgs {
         if (node is IChild child) {
             // Copy parents into a list so they can be modified and
             // filter from the list any which are no longer in the nodes.
-            foreach (INode parent in child.Parents.ToList().
-                Where(this.Nodes.Contains).WhereNot(Removed.Contains).
+            foreach (INode parent in child.Parents.NotNull().ToList().
+                Where(this.Nodes.Contains).WhereNot(this.Removed.Contains).
                 SelectMany(this.PreReachable))
                 yield return parent;
         }

@@ -1,5 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
-using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Linq;
 
@@ -46,9 +46,8 @@ sealed internal class ActionValidator : IRule {
     /// <param name="child">The child node to check all the parents of.</param>
     static private void checkParent(RuleArgs args, IChild child) {
         int nonNullCount = 0;
-        foreach ((IParent parent, int index) in child.Parents.WithIndex()) {
+        foreach ((IParent? parent, int index) in child.Parents.WithIndex()) {
             if (parent is null) {
-                // This shouldn't be able to happen because parent collections should filter them.
                 args.Logger.Error(new Message("A new child should not have a null parent.").
                     With("Child", child).
                     With("Parent Index", index));

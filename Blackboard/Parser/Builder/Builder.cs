@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core;
+using Blackboard.Core.Data.Caps;
 using Blackboard.Core.Extensions;
 using Blackboard.Core.Formula.Factory;
 using Blackboard.Core.Nodes.Interfaces;
@@ -343,15 +344,15 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
             INode target = this.nodes.Pop();
             INode root   = this.factory.AddAssignment(target, value);
 
-            // TODO: Reevaluate this statement and make sure we're doing it correctly.
-            //
             // Push the cast value back onto the stack for any following assignments.
             // By using the cast it makes it more like `X=Y=Z` is `Y=Z; X=Y;` but means that if a double and an int are being set by
             // an int, the int must be assigned first then it can cast to a double for the double assignment, otherwise it will cast
             // to a double but not be able to implicitly cast that double back to an int. For example: if `int X; double Y;` then
-            // `Y=X=3;` works and `X=Y=3` will not. One drawback for this way is that if you assign an int to multiple doubles it will
-            // construct multiple cast nodes, but with a little optimization to remove duplicate node paths, this isn't an issue. 
-            // Alternatively, if we push the value then `X=Y=Z` will be like `Y=Z; X=Z;`, but we won't.
+            // `Y=X=3;` works and `X=Y=3;` will not.
+            //
+            // The alternate approach is if the value is pushed instead, then `X=Y=Z` will be like `Y=Z; X=Z;`.
+            // One drawback for this way is that if you assign an int to multiple doubles it will construct multiple cast nodes,
+            // but with a little optimization to remove duplicate node paths, this isn't an issue. 
             this.nodes.Push(root);
         } catch (S.Exception inner) {
             throw new BlackboardException("Error in assignment").
@@ -444,6 +445,9 @@ sealed internal class Builder : PetiteParser.ParseTree.PromptArgs {
     /// <summary>This handles pushing a bool literal value onto the stack.</summary>
     public void HandlePushBool() =>
         this.parseLiteral("parse a bool", (string text) => Literal.Bool(bool.Parse(text)));
+
+    /// <summary>This handles pushing a null literal value onto the stack.</summary>
+    public void HandlePushNull() => this.nodes.Push(Literal.Data(Object.Null));
 
     /// <summary>This handles pushing a binary int literal value onto the stack.</summary>
     public void HandlePushBin() =>

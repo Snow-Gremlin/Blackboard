@@ -2,16 +2,22 @@
 #----------------------------------------------------------
 # Specific Keywords
 
+# Constants Keywords
 [Identifier] = 'true', 'false' => [Bool];
-[Identifier] = 'namespace' => [Namespace];
-[Identifier] = 'var' => [Var];
+[Identifier] = 'null'          => [Null];
 
+# Pseudo-type Keywords
+[Identifier] = 'namespace' => [Namespace];
+[Identifier] = 'var'       => [Var];
+
+# Declare Keywords
 [Identifier] = 'in'     => [DeclareIn];
 [Identifier] = 'get'    => [DeclareGet];
 [Identifier] = 'define' => [DeclareDefine];
 [Identifier] = 'temp'   => [DeclareTemp];
 [Identifier] = 'extern' => [DeclareExtern];
 
+# Type Keywords
 [Identifier] = 'bool'    => [TypeBool];
 [Identifier] = 'int'     => [TypeInt];
 [Identifier] = 'uint'    => [TypeUint];
@@ -31,8 +37,8 @@
                'private', 'protected', 'public', 'static'
              => [ReservedScoping];
 
-[Identifier] = 'abstract', 'class', 'const', 'def', 'func', 'interface',
-               'operator', 'override', 'typedef', 'void', 'virtual'
+[Identifier] = 'abstract', 'class', 'const', 'def', 'do', 'event', 'func',
+               'interface', 'operator', 'override', 'typedef', 'void', 'virtual'
              => [ReservedDefinitions];
 
 [Identifier] = 'as', 'break', 'catch', 'case', 'continue', 'default', 'else',
@@ -41,6 +47,6 @@
                'using', 'when', 'yield'
              => [ReservedConstructs];
 
-[Identifier] = 'complex', 'do', 'dynamic', 'for', 'foreach', 'goto',
+[Identifier] = 'complex', 'dynamic', 'for', 'foreach', 'goto',
                'label', 'readonly', 'sealed', 'until', 'while'
              => [ReservedUnsupported];

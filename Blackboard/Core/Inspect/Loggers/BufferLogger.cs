@@ -1,12 +1,12 @@
 ﻿using System.IO;
 
-namespace Blackboard.Core.Inspect;
+namespace Blackboard.Core.Inspect.Loggers;
 
 /// <summary>
 /// This is a buffer logger used as a temporary text based output, like a virtual console,
 /// for recording the text of the messages followed by a newline which have been logged.
 /// </summary>
-public class BufferLogger : Logger {
+sealed public class BufferLogger : Logger {
 
     /// <summary>The string buffer to write to.</summary>
     private StringWriter fout;

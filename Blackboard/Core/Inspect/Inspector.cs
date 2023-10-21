@@ -1,4 +1,5 @@
 ﻿using Blackboard.Core.Extensions;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Linq;
 namespace Blackboard.Core.Inspect;
 
 /// <summary>A tool for inspecting, validating, and debugging the slate.</summary>
-sealed public class Inspector {
+sealed internal class Inspector {
 
     /// <summary>Validates the given slate.</summary>
     /// <param name="slate">The slate to validate.</param>
@@ -39,14 +40,15 @@ sealed public class Inspector {
     }
 
     /// <summary>Indicates if there were zero errors.</summary>
-    public bool Passed => this.logger.Count(Level.Error) > 0;
+    public bool Passed => this.logger.Count(Level.Error) <= 0;
 
     /// <summary>Collects all the nodes in the slate reachable from global.</summary>
     public void CollectNodes() {
         HashSet<INode> pending = new();
 
-        void addToPending(INode node) {
-            if (this.touched.Contains(node) ||
+        void addToPending(INode? node) {
+            if (node is null ||
+                this.touched.Contains(node) ||
                 pending.Contains(node)) return;
             pending.Add(node);
         }
@@ -92,7 +94,7 @@ sealed public class Inspector {
     /// <summary>Checks that the parents of the given child has this child as a child.</summary>
     /// <param name="child">The child to check.</param>
     private void checkChild(IChild child) {
-        foreach (IParent parent in child.Parents) {
+        foreach (IParent parent in child.Parents.NotNull()) {
             if (!parent.Children.Contains(child))
                 this.logger.Error(new Message("Parent doesn't know it's child").
                     With("Child",  this.stringifier.Stringify(child)).

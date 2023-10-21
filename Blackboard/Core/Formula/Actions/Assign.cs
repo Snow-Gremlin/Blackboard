@@ -1,5 +1,7 @@
 ﻿using Blackboard.Core.Data.Interfaces;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
+using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +10,7 @@ namespace Blackboard.Core.Formula.Actions;
 
 /// <summary>This is an action that will assign an input node to a data.</summary>
 /// <typeparam name="T">The type of data for the input node.</typeparam>
-sealed public class Assign<T> : IAssign
+sealed internal class Assign<T> : IAssign
     where T : IData {
 
     /// <summary>
@@ -30,12 +32,6 @@ sealed public class Assign<T> : IAssign
     /// <summary>The data node to get the data to assign.</summary>
     private readonly IValue<T> value;
 
-    /// <summary>
-    /// This is a subset of all the node for this node to write which need to be
-    /// added to parents their parents to make this node reactive to changes.
-    /// </summary>
-    private readonly IEvaluable[] needPending;
-
     /// <summary>Creates a new assignment.</summary>
     /// <remarks>It is assumed that these values have been run through the optimizer and validated.</remarks>
     /// <param name="target">The input node to assign.</param>
@@ -45,10 +41,9 @@ sealed public class Assign<T> : IAssign
         this.target = target;
         this.value  = value;
 
-        // Pre-sort the evaluable nodes.
-        LinkedList<IEvaluable> nodes = new();
-        nodes.SortInsertUnique(allNewNodes.Illegitimates().OfType<IEvaluable>());
-        this.needPending = nodes.ToArray();
+        // Pre-group the evaluable nodes.
+        this.NeedPending = new();
+        this.NeedPending.Insert(allNewNodes.Illegitimates().OfType<IEvaluable>());
     }
 
     /// <summary>The target input node to set the value of.</summary>
@@ -58,7 +53,7 @@ sealed public class Assign<T> : IAssign
     public IDataNode Value => this.value;
 
     /// <summary>All the nodes which are new children of the node to write.</summary>
-    public IReadOnlyList<IEvaluable> NeedPending => this.needPending;
+    public EvalPending NeedPending { get; }
 
     /// <summary>This will perform the action.</summary>
     /// <param name="slate">The slate for this action.</param>
@@ -66,7 +61,7 @@ sealed public class Assign<T> : IAssign
     /// <param name="logger">The optional logger to debug with.</param>
     public void Perform(Slate slate, Record.Result result, Logger? logger = null) {
         logger.Info("Assign: {0}", this);
-        slate.PendEval(this.needPending);
+        slate.PendEval(this.NeedPending);
         slate.PerformEvaluation(logger);
         slate.SetValue(this.value.Value, this.target);
         logger.Info("Assign Done {0}", this.target);

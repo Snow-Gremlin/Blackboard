@@ -3,6 +3,7 @@ using Blackboard.Core.Extensions;
 using Blackboard.Core.Formula.Factory;
 using Blackboard.Core.Innate;
 using Blackboard.Core.Inspect;
+using Blackboard.Core.Inspect.Loggers;
 using Blackboard.Core.Nodes.Collections;
 using Blackboard.Core.Nodes.Interfaces;
 using Blackboard.Core.Nodes.Outer;
@@ -17,13 +18,13 @@ namespace Blackboard.Core;
 /// The slate stores all blackboard data via a node graph and
 /// perform evaluations/updates of change the values of the nodes.
 /// </summary>
-public class Slate: INodeReader, IReader, IWriter {
+sealed internal class Slate: INodeReader, IReader, IWriter {
 
     /// <summary>The nodes which have had one or more parent modified and they need to have their depth updated.</summary>
-    private readonly LinkedList<IEvaluable> pendingUpdate;
+    private readonly EvalPending pendingUpdate;
 
     /// <summary>The nodes which have had one or more parent modified and they need to be reevaluated.</summary>
-    private readonly LinkedList<IEvaluable> pendingEval;
+    private readonly EvalPending pendingEval;
 
     /// <summary>A collection of literals and constants used in the graph.</summary>
     /// <remarks>
@@ -77,7 +78,7 @@ public class Slate: INodeReader, IReader, IWriter {
         data = (node as IDataNode)?.Data;
         return data is not null;
     }
-    
+
     /// <summary>Sets a value for the given named input.</summary>
     /// <remarks>
     /// This will not cause an evaluation,
@@ -86,11 +87,19 @@ public class Slate: INodeReader, IReader, IWriter {
     /// <typeparam name="T">The type of the value to set to the input.</typeparam>
     /// <param name="value">The value to set to that node.</param>
     /// <param name="names">The name of the input node to set.</param>
-    public void SetValue<T>(T value, IEnumerable<string> names) where T : IData =>
-        this.SetValue(value, this.GetNode<IValueInput<T>>(names));
+    public void SetValue<T>(T value, IEnumerable<string> names) where T : IData {
+        IValueInput<T> input = this.TryGetNode(names, out INode? node) ?
+            node is IValueInput<T> result ? result :
+            throw new BlackboardException("The value by the given name is not an input value with the given type.").
+                With("Name", names.Join(".")).
+                With("Node", node).
+                With("Type", typeof(T)) :
+            throw new BlackboardException("No value with the given name exists.").
+                With("Name", names.Join(".")).
+                With("Type", typeof(T));
+        this.SetValue(value, input);
+    }
 
-    // TODO: Change above and below to use TryGetNode and throw errors.
-    
     /// <summary>This will provoke the node with the given name.</summary>
     /// <remarks>
     /// This will not cause an evaluation,
@@ -98,8 +107,16 @@ public class Slate: INodeReader, IReader, IWriter {
     /// </remarks>
     /// <param name="names">The name of trigger node to provoke.</param>
     /// <param name="provoke">True to provoke, false to reset.</param>
-    public void SetTrigger(IEnumerable<string> names, bool provoke = true) =>
-        this.SetTrigger(this.GetNode<ITriggerInput>(names), provoke);
+    public void SetTrigger(IEnumerable<string> names, bool provoke = true) {
+        ITriggerInput input = this.TryGetNode(names, out INode? node) ?
+            node is ITriggerInput result ? result :
+            throw new BlackboardException("The node by the given name is not an input trigger.").
+                With("Name", names.Join(".")).
+                With("Node", node) :
+            throw new BlackboardException("No trigger with the given name exists.").
+                With("Name", names.Join("."));
+        this.SetTrigger(input, provoke);
+    }
       
     /// <summary>Tries to get the node with the given node.</summary>
     /// <param name="names">The name of the node to get.</param>
@@ -146,17 +163,17 @@ public class Slate: INodeReader, IReader, IWriter {
     public void PendUpdate(params INode[] nodes) =>
         this.PendUpdate(nodes as IEnumerable<INode>);
 
-    /// <summaryThis indicates that the given nodes have had parents added or removed and need to be updated.</summary>
+    /// <summary>This indicates that the given nodes have had parents added or removed and need to be updated.</summary>
     /// <remarks>This will pend the given nodes to update the depths prior to evaluation.</remarks>
     /// <param name="nodes">The nodes to pend evaluation for.</param>
     public void PendUpdate(IEnumerable<INode> nodes) =>
-        this.pendingUpdate.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
+        this.pendingUpdate.Insert(nodes.NotNull().OfType<IEvaluable>());
 
     /// <summary>This gets all the nodes pending update.</summary>
-    public IEnumerable<INode> PendingUpdate => this.pendingEval;
+    public IEnumerable<IEvaluable> PendingUpdate => this.pendingUpdate.Nodes;
 
     /// <summary>This indicates if any nodes are pending update.</summary>
-    public bool HasPendingUpdate => this.pendingUpdate.Count > 0;
+    public bool HasPendingUpdate => this.pendingUpdate.HasPending;
 
     /// <summary>
     /// This updates the depth values of the given pending nodes and
@@ -184,13 +201,20 @@ public class Slate: INodeReader, IReader, IWriter {
     /// </summary>
     /// <param name="nodes">The nodes to pend evaluation for.</param>
     public void PendEval(IEnumerable<INode> nodes) =>
-        this.pendingEval.SortInsertUnique(nodes.NotNull().OfType<IEvaluable>());
+        this.pendingEval.Insert(nodes.NotNull().OfType<IEvaluable>());
+    
+    /// <summary>
+    /// This indicates that the given nodes have had parents changed
+    /// and need to be recalculated during evaluation.
+    /// </summary>
+    /// <param name="nodes">The nodes to pend evaluation for.</param>
+    public void PendEval(EvalPending nodes) => this.pendingEval.Insert(nodes);
 
     /// <summary>This gets all the nodes pending evaluation.</summary>
-    public IEnumerable<INode> PendingEval => this.pendingEval;
+    public IEnumerable<IEvaluable> PendingEval => this.pendingEval.Nodes;
 
     /// <summary>This indicates if any changes are pending evaluation.</summary>
-    public bool HasPendingEval => this.pendingEval.Count > 0;
+    public bool HasPendingEval => this.pendingEval.HasPending;
 
     /// <summary>
     /// Performs an evaluation of all pending nodes and

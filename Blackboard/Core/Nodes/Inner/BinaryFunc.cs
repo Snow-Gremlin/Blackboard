@@ -9,7 +9,7 @@ namespace Blackboard.Core.Nodes.Inner;
 
 /// <summary>Binary nodes for floating point mathematics.</summary>
 /// <typeparam name="T">The type of floating point to perform the math on.</typeparam>
-static public class BinaryFloatingPoint<T>
+static internal class BinaryFloatingPoint<T>
     where T : struct, IFloatingPoint<T>, IEquatable<T> {
 
     /// <summary>This is a factory for creating a new Round instance of this node.</summary>
@@ -48,7 +48,7 @@ static public class BinaryFloatingPoint<T>
 }
 
 /// <summary>Binary nodes for specific hard-coded data types.</summary>
-static public class Binary {
+static internal class Binary {
 
     /// <summary>This is a factory for creating a new PadLeft instance of this node.</summary>
     /// <remarks>
@@ -116,7 +116,7 @@ static public class Binary {
 /// This uses a little more computation time and more memory that hard coded nodes,
 /// therefor this should be used to perform less commonly used nodes.
 /// </remarks>
-sealed public class BinaryFunc<T1, T2, TResult> : BinaryValue<T1, T2, TResult>
+sealed internal class BinaryFunc<T1, T2, TResult> : BinaryValue<T1, T2, TResult>
     where T1 : struct, IEquatable<T1>
     where T2 : struct, IEquatable<T2>
     where TResult : struct, IEquatable<TResult> {

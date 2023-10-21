@@ -7,7 +7,7 @@ namespace Blackboard.Core.Nodes.Outer;
 
 /// <summary>An external node as a placeholder for value node.</summary>
 /// <typeparam name="T">The type of the value to hold.</typeparam>
-sealed public class ExternValue<T> : ValueNode<T>, IValueExtern<T>
+sealed internal class ExternValue<T> : ValueNode<T>, IValueExtern<T>
     where T : struct, IData, IEquatable<T> {
 
     /// <summary>The shell to use in place of an extern in a define.</summary>
